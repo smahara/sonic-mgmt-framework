@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Set the max arp and max ndp entries in the proc settings
+
+echo 2560 > /proc/sys/net/ipv4/neigh/default/gc_thresh2
+echo 2560 > /proc/sys/net/ipv4/neigh/default/gc_thresh3
+echo 2560 > /proc/sys/net/ipv6/neigh/default/gc_thresh2
+echo 2560 > /proc/sys/net/ipv6/neigh/default/gc_thresh3

@@ -41,6 +41,11 @@ supervisorctl start enable_counters
 
 supervisorctl start nbrmgrd
 
+# Set any scaling constants in Linux
+if [ -f /usr/bin/update_proc_variables ]; then
+    /usr/bin/update_proc_variables
+fi
+
 # Start arp_update when VLAN exists
 VLAN=`sonic-cfggen -d -v 'VLAN.keys() | join(" ") if VLAN'`
 if [ "$VLAN" != "" ]; then
