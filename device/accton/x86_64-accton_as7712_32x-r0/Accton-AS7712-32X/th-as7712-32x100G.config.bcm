@@ -1,9 +1,9 @@
 # accton_as7712_32x 32x100G SDK config
 os=unix
 schan_intr_enable=0
-l2_mem_entries=40960
+l2_mem_entries=8192
 l2xmsg_mode=1
-l3_mem_entries=40960
+l3_mem_entries=8192
 parity_correction=0
 parity_enable=0
 mmu_lossless=1
@@ -21,7 +21,9 @@ cdma_timeout_usec=15000000
 dma_desc_timeout_usec=15000000
 ipv6_lpm_128b_enable=1
 l3_alpm_enable=2
-lpm_scaling_enable=0
+lpm_ipv6_128b_reserved=0
+lpm_scaling_enable=1
+num_ipv6_lpm_128b_entries=3072
 max_vp_lags=0
 miim_intr_enable=0
 oversubscribe_mode=1
