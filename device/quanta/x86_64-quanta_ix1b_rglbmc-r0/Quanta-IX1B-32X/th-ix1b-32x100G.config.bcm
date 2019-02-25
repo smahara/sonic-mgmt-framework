@@ -15,8 +15,11 @@ parity_correction=1
 ipv6_lpm_128b_enable=1
 l3_alpm_enable=2
 
-l2_mem_entries=40960
-l3_mem_entries=40960
+l2_mem_entries=32768
+l3_mem_entries=8192
+lpm_ipv6_128b_reserved=0
+lpm_scaling_enable=1
+num_ipv6_lpm_128b_entries=3072
 
 portmap_1=1:100
 portmap_2=5:100
