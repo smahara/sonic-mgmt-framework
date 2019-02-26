@@ -1,7 +1,7 @@
 # accton_as7712_32x 32x100G SDK config
 os=unix
 schan_intr_enable=0
-l2_mem_entries=32768
+l2_mem_entries=8192
 l2xmsg_mode=1
 l3_mem_entries=8192
 parity_correction=0
