@@ -11,3 +11,14 @@ sonic-quanta-platform-modules (1.0) unstable; urgency=low
 
   * Add support for Quanta IX8-56X
   * Initial release
+
+sonic-quanta-platform-modules (1.0) unstable; urgency=low
+
+  * Add support for Quanta IX9-32X
+  * Initial release
+
+sonic-quanta-platform-modules (1.0) unstable; urgency=low
+
+  * Add support for Quanta IX4-64X
+  * Initial release
+
