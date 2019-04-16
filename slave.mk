@@ -121,6 +121,13 @@ ifeq ($(SONIC_BUILD_JOBS),)
 override SONIC_BUILD_JOBS := $(SONIC_CONFIG_BUILD_JOBS)
 endif
 
+# Allow command line value to override config file definition.
+# It's being done this way since several makefiles already
+# reference the SONIC_CONFIG_MAKE_JOBS variable.
+ifneq ($(SONIC_MAKE_JOBS),)
+override SONIC_CONFIG_MAKE_JOBS := $(SONIC_MAKE_JOBS)
+endif
+
 ifeq ($(VS_PREPARE_MEM),)
 override VS_PREPARE_MEM := $(DEFAULT_VS_PREPARE_MEM)
 endif

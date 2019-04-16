@@ -32,8 +32,13 @@ set -x -e
 DOCKER_VERSION=5:18.09.2~3-0~debian-stretch
 LINUX_KERNEL_VERSION=4.9.0-8-2
 
+# Create special tmpfs mount point for fsroot
+FILESYSTEM_BASE=/sonic/build
+mkdir -p ${FILESYSTEM_BASE}
+sudo mount -t tmpfs -o size=16G tmpfs ${FILESYSTEM_BASE}
+
 ## Working directory to prepare the file system
-FILESYSTEM_ROOT=./fsroot
+FILESYSTEM_ROOT=${FILESYSTEM_BASE}/fsroot
 PLATFORM_DIR=platform
 ## Hostname for the linux image
 HOSTNAME=sonic

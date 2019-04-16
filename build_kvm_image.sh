@@ -10,7 +10,11 @@ ONIE_RECOVERY_ISO=$2
 INSTALLER=$3
 DISK_SIZE=$4
 
-INSTALLER_DISK="./sonic-installer.img"
+# Create special tmpfs mount point for installer disk
+FILESYSTEM_BASE=/sonic/kvmbuild
+mkdir -p ${FILESYSTEM_BASE}
+sudo mount -t tmpfs -o size=16G tmpfs ${FILESYSTEM_BASE}
+INSTALLER_DISK="${FILESYSTEM_BASE}/sonic-installer.img"
 
 # VM will listen on telnet port $KVM_PORT
 KVM_PORT=9000
