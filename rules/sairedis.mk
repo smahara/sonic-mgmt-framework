@@ -14,6 +14,8 @@ LIBSAIVS = libsaivs_1.0.0_amd64.deb
 $(eval $(call add_derived_package,$(LIBSAIREDIS),$(LIBSAIVS)))
 
 LIBSAIVS_DEV = libsaivs-dev_1.0.0_amd64.deb
+$(LIBSAIVS_DEV)_DEPENDS += $(LIBSAIVS)
+$(LIBSAIVS_DEV)_RDEPENDS += $(LIBSAIVS)
 $(eval $(call add_derived_package,$(LIBSAIREDIS),$(LIBSAIVS_DEV)))
 
 ifneq ($(CONFIGURED_PLATFORM),vs)
