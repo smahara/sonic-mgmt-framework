@@ -1,4 +1,5 @@
-FROM sonic-slave-stretch-base
+ARG SLAVE_BASE_TAG=latest
+FROM sonic-slave-stretch-base:${SLAVE_BASE_TAG}
 
 # Add user
 ARG user
