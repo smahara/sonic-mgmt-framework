@@ -38,6 +38,9 @@ SHELL = /bin/bash
 
 USER := $(shell id -un)
 PWD := $(shell pwd)
+BASE_IMAGE_LOCK_TIMEOUT_SECS = 3600
+USER_IMAGE_LOCK_TIMEOUT_SECS = 900
+LOCK_DIR = /tmp/docker_images_locks
 
 ifeq ($(USER), root)
 $(error Add your user account to docker group and use your user account to make. root or sudo are not supported!)
@@ -65,6 +68,9 @@ endif
 OVERLAY_MODULE_CHECK := lsmod | grep "^overlay " > /dev/null 2>&1 || (echo "ERROR: Module 'overlay' not loaded. Try running 'sudo modprobe overlay'."; exit 1)
 
 BUILD_TIMESTAMP := $(shell date +%Y%m%d\.%H%M%S)
+
+BASE_IMAGE_LOCK_FILE_NAME := $(LOCK_DIR)/$(SLAVE_BASE_TAG).lock
+USER_IMAGE_LOCK_FILE_NAME := $(LOCK_DIR)/$(USER).lock
 
 ifeq ($(DOCKER_BUILDER_MOUNT),)
 override DOCKER_BUILDER_MOUNT := "$(PWD):/sonic"
@@ -103,6 +109,39 @@ DOCKER_BUILD = docker build --no-cache \
 	       -f $(SLAVE_DIR)/Dockerfile.user \
 	       $(SLAVE_DIR)
 
+DOCKER_BASE_BUILD_PROTECTED = echo "Start time: "`date`; \
+				echo "Attempting to acquire base image lock (waiting up to $(BASE_IMAGE_LOCK_TIMEOUT_SECS) seconds)..."; \
+				mkdir -p $(LOCK_DIR); \
+				touch $(BASE_IMAGE_LOCK_FILE_NAME) && \
+				exec {BASE_IMAGE_LOCK_FD}<$(BASE_IMAGE_LOCK_FILE_NAME); \
+				if ! flock -x -w $(BASE_IMAGE_LOCK_TIMEOUT_SECS) $${BASE_IMAGE_LOCK_FD}; then \
+					echo "ERROR: Could not acquire base image lock. Try resubmitting your build."; \
+					exit 1; \
+				else \
+					echo "Base image lock acquired. Continuing..."; \
+					docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
+					$(DOCKER_BASE_BUILD); \
+					docker_rc=$$?; \
+					eval exec "$${BASE_IMAGE_LOCK_FD}<&-"; \
+					exit $${docker_rc}; \
+				fi
+
+DOCKER_BUILD_PROTECTED = echo "Start time: "`date`; \
+			echo "Attempting to acquire user image lock (waiting up to $(USER_IMAGE_LOCK_TIMEOUT_SECS) seconds)..."; \
+			mkdir -p $(LOCK_DIR); \
+			touch $(USER_IMAGE_LOCK_FILE_NAME) && \
+			exec {USER_IMAGE_LOCK_FD}<$(USER_IMAGE_LOCK_FILE_NAME) ; \
+			if ! flock -x -w $(USER_IMAGE_LOCK_TIMEOUT_SECS) $${USER_IMAGE_LOCK_FD}; then  \
+				echo "ERROR: Could not acquire user image lock. Try resubmitting your build."; \
+				exit 1; \
+			else \
+				echo "User image lock acquired. Continuing..."; \
+				$(DOCKER_BUILD); \
+				docker_rc=$$?; \
+				eval exec "$${USER_IMAGE_LOCK_FD}<&-"; \
+				exit $${docker_rc}; \
+			fi
+
 SONIC_BUILD_INSTRUCTION :=  make \
                            -f slave.mk \
                            BLDENV=$(BLDENV) \
@@ -132,10 +171,10 @@ SONIC_BUILD_INSTRUCTION :=  make \
 	@$(OVERLAY_MODULE_CHECK)
 	@docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) not found. Building... ; \
-	    $(DOCKER_BASE_BUILD) ; }
+	    $(DOCKER_BASE_BUILD_PROTECTED) ; } || exit 1
 	@docker inspect --type image $(SLAVE_IMAGE):$(SLAVE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_IMAGE):$(SLAVE_TAG) not found. Building... ; \
-	    $(DOCKER_BUILD) ; }
+	    $(DOCKER_BUILD_PROTECTED) ; } || exit 1
 ifeq "$(KEEP_SLAVE_ON)" "yes"
     ifdef SOURCE_FOLDER
 		@$(DOCKER_RUN) -v $(SOURCE_FOLDER):/var/$(USER)/src $(SLAVE_IMAGE):$(SLAVE_TAG) bash -c "$(SONIC_BUILD_INSTRUCTION) $@; /bin/bash"
@@ -147,17 +186,17 @@ else
 endif
 
 sonic-slave-build :
-	$(DOCKER_BASE_BUILD)
-	$(DOCKER_BUILD)
+	$(DOCKER_BASE_BUILD_PROTECTED) || exit 1
+	$(DOCKER_BUILD_PROTECTED) || exit 1
 
 sonic-slave-bash :
 	@$(OVERLAY_MODULE_CHECK)
 	@docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) not found. Building... ; \
-	    $(DOCKER_BASE_BUILD) ; }
+	    $(DOCKER_BASE_BUILD_PROTECTED) ; } || exit 1
 	@docker inspect --type image $(SLAVE_IMAGE):$(SLAVE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_IMAGE):$(SLAVE_TAG) not found. Building... ; \
-	    $(DOCKER_BUILD) ; }
+	    $(DOCKER_BUILD_PROTECTED) ; } || exit 1
 	@$(DOCKER_RUN) -t $(SLAVE_IMAGE):$(SLAVE_TAG) bash
 
 showtag:

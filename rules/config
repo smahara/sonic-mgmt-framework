@@ -14,7 +14,7 @@ SONIC_CONFIG_BUILD_JOBS = 8
 
 # SONIC_CONFIG_MAKE_JOBS - set number of parallel make jobs per package.
 # Corresponding -j argument will be passed to make/dpkg commands that build separate packages
-SONIC_CONFIG_MAKE_JOBS = $(shell nproc)
+SONIC_CONFIG_MAKE_JOBS = 8
 
 # SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD - use native dockerd for build.
 # If set to y SONiC build container will use native dockerd instead of dind for faster build
