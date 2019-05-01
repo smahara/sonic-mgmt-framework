@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Broadcom
+ * Copyright 2017-2019 Broadcom
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, version 2, as
@@ -63,8 +63,10 @@ MODULE_PARM_DESC(debug,
 /* set KNET_CB_DEBUG for debug info */
 #define KNET_CB_DEBUG
 
+/* These below need to match incoming enum values */
 #define FILTER_TAG_STRIP 0
 #define FILTER_TAG_KEEP  1
+#define FILTER_TAG_ORIGINAL 2
 
 /* Maintain tag strip statistics */
 struct strip_stats_s {
@@ -200,29 +202,38 @@ strip_tag_rx_cb(struct sk_buff *skb, int dev_no, void *meta)
     {
         strip_tag = 1;
     }
+  
     /* Get DCB type for this packet, passed by KNET driver */
     dcb_type = KNET_SKB_CB(skb)->dcb_type;
 
     /* Get tag status from DCB */
-    tag_status = get_tag_status(dcb_type, meta);
-
+    tag_status = get_tag_status(dcb_type, meta);     
 #ifdef KNET_CB_DEBUG
     if (debug & 0x1) {
         gprintk("%s; DCB Type: %d; tag status: %d\n", __func__, dcb_type, tag_status);
     }
 #endif
-
     if (tag_status < 0) {
         /* Unsupported DCB type */
         return skb;
     }
+    
+    if (filter_flags == FILTER_TAG_ORIGINAL)
+    {
+        /* If untagged or single inner, strip the extra tag that knet
+           keep tag will add. */
+        if (tag_status  <  2)
+        {
+            strip_tag = 1;
+        }
+    }
 
     strip_stats.checked++;
-   
+    
     if (strip_tag) {
 #ifdef KNET_CB_DEBUG
         if (debug & 0x1) {
-            gprintk("%s; Stripping VLAN\n", __func__);
+            gprintk("%s; Stripping VLAN tag\n", __func__);
         }
 #endif
         strip_stats.stripped++;
@@ -231,7 +242,7 @@ strip_tag_rx_cb(struct sk_buff *skb, int dev_no, void *meta)
 #ifdef KNET_CB_DEBUG
     else {
         if (debug & 0x1) {
-            gprintk("%s; Preserve VLAN\n", __func__);
+            gprintk("%s; Keeping VLAN tag\n", __func__);
         }
     }
 #endif
@@ -275,7 +286,13 @@ static int
 _cleanup(void)
 {
     bkn_rx_skb_cb_unregister(strip_tag_rx_cb);
-    bkn_tx_skb_cb_unregister(strip_tag_tx_cb);
+    /* strip_tag_tx_cb is currently a noop, so 
+     * no need to unregister. 
+     */
+    if (0)
+    {
+        bkn_tx_skb_cb_unregister(strip_tag_tx_cb);
+    }
     bkn_filter_cb_unregister(strip_tag_filter_cb);
 
     return 0;
@@ -285,7 +302,13 @@ static int
 _init(void)
 {
     bkn_rx_skb_cb_register(strip_tag_rx_cb);
-    bkn_tx_skb_cb_register(strip_tag_tx_cb);
+    /* strip_tag_tx_cb is currently a noop, so 
+     * no need to register. 
+     */
+    if (0)
+    {
+        bkn_tx_skb_cb_register(strip_tag_tx_cb);
+    }
     bkn_filter_cb_register(strip_tag_filter_cb);
 
     return 0;
