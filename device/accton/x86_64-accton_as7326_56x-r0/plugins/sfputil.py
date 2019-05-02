@@ -193,10 +193,13 @@ class SfpUtil(SfpUtilBase):
 
         return False
 
-    def get_low_power_mode(self, port_num):             
-        raise NotImplementedError
+    def get_low_power_mode(self, port_num):
+        # LPMode is pulled low on AS7326, and it could only be altered
+        # via 2-wire serial interface
+        return False
 
-    def set_low_power_mode(self, port_num, lpmode):                
+    def set_low_power_mode(self, port_num, lpmode):
+        # AS7326 CPLD does not provide this function
         raise NotImplementedError
 
     def reset(self, port_num):
