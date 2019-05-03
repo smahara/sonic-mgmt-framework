@@ -11,13 +11,15 @@ RUN apt-get update
 
 {% if docker_dhcp_relay_debs.strip() -%}
 # Copy built Debian packages
-{%- for deb in docker_dhcp_relay_debs.split(' ') %}
-COPY debs/{{ deb }} debs/
-{%- endfor %}
+COPY \
+{% for deb in docker_dhcp_relay_debs.split(' ') -%}
+debs/{{ deb }}{{' '}}
+{%- endfor -%}
+debs/
 
 # Install built Debian packages and implicitly install their dependencies
-{%- for deb in docker_dhcp_relay_debs.split(' ') %}
-RUN dpkg_apt() { [ -f $1 ] && { dpkg -i $1 || apt-get -y install -f; } || return 1; }; dpkg_apt debs/{{ deb }}
+RUN dpkg_apt() { [ -f $1 ] && { dpkg -i $1 || apt-get -y install -f; } || return 1; }{%- for deb in docker_dhcp_relay_debs.split(' ') %}; \
+dpkg_apt debs/{{ deb }}
 {%- endfor %}
 {%- endif %}
 
