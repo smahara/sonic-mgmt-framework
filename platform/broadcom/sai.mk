@@ -9,7 +9,7 @@ endif
 
 #BRCM_SAI
 ifeq ($(LOCAL_SAI_DEBS_PATH),)
-$(BRCM_SAI)_URL = "http://10.59.132.240:9999/projects/csg_sonic/sonicbld/ocp_sai_190501_1208/build/libsaibcm_3.5.1.2_amd64.deb"
+$(BRCM_SAI)_URL = "http://10.59.132.240:9999/projects/csg_sonic/sonicbld/ocp_sai_190503_0300/build/libsaibcm_3.5.1.2_amd64.deb"
 SONIC_ONLINE_DEBS += $(BRCM_SAI)
 else
 $(BRCM_SAI)_PATH = $(SAI_LIBS_MOUNT_POINT)
@@ -19,7 +19,7 @@ endif
 #BRCM_SAI_DEV
 $(eval $(call add_derived_package,$(BRCM_SAI),$(BRCM_SAI_DEV)))
 ifeq ($(LOCAL_SAI_DEBS_PATH),)
-$(BRCM_SAI_DEV)_URL = "http://10.59.132.240:9999/projects/csg_sonic/sonicbld/ocp_sai_190501_1208/build/libsaibcm-dev_3.5.1.2_amd64.deb"
+$(BRCM_SAI_DEV)_URL = "http://10.59.132.240:9999/projects/csg_sonic/sonicbld/ocp_sai_190503_0300/build/libsaibcm-dev_3.5.1.2_amd64.deb"
 else
 $(BRCM_SAI_DEV)_PATH = $(SAI_LIBS_MOUNT_POINT)
 endif
