@@ -147,6 +147,8 @@ endif
 endif
 
 MAKEFLAGS += -j $(SONIC_BUILD_JOBS)
+DEB_BUILD_OPTIONS_GENERIC += "parallel=$(SONIC_CONFIG_MAKE_JOBS)"
+export DEB_BUILD_OPTIONS := "$(DEB_BUILD_OPTIONS_GENERIC)"
 export SONIC_CONFIG_MAKE_JOBS
 
 ###############################################################################
@@ -663,6 +665,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 
 	USERNAME="$(USERNAME)" \
 	PASSWORD="$(PASSWORD)" \
+	NUMPROCS="$(SONIC_CONFIG_MAKE_JOBS)" \
 		./build_debian.sh $(LOG)
 
 	USERNAME="$(USERNAME)" \
