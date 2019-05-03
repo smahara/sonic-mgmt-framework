@@ -30,7 +30,8 @@
 #  * VS_PREPARE_MEM: Prepare memory in VS build (drop cache and compact).
 #  *                 Default: yes
 #  *                 Values:  yes, no
-#  * KERNEL_PROCURE_METHOD: Specifying method of obtaining kernel Debian package: download or build
+#  * KERNEL_PROCURE_METHOD: Specifying method of obtaining kernel Debian package: download, cache, or build
+#  * KERNEL_CACHE_PATH: Full path to kernel Debian package tarball when cache procure method is used
 #
 ###############################################################################
 
@@ -88,6 +89,16 @@ DOCKER_RUN := docker run --rm=true --privileged \
     -i$(if $(TERM),t,)
 
 include rules/config
+
+# Set up kernel cache path value to pass into docker run command.
+# This is also set up in slave.mk, but that's too late for passing into docker.
+ifeq ($(KERNEL_CACHE_PATH),)
+override KERNEL_CACHE_PATH := $(strip $(DEFAULT_KERNEL_CACHE_PATH))
+endif
+
+ifneq ($(KERNEL_CACHE_PATH),)
+    DOCKER_RUN += -v "$(KERNEL_CACHE_PATH):/kernel_cache"
+endif
 
 ifeq ($(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD), y)
     DOCKER_RUN += -v /var/run/docker.sock:/var/run/docker.sock
@@ -158,6 +169,7 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            SONIC_BUILD_JOBS=$(SONIC_BUILD_JOBS) \
                            VS_PREPARE_MEM=$(VS_PREPARE_MEM) \
                            KERNEL_PROCURE_METHOD=$(KERNEL_PROCURE_METHOD) \
+                           KERNEL_CACHE_PATH=$(KERNEL_CACHE_PATH) \
                            HTTP_PROXY=$(http_proxy) \
                            HTTPS_PROXY=$(https_proxy) \
                            SONIC_ENABLE_SYSTEM_TELEMETRY=$(ENABLE_SYSTEM_TELEMETRY) \
@@ -186,8 +198,8 @@ else
 endif
 
 sonic-slave-build :
-	$(DOCKER_BASE_BUILD_PROTECTED) || exit 1
-	$(DOCKER_BUILD_PROTECTED) || exit 1
+	@$(DOCKER_BASE_BUILD_PROTECTED) || exit 1
+	@$(DOCKER_BUILD_PROTECTED) || exit 1
 
 sonic-slave-bash :
 	@$(OVERLAY_MODULE_CHECK)

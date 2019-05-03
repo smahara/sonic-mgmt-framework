@@ -36,7 +36,7 @@ PYTHON_WHEELS_PATH = $(TARGET_PATH)/python-wheels
 PROJECT_ROOT = $(shell pwd)
 STRETCH_DEBS_PATH = $(TARGET_PATH)/debs/stretch
 STRETCH_FILES_PATH = $(TARGET_PATH)/files/stretch
-DBG_IMAGE_MARK = -dbg
+DBG_IMAGE_MARK = dbg
 
 CONFIGURED_PLATFORM := $(shell [ -f .platform ] && cat .platform || echo generic)
 PLATFORM_PATH = platform/$(CONFIGURED_PLATFORM)
@@ -136,6 +136,16 @@ ifeq ($(KERNEL_PROCURE_METHOD),)
 override KERNEL_PROCURE_METHOD := $(DEFAULT_KERNEL_PROCURE_METHOD)
 endif
 
+ifeq ($(KERNEL_CACHE_PATH),)
+override KERNEL_CACHE_PATH := $(strip $(DEFAULT_KERNEL_CACHE_PATH))
+endif
+
+ifeq ($(KERNEL_PROCURE_METHOD),cache)
+ifeq ($(KERNEL_CACHE_PATH),)
+$(error KERNEL_CACHE_PATH must be specified for KERNEL_PROCURE_METHOD=cache)
+endif
+endif
+
 MAKEFLAGS += -j $(SONIC_BUILD_JOBS)
 export SONIC_CONFIG_MAKE_JOBS
 
@@ -177,6 +187,9 @@ $(info "ENABLE_SYSTEM_TELEMETRY"         : "$(ENABLE_SYSTEM_TELEMETRY)")
 $(info "SONIC_DEBUGGING_ON"              : "$(SONIC_DEBUGGING_ON)")
 $(info "SONIC_PROFILING_ON"              : "$(SONIC_PROFILING_ON)")
 $(info "KERNEL_PROCURE_METHOD"           : "$(KERNEL_PROCURE_METHOD)")
+ifeq ($(KERNEL_PROCURE_METHOD),cache)
+$(info "KERNEL_CACHE_PATH"               : "$(KERNEL_CACHE_PATH)")
+endif
 $(info "BUILD_TIMESTAMP"                 : "$(BUILD_TIMESTAMP)")
 $(info "BLDENV"                          : "$(BLDENV)")
 $(info "VS_PREPARE_MEM"                  : "$(VS_PREPARE_MEM)")
@@ -188,6 +201,7 @@ $(info )
 ###############################################################################
 
 export kernel_procure_method=$(KERNEL_PROCURE_METHOD)
+export kernel_cache_mount:=/kernel_cache
 export vs_build_prepare_mem=$(VS_PREPARE_MEM)
 
 ###############################################################################
@@ -485,7 +499,7 @@ ifeq ($(BLDENV),stretch)
 	DOCKER_IMAGES := $(SONIC_STRETCH_DOCKERS)
 	DOCKER_DBG_IMAGES := $(SONIC_STRETCH_DBG_DOCKERS)
 	SONIC_STRETCH_DOCKERS_FOR_INSTALLERS = $(filter $(SONIC_STRETCH_DOCKERS),$(DOCKER_IMAGES_FOR_INSTALLERS))
-	SONIC_STRETCH_DBG_DOCKERS_FOR_INSTALLERS = $(filter $(SONIC_STRETCH_DBG_DOCKERS), $(patsubst %.gz,%$(DBG_IMAGE_MARK).gz, $(SONIC_STRETCH_DOCKERS_FOR_INSTALLERS)))
+	SONIC_STRETCH_DBG_DOCKERS_FOR_INSTALLERS = $(filter $(SONIC_STRETCH_DBG_DOCKERS), $(patsubst %.gz,%-$(DBG_IMAGE_MARK).gz, $(SONIC_STRETCH_DOCKERS_FOR_INSTALLERS)))
 else
 	DOCKER_IMAGES := $(filter-out $(SONIC_STRETCH_DOCKERS), $(SONIC_DOCKER_IMAGES))
 	DOCKER_DBG_IMAGES := $(filter-out $(SONIC_STRETCH_DBG_DOCKERS), $(SONIC_DOCKER_DBG_IMAGES))
@@ -536,7 +550,7 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 SONIC_TARGET_LIST += $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES))
 
 # Targets for building docker images
-$(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%$(DBG_IMAGE_MARK).gz : .platform docker-start \
+$(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAGE_MARK).gz : .platform docker-start \
 		$$(addprefix $(DEBS_PATH)/,$$($$*.gz_DBG_DEPENDS)) \
 		$$(addsuffix -load,$$(addprefix $(TARGET_PATH)/,$$*.gz))
 	$(HEADER)
