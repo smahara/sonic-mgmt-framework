@@ -27,6 +27,7 @@
 #  *                  make NOSTRETCH=1 KEEP_SLAVE_ON=yes <any jessie target>
 #  * SOURCE_FOLDER: host path to be mount as /var/$(USER)/src, only effective when KEEP_SLAVE_ON=yes
 #  * SONIC_BUILD_JOBS: Specifying number of concurrent build job(s) to run
+#  * SONIC_MAKE_JOBS: Specifying number of parallel processes to run within a target makefile
 #  * VS_PREPARE_MEM: Prepare memory in VS build (drop cache and compact).
 #  *                 Default: yes
 #  *                 Values:  yes, no
@@ -114,53 +115,53 @@ ifeq ($(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD), y)
 endif
 
 DOCKER_BASE_BUILD = docker build --no-cache \
-		    -t $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) \
-		    --build-arg http_proxy=$(http_proxy) \
-		    --build-arg https_proxy=$(https_proxy) \
-		    $(SLAVE_DIR)
+                    -t $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) \
+                    --build-arg http_proxy=$(http_proxy) \
+                    --build-arg https_proxy=$(https_proxy) \
+                    $(SLAVE_DIR)
 
 DOCKER_BUILD = docker build --no-cache \
-	       --build-arg user=$(USER) \
-	       --build-arg uid=$(shell id -u) \
-	       --build-arg guid=$(shell id -g) \
-	       --build-arg hostname=$(shell echo $$HOSTNAME) \
-	       --build-arg SLAVE_BASE_TAG=$(SLAVE_BASE_TAG) \
-	       -t $(SLAVE_IMAGE):$(SLAVE_TAG) \
-	       -f $(SLAVE_DIR)/Dockerfile.user \
-	       $(SLAVE_DIR)
+               --build-arg user=$(USER) \
+               --build-arg uid=$(shell id -u) \
+               --build-arg guid=$(shell id -g) \
+               --build-arg hostname=$(shell echo $$HOSTNAME) \
+               --build-arg SLAVE_BASE_TAG=$(SLAVE_BASE_TAG) \
+               -t $(SLAVE_IMAGE):$(SLAVE_TAG) \
+               -f $(SLAVE_DIR)/Dockerfile.user \
+               $(SLAVE_DIR)
 
 DOCKER_BASE_BUILD_PROTECTED = echo "Start time: "`date`; \
-				echo "Attempting to acquire base image lock (waiting up to $(BASE_IMAGE_LOCK_TIMEOUT_SECS) seconds)..."; \
-				mkdir -p $(LOCK_DIR); \
-				touch $(BASE_IMAGE_LOCK_FILE_NAME) && \
-				exec {BASE_IMAGE_LOCK_FD}<$(BASE_IMAGE_LOCK_FILE_NAME); \
-				if ! flock -x -w $(BASE_IMAGE_LOCK_TIMEOUT_SECS) $${BASE_IMAGE_LOCK_FD}; then \
-					echo "ERROR: Could not acquire base image lock. Try resubmitting your build."; \
-					exit 1; \
-				else \
-					echo "Base image lock acquired. Continuing..."; \
-					docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
-					$(DOCKER_BASE_BUILD); \
-					docker_rc=$$?; \
-					eval exec "$${BASE_IMAGE_LOCK_FD}<&-"; \
-					exit $${docker_rc}; \
-				fi
+                              echo "Attempting to acquire base image lock (waiting up to $(BASE_IMAGE_LOCK_TIMEOUT_SECS) seconds)..."; \
+                              [ -d $(LOCK_DIR) ] || (mkdir -p $(LOCK_DIR) && chmod 0777 $(LOCK_DIR)); \
+                              touch $(BASE_IMAGE_LOCK_FILE_NAME) && \
+                              exec {BASE_IMAGE_LOCK_FD}<$(BASE_IMAGE_LOCK_FILE_NAME); \
+                              if ! flock -x -w $(BASE_IMAGE_LOCK_TIMEOUT_SECS) $${BASE_IMAGE_LOCK_FD}; then \
+                                  echo "ERROR: Could not acquire base image lock. Try resubmitting your build."; \
+                                  exit 1; \
+                              else \
+                                  echo "Base image lock acquired. Continuing..."; \
+                                  docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
+                                  $(DOCKER_BASE_BUILD); \
+                                  docker_rc=$$?; \
+                                  eval exec "$${BASE_IMAGE_LOCK_FD}<&-"; \
+                                  exit $${docker_rc}; \
+                              fi
 
 DOCKER_BUILD_PROTECTED = echo "Start time: "`date`; \
-			echo "Attempting to acquire user image lock (waiting up to $(USER_IMAGE_LOCK_TIMEOUT_SECS) seconds)..."; \
-			mkdir -p $(LOCK_DIR); \
-			touch $(USER_IMAGE_LOCK_FILE_NAME) && \
-			exec {USER_IMAGE_LOCK_FD}<$(USER_IMAGE_LOCK_FILE_NAME) ; \
-			if ! flock -x -w $(USER_IMAGE_LOCK_TIMEOUT_SECS) $${USER_IMAGE_LOCK_FD}; then  \
-				echo "ERROR: Could not acquire user image lock. Try resubmitting your build."; \
-				exit 1; \
-			else \
-				echo "User image lock acquired. Continuing..."; \
-				$(DOCKER_BUILD); \
-				docker_rc=$$?; \
-				eval exec "$${USER_IMAGE_LOCK_FD}<&-"; \
-				exit $${docker_rc}; \
-			fi
+                         echo "Attempting to acquire user image lock (waiting up to $(USER_IMAGE_LOCK_TIMEOUT_SECS) seconds)..."; \
+                         [ -d $(LOCK_DIR) ] || (mkdir -p $(LOCK_DIR) && chmod 0777 $(LOCK_DIR)); \
+                         touch $(USER_IMAGE_LOCK_FILE_NAME) && \
+                         exec {USER_IMAGE_LOCK_FD}<$(USER_IMAGE_LOCK_FILE_NAME) ; \
+                         if ! flock -x -w $(USER_IMAGE_LOCK_TIMEOUT_SECS) $${USER_IMAGE_LOCK_FD}; then  \
+                             echo "ERROR: Could not acquire user image lock. Try resubmitting your build."; \
+                             exit 1; \
+                         else \
+                             echo "User image lock acquired. Continuing..."; \
+                             $(DOCKER_BUILD); \
+                             docker_rc=$$?; \
+                             eval exec "$${USER_IMAGE_LOCK_FD}<&-"; \
+                             exit $${docker_rc}; \
+                         fi
 
 SONIC_BUILD_INSTRUCTION :=  make \
                            -f slave.mk \
@@ -176,6 +177,7 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            PASSWORD=$(PASSWORD) \
                            USERNAME=$(USERNAME) \
                            SONIC_BUILD_JOBS=$(SONIC_BUILD_JOBS) \
+                           SONIC_MAKE_JOBS=$(SONIC_MAKE_JOBS) \
                            VS_PREPARE_MEM=$(VS_PREPARE_MEM) \
                            KERNEL_PROCURE_METHOD=$(KERNEL_PROCURE_METHOD) \
                            KERNEL_CACHE_PATH=$(KERNEL_CACHE_PATH) \

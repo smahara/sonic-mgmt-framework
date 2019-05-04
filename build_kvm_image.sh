@@ -11,10 +11,10 @@ INSTALLER=$3
 DISK_SIZE=$4
 
 # Create special tmpfs mount point for installer disk
-FILESYSTEM_BASE=/sonic/kvmbuild
-mkdir -p ${FILESYSTEM_BASE}
-sudo mount -t tmpfs -o size=16G tmpfs ${FILESYSTEM_BASE}
-INSTALLER_DISK="${FILESYSTEM_BASE}/sonic-installer.img"
+FILESYSTEM_KVMBASE=/sonic/kvmbuild
+mkdir -p ${FILESYSTEM_KVMBASE}
+sudo mount -t tmpfs -o size=16G tmpfs ${FILESYSTEM_KVMBASE}
+INSTALLER_DISK="${FILESYSTEM_KVMBASE}/sonic-installer.img"
 
 # VM will listen on telnet port $KVM_PORT
 KVM_PORT=9000
@@ -75,7 +75,10 @@ kvm_pid=$!
 
 sleep 2.0
 
+FILESYSTEM_KVMBASE=/sonic/kvmbuild
+
 [ -d "/proc/$kvm_pid" ] || {
+        sudo umount -f ${FILESYSTEM_KVMBASE} || true
         echo "ERROR: kvm died."
         cat $kvm_log
         exit 1
@@ -86,5 +89,7 @@ echo "to kill kvm:  sudo kill $kvm_pid"
 ./check_install.py -u $SONIC_USERNAME -P $PASSWD -p $KVM_PORT
 
 kill $kvm_pid
+
+sudo umount -f ${FILESYSTEM_KVMBASE} || true
 
 exit 0

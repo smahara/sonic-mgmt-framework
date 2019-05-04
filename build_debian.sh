@@ -9,6 +9,8 @@
 ##          The name of the default admin user
 ##   PASSWORD
 ##          The password, expected by chpasswd command
+##   NUMPROCS
+##          Limit the number of processes to use with mksquashfs
 
 ## Default user
 [ -n "$USERNAME" ] || {
@@ -20,6 +22,11 @@
 [ -n "$PASSWORD" ] || {
     echo "Error: no or empty PASSWORD"
     exit 1
+}
+
+## Number of CPU processes to use for mksquashfs
+[ -n "$NUMPROCS" ] || {
+    NUMPROCS=$(nproc)
 }
 
 ## Include common functions
@@ -450,7 +457,7 @@ sudo rm -f $ONIE_INSTALLER_PAYLOAD $FILESYSTEM_SQUASHFS
 ## Note: -x to skip directories on different file systems, such as /proc
 sudo du -hsx $FILESYSTEM_ROOT
 sudo mkdir -p $FILESYSTEM_ROOT/var/lib/docker
-sudo mksquashfs $FILESYSTEM_ROOT $FILESYSTEM_SQUASHFS -e boot -e var/lib/docker -e $PLATFORM_DIR
+sudo mksquashfs $FILESYSTEM_ROOT $FILESYSTEM_SQUASHFS -processors $NUMPROCS -e boot -e var/lib/docker -e $PLATFORM_DIR
 
 ## Compress docker files
 pushd $FILESYSTEM_ROOT && sudo tar czf $OLDPWD/$FILESYSTEM_DOCKERFS -C var/lib/docker .; popd
