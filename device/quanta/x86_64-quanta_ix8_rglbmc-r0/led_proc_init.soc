@@ -1,0 +1,11 @@
+#led stop
+#sleep 1
+#m0 Load 0 0x0 /usr/share/sonic/platform/linkscan_led_fw.bin
+#m0 Load 0 0x0 linkscan_led_fw.bin
+#sleep 4
+#m0 Load 0 0x3800 /usr/share/sonic/platform/custom_led.bin
+#m0 Load 0 0x3800 custom_led.bin
+#sleep 4
+#led start
+#sleep 1
+#led auto on
