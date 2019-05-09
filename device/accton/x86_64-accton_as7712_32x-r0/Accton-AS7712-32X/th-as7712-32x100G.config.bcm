@@ -1,15 +1,15 @@
-# accton_as7712_32x 32x100G SDK config
+# accton_as7712_32x
 os=unix
 schan_intr_enable=0
 l2_mem_entries=8192
 l2xmsg_mode=1
 l3_mem_entries=8192
-parity_correction=0
-parity_enable=0
+parity_correction=1
+parity_enable=1
 mmu_lossless=1
 
-pbmp_oversubscribe=0x444444441111111104444444422222222
-pbmp_xport_xe=0x444444451111111144444444422222222
+pbmp_oversubscribe=0x3ffffffffffffffffffffffffffffffffe
+pbmp_xport_xe=0x3ffffffffffffffffffffffffffffffffe
 
 #
 arl_clean_timeout_usec=15000000
@@ -28,288 +28,349 @@ max_vp_lags=0
 miim_intr_enable=0
 oversubscribe_mode=1
 
-# portmap_0=x:xx
-#FC0
+# portmap
+portmap_50=49:100
+portmap_54=53:100
+portmap_58=57:100
+portmap_62=61:100
+portmap_68=65:100
+portmap_72=69:100
+portmap_76=73:100
+portmap_80=77:100
+portmap_34=33:100
+portmap_38=37:100
+portmap_42=41:100
+portmap_46=45:100
+portmap_84=81:100
+portmap_88=85:100
+portmap_92=89:100
+portmap_96=93:100
+portmap_102=97:100
+portmap_106=101:100
+portmap_110=105:100
+portmap_114=109:100
+portmap_17=17:100
+portmap_21=21:100
+portmap_25=25:100
+portmap_29=29:100
+portmap_118=113:100
+portmap_122=117:100
+portmap_126=121:100
+portmap_130=125:100
 portmap_1=1:100
-
-#FC1
 portmap_5=5:100
-
-#FC2
 portmap_9=9:100
-
-#FC3
 portmap_13=13:100
 
-#FC4
-portmap_17=17:100
+# dport
+dport_map_direct=0
+dport_map_enable=1
+dport_map_port_100=130      #TSC-E management port 2
+dport_map_port_102=65
+dport_map_port_103=66
+dport_map_port_104=67
+dport_map_port_105=68
+dport_map_port_106=69
+dport_map_port_107=70
+dport_map_port_108=71
+dport_map_port_109=72
+dport_map_port_10=122
+dport_map_port_110=73
+dport_map_port_111=74
+dport_map_port_112=75
+dport_map_port_113=76
+dport_map_port_114=77
+dport_map_port_115=78
+dport_map_port_116=79
+dport_map_port_117=80
+dport_map_port_118=97
+dport_map_port_119=98
+dport_map_port_11=123
+dport_map_port_120=99
+dport_map_port_121=100
+dport_map_port_122=101
+dport_map_port_123=102
+dport_map_port_124=103
+dport_map_port_125=104
+dport_map_port_126=105
+dport_map_port_127=106
+dport_map_port_128=107
+dport_map_port_129=108
+dport_map_port_12=124
+dport_map_port_130=109
+dport_map_port_131=110
+dport_map_port_132=111
+dport_map_port_133=112
+dport_map_port_13=125
+dport_map_port_14=126
+dport_map_port_15=127
+dport_map_port_16=128
+dport_map_port_17=81
+dport_map_port_18=82
+dport_map_port_19=83
+dport_map_port_1=113
+dport_map_port_20=84
+dport_map_port_21=85
+dport_map_port_22=86
+dport_map_port_23=87
+dport_map_port_24=88
+dport_map_port_25=89
+dport_map_port_26=90
+dport_map_port_27=91
+dport_map_port_28=92
+dport_map_port_29=93
+dport_map_port_2=114
+dport_map_port_30=94
+dport_map_port_31=95
+dport_map_port_32=96
+dport_map_port_34=33
+dport_map_port_35=34
+dport_map_port_36=35
+dport_map_port_37=36
+dport_map_port_38=37
+dport_map_port_39=38
+dport_map_port_3=115
+dport_map_port_40=39
+dport_map_port_41=40
+dport_map_port_42=41
+dport_map_port_43=42
+dport_map_port_44=43
+dport_map_port_45=44
+dport_map_port_46=45
+dport_map_port_47=46
+dport_map_port_48=47
+dport_map_port_49=48
+dport_map_port_4=116
+dport_map_port_50=1
+dport_map_port_51=2
+dport_map_port_52=3
+dport_map_port_53=4
+dport_map_port_54=5
+dport_map_port_55=6
+dport_map_port_56=7
+dport_map_port_57=8
+dport_map_port_58=9
+dport_map_port_59=10
+dport_map_port_5=117
+dport_map_port_60=11
+dport_map_port_61=12
+dport_map_port_62=13
+dport_map_port_63=14
+dport_map_port_64=15
+dport_map_port_65=16
+dport_map_port_66=129        #TSC-E management port 1
+dport_map_port_68=17
+dport_map_port_69=18
+dport_map_port_6=118
+dport_map_port_70=19
+dport_map_port_71=20
+dport_map_port_72=21
+dport_map_port_73=22
+dport_map_port_74=23
+dport_map_port_75=24
+dport_map_port_76=25
+dport_map_port_77=26
+dport_map_port_78=27
+dport_map_port_79=28
+dport_map_port_7=119
+dport_map_port_80=29
+dport_map_port_81=30
+dport_map_port_82=31
+dport_map_port_83=32
+dport_map_port_84=49
+dport_map_port_85=50
+dport_map_port_86=51
+dport_map_port_87=52
+dport_map_port_88=53
+dport_map_port_89=54
+dport_map_port_8=120
+dport_map_port_90=55
+dport_map_port_91=56
+dport_map_port_92=57
+dport_map_port_93=58
+dport_map_port_94=59
+dport_map_port_95=60
+dport_map_port_96=61
+dport_map_port_97=62
+dport_map_port_98=63
+dport_map_port_99=64
+dport_map_port_9=121
 
-#FC5
-portmap_21=21:100
+# polarity
+phy_xaui_rx_polarity_flip_106=0xF # phy_xaui_rx_polarity_flip_106=0xf
+phy_xaui_rx_polarity_flip_107=0x1
+phy_xaui_rx_polarity_flip_108=0x3
+phy_xaui_rx_polarity_flip_109=0x1
+phy_xaui_rx_polarity_flip_114=0x2 # phy_xaui_rx_polarity_flip_114=0x2
+phy_xaui_rx_polarity_flip_115=0x1
+phy_xaui_rx_polarity_flip_116=0x0
+phy_xaui_rx_polarity_flip_117=0x0
+phy_xaui_rx_polarity_flip_118=0xA # phy_xaui_rx_polarity_flip_118=0xa 
+phy_xaui_rx_polarity_flip_119=0x1
+phy_xaui_rx_polarity_flip_120=0x2
+phy_xaui_rx_polarity_flip_121=0x1
+phy_xaui_rx_polarity_flip_84=0xF # phy_xaui_rx_polarity_flip_84=0xf
+phy_xaui_rx_polarity_flip_85=0x1
+phy_xaui_rx_polarity_flip_86=0x3
+phy_xaui_rx_polarity_flip_87=0x1
+phy_xaui_rx_polarity_flip_88=0xF # phy_xaui_rx_polarity_flip_88=0xf
+phy_xaui_rx_polarity_flip_89=0x1
+phy_xaui_rx_polarity_flip_90=0x3
+phy_xaui_rx_polarity_flip_91=0x1
+phy_xaui_rx_polarity_flip_92=0xF # phy_xaui_tx_polarity_flip_92=0xf
+phy_xaui_rx_polarity_flip_93=0x1
+phy_xaui_rx_polarity_flip_94=0x3
+phy_xaui_rx_polarity_flip_95=0x1
+phy_xaui_tx_polarity_flip_102=0x1 # phy_xaui_tx_polarity_flip_102=0x1
+phy_xaui_tx_polarity_flip_103=0x0
+phy_xaui_tx_polarity_flip_104=0x0
+phy_xaui_tx_polarity_flip_105=0x0
+phy_xaui_tx_polarity_flip_110=0xE # phy_xaui_tx_polarity_flip_110=0xe
+phy_xaui_tx_polarity_flip_111=0x1
+phy_xaui_tx_polarity_flip_112=0x3
+phy_xaui_tx_polarity_flip_113=0x1
+phy_xaui_tx_polarity_flip_118=0xF # phy_xaui_tx_polarity_flip_118=0xf
+phy_xaui_tx_polarity_flip_119=0x1
+phy_xaui_tx_polarity_flip_120=0x3
+phy_xaui_tx_polarity_flip_121=0x1
+phy_xaui_tx_polarity_flip_17=0xF # phy_xaui_tx_polarity_flip_17=0xf
+phy_xaui_tx_polarity_flip_18=0x1
+phy_xaui_tx_polarity_flip_19=0x3
+phy_xaui_tx_polarity_flip_20=0x1
+phy_xaui_tx_polarity_flip_84=0x6 # phy_xaui_tx_polarity_flip_84=0x6
+phy_xaui_tx_polarity_flip_85=0x1
+phy_xaui_tx_polarity_flip_86=0x1
+phy_xaui_tx_polarity_flip_87=0x0
+phy_xaui_tx_polarity_flip_92=0xE #phy_xaui_tx_polarity_flip_92=0xe
+phy_xaui_tx_polarity_flip_93=0x1
+phy_xaui_tx_polarity_flip_94=0x3
+phy_xaui_tx_polarity_flip_95=0x1
+phy_xaui_tx_polarity_flip_96=0x1 # phy_xaui_tx_polarity_flip_96=0x1
+phy_xaui_tx_polarity_flip_97=0x0
+phy_xaui_tx_polarity_flip_98=0x0
+phy_xaui_tx_polarity_flip_99=0x0
 
-#FC6
-portmap_25=25:100
-
-#FC7
-portmap_29=29:100
-
-# Tile-1
-#FC8
-portmap_34=33:100
-
-#FC9
-portmap_38=37:100
-
-#FC10
-portmap_42=41:100
-
-#FC11
-portmap_46=45:100
-
-#FC12
-portmap_50=49:100
-
-#FC13
-portmap_54=53:100
-
-#FC14
-portmap_58=57:100
-
-#FC15
-portmap_62=61:100
-
-#TSC-E Management port 1
-#portmap_66=129:10
-#portmap_67=133:10
-
-# Tile-2
-#FC16
-portmap_68=65:100
-
-#FC17
-portmap_72=69:100
-
-#FC18
-portmap_76=73:100
-
-#FC19
-portmap_80=77:100
-
-#FC20
-portmap_84=81:100
-
-#FC21
-portmap_88=85:100
-
-#FC22
-portmap_92=89:100
-
-#FC23
-portmap_96=93:100
-
-#TSC-E Management port 2
-#portmap_100=131:10
-#portmap_101=134:10
-
-# Tile-3
-#FC24
-portmap_102=97:100
-
-#FC25
-portmap_106=101:100
-
-#FC26
-portmap_110=105:100
-
-#FC27
-portmap_114=109:100
-
-#FC28
-portmap_118=113:100
-
-#FC29
-portmap_122=117:100
-
-#FC30
-portmap_126=121:100
-
-#FC31
-portmap_130=125:100
-
-
-
-## TX/RX Lane Swap
-#########
-# port5 #
-# FC16  #
-#########
-xgxs_tx_lane_map_68=0x0123
-xgxs_rx_lane_map_68=0x0123
-
-#########
-# port8 #
-# FC19  #
-#########
-xgxs_tx_lane_map_80=0x0123
-xgxs_rx_lane_map_80=0x0123
-
-#########
-# port13#
-# FC20  #
-#########
-xgxs_tx_lane_map_84=0x1032
-xgxs_rx_lane_map_84=0x1032
-
-#########
-# port14#
-# FC21  #
-#########
-xgxs_tx_lane_map_88=0x0123
-xgxs_rx_lane_map_88=0x0123
-
-#########
-# port15#
-# FC22  #
-#########
-xgxs_tx_lane_map_92=0x1032
-xgxs_rx_lane_map_92=0x1032
-
-#########
-# port17#
-# FC24  #
-#########
-xgxs_tx_lane_map_102=0x1032
+# lane_map
 xgxs_rx_lane_map_102=0x1032
-
-#########
-# port18#
-# FC25  #
-#########
-xgxs_tx_lane_map_106=0x0123
+xgxs_rx_lane_map_103=0x1032
+xgxs_rx_lane_map_104=0x1032
+xgxs_rx_lane_map_105=0x1032
 xgxs_rx_lane_map_106=0x0123
-
-#########
-# port19#
-# FC26  #
-#########
-xgxs_tx_lane_map_110=0x1032
+xgxs_rx_lane_map_107=0x0123
+xgxs_rx_lane_map_108=0x0123
+xgxs_rx_lane_map_109=0x0123
+xgxs_rx_lane_map_10=0x0123
 xgxs_rx_lane_map_110=0x1032
-
-#########
-# port20#
-# FC27  #
-#########
-xgxs_tx_lane_map_114=0x0123
+xgxs_rx_lane_map_111=0x1032
+xgxs_rx_lane_map_112=0x1032
+xgxs_rx_lane_map_113=0x1032
 xgxs_rx_lane_map_114=0x0123
-
-#########
-# port26#
-# FC29  #
-#########
-xgxs_tx_lane_map_122=0x0123
+xgxs_rx_lane_map_115=0x0123
+xgxs_rx_lane_map_116=0x0123
+xgxs_rx_lane_map_117=0x0123
+xgxs_rx_lane_map_11=0x0123
 xgxs_rx_lane_map_122=0x0123
-
-#########
-# port27#
-# FC30  #
-#########
-xgxs_tx_lane_map_126=0x0123
+xgxs_rx_lane_map_123=0x0123
+xgxs_rx_lane_map_124=0x0123
+xgxs_rx_lane_map_125=0x0123
 xgxs_rx_lane_map_126=0x0123
-
-#########
-# port29#
-# FC0   #
-#########
-xgxs_tx_lane_map_1=0x0123
-xgxs_rx_lane_map_1=0x0123
-
-# port30#
-# FC1   #
-#########
-xgxs_tx_lane_map_5=0x0123
-xgxs_rx_lane_map_5=0x0123
-
-#########
-# port31#
-# FC2   #
-#########
-xgxs_tx_lane_map_9=0x0123
-xgxs_rx_lane_map_9=0x0123
-
-#########
-# port32#
-# FC3   #
-#########
-xgxs_tx_lane_map_13=0x0123
+xgxs_rx_lane_map_127=0x0123
+xgxs_rx_lane_map_128=0x0123
+xgxs_rx_lane_map_129=0x0123
+xgxs_rx_lane_map_12=0x0123
 xgxs_rx_lane_map_13=0x0123
-
-
-## RX / TX Serdes lane polarity flip list
-## RX / TX Serdes lane polarity flip list
-#########
-# FC4   #
-# port21 #
-#########
-phy_xaui_tx_polarity_flip_17=0xf
-
-#########
-# FC20  #
-# port13 #
-#########
-phy_xaui_rx_polarity_flip_84=0xf
-phy_xaui_tx_polarity_flip_84=0x6
-
-#########
-# FC21  #
-# port14 #
-#########
-phy_xaui_rx_polarity_flip_88=0xf
-
-#########
-# FC22  #
-# port15 #
-#########
-phy_xaui_rx_polarity_flip_92=0xf
-phy_xaui_tx_polarity_flip_92=0xe
-
-
-#########
-# FC23  #
-# port16 #
-#########
-phy_xaui_tx_polarity_flip_96=0x1
-
-#########
-# FC24  #
-# port17 #
-#########
-phy_xaui_tx_polarity_flip_102=0x1
-
-
-#########
-# FC25  #
-# port18 #
-#########
-phy_xaui_rx_polarity_flip_106=0xf
-
-#########
-# FC26  #
-# port19 #
-#########
-phy_xaui_tx_polarity_flip_110=0xe
-
-#########
-# FC27  #
-# port20 #
-#########
-phy_xaui_rx_polarity_flip_114=0x2
-
-#########
-# FC28  #
-# port25 #
-#########
-phy_xaui_rx_polarity_flip_118=0xa
-phy_xaui_tx_polarity_flip_118=0xf
+xgxs_rx_lane_map_14=0x0123
+xgxs_rx_lane_map_15=0x0123
+xgxs_rx_lane_map_16=0x0123
+xgxs_rx_lane_map_1=0x0123
+xgxs_rx_lane_map_2=0x0123
+xgxs_rx_lane_map_3=0x0123
+xgxs_rx_lane_map_4=0x0123
+xgxs_rx_lane_map_5=0x0123
+xgxs_rx_lane_map_68=0x0123
+xgxs_rx_lane_map_69=0x0123
+xgxs_rx_lane_map_6=0x0123
+xgxs_rx_lane_map_70=0x0123
+xgxs_rx_lane_map_71=0x0123
+xgxs_rx_lane_map_7=0x0123
+xgxs_rx_lane_map_80=0x0123
+xgxs_rx_lane_map_81=0x0123
+xgxs_rx_lane_map_82=0x0123
+xgxs_rx_lane_map_83=0x0123
+xgxs_rx_lane_map_84=0x1032
+xgxs_rx_lane_map_85=0x1032
+xgxs_rx_lane_map_86=0x1032
+xgxs_rx_lane_map_87=0x1032
+xgxs_rx_lane_map_88=0x0123
+xgxs_rx_lane_map_89=0x0123
+xgxs_rx_lane_map_8=0x0123
+xgxs_rx_lane_map_90=0x0123
+xgxs_rx_lane_map_91=0x0123
+xgxs_rx_lane_map_92=0x1032
+xgxs_rx_lane_map_93=0x1032
+xgxs_rx_lane_map_94=0x1032
+xgxs_rx_lane_map_95=0x1032
+xgxs_rx_lane_map_9=0x0123
+xgxs_tx_lane_map_102=0x1032
+xgxs_tx_lane_map_103=0x1032
+xgxs_tx_lane_map_104=0x1032
+xgxs_tx_lane_map_105=0x1032
+xgxs_tx_lane_map_106=0x0123
+xgxs_tx_lane_map_107=0x0123
+xgxs_tx_lane_map_108=0x0123
+xgxs_tx_lane_map_109=0x0123
+xgxs_tx_lane_map_10=0x0123
+xgxs_tx_lane_map_110=0x1032
+xgxs_tx_lane_map_111=0x1032
+xgxs_tx_lane_map_112=0x1032
+xgxs_tx_lane_map_113=0x1032
+xgxs_tx_lane_map_114=0x0123
+xgxs_tx_lane_map_115=0x0123
+xgxs_tx_lane_map_116=0x0123
+xgxs_tx_lane_map_117=0x0123
+xgxs_tx_lane_map_11=0x0123
+xgxs_tx_lane_map_122=0x0123
+xgxs_tx_lane_map_123=0x0123
+xgxs_tx_lane_map_124=0x0123
+xgxs_tx_lane_map_125=0x0123
+xgxs_tx_lane_map_126=0x0123
+xgxs_tx_lane_map_127=0x0123
+xgxs_tx_lane_map_128=0x0123
+xgxs_tx_lane_map_129=0x0123
+xgxs_tx_lane_map_12=0x0123
+xgxs_tx_lane_map_13=0x0123
+xgxs_tx_lane_map_14=0x0123
+xgxs_tx_lane_map_15=0x0123
+xgxs_tx_lane_map_16=0x0123
+xgxs_tx_lane_map_1=0x0123
+xgxs_tx_lane_map_2=0x0123
+xgxs_tx_lane_map_3=0x0123
+xgxs_tx_lane_map_4=0x0123
+xgxs_tx_lane_map_5=0x0123
+xgxs_tx_lane_map_68=0x0123
+xgxs_tx_lane_map_69=0x0123
+xgxs_tx_lane_map_6=0x0123
+xgxs_tx_lane_map_70=0x0123
+xgxs_tx_lane_map_71=0x0123
+xgxs_tx_lane_map_7=0x0123
+xgxs_tx_lane_map_80=0x0123
+xgxs_tx_lane_map_81=0x0123
+xgxs_tx_lane_map_82=0x0123
+xgxs_tx_lane_map_83=0x0123
+xgxs_tx_lane_map_84=0x1032
+xgxs_tx_lane_map_85=0x1032
+xgxs_tx_lane_map_86=0x1032
+xgxs_tx_lane_map_87=0x1032
+xgxs_tx_lane_map_88=0x0123
+xgxs_tx_lane_map_89=0x0123
+xgxs_tx_lane_map_8=0x0123
+xgxs_tx_lane_map_90=0x0123
+xgxs_tx_lane_map_91=0x0123
+xgxs_tx_lane_map_92=0x1032
+xgxs_tx_lane_map_93=0x1032
+xgxs_tx_lane_map_94=0x1032
+xgxs_tx_lane_map_95=0x1032
+xgxs_tx_lane_map_9=0x0123
 
 #Driver Current
 serdes_driver_current_lane0_1=0x8
