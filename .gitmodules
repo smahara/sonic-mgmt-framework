@@ -4,7 +4,7 @@
 	branch = broadcom_sonic
 [submodule "sonic-linux-kernel"]
 	path = src/sonic-linux-kernel
-	url = ../sonic-linux-kernel.git
+	url = ../../sonic/sonic-linux-kernel.git
 	branch = broadcom_sonic
 [submodule "sonic-sairedis"]
 	path = src/sonic-sairedis
@@ -57,6 +57,10 @@
 [submodule "src/sonic-platform-daemons"]
 	path = src/sonic-platform-daemons
 	url = ../sonic-platform-daemons.git
+	branch = broadcom_sonic
+[submodule "src/sonic-stp"]
+	path = src/sonic-stp
+	url = ../sonic-stp.git
 	branch = broadcom_sonic
 [submodule "src/sonic-frr/frr"]
 	path = src/sonic-frr/frr
