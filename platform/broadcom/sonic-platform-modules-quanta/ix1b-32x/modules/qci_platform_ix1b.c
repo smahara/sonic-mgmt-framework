@@ -366,6 +366,24 @@ struct gpio_leds_priv {
 	struct gpio_led_data leds[];
 };
 
+static struct i2c_adapter *i2c_get_adapter_wait_wait(int nr)
+{
+	struct i2c_adapter *adap = NULL;
+	int i = 0;
+
+	for (i = 0; i < 300; ++i) {
+		adap = i2c_get_adapter(nr);
+		if (adap)
+			break;
+		msleep(10);
+	}
+
+	if (adap == NULL)
+		printk(KERN_ERR "%s: unable to get i2c adapter for bus %d\n", __FILE__, nr);
+
+	return adap;
+}
+
 static int __init ix1b_platform_init(void)
 {
 	struct i2c_client *client;
@@ -389,7 +407,7 @@ static int __init ix1b_platform_init(void)
 	if (ret)
 		goto fail_platform_device;
 
-	adapter = i2c_get_adapter(0);
+	adapter = i2c_get_adapter_wait(0);
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[0]);		// pca9546_1
 	printk("[CC] NEW device pca9546_1\n");
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[1]);		// pca9546_2
@@ -400,17 +418,17 @@ static int __init ix1b_platform_init(void)
 #endif
 	i2c_put_adapter(adapter);
 
-	adapter = i2c_get_adapter(0x14);
+	adapter = i2c_get_adapter_wait(0x14);
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[12]);		// pmbus_psu1
 	printk("[CC] NEW device pmbus_psu1\n");
 	i2c_put_adapter(adapter);
 
-	adapter = i2c_get_adapter(0x15);
+	adapter = i2c_get_adapter_wait(0x15);
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[13]);		// pmbus_psu2
 	printk("[CC] NEW device pmbus_psu2\n");
 	i2c_put_adapter(adapter);
 
-	adapter = i2c_get_adapter(0x16);
+	adapter = i2c_get_adapter_wait(0x16);
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[2]);		// pca9555-PSU1
 	printk("[CC] NEW device pca9555-PSU1\n");
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[3]);		// MB_BOARDINFO_EEPROM
@@ -419,12 +437,12 @@ static int __init ix1b_platform_init(void)
 	printk("[CC] NEW device pca9555-ID\n");
 	i2c_put_adapter(adapter);
 
-	adapter = i2c_get_adapter(0x17);
+	adapter = i2c_get_adapter_wait(0x17);
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[11]);		// pca9555-fan
 	printk("[CC] NEW device pca9555-fan\n");
 	i2c_put_adapter(adapter);
 
-	adapter = i2c_get_adapter(0x10);
+	adapter = i2c_get_adapter_wait(0x10);
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[4]);		// pca9548_2 SFP
 	printk("[CC] NEW device pca9548_2 SFP\n");
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[5]);		// pca9548_3 SFP
@@ -437,20 +455,20 @@ static int __init ix1b_platform_init(void)
 	printk("[CC] NEW device CPLD3\n");
 	i2c_put_adapter(adapter);
 
-	adapter = i2c_get_adapter(0x11);
+	adapter = i2c_get_adapter_wait(0x11);
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[7]);		// pca9548_5 SFP
 	printk("[CC] NEW device pca9548_5 SFP\n");
 	i2c_put_adapter(adapter);
 
 #if defined(QUANTA_CPU_RGL)
-	adapter = i2c_get_adapter(0x18);
+	adapter = i2c_get_adapter_wait(0x18);
 	client = i2c_new_device(adapter, &ix1b_i2c_devices[15]);		// cpu pca9555_1
 	printk("[CC] NEW device cpu pca9555_1\n");
 	i2c_put_adapter(adapter);
 
 	for(i = 0x20; i < 0x40; i++)
 	{
-		adapter = i2c_get_adapter(i);
+		adapter = i2c_get_adapter_wait(i);
 		client = i2c_new_device(adapter, &ix1b_i2c_devices[16]);		// eeprom for loopback module
 		i2c_put_adapter(adapter);
 	}
