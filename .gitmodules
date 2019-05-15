@@ -58,6 +58,10 @@
 	path = src/sonic-platform-daemons
 	url = ../sonic-platform-daemons.git
 	branch = broadcom_sonic
+[submodule "src/sonic-stp"]
+	path = src/sonic-stp
+	url = ../sonic-stp.git
+	branch = broadcom_sonic
 [submodule "src/sonic-frr/frr"]
 	path = src/sonic-frr/frr
 	url = ../sonic-frr.git
