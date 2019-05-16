@@ -90,3 +90,7 @@
 	path = platform/mellanox/mlnx-sai/SAI-Implementation
 	url = ../SAI-Implementation.git
 	branch = broadcom_sonic
+[submodule "src/sonic-broadview"]
+	path = src/sonic-broadview
+	url = ../sonic-broadview.git
+	branch = broadcom_sonic
