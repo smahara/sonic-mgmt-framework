@@ -94,3 +94,7 @@
 	path = src/sonic-broadview
 	url = ../sonic-broadview.git
 	branch = broadcom_sonic
+[submodule "src/sonic-telemetry"]
+	path = src/sonic-telemetry
+	url = ../sonic-telemetry.git
+	branch = broadcom_sonic
