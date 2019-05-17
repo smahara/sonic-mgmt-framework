@@ -25,24 +25,22 @@ if [ ${BDID} -lt 15 ]; then
     i2cset -f -y 18 0x60 0x7 0xff
     printf "remove PCI device"
     echo 1 > /sys/bus/pci/devices/0000:07:00.0/remove
-    ls /sys/bus/pci/devices/
     printf "rescan PCI device"
     echo 1 > /sys/bus/pci/rescan
-    ls /sys/bus/pci/devices/
     sleep 1
-    lspci -n|grep 07:00.0
+    lspci -n|grep 07:00.0 > /dev/null 2>&1
     if [ $? -ne 0 ];then
         echo "Broadcom Corporation Device is not detect"|tee -a $test_log
         echo "rescan PCI again" | tee -a $test_log
         echo 1 > /sys/bus/pci/rescan
         sleep 1
-        lspci -n|grep 07:00.0
+        lspci -n|grep 07:00.0 > /dev/null 2>&1
         if [ $? -ne 0 ];then
             echo "Broadcom Corporation Device NG" |tee -a $test_log
             echo "rescan PCI again-2" |tee -a $test_log
             echo 1 > /sys/bus/pci/rescan
             sleep 1
-            lspci -n|grep 07:00.0
+            lspci -n|grep 07:00.0 > /dev/null 2>&1
             if [ $? -ne 0 ];then
                 echo "[ ERROR ] Broadcom Corporation Device Not detected"|tee -a $test_log
             fi

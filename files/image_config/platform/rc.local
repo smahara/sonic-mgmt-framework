@@ -351,7 +351,12 @@ if [ -f $FIRST_BOOT_FILE ]; then
         mv /host/grub.cfg /host/grub/grub.cfg
     fi
 
-    firsttime_exit
+    rm -rf $FIRST_BOOT_FILE
+fi
+
+if [ -f /usr/share/sonic/device/${onie_platform}/platform_init.sh ]; then
+    chmod +x /usr/share/sonic/device/${onie_platform}/platform_init.sh
+    /usr/share/sonic/device/${onie_platform}/platform_init.sh
 fi
 
 exit 0

@@ -1,7 +1,8 @@
 [Unit]
 Description=Accton AS7326-56X Platform Monitoring service
 Before=pmon.service
-After=as7326-platform-handle_mac.service
+After=sysinit.target
+Requires=opennsl-modules.service
 DefaultDependencies=no
 
 [Service]
