@@ -1,7 +1,9 @@
+# Copyright 2019 Broadcom. All rights reserved. The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+
 linkscan off
 
 #Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI
-rcload /usr/share/sonic/platform/preemphasis-48x25G-8x100G.soc
+rcload /usr/share/sonic/platform/preemphasis-48x10G-8x100G.soc
 
 linkscan on
 
