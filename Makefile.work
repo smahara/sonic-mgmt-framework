@@ -32,7 +32,6 @@
 #  *                 Values:  yes, no
 #  * KERNEL_PROCURE_METHOD: Specifying method of obtaining kernel Debian package: download, cache, or build
 #  * KERNEL_CACHE_PATH: Full path to kernel Debian package tarball when cache procure method is used
-#  * LOCAL_SAI_DEBS_PATH: Full path to the parent directory that holds SAI debian packages
 #
 ###############################################################################
 
@@ -100,14 +99,6 @@ endif
 
 ifneq ($(KERNEL_CACHE_PATH),)
     DOCKER_RUN += -v "$(KERNEL_CACHE_PATH):/kernel_cache"
-endif
-
-ifneq  ($(LOCAL_SAI_DEBS_PATH),)
-override LOCAL_SAI_DEBS_PATH := $(patsubst %/,%,$(strip $(LOCAL_SAI_DEBS_PATH)))
-endif
-
-ifneq ($(LOCAL_SAI_DEBS_PATH),)
-    DOCKER_RUN += -v "$(LOCAL_SAI_DEBS_PATH):/sai_libs"
 endif
 
 ifeq ($(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD), y)
@@ -183,7 +174,6 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            HTTP_PROXY=$(http_proxy) \
                            HTTPS_PROXY=$(https_proxy) \
                            SONIC_ENABLE_SYSTEM_TELEMETRY=$(ENABLE_SYSTEM_TELEMETRY) \
-                           LOCAL_SAI_DEBS_PATH=$(LOCAL_SAI_DEBS_PATH) \
                            $(SONIC_OVERRIDE_BUILD_VARS)
 
 .PHONY: sonic-slave-build sonic-slave-bash init reset
