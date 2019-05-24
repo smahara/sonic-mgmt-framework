@@ -98,3 +98,7 @@
 	path = src/sonic-telemetry
 	url = ../sonic-telemetry.git
 	branch = buzznik_dev
+[submodule "src/sonic-l2mcd"]
+	path = src/sonic-l2mcd
+	url = ../sonic-l2mcd.git
+	branch = buzznik_dev
