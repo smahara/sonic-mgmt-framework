@@ -1,8 +1,13 @@
-# Copyright 2019 Broadcom. All rights reserved. The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+# Copyright 2019 Broadcom. All rights reserved.
+# The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 
 linkscan off
 
-#Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI
+m0 load 0 0x3800 /usr/share/sonic/platform/custom_led.bin
+led auto on
+led start
+
+# Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI
 rcload /usr/share/sonic/platform/preemphasis-48x10G-8x100G.soc
 
 linkscan on
