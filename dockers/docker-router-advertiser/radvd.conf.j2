@@ -8,21 +8,30 @@
 # See man page for radvd.conf for descriptions of all available options
 #
 
-{# If our configuration has VLAN interfaces... #}
 {% if VLAN_INTERFACE %}
-{% for (name, prefix) in VLAN_INTERFACE %}
-{# If this VLAN has an IPv6 address... #}
-{% if prefix | ipv6 %}
-interface {{ name }}
+        {% set interfaces = [] %}
+        {% set INTF_CFG = dict() %}
+        {% for (name, prefix) in VLAN_INTERFACE %}
+                {% if prefix | ipv6 %}
+                        {% if name not in INTF_CFG %}
+                                {% set x=INTF_CFG.__setitem__(name, []|list) %}
+                        {% endif %}
+                        {% set x=INTF_CFG.__setitem__(name, [prefix]|list + INTF_CFG[name]|list) %}
+                {% endif %}
+        {% endfor %}
+{% for (iface, prefixlist) in INTF_CFG.items() %}
+
+interface {{ iface }}
 {
-    IgnoreIfMissing on;
-    AdvSendAdvert on;
-    MinRtrAdvInterval 200;
-    MaxRtrAdvInterval 600;
-    AdvManagedFlag on;
-    AdvOtherConfigFlag off;
-    AdvLinkMTU 9100;
-    AdvHomeAgentFlag off;
+IgnoreIfMissing on;
+AdvSendAdvert on;
+MinRtrAdvInterval 200;
+MaxRtrAdvInterval 600;
+AdvManagedFlag on;
+AdvOtherConfigFlag off;
+AdvLinkMTU 9100;
+AdvHomeAgentFlag off;
+{% for prefix in prefixlist %}
     prefix {{ prefix | network }}/{{ prefix | prefixlen }} {
         AdvOnLink on;
         AdvAutonomous off;
@@ -30,8 +39,7 @@ interface {{ name }}
         AdvValidLifetime infinity;
         AdvPreferredLifetime infinity;
     };
+{% endfor %}
 };
-
-{% endif %}
 {% endfor %}
 {% endif %}
