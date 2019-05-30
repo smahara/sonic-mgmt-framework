@@ -40,6 +40,7 @@ command:
 """
 
 import os
+import os.path
 import commands
 import sys, getopt
 import logging
@@ -233,9 +234,6 @@ cpld_of_module = {'12-0062': list(range(0,30)),
 
 
 mknod =[
-'echo pca9548 0x77 > /sys/bus/i2c/devices/i2c-0/new_device',
-'echo pca9548 0x70 > /sys/bus/i2c/devices/i2c-1/new_device' ,
-'echo pca9548 0x71 > /sys/bus/i2c/devices/i2c-1/new_device' ,
 'echo pca9548 0x72 > /sys/bus/i2c/devices/i2c-24/new_device' ,
 'echo pca9548 0x70 > /sys/bus/i2c/devices/i2c-2/new_device' ,
 'echo pca9548 0x71 > /sys/bus/i2c/devices/i2c-33/new_device',
@@ -272,6 +270,9 @@ def device_install():
     global FORCE
 
     order = i2c_order_check()
+
+    while os.path.exists("/sys/class/i2c-adapter/i2c-24/name") is not True:
+        time.sleep(1)
 
     # if 0x70 is not exist @i2c-1, use reversed bus order
     if order:
@@ -571,9 +572,7 @@ def device_traversal():
     return
 
 def device_exist():
-    ret1, log = log_os_system("ls "+i2c_prefix+"*0070", 0)
-    ret2, log = log_os_system("ls "+i2c_prefix+"i2c-2", 0)
-    return not(ret1 or ret2)
+    return os.path.exists("/sys/class/i2c-adapter/i2c-19/19-0064/name")
 
 if __name__ == "__main__":
     main()

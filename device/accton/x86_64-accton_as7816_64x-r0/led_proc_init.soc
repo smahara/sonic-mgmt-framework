@@ -153,3 +153,7 @@ led 0 start
 led 1 start
 led 2 start
 led 3 start
+
+# Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI
+rcload /usr/share/sonic/platform/preemphasis-64x100G.soc
+
