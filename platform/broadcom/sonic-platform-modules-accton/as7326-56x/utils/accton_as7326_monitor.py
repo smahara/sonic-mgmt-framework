@@ -221,12 +221,12 @@ class device_monitor(object):
         logging.debug('ori_state=%d, fan_policy_state=%d', ori_state, fan_policy_state)
         new_pwm = fan_policy_state_pwm_tlb[fan_policy_state][0]
         if fan_fail==0:
-        logging.debug('new_pwm=%d', new_pwm)
+            logging.debug('new_pwm=%d', new_pwm)
         
         if fan_fail==0:
-        if new_pwm!=ori_pwm:
-            fan.set_fan_duty_cycle(new_pwm)
-            logging.info('Set fan speed from %d to %d', ori_pwm, new_pwm)
+            if new_pwm!=ori_pwm:
+                fan.set_fan_duty_cycle(new_pwm)
+                logging.info('Set fan speed from %d to %d', ori_pwm, new_pwm)
         
         for i in range (fan.FAN_NUM_1_IDX, fan.FAN_NUM_ON_MAIN_BROAD+1):
             if fan.get_fan_status(i)==0:
@@ -337,4 +337,4 @@ def main(argv):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
-    
+

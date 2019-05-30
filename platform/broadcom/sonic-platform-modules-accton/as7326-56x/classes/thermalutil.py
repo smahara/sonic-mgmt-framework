@@ -89,24 +89,24 @@ class ThermalUtil(object):
             return None
 
         if thermal_num < self.THERMAL_NUM_6_IDX:
-        device_path = self.get_thermal_to_device_path(thermal_num)
-            if(os.path.isfile(device_path)):                
-        for filename in glob.glob(device_path):
-            try:
-                val_file = open(filename, 'r')
-            except IOError as e:
-                logging.error('GET. unable to open file: %s', str(e))
-                return None
-        content = val_file.readline().rstrip()
-        if content == '':
-            logging.debug('GET. content is NULL. device_path:%s', device_path)
-            return None
-        try:
-		    val_file.close()
-        except:
-            logging.debug('GET. unable to close file. device_path:%s', device_path)
-            return None
-                return int(content)
+            device_path = self.get_thermal_to_device_path(thermal_num)
+            if (os.path.isfile(device_path)):
+                for filename in glob.glob(device_path):
+                    try:
+                        val_file = open(filename, 'r')
+                    except IOError as e:
+                        logging.error('GET. unable to open file: %s', str(e))
+                        return None
+                    content = val_file.readline().rstrip()
+                    if content == '':
+                        logging.debug('GET. content is NULL. device_path:%s', device_path)
+                        return None
+                    try:
+                        val_file.close()
+                    except:
+                        logging.debug('GET. unable to close file. device_path:%s', device_path)
+                        return None
+                    return int(content)
       
             else:
                 print "No such device_path=%s"%device_path
