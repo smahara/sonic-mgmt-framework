@@ -431,7 +431,7 @@ phy_chain_tx_polarity_flip_physical{126.0}=0x1
 phy_chain_tx_polarity_flip_physical{127.0}=0x0
 phy_chain_tx_polarity_flip_physical{128.0}=0x0
 
-#dport_map_port_130=82
-#dport_map_port_66=81
-#portmap_130=128:10:m
-#portmap_66=129:10:m
+dport_map_port_130=82
+dport_map_port_66=81
+portmap_130=128:10:m
+portmap_66=129:10:m
