@@ -9,3 +9,4 @@
 0009-teamd-prevent-private-change-handler-reentrance.patch
 0010-teamd-lacp-update-port-state-according-to-partners-sy.patch
 0011-teamd-lacp-port-admin-down-recv-not-processing.patch
+0012-teamd-send-LACPDU-after-self-state-changed.patch
