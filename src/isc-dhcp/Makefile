@@ -5,6 +5,12 @@ SHELL = /bin/bash
 MAIN_TARGET = isc-dhcp-common_$(ISC_DHCP_VERSION)_amd64.deb
 DERIVED_TARGETS = isc-dhcp-relay_$(ISC_DHCP_VERSION)_amd64.deb
 
+# For non-optimizing builds, use -O1 optimization instead of the default -O0.
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+optlevel = -O1
+endif
+
+
 $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	# Remove any stale files
 	rm -rf ./isc-dhcp
@@ -23,7 +29,7 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	stg import -s ../patch/series
 
 	# Build source and Debian packages
-	dpkg-buildpackage -rfakeroot -b -us -uc -j$(SONIC_CONFIG_MAKE_JOBS)
+	DEB_CFLAGS_APPEND="$(optlevel)" dpkg-buildpackage -rfakeroot -b -us -uc -j$(SONIC_CONFIG_MAKE_JOBS)
 	popd
 
 	# Move the newly-built .deb packages to the destination directory

@@ -117,6 +117,17 @@ ifeq ($(SONIC_PROFILING_ON),y)
 DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
 endif
 
+
+
+ifeq ($(SONIC_COVERAGE_ON),y)
+DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
+export COV_CFLAGS := -O0 -coverage
+export COV_CFG_FLAGS := --enable-gcov=yes
+export COV_LDFLAGS := -lgcov
+export SONIC_COVERAGE_ON := y
+endif
+
+
 ifeq ($(SONIC_BUILD_JOBS),)
 override SONIC_BUILD_JOBS := $(SONIC_CONFIG_BUILD_JOBS)
 endif
@@ -188,6 +199,7 @@ $(info "HTTPS_PROXY"                     : "$(HTTPS_PROXY)")
 $(info "ENABLE_SYSTEM_TELEMETRY"         : "$(ENABLE_SYSTEM_TELEMETRY)")
 $(info "SONIC_DEBUGGING_ON"              : "$(SONIC_DEBUGGING_ON)")
 $(info "SONIC_PROFILING_ON"              : "$(SONIC_PROFILING_ON)")
+$(info "SONIC_COVERAGE_ON"               : "$(SONIC_COVERAGE_ON)")
 $(info "KERNEL_PROCURE_METHOD"           : "$(KERNEL_PROCURE_METHOD)")
 ifeq ($(KERNEL_PROCURE_METHOD),cache)
 $(info "KERNEL_CACHE_PATH"               : "$(KERNEL_CACHE_PATH)")
