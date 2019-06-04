@@ -21,6 +21,34 @@ iface lo {{ 'inet' if prefix | ipv4 else 'inet6' }} static
 
 # The management network interface
 auto eth0
+{% if (ZTP is defined) and (ZTP['mode'] is defined and ZTP['mode']['profile'] == 'active') %}
+
+
+# ZTP out-of-band interface
+allow-hotplug eth0
+{% if ZTP['mode']['ipv4'] == 'true' %}
+iface eth0 inet dhcp
+{% endif %}
+{% if ZTP['mode']['ipv6'] == 'true' %}
+iface eth0 inet6 dhcp
+{% endif %}
+
+{% if ZTP['mode']['inband'] == 'true' %}
+{% for port in PORT %}
+
+# ZTP in-band interface {{ port }}
+auto {{ port }}
+allow-hotplug {{ port }}
+{% if ZTP['mode']['ipv4'] == 'true' %}
+iface {{ port }} inet dhcp
+{% endif %}
+{% if ZTP['mode']['ipv6'] == 'true' %}
+iface {{ port }} inet6 dhcp
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% else %}
 {% if MGMT_INTERFACE %}
 {% for (name, prefix) in MGMT_INTERFACE %}
 iface eth0 {{ 'inet' if prefix | ipv4 else 'inet6' }} static
@@ -45,6 +73,7 @@ iface eth0 {{ 'inet' if prefix | ipv4 else 'inet6' }} static
 {% endfor %}
 {% else %}
 iface eth0 inet dhcp
+{% endif %}
 {% endif %}
 #
 source /etc/network/interfaces.d/*
