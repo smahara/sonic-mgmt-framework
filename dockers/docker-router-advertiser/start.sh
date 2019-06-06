@@ -25,8 +25,11 @@ fi
 sonic-cfggen -d -t /usr/share/sonic/templates/wait_for_intf.sh.j2 > /usr/bin/wait_for_intf.sh
 chmod +x /usr/bin/wait_for_intf.sh
 
-# Wait for pertinent interfaces to come up
-/usr/bin/wait_for_intf.sh
+# Wait for pertinent interfaces to come up.
+# Disabled this for now so that radvd process is spawned immediately if device is ToRRouter.
+# Once radv docker stop/start is issued after configuring VLAN routing interfaces with IPv6 addresses, 
+# the radv docker starts the radvd process.
+#/usr/bin/wait_for_intf.sh
 
 # Start the router advertiser
 supervisorctl start radvd
