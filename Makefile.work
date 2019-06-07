@@ -5,6 +5,7 @@
 #
 #  * PLATFORM: Specific platform we wish to build images for.
 #  * BUILD_NUMBER: Desired version-number to pass to the building-system.
+#  * EXT_BUILD_TIMESTAMP: Externally-supplied timestamp used by build process instead of querying date/time.
 #  * ENABLE_DHCP_GRAPH_SERVICE: Enables get-graph service to fetch minigraph files
 #    through http.
 #  * ENABLE_ZTP: Enables zero touch provisioning.
@@ -73,6 +74,11 @@ endif
 OVERLAY_MODULE_CHECK := lsmod | grep "^overlay " > /dev/null 2>&1 || (echo "ERROR: Module 'overlay' not loaded. Try running 'sudo modprobe overlay'."; exit 1)
 
 BUILD_TIMESTAMP := $(shell date +%Y%m%d\.%H%M%S)
+
+# If externally-specified timestamp is provided, use it for consistency throughout build phases.
+ifneq ($(EXT_BUILD_TIMESTAMP),)
+override BUILD_TIMESTAMP := $(EXT_BUILD_TIMESTAMP)
+endif
 
 BASE_IMAGE_LOCK_FILE_NAME := $(LOCK_DIR)/$(SLAVE_BASE_TAG).lock
 USER_IMAGE_LOCK_FILE_NAME := $(LOCK_DIR)/$(USER).lock
