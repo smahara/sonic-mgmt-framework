@@ -22,6 +22,7 @@ $(DOCKER_SONIC_VS)_DEPENDS += $(SWSS_DBG) \
                               $(SYNCD_VS_DBG)
 endif
 
+export SONIC_ROUTING_STACK
 ifeq ($(SONIC_ROUTING_STACK), quagga)
 $(DOCKER_SONIC_VS)_DEPENDS += $(QUAGGA)
 else ifeq ($(SONIC_ROUTING_STACK), frr)
