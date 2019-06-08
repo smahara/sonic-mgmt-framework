@@ -47,7 +47,8 @@ RUN apt-get install -y net-tools \
                        apt-utils \
                        psmisc \
                        tcpdump \
-                       python-scapy
+                       python-scapy \
+		       sudo
 
 RUN pip install setuptools
 RUN pip install py2_ipaddress
@@ -106,7 +107,7 @@ COPY ["files/sonic_version.yml", "/etc/sonic/"]
 RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
 
 RUN echo "docker-sonic-vs" > /etc/hostname
-RUN touch /etc/quagga/zebra.conf
+RUN touch /etc/{{ SONIC_ROUTING_STACK }}/zebra.conf
 
 # Create /var/warmboot/teamd folder for teammgrd
 RUN mkdir -p /var/warmboot/teamd
