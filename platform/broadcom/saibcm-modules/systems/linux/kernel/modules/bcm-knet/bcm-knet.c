@@ -4485,7 +4485,7 @@ bkn_tx(struct sk_buff *skb, struct net_device *dev)
         } else {
             if (sinfo->cmic_type == 'x' && priv->port >= 0) {
                 if (skb_header_cloned(skb) || skb_headroom(skb) < hdrlen + 4 ||
-                    ((unsigned long)skb->data % 4)) {
+                    (sinfo->dcb_type == 36 && (unsigned long)skb->data % 4)) {
                     /* Current SKB cannot be modified */
                     DBG_SKB(("Realloc Tx SKB\n"));
                     new_skb = dev_alloc_skb(pktlen + hdrlen + 4 + FCS_SZ);
