@@ -17,7 +17,7 @@ class SfpUtil(SfpUtilBase):
     PORT_END = 81
     PORTS_IN_BLOCK = 82
     QSFP_PORT_START = 48
-    QSFP_PORT_END = 82
+    QSFP_PORT_END = 80
 
     BASE_VAL_PATH = "/sys/class/i2c-adapter/i2c-{0}/{1}-0050/"
 
@@ -130,10 +130,10 @@ class SfpUtil(SfpUtilBase):
     @property
     def qsfp_port_end(self):
         return self.QSFP_PORT_END
-    
+
     @property
     def qsfp_ports(self):
-        return range(self.QSFP_PORT_START, self.PORTS_IN_BLOCK + 1)
+        return range(self.QSFP_PORT_START, self.QSFP_PORT_END)
 
     @property
     def port_to_eeprom_mapping(self):
@@ -149,16 +149,18 @@ class SfpUtil(SfpUtilBase):
 
 
     # For port 48~51 are QSFP, here presumed they're all split to 4 lanes.
-    def get_cage_num(self, port_num):             
+    def get_cage_num(self, port_num):
         cage_num = port_num
-        if (port_num >= self.QSFP_PORT_START):
+        if (port_num >= self.QSFP_PORT_END):
+            cage_num = 56 + (port_num - self.QSFP_PORT_END)
+        elif (port_num >= self.QSFP_PORT_START):
             cage_num = (port_num - self.QSFP_PORT_START)/4
             cage_num = cage_num + self.QSFP_PORT_START
 
         return cage_num
 
     # For cage 0~23 and 48~51 are at cpld2, others are at cpld3.
-    def get_cpld_num(self, port_num):             
+    def get_cpld_num(self, port_num):
         cpld_i = 1
         cage_num = self.get_cage_num(port_num)
         if (port_num > 29):
@@ -212,3 +214,4 @@ class SfpUtil(SfpUtilBase):
         on this platform.
         """
         raise NotImplementedError
+
