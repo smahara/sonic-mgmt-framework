@@ -5,7 +5,7 @@
 0005-libteam-Add-warm_reboot-mode.patch
 0007-Skip-setting-the-same-hwaddr-to-lag-port-to-avoid-di.patch
 0010-teamd-lacp-update-port-state-according-to-partners-sy.patch
-0011-teamd-lacp-port-admin-down-recv-not-processing.patch
-0012-teamd-send-LACPDU-after-self-state-changed.patch
-0013-libteam-resynchronize-ifinfo-after-lost-RTNLGRP_LINK-.patch
-0014-teamd-do-not-process-lacpdu-before-the-port-ifinfo-i.patch
+0011-libteam-resynchronize-ifinfo-after-lost-RTNLGRP_LINK-.patch
+0012-teamd-do-not-process-lacpdu-before-the-port-ifinfo-i.patch
+0013-teamd-lacp-port-admin-down-recv-not-processing.patch
+0014-teamd-send-LACPDU-after-self-state-changed.patch
