@@ -1,0 +1,57 @@
+[submodule "deps/src/github.com/Workiva/go-datastructures"]
+	path = deps/src/github.com/Workiva/go-datastructures
+	url = https://github.com/Workiva/go-datastructures
+[submodule "deps/src/github.com/go-redis/redis"]
+	path = deps/src/github.com/go-redis/redis
+	url = https://github.com/go-redis/redis
+[submodule "deps/src/github.com/golang/glog"]
+	path = deps/src/github.com/golang/glog
+	url = https://github.com/golang/glog
+[submodule "deps/src/github.com/golang/protobuf"]
+	path = deps/src/github.com/golang/protobuf
+	url = https://github.com/golang/protobuf
+[submodule "deps/src/github.com/gorilla/mux"]
+	path = deps/src/github.com/gorilla/mux
+	url = https://github.com/gorilla/mux
+[submodule "deps/src/github.com/openconfig/gnmi"]
+	path = deps/src/github.com/openconfig/gnmi
+	url = https://github.com/openconfig/gnmi
+[submodule "deps/src/github.com/openconfig/goyang"]
+	path = deps/src/github.com/openconfig/goyang
+	url = https://github.com/openconfig/goyang
+[submodule "deps/src/github.com/openconfig/ygot"]
+	path = deps/src/github.com/openconfig/ygot
+	url = https://github.com/openconfig/ygot
+[submodule "deps/src/github.com/pborman/getopt"]
+	path = deps/src/github.com/pborman/getopt
+	url = https://github.com/pborman/getopt
+[submodule "deps/src/github.com/kylelemons/godebug"]
+	path = deps/src/github.com/kylelemons/godebug
+	url = https://github.com/kylelemons/godebug
+[submodule "deps/src/github.com/go-playground/universal-translator"]
+	path = deps/src/github.com/go-playground/universal-translator
+	url = https://github.com/go-playground/universal-translator
+[submodule "deps/src/github.com/go-playground/locales"]
+	path = deps/src/github.com/go-playground/locales
+	url = https://github.com/go-playground/locales
+[submodule "deps/src/github.com/leodido/go-urn"]
+	path = deps/src/github.com/leodido/go-urn
+	url = https://github.com/leodido/go-urn
+[submodule "deps/src/gopkg.in/go-playground/validator.v9"]
+	path = deps/src/gopkg.in/go-playground/validator.v9
+	url = https://gopkg.in/go-playground/validator.v9
+[submodule "deps/src/golang.org/x/net"]
+	path = deps/src/golang.org/x/net
+	url = https://go.googlesource.com/net
+[submodule "deps/src/golang.org/x/sys"]
+	path = deps/src/golang.org/x/sys
+	url = https://go.googlesource.com/sys
+[submodule "deps/src/golang.org/x/text"]
+	path = deps/src/golang.org/x/text
+	url = https://go.googlesource.com/text
+[submodule "deps/src/google.golang.org/grpc"]
+	path = deps/src/google.golang.org/grpc
+	url = https://github.com/grpc/grpc-go
+[submodule "deps/src/google.golang.org/genproto"]
+	path = deps/src/google.golang.org/genproto
+	url = https://github.com/google/go-genproto

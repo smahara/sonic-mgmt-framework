@@ -9,6 +9,7 @@
 TOPDIR := $(abspath .)
 BUILD_DIR := $(TOPDIR)/build
 REST_DIST_DIR := $(BUILD_DIR)/rest_server/dist
+GO_DEPS_DIR := $(TOPDIR)/deps
 
 # Source files affecting REST server
 REST_SRCS := $(shell find $(TOPDIR)/src -name '*.go' | sort) \
@@ -16,7 +17,7 @@ REST_SRCS := $(shell find $(TOPDIR)/src -name '*.go' | sort) \
 			 $(shell find $(TOPDIR)/models/openapi -name '*.yaml' | sort)
 
 REST_BIN := $(REST_DIST_DIR)/main
-REST_GOPATH = $(shell go env GOPATH):$(TOPDIR):$(REST_DIST_DIR)
+REST_GOPATH = $(shell go env GOPATH):$(TOPDIR):$(REST_DIST_DIR):$(GO_DEPS_DIR)
 
 #$(info REST_SRCS = $(REST_SRCS) )
 
