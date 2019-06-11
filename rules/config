@@ -110,3 +110,11 @@ FRR_USER_GID = 300
 
 # Default VS build memory preparation
 DEFAULT_VS_PREPARE_MEM = yes
+
+
+# Docker local registry server info where
+# Docker base images are pushed and pulled from the local docker registry
+# DOCKER_REGISTRY_SERVER=10.75.18.181:5000
+
+
+

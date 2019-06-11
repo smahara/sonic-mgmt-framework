@@ -178,6 +178,29 @@ DOCKER_BUILD = docker build --no-cache \
                -f $(SLAVE_DIR)/Dockerfile.user \
                $(SLAVE_DIR)
 
+
+DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL = \
+                        docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null ||   \
+                        $(if $(DOCKER_REGISTRY_SERVER), \
+                            if [[ $$(curl -s -k -X GET https://$(DOCKER_REGISTRY_SERVER)/v2/$(SLAVE_BASE_IMAGE)/tags/list | grep $(SLAVE_BASE_TAG)) ]]; then \
+                                docker pull $(DOCKER_REGISTRY_SERVER)/$(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) && \
+                                docker tag $(DOCKER_REGISTRY_SERVER)/$(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) && \
+                                docker rmi $(DOCKER_REGISTRY_SERVER)/$(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) ; \
+                            fi, echo \
+                         )
+
+DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PUSH = \
+                        $(if $(DOCKER_REGISTRY_SERVER), \
+                            if [[ ! $$(curl -s -k -X GET https://$(DOCKER_REGISTRY_SERVER)/v2/$(SLAVE_BASE_IMAGE)/tags/list | grep $(SLAVE_BASE_TAG)) ]]; then \
+                                docker tag $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) $(DOCKER_REGISTRY_SERVER)/$(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) && \
+                                docker push $(DOCKER_REGISTRY_SERVER)/$(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) || \
+                                echo "Docker registry push failed for $(DOCKER_REGISTRY_SERVER)/$(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG)" && \
+                                docker rmi $(DOCKER_REGISTRY_SERVER)/$(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG); \
+                            fi ,echo \
+                         )
+
+
+
 DOCKER_BASE_BUILD_PROTECTED = echo "Start time: "`date`; \
                               echo "Attempting to acquire base image lock (waiting up to $(BASE_IMAGE_LOCK_TIMEOUT_SECS) seconds)..."; \
                               [ -d $(LOCK_DIR) ] || (mkdir -p $(LOCK_DIR) && chmod 0777 $(LOCK_DIR)); \
@@ -191,6 +214,7 @@ DOCKER_BASE_BUILD_PROTECTED = echo "Start time: "`date`; \
                                   docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
                                   $(DOCKER_BASE_BUILD); \
                                   docker_rc=$$?; \
+                                  [ $${docker_rc} -eq 0 ] &&  $(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PUSH); \
                                   eval exec "$${BASE_IMAGE_LOCK_FD}<&-"; \
                                   exit $${docker_rc}; \
                               fi
@@ -248,6 +272,7 @@ SONIC_BUILD_INSTRUCTION :=  make \
 
 %::
 	@$(OVERLAY_MODULE_CHECK)
+	@$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
 	@docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) not found. Building... ; \
 	    $(DOCKER_BASE_BUILD_PROTECTED) ; } || exit 1
@@ -268,11 +293,13 @@ docker-cleanup:
 	$(docker-image-cleanup)
 
 sonic-slave-build :
+	@$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
 	@$(DOCKER_BASE_BUILD_PROTECTED) || exit 1
 	@$(DOCKER_BUILD_PROTECTED) || exit 1
 
 sonic-slave-bash :
 	@$(OVERLAY_MODULE_CHECK)
+	@$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
 	@docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) not found. Building... ; \
 	    $(DOCKER_BASE_BUILD_PROTECTED) ; } || exit 1
