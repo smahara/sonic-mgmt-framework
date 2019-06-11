@@ -23,6 +23,7 @@
 
 try:
     import os
+    import os.path
     import sys, getopt
     import subprocess
     import click
@@ -76,7 +77,13 @@ class device_monitor(object):
     #fan1_present, fan6_present
 
     def __init__(self, log_file, log_level):
-        
+
+        # wait for 'as7326_56x_fan' initialization
+        while True:
+            if os.path.isfile("/sys/bus/i2c/devices/11-0066/name"):
+                break
+            time.sleep(1)
+
         self.fan_num = 6
         self.fan_path = "/sys/bus/i2c/devices/11-0066/"        
         self.present = {
