@@ -37,6 +37,11 @@ while /bin/true; do
   
   VLAN=`sonic-cfggen -d -v 'VLAN.keys() | join(" ") if VLAN'`
   for vlan in $VLAN; do
+      # check if the vlan interface is present in the kernel
+      vlan_intf=$(ip link show type vlan | grep $vlan)
+	    if [[ ! "$vlan_intf" ]]; then
+		      continue
+	    fi
       # generate a list of arping commands:
       #   arping -q -w 0 -c 1 -i <VLAN interface> <IP 1>;
       #   arping -q -w 0 -c 1 -i <VLAN interface> <IP 2>;
