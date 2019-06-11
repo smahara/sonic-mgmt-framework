@@ -33,6 +33,13 @@ while /bin/true; do
       ndisc6cmd="sed -e 's/^/ndisc6 -q -w 0 -1 /' -e 's/$/;/'"
       ip6cmd="ip -6 neigh show | grep -v fe80 | grep $neighbor | cut -d ' ' -f 1,3 | $ndisc6cmd"
       eval `eval $ip6cmd`
+
+	  # Use ping6 utility only for neighbor entries in FAILED state
+	  # Once added, ndisc6 utility will keep refreshing them
+	  #   ping6 -n -q -i 0 -c 1 -W 0 <IP> -I <Interface> >/dev/null;
+	  ping6cmd="sed -e 's/ / -I /' -e 's/^/ping6 -n -q -i 0 -c 1 -W 0 /' -e 's/$/ >\/dev\/null;/'"
+      ip6cmd="ip -6 neigh show | grep -v fe80 | grep -i failed | grep $neighbor | cut -d ' ' -f 1,3 | $ping6cmd"
+      eval `eval $ip6cmd`
   done
   
   VLAN=`sonic-cfggen -d -v 'VLAN.keys() | join(" ") if VLAN'`
@@ -61,6 +68,13 @@ while /bin/true; do
       #   ...
       ndisc6cmd="sed -e 's/^/ndisc6 -q -w 0 -1 /' -e 's/$/;/'"
       ip6cmd="ip -6 neigh show | grep -v fe80 | grep $vlan | cut -d ' ' -f 1,3 | $ndisc6cmd"
+      eval `eval $ip6cmd`
+	  
+	  # Use ping6 utility only for neighbor entries in FAILED state
+	  # Once added, ndisc6 utility will keep refreshing them
+	  #   ping6 -n -q -i 0 -c 1 -W 0 <IP> -I <Interface> >/dev/null;
+	  ping6cmd="sed -e 's/ / -I /' -e 's/^/ping6 -n -q -i 0 -c 1 -W 0 /' -e 's/$/ >\/dev\/null;/'"
+      ip6cmd="ip -6 neigh show | grep -v fe80 | grep -i failed | grep $vlan | cut -d ' ' -f 1,3 | $ping6cmd"
       eval `eval $ip6cmd`
   done
   sleep 300
