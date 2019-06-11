@@ -118,3 +118,7 @@ DEFAULT_VS_PREPARE_MEM = yes
 
 
 
+# Debian local mirror site info
+# DEBIAN_ARCHIVE_MIRROR=10.175.127.104 
+# DEBIAN_ORG_MIRROR=10.75.18.181 
+

@@ -1,12 +1,30 @@
 FROM debian:stretch
 
+ARG debian_archive_mirror
+ARG debian_org_mirror
+
+
 MAINTAINER gulv@microsoft.com
+
+
+RUN     test "x${debian_archive_mirror}" != "x" && test "x${debian_org_mirror}" != "x"  && \
+        echo "deb http://${debian_org_mirror}/debian stretch main " > /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_org_mirror}/debian-security stretch/updates main " >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_org_mirror}/debian stretch-updates main" >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_archive_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.mirror.list && \
+        echo "deb-src http://${debian_archive_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_archive_mirror}/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.mirror.list && \
+        echo "deb-src http://${debian_archive_mirror}/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_archive_mirror}/debian stretch-backports main" >> /etc/apt/sources.mirror.list && \
+        cat /etc/apt/sources.list >> /etc/apt/sources.mirror.list && \
+        cat /etc/apt/sources.mirror.list > /etc/apt/sources.list || echo
+
 
 RUN echo "deb http://debian-archive.trafficmanager.net/debian/ stretch main contrib non-free" >> /etc/apt/sources.list && \
         echo "deb-src http://debian-archive.trafficmanager.net/debian/ stretch main contrib non-free" >> /etc/apt/sources.list && \
         echo "deb http://debian-archive.trafficmanager.net/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
         echo "deb-src http://debian-archive.trafficmanager.net/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
-        echo "deb http://debian-archive.trafficmanager.net/debian stretch-backports main" >> /etc/apt/sources.list
+        echo "deb http://debian-archive.trafficmanager.net/debian stretch-backports main" >> /etc/apt/sources.list 
 
 ## Make apt-get non-interactive
 ENV DEBIAN_FRONTEND=noninteractive
