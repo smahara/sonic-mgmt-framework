@@ -139,6 +139,22 @@ ifneq ($(SONIC_MAKE_JOBS),)
 override SONIC_CONFIG_MAKE_JOBS := $(SONIC_MAKE_JOBS)
 endif
 
+# If SONIC_CONFIG_NATIVE_DOCKERD_SHARED is enabled, force
+# SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD enabled as well.
+ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
+override SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD := y
+endif
+
+ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
+DOCKER_IMAGE_REF = $*$(DOCKER_USERNAME):$(DOCKER_USERTAG)
+DOCKER_DBG_IMAGE_REF = $*-$(DBG_IMAGE_MARK)$(DOCKER_USERNAME):$(DOCKER_USERTAG)
+docker-load-image-get = $(if $(1),$(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG))
+else
+DOCKER_IMAGE_REF = $*
+DOCKER_DBG_IMAGE_REF = $*-$(DBG_IMAGE_MARK)
+docker-load-image-get = $(1)
+endif
+
 ifeq ($(VS_PREPARE_MEM),)
 override VS_PREPARE_MEM := $(DEFAULT_VS_PREPARE_MEM)
 endif
@@ -220,6 +236,47 @@ $(info )
 export kernel_procure_method=$(KERNEL_PROCURE_METHOD)
 export kernel_cache_mount:=/kernel_cache
 export vs_build_prepare_mem=$(VS_PREPARE_MEM)
+
+###############################################################################
+## Canned sequences
+###############################################################################
+
+ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
+# $(call docker-image-save,from,to)
+define docker-image-save
+    exec 201>"$(DOCKER_LOCKFILE_SAVE)"
+    if ! flock -x -w 600 201; then
+        @echo "ERROR: Cannot obtain Docker save lock for $(1)"
+        exit 1
+    else
+        docker tag $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(1):latest
+        docker save $(1):latest | gzip -c > $(2)
+        docker rmi -f $(1):latest &> /dev/null
+        eval exec "201<&-"
+    fi
+    docker rmi -f $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) &> /dev/null
+endef
+# $(call docker-image-load,from)
+define docker-image-load
+    exec 202>"$(DOCKER_LOCKFILE_LOAD)"
+    if ! flock -x -w 600 202; then
+        @echo "ERROR: Cannot obtain Docker load lock for $(1)"
+        exit 1
+    else
+        docker load -i $(TARGET_PATH)/$(1).gz $(LOG)
+        docker tag $(1):latest $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) &> /dev/null
+        docker rmi -f $(1):latest &> /dev/null
+        eval exec "202<&-"
+    fi
+endef
+else
+define docker-image-save
+    docker save $(1):latest | gzip -c > $(2)
+endef
+define docker-image-load
+    docker load -i $(TARGET_PATH)/$(1).gz $(LOG)
+endef
+endif
 
 ###############################################################################
 ## Local targets
@@ -501,8 +558,8 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_SIMPLE_DOCKER_IMAGES)) : $(TARGET_PATH)/%.g
 		--build-arg guid=$(GUID) \
 		--build-arg docker_container_name=$($*.gz_CONTAINER_NAME) \
 		--label Tag=$(SONIC_GET_VERSION) \
-		-t $* $($*.gz_PATH) $(LOG)
-	docker save $* | gzip -c > $@
+		-t $(DOCKER_IMAGE_REF) $($*.gz_PATH) $(LOG)
+	$(call docker-image-save,$*,$@)
 	# Clean up
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
 	$(FOOTER)
@@ -546,6 +603,7 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_pydebs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_PYTHON_DEBS)))\n" | awk '!a[$$0]++'))
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_whls=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_PYTHON_WHEELS)))\n" | awk '!a[$$0]++'))
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_dbgs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_PACKAGES)))\n" | awk '!a[$$0]++'))
+	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_load_image=$(shell printf "$(call docker-load-image-get,$(subst $(SPACE),\n,$(patsubst %.gz,%,$(call expand,$($*.gz_LOAD_DOCKERS)))))\n" | awk '!a[$$0]++'))
 	j2 $($*.gz_PATH)/Dockerfile.j2 > $($*.gz_PATH)/Dockerfile
 	docker info $(LOG)
 	docker build --squash --no-cache \
@@ -558,15 +616,15 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 		--build-arg frr_user_uid=$(FRR_USER_UID) \
 		--build-arg frr_user_gid=$(FRR_USER_GID) \
 		--label Tag=$(SONIC_GET_VERSION) \
-		-t $* $($*.gz_PATH) $(LOG)
-	docker save $* | gzip -c > $@
+		-t $(DOCKER_IMAGE_REF) $($*.gz_PATH) $(LOG)
+	$(call docker-image-save,$*,$@)
 	# Clean up
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
 	$(FOOTER)
 
 SONIC_TARGET_LIST += $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES))
 
-# Targets for building docker images
+# Targets for building docker debug images
 $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAGE_MARK).gz : .platform docker-start \
 		$$(addprefix $(DEBS_PATH)/,$$($$*.gz_DBG_DEPENDS)) \
 		$$(addsuffix -load,$$(addprefix $(TARGET_PATH)/,$$*.gz))
@@ -576,7 +634,7 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAG
 	# Export variables for j2. Use path for unique variable names, e.g. docker_orchagent_debs
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_DEPENDS),RDEPENDS))\n" | awk '!a[$$0]++'))
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_IMAGE_PACKAGES)))\n" | awk '!a[$$0]++'))
-	./build_debug_docker_j2.sh $* $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs > $($*.gz_PATH)/Dockerfile-dbg.j2
+	./build_debug_docker_j2.sh $(DOCKER_IMAGE_REF) $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs > $($*.gz_PATH)/Dockerfile-dbg.j2
 	j2 $($*.gz_PATH)/Dockerfile-dbg.j2 > $($*.gz_PATH)/Dockerfile-dbg
 	docker info $(LOG)
 	docker build --squash --no-cache \
@@ -585,9 +643,10 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAG
 		--build-arg docker_container_name=$($*.gz_CONTAINER_NAME) \
 		--label Tag=$(SONIC_GET_VERSION) \
 		--file $($*.gz_PATH)/Dockerfile-dbg \
-		-t $*-dbg $($*.gz_PATH) $(LOG)
-	docker save $*-dbg | gzip -c > $@
+		-t $(DOCKER_DBG_IMAGE_REF) $($*.gz_PATH) $(LOG)
+	$(call docker-image-save,$*-$(DBG_IMAGE_MARK),$@)
 	# Clean up
+	docker rmi -f $(DOCKER_IMAGE_REF) &> /dev/null || true
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
 	$(FOOTER)
 
@@ -599,7 +658,7 @@ DOCKER_LOAD_TARGETS = $(addsuffix -load,$(addprefix $(TARGET_PATH)/, \
 
 $(DOCKER_LOAD_TARGETS) : $(TARGET_PATH)/%.gz-load : .platform docker-start $$(TARGET_PATH)/$$*.gz
 	$(HEADER)
-	docker load -i $(TARGET_PATH)/$*.gz $(LOG)
+	$(call docker-image-load,$*)
 	$(FOOTER)
 
 ###############################################################################
