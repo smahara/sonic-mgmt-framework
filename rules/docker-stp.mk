@@ -25,3 +25,5 @@ $(DOCKER_STP)_CONTAINER_NAME = stp
 $(DOCKER_STP)_RUN_OPT += --net=host --privileged -t
 $(DOCKER_STP)_RUN_OPT += -v /etc/sonic:/etc/sonic:ro
 $(DOCKER_STP)_RUN_OPT += -v /host/warmboot:/var/warmboot
+
+$(DOCKER_STP)_BASE_IMAGE_FILES += stpctl:/usr/bin/stpctl
