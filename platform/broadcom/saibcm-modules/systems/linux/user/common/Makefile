@@ -149,9 +149,9 @@ ADD_TO_CFLAGS += -I$(SDK)/systems/bde/linux/include
 ADD_TO_CFLAGS += -DPROXY_SUPPORT=0
 
 CFLAGS += $(ADD_TO_CFLAGS)
+
 #SAI_FIXUP
 CFLAGS:=$(filter-out -fPIC, $(CFLAGS))
-
 
 kernel_modules:
 	$(MAKE) -C $(SDK)/systems/bde/linux/kernel kernel_version=$(kernel_version)
