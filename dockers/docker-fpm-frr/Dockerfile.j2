@@ -1,4 +1,4 @@
-FROM docker-config-engine-stretch
+FROM {{ docker_fpm_frr_load_image }}
 
 ARG docker_container_name
 ARG frr_user_uid
