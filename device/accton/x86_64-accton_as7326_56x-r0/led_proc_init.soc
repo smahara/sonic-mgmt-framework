@@ -8,7 +8,7 @@ led auto on
 led start
 
 # Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI
-rcload /usr/share/sonic/platform/preemphasis-48x10G-8x100G.soc
+rcload /usr/share/sonic/platform/preemphasis-48x25G-8x100G.soc
 
 linkscan on
 
