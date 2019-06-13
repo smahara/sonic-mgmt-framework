@@ -1,15 +1,15 @@
 /*
  * Copyright 2017-2019 Broadcom
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, version 2, as
  * published by the Free Software Foundation (the "GPL").
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License version 2 (GPLv2) for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * version 2 (GPLv2) along with this source code.
  */
@@ -49,12 +49,10 @@ MODULE_AUTHOR("Broadcom Corporation");
 MODULE_DESCRIPTION("Broadcom Linux KNET Call-Back Driver");
 MODULE_LICENSE("GPL");
 
-
 static int debug;
 LKM_MOD_PARAM(debug, "i", int, 0);
 MODULE_PARM_DESC(debug,
 "Debug level (default 0)");
-
 
 /* Module Information */
 #define MODULE_MAJOR 121
@@ -64,8 +62,8 @@ MODULE_PARM_DESC(debug,
 #define KNET_CB_DEBUG
 
 /* These below need to match incoming enum values */
-#define FILTER_TAG_STRIP 0
-#define FILTER_TAG_KEEP  1
+#define FILTER_TAG_STRIP    0
+#define FILTER_TAG_KEEP     1
 #define FILTER_TAG_ORIGINAL 2
 
 /* Maintain tag strip statistics */
@@ -107,7 +105,7 @@ strip_vlan_tag(struct sk_buff *skb)
  *
  * DCB type 14: word 12, bits 10.11
  * DCB type 19, 20, 21, 22, 30: word 12, bits 10..11
- * DCB type 23, 29: word 13, bits 0..1 
+ * DCB type 23, 29: word 13, bits 0..1
  * DCB type 31, 34, 37: word 13, bits 0..1
  * DCB type 26, 32, 33, 35: word 13, bits 0..1
  *
@@ -152,7 +150,7 @@ get_tag_status(int dcb_type, void *meta)
         {
             /* untested */
             /* TH3 only parses outer tag. */
-            const int   tag_map[4] = { 0, 2, -1, -1 };            
+            const int   tag_map[4] = { 0, 2, -1, -1 };
             tag_status = tag_map[(dcb[9] >> 13) & 0x3];
         }
         break;
@@ -164,7 +162,7 @@ get_tag_status(int dcb_type, void *meta)
     if (debug & 0x1) {
         gprintk("%s; DCB Type: %d; tag status: %d\n", __func__, dcb_type, tag_status);
     }
-#endif    
+#endif
     return tag_status;
 }
 
@@ -185,7 +183,7 @@ strip_tag_rx_cb(struct sk_buff *skb, int dev_no, void *meta)
     if (debug & 0x1) {
         gprintk("%s Enter; netif Flags: %08X filter_flags %08X \n",
                 __func__, netif_flags, filter_flags);
-    }
+     }
 #endif
 
     /* KNET implements this already */
@@ -202,22 +200,23 @@ strip_tag_rx_cb(struct sk_buff *skb, int dev_no, void *meta)
     {
         strip_tag = 1;
     }
-  
     /* Get DCB type for this packet, passed by KNET driver */
     dcb_type = KNET_SKB_CB(skb)->dcb_type;
 
     /* Get tag status from DCB */
-    tag_status = get_tag_status(dcb_type, meta);     
+    tag_status = get_tag_status(dcb_type, meta);
+
 #ifdef KNET_CB_DEBUG
     if (debug & 0x1) {
         gprintk("%s; DCB Type: %d; tag status: %d\n", __func__, dcb_type, tag_status);
     }
 #endif
+
     if (tag_status < 0) {
         /* Unsupported DCB type */
         return skb;
     }
-    
+
     if (filter_flags == FILTER_TAG_ORIGINAL)
     {
         /* If untagged or single inner, strip the extra tag that knet
@@ -227,13 +226,12 @@ strip_tag_rx_cb(struct sk_buff *skb, int dev_no, void *meta)
             strip_tag = 1;
         }
     }
-
     strip_stats.checked++;
-    
+
     if (strip_tag) {
 #ifdef KNET_CB_DEBUG
         if (debug & 0x1) {
-            gprintk("%s; Stripping VLAN tag\n", __func__);
+            gprintk("%s; Stripping VLAN\n", __func__);
         }
 #endif
         strip_stats.stripped++;
@@ -242,11 +240,10 @@ strip_tag_rx_cb(struct sk_buff *skb, int dev_no, void *meta)
 #ifdef KNET_CB_DEBUG
     else {
         if (debug & 0x1) {
-            gprintk("%s; Keeping VLAN tag\n", __func__);
+            gprintk("%s; Preserve VLAN\n", __func__);
         }
     }
 #endif
-
     return skb;
 }
 
@@ -261,7 +258,7 @@ strip_tag_tx_cb(struct sk_buff *skb, int dev_no, void *meta)
 /* Filter callback not used */
 static int
 strip_tag_filter_cb(uint8_t * pkt, int size, int dev_no, void *meta,
-                    int chan, kcom_filter_t *kf)
+                     int chan, kcom_filter_t *kf)
 {
     /* Pass through for now */
     return 0;
@@ -271,9 +268,10 @@ strip_tag_filter_cb(uint8_t * pkt, int size, int dev_no, void *meta,
  * Get statistics.
  * % cat /proc/linux-knet-cb
  */
+
 static int
 _pprint(void)
-{   
+{
     pprintf("Broadcom Linux KNET Call-Back: Untagged VLAN Stripper\n");
     pprintf("    %lu stripped packets\n", strip_stats.stripped);
     pprintf("    %lu packets checked\n", strip_stats.checked);
@@ -286,9 +284,7 @@ static int
 _cleanup(void)
 {
     bkn_rx_skb_cb_unregister(strip_tag_rx_cb);
-    /* strip_tag_tx_cb is currently a noop, so 
-     * no need to unregister. 
-     */
+    /* strip_tag_tx_cb is currently a no-op, so no need to unregister */
     if (0)
     {
         bkn_tx_skb_cb_unregister(strip_tag_tx_cb);
@@ -296,15 +292,14 @@ _cleanup(void)
     bkn_filter_cb_unregister(strip_tag_filter_cb);
 
     return 0;
-}   
+}
 
 static int
 _init(void)
 {
+
     bkn_rx_skb_cb_register(strip_tag_rx_cb);
-    /* strip_tag_tx_cb is currently a noop, so 
-     * no need to register. 
-     */
+    /* strip_tag_tx_cb is currently a no-op, so no need to register */
     if (0)
     {
         bkn_tx_skb_cb_register(strip_tag_tx_cb);
@@ -315,15 +310,15 @@ _init(void)
 }
 
 static gmodule_t _gmodule = {
-    name: MODULE_NAME, 
-    major: MODULE_MAJOR, 
+    name: MODULE_NAME,
+    major: MODULE_MAJOR,
     init: _init,
-    cleanup: _cleanup, 
-    pprint: _pprint, 
+    cleanup: _cleanup,
+    pprint: _pprint,
     ioctl: NULL,
-    open: NULL, 
-    close: NULL, 
-}; 
+    open: NULL,
+    close: NULL,
+};
 
 gmodule_t*
 gmodule_get(void)
