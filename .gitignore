@@ -103,6 +103,7 @@ dockers/docker-orchagent/Dockerfile
 dockers/docker-platform-monitor/Dockerfile
 dockers/docker-router-advertiser/Dockerfile
 dockers/docker-snmp-sv2/Dockerfile
+dockers/docker-stp/Dockerfile
 dockers/docker-teamd/Dockerfile
 dockers/docker-sonic-mgmt/Dockerfile
 dockers/docker-sonic-telemetry/Dockerfile
