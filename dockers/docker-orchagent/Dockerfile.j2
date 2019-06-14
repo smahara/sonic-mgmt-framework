@@ -15,7 +15,7 @@ RUN apt-get update \
  && apt-get install -y libelf1 libmnl0 bridge-utils
 
 RUN pip install setuptools
-RUN pip install scapy==2.4.2 pyroute2==0.5.3 netifaces==0.10.7 monotonic==1.5
+RUN pip install scapy==2.4.2 pyroute2==0.5.3 monotonic==1.5
 
 COPY \
 {% for deb in docker_orchagent_debs.split(' ') -%}
