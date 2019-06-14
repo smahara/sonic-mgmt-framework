@@ -74,11 +74,11 @@ class ThermalUtil(object):
             THERMAL_NUM_4_IDX: ['15', '4b'],
            }
     thermal_sysfspath ={
-    THERMAL_NUM_1_IDX: ["/sys/bus/i2c/drivers/lm75/15-0048/hwmon/hwmon2/temp1_input"],
-    THERMAL_NUM_2_IDX: ["/sys/bus/i2c/drivers/lm75/15-0049/hwmon/hwmon3/temp1_input"],  
-    THERMAL_NUM_3_IDX: ["/sys/bus/i2c/drivers/lm75/15-004a/hwmon/hwmon4/temp1_input"],
-    THERMAL_NUM_4_IDX: ["/sys/bus/i2c/drivers/lm75/15-004b/hwmon/hwmon5/temp1_input"],        
-    THERMAL_NUM_5_IDX: ["/sys/class/hwmon/hwmon0/temp1_input"],     
+    THERMAL_NUM_1_IDX: ["/sys/class/hwmon/hwmon3/temp1_input"],
+    THERMAL_NUM_2_IDX: ["/sys/class/hwmon/hwmon4/temp1_input"],
+    THERMAL_NUM_3_IDX: ["/sys/class/hwmon/hwmon5/temp1_input"],
+    THERMAL_NUM_4_IDX: ["/sys/class/hwmon/hwmon6/temp1_input"],
+    THERMAL_NUM_5_IDX: ["/sys/class/hwmon/hwmon0/temp1_input"],
            }
 
     #def __init__(self):

@@ -212,11 +212,9 @@ class device_monitor(object):
             temp_get= (temp2 + temp4)/2  # Use (sensor_LM75_49 + Thermal sensor_LM75_CPU_4B) /2 
         ori_state=fan_policy_state
         fan_policy_state=self.get_state_from_fan_policy(temp_get, fan_policy)
-        print "temp2=%d"%temp2
-        print "temp4=%d"%temp4
-        print "temp_get=%d"%temp_get
-        #print "temp4=%d"%temp4
-        #print "temp6=%d"%temp6
+        logging.debug("temp2=" + str(temp2))
+        logging.debug("temp4=" + str(temp4))
+        logging.debug("temp_get=" + str(temp_get))
         logging.debug('lm75_48=%d, lm75_49=%d, lm75_4a=%d, lm_4b=%d, cpu=%d, bcm=%d', temp1,temp2,temp3,temp4,temp5,temp6)
         logging.debug('ori_state=%d, fan_policy_state=%d', ori_state, fan_policy_state)
         new_pwm = fan_policy_state_pwm_tlb[fan_policy_state][0]
