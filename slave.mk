@@ -117,8 +117,6 @@ ifeq ($(SONIC_PROFILING_ON),y)
 DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
 endif
 
-
-
 ifeq ($(SONIC_COVERAGE_ON),y)
 DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
 export COV_CFLAGS := -O0 -coverage
@@ -126,7 +124,6 @@ export COV_CFG_FLAGS := --enable-gcov=yes
 export COV_LDFLAGS := -lgcov
 export SONIC_COVERAGE_ON := y
 endif
-
 
 ifeq ($(SONIC_BUILD_JOBS),)
 override SONIC_BUILD_JOBS := $(SONIC_CONFIG_BUILD_JOBS)
@@ -197,6 +194,8 @@ $(info "CONFIGURED_PLATFORM"             : "$(if $(PLATFORM),$(PLATFORM),$(CONFI
 $(info "SONIC_CONFIG_PRINT_DEPENDENCIES" : "$(SONIC_CONFIG_PRINT_DEPENDENCIES)")
 $(info "SONIC_BUILD_JOBS"                : "$(SONIC_BUILD_JOBS)")
 $(info "SONIC_CONFIG_MAKE_JOBS"          : "$(SONIC_CONFIG_MAKE_JOBS)")
+$(info "USE_NATIVE_DOCKERD_FOR_BUILD"    : "$(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD)")
+$(info "NATIVE_DOCKERD_SHARED"           : "$(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)")
 $(info "USERNAME"                        : "$(USERNAME)")
 $(info "PASSWORD"                        : "$(PASSWORD)")
 $(info "ENABLE_DHCP_GRAPH_SERVICE"       : "$(ENABLE_DHCP_GRAPH_SERVICE)")
@@ -246,27 +245,38 @@ ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
 define docker-image-save
     exec 201>"$(DOCKER_LOCKFILE_SAVE)"
     if ! flock -x -w 600 201; then
-        @echo "ERROR: Cannot obtain Docker save lock for $(1)"
+        @echo "ERROR: Cannot obtain docker image lock for $(1) save" $(LOG)
         exit 1
     else
-        docker tag $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(1):latest
+        @echo "Obtained docker image lock for $(1) save" $(LOG)
+        @echo "Tagging docker image $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) as $(1):latest" $(LOG)
+        docker tag $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(1):latest $(LOG)
+        @echo "Saving docker image $(1):latest" $(LOG)
         docker save $(1):latest | gzip -c > $(2)
-        docker rmi -f $(1):latest &> /dev/null
+        @echo "Removing docker image $(1):latest" $(LOG)
+        docker rmi -f $(1):latest $(LOG)
         eval exec "201<&-"
+        @echo "Released docker image lock for $(1) save" $(LOG)
     fi
-    docker rmi -f $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) &> /dev/null
+    @echo "Removing docker image $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG)" $(LOG)
+    docker rmi -f $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
 endef
 # $(call docker-image-load,from)
 define docker-image-load
-    exec 202>"$(DOCKER_LOCKFILE_LOAD)"
-    if ! flock -x -w 600 202; then
-        @echo "ERROR: Cannot obtain Docker load lock for $(1)"
+    exec 201>"$(DOCKER_LOCKFILE_SAVE)"
+    if ! flock -x -w 600 201; then
+        @echo "ERROR: Cannot obtain docker image lock for $(1) load" $(LOG)
         exit 1
     else
+        @echo "Obtained docker image lock for $(1) load" $(LOG)
+        @echo "Loading docker image $(TARGET_PATH)/$(1).gz" $(LOG)
         docker load -i $(TARGET_PATH)/$(1).gz $(LOG)
-        docker tag $(1):latest $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) &> /dev/null
-        docker rmi -f $(1):latest &> /dev/null
-        eval exec "202<&-"
+        @echo "Tagging docker image $(1):latest as $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG)" $(LOG)
+        docker tag $(1):latest $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
+        @echo "Removing docker image $(1):latest" $(LOG)
+        docker rmi -f $(1):latest $(LOG)
+        eval exec "201<&-"
+        @echo "Released docker image lock for $(1) load" $(LOG)
     fi
 endef
 else
@@ -646,6 +656,7 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAG
 		-t $(DOCKER_DBG_IMAGE_REF) $($*.gz_PATH) $(LOG)
 	$(call docker-image-save,$*-$(DBG_IMAGE_MARK),$@)
 	# Clean up
+	@echo "Removing docker image $(DOCKER_IMAGE_REF)" $(LOG)
 	docker rmi -f $(DOCKER_IMAGE_REF) &> /dev/null || true
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
 	$(FOOTER)
