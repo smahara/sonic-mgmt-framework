@@ -82,6 +82,10 @@ sudo cp {{config_engine_wheel_path}} $FILESYSTEM_ROOT/$CONFIG_ENGINE_WHEEL_NAME
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install $CONFIG_ENGINE_WHEEL_NAME
 sudo rm -rf $FILESYSTEM_ROOT/$CONFIG_ENGINE_WHEEL_NAME
 
+# Install python-netifaces
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/python-netifaces*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
 # Install Python client for Redis
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install "redis==2.10.6"
 
