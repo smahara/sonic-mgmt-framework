@@ -6,7 +6,7 @@
 
 .PHONY: all clean cleanall codegen rest-server yamlGen
 
-TOPDIR := $(abspath .)
+export TOPDIR=$(abspath .)
 BUILD_DIR := $(TOPDIR)/build
 REST_DIST_DIR := $(BUILD_DIR)/rest_server/dist
 GO_DEPS_DIR := $(TOPDIR)/deps
@@ -21,9 +21,12 @@ REST_GOPATH = $(shell go env GOPATH):$(TOPDIR):$(REST_DIST_DIR):$(GO_DEPS_DIR)
 
 #$(info REST_SRCS = $(REST_SRCS) )
 
-all: rest-server
+all: rest-server cli
 
 rest-server: $(REST_BIN)
+
+cli:
+	$(MAKE) -C $(TOPDIR)/src/CLI -f Makefile 
 
 yamlGen:
 	$(MAKE) -C models/yang
@@ -39,6 +42,7 @@ codegen:
 clean:
 	$(MAKE) -C models clean
 	$(MAKE) -C models/yang clean
+	$(MAKE) --directory=$(TOPDIR)/src/CLI clean
 
 cleanall:
 	rm -rf build

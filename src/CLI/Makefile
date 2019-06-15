@@ -2,7 +2,7 @@ SHELL = /bin/bash
 .ONESHELL:
 .SHELLFLAGS += -e
 
-export SONIC_CLI_ROOT=$(PWD)
+export SONIC_CLI_ROOT= $(TOPDIR)/src/CLI
 
 SUBDIRS := clitree renderer klish 
 
