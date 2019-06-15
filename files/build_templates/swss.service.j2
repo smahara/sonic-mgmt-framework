@@ -10,7 +10,9 @@ After=database.service updategraph.service
 After=interfaces-config.service
 Before=ntp-config.service
 StartLimitIntervalSec=1200
-StartLimitBurst=3
+# Increase max number of reloads of swss to 20 in 20 minutes.
+# Config reload is not differentiated with crash scenario, so automation usecases may exceed the current limit
+StartLimitBurst=20
 
 [Service]
 User=root
