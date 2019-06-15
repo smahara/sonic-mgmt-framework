@@ -20,6 +20,7 @@ all : $(SRC_REPLACEMENTS)
 	cp $(KLISH_SRC)/clish_start $(SONIC_CLI_ROOT)/.
 
 	cp -r ${KLISH_SRC}/bin/clish   ${SONIC_CLI_ROOT}/target/.
+	cp -r ${KLISH_SRC}/bin/.libs/clish ${SONIC_CLI_ROOT}/target/.libs
 	cp -r ${KLISH_SRC}/.libs/*.so* ${SONIC_CLI_ROOT}/target/.libs
 	cp -r ${KLISH_SRC}/.libs/*.a   ${SONIC_CLI_ROOT}/target/.libs
 	@echo "complete klish build"
