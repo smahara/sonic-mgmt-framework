@@ -40,7 +40,7 @@ class Configuration(object):
             return
 
         # Default Base url
-        self.host = "http://localhost/v1/restconf/data"
+        self.host = "http://localhost:8080/v1/restconf/data"
         # Temp file folder for downloading files
         self.temp_folder_path = None
 
