@@ -155,6 +155,8 @@ def driver_check():
 
 
 kos = [
+'modprobe i2c-ismt',
+'modprobe i2c-i801',
 'modprobe i2c_dev',
 'modprobe i2c_mux_pca954x force_deselect_on_exit=1',
 'modprobe accton_i2c_cpld'  ,
