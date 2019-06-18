@@ -6,7 +6,7 @@
 
 .PHONY: all clean cleanall codegen rest-server yamlGen
 
-export TOPDIR=$(abspath .)
+TOPDIR := $(abspath .)
 BUILD_DIR := $(TOPDIR)/build
 REST_DIST_DIR := $(BUILD_DIR)/rest_server/dist
 GO_DEPS_DIR := $(TOPDIR)/deps
