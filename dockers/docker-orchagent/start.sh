@@ -43,13 +43,20 @@ supervisorctl start nbrmgrd
 
 supervisorctl start vxlanmgrd
 
+supervisorctl start natmgrd
+
+supervisorctl start natsyncd
+
 # Set any scaling constants in Linux
 if [ -f /usr/bin/update_proc_variables ]; then
     /usr/bin/update_proc_variables
 fi
+#Start the arp_update by default
+# This is need to resolve arp for static neighbour entries configured for static route
+supervisorctl start arp_update
 
 # Start arp_update when VLAN exists
-VLAN=`sonic-cfggen -d -v 'VLAN.keys() | join(" ") if VLAN'`
-if [ "$VLAN" != "" ]; then
-    supervisorctl start arp_update
-fi
+#VLAN=`sonic-cfggen -d -v 'VLAN.keys() | join(" ") if VLAN'`
+#if [ "$VLAN" != "" ]; then
+#    supervisorctl start arp_update
+#fi

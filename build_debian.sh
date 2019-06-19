@@ -172,7 +172,7 @@ sudo chmod +x $FILESYSTEM_ROOT/etc/initramfs-tools/hooks/union-fsck
 pushd $FILESYSTEM_ROOT/usr/share/initramfs-tools/scripts/init-bottom && sudo patch -p1 < $OLDPWD/files/initramfs-tools/udev.patch; popd
 
 ## Install latest intel ixgbe driver
-sudo cp target/files/stretch/ixgbe.ko $FILESYSTEM_ROOT/lib/modules/${LINUX_KERNEL_VERSION}-amd64/kernel/drivers/net/ethernet/intel/ixgbe/ixgbe.ko
+sudo cp $files_path/ixgbe.ko $FILESYSTEM_ROOT/lib/modules/${LINUX_KERNEL_VERSION}-amd64/kernel/drivers/net/ethernet/intel/ixgbe/ixgbe.ko
 
 ## Install docker
 echo '[INFO] Install docker'
@@ -217,7 +217,6 @@ sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y install      \
 ## Note: don't install python-apt by pip, older than Debian repo one
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install      \
     file                    \
-    ifupdown2               \
     iproute2                \
     bridge-utils            \
     isc-dhcp-client         \
@@ -242,6 +241,7 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     usbutils                \
     pciutils                \
     iptables-persistent     \
+    ebtables                \
     logrotate               \
     curl                    \
     kexec-tools             \
@@ -259,7 +259,9 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     tcptraceroute           \
     mtr-tiny                \
     locales                 \
-    cgroup-tools
+    flashrom                \
+    cgroup-tools            \
+    conntrack
 
 #Adds a locale to a debian system in non-interactive mode
 sudo sed -i '/^#.* en_US.* /s/^#//' $FILESYSTEM_ROOT/etc/locale.gen && \
@@ -317,7 +319,7 @@ check filesystem root-overlay with path /
 check filesystem var-log with path /var/log
   if space usage > 90% for 5 times within 10 cycles then alert
 check system $HOST
-  if memory usage > 90% for 5 times within 10 cycles then alert
+  if memory usage > 50% for 5 times within 10 cycles then alert
   if cpu usage (user) > 90% for 5 times within 10 cycles then alert
   if cpu usage (system) > 90% for 5 times within 10 cycles then alert
 EOF
@@ -349,6 +351,9 @@ set /files/etc/sysctl.conf/net.ipv4.conf.all.arp_ignore 2
 set /files/etc/sysctl.conf/net.ipv4.neigh.default.base_reachable_time_ms 1800000
 set /files/etc/sysctl.conf/net.ipv6.neigh.default.base_reachable_time_ms 1800000
 
+set /files/etc/sysctl.conf/net.ipv4.neigh.default.gc_thresh1 1
+set /files/etc/sysctl.conf/net.ipv6.neigh.default.gc_thresh1 1
+
 set /files/etc/sysctl.conf/net.ipv6.conf.default.forwarding 1
 set /files/etc/sysctl.conf/net.ipv6.conf.all.forwarding 1
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.forwarding 0
@@ -378,7 +383,6 @@ sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install 'docker
 
 ## Get gcc and python dev pkgs
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install gcc libpython2.7-dev
-sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install 'netifaces==0.10.7'
 
 ## Create /var/run/redis folder for docker-database to mount
 sudo mkdir -p $FILESYSTEM_ROOT/var/run/redis
@@ -422,6 +426,10 @@ if [ "${enable_organization_extensions}" = "y" ]; then
       ./files/build_templates/organization_extensions.sh -f $FILESYSTEM_ROOT -h $HOSTNAME
    fi
 fi
+
+## Setup ebtable rules (rule file is in binary format)
+sudo sed -i 's/EBTABLES_LOAD_ON_START="no"/EBTABLES_LOAD_ON_START="yes"/g' ${FILESYSTEM_ROOT}/etc/default/ebtables
+sudo cp files/image_config/ebtables/ebtables.filter ${FILESYSTEM_ROOT}/etc
 
 ## Remove gcc and python dev pkgs
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y remove gcc libpython2.7-dev

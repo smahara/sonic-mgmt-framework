@@ -1,4 +1,4 @@
-FROM docker-config-engine
+FROM {{ docker_l2mcd_load_image }}
 
 ARG docker_container_name
 RUN [ -f /etc/rsyslog.conf ] && sed -ri "s/%syslogtag%/$docker_container_name#%syslogtag%/;" /etc/rsyslog.conf
@@ -22,7 +22,7 @@ debs/{{ deb }}{{' '}}
 {%- endfor -%}
 debs/
 
-RUN dpkg -i \
+RUN dpkg -i --force-all \
 {% for deb in docker_l2mcd_debs.split(' ') -%}
 debs/{{ deb }}{{' '}}
 {%- endfor %}

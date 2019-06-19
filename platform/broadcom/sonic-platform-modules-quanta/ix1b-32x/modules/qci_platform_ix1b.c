@@ -39,6 +39,7 @@
 #include <linux/input-polldev.h>
 #include <linux/rfkill.h>
 #include <linux/slab.h>
+#include <linux/delay.h>
 #include <linux/i2c/pca954x.h>
 #if LINUX_VERSION_CODE > KERNEL_VERSION(3,12,0)
 #include <linux/platform_data/pca953x.h>
@@ -239,7 +240,7 @@ static struct i2c_board_info ix1b_i2c_devices[] = {
 		.platform_data = &pca9555_cpuled_data,
 	},
 	{
-		I2C_BOARD_INFO("24c02", 0x50),
+		I2C_BOARD_INFO("optoe1", 0x50),
 	},
 #endif
 };
@@ -366,7 +367,7 @@ struct gpio_leds_priv {
 	struct gpio_led_data leds[];
 };
 
-static struct i2c_adapter *i2c_get_adapter_wait_wait(int nr)
+static struct i2c_adapter *i2c_get_adapter_wait(int nr)
 {
 	struct i2c_adapter *adap = NULL;
 	int i = 0;
@@ -507,3 +508,4 @@ module_exit(ix1b_platform_exit);
 MODULE_AUTHOR("Quanta Computer Inc.");
 MODULE_DESCRIPTION("Quanta IX1B Platform Driver");
 MODULE_LICENSE("GPL");
+

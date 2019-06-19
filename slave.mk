@@ -117,6 +117,14 @@ ifeq ($(SONIC_PROFILING_ON),y)
 DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
 endif
 
+ifeq ($(SONIC_COVERAGE_ON),y)
+DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
+export COV_CFLAGS := -O0 -coverage
+export COV_CFG_FLAGS := --enable-gcov=yes
+export COV_LDFLAGS := -lgcov
+export SONIC_COVERAGE_ON := y
+endif
+
 ifeq ($(SONIC_BUILD_JOBS),)
 override SONIC_BUILD_JOBS := $(SONIC_CONFIG_BUILD_JOBS)
 endif
@@ -126,6 +134,22 @@ endif
 # reference the SONIC_CONFIG_MAKE_JOBS variable.
 ifneq ($(SONIC_MAKE_JOBS),)
 override SONIC_CONFIG_MAKE_JOBS := $(SONIC_MAKE_JOBS)
+endif
+
+# If SONIC_CONFIG_NATIVE_DOCKERD_SHARED is enabled, force
+# SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD enabled as well.
+ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
+override SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD := y
+endif
+
+ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
+DOCKER_IMAGE_REF = $*$(DOCKER_USERNAME):$(DOCKER_USERTAG)
+DOCKER_DBG_IMAGE_REF = $*-$(DBG_IMAGE_MARK)$(DOCKER_USERNAME):$(DOCKER_USERTAG)
+docker-load-image-get = $(if $(1),$(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG))
+else
+DOCKER_IMAGE_REF = $*
+DOCKER_DBG_IMAGE_REF = $*-$(DBG_IMAGE_MARK)
+docker-load-image-get = $(1)
 endif
 
 ifeq ($(VS_PREPARE_MEM),)
@@ -170,6 +194,8 @@ $(info "CONFIGURED_PLATFORM"             : "$(if $(PLATFORM),$(PLATFORM),$(CONFI
 $(info "SONIC_CONFIG_PRINT_DEPENDENCIES" : "$(SONIC_CONFIG_PRINT_DEPENDENCIES)")
 $(info "SONIC_BUILD_JOBS"                : "$(SONIC_BUILD_JOBS)")
 $(info "SONIC_CONFIG_MAKE_JOBS"          : "$(SONIC_CONFIG_MAKE_JOBS)")
+$(info "USE_NATIVE_DOCKERD_FOR_BUILD"    : "$(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD)")
+$(info "NATIVE_DOCKERD_SHARED"           : "$(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)")
 $(info "USERNAME"                        : "$(USERNAME)")
 $(info "PASSWORD"                        : "$(PASSWORD)")
 $(info "ENABLE_DHCP_GRAPH_SERVICE"       : "$(ENABLE_DHCP_GRAPH_SERVICE)")
@@ -186,15 +212,19 @@ $(info "ENABLE_ORGANIZATION_EXTENSIONS"  : "$(ENABLE_ORGANIZATION_EXTENSIONS)")
 $(info "HTTP_PROXY"                      : "$(HTTP_PROXY)")
 $(info "HTTPS_PROXY"                     : "$(HTTPS_PROXY)")
 $(info "ENABLE_SYSTEM_TELEMETRY"         : "$(ENABLE_SYSTEM_TELEMETRY)")
+$(info "ENABLE_ZTP"                      : "$(ENABLE_ZTP)")
 $(info "SONIC_DEBUGGING_ON"              : "$(SONIC_DEBUGGING_ON)")
 $(info "SONIC_PROFILING_ON"              : "$(SONIC_PROFILING_ON)")
+$(info "SONIC_COVERAGE_ON"               : "$(SONIC_COVERAGE_ON)")
 $(info "KERNEL_PROCURE_METHOD"           : "$(KERNEL_PROCURE_METHOD)")
 ifeq ($(KERNEL_PROCURE_METHOD),cache)
 $(info "KERNEL_CACHE_PATH"               : "$(KERNEL_CACHE_PATH)")
 endif
+$(info "BUILD_NUMBER"                    : "$(BUILD_NUMBER)")
 $(info "BUILD_TIMESTAMP"                 : "$(BUILD_TIMESTAMP)")
 $(info "BLDENV"                          : "$(BLDENV)")
 $(info "VS_PREPARE_MEM"                  : "$(VS_PREPARE_MEM)")
+$(info "VERSION"                         : "$(SONIC_GET_VERSION)")
 $(info )
 
 ###############################################################################
@@ -205,6 +235,58 @@ $(info )
 export kernel_procure_method=$(KERNEL_PROCURE_METHOD)
 export kernel_cache_mount:=/kernel_cache
 export vs_build_prepare_mem=$(VS_PREPARE_MEM)
+
+###############################################################################
+## Canned sequences
+###############################################################################
+
+ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
+# $(call docker-image-save,from,to)
+define docker-image-save
+    exec 201>"$(DOCKER_LOCKFILE_SAVE)"
+    if ! flock -x -w 600 201; then
+        @echo "ERROR: Cannot obtain docker image lock for $(1) save" $(LOG)
+        exit 1
+    else
+        @echo "Obtained docker image lock for $(1) save" $(LOG)
+        @echo "Tagging docker image $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) as $(1):latest" $(LOG)
+        docker tag $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(1):latest $(LOG)
+        @echo "Saving docker image $(1):latest" $(LOG)
+        docker save $(1):latest | gzip -c > $(2)
+        @echo "Removing docker image $(1):latest" $(LOG)
+        docker rmi -f $(1):latest $(LOG)
+        eval exec "201<&-"
+        @echo "Released docker image lock for $(1) save" $(LOG)
+    fi
+    @echo "Removing docker image $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG)" $(LOG)
+    docker rmi -f $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
+endef
+# $(call docker-image-load,from)
+define docker-image-load
+    exec 201>"$(DOCKER_LOCKFILE_SAVE)"
+    if ! flock -x -w 600 201; then
+        @echo "ERROR: Cannot obtain docker image lock for $(1) load" $(LOG)
+        exit 1
+    else
+        @echo "Obtained docker image lock for $(1) load" $(LOG)
+        @echo "Loading docker image $(TARGET_PATH)/$(1).gz" $(LOG)
+        docker load -i $(TARGET_PATH)/$(1).gz $(LOG)
+        @echo "Tagging docker image $(1):latest as $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG)" $(LOG)
+        docker tag $(1):latest $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
+        @echo "Removing docker image $(1):latest" $(LOG)
+        docker rmi -f $(1):latest $(LOG)
+        eval exec "201<&-"
+        @echo "Released docker image lock for $(1) load" $(LOG)
+    fi
+endef
+else
+define docker-image-save
+    docker save $(1):latest | gzip -c > $(2)
+endef
+define docker-image-load
+    docker load -i $(TARGET_PATH)/$(1).gz $(LOG)
+endef
+endif
 
 ###############################################################################
 ## Local targets
@@ -391,7 +473,7 @@ $(SONIC_INSTALL_TARGETS) : $(DEBS_PATH)/%-install : .platform $$(addsuffix -inst
 	# put a lock here because dpkg does not allow installing packages in parallel
 	while true; do
 	if mkdir $(DEBS_PATH)/dpkg_lock &> /dev/null; then
-	{ sudo dpkg -i $(DEBS_PATH)/$* $(LOG) && rm -d $(DEBS_PATH)/dpkg_lock && break; } || { rm -d $(DEBS_PATH)/dpkg_lock && exit 1 ; }
+	{ sudo dpkg -i $($*_DPKGFLAGS) $(DEBS_PATH)/$* $(LOG) && rm -d $(DEBS_PATH)/dpkg_lock && break; } || { rm -d $(DEBS_PATH)/dpkg_lock && exit 1 ; }
 	fi
 	done
 	$(FOOTER)
@@ -486,25 +568,25 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_SIMPLE_DOCKER_IMAGES)) : $(TARGET_PATH)/%.g
 		--build-arg guid=$(GUID) \
 		--build-arg docker_container_name=$($*.gz_CONTAINER_NAME) \
 		--label Tag=$(SONIC_GET_VERSION) \
-		-t $* $($*.gz_PATH) $(LOG)
-	docker save $* | gzip -c > $@
+		-t $(DOCKER_IMAGE_REF) $($*.gz_PATH) $(LOG)
+	$(call docker-image-save,$*,$@)
 	# Clean up
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
 	$(FOOTER)
 
 SONIC_TARGET_LIST += $(addprefix $(TARGET_PATH)/, $(SONIC_SIMPLE_DOCKER_IMAGES))
 
-# Build stretch docker images only in stretch slave docker,
+# Build jessie docker images only in jessie slave docker,
 # jessie docker images only in jessie slave docker
-DOCKER_IMAGES_FOR_INSTALLERS := $(sort $(foreach installer,$(SONIC_INSTALLERS),$($(installer)_DOCKERS)))
-ifeq ($(BLDENV),stretch)
-	DOCKER_IMAGES := $(SONIC_STRETCH_DOCKERS)
-	DOCKER_DBG_IMAGES := $(SONIC_STRETCH_DBG_DOCKERS)
-	SONIC_STRETCH_DOCKERS_FOR_INSTALLERS = $(filter $(SONIC_STRETCH_DOCKERS),$(DOCKER_IMAGES_FOR_INSTALLERS))
-	SONIC_STRETCH_DBG_DOCKERS_FOR_INSTALLERS = $(filter $(SONIC_STRETCH_DBG_DOCKERS), $(patsubst %.gz,%-$(DBG_IMAGE_MARK).gz, $(SONIC_STRETCH_DOCKERS_FOR_INSTALLERS)))
+ifeq ($(BLDENV),)
+	DOCKER_IMAGES_FOR_INSTALLERS := $(sort $(foreach installer,$(SONIC_INSTALLERS),$($(installer)_DOCKERS)))
+	DOCKER_IMAGES := $(SONIC_JESSIE_DOCKERS)
+	DOCKER_DBG_IMAGES := $(SONIC_JESSIE_DBG_DOCKERS)
+	SONIC_JESSIE_DOCKERS_FOR_INSTALLERS = $(filter $(SONIC_JESSIE_DOCKERS),$(DOCKER_IMAGES_FOR_INSTALLERS) $(EXTRA_JESSIE_TARGETS))
+	SONIC_JESSIE_DBG_DOCKERS_FOR_INSTALLERS = $(filter $(SONIC_JESSIE_DBG_DOCKERS), $(patsubst %.gz,%-$(DBG_IMAGE_MARK).gz, $(SONIC_JESSIE_DOCKERS_FOR_INSTALLERS)))
 else
-	DOCKER_IMAGES := $(filter-out $(SONIC_STRETCH_DOCKERS), $(SONIC_DOCKER_IMAGES))
-	DOCKER_DBG_IMAGES := $(filter-out $(SONIC_STRETCH_DBG_DOCKERS), $(SONIC_DOCKER_DBG_IMAGES))
+	DOCKER_IMAGES := $(filter-out $(SONIC_JESSIE_DOCKERS), $(SONIC_DOCKER_IMAGES))
+	DOCKER_DBG_IMAGES := $(filter-out $(SONIC_JESSIE_DBG_DOCKERS), $(SONIC_DOCKER_DBG_IMAGES))
 endif
 
 # Targets for building docker images
@@ -531,6 +613,7 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_pydebs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_PYTHON_DEBS)))\n" | awk '!a[$$0]++'))
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_whls=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_PYTHON_WHEELS)))\n" | awk '!a[$$0]++'))
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_dbgs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_PACKAGES)))\n" | awk '!a[$$0]++'))
+	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_load_image=$(shell printf "$(call docker-load-image-get,$(subst $(SPACE),\n,$(patsubst %.gz,%,$(call expand,$($*.gz_LOAD_DOCKERS)))))\n" | awk '!a[$$0]++'))
 	j2 $($*.gz_PATH)/Dockerfile.j2 > $($*.gz_PATH)/Dockerfile
 	docker info $(LOG)
 	docker build --squash --no-cache \
@@ -543,15 +626,15 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 		--build-arg frr_user_uid=$(FRR_USER_UID) \
 		--build-arg frr_user_gid=$(FRR_USER_GID) \
 		--label Tag=$(SONIC_GET_VERSION) \
-		-t $* $($*.gz_PATH) $(LOG)
-	docker save $* | gzip -c > $@
+		-t $(DOCKER_IMAGE_REF) $($*.gz_PATH) $(LOG)
+	$(call docker-image-save,$*,$@)
 	# Clean up
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
 	$(FOOTER)
 
 SONIC_TARGET_LIST += $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES))
 
-# Targets for building docker images
+# Targets for building docker debug images
 $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAGE_MARK).gz : .platform docker-start \
 		$$(addprefix $(DEBS_PATH)/,$$($$*.gz_DBG_DEPENDS)) \
 		$$(addsuffix -load,$$(addprefix $(TARGET_PATH)/,$$*.gz))
@@ -561,7 +644,7 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAG
 	# Export variables for j2. Use path for unique variable names, e.g. docker_orchagent_debs
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_DEPENDS),RDEPENDS))\n" | awk '!a[$$0]++'))
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_IMAGE_PACKAGES)))\n" | awk '!a[$$0]++'))
-	./build_debug_docker_j2.sh $* $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs > $($*.gz_PATH)/Dockerfile-dbg.j2
+	./build_debug_docker_j2.sh $(DOCKER_IMAGE_REF) $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs > $($*.gz_PATH)/Dockerfile-dbg.j2
 	j2 $($*.gz_PATH)/Dockerfile-dbg.j2 > $($*.gz_PATH)/Dockerfile-dbg
 	docker info $(LOG)
 	docker build --squash --no-cache \
@@ -570,9 +653,11 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAG
 		--build-arg docker_container_name=$($*.gz_CONTAINER_NAME) \
 		--label Tag=$(SONIC_GET_VERSION) \
 		--file $($*.gz_PATH)/Dockerfile-dbg \
-		-t $*-dbg $($*.gz_PATH) $(LOG)
-	docker save $*-dbg | gzip -c > $@
+		-t $(DOCKER_DBG_IMAGE_REF) $($*.gz_PATH) $(LOG)
+	$(call docker-image-save,$*-$(DBG_IMAGE_MARK),$@)
 	# Clean up
+	@echo "Removing docker image $(DOCKER_IMAGE_REF)" $(LOG)
+	docker rmi -f $(DOCKER_IMAGE_REF) &> /dev/null || true
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
 	$(FOOTER)
 
@@ -584,7 +669,7 @@ DOCKER_LOAD_TARGETS = $(addsuffix -load,$(addprefix $(TARGET_PATH)/, \
 
 $(DOCKER_LOAD_TARGETS) : $(TARGET_PATH)/%.gz-load : .platform docker-start $$(TARGET_PATH)/$$*.gz
 	$(HEADER)
-	docker load -i $(TARGET_PATH)/$*.gz $(LOG)
+	$(call docker-image-load,$*)
 	$(FOOTER)
 
 ###############################################################################
@@ -604,10 +689,12 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
                 $(LINUX_KERNEL) \
                 $(SONIC_DEVICE_DATA) \
                 $(PYTHON_CLICK) \
+                $(IFUPDOWN2) \
                 $(LIBPAM_TACPLUS) \
                 $(LIBNSS_TACPLUS)) \
         $$(addprefix $(TARGET_PATH)/,$$($$*_DOCKERS)) \
         $$(addprefix $(FILES_PATH)/,$$($$*_FILES)) \
+	$(if $(findstring y,$(ENABLE_ZTP)),$(addprefix $(DEBS_PATH)/,$(SONIC_ZTP))) \
         $(addprefix $(STRETCH_FILES_PATH)/,$(IXGBE_DRIVER)) \
         $(addprefix $(PYTHON_DEBS_PATH)/,$(SONIC_UTILS)) \
         $(addprefix $(PYTHON_WHEELS_PATH)/,$(SONIC_CONFIG_ENGINE)) \
@@ -616,6 +703,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	$(HEADER)
 	# Pass initramfs and linux kernel explicitly. They are used for all platforms
 	export debs_path="$(STRETCH_DEBS_PATH)"
+	export files_path="$(FILES_PATH)"
 	export python_debs_path="$(PYTHON_DEBS_PATH)" 
 	export initramfs_tools="$(STRETCH_DEBS_PATH)/$(INITRAMFS_TOOLS)"
 	export linux_kernel="$(STRTCH_DEBS_PATH)/$(LINUX_KERNEL)"
@@ -626,6 +714,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	export sonic_asic_platform="$(CONFIGURED_PLATFORM)"
 	export enable_organization_extensions="$(ENABLE_ORGANIZATION_EXTENSIONS)"
 	export enable_dhcp_graph_service="$(ENABLE_DHCP_GRAPH_SERVICE)"
+	export enable_ztp="$(ENABLE_ZTP)"
 	export shutdown_bgp_on_start="$(SHUTDOWN_BGP_ON_START)"
 	export enable_pfcwd_on_start="$(ENABLE_PFCWD_ON_START)"
 	export installer_debs="$(addprefix $(STRETCH_DEBS_PATH)/,$($*_INSTALLS))"
@@ -743,6 +832,7 @@ stretch : $$(addprefix $(DEBS_PATH)/,$$(SONIC_STRETCH_DEBS)) \
           $$(addprefix $(TARGET_PATH)/,$$(SONIC_STRETCH_DOCKERS_FOR_INSTALLERS)) \
           $$(addprefix $(TARGET_PATH)/,$$(SONIC_STRETCH_DBG_DOCKERS_FOR_INSTALLERS))
 
+jessie : $$(addprefix $(TARGET_PATH)/,$$(SONIC_JESSIE_DOCKERS_FOR_INSTALLERS))
 
 ###############################################################################
 ## Standard targets

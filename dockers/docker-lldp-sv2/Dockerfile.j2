@@ -1,4 +1,4 @@
-FROM docker-config-engine-stretch
+FROM {{ docker_lldp_sv2_load_image }}
 
 ARG docker_container_name
 RUN [ -f /etc/rsyslog.conf ] && sed -ri "s/%syslogtag%/$docker_container_name#%syslogtag%/;" /etc/rsyslog.conf
@@ -40,7 +40,7 @@ RUN pip install \
 {% endif %}
 
 # Clean up
-RUN apt-get remove -y python-pip; apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
+RUN apt-get purge -y python-pip; apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
 RUN rm -rf /debs /python-wheels ~/.cache
 
 COPY ["start.sh", "lldpmgrd", "/usr/bin/"]

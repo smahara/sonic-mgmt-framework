@@ -1,7 +1,8 @@
 ifneq ($(KERNELRELEASE),)
 obj-m:= accton_i2c_cpld.o \
     accton_as7326_56x_fan.o accton_as7326_56x_leds.o \
-    accton_as7326_56x_psu.o ym2651y.o
+    accton_as7326_56x_psu.o ym2651y.o \
+    at24.o
 
 else
 ifeq (,$(KERNEL_SRC))

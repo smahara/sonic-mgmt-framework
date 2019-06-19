@@ -1,4 +1,4 @@
-FROM docker-config-engine-stretch
+FROM {{ docker_snmp_sv2_load_image }}
 
 ARG docker_container_name
 RUN [ -f /etc/rsyslog.conf ] && sed -ri "s/%syslogtag%/$docker_container_name#%syslogtag%/;" /etc/rsyslog.conf
@@ -58,7 +58,8 @@ RUN pip install \
 RUN python3.6 -m sonic_ax_impl install
 
 # Clean up
-RUN apt-get -y purge libpython3.6-dev curl gcc make libdpkg-perl; \
+RUN apt-get -y purge libpython3.6-dev libpython3.6 curl gcc make libdpkg-perl; \
+    apt-get -y purge libldap-2.4-2 libsasl2-2 libsasl2-modules libsasl2-modules-db; \
     apt-get clean -y && apt-get autoclean -y && apt-get autoremove -y --purge
 RUN find / | grep -E "__pycache__" | xargs rm -rf
 RUN rm -rf /debs /python-wheels ~/.cache

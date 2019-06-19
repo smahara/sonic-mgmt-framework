@@ -1,0 +1,36 @@
+From 7cae808fc257fc8e0bfbda726c447c35ba2a35bc Mon Sep 17 00:00:00 2001
+From: Rajendra Dendukuri <rajendra.dendukuri@broadcom.com>
+Date: Wed, 12 Jun 2019 23:53:01 -0400
+Subject: [PATCH] segfault when trying to access netifaces.ifaddresses
+
+Signed-off-by: Rajendra Dendukuri <rajendra.dendukuri@broadcom.com>
+---
+ netifaces.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/netifaces.c b/netifaces.c
+index fa18add..c73d14b 100644
+--- a/netifaces.c
++++ b/netifaces.c
+@@ -1024,7 +1024,7 @@ ifaddrs (PyObject *self, PyObject *args)
+     char buffer[256];
+     PyObject *pyaddr = NULL, *netmask = NULL, *braddr = NULL, *flags = NULL;
+ 
+-    if (strcmp (addr->ifa_name, ifname) != 0)
++    if (addr->ifa_name == NULL || strcmp (addr->ifa_name, ifname) != 0)
+       continue;
+  
+     /* We mark the interface as found, even if there are no addresses;
+@@ -1357,6 +1357,9 @@ interfaces (PyObject *self)
+   }
+ 
+   for (addr = addrs; addr; addr = addr->ifa_next) {
++    if (addr->ifa_name == NULL)
++      continue;
++
+     if (!prev_name || strncmp (addr->ifa_name, prev_name, IFNAMSIZ) != 0) {
+       PyObject *ifname = PyUnicode_FromString (addr->ifa_name);
+     
+-- 
+2.7.4
+

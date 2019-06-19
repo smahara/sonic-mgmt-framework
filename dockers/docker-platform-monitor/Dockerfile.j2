@@ -1,4 +1,4 @@
-FROM docker-config-engine-stretch
+FROM {{ docker_platform_monitor_load_image }}
 
 ARG docker_container_name
 RUN [ -f /etc/rsyslog.conf ] && sed -ri "s/%syslogtag%/$docker_container_name#%syslogtag%/;" /etc/rsyslog.conf
@@ -7,7 +7,7 @@ RUN [ -f /etc/rsyslog.conf ] && sed -ri "s/%syslogtag%/$docker_container_name#%s
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install required packages
-RUN apt-get update && apt-get install -y python-pip libpython2.7 ipmitool librrd8 librrd-dev rrdtool
+RUN apt-get update && apt-get install -y python-pip libpython2.7 ipmitool librrd8 librrd-dev rrdtool python-smbus ethtool
 
 {% if docker_platform_monitor_debs.strip() -%}
 # Copy locally-built Debian package dependencies
@@ -53,7 +53,7 @@ RUN pip install \
 {% endif %}
 
 # Clean up
-RUN apt-get remove -y python-pip; apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
+RUN apt-get purge -y python-pip; apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
 RUN rm -rf /debs /python-wheels ~/.cache
 
 COPY ["docker_init.sh", "lm-sensors.sh", "/usr/bin/"]

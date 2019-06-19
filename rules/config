@@ -20,6 +20,15 @@ SONIC_CONFIG_MAKE_JOBS = 8
 # If set to y SONiC build container will use native dockerd instead of dind for faster build
 # SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD = y
 
+# SONIC_CONFIG_NATIVE_DOCKERD_SHARED - native dockerd for build runs on a shared build server.
+# Note: Enabling this option automatically sets SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD=y.
+# If both options are set, this one prevails.
+# If set to y, special handling of the docker image file names is needed to avoid conflicts with
+# other SONiC build jobs on the same server. This requires changes to the Dockerfile.j2 FROM statement
+# in the dockers/ and platform/ subdirs to use a variable reference instead of an explicit image name.
+# The following platforms support this option: broadcom, vs
+SONIC_CONFIG_NATIVE_DOCKERD_SHARED = y
+
 # SONIC_CONFIG_ENABLE_COLORS - enable colored output in build system.
 # Comment next line to disable:
 # SONIC_CONFIG_ENABLE_COLORS = y
@@ -35,6 +44,9 @@ DEFAULT_PASSWORD = broadcom
 # passed through DHCP option 225.
 # If not set (default behavior) the default minigraph built into the image will be used.
 # ENABLE_DHCP_GRAPH_SERVICE = y
+
+# ENABLE_ZTP - installs Zero Touch Provisioning support.
+ENABLE_ZTP = y
 
 # SHUTDOWN_BGP_ON_START - if set to y all bgp sessions will be in admin down state when
 # bgp service starts.
@@ -68,6 +80,12 @@ ENABLE_ORGANIZATION_EXTENSIONS = y
 SONIC_DEBUGGING_ON = y
 #SONIC_PROFILING_ON = y
 
+# Coverage option allows sonic packages to get built with coverage flags and generates
+# coverage data during compilation. Given that 'coverage' option is superset of both debugging
+# and profiling, user should only enable either coverage option or the other options..
+# if coverage option is enabled, it will prevail irrespective of other options.
+#SONIC_COVERAGE_ON = y
+
 # ENABLE_SYSTEM_TELEMETRY - build docker-sonic-telemetry for system telemetry support
 ENABLE_SYSTEM_TELEMETRY = y
 
@@ -93,3 +111,15 @@ FRR_USER_GID = 300
 
 # Default VS build memory preparation
 DEFAULT_VS_PREPARE_MEM = yes
+
+
+# Docker local registry server info where
+# Docker base images are pushed and pulled from the local docker registry
+# DOCKER_REGISTRY_SERVER=10.75.18.181:5000
+
+
+
+# Debian local mirror site info
+# DEBIAN_ARCHIVE_MIRROR=10.175.127.104 
+# DEBIAN_ORG_MIRROR=10.75.18.181 
+

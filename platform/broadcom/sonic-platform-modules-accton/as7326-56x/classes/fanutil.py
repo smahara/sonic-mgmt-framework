@@ -24,6 +24,7 @@
 # ------------------------------------------------------------------
 
 try:
+    import os.path
     import time
     import logging
     from collections import namedtuple
@@ -151,6 +152,12 @@ class FanUtil(object):
         return True
 
     def __init__(self):
+        # wait for 'as7326_56x_fan' initialization
+        while True:
+            if os.path.isfile("/sys/bus/i2c/devices/11-0066/name"):
+                break
+            time.sleep(1)
+
         fan_path = self.BASE_VAL_PATH 
 
         for fan_num in range(self.FAN_NUM_1_IDX, self.FAN_NUM_ON_MAIN_BROAD+1):

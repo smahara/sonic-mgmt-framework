@@ -65,6 +65,10 @@ sudo mkdir -p $FILESYSTEM_ROOT/etc/modprobe.d/
 sudo mkdir -p $FILESYSTEM_ROOT/var/cache/sonic/
 sudo mkdir -p $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 
+# Install a more recent version of ifupdown2  (and its dependencies via 'apt-get -y install -f')
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/ifupdown2_*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
 # Install dependencies for SONiC config engine
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install \
     python-dev     \
@@ -77,6 +81,10 @@ CONFIG_ENGINE_WHEEL_NAME=$(basename {{config_engine_wheel_path}})
 sudo cp {{config_engine_wheel_path}} $FILESYSTEM_ROOT/$CONFIG_ENGINE_WHEEL_NAME
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install $CONFIG_ENGINE_WHEEL_NAME
 sudo rm -rf $FILESYSTEM_ROOT/$CONFIG_ENGINE_WHEEL_NAME
+
+# Install python-netifaces
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/python-netifaces*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
 
 # Install Python client for Redis
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install "redis==2.10.6"
@@ -111,6 +119,8 @@ sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/python-click*_all.deb || \
 # Install python pexpect used by sonic-utilities consutil
 # using pip install instead to get a more recent version than is available through debian
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install pexpect
+# Install python click-default-group by sonic-utilities
+sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install click-default-group==1.2
 
 # Install tabulate >= 0.8.1 via pip in order to support multi-line row output for sonic-utilities
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install tabulate==0.8.2
@@ -118,6 +128,12 @@ sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install tabulat
 # Install SONiC Utilities (and its dependencies via 'apt-get -y install -f')
 sudo dpkg --root=$FILESYSTEM_ROOT -i $python_debs_path/python-sonic-utilities_*.deb || \
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+{% if enable_ztp == "y" %}
+# Install ZTP (and its dependencies via 'apt-get -y install -f')
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/sonic-ztp_*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+{% endif %}
 
 # SONiC utilities installs bash-completion as a dependency. However, it is disabled by default
 # in bash.bashrc, so we copy a version of the file with it enabled here.
@@ -208,6 +224,11 @@ sudo bash -c "echo '{ \"DEVICE_METADATA\": { \"localhost\": { \"default_bgp_stat
 {%- for crm_res in ["ipv4_route", "ipv6_route", "ipv4_nexthop", "ipv6_nexthop", "ipv4_neighbor", "ipv6_neighbor", "nexthop_group_member", "nexthop_group", "acl_table", "acl_group", "acl_entry", "acl_counter", "fdb_entry"] -%}
 \"{{crm_res}}_threshold_type\": \"percentage\", \"{{crm_res}}_low_threshold\": \"70\", \"{{crm_res}}_high_threshold\": \"85\"{% if not loop.last %}, {% endif %}
 {%- endfor %} } } }' >> $FILESYSTEM_ROOT/etc/sonic/init_cfg.json"
+
+# Copy config-setup script and service file
+j2 files/build_templates/config-setup.service.j2 | sudo tee $FILESYSTEM_ROOT/etc/systemd/system/config-setup.service
+sudo cp $IMAGE_CONFIGS/config-setup/config-setup $FILESYSTEM_ROOT/usr/bin/config-setup
+sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable config-setup.service
 
 # Copy SNMP configuration files
 sudo cp $IMAGE_CONFIGS/snmp/snmp.yml $FILESYSTEM_ROOT/etc/sonic/
@@ -311,7 +332,7 @@ sudo LANG=C cp $SCRIPTS_DIR/syncd.sh $FILESYSTEM_ROOT/usr/local/bin/syncd.sh
 sudo cp $BUILD_TEMPLATES/snmp.timer $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable snmp.timer
 
-sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get remove -y python-dev
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get purge -y python-dev
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get clean -y
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get autoremove -y
 
@@ -325,10 +346,10 @@ sudo cp {{src}} $FILESYSTEM_ROOT/{{dst}}
 
 {% if sonic_asic_platform == "mellanox" %}
 sudo mkdir -p $FILESYSTEM_ROOT/etc/mlnx/
-sudo cp target/files/$MLNX_SPC_FW_FILE $FILESYSTEM_ROOT/etc/mlnx/fw-SPC.mfa
-sudo cp target/files/$MLNX_SPC2_FW_FILE $FILESYSTEM_ROOT/etc/mlnx/fw-SPC2.mfa
-sudo cp target/files/$ISSU_VERSION_FILE $FILESYSTEM_ROOT/etc/mlnx/issu-version
-sudo cp target/files/$MLNX_FFB_SCRIPT $FILESYSTEM_ROOT/usr/bin/mlnx-ffb.sh
+sudo cp $files_path/$MLNX_SPC_FW_FILE $FILESYSTEM_ROOT/etc/mlnx/fw-SPC.mfa
+sudo cp $files_path/$MLNX_SPC2_FW_FILE $FILESYSTEM_ROOT/etc/mlnx/fw-SPC2.mfa
+sudo cp $files_path/$ISSU_VERSION_FILE $FILESYSTEM_ROOT/etc/mlnx/issu-version
+sudo cp $files_path/$MLNX_FFB_SCRIPT $FILESYSTEM_ROOT/usr/bin/mlnx-ffb.sh
 j2 platform/mellanox/mlnx-fw-upgrade.j2 | sudo tee $FILESYSTEM_ROOT/usr/bin/mlnx-fw-upgrade.sh
 sudo chmod 755 $FILESYSTEM_ROOT/usr/bin/mlnx-fw-upgrade.sh
 {% endif %}
@@ -337,8 +358,6 @@ sudo chmod 755 $FILESYSTEM_ROOT/usr/bin/mlnx-fw-upgrade.sh
 sudo mkdir $FILESYSTEM_ROOT/etc/sonic/frr
 sudo touch $FILESYSTEM_ROOT/etc/sonic/frr/frr.conf
 sudo touch $FILESYSTEM_ROOT/etc/sonic/frr/vtysh.conf
-sudo cp dockers/docker-fpm-frr/daemons.conf $FILESYSTEM_ROOT/etc/sonic/frr/
-sudo cp dockers/docker-fpm-frr/daemons $FILESYSTEM_ROOT/etc/sonic/frr/
 sudo chown -R $FRR_USER_UID:$FRR_USER_GID $FILESYSTEM_ROOT/etc/sonic/frr
 sudo chmod -R 640 $FILESYSTEM_ROOT/etc/sonic/frr/
 sudo chmod 750 $FILESYSTEM_ROOT/etc/sonic/frr

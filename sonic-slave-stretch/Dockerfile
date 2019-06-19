@@ -1,12 +1,30 @@
 FROM debian:stretch
 
+ARG debian_archive_mirror
+ARG debian_org_mirror
+
+
 MAINTAINER gulv@microsoft.com
+
+
+RUN     test "x${debian_archive_mirror}" != "x" && test "x${debian_org_mirror}" != "x"  && \
+        echo "deb http://${debian_org_mirror}/debian stretch main " > /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_org_mirror}/debian-security stretch/updates main " >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_org_mirror}/debian stretch-updates main" >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_archive_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.mirror.list && \
+        echo "deb-src http://${debian_archive_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_archive_mirror}/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.mirror.list && \
+        echo "deb-src http://${debian_archive_mirror}/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_archive_mirror}/debian stretch-backports main" >> /etc/apt/sources.mirror.list && \
+        cat /etc/apt/sources.list >> /etc/apt/sources.mirror.list && \
+        cat /etc/apt/sources.mirror.list > /etc/apt/sources.list || echo
+
 
 RUN echo "deb http://debian-archive.trafficmanager.net/debian/ stretch main contrib non-free" >> /etc/apt/sources.list && \
         echo "deb-src http://debian-archive.trafficmanager.net/debian/ stretch main contrib non-free" >> /etc/apt/sources.list && \
         echo "deb http://debian-archive.trafficmanager.net/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
         echo "deb-src http://debian-archive.trafficmanager.net/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
-        echo "deb http://debian-archive.trafficmanager.net/debian stretch-backports main" >> /etc/apt/sources.list
+        echo "deb http://debian-archive.trafficmanager.net/debian stretch-backports main" >> /etc/apt/sources.list 
 
 ## Make apt-get non-interactive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -62,6 +80,11 @@ RUN apt-get update && apt-get install -y \
         libjson-c-dev \
         libsystemd-dev \
         python-ipaddr \
+        libcmocka-dev \
+        python3-all-dev \
+        python3-all-dbg \
+        install-info \
+        logrotate \
 # For libnl3 (local) build
         cdbs \
 # For SAI meta build
@@ -109,7 +132,6 @@ RUN apt-get update && apt-get install -y \
         dpatch \
         libdb-dev \
         iptables-dev \
-        swig \
         ctags \
 # For mellanox sai build
         libtool-bin \
@@ -228,13 +250,18 @@ RUN apt-get update && apt-get install -y \
         python3-colorama \
 # For initramfs
         bash-completion \
+# For sonic vs image build
+        dosfstools \
+        qemu-kvm \
+        libvirt-clients \
 # For lm-sensors
         librrd8 \
         librrd-dev \
         rrdtool \
 # For smartmontools 6.6-1
         automake1.11 \
-        libselinux1-dev
+        libselinux1-dev \
+		texi2html
 
 # For smartmontools 6.6-1
 RUN apt-get -t stretch-backports install -y debhelper
@@ -262,6 +289,8 @@ RUN pip install --force-reinstall --upgrade jinja2>=2.10
 # For templating
 RUN pip install j2cli
 
+# Remove python-click 6.6
+RUN apt-get purge -y python-click
 # For sonic utilities testing
 RUN pip install click-default-group click natsort tabulate netifaces==0.10.7 fastentrypoints
 
@@ -276,8 +305,22 @@ RUN pip3 install redis
 # For supervisor build
 RUN pip install meld3 mock
 
+# For vs image build
+RUN pip install pexpect==4.6.0
+
+# For sonic-utilities build
+RUN pip install mockredispy==2.9.3
+RUN pip install pytest-runner==4.4
+RUN pip install setuptools==40.8.0
+
 # Install dependencies for isc-dhcp-relay build
 RUN apt-get -y build-dep isc-dhcp
+
+# Install vim
+RUN apt-get install -y vim
+
+# Install rsyslog
+RUN apt-get install -y rsyslog
 
 RUN cd /usr/src/gtest && cmake . && make -C /usr/src/gtest
 

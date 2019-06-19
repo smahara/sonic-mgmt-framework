@@ -74,11 +74,11 @@ class ThermalUtil(object):
             THERMAL_NUM_4_IDX: ['15', '4b'],
            }
     thermal_sysfspath ={
-    THERMAL_NUM_1_IDX: ["/sys/bus/i2c/drivers/lm75/15-0048/hwmon/hwmon2/temp1_input"],
-    THERMAL_NUM_2_IDX: ["/sys/bus/i2c/drivers/lm75/15-0049/hwmon/hwmon3/temp1_input"],  
-    THERMAL_NUM_3_IDX: ["/sys/bus/i2c/drivers/lm75/15-004a/hwmon/hwmon4/temp1_input"],
-    THERMAL_NUM_4_IDX: ["/sys/bus/i2c/drivers/lm75/15-004b/hwmon/hwmon5/temp1_input"],        
-    THERMAL_NUM_5_IDX: ["/sys/class/hwmon/hwmon0/temp1_input"],     
+    THERMAL_NUM_1_IDX: ["/sys/class/hwmon/hwmon3/temp1_input"],
+    THERMAL_NUM_2_IDX: ["/sys/class/hwmon/hwmon4/temp1_input"],
+    THERMAL_NUM_3_IDX: ["/sys/class/hwmon/hwmon5/temp1_input"],
+    THERMAL_NUM_4_IDX: ["/sys/class/hwmon/hwmon6/temp1_input"],
+    THERMAL_NUM_5_IDX: ["/sys/class/hwmon/hwmon0/temp1_input"],
            }
 
     #def __init__(self):
@@ -89,24 +89,24 @@ class ThermalUtil(object):
             return None
 
         if thermal_num < self.THERMAL_NUM_6_IDX:
-        device_path = self.get_thermal_to_device_path(thermal_num)
-            if(os.path.isfile(device_path)):                
-        for filename in glob.glob(device_path):
-            try:
-                val_file = open(filename, 'r')
-            except IOError as e:
-                logging.error('GET. unable to open file: %s', str(e))
-                return None
-        content = val_file.readline().rstrip()
-        if content == '':
-            logging.debug('GET. content is NULL. device_path:%s', device_path)
-            return None
-        try:
-		    val_file.close()
-        except:
-            logging.debug('GET. unable to close file. device_path:%s', device_path)
-            return None
-                return int(content)
+            device_path = self.get_thermal_to_device_path(thermal_num)
+            if (os.path.isfile(device_path)):
+                for filename in glob.glob(device_path):
+                    try:
+                        val_file = open(filename, 'r')
+                    except IOError as e:
+                        logging.error('GET. unable to open file: %s', str(e))
+                        return None
+                    content = val_file.readline().rstrip()
+                    if content == '':
+                        logging.debug('GET. content is NULL. device_path:%s', device_path)
+                        return None
+                    try:
+                        val_file.close()
+                    except:
+                        logging.debug('GET. unable to close file. device_path:%s', device_path)
+                        return None
+                    return int(content)
       
             else:
                 print "No such device_path=%s"%device_path
