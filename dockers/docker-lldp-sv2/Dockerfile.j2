@@ -8,6 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Update apt's cache of available packages
 RUN apt-get update
+RUN apt-get install -f -y libbsd0 libjansson4
 
 
 {% if docker_lldp_sv2_debs.strip() -%}

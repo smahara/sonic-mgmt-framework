@@ -1,0 +1,31 @@
+diff --git a/src/daemon/netlink.c b/src/daemon/netlink.c
+index f4227b8..9e9fedd 100644
+--- a/src/daemon/netlink.c
++++ b/src/daemon/netlink.c
+@@ -601,11 +601,11 @@ retry:
+ 
+ 					if (msg->nlmsg_type == RTM_NEWADDR) {
+ 						if (ifaold == NULL) {
+-							log_debug("netlink", "new address %s%%%d",
++							log_debug("netlink", "new address %s on interface %d",
+ 							    addr, ifanew->index);
+ 							TAILQ_INSERT_TAIL(ifas, ifanew, next);
+ 						} else {
+-							log_debug("netlink", "updated address %s%%%d",
++							log_debug("netlink", "updated address %s on interface %d",
+ 							    addr, ifaold->index);
+ 							TAILQ_INSERT_AFTER(ifas, ifaold, ifanew, next);
+ 							TAILQ_REMOVE(ifas, ifaold, next);
+@@ -614,10 +614,10 @@ retry:
+ 					} else {
+ 						if (ifaold == NULL) {
+ 							log_info("netlink",
+-							    "removal request for address of %s%%%d, but no knowledge of it",
++							    "removal request for address of %s on interface %d, but no knowledge of it",
+ 							    addr, ifanew->index);
+ 						} else {
+-							log_debug("netlink", "address %s%%%d is to be removed",
++							log_debug("netlink", "address %s on interface %d is to be removed",
+ 							    addr, ifaold->index);
+ 							TAILQ_REMOVE(ifas, ifaold, next);
+ 							interfaces_free_address(ifaold);
