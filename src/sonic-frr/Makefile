@@ -3,7 +3,7 @@ SHELL = /bin/bash
 .SHELLFLAGS += -e
 
 MAIN_TARGET = $(FRR)
-DERIVED_TARGET = $(FRR_PYTHONTOOLS)
+DERIVED_TARGET = $(FRR_PYTHONTOOLS) $(FRR_SNMP)
 
 $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	# Build the package
