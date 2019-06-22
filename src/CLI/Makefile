@@ -3,6 +3,7 @@ SHELL = /bin/bash
 .SHELLFLAGS += -e
 
 SUBDIRS := clitree renderer klish 
+export SONIC_CLI_ROOT=$(TOPDIR)/src/CLI
 
 all: packages $(SUBDIRS)
 $(SUBDIRS):
@@ -24,4 +25,8 @@ clean:
 packages:
 	if ! dpkg -l | grep autoconf -c >>/dev/null; then sudo apt-get install autoconf; fi
 	if ! dpkg -l | grep m4 -c >>/dev/null; then sudo apt-get install m4; fi
+	if ! dpkg -l | grep libxml2-utils -c >>/dev/null; then sudo apt-get install libxml2-utils; fi
+	if ! dpkg -l | grep xsltproc -c >>/dev/null; then sudo apt-get install xsltproc; fi
+	if ! dpkg -l | grep python-lxml -c >>/dev/null; then sudo apt-get install python-lxml; fi
+	if ! dpkg -l | grep libexpat1-dev -c >>/dev/null; then sudo apt-get install libexpat1-dev; fi
 

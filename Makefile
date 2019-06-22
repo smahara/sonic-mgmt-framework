@@ -47,7 +47,7 @@ REST_GOPATH = $(GOPATH):$(CVL_GOPATH):$(TOPDIR):$(REST_DIST_DIR)
 
 #$(info REST_SRCS = $(REST_SRCS) )
 
-all: golang go-deps go-patch apt-deps pip-deps rest-server cli
+all: golang go-deps go-patch apt-deps pip-deps cli rest-server
 
 golang:
 	wget https://dl.google.com/go/go1.12.6.linux-amd64.tar.gz
@@ -103,7 +103,7 @@ install:
 	$(INSTALL) -D $(TOPDIR)/src/cvl/build/libyang/build/user_types/*.so $(DESTDIR)/usr/sbin/lib/
 	cp -rf $(TOPDIR)/build/rest_server/dist/ui/ $(DESTDIR)/rest_ui/
 	cp -rf $(TOPDIR)/build/cli $(DESTDIR)/usr/sbin/.
-	cp -rf $(TOPDIR)/build/swagger_client_py/swagger_client $(DESTDIR)/usr/sbin/.
+	cp -rf $(TOPDIR)/build/swagger_client_py/swagger_client $(DESTDIR)/usr/sbin/lib.
 
 
 $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :

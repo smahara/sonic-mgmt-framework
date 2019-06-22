@@ -5,16 +5,18 @@ SHELL = /bin/bash
 KLISH_VERSION = 2.1.4
 PYTHONVER=2.7
 
-SONIC_CLI_ROOT=$(TOPDIR)/src/CLI
 KLISH_SRC = $(SONIC_CLI_ROOT)/klish/klish-$(KLISH_VERSION)
 
 SRC_REPLACEMENTS:=$(shell find patches -type f)
 all : $(SRC_REPLACEMENTS)
-	rm -rf klish-$(KLISH_VERSION)
-	git clone https://src.libcode.org/pkun/klish.git klish-$(KLISH_VERSION)
-	patches/scripts/patchmake.sh -p VER=${KLISH_VERSION} TSP=${CURDIR} DSP=${CURDIR}/patches TWP=${CURDIR}
+	#rm -rf klish-$(KLISH_VERSION)
+	#git clone https://src.libcode.org/pkun/klish.git klish-$(KLISH_VERSION)
+	rm -rf $(KLISH_SRC)
+	git clone https://src.libcode.org/pkun/klish.git $(KLISH_SRC)
+	$(SONIC_CLI_ROOT)/klish/patches/scripts/patchmake.sh -p VER=${KLISH_VERSION} TSP=${CURDIR} DSP=${CURDIR}/patches TWP=${CURDIR}
 
-	cd klish-$(KLISH_VERSION)
+	#cd klish-$(KLISH_VERSION)
+	cd $(KLISH_SRC)
 	sh autogen.sh && ./configure && make
 
 	mkdir -p $(SONIC_CLI_ROOT)/target/.libs
