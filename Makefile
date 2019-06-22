@@ -103,7 +103,7 @@ install:
 	$(INSTALL) -D $(TOPDIR)/src/cvl/build/libyang/build/user_types/*.so $(DESTDIR)/usr/sbin/lib/
 	cp -rf $(TOPDIR)/build/rest_server/dist/ui/ $(DESTDIR)/rest_ui/
 	cp -rf $(TOPDIR)/build/cli $(DESTDIR)/usr/sbin/.
-	cp -rf $(TOPDIR)/build/swagger_client_py/swagger_client $(DESTDIR)/usr/sbin/lib.
+	cp -rf $(TOPDIR)/build/swagger_client_py/swagger_client $(DESTDIR)/usr/sbin/lib/.
 
 
 $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
