@@ -1,3 +1,9 @@
+{% block banner %}
+# =============== Managed by SONiC Config Engine DO NOT EDIT! ===============
+# generated from /usr/share/sonic/templates/dhclient.conf.j2 using sonic-cfggen
+# file: /etc/dhcp/dhclient.conf
+#
+{% endblock banner %}
 # Configuration file for /sbin/dhclient, which is included in Debian's
 #       dhcp3-client package.
 #
@@ -11,7 +17,6 @@
 #       few changes must be made to this file, if any.
 #
 
-retry 60;
 option rfc3442-classless-static-routes code 121 = array of unsigned integer 8;
 option snmp-community code 224 = text;
 option minigraph-url code 225 = text;
@@ -28,11 +33,13 @@ send host-name = gethostname();
 request subnet-mask, broadcast-address, time-offset, routers,
         domain-name, domain-name-servers, domain-search, host-name,
         dhcp6.name-servers, dhcp6.domain-search, interface-mtu,
-        rfc3442-classless-static-routes, ntp-servers,
-        bootfile-name, provisioning-script-url, log-servers, tftp-server-name,
-        dhcp6.provisioning-script-url, dhcp6.boot-file-url,
+        rfc3442-classless-static-routes, ntp-servers, log-servers,
+{%- if ZTP is defined -%}bootfile-name, provisioning-script-url, tftp-server-name,
+        dhcp6.provisioning-script-url, dhcp6.boot-file-url,{%- endif -%}
         snmp-community, minigraph-url, acl-url;
-
+{% if ZTP is defined %}
 send user-class "SONiC-ZTP";
 send dhcp6.user-class "SONiC-ZTP";
-send dhcp-client-identifier "SONiC##PRODUCT_NAME##SERIAL_NO";
+send dhcp-client-identifier "SONiC##{{ ZTP['mode']['product-name'] }}##{{ ZTP['mode']['serial-no'] }}";
+retry 60;
+{% endif %}

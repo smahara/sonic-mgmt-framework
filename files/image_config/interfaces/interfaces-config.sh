@@ -11,6 +11,7 @@ for intf_pid in $(ls -1 /var/run/dhclient*.Ethernet*.pid 2> /dev/null); do
   [ -f ${intf_pid} ] && kill `cat ${intf_pid}` && rm -f ${intf_pid}
 done
 
+sonic-cfggen -d -t /usr/share/sonic/templates/dhclient.conf.j2 > /etc/dhcp/dhclient.conf
 systemctl restart networking
 
 ifdown lo && ifup lo
