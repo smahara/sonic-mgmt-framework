@@ -34,8 +34,6 @@ TOPDIR := $(abspath .)
 BUILD_DIR := $(TOPDIR)/build
 REST_DIST_DIR := $(BUILD_DIR)/rest_server/dist
 
-export TOPDIR
-
 # Source files affecting REST server
 REST_SRCS := $(shell find $(TOPDIR)/src -name '*.go' | sort) \
 			 $(shell find $(TOPDIR)/models/yang -name '*.yang' | sort) \

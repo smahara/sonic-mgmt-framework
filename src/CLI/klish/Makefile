@@ -14,6 +14,7 @@ all : $(SRC_REPLACEMENTS)
 	patches/scripts/patchmake.sh -p VER=${KLISH_VERSION} TSP=${CURDIR} DSP=${CURDIR}/patches TWP=${CURDIR}
 
 	cd klish-$(KLISH_VERSION)
+	git reset --hard HEAD
 	sh autogen.sh && ./configure && make
 
 	mkdir -p $(SONIC_CLI_ROOT)/target/.libs
