@@ -269,16 +269,6 @@ if [ -f $FIRST_BOOT_FILE ]; then
         dpkg -i /host/image-$SONIC_VERSION/platform/$platform/*.deb
     fi
 
-    # Expand switch identifiers sent along with DHCP request
-    if [ -n "$onie_platform" ]; then
-        if [ -f /etc/dhcp/dhclient.conf ]; then
-           PRODUCT_NAME=$(decode-syseeprom -p)
-           SERIAL_NO=$(decode-syseeprom -s)
-           [ "${PRODUCT_NAME}" != "" ] && sed -i "s:PRODUCT_NAME:${PRODUCT_NAME}:g" /etc/dhcp/dhclient.conf
-           [ "${SERIAL_NO}" != "" ] && sed -i "s:SERIAL_NO:${SERIAL_NO}:g" /etc/dhcp/dhclient.conf
-        fi
-    fi
-
     # If the unit booted into SONiC from another NOS's grub,
     # we now install a grub for SONiC.
     if [ -n "$onie_platform" ] && [ -n "$migration" ]; then

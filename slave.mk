@@ -746,6 +746,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	j2 -f env files/initramfs-tools/arista-convertfs.j2 onie-image.conf > files/initramfs-tools/arista-convertfs
 
 	j2 files/build_templates/updategraph.service.j2 > updategraph.service
+	j2 files/dhcp/dhclient.conf.j2 > files/dhcp/dhclient.conf
 
 	$(if $($*_DOCKERS),
 		j2 files/build_templates/sonic_debian_extension.j2 > sonic_debian_extension.sh
