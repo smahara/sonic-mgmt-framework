@@ -115,11 +115,11 @@ DEFAULT_VS_PREPARE_MEM = yes
 
 # Docker local registry server info where
 # Docker base images are pushed and pulled from the local docker registry
-# DOCKER_REGISTRY_SERVER=10.75.18.181:5000
+DOCKER_REGISTRY_SERVER=10.75.139.137:5000
 
 
 
 # Debian local mirror site info
-# DEBIAN_ARCHIVE_MIRROR=10.175.127.104 
-# DEBIAN_ORG_MIRROR=10.75.18.181 
+#DEBIAN_ARCHIVE_MIRROR=10.75.18.181:9090
+#DEBIAN_ORG_MIRROR=10.75.18.181:8080
 
