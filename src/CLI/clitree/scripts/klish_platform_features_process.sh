@@ -40,6 +40,7 @@ function insert_in()
     fi
     #echo Insert_in $filename. Option $option
     while read -r line; do
+        [ ! -f $outfile ] && touch $outfile
         echo ${line} >> $outfile
         if [[ "${line}" =~ ${matchpattern} ]]; then
             #echo Match found for ${line}
