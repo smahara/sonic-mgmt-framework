@@ -27,7 +27,6 @@ all : $(SRC_REPLACEMENTS)
 	cp -r ${KLISH_SRC}/.libs/*.so* ${SONIC_CLI_ROOT}/target/.libs
 	cp -r ${KLISH_SRC}/.libs/*.a   ${SONIC_CLI_ROOT}/target/.libs
 	@echo "complete klish build"
-	touch $@
 
 .PHONY: clean
 clean:
