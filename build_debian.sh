@@ -261,6 +261,8 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     locales                 \
     flashrom                \
     cgroup-tools            \
+    python-argcomplete      \
+    python-ipaddr           \
     conntrack
 
 #Adds a locale to a debian system in non-interactive mode
