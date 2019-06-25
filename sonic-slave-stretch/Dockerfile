@@ -254,6 +254,11 @@ RUN apt-get update && apt-get install -y \
         dosfstools \
         qemu-kvm \
         libvirt-clients \
+# For ntp
+	autogen \
+	libopts25-dev \
+	pps-tools \
+	dh-apparmor \
 # For lm-sensors
         librrd8 \
         librrd-dev \
