@@ -12,9 +12,7 @@ RUN apt-get update \
  && apt-get install -f -y ifupdown arping libdbus-1-3 libdaemon0 libjansson4 libpython2.7 iproute2 \
  && apt-get install -f -y ndisc6 tcpdump \
  && apt-get -y install libjemalloc1 \
- && apt-get install -y libelf1 libmnl0 bridge-utils \
- && apt-get install -y iptables \
- && apt-get install -y conntrack
+ && apt-get install -y libelf1 libmnl0 bridge-utils
 
 RUN pip install setuptools
 RUN pip install scapy==2.4.2 pyroute2==0.5.3 monotonic==1.5
