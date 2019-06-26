@@ -38,6 +38,10 @@ import re
 import time
 from collections import namedtuple
 
+if (os.path.exists('/usr/local/bin/pddf_util.py')):
+    #print "Imported pddf_util########"
+    import pddf_util
+
 
 
 
@@ -85,11 +89,26 @@ def main():
             FORCE = 1
         else:
             logging.info('no option')                          
+    
+    pddf_support = 0
+    if os.path.exists("/usr/local/bin/pddf"):
+        pddf_support = 1
+        print "PDDF_SUPPORT is ON"
+    else:
+        print "PDDF_SUPPORT is OFF"
+
     for arg in args:            
         if arg == 'install':
-           do_install()
+            # Check if the pddf support is present
+            if pddf_support == 1:
+                pddf_util.do_install()
+            else:
+                do_install()
         elif arg == 'clean':
-           do_uninstall()
+            if pddf_support == 1:
+                pddf_util.do_uninstall()
+            else:
+                do_uninstall()
         elif arg == 'show':
            device_traversal()
         elif arg == 'sff':

@@ -97,6 +97,19 @@ ifneq ($(CONFIGURED_PLATFORM), undefined)
 include $(PLATFORM_PATH)/rules.mk
 endif
 
+
+ifeq ($(SONIC_USE_PDDF_FRAMEWORK),y)
+PDDF_SUPPORT = y
+endif
+export PDDF_SUPPORT
+
+ifeq ($(PDDF_SUPPORT), y)
+PDDF_DIR = pddf
+PLATFORM_PDDF_PATH = platform/$(PDDF_DIR)
+include $(PLATFORM_PDDF_PATH)/rules.mk
+endif
+
+
 ifeq ($(USERNAME),)
 override USERNAME := $(DEFAULT_USERNAME)
 else
@@ -117,6 +130,8 @@ ifeq ($(SONIC_PROFILING_ON),y)
 DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
 endif
 
+
+
 ifeq ($(SONIC_COVERAGE_ON),y)
 DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
 export COV_CFLAGS := -O0 -coverage
@@ -124,6 +139,7 @@ export COV_CFG_FLAGS := --enable-gcov=yes
 export COV_LDFLAGS := -lgcov
 export SONIC_COVERAGE_ON := y
 endif
+
 
 ifeq ($(SONIC_BUILD_JOBS),)
 override SONIC_BUILD_JOBS := $(SONIC_CONFIG_BUILD_JOBS)
@@ -225,6 +241,7 @@ $(info "BUILD_TIMESTAMP"                 : "$(BUILD_TIMESTAMP)")
 $(info "BLDENV"                          : "$(BLDENV)")
 $(info "VS_PREPARE_MEM"                  : "$(VS_PREPARE_MEM)")
 $(info "VERSION"                         : "$(SONIC_GET_VERSION)")
+$(info "PDDF_SUPPORT"                    : "$(PDDF_SUPPORT)")
 $(info )
 
 ###############################################################################

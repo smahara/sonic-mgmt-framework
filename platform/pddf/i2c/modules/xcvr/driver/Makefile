@@ -1,0 +1,11 @@
+TARGET = pddf_xcvr_driver_module
+
+#$(info  ===========$(M)=========)
+
+obj-m := $(TARGET).o 
+
+$(TARGET)-objs := pddf_xcvr_api.o pddf_xcvr_driver.o
+
+ccflags-y := -I$(M)/modules/include
+#ccflags-y += -I$(M)/modules/xcvr
+#CFLAGS_$(obj-m):= -I$(M) -I../
