@@ -224,7 +224,6 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     vim                     \
     tcpdump                 \
     dbus                    \
-    ntp                     \
     ntpstat                 \
     openssh-server          \
     python                  \
@@ -259,6 +258,8 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     tcptraceroute           \
     mtr-tiny                \
     locales                 \
+    netbase                 \
+    libopts25               \
     flashrom                \
     cgroup-tools            \
     python-argcomplete      \
@@ -286,7 +287,9 @@ sudo sed -i 's/LOAD_KEXEC=true/LOAD_KEXEC=false/' $FILESYSTEM_ROOT/etc/default/k
 
 ## Modifty ntp default configuration: disable initial jump (add -x), and disable
 ## jump when time difference is greater than 1000 seconds (remove -g).
-sudo sed -i "s/NTPD_OPTS='-g'/NTPD_OPTS='-x'/" $FILESYSTEM_ROOT/etc/default/ntp
+# ========== patch built NTP will be installed later.
+#sudo sed -i "s/NTPD_OPTS='-g'/NTPD_OPTS='-x'/" $FILESYSTEM_ROOT/etc/default/ntp
+# ===========
 
 ## Fix ping tools permission so non root user can directly use them
 ## Note: this is a workaround since aufs doesn't support extended attributes
