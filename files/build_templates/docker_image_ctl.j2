@@ -55,6 +55,12 @@ function preStartAction()
     fi
 {%- elif docker_container_name == "teamd" %}
     wait_for_swss_db_flush_done
+{%- elif docker_container_name == "syncd" %}
+    # Clear the portstat counters
+    for file in `ls /tmp/portstat*/*`
+    do
+      sed -i "s|S'[0-9]*'|S'0'|g" $file
+    done
 {%- else %}
     : # nothing
 {%- endif %}
