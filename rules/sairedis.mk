@@ -23,9 +23,11 @@ SYNCD = syncd_1.0.0_amd64.deb
 $(SYNCD)_RDEPENDS += $(LIBSAIREDIS) $(LIBSAIMETADATA)
 $(eval $(call add_derived_package,$(LIBSAIREDIS),$(SYNCD)))
 
+ifeq ($(ENABLE_SYNCD_RPC),y)
 SYNCD_RPC = syncd-rpc_1.0.0_amd64.deb
 $(SYNCD_RPC)_RDEPENDS += $(LIBSAIREDIS) $(LIBSAIMETADATA)
 $(eval $(call add_derived_package,$(LIBSAIREDIS),$(SYNCD_RPC)))
+endif
 endif
 
 LIBSAIMETADATA = libsaimetadata_1.0.0_amd64.deb
@@ -51,10 +53,12 @@ $(SYNCD_DBG)_DEPENDS += $(SYNCD)
 $(SYNCD_DBG)_RDEPENDS += $(SYNCD)
 $(eval $(call add_derived_package,$(LIBSAIREDIS),$(SYNCD_DBG)))
 
+ifeq ($(ENABLE_SYNCD_RPC),y)
 SYNCD_RPC_DBG = syncd-rpc-dbg_1.0.0_amd64.deb
 $(SYNCD_RPC_DBG)_DEPENDS += $(SYNCD_RPC)
 $(SYNCD_RPC_DBG)_RDEPENDS += $(SYNCD_RPC)
 $(eval $(call add_derived_package,$(LIBSAIREDIS),$(SYNCD_RPC_DBG)))
+endif
 endif
 
 LIBSAIMETADATA_DBG = libsaimetadata-dbg_1.0.0_amd64.deb

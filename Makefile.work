@@ -82,7 +82,7 @@ endif
 BASE_IMAGE_LOCK_FILE_NAME := $(LOCK_DIR)/$(SLAVE_BASE_TAG).lock
 USER_IMAGE_LOCK_FILE_NAME := $(LOCK_DIR)/$(USER).lock
 
-# Create separate Docker lockfiles for saving vs. loading an image.
+# Create Docker lockfile for saving and loading an image.
 ifeq ($(DOCKER_LOCKDIR),)
 override DOCKER_LOCKDIR := /tmp/docklock
 endif
