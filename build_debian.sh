@@ -330,9 +330,7 @@ check system $HOST
 EOF
 
 ## Config sysctl
-sudo mkdir -p $FILESYSTEM_ROOT/var/core
 sudo augtool --autosave "
-set /files/etc/sysctl.conf/kernel.core_pattern '|/usr/bin/coredump-compress %e %t %p'
 
 set /files/etc/sysctl.conf/kernel.softlockup_panic 1
 set /files/etc/sysctl.conf/kernel.panic 10
@@ -406,6 +404,9 @@ sudo cp files/dhcp/graphserviceurl $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks
 sudo cp files/dhcp/snmpcommunity $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
 sudo cp files/dhcp/vrf $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
 sudo cp files/dhcp/dhclient.conf $FILESYSTEM_ROOT/etc/dhcp/
+
+## Configure application core dump handler
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get install -y systemd-coredump
 
 ## Version file
 sudo mkdir -p $FILESYSTEM_ROOT/etc/sonic
