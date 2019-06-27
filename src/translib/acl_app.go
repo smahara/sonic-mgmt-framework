@@ -123,6 +123,20 @@ func (app *AclApp) translateCreate(d *db.DB) ([]db.WatchKeys, error) {
 	log.Info("translateCreate:acl:path =", app.path)
 
 	aclObj := app.getAppRootObject()
+
+	// transformer start
+        json, err := ygot.EmitJSON(aclObj, &ygot.EmitJSONConfig{
+                Format: ygot.RFC7951,
+                Indent: "  ",
+                RFC7951Config: &ygot.RFC7951JSONConfig{
+                        AppendModuleName: true,
+                },
+        })
+
+	translate(int(d.Opts.DBNo), json)
+	//result, err = translate(int(d.Opts.DBNo), json)
+	// transformer end
+
 	app.aclTableMap = app.convertOCAclsToInternal(aclObj)
 	app.ruleTableMap = app.convertOCAclRulesToInternal(aclObj)
 	app.bindAclFlag, err = app.convertOCAclBindingsToInternal(d, app.aclTableMap, aclObj)

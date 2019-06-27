@@ -47,7 +47,8 @@ REST_GOPATH = $(GOPATH):$(CVL_GOPATH):$(TOPDIR):$(REST_DIST_DIR)
 
 #$(info REST_SRCS = $(REST_SRCS) )
 
-all: build-deps apt-deps pip-deps pip2-deps cli golang go-deps go-patch rest-server
+#all: build-deps apt-deps pip-deps pip2-deps cli golang go-deps go-patch rest-server
+all: build-deps apt-deps pip-deps pip2-deps cli rest-server
 
 build-deps:
 	mkdir -p $(BUILD_DIR)
