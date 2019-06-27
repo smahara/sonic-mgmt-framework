@@ -1,0 +1,33 @@
+{
+	"PSU":
+	{
+		"psu_present": 
+		{
+			"valmap": { "1":true, "0":false }
+		},
+
+		"psu_power_good": 
+		{
+			"valmap": { "1": true, "0":false }
+		},
+
+		"psu_fan_dir":
+		{
+			"valmap": { "F2B":"FAN_DIRECTION_INTAKE", "B2F":"FAN_DIRECTION_EXHAUST" }
+		}
+	},
+
+	"FAN":
+	{
+		"direction":
+		{
+			"valmap": {"1":"FAN_DIRECTION_INTAKE", "0":"FAN_DIRECTION_EXHAUST"}
+		},
+
+		"present":
+		{
+			"valmap": {"1":true, "0":false}
+		}
+	}
+
+}
