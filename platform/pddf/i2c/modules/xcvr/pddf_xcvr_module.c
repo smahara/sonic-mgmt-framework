@@ -190,7 +190,7 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 		client_ptr = (struct i2c_client *)get_device_table(cdata->i2c_name);
 		if (client_ptr)
 		{
-			printk(KERN_ERR "Removing %s client: 0x%x\n", cdata->i2c_name, client_ptr);
+			pddf_dbg(KERN_ERR "Removing %s client: 0x%x\n", cdata->i2c_name, client_ptr);
 			i2c_unregister_device(client_ptr);
 			delete_device_table(cdata->i2c_name);
 		}

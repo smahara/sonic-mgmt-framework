@@ -91,11 +91,12 @@ def main():
             logging.info('no option')                          
     
     pddf_support = 0
-    if os.path.exists("/usr/local/bin/pddf"):
-        pddf_support = 1
-        print "PDDF_SUPPORT is ON"
-    else:
-        print "PDDF_SUPPORT is OFF"
+    if os.path.exists("/usr/share/sonic/platform"):
+        if os.path.exists("/usr/share/sonic/platform/pddf_support"):
+            pddf_support = 1
+            print "PDDF_SUPPORT is ON"
+        else:
+            print "PDDF_SUPPORT is OFF"
 
     for arg in args:            
         if arg == 'install':
