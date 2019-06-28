@@ -29,6 +29,7 @@ debs/{{ deb }}{{' '}}
 
 COPY ["start.sh", "/usr/bin/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
+COPY ["restore_nat_entries.py", "/usr/bin/"]
 
 RUN apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
 RUN rm -rf /debs
