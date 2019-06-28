@@ -756,12 +756,15 @@ def validate_sysfs_creation(obj, validate_type):
             for sysfs in obj[validate_type]:
                 if(not os.path.exists(sysfs)):
                     print "[SYSFS FILE] " + sysfs + ": does not exist"
-
-		else:
-                    print "[SYSFS DIR] " + dir + ": does not exist"
+        else:
+            print "[SYSFS DIR] " + dir + ": does not exist"
 
 def validate_dsysfs_creation(obj, validate_type):
-	for sysfs in obj[validate_type]:
+    # There is a possibility that some components dont have any device-data attr
+    if not obj[validate_type]:
+        print "[SYSFS ATTR] for " + validate_type  + ": does not exist"
+    else:
+        for sysfs in obj[validate_type]:
             if(not os.path.exists(sysfs)):
                 print "[SYSFS FILE] " + sysfs + ": does not exist"
 
