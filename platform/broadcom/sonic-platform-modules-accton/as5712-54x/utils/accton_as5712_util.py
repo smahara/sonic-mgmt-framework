@@ -356,7 +356,11 @@ def device_install():
             print output
             if FORCE == 0:
                 return status
-   
+        #Set SFP+ Tx disable status to default
+        if i < QSFP_START:
+            ret, dev = get_path_sfp_tx_dis(i+1)
+            output = log_os_system("echo 0 > "+dev, 1)
+
     return
 
 def device_uninstall():
