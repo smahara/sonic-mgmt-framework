@@ -177,6 +177,12 @@ sudo LANG=C cp $IMAGE_CONFIGS/warmboot-finalizer/finalize-warmboot.sh $FILESYSTE
 sudo LANG=C cp $IMAGE_CONFIGS/warmboot-finalizer/warmboot-finalizer.service $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable warmboot-finalizer.service
 
+
+# Copy support save export files
+sudo LANG=C cp $SCRIPTS_DIR/export/export.py  $FILESYSTEM_ROOT/usr/local/bin/export.py
+sudo LANG=C cp $IMAGE_CONFIGS/export/export.service $FILESYSTEM_ROOT/etc/systemd/system/
+sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable export.service
+
 # Copy rsyslog configuration files and templates
 sudo cp $IMAGE_CONFIGS/rsyslog/rsyslog-config.service  $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable rsyslog-config.service

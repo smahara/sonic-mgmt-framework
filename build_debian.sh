@@ -438,6 +438,11 @@ sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install 'docker
 ## Get gcc and python dev pkgs
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install gcc libpython2.7-dev
 
+
+# Package scp/sftp/crypto for export
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT pip install paramiko SSHClient SCPClient scp watchdog pycrypto  Daemonize
+
+
 ## Create /var/run/redis folder for docker-database to mount
 sudo mkdir -p $FILESYSTEM_ROOT/var/run/redis
 
