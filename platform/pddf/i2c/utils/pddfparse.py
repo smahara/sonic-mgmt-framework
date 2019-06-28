@@ -37,12 +37,11 @@ def get_platform_and_hwsku():
 
     return (platform, hwsku)
 
-platform, hwsku = get_platform_and_hwsku()
-
 if not os.path.exists("/usr/share/sonic/platform"):
+    platform, hwsku = get_platform_and_hwsku()
     os.symlink("/usr/share/sonic/device/"+platform, "/usr/share/sonic/platform")
 
-with open('/usr/share/sonic/platform/pddf/pddf-device-order-1.json') as f:
+with open('/usr/share/sonic/platform/pddf/pddf-device.json') as f:
           data = json.load(f)
 f.close()
 
@@ -387,44 +386,65 @@ def delete_psu_device(tree, dev, ops):
 #################################################################################################################################
 #   SHOW ATTRIBIUTES DEFS
 #################################################################################################################################
-#data_sysfs{}
+data_sysfs_obj={}
 
-
-def show_attr_device_sysfs(tree, dev, ops):
+def show_device_sysfs(tree, dev, ops):
     parent=dev['dev_info']['device_parent']
-    ##print parent
+    #print parent
     pdev=tree[parent]
     if pdev['dev_info']['device_parent'] == 'SYSTEM':
-            return "/sys/bus/i2c/devices/"+"i2c-%d"%int(pdev['i2c']['topo_info']['dev_addr'], 0)
-    return show_attr_device_sysfs(tree, pdev, ops) + "/" + "i2c-%d" % int(dev['i2c']['topo_info']['parent_bus'], 0)
+        return "/sys/bus/i2c/devices/"+"i2c-%d"%int(pdev['i2c']['topo_info']['dev_addr'], 0)
+    return show_device_sysfs(tree, pdev, ops) + "/" + "i2c-%d" % int(dev['i2c']['topo_info']['parent_bus'], 0)
+
 
 # This is alid for 'at24' type of EEPROM devices. Only one attribtue 'eeprom' 
 def show_attr_eeprom_device(tree, dev, ops):
     str = ""
     attr_name=ops['attr']
     attr_list=dev['i2c']['attr_list']
+    KEY="eeprom"
+    dsysfs_path=""
+
+    if not KEY in data_sysfs_obj:
+        data_sysfs_obj[KEY]=[]
 
     for attr in attr_list:
         if attr_name == attr['attr_name'] or attr_name == 'all':
-            str += show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s\n"%attr['attr_name']
             #print show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+            dsysfs_path = show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+            if not dsysfs_path in data_sysfs_obj[KEY]:
+                data_sysfs_obj[KEY].append(dsysfs_path)
+            str += dsysfs_path+"\n"
     return str
 
 
 def show_attr_mux_device(tree, dev, ops):
     ret = ""
+    KEY="mux"
+    if not KEY in data_sysfs_obj:
+        data_sysfs_obj[KEY]=[]
+
     return ret
 
 def show_attr_psu_i2c_device(tree, dev, ops):
     target=ops['target']
     attr_name=ops['attr']
     str = ""
+    KEY="psu"
+    dsysfs_path=""
+
+    if not KEY in data_sysfs_obj:
+        data_sysfs_obj[KEY]=[]
+
     if target == 'all' or target == dev['dev_info']['virt_parent'] :
         attr_list=dev['i2c']['attr_list']
         for attr in attr_list:
             if attr_name == attr['attr_name'] or attr_name == 'all' :
-                str += show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s\n"%attr['attr_name']
                 #print show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+                dsysfs_path = show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+                if not dsysfs_path in data_sysfs_obj[KEY]:
+                    data_sysfs_obj[KEY].append(dsysfs_path)
+                str += dsysfs_path+"\n"
     return str
 
 
@@ -436,11 +456,20 @@ def show_attr_fan_device(tree, dev, ops):
     str = ""
     attr_name=ops['attr']
     attr_list=dev['i2c']['attr_list']
+    KEY="fan"
+    dsysfs_path=""
+
+    if not KEY in data_sysfs_obj:
+        data_sysfs_obj[KEY]=[]
+
 
     for attr in attr_list:
         if attr_name == attr['attr_name'] or attr_name == 'all':
-            str += show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s\n"%attr['attr_name']
             #print show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+            dsysfs_path= show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+            if not dsysfs_path in data_sysfs_obj[KEY]:
+                data_sysfs_obj[KEY].append(dsysfs_path)
+            str += dsysfs_path+"\n"
     return str
 
 # This is only valid for LM75
@@ -448,26 +477,44 @@ def show_attr_temp_sensor_device(tree, dev, ops):
     str = ""
     attr_name=ops['attr']
     attr_list=dev['i2c']['attr_list']
+    KEY="temp-sensors"
+    dsysfs_path=""
+
+    if not KEY in data_sysfs_obj:
+        data_sysfs_obj[KEY]=[]
+
 
     for attr in attr_list:
         if attr_name == attr['attr_name'] or attr_name == 'all':
             path = show_device_sysfs(tree, dev, ops)+"/%d-00%x/" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))
             #print  glob.glob(path+'hwmon/hwmon*/'+attr['attr_name'])
-            full_path = glob.glob(path + 'hwmon/hwmon*/' + attr['attr_name'])[0]
-            #full_path = path + 'hwmon/hwmon/' + attr['attr_name']
-            str += full_path + "\n"
+	    if (os.path.exists(path)):
+                full_path = glob.glob(path + 'hwmon/hwmon*/' + attr['attr_name'])[0]
+                #full_path = path + 'hwmon/hwmon/' + attr['attr_name']
+                dsysfs_path=full_path
+                if not dsysfs_path in data_sysfs_obj[KEY]:
+                    data_sysfs_obj[KEY].append(dsysfs_path)
+                str += full_path + "\n"
     return str
 
 def show_attr_sysstatus_device(tree, dev, ops):
     ret = ""
     attr_name=ops['attr']
     attr_list=dev['attr_list']
+    KEY="sys-status"
+    dsysfs_path=""
+
+    if not KEY in data_sysfs_obj:
+        data_sysfs_obj[KEY]=[]
+
 
     for attr in attr_list:
        if attr_name == attr['attr_name'] or attr_name == 'all':
-          path = "/sys/kernel/pddf/devices/sysstatus/sysstatus_data/" + attr['attr_name'] + "\n"
+          dsysfs_path = "/sys/kernel/pddf/devices/sysstatus/sysstatus_data/" + attr['attr_name']
+          if not dsysfs_path in data_sysfs_obj[KEY]:
+              data_sysfs_obj[KEY].append(dsysfs_path)
           #print path
-          ret += path
+          ret += dsysfs_path+"\n"
     return ret
 
 
@@ -475,11 +522,19 @@ def show_attr_xcvr_i2c_device(tree, dev, ops):
     target=ops['target']
     attr_name=ops['attr']
     str = ""
+    dsysfs_path = ""
+    KEY="xcvr"
+    if not KEY in data_sysfs_obj:
+        data_sysfs_obj[KEY]=[]
+
     if target == 'all' or target == dev['dev_info']['virt_parent'] :
         attr_list=dev['i2c']['attr_list']
         for attr in attr_list:
             if attr_name == attr['attr_name'] or attr_name == 'all' :
-                str += show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s\n"%attr['attr_name']
+                dsysfs_path = show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+                if not dsysfs_path in data_sysfs_obj[KEY]:
+                    data_sysfs_obj[KEY].append(dsysfs_path)
+                str += dsysfs_path+"\n"
     return str
 
 
@@ -488,6 +543,10 @@ def show_attr_xcvr_device(tree, dev, ops):
 
 def show_attr_cpld_device(tree, dev, ops):
     ret = ""
+    KEY="cpld"
+    if not KEY in data_sysfs_obj:
+        data_sysfs_obj[KEY]=[]
+
     return ret
 
 
@@ -499,15 +558,21 @@ sysfs_obj={}
 def check_led_cmds(tree, key, ops):
         name = ops['target']+'_LED'
         if (ops['target']=='config' or ops['attr']=='all') or (name==tree[key]['dev_info']['device_name'] and ops['attr']==tree[key]['dev_attr']['index']):
-                return (True)
+            return (True)
         else:
-                return (False)
+            return (False)
 
-def dump_sysfs_obj(obj):
+def dump_sysfs_obj(obj, key_type):
+	if (key_type == 'keys'):
+	    for key in obj.keys():	
+	        print key
+	    return
+
         for key in obj:
-		print key+":"
+	    if (key == key_type or key_type == 'all'):
+	        print key+":"
                 for entry in obj[key]:
-                       print "\t"+entry
+                    print "\t"+entry
 
 def add_list_sysfs_obj(obj, KEY, list):
     for sysfs in list:
@@ -526,21 +591,12 @@ def sysfs_device(tree, attr, path, obj, obj_key):
                 if not sysfs_path in obj[obj_key]:
                         obj[obj_key].append(sysfs_path)
 
-def show_device_sysfs(tree, dev, ops):
-
-	parent=dev['dev_info']['device_parent']
-        #print parent
-	pdev=tree[parent]
-	if pdev['dev_info']['device_parent'] == 'SYSTEM':
-		return "/sys/bus/i2c/devices/"+"i2c-%d"%int(pdev['i2c']['topo_info']['dev_addr'], 0)
-	return show_device_sysfs(tree, pdev, ops) + "/" + "i2c-%d" % int(dev['i2c']['topo_info']['parent_bus'], 0)
-
 def show_eeprom_device(tree, dev, ops):
 	return
 
 
 def show_mux_device(tree, dev, ops):
-        KEY ='/sys/kernel/pddf/devices/mux'
+        KEY ='mux'
         if not KEY in sysfs_obj:
                 sysfs_obj[KEY] = []
                 sysfs_device(tree, dev['i2c']['topo_info'], "pddf/devices/mux", sysfs_obj, KEY)
@@ -555,7 +611,7 @@ def show_mux_device(tree, dev, ops):
 
 
 def show_psu_i2c_device(tree, dev, ops):
-    KEY ='/sys/kernel/pddf/devices/psu'
+    KEY ='psu'
     path='pddf/devices/psu/i2c'
     if dev['i2c']['topo_info']['dev_type'] in tree['PLATFORM']['drivers']['PSU']:
         if not KEY in sysfs_obj:
@@ -580,10 +636,16 @@ def show_psu_device(tree, dev, ops):
         show_psu_i2c_device(tree, dev, ops )
         return
 
+def show_client_device():
+    KEY ='client'
+    if not KEY in sysfs_obj:
+           sysfs_obj[KEY] = []
+           list=['/sys/kernel/pddf/devices/showall']
+           add_list_sysfs_obj(sysfs_obj, KEY, list)
 
 
 def show_fan_device(tree, dev, ops):
-    KEY ='/sys/kernel/pddf/devices/fan'
+    KEY ='fan'
     path='pddf/devices/fan/i2c'
     if dev['i2c']['topo_info']['dev_type'] in tree['PLATFORM']['drivers']['FAN']:
         if not KEY in sysfs_obj:
@@ -607,7 +669,7 @@ def show_temp_sensor_device(tree, dev, ops):
 	return
 
 def show_sysstatus_device(tree, dev, ops):
-    KEY ='/sys/kernel/pddf/devices/sysstatus'
+    KEY ='sysstatus'
     if not KEY in sysfs_obj:
         sysfs_obj[KEY] = []
         for attr in dev['attr_list']:
@@ -618,7 +680,7 @@ def show_sysstatus_device(tree, dev, ops):
 
 
 def show_xcvr_i2c_device(tree, dev, ops):
-    KEY ='/sys/kernel/pddf/devices/xcvr'
+    KEY ='xcvr'
     if dev['i2c']['topo_info']['dev_type'] in tree['PLATFORM']['drivers']['PORT_MODULE']:
         if not KEY in sysfs_obj:
                 sysfs_obj[KEY] = []
@@ -640,7 +702,7 @@ def show_xcvr_device(tree, dev, ops):
         show_xcvr_i2c_device(tree, dev, ops )
 
 def show_cpld_device(tree, dev, ops):
-    KEY ='/sys/kernel/pddf/devices/cpld'
+    KEY ='cpld'
     if dev['i2c']['topo_info']['dev_type'] in tree['PLATFORM']['drivers']['CPLD']:
         if not KEY in sysfs_obj:
                 sysfs_obj[KEY] = []
@@ -655,7 +717,7 @@ def show_cpld_device(tree, dev, ops):
 
 def show_led_platform_device(tree, key, ops):
         if ops['attr']=='all' or ops['attr']=='PLATFORM':
-                KEY='/sys/kernel/pddf/devices/platform'
+                KEY='platform'
                 if not KEY in sysfs_obj:
                         sysfs_obj[KEY] = []
                         path='pddf/devices/platform'
@@ -664,7 +726,7 @@ def show_led_platform_device(tree, key, ops):
 
 def show_led_device(tree, key, ops):
         if check_led_cmds(tree, key, ops):
-                KEY='/sys/kernel/pddf/devices/led'
+                KEY='led'
                 if not KEY in sysfs_obj:
                         sysfs_obj[KEY] = []
                         path="pddf/devices/led"
@@ -688,18 +750,21 @@ def show_led_device(tree, key, ops):
 #################################################################################################################################
 #  SPYTEST 
 #################################################################################################################################
-def validate_sysfs_creation(obj):
-	error_status=0
-        for key in obj:
-		if (os.path.exists(key)):
-                	for sysfs in obj[key]:
-				if(not os.path.exists(sysfs)):
-					print "[SYSFS FILE] " + sysfs + ": not existed"
-					
+def validate_sysfs_creation(obj, validate_type):
+        dir = '/sys/kernel/pddf/devices/'+validate_type
+        if (os.path.exists(dir) or validate_type=='client'):
+            for sysfs in obj[validate_type]:
+                if(not os.path.exists(sysfs)):
+                    print "[SYSFS FILE] " + sysfs + ": does not exist"
+
 		else:
-			print "[SYSFS DIR] " + key + ": not existed"
-			error_status=1
-					
+                    print "[SYSFS DIR] " + dir + ": does not exist"
+
+def validate_dsysfs_creation(obj, validate_type):
+	for sysfs in obj[validate_type]:
+            if(not os.path.exists(sysfs)):
+                print "[SYSFS FILE] " + sysfs + ": does not exist"
+
 
 #################################################################################################################################
 #   PARSE DEFS
@@ -888,6 +953,7 @@ def show_pddf_devices():
     dev_parse(data, data['SYSTEM'], { "cmd": "show", "target":"all", "attr":"all" } )
     dev_parse(data, data['SYSSTATUS'], { "cmd": "show", "target":"all", "attr":"all" } )
     led_parse(data, { "cmd": "show", "target":"all", "attr":"all" })
+    show_client_device()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -904,21 +970,36 @@ def main():
     if args.sysfs:
         if args.sysfs[0] == 'all':
 		show_pddf_devices()
+        if args.sysfs[0] == 'print':
+		show_pddf_devices()
+		dump_sysfs_obj(sysfs_obj, args.sysfs[1])
         if args.sysfs[0] == 'validate':
 		show_pddf_devices()
-		validate_sysfs_creation(sysfs_obj)
+		validate_sysfs_creation(sysfs_obj, args.sysfs[1])
 
     if args.dsysfs:
-        if args.dsysfs[0] == 'all':
+	if args.dsysfs[0] == 'validate':
+            dev_parse(data, data['SYSTEM'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
+            dev_parse(data, data['SYSSTATUS'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
+            validate_dsysfs_creation(data_sysfs_obj, args.dsysfs[1])
+
+        elif args.dsysfs[0] == 'print':
+            dev_parse(data, data['SYSTEM'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
+            dev_parse(data, data['SYSSTATUS'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
+            dump_sysfs_obj(data_sysfs_obj, args.dsysfs[1])
+
+        elif args.dsysfs[0] == 'all':
             ret = dev_parse(data, data['SYSTEM'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
-            if not ret is None:
-                ret = ret.rstrip('\n')
-                print ret
+            ret += dev_parse(data, data['SYSSTATUS'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
+            dump_sysfs_obj(data_sysfs_obj, 'all')
+            #if not ret is None:
+                #ret = ret.rstrip('\n')
+                #print ret
         else:
             ret = dev_parse(data, data[args.dsysfs[0]], { "cmd": "show_attr", "target":args.dsysfs[0], "attr":args.dsysfs[1] })
-            if not ret is None:
-                ret = ret.rstrip('\n')
-                print ret
+            #if not ret is None:
+                #ret = ret.rstrip('\n')
+                #print ret
 
     if args.delete:
         delete_pddf_devices()
