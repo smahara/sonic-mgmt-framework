@@ -130,8 +130,6 @@ ifeq ($(SONIC_PROFILING_ON),y)
 DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
 endif
 
-
-
 ifeq ($(SONIC_COVERAGE_ON),y)
 DEB_BUILD_OPTIONS_GENERIC := nostrip noopt
 export COV_CFLAGS := -O0 -coverage
@@ -139,7 +137,6 @@ export COV_CFG_FLAGS := --enable-gcov=yes
 export COV_LDFLAGS := -lgcov
 export SONIC_COVERAGE_ON := y
 endif
-
 
 ifeq ($(SONIC_BUILD_JOBS),)
 override SONIC_BUILD_JOBS := $(SONIC_CONFIG_BUILD_JOBS)
@@ -690,6 +687,15 @@ $(DOCKER_LOAD_TARGETS) : $(TARGET_PATH)/%.gz-load : .platform docker-start $$(TA
 	$(call docker-image-load,$*)
 	$(FOOTER)
 
+.PHONY: $(TARGET_PATH)/fsroot_prep
+$(TARGET_PATH)/fsroot_prep:
+	$(HEADER)
+	USERNAME="$(USERNAME)" \
+	PASSWORD="$(PASSWORD)" \
+	NUMPROCS="$(SONIC_CONFIG_MAKE_JOBS)" \
+		./build_debian.sh 1 $(LOG)
+	$(FOOTER)
+
 ###############################################################################
 ## Installers
 ###############################################################################
@@ -718,7 +724,8 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
         $(addprefix $(PYTHON_DEBS_PATH)/,$(SONIC_UTILS)) \
         $(addprefix $(PYTHON_WHEELS_PATH)/,$(SONIC_CONFIG_ENGINE)) \
         $(addprefix $(PYTHON_WHEELS_PATH)/,$(SONIC_PLATFORM_COMMON_PY2)) \
-        $(addprefix $(PYTHON_WHEELS_PATH)/,$(REDIS_DUMP_LOAD_PY2))
+        $(addprefix $(PYTHON_WHEELS_PATH)/,$(REDIS_DUMP_LOAD_PY2)) \
+        | $(TARGET_PATH)/fsroot_prep
 	$(HEADER)
 	# Pass initramfs and linux kernel explicitly. They are used for all platforms
 	export debs_path="$(STRETCH_DEBS_PATH)"
@@ -775,7 +782,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	USERNAME="$(USERNAME)" \
 	PASSWORD="$(PASSWORD)" \
 	NUMPROCS="$(SONIC_CONFIG_MAKE_JOBS)" \
-		./build_debian.sh $(LOG)
+		./build_debian.sh 2 $(LOG)
 
 	USERNAME="$(USERNAME)" \
 	PASSWORD="$(PASSWORD)" \

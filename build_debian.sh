@@ -3,7 +3,7 @@
 ## an ONIE installer image.
 ##
 ## USAGE:
-##   USERNAME=username PASSWORD=password ./build_debian
+##   USERNAME=username PASSWORD=password ./build_debian [phase]
 ## ENVIRONMENT:
 ##   USERNAME
 ##          The name of the default admin user
@@ -11,6 +11,10 @@
 ##          The password, expected by chpasswd command
 ##   NUMPROCS
 ##          Limit the number of processes to use with mksquashfs
+##   phase (optional)
+##          Split the fsroot creation into the following phases (must be invoked in sequence!)
+##             1 -- Create fsroot mount point and build common part up to (but not including) version file.
+##             2 -- Build version file and all SONiC custom content (Debian extensions, org-specific extensions, clean up).
 
 ## Default user
 [ -n "$USERNAME" ] || {
@@ -29,6 +33,28 @@
     NUMPROCS=$(nproc)
 }
 
+## Check for optional phase and make sure it's valid
+if [ "$#" -ge 1 ]; then
+    if [ "$1" -ne 1 ] && [ "$1" -ne 2 ]; then
+        echo "Error: invalid phase '$1' specified"
+        exit 1
+    fi
+fi
+## Set phase to input value, or use default of 0 to perform all phases
+PHASE=${1:-0}
+
+## Define local phase-specific flags
+if [ "$PHASE" -eq 0 ] || [ "$PHASE" -eq 1 ]; then
+    IS_PHASE_1=true
+else
+    IS_PHASE_1=false
+fi
+if [ "$PHASE" -eq 0 ] || [ "$PHASE" -eq 2 ]; then
+    IS_PHASE_2=true
+else
+    IS_PHASE_2=false
+fi
+
 ## Include common functions
 . functions.sh
 
@@ -39,12 +65,8 @@ set -x -e
 DOCKER_VERSION=5:18.09.2~3-0~debian-stretch
 LINUX_KERNEL_VERSION=4.9.0-8-2
 
-# Create special tmpfs mount point for fsroot
-FILESYSTEM_BASE=/sonic/build
-mkdir -p ${FILESYSTEM_BASE}
-sudo mount -t tmpfs -o size=16G tmpfs ${FILESYSTEM_BASE}
-
 ## Working directory to prepare the file system
+FILESYSTEM_BASE=/sonic/build
 FILESYSTEM_ROOT=${FILESYSTEM_BASE}/fsroot
 PLATFORM_DIR=platform
 ## Hostname for the linux image
@@ -65,6 +87,13 @@ DEFAULT_USERINFO="Default admin user,,,"
     echo "Error: Invalid FILESYSTEM_SQUASHFS in onie image config file"
     exit 1
 }
+
+#### PHASE 1 section ####
+if $IS_PHASE_1; then
+
+# Create special tmpfs mount point for fsroot
+mkdir -p ${FILESYSTEM_BASE}
+sudo mount -t tmpfs -o size=16G tmpfs ${FILESYSTEM_BASE}
 
 ## Prepare the file system directory
 if [[ -d $FILESYSTEM_ROOT ]]; then
@@ -96,12 +125,18 @@ sudo LANG=C chroot $FILESYSTEM_ROOT /bin/bash -c 'echo "sysfs /sys sysfs default
 ## Setup proxy
 [ -n "$http_proxy" ] && sudo /bin/bash -c "echo 'Acquire::http::Proxy \"$http_proxy\";' > $FILESYSTEM_ROOT/etc/apt/apt.conf.d/01proxy"
 
+fi  #### end PHASE 1 section ####
+
+#### Common to PHASE 1 and PHASE 2 ####
 ## Note: mounting is necessary to makedev and install linux image
 echo '[INFO] Mount all'
 ## Output all the mounted device for troubleshooting
 mount
 trap_push 'sudo umount $FILESYSTEM_ROOT/proc || true'
 sudo LANG=C chroot $FILESYSTEM_ROOT mount proc /proc -t proc
+
+#### PHASE 1 section ####
+if $IS_PHASE_1; then
 
 ## Pointing apt to public apt mirrors and getting latest packages, needed for latest security updates
 sudo cp files/apt/sources.list $FILESYSTEM_ROOT/etc/apt/
@@ -124,6 +159,12 @@ sudo LANG=C chroot $FILESYSTEM_ROOT /bin/bash -c 'cd /dev && MAKEDEV generic'
 ## However, 'dpkg -i' plus 'apt-get install -f' will ignore the recommended dependency. So
 ## we install busybox explicitly
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y install busybox
+
+fi  #### end PHASE 1 section ####
+
+#### PHASE 2 section ####
+if $IS_PHASE_2; then
+
 echo '[INFO] Install SONiC linux kernel image'
 ## Note: duplicate apt-get command to ensure every line return zero
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/initramfs-tools-core_*.deb || \
@@ -173,6 +214,11 @@ pushd $FILESYSTEM_ROOT/usr/share/initramfs-tools/scripts/init-bottom && sudo pat
 
 ## Install latest intel ixgbe driver
 sudo cp $files_path/ixgbe.ko $FILESYSTEM_ROOT/lib/modules/${LINUX_KERNEL_VERSION}-amd64/kernel/drivers/net/ethernet/intel/ixgbe/ixgbe.ko
+
+fi  #### end PHASE 2 section ####
+
+#### PHASE 1 section ####
+if $IS_PHASE_1; then
 
 ## Install docker
 echo '[INFO] Install docker'
@@ -281,6 +327,11 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y do
     grub-pc-bin
 
 sudo mv $FILESYSTEM_ROOT/grub-pc-bin*.deb $FILESYSTEM_ROOT/$PLATFORM_DIR/x86_64-grub
+
+fi  #### end PHASE 1 section ####
+
+#### PHASE 2 section ####
+if $IS_PHASE_2; then
 
 ## Disable kexec supported reboot which was installed by default
 sudo sed -i 's/LOAD_KEXEC=true/LOAD_KEXEC=false/' $FILESYSTEM_ROOT/etc/default/kexec
@@ -482,3 +533,5 @@ sudo zip -g $ONIE_INSTALLER_PAYLOAD $FILESYSTEM_SQUASHFS $FILESYSTEM_DOCKERFS
 
 FILESYSTEM_BASE=/sonic/build
 sudo umount -f ${FILESYSTEM_BASE} || true
+
+fi  #### end PHASE 2 section ####
