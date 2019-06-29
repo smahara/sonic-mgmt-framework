@@ -42,6 +42,25 @@ class FanUtil(FanBase):
     def get_num_fan(self):
         return self.platform['num_fans']
 
+    def get_fan_present(self, idx):
+        # 0 based fan index
+        if idx<0 or idx>=self.platform['num_fans']:
+            print "Invalid 0-based fan index %d\n"%idx
+
+        attr_name = "fan" + str(idx+1) + "_present"
+        sysfs_path = pddfparse.get_path("FAN-CTRL", attr_name)
+
+        try:
+            with open(sysfs_path, 'r') as f:
+                presence = int(f.read())
+        except IOError:
+            return False
+        
+        print "FAN-%d is %spresent"%(idx+1, "" if presence==1 else "not ")
+
+        return True
+
+
     def get_direction(self):
         num_fan = self.get_num_fan();
 
@@ -52,7 +71,6 @@ class FanUtil(FanBase):
             try:
                 with open(path, 'r') as f:
                     val = int(f.read())
-                f.close()
             except IOError:
                 return False
 
@@ -70,8 +88,8 @@ class FanUtil(FanBase):
         for i in range(1, num_fan+1):
             attr1 = "fan" + str(i) + "_front_rpm"
             attr2 = "fan" + str(i) + "_rear_rpm"
-            path1 = pddfparse.get_path("FAN-CPLD", attr1)
-            path2 = pddfparse.get_path("FAN-CPLD", attr2)
+            path1 = pddfparse.get_path("FAN-CTRL", attr1)
+            path2 = pddfparse.get_path("FAN-CTRL", attr2)
             #print %d-%s%(i,path)
             try:
                 with open(path1, 'r') as f1:
@@ -97,7 +115,7 @@ class FanUtil(FanBase):
         status = 0
         for i in range(1, num_fan+1):
             attr = "fan" + str(i) + "_pwm"
-            node = pddfparse.get_path("FAN-CPLD", attr)
+            node = pddfparse.get_path("FAN-CTRL", attr)
             try:
                 with open(node, 'w') as f:
                     f.write(str(pwm))
@@ -114,6 +132,9 @@ class FanUtil(FanBase):
 
 if __name__== "__main__":
     obj=FanUtil()
+    #for i in range(0,6):
+        #obj.get_fan_present(i)
+
     #obj.get_direction()
     ##print(obj.get_direction())
     #print(obj.get_speed())
