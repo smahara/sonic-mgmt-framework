@@ -66,7 +66,7 @@ class SfpUtil(SfpUtilBase):
             return False
 
         reg_value = reg_file.readline().rstrip()
-        print "%s: Presence Status %d"%(device, int(reg_value))
+        #print "%s: Presence Status %d"%(device, int(reg_value))
         if reg_value == '1':
             return True
 
