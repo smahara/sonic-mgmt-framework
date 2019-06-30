@@ -1,0 +1,224 @@
+#!/usr/bin/env python
+#####################################################################
+#
+# portchannelstat is a tool for summarizing network statistics. 
+#
+#####################################################################
+
+import argparse
+import cPickle as pickle
+import datetime
+import os.path
+import swsssdk
+import sys
+import time
+
+from collections import namedtuple, OrderedDict
+
+
+NStats = namedtuple("NStats", "rx_ok, rx_err, rx_drop, rx_ovr, tx_ok,\
+                    tx_err, tx_drop, tx_ovr, rx_byt, tx_byt")
+
+
+counter_bucket_dict = {
+    'SAI_PORT_STAT_IF_IN_UCAST_PKTS': 0,
+    'SAI_PORT_STAT_IF_IN_NON_UCAST_PKTS': 0,
+    'SAI_PORT_STAT_IF_IN_ERRORS': 1,
+    'SAI_PORT_STAT_IF_IN_DISCARDS': 2,
+    'SAI_PORT_STAT_ETHER_RX_OVERSIZE_PKTS': 3,
+    'SAI_PORT_STAT_IF_OUT_UCAST_PKTS': 4,
+    'SAI_PORT_STAT_IF_OUT_NON_UCAST_PKTS': 4,
+    'SAI_PORT_STAT_IF_OUT_ERRORS': 5,
+    'SAI_PORT_STAT_IF_OUT_DISCARDS': 6,
+    'SAI_PORT_STAT_ETHER_TX_OVERSIZE_PKTS': 7,
+    'SAI_PORT_STAT_IF_IN_OCTETS': 8,
+    'SAI_PORT_STAT_IF_OUT_OCTETS': 9
+}
+
+STATUS_NA = 'N/A'
+
+COUNTER_TABLE_PREFIX = "COUNTERS:"
+COUNTERS_PORT_NAME_MAP = "COUNTERS_PORT_NAME_MAP"
+
+class Portchstat(object):
+    def __init__(self):
+        self.db = swsssdk.SonicV2Connector(host='127.0.0.1')
+        self.db.connect(self.db.COUNTERS_DB)
+
+    def get_counters(self,table_id):
+        """
+            Get the counters from specific table.
+        """
+        fields = ["0","0","0","0","0","0","0","0","0","0"]
+        for counter_name, pos in counter_bucket_dict.iteritems():
+            full_table_id = COUNTER_TABLE_PREFIX + table_id
+            counter_data =  self.db.get(self.db.COUNTERS_DB, full_table_id,  
+counter_name)
+            if counter_data is not None:
+                fields[pos] = str(int(fields[pos]) + int(counter_data))
+        cntr = NStats._make(fields)
+        return cntr
+
+    def delete_portchannel_data(self,file_dict,lag,port):
+        """
+            Remove port from portchannel.
+        """
+        if not file_dict:
+            print("Empty dictionary")
+            return
+        else:
+            if file_dict.has_key(lag):
+                [po_agg,eth_dict] = file_dict[lag]
+                if eth_dict.has_key(port):
+                    po_agg = self.compare_and_update(po_agg,eth_dict[port],port)
+                    eth_dict.pop(port)
+                    file_dict[lag] = [po_agg,eth_dict]
+                else:
+                    print("Ethernet port {} does not exist".format(port))
+            else:
+                print("Port-channel {} does not exist".format(lag))
+        return file_dict
+            
+            
+    def add_portchannel_data(self,file_dict,lag,port):
+        """
+            Get the counters info from database.
+        """
+        # Get the info from database
+        eth_dict = OrderedDict()
+        fields_po = ["0","0","0","0","0","0","0","0","0","0"]
+        tup = NStats._make(fields_po)
+        if file_dict: 
+            if file_dict.has_key(lag):
+                val = file_dict[lag]
+                if (isinstance(val,list) and len(val) == 2):
+                    [tup,eth_dict] = val
+        
+        try:
+            counter_port_name_map = self.db.get_all(self.db.COUNTERS_DB, COUNTERS_PORT_NAME_MAP);
+            if counter_port_name_map is None:
+                return file_dict
+            eth_dict[port] = self.get_counters(counter_port_name_map[port])
+        except:
+            print("Exception : ", sys.exc_info()[0])
+        else:
+            file_dict[lag] = [tup,eth_dict]
+        return file_dict
+
+    def compare_and_update(self,saved_tuple,new_tuple,port):
+        """
+            Add tuple elements and return a namedtuple.
+        """
+        fields = ["0","0","0","0","0","0","0","0","0","0"]
+        db_counters = None
+        try:
+            print "trying to access COU_DB"
+            counter_port_name_map = self.db.get_all(self.db.COUNTERS_DB, COUNTERS_PORT_NAME_MAP);
+            if counter_port_name_map is None:
+               print "the map is NONE" 
+            else:
+                print "accessing the  COU_DB"
+                print port
+#                print counter_port_name_map[port]
+                db_counters = self.get_counters(counter_port_name_map[port])
+                if db_counters is None:
+                    print "DB COUTNERS IS NONE"
+        except:
+            print("Exception : ", sys.exc_info()[0])
+        else:
+            if db_counters is None:
+                print("Unable to fetch values from database")
+            else:
+                print "updatind the new values into porthcannel"
+                print db_counters
+                print new_tuple
+                new_tuple =  NStats._make(list(map(lambda x, y: str(int(x) - int(y)), list(db_counters), list(new_tuple))))
+                print new_tuple
+
+        if saved_tuple is None:
+            saved_tuple = NStats._make(fields)
+        if new_tuple is None:
+            new_tuple = NStats._make(fields)
+
+        if isinstance(saved_tuple,tuple) and isinstance(new_tuple,tuple):
+            return NStats._make(list(map(lambda x, y: str(int(x) + int(y)), list(saved_tuple), list(new_tuple))))
+        else:
+            print 'Data not found'
+
+def create_base_folders():
+    uid = "tmp"
+    cnstat_file = uid
+    cnstat_snapshot_file = "snapshot" 
+    cnstat_dir = "/tmp/portchannelstat/portstat-" + uid
+    cnstat_fqn_file = cnstat_dir + "/" + cnstat_file
+    cnstat_fqn_snapshot_file = cnstat_dir + "/" + cnstat_snapshot_file
+
+    if not os.path.exists(cnstat_dir):
+        try:
+            os.makedirs(os.path.dirname(cnstat_fqn_snapshot_file))
+        except:
+            print('Unable to create directory')
+    return cnstat_fqn_snapshot_file
+
+def get_file_contents(filename):
+    file_dict = OrderedDict()
+    if os.path.isfile(filename):
+        try:
+            file = open(filename, 'r')
+            file_dict = pickle.load(file)
+            file.close()
+        except IOError as e:
+            print e.errno, e
+    return file_dict
+
+def dump_file_contents(filename,file_dict):
+    try:
+        file = open(filename, 'w')
+        pickle.dump(file_dict,file)
+        file.close()
+    except IOError as e:
+        print e
+        sys.exit(e.errno)
+    else:
+        sys.exit(0)
+
+def main():
+    parser  = argparse.ArgumentParser(description='test')
+    parser.add_argument('-e', '--eth', type=str, help='Pass ethernet port name.',
+ default=None)
+    parser.add_argument('-l', '--lag', type=str, help='Pass port-channel name.',
+ default=None)
+    parser.add_argument('-a', '--add', action='store_true', help='Add port to portchannel')
+    parser.add_argument('-d', '--delete', action='store_true', help='Delete port from portchannel')
+    parser.add_argument('-ld', '--lagdelete', action='store_true', help='Delete portchannel')
+
+    args = parser.parse_args()
+
+    eth_port = args.eth
+    port_channel = args.lag
+    add_stats = args.add 
+    del_stats = args.delete
+    del_lag = args.lagdelete
+ 
+    portchstat = Portchstat()
+    filename = create_base_folders()
+    file_dict = OrderedDict()
+    file_dict = get_file_contents(filename)
+
+    if eth_port and port_channel:
+        if add_stats:
+            dump_file_contents(filename,portchstat.add_portchannel_data(file_dict,port_channel,eth_port))
+        elif del_stats:
+            dump_file_contents(filename,portchstat.delete_portchannel_data(file_dict,port_channel,eth_port))
+        else:
+            print("Invalid option")
+    elif port_channel:
+        if del_lag:
+            file_dict.pop(port_channel)
+            dump_file_contents(filename,file_dict)
+    else:
+        print("Invalid option")
+
+if __name__ == "__main__":
+    main()
+
