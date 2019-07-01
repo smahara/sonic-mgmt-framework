@@ -64,6 +64,6 @@ RUN rm -rf /debs ~/.cache
 RUN mkdir -p /home/pde
 
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
-COPY ["pde_init.sh", "scripts/parse_port_config.py", "/usr/bin/"]
+COPY ["pde_init.sh", "/usr/bin/"]
 
 ENTRYPOINT ["/usr/bin/pde_init.sh"]
