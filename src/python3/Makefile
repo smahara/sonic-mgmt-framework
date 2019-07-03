@@ -15,6 +15,7 @@ DERIVED_TARGETS = lib$(PYTHON_PNAME)-stdlib_$(PYTHON_VER)-$(PYTHON_DEB_VER)_amd6
 				  #$(PYTHON_PNAME)-dev_$(PYTHON_VER)-$(PYTHON_DEB_VER)_amd64.deb
 
 $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
+	# Remove any stale files
 	rm -rf $(PYTHON_PNAME)-$(PYTHON_VER)
 
 	## Obtaining the python3
