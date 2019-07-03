@@ -69,6 +69,7 @@ type ModelData struct{
 //initializes logging and app modules
 func init() {
     log.Flush()
+    //TODO - init transformer
 }
 
 //Creates entries in the redis DB pertaining to the path and payload
