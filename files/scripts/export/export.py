@@ -41,7 +41,7 @@ g_exp_ctx['servername']='None'
 g_exp_ctx['username']='None'
 g_exp_ctx['password']='None'
 g_exp_ctx['destdir']='supportsave'
-g_exp_ctx['interval']='1800'
+g_exp_ctx['interval']='30'
 g_exp_ctx['protocol']='scp'
 g_exp_ctx['config']='disable'
 g_exp_ctx['coredir']='/var/core/'
@@ -231,7 +231,7 @@ def export_daemon():
 
             curr_ts = time.time()
             diff = curr_ts - g_last_ts
-            if diff > int(g_exp_ctx['interval'])/2:
+            if diff > (int(g_exp_ctx['interval'])*60)/2:
                    logger.debug("Tech-Support export - curr:{}, last:{}, diff:{}\n".format(curr_ts, g_last_ts, diff))
                    generate_support_save()
             else:
@@ -239,7 +239,7 @@ def export_daemon():
                 pass
 
             g_last_ts = curr_ts
-            time.sleep(int(g_exp_ctx['interval']))
+            time.sleep(int(g_exp_ctx['interval'])*60)
 
     except Exception as e:
         logger.error( "Tech-Support export is failed, Error"+str(e) )
