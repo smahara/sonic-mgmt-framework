@@ -41,7 +41,7 @@ def get_sonic_version_info():
         return None
     data = {}
     with open('/etc/sonic/sonic_version.yml') as stream:
-        data = yaml.load(stream)
+        data = yaml.full_load(stream)
     return data
 
 def get_system_mac():
