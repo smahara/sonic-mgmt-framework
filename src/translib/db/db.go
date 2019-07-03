@@ -430,6 +430,9 @@ func (d *DB) doCVL(ts * TableSpec, cvlOps []cvl.CVLOperation, key Key, vals []Va
 
 	var cvlRetCode cvl.CVLRetCode
 
+	// temporarily disable CVL
+	return e
+
 	// No Transaction case. No CVL.
 	if d.txState == txStateNone {
 		glog.Info("doCVL: No Transactions. Skipping CVL")

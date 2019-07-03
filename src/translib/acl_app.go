@@ -129,13 +129,14 @@ func (app *AclApp) translateCreate(d *db.DB) ([]db.WatchKeys, error) {
 	app.aclTableMap = result["ACL_TABLE"]
 	// bindAclFlag?
 	for _, element := range app.aclTableMap {
-		if element.Field["ports@"] != "" {
+		if element.Field["stage"] != "" {
 			app.bindAclFlag = true
 			break
 		}
 	}
 	
-	// popluated the ruleTableMap from the translated map. No need if it is the same dimension
+	// popluated the ruleTableMap from the translated map. 
+	// we can do "app.aclTableMap = result["ACL_RULE"]" if both are defined in the same dimension
 	for key, element := range result["ACL_RULE"] {
 		// split into aclKey and ruleKey
 		tokens := strings.Split(key, "|")
@@ -1320,22 +1321,10 @@ func (app *AclApp) generateDbWatchKeys(d *db.DB, isDeleteOp bool) ([]db.WatchKey
 	if isSubtreeRequest(targetUriPath, "/openconfig-acl:acl/interfaces") {
 		if aclObj.Interfaces != nil && len(aclObj.Interfaces.Interface) > 0 {
 			// Request is for specific interface
-			var intfData *ocbinds.OpenconfigAcl_Acl_Interfaces_Interface
-			for intfId := range aclObj.Interfaces.Interface {
-				intfData = aclObj.Interfaces.Interface[intfId]
-				if intfData != nil {
-					if intfData.IngressAclSets != nil && len(intfData.IngressAclSets.IngressAclSet) > 0 {
-						for inAclKey, _ := range intfData.IngressAclSets.IngressAclSet {
-							aclName := getAclKeyStrFromOCKey(inAclKey.SetName, inAclKey.Type)
-							keys = append(keys, db.WatchKeys{app.aclTs, &db.Key{Comp: []string{aclName}}})
-						}
-					} else if intfData.EgressAclSets != nil && len(intfData.EgressAclSets.EgressAclSet) > 0 {
-						for outAclKey, _ := range intfData.EgressAclSets.EgressAclSet {
-							aclName := getAclKeyStrFromOCKey(outAclKey.SetName, outAclKey.Type)
-							keys = append(keys, db.WatchKeys{app.aclTs, &db.Key{Comp: []string{aclName}}})
-						}
-					}
-				}
+			for aclKey, element := range app.aclTableMap {
+				if (element.Field["stage"] == "INGRESS" || element.Field["stage"] == "EGRESS") {
+					keys = append(keys, db.WatchKeys{app.aclTs, &db.Key{Comp: []string{aclKey}}})
+				} 
 			}
 		} else {
 			// Request for all interfaces
