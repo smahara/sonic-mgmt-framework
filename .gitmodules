@@ -105,3 +105,4 @@
 [submodule "src/sonic-platform-pde"]
 	path = src/sonic-platform-pde
 	url = ../sonic-platform-pde.git
+	branch = broadcom_sonic
