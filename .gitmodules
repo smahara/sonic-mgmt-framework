@@ -102,3 +102,6 @@
 	path = src/sonic-ztp
 	url = ../sonic-ztp.git
 	branch = broadcom_sonic
+[submodule "src/sonic-platform-pde"]
+	path = src/sonic-platform-pde
+	url = ../sonic-platform-pde.git
