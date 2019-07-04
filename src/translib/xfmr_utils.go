@@ -7,14 +7,34 @@ import (
 	"github.com/sbinet/go-python"
 )
 
+
+func init_transformer() {
+	python.Initialize()
+
+	transformerModule := python.PyImport_ImportModule("transformer")
+	if transformerModule == nil {
+		panic("Error importing module")
+	}
+
+	init_transformerFunc := transformerModule.GetAttrString("init_transformer")
+	if init_transformerFunc == nil {
+		panic("Error importing function")
+	}
+	xfmr := init_transformerFunc.Call(python.PyTuple_New(0), python.PyDict_New())
+	if xfmr == nil {
+		panic("Error initilaizing transformer")
+	}
+	return
+}
+
 // TODO - Py-DECREF, GIL, Initialize/finalize with optimization
 func translate_to_db(d *db.DB, json []byte) (map[string]map[string]db.Value, error) {
 	var err error
 	// table.key.fields
 	var result = make(map[string]map[string]db.Value)
 	
-	python.Initialize()
-	defer python.Finalize()
+	//python.Initialize()
+	//defer python.Finalize()
 
 	transformerModule := python.PyImport_ImportModule("transformer")
 	if transformerModule == nil {
