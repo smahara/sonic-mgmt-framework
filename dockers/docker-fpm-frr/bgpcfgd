@@ -10,7 +10,11 @@ class BGPConfigDaemon:
 
     def __init__(self):
         self.config_db = ConfigDBConnector()
-        self.config_db.connect()
+        try:
+            self.config_db.connect()
+        except Exception as e:
+            syslog.syslog(syslog.LOG_ERR, '[bgp cfgd] Failed connecting to config DB with exception:' + str(e))
+
         self.bgp_asn = self.config_db.get_entry('DEVICE_METADATA', 'localhost')['bgp_asn']
         self.bgp_neighbor = self.config_db.get_table('BGP_NEIGHBOR')
 
@@ -50,11 +54,14 @@ class BGPConfigDaemon:
             self.bgp_neighbor[key] = data
 
     def start(self):
-        self.config_db.subscribe('BGP_NEIGHBOR', 
+        try:
+            self.config_db.subscribe('BGP_NEIGHBOR', 
                 lambda table, key, data: self.bgp_handler(key, data))
-        self.config_db.subscribe('DEVICE_METADATA',
+            self.config_db.subscribe('DEVICE_METADATA',
                 lambda table, key, data: self.metadata_handler(key, data))
-        self.config_db.listen()
+            self.config_db.listen()
+        except Exception as e:
+            syslog.syslog(syslog.LOG_ERR, '[bgp cfgd] Failed subscribing/listening to config DB with exception:' + str(e))
 
 
 def main():
