@@ -14,14 +14,26 @@ Description: restore_nat_entries.py -- restoring nat entries table into kernel d
 import sys
 import subprocess
 import swsssdk
+from swsscommon import swsscommon
+import logging
+import re
+import os
 
-def add_nat_conntrack_entry_in_kernel(ipproto, src-ip, dst-ip, src-port, dst-port, nat-src-ip, nat-dst-ip, nat-src-port, nat-dst-port):
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
+logger.addHandler(logging.NullHandler())
+
+def add_nat_conntrack_entry_in_kernel(ipproto, srcip, dstip, srcport, dstport, natsrcip, natdstip, natsrcport, natdstport):
     # pyroute2 doesn't have support for adding conntrack entries via netlink yet. So, invoking the conntrack utility to add the entries.
-    ctcmd = 'conntrack -I -n ' + nat-src-ip + ':' + nat-src-port + '-g ' + nat-dst-ip + ':' + nat-dst-port +
-                       ' --protonum ' + ipproto + ' --timeout 600 --src ' + src-ip + ' --sport ' + src-port +
-                       ' --dst ' + dst-ip + ' --dport ' + dst-port + ' -u ASSURED'
+    state = ''
+    if (ipproto == '6'):
+        state = ' --state ESTABLISHED '
+    ctcmd = 'conntrack -I -n ' + natdstip + ':' + natdstport + ' -g ' + natsrcip + ':' + natsrcport + \
+                       ' --protonum ' + ipproto + state + ' --timeout 600 --src ' + srcip + ' --sport ' + srcport + \
+                       ' --dst ' + dstip + ' --dport ' + dstport + ' -u ASSURED'
     subprocess.call(ctcmd, shell=True)
-    print("Restored conntrack : %s", ctcmd)
 
 # Set the statedb "NAT_RESTORE_TABLE|Flags", so natsyncd can start reconciliation
 def set_statedb_nat_restore_done():
@@ -34,14 +46,15 @@ def set_statedb_nat_restore_done():
 # This function is to restore the kernel nat entries based on the saved nat entries.
 def restore_update_kernel_nat_entries(filename):
     # Read the entries from nat_entries.dump file and add them to kernel
-    with open(filename, 'w') as fp:
+    with open(filename, 'r') as fp:
         for line in fp:
-            ctline = re.findall(r'^(\w+)\s+(\d+).*src=([\d.]+).*dst=([\d.]+).*sport=(\d+).*dport=(\d+).*src=([\d.]+).*dst([\d.]+).*sport=(\d+).*dport=(\d+)', line)
-            if (ctline[0] != 'tcp' && ctline[0] != 'udp')
+            ctline = re.findall(r'^(\w+)\s+(\d+).*src=([\d.]+)\s+dst=([\d.]+)\s+sport=(\d+)\s+dport=(\d+).*src=([\d.]+)\s+dst=([\d.]+)\s+sport=(\d+)\s+dport=(\d+)', line)
+            if not ctline:
                 continue
-            add_nat_conntrack_entry_in_kernel(ctline[1], ctline[2], ctline[3], ctline[4], ctline[5], ctline[6], ctline[7], ctline[8], ctline[9])
-
-    # Remove the dump file after restoration
+            cmdargs = ctline[0]
+            if ((cmdargs[0] != 'tcp') and (cmdargs[0] != 'udp')):
+               continue
+            add_nat_conntrack_entry_in_kernel(cmdargs[1], cmdargs[2], cmdargs[3], cmdargs[4], cmdargs[5], cmdargs[6], cmdargs[7], cmdargs[8], cmdargs[9])
 
 def main():
 
@@ -57,7 +70,7 @@ def main():
         print("restore_nat_entries service is skipped as warm restart not enabled")
         return
 
-    # swss restart not system warm reboot, set statedb directly
+    # NAT restart not system warm reboot, set statedb directly
     if not warmstart.isSystemWarmRebootEnabled():
         set_statedb_nat_restore_done()
         print("restore_nat_entries service is done as system warm reboot not enabled")
@@ -70,6 +83,9 @@ def main():
     except Exception as e:
         logger.exception(str(e))
         sys.exit(1)
+
+    # Remove the dump file after restoration
+    os.remove('/var/warmboot/nat/nat_entries.dump') 
 
     # set statedb to signal other processes like natsyncd
     set_statedb_nat_restore_done()

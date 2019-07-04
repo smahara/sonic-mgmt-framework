@@ -11,3 +11,5 @@ supervisorctl start natmgrd
 
 supervisorctl start natsyncd
 
+supervisorctl start restore_nat_entries
+
