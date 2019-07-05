@@ -106,3 +106,7 @@
 	path = src/sonic-ztp
 	url = ../sonic-ztp.git
 	branch = buzznik_dev
+[submodule "src/sonic-tam"]
+	path = src/sonic-tam
+	url = ../sonic-tam.git
+	branch = buzznik_dev
