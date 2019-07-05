@@ -455,54 +455,12 @@
                         [
                                         {"attr_name":"on",  "bits" : "1:0", "color" : "Green", "value" : "0x2", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"},
                                         {"attr_name":"faulty",  "bits" : "1:0", "color" : "Red", "value" : "0x1", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"},
-                                        {"attr_name":"off",  "bits" : "1:0", "color" : "Off", "value" : "0x0", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"}
+                                        {"attr_name":"off",  "bits" : "1:0", "color" : "Off", "value" : "0x3", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"}
                         ]
                         }
 
 	},
 	
-	"FAN_LED":
-	{
-			"dev_info": { "device_type":"LED", "device_name":"FAN_LED"},
-                        "dev_attr": { "index":"0"},
-                        "i2c" : {
-			"attr_list":
-			[
-                                        {"attr_name":"on",  "bits" : "1:0", "color" : "Green", "value" : "0x1", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"},
-                                        {"attr_name":"faulty",  "bits" : "1:0", "color" : "Red", "value" : "0x2", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"},
-                                        {"attr_name":"off", "bits" : "1:0", "color" : "off", "value" : "0x3", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"}
-			]
-                        }
-	},
-	
-	"PSU1_LED":
-	{
-			"dev_info": { "device_type":"LED", "device_name":"PSU_LED"},
-                        "dev_attr": { "index":"0"},
-                        "i2c" : {
-			"attr_list":
-			[
-                                        {"attr_name":"on",  "bits" : "6:5", "color" : "Green", "value" : "0x1", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"},
-                                        {"attr_name":"faulty",  "bits" : "6:5", "color" : "Red", "value" : "0x2", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"},
-                                        {"attr_name":"off",  "bits" : "6:5", "color" : "Off", "value" : "0x3", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"}
-			]
-                        }
-
-	},
-	
-	"PSU2_LED":
-	{
-			"dev_info": { "device_type":"LED", "device_name":"PSU_LED"},
-                        "dev_attr": { "index":"1"},
-                        "i2c" : {
-			"attr_list":
-			[
-                                        {"attr_name":"on",  "bits" : "4:3", "color" : "Green", "value" : "0x1", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"},
-                                        {"attr_name":"faulty",  "bits" : "4:3", "color" : "Red", "value" : "0x2", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"},
-                                        {"attr_name":"off",  "bits" : "4:3", "color" : "Off", "value" : "0x3", "swpld_addr" : "0x60", "swpld_addr_offset" : "0x41"}
-			]
-                        }
-	},
 
     "PORT1":
     {
