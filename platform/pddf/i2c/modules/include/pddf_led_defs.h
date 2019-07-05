@@ -30,7 +30,6 @@ typedef enum {
 	OFF,
 	FAULTY,
 	BLINK,
-	WIP,
         MAX_LED_STATUS		
 }LED_STATUS;
 typedef struct 

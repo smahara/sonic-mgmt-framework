@@ -388,6 +388,17 @@ def delete_psu_device(tree, dev, ops):
 #################################################################################################################################
 data_sysfs_obj={}
 
+def is_led_device_configured(device_name, index):
+        for key in data.keys():
+                if key != 'PLATFORM':
+                        dev_info=data[key]['dev_info']
+                        if dev_info['device_type'] == 'LED':
+                        	attr=data[key]['dev_attr']
+				if((device_name==dev_info['device_name']) and (index==attr['index'])):
+					return(True)
+
+	return (False)
+
 def show_device_sysfs(tree, dev, ops):
     parent=dev['dev_info']['device_parent']
     #print parent
@@ -897,7 +908,7 @@ def create_attr(key, value, path):
 
 def create_led_platform_device(tree, key, ops):
         if ops['attr']=='all' or ops['attr']=='PLATFORM':
-		path='pddf/devices/led'
+		path='pddf/devices/platform'
 		create_attr('num_psus', tree['PLATFORM']['num_psus'], path)
 		create_attr('num_fans', tree['PLATFORM']['num_fans'], path)
 
