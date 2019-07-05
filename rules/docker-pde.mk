@@ -29,6 +29,9 @@ SONIC_INSTALL_DOCKER_DBG_IMAGES += $(DOCKER_PDE_DBG)
 $(DOCKER_PDE)_CONTAINER_NAME = pde
 $(DOCKER_PDE)_RUN_OPT += --net=host --privileged -t
 $(DOCKER_PDE)_RUN_OPT += -v /etc/sonic:/etc/sonic:ro
+$(DOCKER_PDE)_RUN_OPT += -v /host/machine.conf:/host/machine.conf:ro
+$(DOCKER_PDE)_RUN_OPT += -v /usr/lib/python2.7/dist-packages:/usr/share/sonic/classes:ro
+$(DOCKER_PDE)_RUN_OPT += -v /var/log/syslog:/var/log/syslog:ro
 $(DOCKER_PDE)_BASE_IMAGE_FILES += pde-test-host:/usr/bin/pde-test-host
 
 endif
