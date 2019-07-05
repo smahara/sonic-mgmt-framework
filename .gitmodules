@@ -106,3 +106,7 @@
 	path = src/sonic-platform-pde
 	url = ../sonic-platform-pde.git
 	branch = broadcom_sonic
+[submodule "src/sonic-tam"]
+	path = src/sonic-tam
+	url = ../sonic-tam.git
+	branch = broadcom_sonic
