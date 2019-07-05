@@ -27,8 +27,271 @@
 #define sfp_dbg(...)
 #endif
 
+extern XCVR_SYSFS_ATTR_OPS xcvr_ops[];
+
 int get_xcvr_module_attr_data(struct i2c_client *client, struct device *dev,
                             struct device_attribute *da, XCVR_ATTR *xattr);
+
+int sonic_i2c_get_mod_pres(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+	uint32_t modpres = 0;
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		/*sfp_dbg(KERN_ERR "%s: status 0x%x\n", __FUNCTION__, status);*/
+
+		if (status > 0)
+		{
+			modpres = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
+			sfp_dbg(KERN_ERR "\nMod presence :0x%x, reg_value = 0x%x\n", modpres, status);
+		}
+		else
+			return status;
+	}
+	else if(strcmp(info->devtype, "eeprom") == 0)
+	{
+		/* get client client for eeprom -  Not Applicable */
+	}
+	data->modpres = modpres;
+
+	return 0;
+}
+
+int sonic_i2c_get_mod_reset(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+    uint32_t modreset=0;
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		if (status > 0) 
+		{
+			modreset = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
+			sfp_dbg(KERN_ERR "\nMod Reset :0x%x, reg_value = 0x%x\n", modreset, status);
+		}
+		else
+			return status;
+	} 
+	else if(strcmp(info->devtype, "eeprom") == 0)
+	{
+		/* get client client for eeprom -  Not Applicable */
+	}
+
+	data->reset = modreset;
+	return 0;
+}
+
+
+int sonic_i2c_get_mod_intr_status(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+	uint32_t mod_intr = 0;
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		if (status > 0)
+		{
+			mod_intr = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
+			sfp_dbg(KERN_ERR "\nModule Interrupt :0x%x, reg_value = 0x%x\n", mod_intr, status);
+		}
+		else
+			return status;
+	} 
+	else if(strcmp(info->devtype, "eeprom") == 0)
+	{
+		/* get client client for eeprom -  Not Applicable */
+	}
+
+	data->intr_status = mod_intr;
+	return 0;
+}
+
+
+int sonic_i2c_get_mod_lpmode(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+	uint32_t lpmode = 0;
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		if (status > 0)
+		{
+			lpmode = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
+			sfp_dbg(KERN_ERR "\nModule LPmode :0x%x, reg_value = 0x%x\n", lpmode, status);
+		}
+		else
+			return status;
+	}
+	
+	data->lpmode = lpmode;
+	return 0;
+}
+
+int sonic_i2c_get_mod_rxlos(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+	uint32_t rxlos = 0;
+
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		if (status > 0)
+		{
+			rxlos = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
+			sfp_dbg(KERN_ERR "\nModule RxLOS :0x%x, reg_value = 0x%x\n", rxlos, status);
+		}
+		else
+			return status;
+	} 
+	data->rxlos = rxlos;
+
+	return 0;
+}
+
+int sonic_i2c_get_mod_txdisable(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+	uint32_t txdis = 0;
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		if (status > 0)
+		{
+			txdis = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
+			sfp_dbg(KERN_ERR "\nModule TxDisable :0x%x, reg_value = 0x%x\n", txdis, status);
+		}
+		else
+			return status;
+	}
+	data->txdisable = txdis;
+
+	return 0;
+}
+
+int sonic_i2c_get_mod_txfault(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+	uint32_t txflt = 0;
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		if (status > 0)
+		{
+			txflt = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
+			sfp_dbg(KERN_ERR "\nModule TxFault :0x%x, reg_value = 0x%x\n", txflt, status);
+		}
+		else
+			return status;
+
+	} 
+	data->txfault = txflt;
+
+	return 0;
+}
+
+int sonic_i2c_set_mod_reset(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+	unsigned int val_mask = 0;
+	uint8_t reg;
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		if(data->reset == 1) { 
+			if(info->cmpval == 0)
+				val_mask = ~(BIT_INDEX(info->mask));
+			else
+				val_mask = BIT_INDEX(info->mask);
+		}
+		else {
+			if(info->cmpval == 0)
+				val_mask = BIT_INDEX(info->mask);
+			else
+				val_mask = ~(BIT_INDEX(info->mask));
+		}
+
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		if (status > 0)
+		{
+			reg = status & val_mask;
+			status = board_i2c_cpld_write(info->devaddr, info->offset, reg);
+		}
+	}
+
+	return status;
+}
+
+int sonic_i2c_set_mod_lpmode(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+	unsigned int val_mask = 0;
+	uint8_t reg;
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		if(data->lpmode == 1) { 
+			if(info->cmpval == 0)
+				val_mask = ~(BIT_INDEX(info->mask));
+			else
+				val_mask = BIT_INDEX(info->mask);
+		}
+		else {
+			if(info->cmpval == 0)
+				val_mask = BIT_INDEX(info->mask);
+			else
+				val_mask = ~(BIT_INDEX(info->mask));
+		}
+
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		if (status > 0)
+		{
+			reg = status & val_mask;
+			status = board_i2c_cpld_write(info->devaddr, info->offset, reg);
+		}
+	}
+
+	return status;
+}
+
+int sonic_i2c_set_mod_txdisable(struct i2c_client *client, XCVR_ATTR *info, struct xcvr_data *data)
+{
+	int status = 0;
+	unsigned int val_mask = 0;
+	uint8_t reg;
+
+	if (strcmp(info->devtype, "cpld") == 0)
+	{
+		if(data->txdisable == 1) { 
+			if(info->cmpval == 0)
+				val_mask = ~(BIT_INDEX(info->mask));
+			else
+				val_mask = BIT_INDEX(info->mask);
+		}
+		else {
+			if(info->cmpval == 0)
+				val_mask = BIT_INDEX(info->mask);
+			else
+				val_mask = ~(BIT_INDEX(info->mask));
+		}
+
+		status = board_i2c_cpld_read(info->devaddr , info->offset);
+		if (status > 0)
+		{
+			reg = status & val_mask;
+			status = board_i2c_cpld_write(info->devaddr, info->offset, reg);
+		}
+	}
+
+	return status;
+}
 
 ssize_t get_module_presence(struct device *dev, struct device_attribute *da,
              char *buf)
@@ -38,7 +301,8 @@ ssize_t get_module_presence(struct device *dev, struct device_attribute *da,
     struct xcvr_data *data = i2c_get_clientdata(client);
 	XCVR_PDATA *pdata = (XCVR_PDATA *)(client->dev.platform_data);
 	XCVR_ATTR *attr_data = NULL;
-    uint32_t status = 0, modpres=0, i;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
+    int status = 0, i;
 
 	for (i=0; i<pdata->len; i++)
     {
@@ -47,19 +311,30 @@ ssize_t get_module_presence(struct device *dev, struct device_attribute *da,
 		/*attr_data->aname, attr->dev_attr.attr.name, attr_data->devtype);*/
 		if (strcmp(attr_data->aname, attr->dev_attr.attr.name) == 0)
 		{
+			attr_ops = &xcvr_ops[attr->index];
+
 	        mutex_lock(&data->update_lock);
-			if (strcmp(attr_data->devtype, "cpld") == 0)
+			if (attr_ops->pre_get != NULL)
 			{
-				status = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-				modpres = ((status & BIT_INDEX(attr_data->mask)) == attr_data->cmpval) ? 1 : 0;
-				sfp_dbg(KERN_ERR "\nMod presence :0x%x, reg_value = 0x%x\n", modpres, status);
+				status = (attr_ops->pre_get)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 			} 
-			else if(strcmp(attr_data->devtype, "eeprom") == 0)
+			if (attr_ops->do_get != NULL)
 			{
-				/* get client client for eeprom -  Not Applicable */
+				status = (attr_ops->do_get)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: do_get function fails for %s attribute. ret %d\n", __FUNCTION__, attr_data->aname, status);
+
+			}
+			if (attr_ops->post_get != NULL)
+			{
+				status = (attr_ops->post_get)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 			}
 	        mutex_unlock(&data->update_lock);
-			return sprintf(buf, "%d\n", modpres);
+			return sprintf(buf, "%d\n", data->modpres);
 		}
 	}
 	return sprintf(buf, "%s","");
@@ -73,26 +348,40 @@ ssize_t get_module_reset(struct device *dev, struct device_attribute *da,
     struct xcvr_data *data = i2c_get_clientdata(client);
 	XCVR_PDATA *pdata = (XCVR_PDATA *)(client->dev.platform_data);
 	XCVR_ATTR *attr_data = NULL;
-    uint32_t status = 0, modreset=0, i;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
+    int status = 0, i;
 
 	for (i=0; i<pdata->len; i++)
     {
 		attr_data = &pdata->xcvr_attrs[i];
 		if (strcmp(attr_data->aname, attr->dev_attr.attr.name) == 0)
 		{
+			attr_ops = &xcvr_ops[attr->index];
+
 	        mutex_lock(&data->update_lock);
-			if (strcmp(attr_data->devtype, "cpld") == 0)
+			if (attr_ops->pre_get != NULL)
 			{
-				status = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-				modreset = ((status & BIT_INDEX(attr_data->mask)) == attr_data->cmpval) ? 1 : 0;
-				sfp_dbg(KERN_ERR "\nMod Reset :0x%x, reg_value = 0x%x\n", modreset, status);
+				status = (attr_ops->pre_get)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 			} 
-			else if(strcmp(attr_data->devtype, "eeprom") == 0)
+			if (attr_ops->do_get != NULL)
 			{
-				/* get client client for eeprom -  Not Applicable */
+				status = (attr_ops->do_get)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+
 			}
+			if (attr_ops->post_get != NULL)
+			{
+				status = (attr_ops->post_get)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+			}
+
 	        mutex_unlock(&data->update_lock);
-			return sprintf(buf, "%d\n", modreset);
+
+			return sprintf(buf, "%d\n", data->reset);
 		}
 	}
 	return sprintf(buf, "%s","");
@@ -106,39 +395,44 @@ ssize_t set_module_reset(struct device *dev, struct device_attribute *da, const 
 	struct xcvr_data *data = i2c_get_clientdata(client);
 	XCVR_PDATA *pdata = (XCVR_PDATA *)(client->dev.platform_data);
 	XCVR_ATTR *attr_data = NULL;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
 	int status = 0, i;
-	unsigned int set_value, val_mask;
-	uint8_t reg;
+	unsigned int set_value;
 
 	for (i=0; i<pdata->len; i++)
 	{
 		attr_data = &pdata->xcvr_attrs[i];
 		if (strcmp(attr_data->aname, attr->dev_attr.attr.name) == 0)
 		{
-			mutex_lock(&data->update_lock);
-			if (strcmp(attr_data->devtype, "cpld") == 0)
-			{
+			attr_ops = &xcvr_ops[attr->index];
 				if(kstrtoint(buf, 10, &set_value))
 					return -EINVAL;
 
-				if(set_value == 1) { 
-					if(attr_data->cmpval == 0)
-						val_mask = ~(BIT_INDEX(attr_data->mask));
-					else
-						val_mask = BIT_INDEX(attr_data->mask);
-				}
-				else {
-					if(attr_data->cmpval == 0)
-						val_mask = BIT_INDEX(attr_data->mask);
-					else
-						val_mask = ~(BIT_INDEX(attr_data->mask));
-				}
+			data->reset = set_value;
 
-				reg = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-				reg = reg & val_mask;
-				status = board_i2c_cpld_write(attr_data->devaddr, attr_data->offset, reg);
+			mutex_lock(&data->update_lock);
+			
+			if (attr_ops->pre_set != NULL)
+			{
+				status = (attr_ops->pre_set)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+				}
+			if (attr_ops->do_set != NULL)
+			{
+				status = (attr_ops->do_set)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+
+			}
+			if (attr_ops->post_set != NULL)
+			{
+				status = (attr_ops->post_set)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 			} 
 			mutex_unlock(&data->update_lock);
+
 			return count;
 		}
 	}
@@ -153,26 +447,39 @@ ssize_t get_module_intr_status(struct device *dev, struct device_attribute *da,
     struct xcvr_data *data = i2c_get_clientdata(client);
 	XCVR_PDATA *pdata = (XCVR_PDATA *)(client->dev.platform_data);
 	XCVR_ATTR *attr_data = NULL;
-    uint32_t status = 0, mod_intr=0, i;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
+    int status = 0, i;
 
 	for (i=0; i<pdata->len; i++)
     {
 		attr_data = &pdata->xcvr_attrs[i];
 		if (strcmp(attr_data->aname, attr->dev_attr.attr.name) == 0)
 		{
+			attr_ops = &xcvr_ops[attr->index];
+
 	        mutex_lock(&data->update_lock);
-			if (strcmp(attr_data->devtype, "cpld") == 0)
+			if (attr_ops->pre_get != NULL)
 			{
-				status = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-				mod_intr = ((status & BIT_INDEX(attr_data->mask)) == attr_data->cmpval) ? 1 : 0;
-				sfp_dbg(KERN_ERR "\nModule Interrupt :0x%x, reg_value = 0x%x\n", mod_intr, status);
+				status = (attr_ops->pre_get)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 			} 
-			else if(strcmp(attr_data->devtype, "eeprom") == 0)
+			if (attr_ops->do_get != NULL)
 			{
-				/* get client client for eeprom -  Not Applicable */
+				status = (attr_ops->do_get)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+
 			}
+			if (attr_ops->post_get != NULL)
+			{
+				status = (attr_ops->post_get)(client, attr_data, data);
+				if (status!=0)
+					printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+			}
+
 	        mutex_unlock(&data->update_lock);
-			return sprintf(buf, "%d\n", mod_intr);
+			return sprintf(buf, "%d\n", data->intr_status);
 		}
 	}
 	return sprintf(buf, "%s","");
@@ -200,22 +507,39 @@ int get_xcvr_module_attr_data(struct i2c_client *client, struct device *dev,
 
 ssize_t get_module_lpmode(struct device *dev, struct device_attribute *da, char *buf)
 {
+    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
     struct i2c_client *client = to_i2c_client(dev);
     struct xcvr_data *data = i2c_get_clientdata(client);
 	XCVR_ATTR *attr_data = NULL;
-    unsigned int status = 0, lpmode=0;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
+    int status = 0;
 
 	if(get_xcvr_module_attr_data(client, dev, da, attr_data) && (attr_data != NULL))
 	{
+		attr_ops = &xcvr_ops[attr->index];
+
 		mutex_lock(&data->update_lock);
-		if (strcmp(attr_data->devtype, "cpld") == 0)
+		if (attr_ops->pre_get != NULL)
 		{
-			status = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-			lpmode = ((status & BIT_INDEX(attr_data->mask)) == attr_data->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nModule LPmode :0x%x, reg_value = 0x%x\n", lpmode, status);
+			status = (attr_ops->pre_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 		} 
-	    mutex_unlock(&data->update_lock);
-		return sprintf(buf, "%d\n", lpmode);
+		if (attr_ops->do_get != NULL)
+		{
+			status = (attr_ops->do_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+
+		}
+		if (attr_ops->post_get != NULL)
+		{
+			status = (attr_ops->post_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+		}
+
+		return sprintf(buf, "%d\n", data->lpmode);
 	}
 	else
 		return sprintf(buf,"%s","");
@@ -224,36 +548,42 @@ ssize_t get_module_lpmode(struct device *dev, struct device_attribute *da, char 
 ssize_t set_module_lpmode(struct device *dev, struct device_attribute *da, const char *buf, 
 		size_t count)
 {
+    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
     struct i2c_client *client = to_i2c_client(dev);
     struct xcvr_data *data = i2c_get_clientdata(client);
-	unsigned int status = 0, set_value, val_mask;
-	uint8_t reg;
+	int status = 0;
+	uint32_t set_value;
 	XCVR_ATTR *attr_data = NULL;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
 
 	if(get_xcvr_module_attr_data(client, dev, da, attr_data) && (attr_data != NULL))
 	{
-		mutex_lock(&data->update_lock);
-		if (strcmp(attr_data->devtype, "cpld") == 0)
-		{
+		attr_ops = &xcvr_ops[attr->index];
 			if(kstrtoint(buf, 10, &set_value))
 				return -EINVAL;
 
-			if(set_value == 1) { 
-				if(attr_data->cmpval == 0)
-					val_mask = ~(BIT_INDEX(attr_data->mask));
-				else
-					val_mask = BIT_INDEX(attr_data->mask);
-			}
-			else {
-				if(attr_data->cmpval == 0)
-					val_mask = BIT_INDEX(attr_data->mask);
-				else
-					val_mask = ~(BIT_INDEX(attr_data->mask));
-			}
+		data->lpmode = set_value;
 
-			reg = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-			reg = reg & val_mask;
-			status = board_i2c_cpld_write(attr_data->devaddr, attr_data->offset, reg);
+		mutex_lock(&data->update_lock);
+		
+		if (attr_ops->pre_set != NULL)
+		{
+			status = (attr_ops->pre_set)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+			}
+		if (attr_ops->do_set != NULL)
+		{
+			status = (attr_ops->do_set)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+
+		}
+		if (attr_ops->post_set != NULL)
+		{
+			status = (attr_ops->post_set)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 		} 
 	    mutex_unlock(&data->update_lock);
 	}
@@ -263,22 +593,38 @@ ssize_t set_module_lpmode(struct device *dev, struct device_attribute *da, const
 ssize_t get_module_rxlos(struct device *dev, struct device_attribute *da,
              char *buf)
 {
+    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
     struct i2c_client *client = to_i2c_client(dev);
     struct xcvr_data *data = i2c_get_clientdata(client);
-    unsigned int status = 0, rxlos=0;
+    int status = 0;
 	XCVR_ATTR *attr_data = NULL;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
 
 	if(get_xcvr_module_attr_data(client, dev, da, attr_data) && (attr_data != NULL))
 	{
+		attr_ops = &xcvr_ops[attr->index];
+
 		mutex_lock(&data->update_lock);
-		if (strcmp(attr_data->devtype, "cpld") == 0)
+		if (attr_ops->pre_get != NULL)
 		{
-			status = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-			rxlos = ((status & BIT_INDEX(attr_data->mask)) == attr_data->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nModule RxLOS :0x%x, reg_value = 0x%x\n", rxlos, status);
+			status = (attr_ops->pre_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 		} 
-	    mutex_unlock(&data->update_lock);
-		return sprintf(buf, "%d\n", rxlos);
+		if (attr_ops->do_get != NULL)
+		{
+			status = (attr_ops->do_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+
+		}
+		if (attr_ops->post_get != NULL)
+		{
+			status = (attr_ops->post_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+		}
+		return sprintf(buf, "%d\n", data->rxlos);
 	}
 	else
 		return sprintf(buf,"%s","");
@@ -287,22 +633,38 @@ ssize_t get_module_rxlos(struct device *dev, struct device_attribute *da,
 ssize_t get_module_txdisable(struct device *dev, struct device_attribute *da,
              char *buf)
 {
+    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
     struct i2c_client *client = to_i2c_client(dev);
     struct xcvr_data *data = i2c_get_clientdata(client);
-    unsigned int status = 0, txdis=0;
+    int status = 0;
 	XCVR_ATTR *attr_data = NULL;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
 	
 	if(get_xcvr_module_attr_data(client, dev, da, attr_data) && (attr_data != NULL))
 	{
+		attr_ops = &xcvr_ops[attr->index];
+
 		mutex_lock(&data->update_lock);
-		if (strcmp(attr_data->devtype, "cpld") == 0)
+		if (attr_ops->pre_get != NULL)
 	{
-			status = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-			txdis = ((status & BIT_INDEX(attr_data->mask)) == attr_data->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nModule TxDisable :0x%x, reg_value = 0x%x\n", txdis, status);
+			status = (attr_ops->pre_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 	}
-	    mutex_unlock(&data->update_lock);
-		return sprintf(buf, "%d\n", txdis);
+		if (attr_ops->do_get != NULL)
+		{
+			status = (attr_ops->do_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+
+		}
+		if (attr_ops->post_get != NULL)
+		{
+			status = (attr_ops->post_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+		}
+		return sprintf(buf, "%d\n", data->txdisable);
 	}
 	else
 		return sprintf(buf,"%s","");
@@ -311,36 +673,42 @@ ssize_t get_module_txdisable(struct device *dev, struct device_attribute *da,
 ssize_t set_module_txdisable(struct device *dev, struct device_attribute *da, const char *buf, 
 		size_t count)
 {
+    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
     struct i2c_client *client = to_i2c_client(dev);
     struct xcvr_data *data = i2c_get_clientdata(client);
-	unsigned int status = 0, set_value, val_mask;
-	uint8_t reg;
+	int status = 0;
+	uint32_t set_value;
 	XCVR_ATTR *attr_data = NULL;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
 
 	if(get_xcvr_module_attr_data(client, dev, da, attr_data) && (attr_data != NULL))
 	{
-		mutex_lock(&data->update_lock);
-		if (strcmp(attr_data->devtype, "cpld") == 0)
-		{
+		attr_ops = &xcvr_ops[attr->index];
 			if(kstrtoint(buf, 10, &set_value))
 				return -EINVAL;
 
-			if(set_value == 1) { 
-				if(attr_data->cmpval == 0)
-					val_mask = ~(BIT_INDEX(attr_data->mask));
-				else
-					val_mask = BIT_INDEX(attr_data->mask);
-			}
-			else {
-				if(attr_data->cmpval == 0)
-					val_mask = BIT_INDEX(attr_data->mask);
-				else
-					val_mask = ~(BIT_INDEX(attr_data->mask));
-			}
+		data->txdisable = set_value;
 
-			reg = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-			reg = reg & val_mask;
-			status = board_i2c_cpld_write(attr_data->devaddr, attr_data->offset, reg);
+		mutex_lock(&data->update_lock);
+		
+		if (attr_ops->pre_set != NULL)
+		{
+			status = (attr_ops->pre_set)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+			}
+		if (attr_ops->do_set != NULL)
+		{
+			status = (attr_ops->do_set)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+
+		}
+		if (attr_ops->post_set != NULL)
+		{
+			status = (attr_ops->post_set)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 		} 
 	    mutex_unlock(&data->update_lock);
 	}
@@ -350,22 +718,38 @@ ssize_t set_module_txdisable(struct device *dev, struct device_attribute *da, co
 ssize_t get_module_txfault(struct device *dev, struct device_attribute *da,
              char *buf)
 {
+    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
     struct i2c_client *client = to_i2c_client(dev);
     struct xcvr_data *data = i2c_get_clientdata(client);
-    unsigned int status = 0, txflt=0;
+    int status = 0;
 	XCVR_ATTR *attr_data = NULL;
+	XCVR_SYSFS_ATTR_OPS *attr_ops = NULL;
 
 	if(get_xcvr_module_attr_data(client, dev, da, attr_data) && (attr_data != NULL))
 	{
+		attr_ops = &xcvr_ops[attr->index];
+
 		mutex_lock(&data->update_lock);
-		if (strcmp(attr_data->devtype, "cpld") == 0)
+		if (attr_ops->pre_get != NULL)
 		{
-			status = board_i2c_cpld_read(attr_data->devaddr , attr_data->offset);
-			txflt = ((status & BIT_INDEX(attr_data->mask)) == attr_data->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nModule TxFault :0x%x, reg_value = 0x%x\n", txflt, status);
+			status = (attr_ops->pre_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
 		} 
-	    mutex_unlock(&data->update_lock);
-		return sprintf(buf, "%d\n", txflt);
+		if (attr_ops->do_get != NULL)
+		{
+			status = (attr_ops->do_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+
+		}
+		if (attr_ops->post_get != NULL)
+		{
+			status = (attr_ops->post_get)(client, attr_data, data);
+			if (status!=0)
+				printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
+		}
+		return sprintf(buf, "%d\n", data->txfault);
 	}
 	return sprintf(buf,"%s","");
 }

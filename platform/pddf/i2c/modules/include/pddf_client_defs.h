@@ -72,6 +72,7 @@ typedef struct NEW_DEV_ATTR
 	char errstr[ERR_STR_SIZE];
 
 }NEW_DEV_ATTR;
+extern NEW_DEV_ATTR pddf_data;
 
 extern struct attribute_group pddf_clients_data_group;
 extern  ssize_t store_pddf_data(struct device *dev, struct device_attribute *da, const char *buf, size_t count);
@@ -85,7 +86,22 @@ void traverse_device_table(void );
 
 
 
-extern NEW_DEV_ATTR pddf_data;
+/*Various Ops hook which can be used by vendors to provide some deviation from usual pddf functionality*/
+struct pddf_ops_t 
+{
+	/*Module init ops*/
+	int (*pre_init)(void);
+	int (*post_init)(void);
+	/*probe ops*/
+	int (*pre_probe)(struct i2c_client *, const struct i2c_device_id *);
+	int (*post_probe)(struct i2c_client *, const struct i2c_device_id *);
+	/*remove ops*/
+	int (*pre_remove)(struct i2c_client *);
+	int (*post_remove)(struct i2c_client *);
+	/*Module exit ops*/
+	void (*pre_exit)(void);
+    void (*post_exit)(void);
+};
 
 
 typedef struct PDEVICE

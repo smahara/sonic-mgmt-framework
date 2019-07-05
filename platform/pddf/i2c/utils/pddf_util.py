@@ -155,12 +155,12 @@ def get_path_to_pddf_plugin():
 def config_pddf_utils():
     device_path = get_path_to_device_plugin()
     pddf_path = get_path_to_pddf_plugin()
-
     backup_path = "/".join([device_path, "orig"])
 
     if os.path.exists(backup_path) is False:
         os.mkdir(backup_path)
-    log_os_system("mv "+device_path+"/*.*"+" "+backup_path, 0)
+        log_os_system("mv "+device_path+"/*.*"+" "+backup_path, 0)
+    
     for item in os.listdir(pddf_path):
         shutil.copy(pddf_path+"/"+item, device_path+"/"+item)
     
@@ -193,14 +193,6 @@ def driver_install():
 
     output = config_pddf_utils()
 
-    # trigger the pddfparse script for FAN, PSU, CPLD, MUX, etc
-    status = pddfparse.create_pddf_devices()
-
-    if status:
-        if FORCE == 0:
-            return status
-
-
     return 0
     
 def driver_uninstall():
@@ -217,25 +209,53 @@ def driver_uninstall():
                 return status              
     return 0
 
+def device_install():
+    global FORCE
+    # trigger the pddfparse script for FAN, PSU, CPLD, MUX, etc
+    status = pddfparse.create_pddf_devices()
+    if status:
+        if FORCE == 0:
+            return status
+    return
+
 def device_uninstall():
+    global FORCE
+    # Trigger the paloparse script for deletion of FAN, PSU, OPTICS, CPLD clients
+    status = pddfparse.delete_pddf_devices()
+    if status:
+        if FORCE == 0:
+            return status
     return 
         
 def do_install():
     print "Checking system...."
-    print "No driver, installing...."    
-    status = driver_install()
+    if driver_check()== False :
+        print PROJECT_NAME.upper() +" has no PDDF driver installed...."
+        print "Installing...."    
+        status = driver_install()
+        if status:
+            return  status
+    else:
+        print PROJECT_NAME.upper() +" drivers detected...."
+
+    print "Creating devices ..." 
+    status = device_install()
     if status:
-        return  status
+        return status
+
     return
     
 def do_uninstall():
     print "Checking system...."
-    if driver_check()== False :
-        print PROJECT_NAME.upper() +" has no driver installed...."
-    else:
-        print "Remove all the devices..."
-        pddfparse.delete_pddf_devices()
+    print "Remove all the devices..."
+    status = device_uninstall()
+    if status:
+        return status
 
+
+    if driver_check()== False :
+        print PROJECT_NAME.upper() +" has no PDDF driver installed...."
+    else:
         print "Removing installed driver...."
         status = driver_uninstall()
         if status:

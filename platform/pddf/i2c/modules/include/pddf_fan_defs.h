@@ -39,10 +39,13 @@ typedef struct FAN_SYSFS_ATTR_DATA
 	int index;
 	unsigned short mode;
 	ssize_t (*show)(struct device *dev, struct device_attribute *da, char *buf);
+	int (*pre_get)(void *client, FAN_DATA_ATTR *adata, void *data);
+	int (*do_get)(void *client, FAN_DATA_ATTR *adata, void *data);
+	int (*post_get)(void *client, FAN_DATA_ATTR *adata, void *data);
 	ssize_t (*store)(struct device *dev, struct device_attribute *da, const char *buf, size_t count);
-	int (*pre_access)(void *client, FAN_DATA_ATTR *adata, void *data);
-	int (*do_access)(void *client, FAN_DATA_ATTR *adata, void *data);
-	int (*post_access)(void *client, FAN_DATA_ATTR *adata, void *data);
+	int (*pre_set)(void *client, FAN_DATA_ATTR *adata, void *data);
+	int (*do_set)(void *client, FAN_DATA_ATTR *adata, void *data);
+	int (*post_set)(void *client, FAN_DATA_ATTR *adata, void *data);
 	void *data;
 } FAN_SYSFS_ATTR_DATA;
 

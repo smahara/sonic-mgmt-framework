@@ -172,7 +172,7 @@ int __init sysstatus_data_init(void)
 	int ret = 0;
 
 
-	pddf_dbg("SYSSTATUS_DATA MODULE.. init\n");
+	pddf_dbg("PDDF SYSSTATUS MODULE.. init\n");
 
 	device_kobj = get_device_i2c_kobj();
 	if(!device_kobj) 
@@ -209,7 +209,7 @@ int __init sysstatus_data_init(void)
 
 void __exit sysstatus_data_exit(void)
 {
-	pddf_dbg("SYSSTATUS_DATA MODULE.. exit\n");
+	pddf_dbg("PDDF SYSSTATUS  MODULE.. exit\n");
 	sysfs_remove_group(sysstatus_data_kobj, &pddf_sysstatus_data_group);
 	sysfs_remove_group(sysstatus_addr_kobj, &pddf_sysstatus_addr_group);
     kobject_put(sysstatus_data_kobj);

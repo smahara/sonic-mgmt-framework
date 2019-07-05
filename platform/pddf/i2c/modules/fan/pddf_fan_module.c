@@ -201,7 +201,7 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 	}
 	else
 	{
-		pddf_dbg(KERN_DEBUG "%s: Wrong value for dev_ops %s", __FUNCTION__, buf);
+		printk(KERN_ERR "PDDF_ERROR: %s: Invalid value for dev_ops %s", __FUNCTION__, buf);
 	}
 
 	goto clear_data;
@@ -235,7 +235,7 @@ int __init pddf_data_init(void)
 	int ret = 0;
 
 
-	pddf_dbg("PDDF_DATA MODULE.. init\n");
+	pddf_dbg("PDDF FAN MODULE.. init\n");
 
 	device_kobj = get_device_i2c_kobj();
 	if(!device_kobj) 
@@ -274,7 +274,7 @@ int __init pddf_data_init(void)
 
 void __exit pddf_data_exit(void)
 {
-	pddf_dbg("PDDF_DATA MODULE.. exit\n");
+	pddf_dbg("PDDF FAN MODULE.. exit\n");
 	sysfs_remove_group(i2c_kobj, &pddf_fan_client_data_group);
 	sysfs_remove_group(i2c_kobj, &pddf_clients_data_group);
 	kobject_put(i2c_kobj);

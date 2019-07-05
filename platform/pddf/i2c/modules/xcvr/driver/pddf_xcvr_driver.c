@@ -22,16 +22,33 @@
 #include "pddf_xcvr_defs.h"
 #include "pddf_xcvr_api.h"
 
-enum xcvr_sysfs_attributes {
-    XCVR_PRESENT,
-	XCVR_RESET,
-	XCVR_INTR_STATUS,
-	XCVR_LPMODE,
-	XCVR_RXLOS,
-	XCVR_TXDISABLE,
-	XCVR_TXFAULT,
-	XCVR_ATTR_MAX
+
+struct pddf_ops_t pddf_xcvr_ops = {
+    .pre_init = NULL,
+    .post_init = NULL,
+
+    .pre_probe = NULL,
+    .post_probe = NULL,
+
+    .pre_remove = NULL,
+    .post_remove = NULL,
+
+    .pre_exit = NULL,
+    .post_exit = NULL,
 };
+EXPORT_SYMBOL(pddf_xcvr_ops);
+
+XCVR_SYSFS_ATTR_OPS xcvr_ops[XCVR_ATTR_MAX] = {
+	{XCVR_PRESENT, get_module_presence, NULL, sonic_i2c_get_mod_pres, NULL, NULL, NULL, NULL, NULL},
+	{XCVR_RESET, get_module_reset, NULL, sonic_i2c_get_mod_reset, NULL, set_module_reset, NULL, sonic_i2c_set_mod_reset, NULL},
+	{XCVR_INTR_STATUS, get_module_intr_status, NULL, sonic_i2c_get_mod_intr_status, NULL, NULL, NULL, NULL, NULL},
+	{XCVR_LPMODE, get_module_lpmode, NULL, sonic_i2c_get_mod_lpmode, NULL, set_module_lpmode, NULL, sonic_i2c_set_mod_lpmode, NULL},
+	{XCVR_RXLOS, get_module_rxlos, NULL, sonic_i2c_get_mod_rxlos, NULL, NULL, NULL, NULL, NULL},
+	{XCVR_TXDISABLE, get_module_txdisable, NULL, sonic_i2c_get_mod_txdisable, NULL, set_module_txdisable, NULL, sonic_i2c_set_mod_txdisable, NULL},
+	{XCVR_TXFAULT, get_module_txfault, NULL, sonic_i2c_get_mod_txfault, NULL, NULL, NULL, NULL, NULL},
+};
+EXPORT_SYMBOL(xcvr_ops);
+
 
 /* sysfs attributes  
  */
@@ -72,15 +89,17 @@ static int xcvr_probe(struct i2c_client *client,
 	XCVR_PDATA *xcvr_platform_data;
 	XCVR_ATTR *attr_data;
 
-	/* Calling pre_xcvr_probe */
-	/*status = pre_xcvr_probe(client, dev_id);*/
-
-	pddf_dbg(KERN_ERR "GENERIC_XCVR_DRIVER Probe called... \n");
-
 	if (client == NULL) {
 		pddf_dbg("NULL Client.. \n");
 		goto exit;
 	}
+
+    if (pddf_xcvr_ops.pre_probe)
+    {
+        status = (pddf_xcvr_ops.pre_probe)(client, dev_id);
+        if (status != 0)
+            goto exit;
+    }
 
     if (!i2c_check_functionality(client->adapter, I2C_FUNC_SMBUS_I2C_BLOCK)) {
         status = -EIO;
@@ -140,10 +159,17 @@ static int xcvr_probe(struct i2c_client *client,
     dev_info(&client->dev, "%s: xcvr '%s'\n",
          dev_name(data->xdev), client->name);
     
+    /* Add a support for post probe function */
+    if (pddf_xcvr_ops.post_probe)
+    {
+        status = (pddf_xcvr_ops.post_probe)(client, dev_id);
+        if (status != 0)
+            goto exit_remove;
+    }
+
+
     return 0;
 
-	/* Calling post_xcvr_probe */
-	/*status = post_xcvr_probe(client, dev_id);*/
 
 exit_remove:
     sysfs_remove_group(&client->dev.kobj, &xcvr_group);
@@ -156,9 +182,17 @@ exit:
 
 static int xcvr_remove(struct i2c_client *client)
 {
+	int ret = 0;
     struct xcvr_data *data = i2c_get_clientdata(client);
 	XCVR_PDATA *platdata = (XCVR_PDATA *)client->dev.platform_data;
 	XCVR_ATTR *platdata_sub = platdata->xcvr_attrs;
+
+    if (pddf_xcvr_ops.pre_remove)
+    {
+        ret = (pddf_xcvr_ops.pre_remove)(client);
+        if (ret!=0)
+            printk(KERN_ERR "FAN pre_remove function failed\n");
+    }
 
 	hwmon_device_unregister(data->xdev);
 	sysfs_remove_group(&client->dev.kobj, &xcvr_group);
@@ -173,6 +207,13 @@ static int xcvr_remove(struct i2c_client *client)
 		kfree(platdata);
 	}
     
+    if (pddf_xcvr_ops.post_remove)
+    {
+        ret = (pddf_xcvr_ops.post_remove)(client);
+        if (ret!=0)
+            printk(KERN_ERR "FAN post_remove function failed\n");
+    }
+
     return 0;
 }
 
@@ -205,8 +246,24 @@ int xcvr_init(void)
 {
 	int ret = 0;
 
-	pddf_dbg(KERN_ERR "GENERIC_XCVR_DRIVER.. init Invoked..\n");
+	if (pddf_xcvr_ops.pre_init)
+    {
+        ret = (pddf_xcvr_ops.pre_init)();
+        if (ret!=0)
+            return ret;
+    }
+
+	pddf_dbg(KERN_ERR "PDDF XCVR DRIVER.. init Invoked..\n");
     ret = i2c_add_driver(&xcvr_driver);
+	if (ret!=0)
+		return ret;
+
+    if (pddf_xcvr_ops.post_init)
+    {
+        ret = (pddf_xcvr_ops.post_init)();
+        if (ret!=0)
+            return ret;
+    }
 	
 	return ret;
 }
@@ -214,8 +271,11 @@ EXPORT_SYMBOL(xcvr_init);
 
 void __exit xcvr_exit(void)
 {
-	pddf_dbg("GENERIC_XCVR_DRIVER.. exit\n");
+	pddf_dbg("PDDF XCVR DRIVER.. exit\n");
+	if (pddf_xcvr_ops.pre_exit) (pddf_xcvr_ops.pre_exit)();
     i2c_del_driver(&xcvr_driver);
+	if (pddf_xcvr_ops.post_exit) (pddf_xcvr_ops.post_exit)();
+
 }
 EXPORT_SYMBOL(xcvr_exit);
 
