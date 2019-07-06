@@ -8,6 +8,45 @@
 #ifndef __PDDF_FAN_DRIVER_H__
 #define __PDDF_FAN_DRIVER_H__
 
+enum fan_sysfs_attributes {
+    FAN1_PRESENT,
+    FAN2_PRESENT,
+    FAN3_PRESENT,
+    FAN4_PRESENT,
+    FAN5_PRESENT,
+    FAN6_PRESENT,
+    FAN1_DIRECTION,
+    FAN2_DIRECTION,
+    FAN3_DIRECTION,
+    FAN4_DIRECTION,
+    FAN5_DIRECTION,
+    FAN6_DIRECTION,
+    FAN1_FRONT_RPM,
+    FAN2_FRONT_RPM,
+    FAN3_FRONT_RPM,
+    FAN4_FRONT_RPM,
+    FAN5_FRONT_RPM,
+    FAN6_FRONT_RPM,
+    FAN1_REAR_RPM,
+    FAN2_REAR_RPM,
+    FAN3_REAR_RPM,
+    FAN4_REAR_RPM,
+    FAN5_REAR_RPM,
+    FAN6_REAR_RPM,
+    FAN1_PWM,
+    FAN2_PWM,
+    FAN3_PWM,
+    FAN4_PWM,
+    FAN5_PWM,
+    FAN6_PWM,
+    FAN1_FAULT,
+    FAN2_FAULT,
+    FAN3_FAULT,
+    FAN4_FAULT,
+    FAN5_FAULT,
+    FAN6_FAULT,
+	FAN_MAX_ATTR 
+};
 /* Each client has this additional data */
 struct fan_attr_info {
 	char				name[ATTR_NAME_LEN];

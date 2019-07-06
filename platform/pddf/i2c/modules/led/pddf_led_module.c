@@ -621,7 +621,7 @@ int KBOJ_CREATE(char* name, struct kobject* parent, struct kobject** child)
 
 static int __init led_init(void) {
 	struct kobject *device_kobj;
-	pddf_dbg(KERN_INFO "PDDF_LED GENERIC LED DRIVER init..\n");
+	pddf_dbg(KERN_INFO "PDDF GENERIC LED MODULE init..\n");
 
         device_kobj = get_device_i2c_kobj();
         if(!device_kobj) 
@@ -647,7 +647,7 @@ static int __init led_init(void) {
 
 
 static void __exit led_exit(void) {
-	pddf_dbg("GENERIC LED DRIVER exit..\n");
+	pddf_dbg("PDDF GENERIC LED MODULE exit..\n");
 	free_kobjs();
 	if(psu_led_ops_data) kfree(psu_led_ops_data);
 	if(fantray_led_ops_data) kfree(fantray_led_ops_data);

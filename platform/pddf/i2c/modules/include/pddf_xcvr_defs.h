@@ -62,7 +62,6 @@ typedef enum xcvr_port_type_e {
 } xcvr_port_type_t;
 
 /*static int data_parsing_complete = 0;*/
-
 /* Each client has this additional data
  */
 struct xcvr_data {
@@ -72,7 +71,37 @@ struct xcvr_data {
     unsigned long       last_updated;    /* In jiffies */
     int                 index;           /* port index */
     xcvr_port_type_t    port_type;
-    uint64_t            present;
+    uint32_t            modpres;
+    uint32_t            reset;
+    uint32_t            intr_status;
+    uint32_t            lpmode;
+    uint32_t            rxlos;
+	uint32_t			txdisable;
+    uint32_t            txfault;
+};
+
+typedef struct XCVR_SYSFS_ATTR_OPS
+{
+	int index;
+	ssize_t (*show)(struct device *dev, struct device_attribute *da, char *buf);
+	int (*pre_get)(struct i2c_client *client, XCVR_ATTR *adata, struct xcvr_data *data);
+	int (*do_get)(struct i2c_client *client, XCVR_ATTR *adata, struct xcvr_data *data);
+	int (*post_get)(struct i2c_client *client, XCVR_ATTR *adata, struct xcvr_data *data);
+	ssize_t (*store)(struct device *dev, struct device_attribute *da, const char *buf, size_t count);
+	int (*pre_set)(struct i2c_client *client, XCVR_ATTR *adata, struct xcvr_data *data);
+	int (*do_set)(struct i2c_client *client, XCVR_ATTR *adata, struct xcvr_data *data);
+	int (*post_set)(struct i2c_client *client, XCVR_ATTR *adata, struct xcvr_data *data);
+} XCVR_SYSFS_ATTR_OPS;
+
+enum xcvr_sysfs_attributes {
+    XCVR_PRESENT,
+	XCVR_RESET,
+	XCVR_INTR_STATUS,
+	XCVR_LPMODE,
+	XCVR_RXLOS,
+	XCVR_TXDISABLE,
+	XCVR_TXFAULT,
+	XCVR_ATTR_MAX
 };
 
 extern int board_i2c_cpld_read(unsigned short cpld_addr, u8 reg);

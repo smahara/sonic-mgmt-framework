@@ -29,11 +29,55 @@
 #define psu_dbg(...)
 #endif
 
+static int two_complement_to_int(u16 data, u8 valid_bit, int mask)
+{
+    u16  valid_data  = data & mask;
+    bool is_negative = valid_data >> (valid_bit - 1);
+
+    return is_negative ? (-(((~valid_data) & mask) + 1)) : valid_data;
+}
+
+int psu_update_hw(struct device *dev, struct psu_attr_info *info, PSU_DATA_ATTR *udata)
+{
+    int status = 0;
+    struct i2c_client *client = to_i2c_client(dev);
+    PSU_SYSFS_ATTR_DATA *sysfs_attr_data = NULL;
+
+
+    mutex_lock(&info->update_lock);
+
+    sysfs_attr_data = udata->access_data;
+    if (sysfs_attr_data->pre_set != NULL)
+    {
+        status = (sysfs_attr_data->pre_set)(client, udata, info);
+        if (status!=0)
+            printk(KERN_ERR "%s: pre_set function fails for %s attribute\n", __FUNCTION__, udata->aname);
+    }
+    if (sysfs_attr_data->do_set != NULL)
+    {
+        status = (sysfs_attr_data->do_set)(client, udata, info);
+        if (status!=0)
+            printk(KERN_ERR "%s: do_set function fails for %s attribute\n", __FUNCTION__, udata->aname);
+
+    }
+    if (sysfs_attr_data->post_set != NULL)
+    {
+        status = (sysfs_attr_data->post_set)(client, udata, info);
+        if (status!=0)
+            printk(KERN_ERR "%s: post_set function fails for %s attribute\n", __FUNCTION__, udata->aname);
+    }
+
+    mutex_unlock(&info->update_lock);
+
+    return 0;
+}
+
 
 int psu_update_attr(struct device *dev, struct psu_attr_info *data, PSU_DATA_ATTR *udata)
 {
+	int status = 0;
     struct i2c_client *client = to_i2c_client(dev);
-	PSU_SYSFS_ATTR_DATA *sysfs_attr_data;
+	PSU_SYSFS_ATTR_DATA *sysfs_attr_data=NULL;
 
     mutex_lock(&data->update_lock);
 
@@ -43,12 +87,26 @@ int psu_update_attr(struct device *dev, struct psu_attr_info *data, PSU_DATA_ATT
 
 		/*psu_dbg(KERN_ERR "%s: UPDATING %s ATTR FOR PSU,#### \n", __FUNCTION__, udata->aname );*/
 		sysfs_attr_data = udata->access_data;
+        if (sysfs_attr_data->pre_get != NULL)
+        {
+            status = (sysfs_attr_data->pre_get)(client, udata, data);
+            if (status!=0)
+                printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, udata->aname);
+        }
+        if (sysfs_attr_data->do_get != NULL)
+        {
+            status = (sysfs_attr_data->do_get)(client, udata, data);
+            if (status!=0)
+                printk(KERN_ERR "%s: do_get function fails for %s attribute\n", __FUNCTION__, udata->aname);
 
-		if (sysfs_attr_data->do_access != NULL)
+        }
+        if (sysfs_attr_data->post_get != NULL)
 		{
-			/*psu_dbg(KERN_ERR "Calling access_fptr(0x%x) for %s attr \n", sysfs_attr_data->do_access, udata->aname);*/
-			(sysfs_attr_data->do_access)(client, udata, data);
+            status = (sysfs_attr_data->post_get)(client, udata, data);
+            if (status!=0)
+                printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, udata->aname);
 		}
+
         data->last_updated = jiffies;
         data->valid = 1;
     }
@@ -57,7 +115,7 @@ int psu_update_attr(struct device *dev, struct psu_attr_info *data, PSU_DATA_ATT
 	return 0;
 }
 
-ssize_t show_psu_present_default(struct device *dev, struct device_attribute *da, char *buf)
+ssize_t psu_show_default(struct device *dev, struct device_attribute *da, char *buf)
 {
     struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
     struct i2c_client *client = to_i2c_client(dev);
@@ -65,48 +123,75 @@ ssize_t show_psu_present_default(struct device *dev, struct device_attribute *da
     PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
     PSU_DATA_ATTR *usr_data = NULL;
     struct psu_attr_info *sysfs_attr_info = NULL;
-    int i, status ;
+    int i, status=0;
+	u16 value = 0;
+	int exponent, mantissa;
+	int multiplier = 1000;
 
 
     for (i=0;i<data->num_attr;i++)
     {
         if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 && strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
         {
-			/*psu_dbg(KERN_ERR "### ATTR NAME: %s \n", data->attr_info[i].name);*/
 			sysfs_attr_info = &data->attr_info[i];
             usr_data = &pdata->psu_attrs[i];
         }
     }
 
     if (sysfs_attr_info==NULL || usr_data==NULL)
-        printk(KERN_ERR "psu_present is not supported attribute for this client\n");
+    {
+		printk(KERN_ERR "%s is not supported attribute for this client\n", attr->dev_attr.attr.name);
+		goto exit;
+	}
 
     psu_update_attr(dev, sysfs_attr_info, usr_data);
 
-    status = sysfs_attr_info->val.intval;
-    return sprintf(buf, "%d\n", status);
-}
-
-
-int sonic_i2c_get_psu_present_default(void *client, PSU_DATA_ATTR *adata, void *data)
-{
-	int status = 0;
-    int val = 0;
-	struct psu_attr_info *padata = (struct psu_attr_info *)data;
-
-	
-	if (strncmp(adata->devtype, "cpld", strlen("cpld")) == 0)
+	switch(attr->index)
 	{
-		val = board_i2c_cpld_read(adata->devaddr , adata->offset);
-		padata->val.intval =  ((val & adata->mask) == adata->cmpval);
-		psu_dbg(KERN_ERR "status_value = 0x%x\n", padata->val.intval);
+		case PSU_PRESENT:
+		case PSU_POWER_GOOD:
+			status = sysfs_attr_info->val.intval;
+			return sprintf(buf, "%d\n", status);
+			break;
+		case PSU_MODEL_NAME:
+		case PSU_MFR_ID:
+		case PSU_SERIAL_NUM:
+		case PSU_FAN_DIR:
+			return sprintf(buf, "%s\n", sysfs_attr_info->val.strval);
+			break;
+		case PSU_V_OUT:
+		case PSU_I_OUT:
+		case PSU_P_OUT:
+			value = sysfs_attr_info->val.shortval;
+			exponent = two_complement_to_int(value >> 11, 5, 0x1f);
+			mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);
+			if (exponent >= 0)
+				return sprintf(buf, "%d\n", (mantissa << exponent) * multiplier);
+			else
+				return sprintf(buf, "%d\n", (mantissa * multiplier) / (1 << -exponent));
+
+			break;
+		case PSU_FAN1_SPEED_RPM:
+            value = sysfs_attr_info->val.shortval;
+            exponent = two_complement_to_int(value >> 11, 5, 0x1f);
+            mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);
+            if (exponent >= 0)
+                return sprintf(buf, "%d\n", (mantissa << exponent));
+            else
+                return sprintf(buf, "%d\n", (mantissa) / (1 << -exponent));
+	
+			break;
+		default:
+			printk(KERN_ERR "%s: Unable to find attribute index for %s\n", __FUNCTION__, usr_data->aname);
+			goto exit;
 	}
 
-	return status;
+exit:
+	return sprintf(buf, "%d\n", status);
 }
 
 
-ssize_t show_psu_power_good_default(struct device *dev, struct device_attribute *da, char *buf)
+ssize_t psu_store_default(struct device *dev, struct device_attribute *da, const char *buf, size_t count)
 {
     struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
     struct i2c_client *client = to_i2c_client(dev);
@@ -114,28 +199,52 @@ ssize_t show_psu_power_good_default(struct device *dev, struct device_attribute 
     PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
     PSU_DATA_ATTR *usr_data = NULL;
     struct psu_attr_info *sysfs_attr_info = NULL;
-    int i, status;
-
+    int i, ret ;
 
     for (i=0;i<data->num_attr;i++)
     {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 &&
-                strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
+        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 && strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0)
         {
             sysfs_attr_info = &data->attr_info[i];
             usr_data = &pdata->psu_attrs[i];
         }
     }
 
-    if (sysfs_attr_info==NULL || usr_data==NULL)
-        printk(KERN_ERR "psu_present is not supported attribute for this client\n");
+    if (sysfs_attr_info==NULL || usr_data==NULL) {
+        printk(KERN_ERR "%s is not supported attribute for this client\n", attr->dev_attr.attr.name);
+        goto exit;
+    }
 
-    psu_update_attr(dev, sysfs_attr_info, usr_data);
+    switch(attr->index)
+    {
+		/*No write attributes for now in PSU*/
+        default:
+			/*printk(KERN_ERR "%s: Unable to find the attr index for %s\n", __FUNCTION__, usr_data->aname);*/
+			goto exit;
+    }
 
-    status = sysfs_attr_info->val.intval;
-    return sprintf(buf, "%d\n", status);
+    psu_update_hw(dev, sysfs_attr_info, usr_data);
+
+exit:
+    return count;
 }
 
+int sonic_i2c_get_psu_present_default(void *client, PSU_DATA_ATTR *adata, void *data)
+{
+	int status = 0;
+    int val = 0;
+	struct psu_attr_info *padata = (struct psu_attr_info *)data;
+	
+	
+	if (strncmp(adata->devtype, "cpld", strlen("cpld")) == 0)
+	{
+		val = board_i2c_cpld_read(adata->devaddr , adata->offset);
+		padata->val.intval =  ((val & adata->mask) == adata->cmpval);
+		psu_dbg(KERN_ERR "%s: status_value = 0x%x\n", __FUNCTION__, padata->val.intval);
+	}
+
+	return status;
+}
 
 int sonic_i2c_get_psu_power_good_default(void *client, PSU_DATA_ATTR *adata, void *data)
 {
@@ -144,43 +253,13 @@ int sonic_i2c_get_psu_power_good_default(void *client, PSU_DATA_ATTR *adata, voi
 	struct psu_attr_info *padata = (struct psu_attr_info *)data;
 	
 	if (strncmp(adata->devtype, "cpld", strlen("cpld")) == 0)
-	{
+        {
 		val = board_i2c_cpld_read(adata->devaddr , adata->offset);
 		padata->val.intval =  ((val & adata->mask) == adata->cmpval);
-		psu_dbg(KERN_ERR "status_value = 0x%x\n", padata->val.intval);
-	}
-
-	return status;
-}
-
-
-ssize_t show_psu_model_name_default(struct device *dev, struct device_attribute *da, char *buf)
-{
-    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
-    struct i2c_client *client = to_i2c_client(dev);
-    struct psu_data *data = i2c_get_clientdata(client);
-    PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
-    PSU_DATA_ATTR *usr_data = NULL;
-    struct psu_attr_info *sysfs_attr_info = NULL;
-    int i;
-
-
-    for (i=0;i<data->num_attr;i++)
-    {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 &&
-                strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
-        {
-            sysfs_attr_info = &data->attr_info[i];
-            usr_data = &pdata->psu_attrs[i];
-        }
+		psu_dbg(KERN_ERR "%s: status_value = 0x%x\n", __FUNCTION__, padata->val.intval);
     }
 
-    if (sysfs_attr_info==NULL || usr_data==NULL)
-        printk(KERN_ERR "psu_model_name is not supported attribute for this client\n");
-
-    psu_update_attr(dev, sysfs_attr_info, usr_data);
-
-    return sprintf(buf, "%s\n", sysfs_attr_info->val.strval);
+	return status;
 }
 
 int sonic_i2c_get_psu_model_name_default(void *client, PSU_DATA_ATTR *adata, void *data)
@@ -213,38 +292,8 @@ int sonic_i2c_get_psu_model_name_default(void *client, PSU_DATA_ATTR *adata, voi
 		padata->val.strval[data_len-1] = '\0';
     }
 
-	psu_dbg(KERN_ERR "status = %d, model_name : %s\n", status, padata->val.strval);
+	psu_dbg(KERN_ERR "%s: status = %d, model_name : %s\n", __FUNCTION__, status, padata->val.strval);
     return 0;
-}
-
-
-ssize_t show_psu_mfr_id_default(struct device *dev, struct device_attribute *da, char *buf)
-{
-    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
-    struct i2c_client *client = to_i2c_client(dev);
-    struct psu_data *data = i2c_get_clientdata(client);
-    PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
-    PSU_DATA_ATTR *usr_data = NULL;
-    struct psu_attr_info *sysfs_attr_info = NULL;
-    int i;
-
-
-    for (i=0;i<data->num_attr;i++)
-    {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 &&
-                strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
-        {
-            sysfs_attr_info = &data->attr_info[i];
-            usr_data = &pdata->psu_attrs[i];
-        }
-    }
-
-    if (sysfs_attr_info==NULL || usr_data==NULL)
-        printk(KERN_ERR "psu_mfr_id is not supported attribute for this client\n");
-
-    psu_update_attr(dev, sysfs_attr_info, usr_data);
-
-    return sprintf(buf, "%s\n", sysfs_attr_info->val.strval);
 }
 
 int sonic_i2c_get_psu_mfr_id_default(void *client, PSU_DATA_ATTR *adata, void *data)
@@ -278,40 +327,9 @@ int sonic_i2c_get_psu_mfr_id_default(void *client, PSU_DATA_ATTR *adata, void *d
 		padata->val.strval[data_len-1] = '\0';
     }
 
-	psu_dbg(KERN_ERR "status = %d, mfr_id : %s\n", status, padata->val.strval);
+	psu_dbg(KERN_ERR "%s: status = %d, mfr_id : %s\n", __FUNCTION__, status, padata->val.strval);
     return 0;
 }
-
-
-ssize_t show_psu_serial_num_default(struct device *dev, struct device_attribute *da, char *buf)
-{
-    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
-    struct i2c_client *client = to_i2c_client(dev);
-    struct psu_data *data = i2c_get_clientdata(client);
-    PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
-    PSU_DATA_ATTR *usr_data = NULL;
-    struct psu_attr_info *sysfs_attr_info = NULL;
-    int i;
-
-
-    for (i=0;i<data->num_attr;i++)
-    {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 &&
-                strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
-        {
-            sysfs_attr_info = &data->attr_info[i];
-            usr_data = &pdata->psu_attrs[i];
-        }
-    }
-
-    if (sysfs_attr_info==NULL || usr_data==NULL)
-        printk(KERN_ERR "psu_serial_num is not supported attribute for this client\n");
-
-    psu_update_attr(dev, sysfs_attr_info, usr_data);
-
-    return sprintf(buf, "%s\n", sysfs_attr_info->val.strval);
-}
-
 
 int sonic_i2c_get_psu_serial_num_default(void *client, PSU_DATA_ATTR *adata, void *data)
 {
@@ -344,40 +362,9 @@ int sonic_i2c_get_psu_serial_num_default(void *client, PSU_DATA_ATTR *adata, voi
 		padata->val.strval[data_len-1] = '\0';
     }
 
-	psu_dbg(KERN_ERR "status = %d, serial_num : %s\n", status, padata->val.strval);
+	psu_dbg(KERN_ERR "%s: status = %d, serial_num : %s\n", __FUNCTION__, status, padata->val.strval);
     return 0;
 }
-
-
-ssize_t show_psu_fan_dir_default(struct device *dev, struct device_attribute *da, char *buf)
-{
-    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
-    struct i2c_client *client = to_i2c_client(dev);
-    struct psu_data *data = i2c_get_clientdata(client);
-    PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
-    PSU_DATA_ATTR *usr_data = NULL;
-    struct psu_attr_info *sysfs_attr_info = NULL;
-    int i;
-
-
-    for (i=0;i<data->num_attr;i++)
-    {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 &&
-                strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
-        {
-            sysfs_attr_info = &data->attr_info[i];
-            usr_data = &pdata->psu_attrs[i];
-        }
-    }
-
-    if (sysfs_attr_info==NULL || usr_data==NULL)
-        printk(KERN_ERR "psu_fan_dir is not supported attribute for this client\n");
-
-    psu_update_attr(dev, sysfs_attr_info, usr_data);
-
-    return sprintf(buf, "%s\n", sysfs_attr_info->val.strval);
-}
-
 
 int sonic_i2c_get_psu_fan_dir_default(void *client, PSU_DATA_ATTR *adata, void *data)
 {
@@ -415,57 +402,8 @@ int sonic_i2c_get_psu_fan_dir_default(void *client, PSU_DATA_ATTR *adata, void *
 	else
 		strncpy(padata->val.strval, fan_dir, data_len);
 
-	psu_dbg(KERN_ERR "status = %d, fan_dir : %s\n", status, padata->val.strval);
+	psu_dbg(KERN_ERR "%s: status = %d, fan_dir : %s\n", __FUNCTION__, status, padata->val.strval);
     return 0;
-}
-
-static int two_complement_to_int(u16 data, u8 valid_bit, int mask)
-{
-    u16  valid_data  = data & mask;
-    bool is_negative = valid_data >> (valid_bit - 1);
-
-    return is_negative ? (-(((~valid_data) & mask) + 1)) : valid_data;
-}
-
-
-ssize_t show_psu_v_out_default(struct device *dev, struct device_attribute *da, char *buf)
-{
-    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
-    struct i2c_client *client = to_i2c_client(dev);
-    struct psu_data *data = i2c_get_clientdata(client);
-    PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
-    PSU_DATA_ATTR *usr_data = NULL;
-    struct psu_attr_info *sysfs_attr_info = NULL;
-    int i;
-	u16 value = 0;
-    int exponent, mantissa;
-    int multiplier = 1000;
-
-
-    for (i=0;i<data->num_attr;i++)
-    {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 &&
-                strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
-        {
-            sysfs_attr_info = &data->attr_info[i];
-            usr_data = &pdata->psu_attrs[i];
-        }
-    }
-
-    if (sysfs_attr_info==NULL || usr_data==NULL)
-        psu_dbg(KERN_ERR "psu_v_out is not supported attribute for this client\n");
-
-    psu_update_attr(dev, sysfs_attr_info, usr_data);
-
-	value = sysfs_attr_info->val.shortval;
-
-	exponent = two_complement_to_int(value >> 11, 5, 0x1f);
-    mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);
-    if (exponent >= 0)
-		return sprintf(buf, "%d\n", (mantissa << exponent) * multiplier);
-	else
-		return sprintf(buf, "%d\n", (mantissa * multiplier) / (1 << -exponent));
-
 }
 
 int sonic_i2c_get_psu_v_out_default(void *client, PSU_DATA_ATTR *adata, void *data)
@@ -495,50 +433,9 @@ int sonic_i2c_get_psu_v_out_default(void *client, PSU_DATA_ATTR *adata, void *da
 		padata->val.shortval = status;
     }
 
-	psu_dbg(KERN_ERR "v_out : %d\n", padata->val.shortval);
+	psu_dbg(KERN_ERR "%s: v_out : %d\n", __FUNCTION__, padata->val.shortval);
     return 0;
 }
-
-
-ssize_t show_psu_i_out_default(struct device *dev, struct device_attribute *da, char *buf)
-{
-    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
-    struct i2c_client *client = to_i2c_client(dev);
-    struct psu_data *data = i2c_get_clientdata(client);
-    PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
-    PSU_DATA_ATTR *usr_data = NULL;
-    struct psu_attr_info *sysfs_attr_info = NULL;
-    int i;
-	u16 value = 0;
-    int exponent, mantissa;
-    int multiplier = 1000;
-
-
-    for (i=0;i<data->num_attr;i++)
-    {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 &&
-                strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
-        {
-            sysfs_attr_info = &data->attr_info[i];
-            usr_data = &pdata->psu_attrs[i];
-        }
-    }
-
-    if (sysfs_attr_info==NULL || usr_data==NULL)
-        printk(KERN_ERR "psu_i_out is not supported attribute for this client\n");
-
-    psu_update_attr(dev, sysfs_attr_info, usr_data);
-
-	value = sysfs_attr_info->val.shortval;
-
-	exponent = two_complement_to_int(value >> 11, 5, 0x1f);
-    mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);
-    if (exponent >= 0)
-		return sprintf(buf, "%d\n", (mantissa << exponent) * multiplier);
-	else
-		return sprintf(buf, "%d\n", (mantissa * multiplier) / (1 << -exponent));
-}
-
 
 int sonic_i2c_get_psu_i_out_default(void *client, PSU_DATA_ATTR *adata, void *data)
 {
@@ -567,51 +464,9 @@ int sonic_i2c_get_psu_i_out_default(void *client, PSU_DATA_ATTR *adata, void *da
 		padata->val.shortval = status;
     }
 
-	psu_dbg(KERN_ERR "i_out : %d\n", padata->val.shortval);
+	psu_dbg(KERN_ERR "%s: i_out : %d\n", __FUNCTION__, padata->val.shortval);
     return 0;
 }
-
-
-ssize_t show_psu_p_out_default(struct device *dev, struct device_attribute *da, char *buf)
-{
-    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
-    struct i2c_client *client = to_i2c_client(dev);
-    struct psu_data *data = i2c_get_clientdata(client);
-    PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
-    PSU_DATA_ATTR *usr_data = NULL;
-    struct psu_attr_info *sysfs_attr_info = NULL;
-    int i;
-	u16 value = 0;
-    int exponent, mantissa;
-    int multiplier = 1000;
-
-
-    for (i=0;i<data->num_attr;i++)
-    {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 &&
-                strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
-        {
-            sysfs_attr_info = &data->attr_info[i];
-            usr_data = &pdata->psu_attrs[i];
-        }
-    }
-
-    if (sysfs_attr_info==NULL || usr_data==NULL)
-        psu_dbg(KERN_ERR "psu_p_out is not supported attribute for this client\n");
-
-    psu_update_attr(dev, sysfs_attr_info, usr_data);
-
-	value = sysfs_attr_info->val.shortval;
-
-	exponent = two_complement_to_int(value >> 11, 5, 0x1f);
-    mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);
- 
-	if (exponent >= 0)
-		return sprintf(buf, "%d\n", (mantissa << exponent) * multiplier);
-	else
-		return sprintf(buf, "%d\n", (mantissa * multiplier) / (1 << -exponent));
-}
-
 
 int sonic_i2c_get_psu_p_out_default(void *client, PSU_DATA_ATTR *adata, void *data)
 {
@@ -640,51 +495,9 @@ int sonic_i2c_get_psu_p_out_default(void *client, PSU_DATA_ATTR *adata, void *da
 		padata->val.shortval = status;
     }
 
-	psu_dbg(KERN_ERR "p_out : %d\n", padata->val.shortval);
+	psu_dbg(KERN_ERR "%s: p_out : %d\n", __FUNCTION__, padata->val.shortval);
     return 0;
 }
-
-
-ssize_t show_psu_fan1_speed_rpm_default(struct device *dev, struct device_attribute *da, char *buf)
-{
-    struct sensor_device_attribute *attr = to_sensor_dev_attr(da);
-    struct i2c_client *client = to_i2c_client(dev);
-    struct psu_data *data = i2c_get_clientdata(client);
-    PSU_PDATA *pdata = (PSU_PDATA *)(client->dev.platform_data);
-    PSU_DATA_ATTR *usr_data = NULL;
-    struct psu_attr_info *sysfs_attr_info = NULL;
-    int i;
-	u16 value = 0;
-    int exponent, mantissa;
-    int multiplier = 1;
-
-
-    for (i=0;i<data->num_attr;i++)
-    {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 &&
-                strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
-        {
-            sysfs_attr_info = &data->attr_info[i];
-            usr_data = &pdata->psu_attrs[i];
-        }
-    }
-
-    if (sysfs_attr_info==NULL || usr_data==NULL)
-        printk(KERN_ERR "%s is not supported attribute for this client\n", attr->dev_attr.attr.name);
-
-    psu_update_attr(dev, sysfs_attr_info, usr_data);
-
-	value = sysfs_attr_info->val.shortval;
-
-	exponent = two_complement_to_int(value >> 11, 5, 0x1f);
-    mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);
- 
-	if (exponent >= 0)
-		return sprintf(buf, "%d\n", (mantissa << exponent) * multiplier);
-	else
-		return sprintf(buf, "%d\n", (mantissa * multiplier) / (1 << -exponent));
-}
-
 
 int sonic_i2c_get_psu_fan1_speed_rpm_default(void *client, PSU_DATA_ATTR *adata, void *data)
 {
@@ -713,98 +526,6 @@ int sonic_i2c_get_psu_fan1_speed_rpm_default(void *client, PSU_DATA_ATTR *adata,
 		padata->val.shortval = status;
     }
 
-	psu_dbg(KERN_ERR "fan1_speed_rpm : %d\n", padata->val.shortval);
+	psu_dbg(KERN_ERR "%s: fan1_speed_rpm : %d\n", __FUNCTION__, padata->val.shortval);
     return 0;
 }
-
-
-
-
-#if 0
-#define MERGE_ACCESS_OPS(from, to, elem) \
-	if (from->elem != NULL) \
-	{ \
-		to->elem = from->elem; \
-	}
-
-
-int merge_psu_access_func_list(PSU_ACCESS_FUNC *p_from, PSU_ACCESS_FUNC *p_to)
-{
-    MERGE_ACCESS_OPS(p_from, p_to, get_psu_present);
-    MERGE_ACCESS_OPS(p_from, p_to, get_psu_model_name);
-    MERGE_ACCESS_OPS(p_from, p_to, get_psu_power_good);
-    MERGE_ACCESS_OPS(p_from, p_to, get_psu_mfr_id);
-    MERGE_ACCESS_OPS(p_from, p_to, get_psu_serial_num);
-    MERGE_ACCESS_OPS(p_from, p_to, get_psu_fan_dir);
-    MERGE_ACCESS_OPS(p_from, p_to, get_psu_v_out);
-    MERGE_ACCESS_OPS(p_from, p_to, get_psu_i_out);
-    MERGE_ACCESS_OPS(p_from, p_to, get_psu_p_out);
-    
-	return 0;
-}
-EXPORT_SYMBOL(merge_psu_access_func_list);
-#endif
-
-
-/* OLD DEFAULT GET FUNCTIONS BASED UPON TYPE OF ATTRIBUTE */
-void sonic_i2c_retrieve_psu_status(PSU_DATA_ATTR *usr_data, uint32_t *ret)
-{
-    int val = 0;
-
-    val = board_i2c_cpld_read(usr_data->devaddr , usr_data->offset);
-    psu_dbg(KERN_ERR "psu_status value = %x\n", val);
-    *ret =  ((val & usr_data->mask) == usr_data->cmpval);
-    psu_dbg(KERN_ERR "status_value = 0x%x\n", *ret);
-
-	return;
-}
-
-int sonic_i2c_retrieve_psu_ascii(void *client, char *data, int data_len, uint8_t offset)
-{
-    int status = 0, retry = 10;
-
-	/*status = pre_sonic_i2c_retrieve_psu_mfr_id(client, data, data_len, offset);*/
-
-    psu_dbg(KERN_ERR "Inside sonic_i2c_retrieve_ascii\n");
-    psu_dbg(KERN_ERR "client is : %x\n", (int *)client);
-    psu_dbg(KERN_ERR "client addr is : %x, offset: 0x%x, data_len:%d\n", ((struct i2c_client *)client)->addr, offset, data_len);
-
-    while (retry) {
-        status = i2c_smbus_read_i2c_block_data((struct i2c_client *)client, offset, (data_len), data);
-        if (unlikely(status < 0)) {
-            msleep(60);
-            retry--;
-            continue;
-        }
-        break;
-    }
-    data[data_len] = '\0';
-    psu_dbg(KERN_ERR "status = %d, manufacturer id : %s\n", status, data);
-
-	/*status = post_sonic_i2c_retrieve_psu_mfr_id(data, data_len);*/
-
-    return status;
-}
-
-
-int sonic_i2c_retrieve_psu_linear(void *client, uint8_t offset)
-{
-    int status = 0, retry = 10;
-
-    psu_dbg(KERN_ERR "Inside sonic_i2c_retrieve_psu_linear\n");
-    psu_dbg(KERN_ERR "client is : %x\n", (int *)client);
-    psu_dbg(KERN_ERR "client addr is : %x, offset: 0x%x \n", ((struct i2c_client *)client)->addr, offset);
-
-    while (retry) {
-        status = i2c_smbus_read_word_data((struct i2c_client *)client, offset);
-        if (unlikely(status < 0)) {
-            msleep(60);
-            retry--;
-            continue;
-        }
-        break;
-    }
-    psu_dbg(KERN_ERR "status = 0x%x\n", status);
-    return status;
-}
-

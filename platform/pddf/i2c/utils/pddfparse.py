@@ -236,9 +236,6 @@ def create_xcvr_device(tree, dev, ops):
 
 def create_sysstatus_device(tree, dev, ops):
     for attr in dev['attr_list']:
-        cmd= "echo '%s' > /sys/kernel/pddf/devices/sysstatus/i2c_name"%(dev['dev_info']['device_name'])
-        #print cmd
-        os.system(cmd)
         create_device(tree, attr, "pddf/devices/sysstatus", ops)
         cmd= "echo 'add' > /sys/kernel/pddf/devices/sysstatus/attr_ops\n\n"
         #print cmd

@@ -26,48 +26,50 @@
 
 static unsigned short normal_i2c[] = {0x50, 0x58, 0x51, 0x59, 0x53, 0x5b, I2C_CLIENT_END};
 
-enum psu_sysfs_attributes {
-    PSU_PRESENT,
-    PSU_MODEL_NAME,
-    PSU_POWER_GOOD,
-	PSU_MFR_ID,
-	PSU_SERIAL_NUM,
-	PSU_FAN_DIR,
-    PSU_V_OUT,
-    PSU_I_OUT,
-    PSU_P_OUT,
-    PSU_FAN1_SPEED_RPM,
-	PSU_ATTR_MAX
-};
+struct pddf_ops_t pddf_psu_ops = {
+	.pre_init = NULL,
+	.post_init = NULL,
 
-PSU_SYSFS_ATTR_DATA access_psu_present = {PSU_PRESENT, S_IRUGO, show_psu_present_default, NULL, NULL, sonic_i2c_get_psu_present_default, NULL, NULL};
+	.pre_probe = NULL,
+	.post_probe = NULL,
+
+	.pre_remove = NULL,
+	.post_remove = NULL,
+
+	.pre_exit = NULL,
+	.post_exit = NULL,
+};
+EXPORT_SYMBOL(pddf_psu_ops);
+
+
+PSU_SYSFS_ATTR_DATA access_psu_present = {PSU_PRESENT, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_present_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_present);
 
-PSU_SYSFS_ATTR_DATA access_psu_model_name = {PSU_MODEL_NAME, S_IRUGO, show_psu_model_name_default, NULL, NULL, sonic_i2c_get_psu_model_name_default, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_model_name = {PSU_MODEL_NAME, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_model_name_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_model_name);
 
-PSU_SYSFS_ATTR_DATA access_psu_power_good = {PSU_POWER_GOOD, S_IRUGO, show_psu_power_good_default, NULL, NULL, sonic_i2c_get_psu_power_good_default, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_power_good = {PSU_POWER_GOOD, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_power_good_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_power_good);
 
-PSU_SYSFS_ATTR_DATA access_psu_mfr_id = {PSU_MFR_ID, S_IRUGO, show_psu_mfr_id_default, NULL, NULL, sonic_i2c_get_psu_mfr_id_default, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_mfr_id = {PSU_MFR_ID, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_mfr_id_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_mfr_id);
 
-PSU_SYSFS_ATTR_DATA access_psu_serial_num = {PSU_SERIAL_NUM, S_IRUGO, show_psu_serial_num_default, NULL, NULL, sonic_i2c_get_psu_serial_num_default, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_serial_num = {PSU_SERIAL_NUM, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_serial_num_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_serial_num);
 
-PSU_SYSFS_ATTR_DATA access_psu_fan_dir = {PSU_FAN_DIR, S_IRUGO, show_psu_fan_dir_default, NULL, NULL, sonic_i2c_get_psu_fan_dir_default, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_fan_dir = {PSU_FAN_DIR, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_fan_dir_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_fan_dir);
 
-PSU_SYSFS_ATTR_DATA access_psu_v_out = {PSU_V_OUT, S_IRUGO, show_psu_v_out_default, NULL, NULL, sonic_i2c_get_psu_v_out_default, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_v_out = {PSU_V_OUT, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_v_out_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_v_out);
 
-PSU_SYSFS_ATTR_DATA access_psu_i_out = {PSU_I_OUT, S_IRUGO, show_psu_i_out_default, NULL, NULL, sonic_i2c_get_psu_i_out_default, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_i_out = {PSU_I_OUT, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_i_out_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_i_out);
 
-PSU_SYSFS_ATTR_DATA access_psu_p_out = {PSU_P_OUT, S_IRUGO, show_psu_p_out_default, NULL, NULL, sonic_i2c_get_psu_p_out_default, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_p_out = {PSU_P_OUT, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_p_out_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_p_out);
 
-PSU_SYSFS_ATTR_DATA access_psu_fan1_speed_rpm = {PSU_FAN1_SPEED_RPM, S_IRUGO, show_psu_fan1_speed_rpm_default, NULL, NULL, sonic_i2c_get_psu_fan1_speed_rpm_default, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_fan1_speed_rpm = {PSU_FAN1_SPEED_RPM, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_fan1_speed_rpm_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_fan1_speed_rpm);
 
 
@@ -100,15 +102,6 @@ void *get_psu_access_data(char *name)
 EXPORT_SYMBOL(get_psu_access_data);
 
 
-
-/*#define PSU_DEBUG*/
-#ifdef PSU_DEBUG
-#define psu_dbg(...) pddf_dbg(__VA_ARGS__)
-#else
-#define psu_dbg(...)
-#endif
-
-
 static int psu_probe(struct i2c_client *client,
             const struct i2c_device_id *dev_id)
 {
@@ -119,15 +112,20 @@ static int psu_probe(struct i2c_client *client,
 	PSU_DATA_ATTR *data_attr;
 	PSU_SYSFS_ATTR_DATA_ENTRY *sysfs_data_entry;
 
-	/* Calling pre_psu_probe */
-	/*status = pre_psu_probe(client, dev_id);*/
 
-	pddf_dbg("GENERIC_PSU_DRIVER Probe called... \n");
+	/*pddf_dbg("GENERIC_PSU_DRIVER Probe called... \n");*/
 
 	if (client == NULL) {
 		printk("NULL Client.. \n");
 		goto exit;
 	}
+
+	if (pddf_psu_ops.pre_probe)
+    {
+        status = (pddf_psu_ops.pre_probe)(client, dev_id);
+        if (status != 0)
+            goto exit;
+    }
 
     if (!i2c_check_functionality(client->adapter, I2C_FUNC_SMBUS_I2C_BLOCK)) {
         status = -EIO;
@@ -197,8 +195,13 @@ static int psu_probe(struct i2c_client *client,
     dev_info(&client->dev, "%s: psu '%s'\n",
          dev_name(data->hwmon_dev), client->name);
     
-	/* Calling post_psu_probe */
-	/*status = post_psu_probe(client, dev_id);*/
+	/* Add a support for post probe function */
+    if (pddf_psu_ops.post_probe)
+    {
+        status = (pddf_psu_ops.post_probe)(client, dev_id);
+        if (status != 0)
+            goto exit_remove;
+    }
 
     return 0;
 
@@ -221,11 +224,18 @@ exit:
 
 static int psu_remove(struct i2c_client *client)
 {
-	int i=0, idx=0;
+	int i=0, idx=0, ret = 0;
     struct psu_data *data = i2c_get_clientdata(client);
 	PSU_PDATA *platdata = (PSU_PDATA *)client->dev.platform_data; // use dev_get_platdata()
 	PSU_DATA_ATTR *platdata_sub = platdata->psu_attrs;
 	struct sensor_device_attribute *ptr = NULL;
+
+	if (pddf_psu_ops.pre_remove)
+    {
+        ret = (pddf_psu_ops.pre_remove)(client);
+        if (ret!=0)
+            printk(KERN_ERR "FAN pre_remove function failed\n");
+    }
 
 	hwmon_device_unregister(data->hwmon_dev);
 	sysfs_remove_group(&client->dev.kobj, &data->psu_attribute_group);
@@ -236,7 +246,7 @@ static int psu_remove(struct i2c_client *client)
 		data->psu_attribute_list[i] = NULL;
 		/*pddf_dbg(KERN_ERR "PSU%d: Freed %d: 0x%x\n", data->index+1, i, ptr);*/
 	}
-    pddf_dbg(KERN_ERR "%s: Freed all the memory allocated for battributes\n", __FUNCTION__);
+    pddf_dbg(KERN_ERR "%s: Freed all the memory allocated for attributes\n", __FUNCTION__);
     kfree(data);
 	if (platdata_sub) {
 		printk(KERN_DEBUG "%s: Freeing platform subdata\n", __FUNCTION__);
@@ -247,7 +257,14 @@ static int psu_remove(struct i2c_client *client)
 		kfree(platdata);
 	}
     
-    return 0;
+	if (pddf_psu_ops.post_remove)
+    {
+        ret = (pddf_psu_ops.post_remove)(client);
+        if (ret!=0)
+            printk(KERN_ERR "FAN post_remove function failed\n");
+    }
+
+    return ret;
 }
 
 enum psu_intf
@@ -286,30 +303,37 @@ EXPORT_SYMBOL(example_fun);
 /*int __init psu_init(void)*/
 int psu_init(void)
 {
-	int ret = 0;
+    int status = 0;
 
-	/*ret = pre_psu_init();*/
+    if (pddf_psu_ops.pre_init)
+    {
+        status = (pddf_psu_ops.pre_init)();
+        if (status!=0)
+            return status;
+    }
 
 	pddf_dbg(KERN_ERR "GENERIC_PSU_DRIVER.. init Invoked..\n");
-    ret = i2c_add_driver(&psu_driver);
+    status = i2c_add_driver(&psu_driver);
+    if (status!=0)
+        return status;
 	
-	/*ret = post_psu_init();*/
+    if (pddf_psu_ops.post_init)
+    {
+        status = (pddf_psu_ops.post_init)();
+        if (status!=0)
+            return status;
+    }
 
-	return ret;
+	return status;
 }
 EXPORT_SYMBOL(psu_init);
 
 void __exit psu_exit(void)
 {
-	/*int ret = 0;*/
-
-
-	/*ret = pre_psu_exit();*/
-
 	pddf_dbg("GENERIC_PSU_DRIVER.. exit\n");
+	if (pddf_psu_ops.pre_exit) (pddf_psu_ops.pre_exit)();
     i2c_del_driver(&psu_driver);
-
-	/*ret = post_psu_exit();*/
+	if (pddf_psu_ops.post_exit) (pddf_psu_ops.post_exit)();
 }
 EXPORT_SYMBOL(psu_exit);
 

@@ -8,6 +8,20 @@
 #ifndef __PDDF_PSU_DRIVER_H__
 #define __PDDF_PSU_DRIVER_H__
 
+enum psu_sysfs_attributes {
+    PSU_PRESENT,
+    PSU_MODEL_NAME,
+    PSU_POWER_GOOD,
+	PSU_MFR_ID,
+	PSU_SERIAL_NUM,
+	PSU_FAN_DIR,
+    PSU_V_OUT,
+    PSU_I_OUT,
+    PSU_P_OUT,
+    PSU_FAN1_SPEED_RPM,
+	PSU_ATTR_MAX
+};
+
 
 /* Every client has psu_data which is divided into per attribute data */
 struct psu_attr_info {

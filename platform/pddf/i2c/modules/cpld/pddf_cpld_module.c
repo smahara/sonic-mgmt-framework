@@ -102,7 +102,7 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 	}
 	else
 	{
-		pddf_dbg(KERN_ERR "%s: Wrong value for dev_ops %s", __FUNCTION__, buf);
+		printk(KERN_ERR "PDDF_ERROR: %s: Invalid value for dev_ops %s", __FUNCTION__, buf);
 	}
 
 free_data:
