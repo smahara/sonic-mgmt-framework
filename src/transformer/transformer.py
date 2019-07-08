@@ -29,7 +29,7 @@ class Transformer(object):
     def getInstance():
         """ Static access method. """
         if Transformer.__instance == None:
-            Transformer()
+           Transformer.__instance = Transformer() 
         return Transformer.__instance
 
     def __init__(self):
@@ -71,7 +71,7 @@ class Transformer(object):
 def translate(path, params):
     """
     """
-    print Transformer.getInstance()
+    print "Transformer Instance from translate() : ", Transformer.getInstance()
     Transformer.getInstance().translate_to_db(path, params)
 
     result = {  
@@ -199,9 +199,10 @@ def init_transformer():
     """
     """
     xfmrObj = Transformer()
-    print xfmrObj.getInstance()
+    print "Transformer Instance from init_transformer() : ", xfmrObj.getInstance()
     return xfmrObj
 
 if __name__ == '__main__':
     init_transformer()
+    translate("dummy_path", "dummy_params")
 
