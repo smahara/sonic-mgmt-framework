@@ -45,6 +45,23 @@ class ThermalUtil:
 				data[attr_name] = attr_value/float(1000)	
 			self.info.append(data)
 
+	def show_thermal_temp_values(self, idx):
+            if idx<1 or idx>self.num_thermals:
+                print "Invalid temperature sensor idx %d"%idx
+                return None
+            self.get_thermal_info()
+            thermal_name = "TEMP"+"%d"%idx
+            label=""
+            value=""
+            for temp in self.info:
+                if thermal_name==temp['device_name']:
+                    label = temp['label']
+                    value = "temp1\t %+.1f C (high = %+.1f C, hyst = %+.1f C)" % (temp['temp1_input'], temp['temp1_max'], temp['temp1_max_hyst'])
+                else:
+                    continue
+
+            return (label, value)
+
 	def show_temp_values(self): 
 		self.get_thermal_info()
 		for temp in self.info:
@@ -54,7 +71,7 @@ class ThermalUtil:
 
 		
 
-temp=ThermalUtil()
+#temp=ThermalUtil()
 #num_temps = temp.get_num_thermals()
 ##temp.get_thermal_info()
 #temp.show_temp_values()
