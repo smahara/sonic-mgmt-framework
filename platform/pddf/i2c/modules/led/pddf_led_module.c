@@ -401,26 +401,29 @@ ssize_t dev_operation(struct device *dev, struct device_attribute *da, const cha
 	if(strncmp(buf, "create_on", strlen("create_on"))==0 ) {
 		return(load_led_ops_data(da, ON));
 	}
-	if(strncmp(buf, "create_off", strlen("create_off"))==0 ) {
+	else if(strncmp(buf, "create_off", strlen("create_off"))==0 ) {
 		return(load_led_ops_data(da, OFF));
 	}
-	if(strncmp(buf, "create_faulty", strlen("create_faulty"))==0 ) {
+	else if(strncmp(buf, "create_faulty", strlen("create_faulty"))==0 ) {
 		return(load_led_ops_data(da, FAULTY));
 	}
-	if(strncmp(buf, "create_blink", strlen("create_blink"))==0 ) {
+	else if(strncmp(buf, "create_blink", strlen("create_blink"))==0 ) {
 		return(load_led_ops_data(da, BLINK));
 	}
-	if(strncmp(buf, "show", strlen("show"))==0 ) {
+	else if(strncmp(buf, "show", strlen("show"))==0 ) {
 		show_led_ops_data(da);
 	}
-	if(strncmp(buf, "verify", strlen("verify"))==0 ) {
+	else if(strncmp(buf, "verify", strlen("verify"))==0 ) {
 		verify_led_ops_data(da);
 	}
-	if(strncmp(buf, "get_status", strlen("get_status"))==0 ) {
+	else if(strncmp(buf, "get_status", strlen("get_status"))==0 ) {
 		get_status_led(da);
 	}
-	if(strncmp(buf, "set_status", strlen("set_status"))==0 ) {
+	else if(strncmp(buf, "set_status", strlen("set_status"))==0 ) {
 		set_status_led(da);
+	}
+	else {
+		printk(KERN_ERR "PDDF_ERROR: %s: Invalid value for dev_ops %s", __FUNCTION__, buf);
 	}
 	return(count);
 }
