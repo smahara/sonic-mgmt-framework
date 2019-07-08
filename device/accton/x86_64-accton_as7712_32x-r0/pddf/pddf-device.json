@@ -181,7 +181,7 @@
 
 	"TEMP2" :
 	{
-		"dev_info": { "device_type":"TEMP_SENSOR", "device_name":"TEMP1", "device_parent":"MUX1"},
+		"dev_info": { "device_type":"TEMP_SENSOR", "device_name":"TEMP2", "device_parent":"MUX1"},
 		"i2c":
 		{
 			"topo_info": { "parent_bus":"0x11", "dev_addr":"0x49", "dev_type":"lm75"},
@@ -196,7 +196,7 @@
 
 	"TEMP3" :
 	{
-		"dev_info": { "device_type":"TEMP_SENSOR", "device_name":"TEMP1", "device_parent":"MUX1"},
+		"dev_info": { "device_type":"TEMP_SENSOR", "device_name":"TEMP3", "device_parent":"MUX1"},
 		"i2c":
 		{
 			"topo_info": { "parent_bus":"0x11", "dev_addr":"0x4a", "dev_type":"lm75"},
