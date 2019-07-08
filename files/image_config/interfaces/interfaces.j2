@@ -37,15 +37,20 @@ iface eth0 inet6 dhcp
 
 {% if ZTP['mode']['inband'] == 'true' %}
 {% for port in PORT %}
+{% set var = {'port_exists': True if port | is_intf_exists else False } %}
+{% if var.port_exists %}
 
 # ZTP in-band interface {{ port }}
 auto {{ port }}
 allow-hotplug {{ port }}
+{% if PORT_TABLE['PORT_TABLE:'+port] is defined and PORT_TABLE['PORT_TABLE:'+port]['value']['oper_status'] == 'up' %}
 {% if ZTP['mode']['ipv4'] == 'true' %}
 iface {{ port }} inet dhcp
 {% endif %}
 {% if ZTP['mode']['ipv6'] == 'true' %}
 iface {{ port }} inet6 dhcp
+{% endif %}
+{% endif %}
 {% endif %}
 {% endfor %}
 {% endif %}
