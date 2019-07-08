@@ -755,6 +755,122 @@ def show_led_device(tree, key, ops):
                 	add_list_sysfs_obj(sysfs_obj, KEY, list)
 
 
+def validate_xcvr_device(tree, dev, ops):
+    devtype_list = ['optoe1', 'optoe2']
+    dev_addr_list = ['0x50', '0x51', '0x53']
+    dev_attribs = ['xcvr_present', 'xcvr_reset', 'xcvr_intr_status', 'xcvr_lpmode']
+    ret_val = "xcvr validation failed"
+
+    if dev['i2c']['topo_info']['dev_type'] in devtype_list:
+        for attr in dev['i2c']['attr_list']:
+            if 'attr_name' in attr.keys() and 'eeprom' in attr.values():
+                ret_val = "xcvr validation success"
+            else:
+                print "xcvr validation Failed"
+                return
+
+    elif dev['i2c']['topo_info']['dev_type'] in tree['PLATFORM']['drivers']['PORT_MODULE']:
+        for attr in dev['i2c']['attr_list']:
+            #if 'attr_name' in attr.keys() and 'xcvr_present' in attr.values():
+            if attr.get("attr_name") in dev_attribs:
+                ret_val = "Success"
+            else:
+                print "xcvr validation Failed"
+                return
+    print ret_val
+
+def validate_eeprom_device(tree, dev, ops):
+    devtype_list = ['24c02']
+    dev_access_mode = ['BLOCK', 'BYTE']
+    dev_attribs = ['eeprom']
+    ret_val = "eeprom failed"
+
+    if dev['i2c']['topo_info']['dev_type'] in devtype_list:
+        if dev['i2c']['dev_attr']['access_mode'] in dev_access_mode:
+            for attr in dev['i2c']['attr_list']:
+                if attr.get("attr_name") in dev_attribs:
+                    ret_val = "eeprom success"
+    print ret_val
+
+def validate_mux_device(tree, dev, ops):
+    devtype_list = ['pca9548', 'pca954x']
+    dev_channels = ["0", "1", "2", "3", "4", "5", "6", "7"]
+    ret_val = "mux failed"
+
+    if dev['i2c']['topo_info']['dev_type'] in devtype_list:
+        for attr in dev['i2c']['channel']:
+            if attr.get("chn") in dev_channels:
+                ret_val = "Mux success"
+    print ret_val
+
+def validate_cpld_device(tree, dev, ops):
+    devtype_list = ['i2c_cpld']
+    ret_val = "cpld failed"
+
+    if dev['i2c']['topo_info']['dev_type'] in devtype_list:
+        ret_val = "cpld success"
+    print ret_val
+
+
+def validate_sysstatus_device(tree, dev, ops):
+    dev_attribs = ['board_info', 'cpld1_version', 'power_module_status', 'system_reset5',
+                    'system_reset6', 'system_reset7', 'misc1', 'cpld2_version', 'cpld3_version'
+                ]
+    ret_val = "sysstatus failed"
+
+    if dev['dev_info']['device_type'] == "SYSSTAT":
+            for attr in dev['attr_list']:
+                if attr.get("attr_name") in dev_attribs:
+                    ret_val = "sysstatus success"
+    print ret_val
+
+def validate_temp_sensor_device(tree, dev, ops):
+    devtype_list = ['lm75']
+    dev_attribs = ['temp1_max', 'temp1_max_hyst', 'temp1_input']
+    ret_val = "temp sensor failed"
+
+    if dev['dev_info']['device_type'] == "TEMP_SENSOR":
+        if dev['i2c']['topo_info']['dev_type'] in devtype_list:
+            for attr in dev['i2c']['attr_list']:
+                if attr.get("attr_name") in dev_attribs:
+                    ret_val = "tempsensor success"
+    print ret_val
+
+def validate_fan_device(tree, dev, ops):
+    devtype_list = ['fan_ctrl']
+    dev_attribs = ['none']
+    ret_val = "fan failed"
+
+    if dev['i2c']['topo_info']['dev_type'] in tree['PLATFORM']['drivers']['FAN']:
+        if dev['i2c']['dev_attr']['num_fan'] is not None:
+            numfans = dev['i2c']['dev_attr']['num_fan']
+            #for fn in range(0, numfans):
+            #    cmd = "fan"+fn+"_present"
+            #    if attr.get("attr_name") == cmd:
+            ret_val = "fan success"
+
+    print ret_val
+
+def validate_psu_device(tree, dev, ops):
+    devtype_list = ['psu_pmbus']
+    dev_attribs = ['psu_present', 'psu_model_name', 'psu_power_good', 'psu_mfr_id', 'psu_serial_num',
+                    'psu_fan_dir', 'psu_v_out', 'psu_i_out', 'psu_p_out', 'psu_fan1_speed_rpm'
+                  ]
+    ret_val = "psu failed"
+
+    if dev['i2c']['topo_info']['dev_type'] in tree['PLATFORM']['drivers']['PSU']:
+        for attr in dev['i2c']['attr_list']:
+            if attr.get("attr_name") in dev_attribs:
+                if attr.get("attr_devaddr") is not None:
+                    if attr.get("attr_offset") is not None:
+                        if attr.get("attr_mask") is not None:
+                            if attr.get("attr_len") is not None:
+                                    ret_val = "psu success"
+            else:
+                ret_val = "psu failed"
+
+    print ret_val
+
 #################################################################################################################################
 #  SPYTEST 
 #################################################################################################################################
@@ -960,11 +1076,19 @@ def delete_pddf_devices():
     dev_parse(data, data['SYSTEM'], { "cmd": "delete", "target":"all", "attr":"all" } )
     dev_parse(data, data['SYSSTATUS'], { "cmd": "delete", "target":"all", "attr":"all" } )
 
-def show_pddf_devices():
+def populate_pddf_sysfsobj():
     dev_parse(data, data['SYSTEM'], { "cmd": "show", "target":"all", "attr":"all" } )
     dev_parse(data, data['SYSSTATUS'], { "cmd": "show", "target":"all", "attr":"all" } )
     led_parse(data, { "cmd": "show", "target":"all", "attr":"all" })
     show_client_device()
+
+def validate_pddf_devices(*args):
+    populate_pddf_sysfsobj() 
+    alist = [item for item in args]
+    devtype = alist[0]
+    v_ops = { 'cmd': 'validate', 'target':'all', 'attr':'all' }
+    #dev_parse(data, data[devtype], v_ops )
+    dev_parse(data, data['SYSTEM'], v_ops )
 
 def main():
     parser = argparse.ArgumentParser()
@@ -972,6 +1096,7 @@ def main():
     parser.add_argument("--sysfs", action='store', nargs="+",  help="show access-attributes sysfs for the I2C topology")
     parser.add_argument("--dsysfs", action='store', nargs="+",  help="show data-attributes sysfs for the I2C topology")
     parser.add_argument("--delete", action='store_true', help="Remove all the created I2C clients from topology")
+    parser.add_argument("--validate", action='store', help="Validate the device specific attribute data elements")
     args = parser.parse_args()
     #print args
     str = ""
@@ -980,12 +1105,12 @@ def main():
 
     if args.sysfs:
         if args.sysfs[0] == 'all':
-		show_pddf_devices()
+		populate_pddf_sysfsobj()
         if args.sysfs[0] == 'print':
-		show_pddf_devices()
+		populate_pddf_sysfsobj()
 		dump_sysfs_obj(sysfs_obj, args.sysfs[1])
         if args.sysfs[0] == 'validate':
-		show_pddf_devices()
+		populate_pddf_sysfsobj()
 		validate_sysfs_creation(sysfs_obj, args.sysfs[1])
 
     if args.dsysfs:
@@ -1015,8 +1140,11 @@ def main():
     if args.delete:
         delete_pddf_devices()
 
-
-
+    if args.validate:
+        if args.validate[0] == 'all':
+            validate_pddf_devices(args.validate[1:])
+        else:
+            pass
 
 if __name__ == "__main__" :
         main()
