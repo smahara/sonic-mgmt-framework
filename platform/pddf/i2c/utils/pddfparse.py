@@ -6,6 +6,8 @@ import argparse
 import subprocess
 import glob
 import os
+#from jsonschema import validate
+
 
 cache={}
 SONIC_CFGGEN_PATH = '/usr/local/bin/sonic-cfggen'
@@ -874,6 +876,30 @@ def validate_psu_device(tree, dev, ops):
 #################################################################################################################################
 #  SPYTEST 
 #################################################################################################################################
+def verify_attr(key, attr, path):
+        node="/sys/kernel/%s/%s"%(path, key)
+        try:
+                with open(node, 'r') as f:
+                        status = f.read()
+        except IOError:
+                print "PDDF_VERIFY_ERR: IOError: node:%s key:%s"%(node, key)
+		return
+
+        status=status.rstrip("\n\r")
+        if attr[key]!=status:
+        	print "PDDF_VERIFY_ERR: node: %s switch:%s"%(node, status)
+
+def verify_device(tree, attr, path, ops):
+        for key in attr.keys():
+                verify_attr(key, attr, path)
+
+
+def get_led_device(tree, device_name):
+    create_attr('device_name', tree[device_name]['dev_info']['device_name'], "pddf/devices/led")
+    create_attr('index', tree[device_name]['dev_attr']['index'], "pddf/devices/led")
+    cmd="echo 'verify'  > /sys/kernel/pddf/devices/led/dev_ops\n"
+    os.system(cmd)
+
 def validate_sysfs_creation(obj, validate_type):
         dir = '/sys/kernel/pddf/devices/'+validate_type
         if (os.path.exists(dir) or validate_type=='client'):
@@ -892,6 +918,40 @@ def validate_dsysfs_creation(obj, validate_type):
             if(not os.path.exists(sysfs)):
                 print "[SYSFS FILE] " + sysfs + ": does not exist"
 
+def verify_sysfs_data(tree, verify_type):
+	if (verify_type=='LED'):
+        	for key in tree.keys():
+                	if key != 'PLATFORM':
+                        	attr=tree[key]['dev_info']
+                        	if attr['device_type'] == 'LED':
+                			get_led_device(tree, key)
+                			verify_attr('device_name', tree[key]['dev_info'], "pddf/devices/led")
+                			verify_attr('index', tree[key]['dev_attr'], "pddf/devices/led")
+                			for attr in tree[key]['i2c']['attr_list']:
+                        			path="pddf/devices/led/" + attr['attr_name']
+                        			for entry in attr.keys():
+                                			if (entry != 'attr_name' and entry != 'swpld_addr' and entry != 'swpld_addr_offset'):
+                                        			verify_attr(entry, attr, path)
+							if ( entry == 'swpld_addr' or entry == 'swpld_addr_offset'):
+                                        			verify_attr(entry, attr, 'pddf/devices/led')
+
+
+def schema_validation(tree, validate_type):
+        for key in tree.keys():
+                if (key != 'PLATFORM'):
+                        temp_obj={}
+                        schema_file=""
+                        device_type=tree[key]["dev_info"]["device_type"]
+                        if (validate_type=='all' or validate_type==device_type):
+                                temp_obj[device_type]=data[key]
+                                schema_file="schema/"+device_type + ".schema"
+                                if (os.path.exists(schema_file)):
+                                        #print "Validate " + key + " Schema: " + device_type
+                                        json_data=json.dumps(temp_obj)
+                                        with open(schema_file, 'r') as f:
+                                                schema=json.load(f)
+                                        f.close()
+                                        #validate(temp_obj, schema)
 
 #################################################################################################################################
 #   PARSE DEFS
@@ -1042,11 +1102,6 @@ def create_led_device(tree, key, ops):
                         #print cmd
                         os.system(cmd)
 
-def get_led_device(device_name):
-    create_attr('device_name', data[device_name]['dev_info']['device_name'], "pddf/devices/led")
-    create_attr('index', data[device_name]['dev_attr']['index'], "pddf/devices/led")
-    cmd="echo 'verify'  > /sys/kernel/pddf/devices/led/dev_ops\n"
-    os.system(cmd)
 
 
 def led_parse(tree, ops):
@@ -1090,6 +1145,7 @@ def validate_pddf_devices(*args):
     #dev_parse(data, data[devtype], v_ops )
     dev_parse(data, data['SYSTEM'], v_ops )
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--create", action='store_true', help="create the I2C topology")
@@ -1097,6 +1153,7 @@ def main():
     parser.add_argument("--dsysfs", action='store', nargs="+",  help="show data-attributes sysfs for the I2C topology")
     parser.add_argument("--delete", action='store_true', help="Remove all the created I2C clients from topology")
     parser.add_argument("--validate", action='store', help="Validate the device specific attribute data elements")
+    parser.add_argument("--schema", action='store', nargs="+",  help="Schema Validation")
     args = parser.parse_args()
     #print args
     str = ""
@@ -1112,6 +1169,9 @@ def main():
         if args.sysfs[0] == 'validate':
 		populate_pddf_sysfsobj()
 		validate_sysfs_creation(sysfs_obj, args.sysfs[1])
+        if args.sysfs[0] == 'verify':
+		verify_sysfs_data(data, args.sysfs[1])
+
 
     if args.dsysfs:
 	if args.dsysfs[0] == 'validate':
@@ -1145,6 +1205,10 @@ def main():
             validate_pddf_devices(args.validate[1:])
         else:
             pass
+
+    if args.schema:
+        schema_validation(data, args.schema[0])
+
 
 if __name__ == "__main__" :
         main()
