@@ -1,0 +1,29 @@
+{
+    "DEVICE_METADATA": {
+      "localhost" : {
+       "hwsku" : "{{ DEVICE_METADATA.localhost.hwsku }}",
+       "mac" : "{{ DEVICE_METADATA.localhost.mac }}",
+       "platform" : "{{ DEVICE_METADATA.localhost.platform }}",
+       "type" : "LeafRouter",
+       "hostname" : "sonic"
+      }
+    },
+    "SWITCH": {
+        "switch": {
+            "fdb_aging_time": "300"
+        }
+    },
+    "PORT": {
+{% for port in PORT %}
+         "{{port}}" : {
+                "index": "{{ PORT[port].index }}",
+                "lanes": "{{ PORT[port].lanes }}",
+                "mtu":   "9100",
+                "alias": "{{ PORT[port].alias }}",
+                "admin_status": "up",
+                "speed": "{{ PORT[port].speed }}"
+         }{%- if loop.last == False -%},{% endif %}
+
+{% endfor %}
+   }
+}

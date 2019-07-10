@@ -1,0 +1,80 @@
+{
+    "DEVICE_METADATA": {
+      "localhost" : {
+       "hwsku" : "{{ DEVICE_METADATA.localhost.hwsku }}",
+       "mac" : "{{ DEVICE_METADATA.localhost.mac }}",
+       "platform" : "{{ DEVICE_METADATA.localhost.platform }}",
+       "type" : "ToRRouter",
+       "hostname" : "sonic"
+      }
+    },
+    "VLAN" : {
+       "Vlan1" : {
+          "vlanid": "1",
+         "members" : [
+{% for port in PORT %}
+                       "{{port}}"{%- if loop.last == False -%},{% endif %}
+
+{% endfor %}
+         ]
+      }
+    },
+    "SWITCH": {
+        "switch": {
+            "fdb_aging_time": "300"
+        }
+    },
+    "VLAN_MEMBER" : {
+{% for port in PORT %}
+        "Vlan1|{{port}}": {
+            "tagging_mode": "untagged"
+        }{%- if loop.last == False -%},{% endif %}
+
+{% endfor %}
+    },
+    "PORT": {
+{% for port in PORT %}
+         "{{port}}" : {
+                "index": "{{ PORT[port].index }}",
+                "lanes": "{{ PORT[port].lanes }}",
+                "mtu":   "9100",
+                "alias": "{{ PORT[port].alias }}",
+                "admin_status": "up",
+                "speed": "{{ PORT[port].speed }}"
+         }{%- if loop.last == False -%},{% endif %}
+
+{% endfor %}
+    },
+    "STP": {
+        "GLOBAL": {
+            "forward_delay": "15",
+            "hello_time": "2",
+            "max_age": "20",
+            "mode": "pvst",
+            "priority": "32768",
+            "rootguard_timeout": "30"
+        }
+    },
+    "STP_VLAN": {
+        "Vlan1": {
+            "enabled": "true",
+            "forward_delay": "15",
+            "hello_time": "2",
+            "max_age": "20",
+            "priority": "32768"
+        }
+    },
+    "STP_INTF": {
+{% for port in PORT %}
+        "{{port}}": {
+            "bpdu_guard": "false",
+            "bpdu_guard_do_disable": "false",
+            "enabled": "true",
+            "portfast": "true",
+            "root_guard": "false",
+            "uplink_fast": "false"
+        }{%- if loop.last == False -%},{% endif %}
+
+{% endfor %}
+    }
+}
