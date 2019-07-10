@@ -29,6 +29,36 @@
 #define psu_dbg(...)
 #endif
 
+
+void get_psu_duplicate_sysfs(int idx, char *str)
+{
+	switch (idx)
+	{
+		case PSU_V_OUT:
+			strcpy(str, "in3_input");
+			break;
+		case PSU_I_OUT:
+			strcpy(str, "curr2_input");
+            break;
+		case PSU_P_OUT:
+			strcpy(str, "power2_input");
+            break;
+		case PSU_FAN1_SPEED:
+			strcpy(str, "fan1_input");
+            break;
+		case PSU_TEMP1_INPUT:
+			strcpy(str, "temp1_input");
+            break;
+		/*case PSU_TEMP_FAULT:*/
+			/*strcpy(str, "temp1_fault");*/
+			/*break;*/
+		default:
+			break;
+	}
+
+	return;
+}
+
 static int two_complement_to_int(u16 data, u8 valid_bit, int mask)
 {
     u16  valid_data  = data & mask;
@@ -127,14 +157,19 @@ ssize_t psu_show_default(struct device *dev, struct device_attribute *da, char *
 	u16 value = 0;
 	int exponent, mantissa;
 	int multiplier = 1000;
-
+	char new_str[ATTR_NAME_LEN] = "";
+	PSU_SYSFS_ATTR_DATA *ptr = NULL;
 
     for (i=0;i<data->num_attr;i++)
     {
-        if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 && strcmp(pdata->psu_attrs[i].aname, attr->dev_attr.attr.name) == 0 )
-        {
+		ptr = (PSU_SYSFS_ATTR_DATA *)pdata->psu_attrs[i].access_data;
+		get_psu_duplicate_sysfs(ptr->index , new_str);
+        if ( strcmp(attr->dev_attr.attr.name, pdata->psu_attrs[i].aname) == 0 || strcmp(attr->dev_attr.attr.name, new_str) == 0 ) 
+		{
+			/*printk(KERN_ERR "%s's show func: access_data from %s, idx %d, new_str=%s\n", attr->dev_attr.attr.name, pdata->psu_attrs[i].aname, ptr->index, new_str);*/
 			sysfs_attr_info = &data->attr_info[i];
             usr_data = &pdata->psu_attrs[i];
+			strcpy(new_str, "");
         }
     }
 
@@ -161,7 +196,7 @@ ssize_t psu_show_default(struct device *dev, struct device_attribute *da, char *
 			break;
 		case PSU_V_OUT:
 		case PSU_I_OUT:
-		case PSU_P_OUT:
+			multiplier = 1000;
 			value = sysfs_attr_info->val.shortval;
 			exponent = two_complement_to_int(value >> 11, 5, 0x1f);
 			mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);
@@ -171,7 +206,29 @@ ssize_t psu_show_default(struct device *dev, struct device_attribute *da, char *
 				return sprintf(buf, "%d\n", (mantissa * multiplier) / (1 << -exponent));
 
 			break;
-		case PSU_FAN1_SPEED_RPM:
+		case PSU_P_OUT:
+			multiplier = 1000000;
+			value = sysfs_attr_info->val.shortval;
+			exponent = two_complement_to_int(value >> 11, 5, 0x1f);
+			mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);
+			if (exponent >= 0)
+				return sprintf(buf, "%d\n", (mantissa << exponent) * multiplier);
+			else
+				return sprintf(buf, "%d\n", (mantissa * multiplier) / (1 << -exponent));
+
+			break;
+		case PSU_FAN1_SPEED:
+            value = sysfs_attr_info->val.shortval;
+            exponent = two_complement_to_int(value >> 11, 5, 0x1f);
+            mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);
+            if (exponent >= 0)
+                return sprintf(buf, "%d\n", (mantissa << exponent));
+            else
+                return sprintf(buf, "%d\n", (mantissa) / (1 << -exponent));
+	
+			break;
+		case PSU_TEMP1_INPUT:
+			multiplier = 1000;
             value = sysfs_attr_info->val.shortval;
             exponent = two_complement_to_int(value >> 11, 5, 0x1f);
             mantissa = two_complement_to_int(value & 0x7ff, 11, 0x7ff);

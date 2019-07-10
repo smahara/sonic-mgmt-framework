@@ -177,15 +177,15 @@ EXPORT_SYMBOL(get_fan_access_data);
 
 
 
-
 static int pddf_fan_probe(struct i2c_client *client,
             const struct i2c_device_id *dev_id)
 {
     struct fan_data *data;
-    int status,i,num;
+    int status,i,num, j=0;
 	FAN_PDATA *fan_platform_data;
     FAN_DATA_ATTR *data_attr;
     FAN_SYSFS_ATTR_DATA_ENTRY *sysfs_data_entry;
+	char new_str[ATTR_NAME_LEN] = "";
 
 	if (client == NULL) {
         printk("NULL Client.. \n");
@@ -244,8 +244,25 @@ static int pddf_fan_probe(struct i2c_client *client,
         strcpy(data->attr_info[i].name, data_attr->aname);
         data->attr_info[i].valid = 0;
 		mutex_init(&data->attr_info[i].update_lock);
+
+		/*Create a duplicate entry*/
+		get_fan_duplicate_sysfs(dy_ptr->index, new_str);
+		if (strcmp(new_str,""))
+		{
+			dy_ptr = (struct sensor_device_attribute *)kzalloc(sizeof(struct sensor_device_attribute)+ATTR_NAME_LEN, GFP_KERNEL);
+			dy_ptr->dev_attr.attr.name = (char *)&dy_ptr[1];
+			strcpy((char *)dy_ptr->dev_attr.attr.name, new_str);
+			dy_ptr->dev_attr.attr.mode = sysfs_data_entry->a_ptr->mode;
+			dy_ptr->dev_attr.show = sysfs_data_entry->a_ptr->show;
+			dy_ptr->dev_attr.store = sysfs_data_entry->a_ptr->store;
+			dy_ptr->index = sysfs_data_entry->a_ptr->index;
+
+			data->fan_attribute_list[num+j] = &dy_ptr->dev_attr.attr;
+			j++;
+			strcpy(new_str, "");
+		}
 	}
-	data->fan_attribute_list[i] = NULL;
+	data->fan_attribute_list[i+j] = NULL;
 	data->fan_attribute_group.attrs = data->fan_attribute_list;
 
     /* Register sysfs hooks */
