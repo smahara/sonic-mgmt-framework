@@ -1,0 +1,179 @@
+{
+  "MODULE-NAME": "openconfig-acl",
+  "PREFIX-NAME": "op-acl",
+  "TRANSFORM-SPEC": {
+    "YOBJECTS": [ 
+      {
+        "YOBJECT": "acl",
+        "YCHILDOBJECTS": [
+          {
+            "YOBJECT": "acl-sets",
+            "YCHILDOBJECTS": [
+              {
+                "YOBJECT": "acl-set",
+                 "TABLE-NAME": "ACL_TABLE",
+                 "KEY": 
+                   {
+                     "YLEAFY": [
+                       "name",
+                       "type"
+                      ],
+                       "TRANSFORMER": "xfmr_acl_table_key"
+                   }
+                 ,
+                 "YCHILDOBJECTS": [
+                   {                   
+                     "YOBJECT": "config",
+                     "FIELDS": [ 
+                         {
+                           "YLEAFY": [ 
+                             "description"
+                           ],
+                           "FIELD-NAME": "policy_desc"
+                         },
+                         {
+                           "YLEAFY": [
+                             "type"
+                           ]
+                         }
+                    ]
+                  },
+                  {
+                    "YOBJECT": "state"
+                  },
+                  {
+                    "YOBJECT": "acl-entries",
+					"YCHILDOBJECTS": [
+					  {                   
+						"YOBJECT": "acl-entry",
+						"TABLE-NAME": "ACL_RULE",
+                        "KEY": 
+                          {
+                            "YLEAFY": [
+                              "sequence-id"
+                             ],
+                             "TRANSFORMER": "xfmr_acl_rule_table_key"
+                          }
+                        ,
+						"YCHILDOBJECTS": [ 
+						  {
+							"YOBJECT": "config"
+                          },
+						  {
+							"YOBJECT": "state"
+                          },
+                          {
+							"YOBJECT": "ipv4",
+                            "YCHILDOBJECTS": [
+                              {
+                                "YOBJECT": "config",
+                                "FIELDS": [
+                                  {
+									"YLEAFY": [
+                                      "source-address"
+                                    ],
+									"FIELD-NAME": "SRC_IP"
+								  },
+								  {
+									"YLEAFY": [
+                                      "destination-address"
+                                    ],
+									"FIELD-NAME": "DST_IP"
+								  },
+								  {
+									"YLEAFY": [
+                                      "dscp"
+                                    ],
+									"FIELD-NAME": "DSCP"
+								  },
+								  {
+									"YLEAFY": [
+                                      "protocol"
+                                    ],
+									"FIELD-NAME": "IP_PROTOCOL",
+									"TRANSFORMER": "xfmr_ip_protocol"
+								  }
+                                ]
+                              },
+                              {                              
+                                "YOBJECT": "state"
+                              }
+                            ]
+                          },
+                          {
+                            "YOBJECT": "transport",
+                            "YCHILDOBJECTS": [
+                              {
+                                "YOBJECT": "config",
+                                "FIELDS": [
+                                  {
+                                    "YLEAFY": ["source-port"],
+                                    "FIELD-NAME": [
+                                      "L4_SRC_PORT", "L4_SRC_PORT_RANGE"
+                                    ],
+                                    "TRANSFORMER": "xfmr_source_port"
+                                  },
+                                  { 
+                                    "YLEAFY": ["destination-port"],
+                                    "FIELD-NAME": [
+                                      "L4_DST_PORT", "L4_DST_PORT_RANGE"
+                                    ],
+                                    "TRANSFORMER": "xfmr_destination_port"
+                                  },
+                                  {
+                                    "YLEAFY": [
+                                      "tcp-flags"
+                                    ],
+                                    "FIELD-NAME": "tcp_flags",
+                                    "TRANSFORMER": "xfmr_tcpflags"
+                                  }
+                                ]
+                              },
+                              {                              
+                                "YOBJECT": "state"
+                              }
+
+                            ]
+                          },
+                          {
+                            "YOBJECT": "actions",
+                            "YCHILDOBJECTS": [
+                              { 
+                                "YOBJECT": "config",
+                                "FIELDS": [
+                                  { 
+                                    "YLEAFY": [
+                                      "forwarding-action"
+                                    ],
+                                    "FIELD-NAME": "PACKET_ACTION"
+                                  }
+                                ]
+                              },
+                              {
+                                "YOBJECT": "state"
+                              }
+                            ]
+                          }
+                        ]
+					   }
+					  ]
+                     }
+                    ] 
+                  }
+                ]
+              },
+              {
+                "YOBJECT": "interfaces",
+                "YCHILDOBJECTS": [
+                  {
+                    "YOBJECT": "interface",
+                    "TRANSFORMER":"xmfr_obj_interface_transformer"
+                  }
+                 ]
+               }
+    ]
+  }
+ ]
+}
+}
+ 

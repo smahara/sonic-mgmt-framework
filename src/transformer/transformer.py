@@ -19,7 +19,10 @@ import os
 import sys
 import traceback
 import pdb
-import time
+import opcfg_mgr
+import opcfg_trans_logger as opcfg_log
+
+transformer_filenm = sys._getframe().f_code.co_filename # Filename, for logging
 
 
 class Transformer(object):
@@ -29,7 +32,7 @@ class Transformer(object):
     def getInstance():
         """ Static access method. """
         if Transformer.__instance == None:
-           Transformer.__instance = Transformer() 
+            Transformer.__instance = Transformer()
         return Transformer.__instance
 
     def __init__(self):
@@ -37,31 +40,35 @@ class Transformer(object):
             raise Exception("singleton class")
         else:
             Transformer.__instance = self
+            self.spec_mgr = opcfg_mgr.SpecMgr()
+
 
     #@staticmethod
     def translate_to_db(self, path, params):
         """
         """
-
-        """
+        opcfg_log.log_dbg_msg(transformer_filenm + ":%s"%sys._getframe().f_lineno, "received path : %s, params : %s"%(path, params))
         module_nm = "openconfig-acl" # this open config yang module name should be extracted from incoming parameters
         spec_obj = self.spec_mgr.get_opcfg_spec_obj(module_nm)
-        xpath = "acl/acl-sets/acl-set" # this will e extracted from incoming parameters
-        tbl_info_dict = spec_obj.get_dbtbl_info(xpath)
+        ########### following is mock code on how to use spec APIs/object  #################
+        xpath = "acl/acl-sets/acl-set/name" # this will be extracted from incoming parameters
+        tbl_info_dict = spec_obj.get_table_info(xpath)
+        opcfg_log.log_dbg_msg(transformer_filenm + ":%s"%sys._getframe().f_lineno, "Table info dict : %s"%tbl_info_dict)
         # iterate thru tbl_info_dict to take necessrary actions
         for kidx in tbl_info_dict.keys():
-            if "table_data" in tbl_info_dict:
+            if kidx == "table_data":
                  # will fetch dictionary {'table_name':<nm>, 'table_keys':[list_key_xpaths], 'key_xfmr':<xmfr_nm>}
-                 tbl_key_info_dict = spec_obj.get_tbl_key_info(tbl_info_dict['table_data'])
+                 tbl_key_info_dict = spec_obj.get_table_key_info(tbl_info_dict['table_data'])
+                 print("Table key info dict : %s"%tbl_key_info_dict)
+                 xfmr_result = tbl_key_info_dict['key_xfmr']({"acl/acl-sets/acl-set/name":"dummy_val"})
+                 print("key transformer result %s"%xfmr_result)
             if kidx == "is_key":
                 print("xpath is key")
             if kidx == "field":
                 # extract field list
-                print("xpath is field")
+                print("xpath is field") 
             # check for kidx == "xfmr", if yes then callback depending wheteher its field level or object level passing necessary data
-        """
-        #print (path, params)
-
+        ########################################################################################
         return
 
     #@staticmethod
@@ -71,7 +78,7 @@ class Transformer(object):
 def translate(path, params):
     """
     """
-    print "Transformer Instance from translate() : ", Transformer.getInstance()
+    print("tranlate() instance :",Transformer.getInstance())
     Transformer.getInstance().translate_to_db(path, params)
 
     result = {  
@@ -199,10 +206,18 @@ def init_transformer():
     """
     """
     xfmrObj = Transformer()
-    print "Transformer Instance from init_transformer() : ", xfmrObj.getInstance()
+    print("init_transformer() instance ", xfmrObj.getInstance())
     return xfmrObj
+
 
 if __name__ == '__main__':
     init_transformer()
-    translate("dummy_path", "dummy_params")
+    path = "test"
+    params = {'acl': {
+                 'acl-sets':{
+                    'acl' :[] 
+                 }
+              }  
+             }
+    translate(path, params)
 
