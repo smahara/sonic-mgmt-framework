@@ -26,6 +26,53 @@
 #endif
 
 
+void get_fan_duplicate_sysfs(int idx, char *str)
+{
+	switch (idx)
+	{
+		case FAN1_FRONT_RPM:
+			strcpy(str, "fan1_input");
+			break;
+		case FAN2_FRONT_RPM:
+			strcpy(str, "fan2_input");
+            break;
+		case FAN3_FRONT_RPM:
+			strcpy(str, "fan3_input");
+            break;
+		case FAN4_FRONT_RPM:
+			strcpy(str, "fan4_input");
+            break;
+		case FAN5_FRONT_RPM:
+			strcpy(str, "fan5_input");
+            break;
+		case FAN6_FRONT_RPM:
+			strcpy(str, "fan6_input");
+            break;
+		case FAN1_REAR_RPM:
+			strcpy(str, "fan11_input");
+            break;
+		case FAN2_REAR_RPM:
+			strcpy(str, "fan12_input");
+            break;
+		case FAN3_REAR_RPM:
+			strcpy(str, "fan13_input");
+            break;
+		case FAN4_REAR_RPM:
+			strcpy(str, "fan14_input");
+            break;
+		case FAN5_REAR_RPM:
+			strcpy(str, "fan15_input");
+            break;
+		case FAN6_REAR_RPM:
+			strcpy(str, "fan16_input");
+            break;
+		default:
+			break;
+	}
+
+	return;
+}
+
 
 int fan_update_hw(struct device *dev, struct fan_attr_info *info, FAN_DATA_ATTR *udata)
 {
@@ -116,14 +163,19 @@ ssize_t fan_show_default(struct device *dev, struct device_attribute *da, char *
     FAN_DATA_ATTR *usr_data = NULL;
     struct fan_attr_info *attr_info = NULL;
     int i, status=0;
-
+	char new_str[ATTR_NAME_LEN] = "";
+	FAN_SYSFS_ATTR_DATA *ptr = NULL;
 
     for (i=0;i<data->num_attr;i++)
     {
-		if (strcmp(data->attr_info[i].name, attr->dev_attr.attr.name) == 0 && strcmp(pdata->fan_attrs[i].aname, attr->dev_attr.attr.name) == 0)
+		ptr = (FAN_SYSFS_ATTR_DATA *)pdata->fan_attrs[i].access_data;
+		get_fan_duplicate_sysfs(ptr->index , new_str);
+        if (strcmp(attr->dev_attr.attr.name, pdata->fan_attrs[i].aname) == 0 || strcmp(attr->dev_attr.attr.name, new_str) == 0)
         {
-            attr_info = &data->attr_info[i];
+			/*printk(KERN_ERR "%s's show func: access_data from %s, idx %d, new_str=%s\n", attr->dev_attr.attr.name, pdata->fan_attrs[i].aname, ptr->index, new_str);*/
+			attr_info = &data->attr_info[i];
             usr_data = &pdata->fan_attrs[i];
+			strcpy(new_str, "");
         }
     }
 

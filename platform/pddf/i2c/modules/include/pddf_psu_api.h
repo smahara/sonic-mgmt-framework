@@ -9,6 +9,7 @@
 #ifndef __PDDF_PSU_API_H__
 #define __PDDF_PSU_API_H__
 
+extern void get_psu_duplicate_sysfs(int idx, char *str);
 extern ssize_t psu_show_default(struct device *dev, struct device_attribute *da, char *buf);
 extern ssize_t psu_store_default(struct device *dev, struct device_attribute *da, const char *buf, size_t count);
 

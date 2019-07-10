@@ -17,8 +17,9 @@ enum psu_sysfs_attributes {
 	PSU_FAN_DIR,
     PSU_V_OUT,
     PSU_I_OUT,
-    PSU_P_OUT,
-    PSU_FAN1_SPEED_RPM,
+    PSU_P_OUT, /* This is in micro watts to comply with lm-sensors */
+    PSU_FAN1_SPEED,
+    PSU_TEMP1_INPUT,
 	PSU_ATTR_MAX
 };
 

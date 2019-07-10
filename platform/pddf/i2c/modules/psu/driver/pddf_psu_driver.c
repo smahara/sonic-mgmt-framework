@@ -69,7 +69,7 @@ EXPORT_SYMBOL(access_psu_i_out);
 PSU_SYSFS_ATTR_DATA access_psu_p_out = {PSU_P_OUT, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_p_out_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_p_out);
 
-PSU_SYSFS_ATTR_DATA access_psu_fan1_speed_rpm = {PSU_FAN1_SPEED_RPM, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_fan1_speed_rpm_default, NULL, NULL, NULL, NULL, NULL};
+PSU_SYSFS_ATTR_DATA access_psu_fan1_speed_rpm = {PSU_FAN1_SPEED, S_IRUGO, psu_show_default, NULL, sonic_i2c_get_psu_fan1_speed_rpm_default, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(access_psu_fan1_speed_rpm);
 
 
@@ -107,10 +107,11 @@ static int psu_probe(struct i2c_client *client,
 {
     struct psu_data *data;
     int status =0;
-	int i,num;
+	int i,num, j=0;
 	PSU_PDATA *psu_platform_data;
 	PSU_DATA_ATTR *data_attr;
 	PSU_SYSFS_ATTR_DATA_ENTRY *sysfs_data_entry;
+	char new_str[ATTR_NAME_LEN] = "";
 
 
 	/*pddf_dbg("GENERIC_PSU_DRIVER Probe called... \n");*/
@@ -175,9 +176,25 @@ static int psu_probe(struct i2c_client *client,
 		strcpy(data->attr_info[i].name, data_attr->aname);
 		data->attr_info[i].valid = 0;
 		mutex_init(&data->attr_info[i].update_lock);
-	}
 
-	data->psu_attribute_list[i] = NULL;
+		/*Create a duplicate entry*/
+		get_psu_duplicate_sysfs(dy_ptr->index, new_str);
+		if (strcmp(new_str,""))
+		{
+			dy_ptr = (struct sensor_device_attribute *)kzalloc(sizeof(struct sensor_device_attribute)+ATTR_NAME_LEN, GFP_KERNEL);
+			dy_ptr->dev_attr.attr.name = (char *)&dy_ptr[1];
+			strcpy((char *)dy_ptr->dev_attr.attr.name, new_str);
+			dy_ptr->dev_attr.attr.mode = sysfs_data_entry->a_ptr->mode;
+			dy_ptr->dev_attr.show = sysfs_data_entry->a_ptr->show;
+			dy_ptr->dev_attr.store = sysfs_data_entry->a_ptr->store;
+			dy_ptr->index = sysfs_data_entry->a_ptr->index;
+
+			data->psu_attribute_list[num+j] = &dy_ptr->dev_attr.attr;
+			j++;
+			strcpy(new_str,"");
+		}
+	}
+	data->psu_attribute_list[i+j] = NULL;
 	data->psu_attribute_group.attrs = data->psu_attribute_list;
 
     /* Register sysfs hooks */

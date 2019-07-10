@@ -11,6 +11,7 @@
 
 extern int pddf_fan_post_probe_default(struct i2c_client *client, const struct i2c_device_id *dev_id);
 
+extern void get_fan_duplicate_sysfs(int idx, char *str);
 extern ssize_t fan_show_default(struct device *dev, struct device_attribute *da, char *buf);
 extern ssize_t fan_store_default(struct device *dev, struct device_attribute *da, const char *buf, size_t count);
 

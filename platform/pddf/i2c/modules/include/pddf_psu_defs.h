@@ -11,7 +11,7 @@
 
 
 #define MAX_NUM_PSU 5
-#define MAX_PSU_ATTRS 20
+#define MAX_PSU_ATTRS 32
 #define ATTR_NAME_LEN 32
 #define STR_ATTR_SIZE 32
 #define DEV_TYPE_LEN 32
