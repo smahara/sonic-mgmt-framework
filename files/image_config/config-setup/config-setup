@@ -256,7 +256,14 @@ boot_config()
     do_config_intialization
     # force ZTP to restart
     if  ztp_is_enabled ; then
-       touch /tmp/pending_ztp_restart
+       ztp_status=$(ztp status -c)
+       if [ "$ztp_status" = "5:SUCCESS" ] || \
+          [ "$ztp_status" = "6:FAILED" ]; then
+          # Clear completed ztp information, before starting a new one
+          ztp erase -y
+       else
+          touch /tmp/pending_ztp_restart
+       fi
     fi
   fi
 }
