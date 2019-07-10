@@ -43,56 +43,55 @@
                   },
                   {
                     "YOBJECT": "acl-entries",
-					"YCHILDOBJECTS": [
+                    "YCHILDOBJECTS": [
 					  {                   
-						"YOBJECT": "acl-entry",
-						"TABLE-NAME": "ACL_RULE",
+                        "YOBJECT": "acl-entry",
+                        "TABLE-NAME": "ACL_RULE",
                         "KEY": 
                           {
                             "YLEAFY": [
                               "sequence-id"
                              ],
                              "TRANSFORMER": "xfmr_acl_rule_table_key"
-                          }
-                        ,
-						"YCHILDOBJECTS": [ 
+                          },
+                        "YCHILDOBJECTS": [ 
 						  {
-							"YOBJECT": "config"
+                            "YOBJECT": "config"
                           },
 						  {
-							"YOBJECT": "state"
+                            "YOBJECT": "state"
                           },
                           {
-							"YOBJECT": "ipv4",
+                            "YOBJECT": "ipv4",
                             "YCHILDOBJECTS": [
                               {
                                 "YOBJECT": "config",
                                 "FIELDS": [
                                   {
-									"YLEAFY": [
+                                    "YLEAFY": [
                                       "source-address"
                                     ],
-									"FIELD-NAME": "SRC_IP"
-								  },
-								  {
-									"YLEAFY": [
+                                    "FIELD-NAME": "SRC_IP"
+                                  },
+                                  {
+                                    "YLEAFY": [
                                       "destination-address"
                                     ],
-									"FIELD-NAME": "DST_IP"
-								  },
-								  {
-									"YLEAFY": [
+                                    "FIELD-NAME": "DST_IP"
+                                  },
+                                  {
+                                    "YLEAFY": [
                                       "dscp"
                                     ],
-									"FIELD-NAME": "DSCP"
-								  },
-								  {
-									"YLEAFY": [
+                                    "FIELD-NAME": "DSCP"
+                                  },
+                                  {
+                                    "YLEAFY": [
                                       "protocol"
                                     ],
-									"FIELD-NAME": "IP_PROTOCOL",
-									"TRANSFORMER": "xfmr_ip_protocol"
-								  }
+                                    "FIELD-NAME": "IP_PROTOCOL",
+                                    "TRANSFORMER": "xfmr_ip_protocol"
+                                  }
                                 ]
                               },
                               {                              
@@ -155,8 +154,8 @@
                             ]
                           }
                         ]
-					   }
-					  ]
+                       }
+                      ]
                      }
                     ] 
                   }
