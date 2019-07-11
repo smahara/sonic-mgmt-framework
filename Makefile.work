@@ -157,8 +157,8 @@ endif
 # $(docker-image-cleanup)
 ifeq ($(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD),y)
 define docker-image-cleanup
-    @for i in $(shell docker images --quiet --filter 'dangling=true') ; do (docker rmi -f $$i &> /dev/null || true) ; done
-    @for i in $(shell docker images --quiet docker-*$(DOCKER_USERNAME):$(DOCKER_USERTAG)) ; do (docker rmi -f $$i &> /dev/null || true) ; done
+    @for i in $(shell docker images --quiet --filter 'dangling=true') ; do (docker rmi $$i &> /dev/null || true) ; done
+    @for i in $(shell docker images --quiet docker-*$(DOCKER_USERNAME):$(DOCKER_USERTAG)) ; do (docker rmi $$i &> /dev/null || true) ; done
 endef
 else
 define docker-image-cleanup
