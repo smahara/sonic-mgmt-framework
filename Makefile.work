@@ -32,7 +32,6 @@
 #  * VS_PREPARE_MEM: Prepare memory in VS build (drop cache and compact).
 #  *                 Default: yes
 #  *                 Values:  yes, no
-#  * DOCKER_AVOID_BASE_TAG_LATEST: Don't rely on :latest tag when referencing Docker base build image.
 #  * KERNEL_PROCURE_METHOD: Specifying method of obtaining kernel Debian package: download, cache, or build
 #  * KERNEL_CACHE_PATH: Full path to kernel Debian package tarball when cache procure method is used
 #  * LOCAL_SAI_DEBS_PATH: Full path to the parent directory that holds SAI debian packages
@@ -49,6 +48,16 @@ LOCK_DIR = /tmp/docker_images_locks
 
 ifeq ($(USER), root)
 $(error Add your user account to docker group and use your user account to make. root or sudo are not supported!)
+endif
+
+# Check for minimum Docker version on build host
+# Note: Using the greater of CE (17.05.0) and EE (17.06.1) versions that support ARG before FROM
+docker_min := 17.06.1
+docker_min_ver := $(shell echo "$(docker_min)" | awk -F. '{printf("%d%03d%03d\n",$$1,$$2,$$3);}' 2>/dev/null)
+docker_ver := $(shell docker info 2>/dev/null | grep -i "server version" | cut -d' ' -f3 | awk -F. '{printf("%d%03d%03d\n",$$1,$$2,$$3);}' 2>/dev/null)
+docker_is_valid := $(shell if [ $(docker_ver) -lt $(docker_min_ver) ] ; then echo "0"; else echo "1"; fi)
+ifeq (0,$(docker_is_valid))
+$(error SONiC requires Docker version $(docker_min) or later)
 endif
 
 # Remove lock file in case previous run was forcefully stopped
@@ -161,18 +170,7 @@ ifeq ($(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD), y)
     DOCKER_RUN += -v /var/run/docker.sock:/var/run/docker.sock
 endif
 
-# Define docker build options depending on whether the :latest
-# tag is to be used to reference the Docker base build image.
-ifeq ($(DOCKER_AVOID_BASE_TAG_LATEST),y)
-    DOCKER_BASE_ADD_TAG_LATEST :=
-    DOCKER_IMAGE_TAG_OPTION := --build-arg slave_base_tag_ref=$(SLAVE_BASE_TAG)
-else
-    DOCKER_BASE_ADD_TAG_LATEST := -t $(SLAVE_BASE_IMAGE):latest
-    DOCKER_IMAGE_TAG_OPTION := -t $(SLAVE_IMAGE):latest
-endif
-
 DOCKER_BASE_BUILD = docker build --no-cache \
-                    $(DOCKER_BASE_ADD_TAG_LATEST) \
                     -t $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) \
                     --build-arg http_proxy=$(http_proxy) \
                     --build-arg https_proxy=$(https_proxy) \
@@ -185,9 +183,9 @@ DOCKER_BUILD = docker build --no-cache \
                --build-arg uid=$(shell id -u) \
                --build-arg guid=$(shell id -g) \
                --build-arg hostname=$(shell echo $$HOSTNAME) \
+               --build-arg slave_base_tag_ref=$(SLAVE_BASE_TAG) \
                --build-arg debian_archive_mirror=$(DEBIAN_ARCHIVE_MIRROR) \
                --build-arg debian_org_mirror=$(DEBIAN_ORG_MIRROR) \
-               $(DOCKER_IMAGE_TAG_OPTION) \
                -t $(SLAVE_IMAGE):$(SLAVE_TAG) \
                -f $(SLAVE_DIR)/Dockerfile.user \
                $(SLAVE_DIR)
