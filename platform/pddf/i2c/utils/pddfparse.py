@@ -421,7 +421,12 @@ def show_attr_eeprom_device(tree, dev, ops):
     for attr in attr_list:
         if attr_name == attr['attr_name'] or attr_name == 'all':
             #print show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
-            dsysfs_path = show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+            if 'drv_attr_name' in attr.keys():
+                real_name = attr['drv_attr_name']
+            else:
+                real_name = attr['attr_name']
+
+            dsysfs_path = show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%real_name
             if not dsysfs_path in data_sysfs_obj[KEY]:
                 data_sysfs_obj[KEY].append(dsysfs_path)
             str += dsysfs_path+"\n"
@@ -451,7 +456,12 @@ def show_attr_psu_i2c_device(tree, dev, ops):
         for attr in attr_list:
             if attr_name == attr['attr_name'] or attr_name == 'all' :
                 #print show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
-                dsysfs_path = show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+                if 'drv_attr_name' in attr.keys():
+                    real_name = attr['drv_attr_name']
+                else:
+                    real_name = attr['attr_name']
+
+                dsysfs_path = show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%real_name
                 if not dsysfs_path in data_sysfs_obj[KEY]:
                     data_sysfs_obj[KEY].append(dsysfs_path)
                 str += dsysfs_path+"\n"
@@ -476,7 +486,12 @@ def show_attr_fan_device(tree, dev, ops):
     for attr in attr_list:
         if attr_name == attr['attr_name'] or attr_name == 'all':
             #print show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
-            dsysfs_path= show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+            if 'drv_attr_name' in attr.keys():
+                real_name = attr['drv_attr_name']
+            else:
+                real_name = attr['attr_name']
+
+            dsysfs_path= show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%real_name
             if not dsysfs_path in data_sysfs_obj[KEY]:
                 data_sysfs_obj[KEY].append(dsysfs_path)
             str += dsysfs_path+"\n"
@@ -498,8 +513,13 @@ def show_attr_temp_sensor_device(tree, dev, ops):
         if attr_name == attr['attr_name'] or attr_name == 'all':
             path = show_device_sysfs(tree, dev, ops)+"/%d-00%x/" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))
             #print  glob.glob(path+'hwmon/hwmon*/'+attr['attr_name'])
+            if 'drv_attr_name' in attr.keys():
+                real_name = attr['drv_attr_name']
+            else:
+                real_name = attr['attr_name']
+
 	    if (os.path.exists(path)):
-                full_path = glob.glob(path + 'hwmon/hwmon*/' + attr['attr_name'])[0]
+                full_path = glob.glob(path + 'hwmon/hwmon*/' + real_name)[0]
                 #full_path = path + 'hwmon/hwmon/' + attr['attr_name']
                 dsysfs_path=full_path
                 if not dsysfs_path in data_sysfs_obj[KEY]:
@@ -541,7 +561,12 @@ def show_attr_xcvr_i2c_device(tree, dev, ops):
         attr_list=dev['i2c']['attr_list']
         for attr in attr_list:
             if attr_name == attr['attr_name'] or attr_name == 'all' :
-                dsysfs_path = show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%attr['attr_name']
+                if 'drv_attr_name' in attr.keys():
+                    real_name = attr['drv_attr_name']
+                else:
+                    real_name = attr['attr_name']
+
+                dsysfs_path = show_device_sysfs(tree, dev, ops)+"/%d-00%x" %(int(dev['i2c']['topo_info']['parent_bus'], 0), int(dev['i2c']['topo_info']['dev_addr'], 0))+"/%s"%real_name
                 if not dsysfs_path in data_sysfs_obj[KEY]:
                     data_sysfs_obj[KEY].append(dsysfs_path)
                 str += dsysfs_path+"\n"
