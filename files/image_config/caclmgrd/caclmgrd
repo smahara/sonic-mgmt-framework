@@ -115,7 +115,7 @@ class ControlPlaneAclManager(object):
         tcp_flags_str = tcp_flags_str[:-1]
         return tcp_flags_str
 
-    def get_acl_rules_and_translate_to_iptables_commands(self):
+    def get_acl_rules_and_translate_to_iptables_commands(self, set_default):
         """
         Retrieves current ACL tables and rules from Config DB, translates
         control plane ACLs into a list of iptables commands that can be run
@@ -126,6 +126,7 @@ class ControlPlaneAclManager(object):
 
         """
         iptables_cmds = []
+        num_ctrl_tbl = 0
 
         # First, add iptables commands to set default policies to accept all
         # traffic. In case we are connected remotely, the connection will not
@@ -164,6 +165,7 @@ class ControlPlaneAclManager(object):
             if table_data["type"] != self.ACL_TABLE_TYPE_CTRLPLANE:
                 continue
 
+            num_ctrl_tbl = num_ctrl_tbl + 1
             acl_services = table_data["services"]
 
             for acl_service in acl_services:
@@ -244,29 +246,34 @@ class ControlPlaneAclManager(object):
 
                             iptables_cmds.append(rule_cmd)
 
+        if not num_ctrl_tbl and not set_default:
+            while(len(iptables_cmds)):
+                iptables_cmds.pop()
+
         return iptables_cmds
 
-    def update_control_plane_acls(self):
+    def update_control_plane_acls(self, set_default):
         """
         Convenience wrapper which retrieves current ACL tables and rules from
         Config DB, translates control plane ACLs into a list of iptables
         commands and runs them.
         """
-        iptables_cmds = self.get_acl_rules_and_translate_to_iptables_commands()
+        iptables_cmds = self.get_acl_rules_and_translate_to_iptables_commands(set_default)
 
-        log_info("Issuing the following iptables commands:")
-        for cmd in iptables_cmds:
-            log_info("  " + cmd)
+        if len(iptables_cmds):
+            log_info("ACL configuration changed. Updating iptables rules for control plane ACLs...")
+            log_info("Issuing the following iptables commands:")
+            for cmd in iptables_cmds:
+                log_info("  " + cmd)
 
-        self.run_commands(iptables_cmds)
+            self.run_commands(iptables_cmds)
 
     def notification_handler(self, key, data):
-        log_info("ACL configuration changed. Updating iptables rules for control plane ACLs...")
-        self.update_control_plane_acls()
+        self.update_control_plane_acls(False)
 
     def run(self):
         # Unconditionally update control plane ACLs once at start
-        self.update_control_plane_acls()
+        self.update_control_plane_acls(True)
 
         # Subscribe to notifications when ACL tables or rules change
         self.config_db.subscribe(self.ACL_TABLE,
