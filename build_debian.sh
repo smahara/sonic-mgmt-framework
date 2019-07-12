@@ -427,6 +427,8 @@ set /files/etc/sysctl.conf/net.ipv6.conf.eth0.accept_ra 0
 set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 1
 set /files/etc/sysctl.conf/net.ipv4.udp_l3mdev_accept 1
 
+set /files/etc/sysctl.conf/net.ipv6.ip_nonlocal_bind 1
+
 set /files/etc/sysctl.conf/net.core.rmem_max 2097152
 set /files/etc/sysctl.conf/net.core.wmem_max 2097152
 " -r $FILESYSTEM_ROOT
