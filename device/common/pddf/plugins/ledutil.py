@@ -22,21 +22,23 @@ class LedUtil:
     def set_status_led(self, device_name, index,  color, color_state="SOLID"):
 	led_device_name=device_name+'_LED'
 	if(not pddfparse.is_led_device_configured(led_device_name, index)):
-		print device_name + ' ' + index + " : operation is not supported in the platform" 
-		return 
+		status="ERROR :" + device_name + ' ' + index + " :  is not supported in the platform" 
+		return (status)
 
         pddfparse.create_attr('device_name', led_device_name,  self.path)
         pddfparse.create_attr('index', index, self.path)
         pddfparse.create_attr('color', self.color_map[color], self.cur_state_path)
         pddfparse.create_attr('color_state', color_state, self.cur_state_path)
         pddfparse.create_attr('dev_ops', 'set_status',  self.path)
+	return ("Executed")
 
     def get_status_led(self, device_name, index):
 
 	led_device_name=device_name+'_LED'
 	if(not pddfparse.is_led_device_configured(led_device_name, index)):
-		print device_name + ' ' + index + " : operation is not supported in the platform" 
-		return 
+		status="ERROR : " + device_name + ' ' + index + " : is not supported in the platform" 
+		return (status)
+ 
         pddfparse.create_attr('device_name', led_device_name,  self.path)
 
         pddfparse.create_attr('index', index, self.path)
@@ -50,9 +52,10 @@ class LedUtil:
                with open(color_state_f, 'r') as f:
                     color_state = f.read().strip("\r\n")
         except IOError:
-                    return False
-	print device_name+"_LED index:" + index 
-	print "\t" + color_state + " " + color
+		    status="ERROR :" + color_f + " open failed"
+                    return (status) 
+	status = "%s-%s:\t%s %s\n"%(device_name, index, color, color_state)
+	return (status)
 
 
 
