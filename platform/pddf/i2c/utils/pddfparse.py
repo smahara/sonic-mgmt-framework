@@ -6,7 +6,7 @@ import argparse
 import subprocess
 import glob
 import os
-#from jsonschema import validate
+from jsonschema import validate
 
 
 cache={}
@@ -976,7 +976,7 @@ def schema_validation(tree, validate_type):
                                         with open(schema_file, 'r') as f:
                                                 schema=json.load(f)
                                         f.close()
-                                        #validate(temp_obj, schema)
+                                        validate(temp_obj, schema)
 
 #################################################################################################################################
 #   PARSE DEFS
