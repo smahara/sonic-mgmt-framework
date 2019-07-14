@@ -17,9 +17,9 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	git add -f *
 	git commit -m "unmodified ifupdown2 source"
 
-	# Apply patches
-	stg init
-	stg import -s ../patch/series
+	# Apply patches (None as of now. Un-comment when required)
+	# stg init
+	# stg import -s ../patch/series
 
 	# Build source and Debian packages
 	dpkg-buildpackage -rfakeroot -b -us -uc -j$(SONIC_CONFIG_MAKE_JOBS)

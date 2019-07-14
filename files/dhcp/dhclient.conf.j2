@@ -32,7 +32,7 @@ option dhcp6.boot-file-url code 59 = text;
 send host-name = gethostname();
 request subnet-mask, broadcast-address, time-offset, routers,
         domain-name, domain-name-servers, domain-search, host-name,
-        dhcp6.name-servers, dhcp6.domain-search, interface-mtu,
+        dhcp6.name-servers, dhcp6.domain-search, interface-mtu, dhcp6.fqdn,
         rfc3442-classless-static-routes, ntp-servers, log-servers,
 {%- if ZTP is defined -%}bootfile-name, provisioning-script-url, tftp-server-name,
         dhcp6.provisioning-script-url, dhcp6.boot-file-url,{%- endif -%}
