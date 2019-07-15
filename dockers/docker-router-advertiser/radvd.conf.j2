@@ -11,7 +11,7 @@
 {% if VLAN_INTERFACE %}
         {% set interfaces = [] %}
         {% set INTF_CFG = dict() %}
-        {% for (name, prefix) in VLAN_INTERFACE %}
+        {% for (name, prefix) in VLAN_INTERFACE|pfx_filter %}
                 {% if prefix | ipv6 %}
                         {% if name not in INTF_CFG %}
                                 {% set x=INTF_CFG.__setitem__(name, []|list) %}

@@ -1,0 +1,13 @@
+[Unit]
+Description=PDDF module and device initialization service
+Before=pmon.service
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=
+ExecStop=
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -50,6 +50,16 @@ ifeq ($(USER), root)
 $(error Add your user account to docker group and use your user account to make. root or sudo are not supported!)
 endif
 
+# Check for minimum Docker version on build host
+# Note: Using the greater of CE (17.05.0) and EE (17.06.1) versions that support ARG before FROM
+docker_min := 17.06.1
+docker_min_ver := $(shell echo "$(docker_min)" | awk -F. '{printf("%d%03d%03d\n",$$1,$$2,$$3);}' 2>/dev/null)
+docker_ver := $(shell docker info 2>/dev/null | grep -i "server version" | cut -d' ' -f3 | awk -F. '{printf("%d%03d%03d\n",$$1,$$2,$$3);}' 2>/dev/null)
+docker_is_valid := $(shell if [ $(docker_ver) -lt $(docker_min_ver) ] ; then echo "0"; else echo "1"; fi)
+ifeq (0,$(docker_is_valid))
+$(error SONiC requires Docker version $(docker_min) or later)
+endif
+
 # Remove lock file in case previous run was forcefully stopped
 $(shell rm -f .screen)
 
@@ -82,7 +92,7 @@ endif
 BASE_IMAGE_LOCK_FILE_NAME := $(LOCK_DIR)/$(SLAVE_BASE_TAG).lock
 USER_IMAGE_LOCK_FILE_NAME := $(LOCK_DIR)/$(USER).lock
 
-# Create separate Docker lockfiles for saving vs. loading an image.
+# Create Docker lockfile for saving and loading an image.
 ifeq ($(DOCKER_LOCKDIR),)
 override DOCKER_LOCKDIR := /tmp/docklock
 endif
@@ -147,8 +157,8 @@ endif
 # $(docker-image-cleanup)
 ifeq ($(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD),y)
 define docker-image-cleanup
-    @for i in $(shell docker images --quiet --filter 'dangling=true') ; do (docker rmi -f $$i &> /dev/null || true) ; done
-    @for i in $(shell docker images --quiet docker-*$(DOCKER_USERNAME):$(DOCKER_USERTAG)) ; do (docker rmi -f $$i &> /dev/null || true) ; done
+    @for i in $(shell docker images --quiet --filter 'dangling=true') ; do (docker rmi $$i &> /dev/null || true) ; done
+    @for i in $(shell docker images --quiet docker-*$(DOCKER_USERNAME):$(DOCKER_USERTAG)) ; do (docker rmi $$i &> /dev/null || true) ; done
 endef
 else
 define docker-image-cleanup
@@ -173,7 +183,7 @@ DOCKER_BUILD = docker build --no-cache \
                --build-arg uid=$(shell id -u) \
                --build-arg guid=$(shell id -g) \
                --build-arg hostname=$(shell echo $$HOSTNAME) \
-               --build-arg SLAVE_BASE_TAG=$(SLAVE_BASE_TAG) \
+               --build-arg slave_base_tag_ref=$(SLAVE_BASE_TAG) \
                --build-arg debian_archive_mirror=$(DEBIAN_ARCHIVE_MIRROR) \
                --build-arg debian_org_mirror=$(DEBIAN_ORG_MIRROR) \
                -t $(SLAVE_IMAGE):$(SLAVE_TAG) \
@@ -246,6 +256,7 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            SLAVE_TAG=$(SLAVE_TAG) \
                            ENABLE_DHCP_GRAPH_SERVICE=$(ENABLE_DHCP_GRAPH_SERVICE) \
                            ENABLE_ZTP=$(ENABLE_ZTP) \
+                           ENABLE_PDE=$(ENABLE_PDE) \
                            SHUTDOWN_BGP_ON_START=$(SHUTDOWN_BGP_ON_START) \
                            SONIC_ENABLE_PFCWD_ON_START=$(ENABLE_PFCWD_ON_START) \
                            SONIC_ENABLE_SYNCD_RPC=$(ENABLE_SYNCD_RPC) \
@@ -269,7 +280,16 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            EXTRA_JESSIE_TARGETS=$(EXTRA_JESSIE_TARGETS) \
                            $(SONIC_OVERRIDE_BUILD_VARS)
 
-.PHONY: sonic-slave-build sonic-slave-bash init reset
+PDESUBMODULES = src/sonic-linux-kernel \
+                src/sonic-utilities \
+                src/sonic-platform-common \
+                src/sonic-swss-common \
+                src/sonic-py-swsssdk \
+                src/redis-dump-load \
+                src/sonic-sairedis \
+                src/sonic-platform-pde
+
+.PHONY: sonic-slave-build sonic-slave-bash init initpde reset
 
 .DEFAULT_GOAL :=  all
 
@@ -314,6 +334,12 @@ sonic-slave-bash :
 showtag:
 	@echo $(SLAVE_IMAGE):$(SLAVE_TAG)
 	@echo $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG)
+
+initpde:
+	@for submodule in $(PDESUBMODULES) ; do \
+	git submodule update --init --recursive $$submodule ; \
+	done
+	@git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
 
 init :
 	@git submodule update --init --recursive

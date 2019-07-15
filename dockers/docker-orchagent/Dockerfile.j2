@@ -13,7 +13,6 @@ RUN apt-get update \
  && apt-get install -f -y ndisc6 tcpdump \
  && apt-get -y install libjemalloc1 \
  && apt-get install -y libelf1 libmnl0 bridge-utils \
- && apt-get install -y iptables \
  && apt-get install -y conntrack
 
 RUN pip install setuptools
@@ -34,9 +33,8 @@ debs/{{ deb }}{{' '}}
 RUN apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
 RUN rm -rf /debs
 
-COPY ["files/arp_update", "files/update_proc_variables", "enable_counters.py", "start.sh", "orchagent.sh", "swssconfig.sh", "/usr/bin/"]
+COPY ["files/arp_update", "files/supervisor-proc-exit-listener", "files/update_proc_variables", "enable_counters.py", "start.sh", "orchagent.sh", "swssconfig.sh", "/usr/bin/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
-COPY ["files/supervisor-proc-exit-listener", "/usr/bin"]
 COPY ["critical_processes", "/etc/supervisor/"]
 
 ## Copy all Jinja2 template files into the templates folder

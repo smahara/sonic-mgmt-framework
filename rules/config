@@ -48,6 +48,9 @@ DEFAULT_PASSWORD = broadcom
 # ENABLE_ZTP - installs Zero Touch Provisioning support.
 ENABLE_ZTP = y
 
+# ENABLE_PDE - Enable platform development enviroment
+# ENABLE_PDE = y
+
 # SHUTDOWN_BGP_ON_START - if set to y all bgp sessions will be in admin down state when
 # bgp service starts.
 # SHUTDOWN_BGP_ON_START = y
@@ -59,6 +62,10 @@ ENABLE_ZTP = y
 # SONIC_INSTALL_DEBUG_TOOLS - installs debugging tools in baseline docker
 # Uncomment next line to enable:
 # SONIC_INSTALL_DEBUG_TOOLS = y
+
+# SONIC_USE_PDDF_FRAMEWORK - Use PDDF generic drivers and plugins
+# Uncomment next line to enable:
+SONIC_USE_PDDF_FRAMEWORK = y
 
 # SONIC_ROUTING_STACK - specify the routing-stack being elected to drive SONiC's control-plane.
 # Supported routing stacks on SONiC are:
@@ -112,14 +119,11 @@ FRR_USER_GID = 300
 # Default VS build memory preparation
 DEFAULT_VS_PREPARE_MEM = yes
 
-
 # Docker local registry server info where
 # Docker base images are pushed and pulled from the local docker registry
-# DOCKER_REGISTRY_SERVER=10.75.18.181:5000
-
-
+DOCKER_REGISTRY_SERVER=10.75.139.137:5000
 
 # Debian local mirror site info
-# DEBIAN_ARCHIVE_MIRROR=10.175.127.104 
-# DEBIAN_ORG_MIRROR=10.75.18.181 
+#DEBIAN_ARCHIVE_MIRROR=10.75.18.181:9090
+#DEBIAN_ORG_MIRROR=10.75.18.181:8080
 

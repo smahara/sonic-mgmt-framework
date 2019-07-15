@@ -2,8 +2,7 @@
 SHELL = /bin/bash
 .SHELLFLAGS += -e
 
-MAIN_TARGET = isc-dhcp-common_$(ISC_DHCP_VERSION)_amd64.deb
-DERIVED_TARGETS = isc-dhcp-relay_$(ISC_DHCP_VERSION)_amd64.deb
+MAIN_TARGET = isc-dhcp-relay_$(ISC_DHCP_VERSION)_amd64.deb
 
 # For non-optimizing builds, use -O1 optimization instead of the default -O0.
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
@@ -33,6 +32,4 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	popd
 
 	# Move the newly-built .deb packages to the destination directory
-	mv $* $(DERIVED_TARGETS) $(DEST)/
-
-$(addprefix $(DEST)/, $(DERIVED_TARGETS)): $(DEST)/% : $(DEST)/$(MAIN_TARGET)
+	mv $* $(DEST)/

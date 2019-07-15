@@ -69,6 +69,15 @@ sudo mkdir -p $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/ifupdown2_*.deb || \
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
 
+# Install a more recent version of ntp  (and its dependencies via 'apt-get -y install -f')
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/ntp_*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+# Modifty ntp default configuration: disable initial jump (add -x), and disable
+# jump when time difference is greater than 1000 seconds (remove -g).
+sudo sed -i "s/NTPD_OPTS='-g'/NTPD_OPTS='-x'/" $FILESYSTEM_ROOT/etc/default/ntp
+
+
 # Install dependencies for SONiC config engine
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install \
     python-dev     \
@@ -168,6 +177,12 @@ sudo LANG=C cp $IMAGE_CONFIGS/warmboot-finalizer/finalize-warmboot.sh $FILESYSTE
 sudo LANG=C cp $IMAGE_CONFIGS/warmboot-finalizer/warmboot-finalizer.service $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable warmboot-finalizer.service
 
+
+# Copy support save export files
+sudo LANG=C cp $SCRIPTS_DIR/export/export.py  $FILESYSTEM_ROOT/usr/local/bin/export.py
+sudo LANG=C cp $IMAGE_CONFIGS/export/export.service $FILESYSTEM_ROOT/etc/systemd/system/
+sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable export.service
+
 # Copy rsyslog configuration files and templates
 sudo cp $IMAGE_CONFIGS/rsyslog/rsyslog-config.service  $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable rsyslog-config.service
@@ -186,6 +201,7 @@ sudo cp $IMAGE_CONFIGS/interfaces/interfaces-config.service  $FILESYSTEM_ROOT/et
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable interfaces-config.service
 sudo cp $IMAGE_CONFIGS/interfaces/interfaces-config.sh $FILESYSTEM_ROOT/usr/bin/
 sudo cp $IMAGE_CONFIGS/interfaces/*.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
+sudo cp files/dhcp/dhclient.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 
 # Copy initial interfaces configuration file, will be overwritten on first boot
 sudo cp $IMAGE_CONFIGS/interfaces/init_interfaces $FILESYSTEM_ROOT/etc/network/interfaces
@@ -244,6 +260,24 @@ sudo cp $IMAGE_CONFIGS/sudoers/sudoers.lecture $FILESYSTEM_ROOT/etc/
 sudo cp $IMAGE_CONFIGS/caclmgrd/caclmgrd.service  $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable caclmgrd.service
 sudo cp $IMAGE_CONFIGS/caclmgrd/caclmgrd $FILESYSTEM_ROOT/usr/bin/
+
+## Allow systemd-coredump to perform cleanup of core files and not tmpfiles.d
+sudo sed -i "/\/var\/lib\/systemd\/coredump/d" $FILESYSTEM_ROOT/usr/lib/tmpfiles.d/systemd.conf
+
+# Customize systemd-coredump configuration
+sudo mkdir -p $FILESYSTEM_ROOT/etc/systemd/coredump.conf.d
+sudo cp $IMAGE_CONFIGS/coredump/coredump.conf.d/00-sonic-coredump.conf $FILESYSTEM_ROOT/etc/systemd/coredump.conf.d
+# Setup service to configure coredump service
+sudo cp $IMAGE_CONFIGS/coredump/coredump-config.service $FILESYSTEM_ROOT/etc/systemd/system/
+sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable coredump-config.service
+sudo cp $IMAGE_CONFIGS/coredump/coredump-config.sh $FILESYSTEM_ROOT/usr/bin/
+
+## Enable persistent journal to store coredump history
+sudo mkdir -p  $FILESYSTEM_ROOT/etc/systemd/journald.conf.d/
+sudo cp files/image_config/journald/journald.conf.d/00-sonic-journald.conf $FILESYSTEM_ROOT/etc/systemd/journald.conf.d/
+
+## Shortcut to access core files
+sudo ln -sf /var/lib/systemd/coredump $FILESYSTEM_ROOT/var/core
 
 ## Install package without starting service
 ## ref: https://wiki.debian.org/chroot
@@ -307,6 +341,11 @@ sudo chroot $FILESYSTEM_ROOT docker info
 {% set imagename = imagefilename.split('.')|first -%}
 sudo LANG=C chroot $FILESYSTEM_ROOT docker load < {{image}}
 sudo LANG=C chroot $FILESYSTEM_ROOT docker tag {{imagename}}:latest {{imagename}}:$(sonic_get_version)
+{% if imagename.endswith('-dbg') %}
+{% set imagebasename = imagename.replace('-dbg', '') -%}
+sudo LANG=C chroot $FILESYSTEM_ROOT docker tag {{imagename}}:latest {{imagebasename}}:$(sonic_get_version)
+sudo LANG=C chroot $FILESYSTEM_ROOT docker tag {{imagename}}:latest {{imagebasename}}:latest
+{% endif %}
 {% endfor %}
 sudo chroot $FILESYSTEM_ROOT service docker stop
 sudo rm $FILESYSTEM_ROOT/etc/init.d/docker

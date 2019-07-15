@@ -3,7 +3,7 @@
 ## an ONIE installer image.
 ##
 ## USAGE:
-##   USERNAME=username PASSWORD=password ./build_debian
+##   USERNAME=username PASSWORD=password ./build_debian [phase]
 ## ENVIRONMENT:
 ##   USERNAME
 ##          The name of the default admin user
@@ -11,6 +11,10 @@
 ##          The password, expected by chpasswd command
 ##   NUMPROCS
 ##          Limit the number of processes to use with mksquashfs
+##   phase (optional)
+##          Split the fsroot creation into the following phases (must be invoked in sequence!)
+##             1 -- Create fsroot mount point and build common part up to (but not including) version file.
+##             2 -- Build version file and all SONiC custom content (Debian extensions, org-specific extensions, clean up).
 
 ## Default user
 [ -n "$USERNAME" ] || {
@@ -29,6 +33,28 @@
     NUMPROCS=$(nproc)
 }
 
+## Check for optional phase and make sure it's valid
+if [ "$#" -ge 1 ]; then
+    if [ "$1" -ne 1 ] && [ "$1" -ne 2 ]; then
+        echo "Error: invalid phase '$1' specified"
+        exit 1
+    fi
+fi
+## Set phase to input value, or use default of 0 to perform all phases
+PHASE=${1:-0}
+
+## Define local phase-specific flags
+if [ "$PHASE" -eq 0 ] || [ "$PHASE" -eq 1 ]; then
+    IS_PHASE_1=true
+else
+    IS_PHASE_1=false
+fi
+if [ "$PHASE" -eq 0 ] || [ "$PHASE" -eq 2 ]; then
+    IS_PHASE_2=true
+else
+    IS_PHASE_2=false
+fi
+
 ## Include common functions
 . functions.sh
 
@@ -37,14 +63,10 @@ set -x -e
 
 ## docker engine version (with platform)
 DOCKER_VERSION=5:18.09.2~3-0~debian-stretch
-LINUX_KERNEL_VERSION=4.9.0-8-2
-
-# Create special tmpfs mount point for fsroot
-FILESYSTEM_BASE=/sonic/build
-mkdir -p ${FILESYSTEM_BASE}
-sudo mount -t tmpfs -o size=16G tmpfs ${FILESYSTEM_BASE}
+LINUX_KERNEL_VERSION=4.9.0-9-2
 
 ## Working directory to prepare the file system
+FILESYSTEM_BASE=/sonic/build
 FILESYSTEM_ROOT=${FILESYSTEM_BASE}/fsroot
 PLATFORM_DIR=platform
 ## Hostname for the linux image
@@ -65,6 +87,13 @@ DEFAULT_USERINFO="Default admin user,,,"
     echo "Error: Invalid FILESYSTEM_SQUASHFS in onie image config file"
     exit 1
 }
+
+#### PHASE 1 section ####
+if $IS_PHASE_1; then
+
+# Create special tmpfs mount point for fsroot
+mkdir -p ${FILESYSTEM_BASE}
+sudo mount -t tmpfs -o size=16G tmpfs ${FILESYSTEM_BASE}
 
 ## Prepare the file system directory
 if [[ -d $FILESYSTEM_ROOT ]]; then
@@ -96,12 +125,18 @@ sudo LANG=C chroot $FILESYSTEM_ROOT /bin/bash -c 'echo "sysfs /sys sysfs default
 ## Setup proxy
 [ -n "$http_proxy" ] && sudo /bin/bash -c "echo 'Acquire::http::Proxy \"$http_proxy\";' > $FILESYSTEM_ROOT/etc/apt/apt.conf.d/01proxy"
 
+fi  #### end PHASE 1 section ####
+
+#### Common to PHASE 1 and PHASE 2 ####
 ## Note: mounting is necessary to makedev and install linux image
 echo '[INFO] Mount all'
 ## Output all the mounted device for troubleshooting
 mount
 trap_push 'sudo umount $FILESYSTEM_ROOT/proc || true'
 sudo LANG=C chroot $FILESYSTEM_ROOT mount proc /proc -t proc
+
+#### PHASE 1 section ####
+if $IS_PHASE_1; then
 
 ## Pointing apt to public apt mirrors and getting latest packages, needed for latest security updates
 sudo cp files/apt/sources.list $FILESYSTEM_ROOT/etc/apt/
@@ -124,6 +159,12 @@ sudo LANG=C chroot $FILESYSTEM_ROOT /bin/bash -c 'cd /dev && MAKEDEV generic'
 ## However, 'dpkg -i' plus 'apt-get install -f' will ignore the recommended dependency. So
 ## we install busybox explicitly
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y install busybox
+
+fi  #### end PHASE 1 section ####
+
+#### PHASE 2 section ####
+if $IS_PHASE_2; then
+
 echo '[INFO] Install SONiC linux kernel image'
 ## Note: duplicate apt-get command to ensure every line return zero
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/initramfs-tools-core_*.deb || \
@@ -133,7 +174,7 @@ sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/initramfs-tools_*.deb || \
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/linux-image-${LINUX_KERNEL_VERSION}-amd64_*.deb || \
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install acl
-sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install dmidecode 
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install dmidecode
 
 ## Update initramfs for booting with squashfs+overlay
 cat files/initramfs-tools/modules | sudo tee -a $FILESYSTEM_ROOT/etc/initramfs-tools/modules > /dev/null
@@ -173,6 +214,11 @@ pushd $FILESYSTEM_ROOT/usr/share/initramfs-tools/scripts/init-bottom && sudo pat
 
 ## Install latest intel ixgbe driver
 sudo cp $files_path/ixgbe.ko $FILESYSTEM_ROOT/lib/modules/${LINUX_KERNEL_VERSION}-amd64/kernel/drivers/net/ethernet/intel/ixgbe/ixgbe.ko
+
+fi  #### end PHASE 2 section ####
+
+#### PHASE 1 section ####
+if $IS_PHASE_1; then
 
 ## Install docker
 echo '[INFO] Install docker'
@@ -224,11 +270,11 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     vim                     \
     tcpdump                 \
     dbus                    \
-    ntp                     \
     ntpstat                 \
     openssh-server          \
     python                  \
     python-setuptools       \
+    python-jsonschema       \
     monit                   \
     python-apt              \
     traceroute              \
@@ -259,8 +305,12 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     tcptraceroute           \
     mtr-tiny                \
     locales                 \
+    netbase                 \
+    libopts25               \
     flashrom                \
     cgroup-tools            \
+    python-argcomplete      \
+    python-ipaddr           \
     conntrack
 
 #Adds a locale to a debian system in non-interactive mode
@@ -279,12 +329,19 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y do
 
 sudo mv $FILESYSTEM_ROOT/grub-pc-bin*.deb $FILESYSTEM_ROOT/$PLATFORM_DIR/x86_64-grub
 
+fi  #### end PHASE 1 section ####
+
+#### PHASE 2 section ####
+if $IS_PHASE_2; then
+
 ## Disable kexec supported reboot which was installed by default
 sudo sed -i 's/LOAD_KEXEC=true/LOAD_KEXEC=false/' $FILESYSTEM_ROOT/etc/default/kexec
 
 ## Modifty ntp default configuration: disable initial jump (add -x), and disable
 ## jump when time difference is greater than 1000 seconds (remove -g).
-sudo sed -i "s/NTPD_OPTS='-g'/NTPD_OPTS='-x'/" $FILESYSTEM_ROOT/etc/default/ntp
+# ========== patch built NTP will be installed later.
+#sudo sed -i "s/NTPD_OPTS='-g'/NTPD_OPTS='-x'/" $FILESYSTEM_ROOT/etc/default/ntp
+# ===========
 
 ## Fix ping tools permission so non root user can directly use them
 ## Note: this is a workaround since aufs doesn't support extended attributes
@@ -325,12 +382,11 @@ check system $HOST
 EOF
 
 ## Config sysctl
-sudo mkdir -p $FILESYSTEM_ROOT/var/core
 sudo augtool --autosave "
-set /files/etc/sysctl.conf/kernel.core_pattern '|/usr/bin/coredump-compress %e %t %p'
 
 set /files/etc/sysctl.conf/kernel.softlockup_panic 1
 set /files/etc/sysctl.conf/kernel.panic 10
+set /files/etc/sysctl.conf/vm.panic_on_oom 2
 set /files/etc/sysctl.conf/fs.suid_dumpable 2
 
 set /files/etc/sysctl.conf/net.ipv4.conf.default.forwarding 1
@@ -369,11 +425,16 @@ set /files/etc/sysctl.conf/net.ipv6.conf.eth0.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.accept_ra_defrtr 0
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.accept_ra 0
 
-set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 1
+set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 0
 set /files/etc/sysctl.conf/net.ipv4.udp_l3mdev_accept 1
+
+set /files/etc/sysctl.conf/net.ipv6.ip_nonlocal_bind 1
 
 set /files/etc/sysctl.conf/net.core.rmem_max 2097152
 set /files/etc/sysctl.conf/net.core.wmem_max 2097152
+
+set /files/etc/sysctl.conf/net.core.somaxconn 512
+
 " -r $FILESYSTEM_ROOT
 
 ## docker-py is needed by Ansible docker module
@@ -383,6 +444,11 @@ sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install 'docker
 
 ## Get gcc and python dev pkgs
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install gcc libpython2.7-dev
+
+
+# Package scp/sftp/crypto for export
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT pip install paramiko SSHClient SCPClient scp watchdog pycrypto  Daemonize
+
 
 ## Create /var/run/redis folder for docker-database to mount
 sudo mkdir -p $FILESYSTEM_ROOT/var/run/redis
@@ -397,10 +463,14 @@ EOF
 
 sudo cp files/dhcp/rfc3442-classless-routes $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d
 sudo cp files/dhcp/sethostname $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
+sudo cp files/dhcp/sethostname6 $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
 sudo cp files/dhcp/graphserviceurl $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
 sudo cp files/dhcp/snmpcommunity $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
 sudo cp files/dhcp/vrf $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
 sudo cp files/dhcp/dhclient.conf $FILESYSTEM_ROOT/etc/dhcp/
+
+## Configure application core dump handler
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get install -y systemd-coredump
 
 ## Version file
 sudo mkdir -p $FILESYSTEM_ROOT/etc/sonic
@@ -422,7 +492,7 @@ fi
 ## Organization specific extensions such as Configuration & Scripts for features like AAA, ZTP...
 if [ "${enable_organization_extensions}" = "y" ]; then
    if [ -f files/build_templates/organization_extensions.sh ]; then
-      sudo chmod 755 files/build_templates/organization_extensions.sh 
+      sudo chmod 755 files/build_templates/organization_extensions.sh
       ./files/build_templates/organization_extensions.sh -f $FILESYSTEM_ROOT -h $HOSTNAME
    fi
 fi
@@ -476,3 +546,5 @@ sudo zip -g $ONIE_INSTALLER_PAYLOAD $FILESYSTEM_SQUASHFS $FILESYSTEM_DOCKERFS
 
 FILESYSTEM_BASE=/sonic/build
 sudo umount -f ${FILESYSTEM_BASE} || true
+
+fi  #### end PHASE 2 section ####

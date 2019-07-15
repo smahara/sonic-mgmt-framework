@@ -8,74 +8,99 @@
 # the ipv4/ipv6 neighbors state.
 
 while /bin/true; do
-  # find L3 interfaces which are UP, send ipv6 multicast pings
-  echo "{% for (name, prefix) in INTERFACE %} {{name}} {% endfor %}" > /tmp/intf_tmp.j2
-  INTERFACE=`sonic-cfggen -d -t /tmp/intf_tmp.j2`
-  echo "{% for (name, prefix) in PORTCHANNEL_INTERFACE %} {{name}} {% endfor %}" > /tmp/pc_intf_tmp.j2
-  PC_INTERFACE=`sonic-cfggen -d -t /tmp/pc_intf_tmp.j2`
+    # find L3 interfaces which are UP, send ipv6 multicast pings
+    echo "{% if INTERFACE %} {% for (name, prefix) in INTERFACE|pfx_filter %} {{name}} {% endfor %} {% endif %}" > /tmp/intf_tmp.j2
+    INTERFACE=`sonic-cfggen -d -t /tmp/intf_tmp.j2`
+    echo "{% if PORTCHANNEL_INTERFACE %} {% for (name, prefix) in PORTCHANNEL_INTERFACE|pfx_filter %} {{name}} {% endfor %} {% endif %}" > /tmp/pc_intf_tmp.j2
+    PC_INTERFACE=`sonic-cfggen -d -t /tmp/pc_intf_tmp.j2`
 
-  ALL_INTERFACE="$INTERFACE $PC_INTERFACE"
-  for intf in $ALL_INTERFACE; do
-      ping6cmd="ping6 -I $intf -n -q -i 0 -c 1 -W 0 ff02::1 >/dev/null"
-      intf_up=$(ip link show $intf | grep "state UP")
-      if [[ -n "$intf_up" ]]; then
-          eval $ping6cmd
-      fi
-  done
+    ALL_INTERFACE="$INTERFACE $PC_INTERFACE"
+    for intf in $ALL_INTERFACE; do
+        ping6cmd="ping6 -I $intf -n -q -i 0 -c 1 -W 0 ff02::1 >/dev/null"
+        intf_up=$(ip link show $intf | grep "state UP")
+        if [[ -n "$intf_up" ]]; then
+            eval $ping6cmd
+            #Send ARP/NDP for all failed entries on Router ports
+            arpingcmd="sed -e 's/ / -i /' -e 's/^/arping -q -w 0 -c 1 /' -e 's/$/;/'"
+            ipcmd="ip -4 neigh show | grep $intf | grep -i failed | cut -d ' ' -f 1,3 | $arpingcmd"
+            eval `eval $ipcmd`
 
-  echo "{% for (neigh, prefix) in NEIGH %} {{prefix}} {% endfor %}" > /tmp/neigh_tmp.j2
-  NEIGHBOR=`sonic-cfggen -d -t /tmp/neigh_tmp.j2`
-  for neighbor in $NEIGHBOR; do
-      arpingcmd="sed -e 's/ / -i /' -e 's/^/arping -q -w 0 -c 1 /' -e 's/$/;/'"
-      ipcmd="ip -4 neigh show | grep $neighbor | cut -d ' ' -f 1,3 | $arpingcmd"
-      eval `eval $ipcmd`
+            ping6cmd2="sed -e 's/ / -I /' -e 's/^/ping6 -n -q -i 0 -c 1 -W 0 /' -e 's/$/ >\/dev\/null;/'"
+            ip6cmd="ip -6 neigh show | grep -v fe80 | grep -i failed | grep $intf | cut -d ' ' -f 1,3 | $ping6cmd2"
+            eval `eval $ip6cmd`
+        fi
+    done
 
-      ndisc6cmd="sed -e 's/^/ndisc6 -q -w 0 -1 /' -e 's/$/;/'"
-      ip6cmd="ip -6 neigh show | grep -v fe80 | grep $neighbor | cut -d ' ' -f 1,3 | $ndisc6cmd"
-      eval `eval $ip6cmd`
+    echo "{% for (neigh, prefix) in NEIGH %} {{prefix}} {% endfor %}" > /tmp/neigh_tmp.j2
+    NEIGHBOR=`sonic-cfggen -d -t /tmp/neigh_tmp.j2`
+    for neighbor in $NEIGHBOR; do
+        #get the neighbor entry
+        neigh_entry="$(ip -4 neigh show | grep $neighbor)"
+        if [[ -n "$neigh_entry" ]]; then
+            # get the interface from the neighbor entry 
+            intf="$(ip -4 neigh show | grep $neighbor | cut -d ' ' -f 3)"
+            # get the ipv4 addr for this interface
+            intf_ip=$(ip -4 addr show $intf | grep 'inet' | cut -d: -f2  | awk '{print $2}')
+            #if the interface has no ip then no need to do the arping
+            if [[ ! $intf_ip ]]; then
+                #echo "$intf has no ip, so no need to arping"
+                continue
+            fi
 
-	  # Use ping6 utility only for neighbor entries in FAILED state
-	  # Once added, ndisc6 utility will keep refreshing them
-	  #   ping6 -n -q -i 0 -c 1 -W 0 <IP> -I <Interface> >/dev/null;
-	  ping6cmd="sed -e 's/ / -I /' -e 's/^/ping6 -n -q -i 0 -c 1 -W 0 /' -e 's/$/ >\/dev\/null;/'"
-      ip6cmd="ip -6 neigh show | grep -v fe80 | grep -i failed | grep $neighbor | cut -d ' ' -f 1,3 | $ping6cmd"
-      eval `eval $ip6cmd`
-  done
-  
-  VLAN=`sonic-cfggen -d -v 'VLAN.keys() | join(" ") if VLAN'`
-  for vlan in $VLAN; do
-      # check if the vlan interface is present in the kernel
-      vlan_intf=$(ip link show type vlan | grep $vlan)
-	    if [[ ! "$vlan_intf" ]]; then
-		      continue
-	    fi
-      # generate a list of arping commands:
-      #   arping -q -w 0 -c 1 -i <VLAN interface> <IP 1>;
-      #   arping -q -w 0 -c 1 -i <VLAN interface> <IP 2>;
-      #   ...
-      arpingcmd="sed -e 's/ / -i /' -e 's/^/arping -q -w 0 -c 1 /' -e 's/$/;/'"
-      ipcmd="ip -4 neigh show | grep $vlan | cut -d ' ' -f 1,3 | $arpingcmd"
+            arpingcmd="sed -e 's/ / -i /' -e 's/^/arping -q -w 0 -c 1 /' -e 's/$/;/'"
+            ipcmd="ip -4 neigh show | grep $neighbor | cut -d ' ' -f 1,3 | $arpingcmd"
+            eval `eval $ipcmd`
+        fi
 
-      eval `eval $ipcmd`
+        ndisc6cmd="sed -e 's/^/ndisc6 -q -w 0 -1 /' -e 's/$/;/'"
+        ip6cmd="ip -6 neigh show | grep -v fe80 | grep -vi failed | grep $neighbor | cut -d ' ' -f 1,3 | $ndisc6cmd"
+        eval `eval $ip6cmd`
 
-      # send ipv6 multicast pings to Vlan interfaces to get/refresh link-local addrs
-      ping6cmd="ping6 -I $vlan -n -q -i 0 -c 1 -W 0 ff02::1 >/dev/null"
-      eval $ping6cmd
+        # Use ping6 utility only for neighbor entries in FAILED state
+        # Once added, ndisc6 utility will keep refreshing them
+        #   ping6 -n -q -i 0 -c 1 -W 0 <IP> -I <Interface> >/dev/null;
+        ping6cmd="sed -e 's/ / -I /' -e 's/^/ping6 -n -q -i 0 -c 1 -W 0 /' -e 's/$/ >\/dev\/null;/'"
+        ip6cmd="ip -6 neigh show | grep -v fe80 | grep -i failed | grep $neighbor | cut -d ' ' -f 1,3 | $ping6cmd"
+        eval `eval $ip6cmd`
+    done
 
-      # generate a list of ndisc6 commands (exclude link-local addrs since it is done above):
-      #   ndisc6 -q -w 0 -1 <IP 1> <VLAN interface>;
-      #   ndisc6 -q -w 0 -1 <IP 2> <VLAN interface>;
-      #   ...
-      ndisc6cmd="sed -e 's/^/ndisc6 -q -w 0 -1 /' -e 's/$/;/'"
-      ip6cmd="ip -6 neigh show | grep -v fe80 | grep $vlan | cut -d ' ' -f 1,3 | $ndisc6cmd"
-      eval `eval $ip6cmd`
-	  
-	  # Use ping6 utility only for neighbor entries in FAILED state
-	  # Once added, ndisc6 utility will keep refreshing them
-	  #   ping6 -n -q -i 0 -c 1 -W 0 <IP> -I <Interface> >/dev/null;
-	  ping6cmd="sed -e 's/ / -I /' -e 's/^/ping6 -n -q -i 0 -c 1 -W 0 /' -e 's/$/ >\/dev\/null;/'"
-      ip6cmd="ip -6 neigh show | grep -v fe80 | grep -i failed | grep $vlan | cut -d ' ' -f 1,3 | $ping6cmd"
-      eval `eval $ip6cmd`
-  done
-  sleep 300
+    VLAN=`sonic-cfggen -d -v 'VLAN.keys() | join(" ") if VLAN'`
+    for vlan in $VLAN; do
+        # check if the vlan interface is present in the kernel
+        vlan_intf=$(ip link show type vlan | grep $vlan)
+        if [[ ! "$vlan_intf" ]]; then
+            continue
+        fi
+        # generate a list of arping commands:
+        #   arping -q -w 0 -c 1 -i <VLAN interface> <IP 1>;
+        #   arping -q -w 0 -c 1 -i <VLAN interface> <IP 2>;
+        #   ...
+        # get the ipv4 addr for this interface
+        intf_ip=$(ip -4 addr show $vlan | grep 'inet' | cut -d: -f2  | awk '{print $2}')
+        if [[ $intf_ip ]]; then
+            arpingcmd="sed -e 's/ / -i /' -e 's/^/arping -q -w 0 -c 1 /' -e 's/$/;/'"
+            ipcmd="ip -4 neigh show | grep $vlan | cut -d ' ' -f 1,3 | $arpingcmd"
+            eval `eval $ipcmd`
+        fi
+
+        # send ipv6 multicast pings to Vlan interfaces to get/refresh link-local addrs
+        ping6cmd="ping6 -I $vlan -n -q -i 0 -c 1 -W 0 ff02::1 >/dev/null"
+        eval $ping6cmd
+
+        # generate a list of ndisc6 commands (exclude link-local addrs since it is done above):
+        #   ndisc6 -q -w 0 -1 <IP 1> <VLAN interface>;
+        #   ndisc6 -q -w 0 -1 <IP 2> <VLAN interface>;
+        #   ...
+        ndisc6cmd="sed -e 's/^/ndisc6 -q -w 0 -1 /' -e 's/$/;/'"
+        ip6cmd="ip -6 neigh show | grep -v fe80 | grep -vi failed | grep $vlan | cut -d ' ' -f 1,3 | $ndisc6cmd"
+        eval `eval $ip6cmd`
+
+        # Use ping6 utility only for neighbor entries in FAILED state
+        # Once added, ndisc6 utility will keep refreshing them
+        #   ping6 -n -q -i 0 -c 1 -W 0 <IP> -I <Interface> >/dev/null;
+        ping6cmd="sed -e 's/ / -I /' -e 's/^/ping6 -n -q -i 0 -c 1 -W 0 /' -e 's/$/ >\/dev\/null;/'"
+        ip6cmd="ip -6 neigh show | grep -v fe80 | grep -i failed | grep $vlan | cut -d ' ' -f 1,3 | $ping6cmd"
+        eval `eval $ip6cmd`
+    done
+    sleep 300
 done

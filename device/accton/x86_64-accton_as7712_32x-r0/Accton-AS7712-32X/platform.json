@@ -1,0 +1,10 @@
+{
+    "fec-mode": {
+        "Ethernet0-127": {
+            "1": [ "none", "fc" ], 
+            "2": [ "none", "fc" ], 
+            "4": [ "none", "fc", "rs" ]
+        }
+    }
+}
+

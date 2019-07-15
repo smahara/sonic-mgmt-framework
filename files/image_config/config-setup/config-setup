@@ -16,8 +16,14 @@ CONFIG_DB_INDEX=4
 UPDATEGRAPH_CONF=/etc/sonic/updategraph.conf
 CONFIG_DB_JSON=/etc/sonic/config_db.json
 MINGRAPH_FILE=/etc/sonic/minigraph.xml
-FACTORY_DEFAULT_TEMPLATE=/usr/share/sonic/templates/factory-default.j2
 TMP_ZTP_CONFIG_DB_JSON=/tmp/ztp_config_db.json
+FACTORY_DEFAULT_HOOKS=/etc/config-setup/factory-default-hooks.d
+CONFIG_PRE_MIGRATION_HOOKS=/etc/config-setup/config-migration-pre-hooks.d
+CONFIG_POST_MIGRATION_HOOKS=/etc/config-setup/config-migration-post-hooks.d
+CONFIG_SETUP_VAR_DIR=/var/lib/config-setup
+CONFIG_SETUP_PRE_MIGRATION_FLAG=${CONFIG_SETUP_VAR_DIR}/pending_pre_migration
+CONFIG_SETUP_POST_MIGRATION_FLAG=${CONFIG_SETUP_VAR_DIR}/pending_post_migration
+CONFIG_SETUP_INITIALIZATION_FLAG=${CONFIG_SETUP_VAR_DIR}/pending_initialization
 
 # Command usage and help
 usage()
@@ -31,6 +37,50 @@ cat << EOF
                    it to destination file. If no destination file is provided,
                    save it to ${CONFIG_DB_JSON}.
 EOF
+}
+
+# run given script
+run_hook() {
+    local script="$1"
+    local exit_status=0
+
+    if [ -f $script ]; then
+        . $script
+        exit_status=$?
+    fi
+
+    if [ -n "$exit_status" ] && [ "$exit_status" -ne 0 ]; then
+        logger -p daemon.err "$script returned non-zero exit status $exit_status"
+    fi
+
+    return $exit_status
+}
+
+# run scripts in given directory
+run_hookdir() {
+    local dir="$1"
+    local progress_file="$2"
+    local exit_status=0
+
+    if [ -d "$dir" ]; then
+        if [ -n $progress_file ]; then
+            [ ! -d  $(dirname $progress_file) ] && mkdir -p $(dirname $progress_file)
+            [ ! -e $progress_file  ] &&  run-parts --list $dir > $progress_file
+            SCRIPT_LIST=$(cat $progress_file)
+        else
+            SCRIPT_LIST=$(run-parts --list $dir)
+        fi
+
+        for script in $SCRIPT_LIST; do
+            run_hook $script
+            exit_status=$((exit_status|$?))
+            script_name=$(basename $script)
+            sed -i "/$script_name/d" $progress_file
+        done
+        [ -n $progress_file ] && [ "$(cat ${progress_file})" = "" ] && rm -f ${progress_file}
+    fi
+
+    return $exit_status
 }
 
 # Reload minigraph.xml file on disk
@@ -146,16 +196,14 @@ generate_config()
 
   if [ "$1" = "ztp" ]; then
     /usr/lib/ztp/ztp-profile.sh create ${DEST_FILE}
-  else
+  elif [ "$1" = "factory" ]; then
     rv=1
-    # Use factory default config provided
-    if [ -e ${FACTORY_DEFAULT_TEMPLATE} ]; then
-       sonic-cfggen -H -k ${HW_KEY} -p -t ${FACTORY_DEFAULT_TEMPLATE} > ${DEST_FILE}
-       rv=$?
-    fi
+
+    # Execute config initialization hooks
+    run_hookdir ${FACTORY_DEFAULT_HOOKS} ${CONFIG_SETUP_INITIALIZATION_FLAG}
 
     # Use preset defined in default_sku
-    if [ $rv -ne 0 ] || [ ! -e ${DEST_FILE} ]; then
+    if [ ! -e ${DEST_FILE} ]; then
        sonic-cfggen -H -k ${HW_KEY} --preset ${DEFAULT_PRESET} > ${DEST_FILE}
        rv=$?
        if [ $rv -ne 0 ]; then
@@ -202,6 +250,9 @@ do_config_migration()
   # Migrate all configuration files from old to new
   copy_config_files_and_directories $copy_list
 
+  # Execute custom hooks if present
+  run_hookdir ${CONFIG_POST_MIGRATION_HOOKS} ${CONFIG_SETUP_POST_MIGRATION_FLAG}
+
   if [ x"${WARM_BOOT}" == x"true" ]; then
       echo "Warm reboot detected..."
       disable_updategraph
@@ -229,9 +280,12 @@ do_config_migration()
 # Take a backup of current SONiC configuration
 do_config_backup()
 {
-  echo "Taking backup of configuration before rebooting"
+  echo "Taking backup of curent configuration"
   rm -rf /host/old_config
   cp -ar /etc/sonic /host/old_config
+
+  # Execute custom hooks if present
+  run_hookdir ${CONFIG_PRE_MIGRATION_HOOKS} ${CONFIG_SETUP_PRE_MIGRATION_FLAG}
 }
 
 # Process switch bootup event
@@ -243,11 +297,11 @@ do_config_backup()
 boot_config()
 {
   check_system_warm_boot
-  if [ -e /tmp/pending_config_migration ]; then
+  if [ -e /tmp/pending_config_migration ] || [ -e  ${CONFIG_SETUP_POST_MIGRATION_FLAG} ]; then
      do_config_migration
   fi
 
-  if [ -e /tmp/pending_config_initialization ]; then
+  if [ -e /tmp/pending_config_initialization ] || [ -e  ${CONFIG_SETUP_INITIALIZATION_FLAG} ]; then
      do_config_intialization
   fi
 
@@ -256,7 +310,14 @@ boot_config()
     do_config_intialization
     # force ZTP to restart
     if  ztp_is_enabled ; then
-       touch /tmp/pending_ztp_restart
+       ztp_status=$(ztp status -c)
+       if [ "$ztp_status" = "5:SUCCESS" ] || \
+          [ "$ztp_status" = "6:FAILED" ]; then
+          # Clear completed ztp information, before starting a new one
+          ztp erase -y
+       else
+          touch /tmp/pending_ztp_restart
+       fi
     fi
   fi
 }

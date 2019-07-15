@@ -6,9 +6,9 @@ minigraph file, config DB, json file(s), yaml files(s), command line input,
 and write the data into DB, print as json, or render a jinja2 config template.
 
 Examples:
-    Render template with minigraph:        
+    Render template with minigraph:
         sonic-cfggen -m -t /usr/share/template/bgpd.conf.j2
-    Dump config DB content into json file: 
+    Dump config DB content into json file:
         sonic-cfggen -d --print-data > db_dump.json
     Load content of json file into config DB:
         sonic-cfggen -j db_dump.json --write-to-db
@@ -86,13 +86,28 @@ def unique_name(l):
             new_list.append(item)
     return new_list
 
+def pfx_filter(value):
+    table = OrderedDict()
+    for key,val in value.items():
+        if not isinstance(key, tuple):
+            continue
+        table[key] = val
+    return table
+
+def is_intf_exists(value):
+    if not value:
+        return False
+    link_state = '/sys/class/net/'+value+'/operstate'
+    if os.path.isfile(link_state):
+        return True
+    return False
 
 class FormatConverter:
     """Convert config DB based schema to legacy minigraph based schema for backward capability.
 We will move to DB schema and remove this class when the config templates are modified.
 
 TODO(taoyl): Current version of config db only supports BGP admin states.
-    All other configuration are still loaded from minigraph. Plan to remove 
+    All other configuration are still loaded from minigraph. Plan to remove
     minigraph and move everything into config db in a later commit.
     """
     @staticmethod
@@ -202,7 +217,10 @@ def main():
 
     for yaml_file in args.yaml:
         with open(yaml_file, 'r') as stream:
-            additional_data = yaml.load(stream)      
+	    if yaml.__version__ >= "5.1":
+                additional_data = yaml.full_load(stream)
+	    else:
+                additional_data = yaml.load(stream)
             deep_update(data, FormatConverter.to_deserialized(additional_data))
 
     for json_file in args.json:
@@ -211,7 +229,7 @@ def main():
 
     if args.additional_data != None:
         deep_update(data, json.loads(args.additional_data))
-  
+
     if args.from_db:
         configdb = ConfigDBConnector(**db_kwargs)
         configdb.connect()
@@ -231,9 +249,11 @@ def main():
 
         env = jinja2.Environment(loader=loader, trim_blocks=True)
         env.filters['sort_by_port_index'] = sort_by_port_index
+        env.filters['is_intf_exists'] = is_intf_exists
         env.filters['ipv4'] = is_ipv4
         env.filters['ipv6'] = is_ipv6
         env.filters['unique_name'] = unique_name
+        env.filters['pfx_filter'] = pfx_filter
         for attr in ['ip', 'network', 'prefixlen', 'netmask']:
             env.filters[attr] = partial(prefix_attr, attr)
         template = env.get_template(template_file)

@@ -3,7 +3,7 @@
 
 ifeq ($(ENABLE_ZTP), y)
 
-SONIC_ZTP_VERSION = 0.0.1
+SONIC_ZTP_VERSION = 1.0.0
 
 SONIC_ZTP = sonic-ztp_$(SONIC_ZTP_VERSION)_all.deb
 $(SONIC_ZTP)_SRC_PATH = $(SRC_PATH)/sonic-ztp

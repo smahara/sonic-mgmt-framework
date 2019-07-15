@@ -1,0 +1,6 @@
+ntp (1:4.2.8p10+dfsg-3+deb9u3) stretch; urgency=medium
+
+  * Apply Bug1970 fix for UNLINK_EXPR_SLIST_empty_list from dev branch.
+
+ -- Arun Barboza <arun.barboza@broadcom.com>  Tue, 25 Jun 2019 14:35:24 -0700
+

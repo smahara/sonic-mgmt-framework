@@ -43,10 +43,6 @@ supervisorctl start nbrmgrd
 
 supervisorctl start vxlanmgrd
 
-supervisorctl start natmgrd
-
-supervisorctl start natsyncd
-
 # Set any scaling constants in Linux
 if [ -f /usr/bin/update_proc_variables ]; then
     /usr/bin/update_proc_variables
