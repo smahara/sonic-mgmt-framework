@@ -56,3 +56,13 @@ fi
 
 # enable auto-logout for console ttyS* sessions
 tty | grep ttyS >/dev/null && TMOUT=300
+
+# when the shell exits, append to the history file instead of overwriting it
+shopt -s histappend
+
+# saving 10000 lines to disk and loading the last 5000 lines into memory
+export HISTSIZE=5000
+export HISTFILESIZE=10000
+
+# after each command, append to the history file and reload
+export PROMPT_COMMAND="history -a; history -c; history -r"
