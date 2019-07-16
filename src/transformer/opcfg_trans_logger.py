@@ -2,25 +2,30 @@
 
 import traceback
 
-DEBUG = True
 LOG_PFX = "TRANSFORMER"
 
-def log_dbg_msg(filename, msg, dbg_on = DEBUG):
-     if DEBUG:
-        try:
-            print(LOG_PFX + "[" + filename + "]:" + msg)
-        except Exception as e :
-            msg = "Exception while logging message: "  + str(msg) + ". Exception: " + e.message
-            print(msg)
+import logging
+logging.basicConfig(filename='/tmp/transformer.log', level=logging.DEBUG)
+
+def log_dbg_msg(filename, msg):
+    try:
+	    logging.debug(LOG_PFX + "[" + filename + "]:" + msg)
+    except Exception as e :
+	    msg = "Exception while logging message: "  + str(msg) + ". Exception: " + e.message
+	    logging.exception(msg)
 
 def log_err_msg(filename, msg):
-     log_dbg_msg(filename, msg, dbg_on = True)
+    try:
+	    logging.error(LOG_PFX + "[" + filename + "]:" + msg)
+    except Exception as e :
+ 	    msg = "Exception while logging message: "  + str(msg) + ". Exception: " + e.message
+	    logging.exception(msg)
 
 def log_exception_msg(filename, msg):
     try:
-        print(LOG_PFX + "[" + filename + "]:" + msg)
+        logging.error(LOG_PFX + "[" + filename + "]:" + msg)
     except Exception as e :
         msg = "Exception while logging message: "  + str(msg) + ". Exception: " + e.message
-        print(msg)
-    msg+=repr(traceback.format_exc())
-    print(msg)
+        logging.exception(msg)
+    # msg+=repr(traceback.format_exc())
+    # print(msg)

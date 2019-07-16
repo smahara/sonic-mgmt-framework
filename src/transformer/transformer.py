@@ -20,7 +20,9 @@ import sys
 import traceback
 import pdb
 import opcfg_mgr
-import opcfg_trans_logger as opcfg_log
+from . import opcfg_mgr
+from . import opcfg_trans_logger as opcfg_log
+
 
 transformer_filenm = sys._getframe().f_code.co_filename # Filename, for logging
 
