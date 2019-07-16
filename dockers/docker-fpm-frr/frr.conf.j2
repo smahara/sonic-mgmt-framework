@@ -16,26 +16,32 @@ agentx
 {% endblock system_init %}
 !
 {% block interfaces %}
+{% if INTERFACE %}
 ! Enable link-detect (default disabled)
 {% for (name, prefix) in INTERFACE|pfx_filter %}
 interface {{ name }}
 link-detect
 !
 {% endfor %}
+{% endif %}
+{% if PORTCHANNEL %}
 {% for pc in PORTCHANNEL %}
 interface {{ pc }}
 link-detect
 !
 {% endfor %}
+{% endif %}
 {% endblock interfaces %}
 !
 {% block default_route %}
 ! set static default route to mgmt gateway as a backup to learned default
+{% if MGMT_INTERFACE %}
 {% for (name, prefix) in MGMT_INTERFACE|pfx_filter %}
 {% if prefix | ipv4 %}
 ip route 0.0.0.0/0 {{ MGMT_INTERFACE[(name, prefix)]['gwaddr'] }} 200
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endblock default_route %}
 !
 {% block source_loopback %}
