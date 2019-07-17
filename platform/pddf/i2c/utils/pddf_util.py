@@ -1,5 +1,20 @@
 #!/usr/bin/env python
 
+
+"""
+Usage: %(scriptName)s [options] command object
+
+options:
+    -h | --help     : this help message
+    -d | --debug    : run with debug mode
+    -f | --force    : ignore error during installation or clean
+command:
+    install     : install drivers and generate related sysfs nodes
+    clean       : uninstall drivers and remove related sysfs nodes
+    switch-pddf     : switch to pddf mode, installing pddf drivers and generating sysfs nodes
+    switch-nonpddf  : switch to per platform, non-pddf mode
+"""
+
 import os
 import commands
 import sys, getopt
@@ -60,6 +75,10 @@ def main():
             do_install()
         elif arg == 'clean':
            do_uninstall()
+        elif arg == 'switch-pddf':
+            do_switch_pddf()
+        elif arg == 'switch-nonpddf':
+            do_switch_nonpddf()
         else:
             show_help()
             
@@ -262,6 +281,69 @@ def do_uninstall():
             if FORCE == 0:        
                 return  status                          
     return       
+def do_switch_pddf():
+    print "Checking system...."
+    if os.path.exists('/usr/share/sonic/platform/pddf_support'):
+        print PROJECT_NAME.upper() +" system is already in pddf mode...."
+    else:
+        print "Stopping the platform service..."
+        status, output = log_os_system("systemctl stop as7712-platform-init.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        print "Creating the pddf_support file..."
+        if os.path.exists('/usr/share/sonic/platform'):
+            status, output = log_os_system("touch /usr/share/sonic/platform/pddf_support", 1)
+        else:
+            print "/usr/share/sonic/platform path doesnt exist. Unable to set pddf mode"
+            return -1
+
+        print "Re-starting the platform service..."
+        status, output = log_os_system("systemctl start as7712-platform-init.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        print "Restart the pmon service ..."
+        status, output = log_os_system("systemctl restart pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        return
+
+def do_switch_nonpddf():
+    print "Checking system...."
+    if not os.path.exists('/usr/share/sonic/platform/pddf_support'):
+        print PROJECT_NAME.upper() +" system is already in non-pddf mode...."
+    else:
+        print "Stopping the platform service..."
+        status, output = log_os_system("systemctl stop as7712-platform-init.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        print "Removing the pddf_support file..."
+        if os.path.exists('/usr/share/sonic/platform'):
+            status, output = log_os_system("rm -f /usr/share/sonic/platform/pddf_support", 1)
+        else:
+            print "/usr/share/sonic/platform path doesnt exist. Unable to set non-pddf mode"
+            return -1
+
+        print "Re-starting the platform service..."
+        status, output = log_os_system("systemctl start as7712-platform-init.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        print "Restart the pmon service ..."
+        status, output = log_os_system("systemctl restart pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        return
 
 if __name__ == "__main__":
     main()
