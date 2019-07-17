@@ -142,10 +142,10 @@ static void print_led_data(LED_OPS_DATA *ptr)
 ssize_t get_status_led(struct device_attribute *da)
 {
 	int ret=0;
-        struct pddf_data_attribute *_ptr = (struct pddf_data_attribute *)da;
-        LED_OPS_DATA* temp_data_ptr=(LED_OPS_DATA*)_ptr->addr;
-        LED_OPS_DATA* ops_ptr=find_led_ops_data(da);
-        uint32_t color_val=0, sys_val=0;
+	struct pddf_data_attribute *_ptr = (struct pddf_data_attribute *)da;
+	LED_OPS_DATA* temp_data_ptr=(LED_OPS_DATA*)_ptr->addr;
+	LED_OPS_DATA* ops_ptr=find_led_ops_data(da);
+	uint32_t color_val=0, sys_val=0;
 	int state=0;
 	if (!ops_ptr) { 
 		printk(KERN_ERR "%s: Cannot find LED Ptr", __func__);
@@ -156,7 +156,10 @@ ssize_t get_status_led(struct device_attribute *da)
 			temp_data_ptr->device_name, temp_data_ptr->index);
 		return (-1);
 	}
-       	sys_val = board_i2c_cpld_read(ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset);
+    sys_val = board_i2c_cpld_read(ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset);
+	if (sys_val < 0)
+		return sys_val;
+
 	strcpy(temp_data.cur_state.color_state, "None"); 
 	strcpy(temp_data.cur_state.color, "None"); 
 	for (state=0; state<MAX_LED_STATUS; state++) {
@@ -186,12 +189,12 @@ ssize_t get_status_led(struct device_attribute *da)
 ssize_t set_status_led(struct device_attribute *da)
 {
 	int ret=0;
-        uint32_t sys_val=0, new_val=0;
-        int cur_state = 0;
-        struct pddf_data_attribute *_ptr = (struct pddf_data_attribute *)da;
-        LED_OPS_DATA* temp_data_ptr=(LED_OPS_DATA*)_ptr->addr;
-        LED_OPS_DATA* ops_ptr=find_led_ops_data(da);
-        char* _buf=temp_data_ptr->cur_state.color;
+	uint32_t sys_val=0, new_val=0;
+	int cur_state = 0;
+	struct pddf_data_attribute *_ptr = (struct pddf_data_attribute *)da;
+	LED_OPS_DATA* temp_data_ptr=(LED_OPS_DATA*)_ptr->addr;
+	LED_OPS_DATA* ops_ptr=find_led_ops_data(da);
+	char* _buf=temp_data_ptr->cur_state.color;
 	int blink=0;
 
 	if (!ops_ptr) { 
@@ -220,6 +223,9 @@ ssize_t set_status_led(struct device_attribute *da)
         }
 	if(ops_ptr->data[cur_state].swpld_addr != 0x0) {
         	sys_val = board_i2c_cpld_read(ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset);
+			if (sys_val < 0)
+				return sys_val;
+
         	new_val = (sys_val & ops_ptr->data[cur_state].bits.mask_bits) |
                                 (ops_ptr->data[cur_state].value << ops_ptr->data[cur_state].bits.pos);
 
@@ -246,7 +252,12 @@ ssize_t set_status_led(struct device_attribute *da)
 		LED_TYPE_STR[cur_state], ops_ptr->data[cur_state].color, blink? "Blink":"Solid",
                 ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset,
                 sys_val, new_val,
-		board_i2c_cpld_read(ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset));
+		ret = board_i2c_cpld_read(ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset));
+		if (ret < 0)
+		{
+			printk(KERN_ERR "%s: Error %d in reading from cpld(0x%x) offset 0x%x\n", __FUNCTION__, ret, ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset);
+			return ret;
+		}
 #endif
 	return(ret);
 }
@@ -343,7 +354,7 @@ ssize_t store_pddf_data(struct device *dev, struct device_attribute *da, const c
 
 static int load_led_ops_data(struct device_attribute *da, LED_STATUS state)
 {
-        struct pddf_data_attribute *_ptr = (struct pddf_data_attribute *)da;
+	struct pddf_data_attribute *_ptr = (struct pddf_data_attribute *)da;
 	LED_OPS_DATA* ptr=(LED_OPS_DATA*)_ptr->addr;
 	LED_TYPE led_type;
 	LED_OPS_DATA* ops_ptr=NULL;
@@ -385,9 +396,9 @@ static int show_led_ops_data(struct device_attribute *da)
 
 static int verify_led_ops_data(struct device_attribute *da)
 {
-        struct pddf_data_attribute *_ptr = (struct pddf_data_attribute *)da;
-        LED_OPS_DATA* ptr=(LED_OPS_DATA*)_ptr->addr;
-        LED_OPS_DATA* ops_ptr=find_led_ops_data(da);
+	struct pddf_data_attribute *_ptr = (struct pddf_data_attribute *)da;
+	LED_OPS_DATA* ptr=(LED_OPS_DATA*)_ptr->addr;
+	LED_OPS_DATA* ops_ptr=find_led_ops_data(da);
 
 	if(ops_ptr) 
 		memcpy(ptr, ops_ptr, sizeof(LED_OPS_DATA));
@@ -431,7 +442,7 @@ ssize_t dev_operation(struct device *dev, struct device_attribute *da, const cha
 ssize_t store_config_data(struct device *dev, struct device_attribute *da, const char *buf, size_t count)
 {
 	int ret, num;
-        struct pddf_data_attribute *ptr = (struct pddf_data_attribute *)da;
+	struct pddf_data_attribute *ptr = (struct pddf_data_attribute *)da;
 	if(strncmp(ptr->dev_attr.attr.name, "num_psus", strlen("num_psus"))==0 ) {
 	       ret = kstrtoint(buf,10,&num);
                if (ret==0)
@@ -473,14 +484,14 @@ ssize_t store_config_data(struct device *dev, struct device_attribute *da, const
 
 ssize_t store_bits_data(struct device *dev, struct device_attribute *da, const char *buf, size_t count)
 {
-        int len = 0, num1 = 0, num2 = 0;
+	int len = 0, num1 = 0, num2 = 0;
 	char mask=0xFF;
 	char *pptr=NULL;
 	char bits[NAME_SIZE];
-        struct pddf_data_attribute *ptr = (struct pddf_data_attribute *)da;
+	struct pddf_data_attribute *ptr = (struct pddf_data_attribute *)da;
 	MASK_BITS* bits_ptr=(MASK_BITS*)(ptr->addr); 
-        strncpy(bits_ptr->bits, buf, strlen(buf)-1); // to discard newline char form buf
-        bits_ptr->bits[strlen(buf)-1] = '\0';
+	strncpy(bits_ptr->bits, buf, strlen(buf)-1); // to discard newline char form buf
+	bits_ptr->bits[strlen(buf)-1] = '\0';
 	if((pptr=strstr(buf,":")) != NULL) {
 		len=pptr-buf;
 		sprintf(bits, buf);

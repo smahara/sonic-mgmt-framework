@@ -1066,11 +1066,24 @@ def cpu_parse(tree, bus, ops):
                 str += ret
     return str
 
+def cpu_parse_reverse(tree, bus, ops):
+    str = ""
+    for dev in reversed(bus['i2c']['CONTROLLERS']):
+        dev1 = tree[dev['dev']]
+        for d in dev1['i2c']['DEVICES']:
+            ret=dev_parse(tree, tree[d['dev']], ops)
+            if not ret is None:
+                str += ret
+    return str
+
 
 def dev_parse(tree, dev, ops):
 	attr=dev['dev_info']
 	if attr['device_type'] == 'CPU':
-		return cpu_parse(tree, dev, ops)
+            if ops['cmd']=='delete':
+                return cpu_parse_reverse(tree, dev, ops)
+            else:
+                return cpu_parse(tree, dev, ops)
     
         if attr['device_type'] == 'EEPROM':
             return eeprom_parse(tree, dev, ops)
