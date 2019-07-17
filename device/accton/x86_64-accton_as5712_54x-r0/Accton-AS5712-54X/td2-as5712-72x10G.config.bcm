@@ -11,6 +11,8 @@ ipv6_lpm_128b_enable=1
 l3_alpm_enable=2
 lpm_ipv6_128b_reserved=0
 num_ipv6_lpm_128b_entries=3072
+l2xmsg_mode=1
+l2xmsg_hostbuf_size=8192
 
 
 mmu_lossless=0
