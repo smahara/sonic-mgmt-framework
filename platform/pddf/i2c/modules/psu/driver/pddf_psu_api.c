@@ -296,6 +296,8 @@ int sonic_i2c_get_psu_present_default(void *client, PSU_DATA_ATTR *adata, void *
 	if (strncmp(adata->devtype, "cpld", strlen("cpld")) == 0)
 	{
 		val = board_i2c_cpld_read(adata->devaddr , adata->offset);
+		if (val < 0)
+			return val;
 		padata->val.intval =  ((val & adata->mask) == adata->cmpval);
 		psu_dbg(KERN_ERR "%s: status_value = 0x%x\n", __FUNCTION__, padata->val.intval);
 	}
@@ -312,6 +314,8 @@ int sonic_i2c_get_psu_power_good_default(void *client, PSU_DATA_ATTR *adata, voi
 	if (strncmp(adata->devtype, "cpld", strlen("cpld")) == 0)
         {
 		val = board_i2c_cpld_read(adata->devaddr , adata->offset);
+		if (val < 0)
+			return val;
 		padata->val.intval =  ((val & adata->mask) == adata->cmpval);
 		psu_dbg(KERN_ERR "%s: status_value = 0x%x\n", __FUNCTION__, padata->val.intval);
     }
