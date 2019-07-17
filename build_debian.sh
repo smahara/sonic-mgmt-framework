@@ -431,6 +431,16 @@ set /files/etc/sysctl.conf/net.core.rmem_max 2097152
 set /files/etc/sysctl.conf/net.core.wmem_max 2097152
 " -r $FILESYSTEM_ROOT
 
+## Config systemd
+sudo tee -a $FILESYSTEM_ROOT/etc/systemd/network/99-default.link > /dev/null <<EOF
+[Match]
+Path=/devices/virtual/net/*
+
+[Link]
+NamePolicy=kernel database onboard slot path
+MACAddressPolicy=none
+EOF
+
 ## docker-py is needed by Ansible docker module
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT easy_install pip
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install 'docker-py==1.6.0'
