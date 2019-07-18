@@ -23,20 +23,25 @@ interface {{ name }}
 link-detect
 !
 {% endfor %}
+{% endif %}
+{% if PORTCHANNEL %}
 {% for pc in PORTCHANNEL %}
 interface {{ pc }}
 link-detect
 !
 {% endfor %}
+{% endif %}
 {% endblock interfaces %}
 !
 {% block default_route %}
 ! set static default route to mgmt gateway as a backup to learned default
+{% if MGMT_INTERFACE %}
 {% for (name, prefix) in MGMT_INTERFACE|pfx_filter %}
 {% if prefix | ipv4 %}
 ip route 0.0.0.0/0 {{ MGMT_INTERFACE[(name, prefix)]['gwaddr'] }} 200
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endblock default_route %}
 !
 {% block source_loopback %}
@@ -89,12 +94,15 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
 {% if DEVICE_METADATA['localhost']['type'] == 'ToRRouter' %}
   bgp graceful-restart
 {% endif %}
+{% if LOOPBACK_INTERFACE %}
 {% for (name, prefix) in LOOPBACK_INTERFACE|pfx_filter %}
 {% if prefix | ipv4 and name == 'Loopback0' %}
   bgp router-id {{ prefix | ip }}
 {% endif %}
 {% endfor %}
+{% endif %}
 {# advertise loopback #}
+{% if LOOPBACK_INTERFACE %}
 {% for (name, prefix) in LOOPBACK_INTERFACE|pfx_filter %}
 {% if prefix | ipv4 and name == 'Loopback0' %}
   network {{ prefix | ip }}/32
@@ -104,9 +112,11 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
   exit-address-family
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endblock bgp_init %}
 {% endif %}
 {% block vlan_advertisement %}
+{% if VLAN_INTERFACE %}
 {% for (name, prefix) in VLAN_INTERFACE|pfx_filter %}
 {% if prefix | ipv4 %}
   network {{ prefix }}
@@ -116,8 +126,10 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
   exit-address-family
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endblock vlan_advertisement %}
 {% block bgp_sessions %}
+{% if BGP_NEIGHBOR %}
 {% for neighbor_addr, bgp_session in BGP_NEIGHBOR.iteritems() %}
 {% if bgp_session['asn'] | int != 0 %}
   neighbor {{ neighbor_addr }} remote-as {{ bgp_session['asn'] }}
@@ -167,6 +179,7 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
 {% endif %}
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endblock bgp_sessions %}
 {% block bgp_peers_with_range %}
 {% if BGP_PEER_RANGE %}
