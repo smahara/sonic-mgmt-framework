@@ -6,6 +6,7 @@
 !
 {% endblock banner %}
 !
+{% if DEVICE_METADATA %}
 {% block system_init %}
 hostname {{ DEVICE_METADATA['localhost']['hostname'] }}
 password zebra
@@ -18,6 +19,7 @@ agentx
 {% block interfaces %}
 {% if INTERFACE %}
 ! Enable link-detect (default disabled)
+{% if INTERFACE %}
 {% for (name, prefix) in INTERFACE|pfx_filter %}
 interface {{ name }}
 link-detect
@@ -94,12 +96,15 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
 {% if DEVICE_METADATA['localhost']['type'] == 'ToRRouter' %}
   bgp graceful-restart
 {% endif %}
+{% if LOOPBACK_INTERFACE %}
 {% for (name, prefix) in LOOPBACK_INTERFACE|pfx_filter %}
 {% if prefix | ipv4 and name == 'Loopback0' %}
   bgp router-id {{ prefix | ip }}
 {% endif %}
 {% endfor %}
+{% endif %}
 {# advertise loopback #}
+{% if LOOPBACK_INTERFACE %}
 {% for (name, prefix) in LOOPBACK_INTERFACE|pfx_filter %}
 {% if prefix | ipv4 and name == 'Loopback0' %}
   network {{ prefix | ip }}/32
@@ -109,9 +114,11 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
   exit-address-family
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endblock bgp_init %}
 {% endif %}
 {% block vlan_advertisement %}
+{% if VLAN_INTERFACE %}
 {% for (name, prefix) in VLAN_INTERFACE|pfx_filter %}
 {% if prefix | ipv4 %}
   network {{ prefix }}
@@ -121,12 +128,17 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
   exit-address-family
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endblock vlan_advertisement %}
 {% block bgp_sessions %}
+{% if BGP_NEIGHBOR %}
 {% for neighbor_addr, bgp_session in BGP_NEIGHBOR.iteritems() %}
 {% if bgp_session['asn'] | int != 0 %}
   neighbor {{ neighbor_addr }} remote-as {{ bgp_session['asn'] }}
   neighbor {{ neighbor_addr }} description {{ bgp_session['name'] }}
+{% if bgp_session.has_key('bfd') and bgp_session['bfd'] | int != 0 %}
+  neighbor {{ neighbor_addr }} bfd
+{% endif %}
 {# set the bgp neighbor timers if they have not default values #}
 {% if     (bgp_session['keepalive'] is defined and bgp_session['keepalive'] | int != 60)
       or  (bgp_session['holdtime'] is defined  and bgp_session['holdtime']  | int != 180) %}
@@ -172,6 +184,7 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
 {% endif %}
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endblock bgp_sessions %}
 {% block bgp_peers_with_range %}
 {% if BGP_PEER_RANGE %}
@@ -210,6 +223,47 @@ maximum-paths 64
 route-map ISOLATE permit 10
 set as-path prepend {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
 {% endif %}
+{% endif %}
+{% block bfd_peers %}
+{% if BFD_PEER %}
+bfd
+{% for (peer_key, peer_info) in BFD_PEER.iteritems() %}
+{% set opt_args = '' %}
+{% if peer_key[1] != 'null' %}
+{% set opt_args = opt_args~' '~'local-address'~' '~peer_key[1] %}
+{% endif %}
+{% if peer_key[2] != 'null' %}
+{% set opt_args = opt_args~' '~'interface'~' '~peer_key[2] %}
+{% endif %}
+  peer {{ peer_key[0] }}{{ opt_args }} 
+{# set the bfd peer timers #}
+{% if  (peer_info['transmit_interval'] is defined and peer_info['transmit_interval'] | int != 300) %}
+    transmit-interval {{ peer_info['transmit_interval'] }} 
+{% endif %}
+{% if  (peer_info['receive_interval'] is defined and peer_info['receive_interval'] | int != 300) %}
+    receive-interval {{ peer_info['receive_interval'] }}
+{% endif %}
+{% if  (peer_info['multiplier'] is defined and peer_info['multiplier'] | int != 3) %}
+    detect-multiplier {{ peer_info['multiplier'] }}
+{% endif %}
+{% if  (peer_info['echo_mode'] is defined and peer_info['echo_mode'] != 'false') %}
+    echo-mode
+{% endif %}
+{% if  (peer_info['echo_interval'] is defined and peer_info['echo_interval'] | int != 50) %}
+    echo-interval {{ peer_info['echo_interval'] }}
+{% endif %}
+{% if  (peer_info['label'] is defined and peer_info['label'] != '') %}
+    label {{ peer_info['label'] }}
+{% endif %}
+{% if  (peer_info['admin_status'] is defined and peer_info['admin_status'] == 'up') %}
+    no shutdown
+{% else %}
+    shutdown
+{% endif %}
+  !
+{% endfor %}
+{% endif %}
+{% endblock bfd_peers%}
 !
 route-map set-next-hop-global-v6 permit 10
 set ipv6 next-hop prefer-global
