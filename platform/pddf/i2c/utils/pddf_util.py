@@ -156,49 +156,69 @@ def get_platform_and_hwsku():
 
     return (platform, hwsku)
 
-def get_path_to_device_plugin():
+def get_path_to_device():
     # Get platform and hwsku
     (platform, hwsku) = get_platform_and_hwsku()
 
     # Load platform module from source
     platform_path = "/".join([PLATFORM_ROOT_PATH, platform])
     hwsku_path = "/".join([platform_path, hwsku])
-    plugin_path = "/".join([platform_path, "plugins"])
 
-    return plugin_path
+    return platform_path
 
 def get_path_to_pddf_plugin():
     pddf_path = "/".join([PLATFORM_ROOT_PATH, "pddf/plugins"])
     return pddf_path
 
 def config_pddf_utils():
-    device_path = get_path_to_device_plugin()
+    device_path = get_path_to_device()
+    device_plugin_path = "/".join([device_path, "plugins"])
     pddf_path = get_path_to_pddf_plugin()
-    backup_path = "/".join([device_path, "orig"])
+    backup_path = "/".join([device_plugin_path, "orig"])
 
     if os.path.exists(backup_path) is False:
         os.mkdir(backup_path)
-        log_os_system("mv "+device_path+"/*.*"+" "+backup_path, 0)
+        log_os_system("mv "+device_plugin_path+"/*.*"+" "+backup_path, 0)
     
     for item in os.listdir(pddf_path):
-        shutil.copy(pddf_path+"/"+item, device_path+"/"+item)
+        shutil.copy(pddf_path+"/"+item, device_plugin_path+"/"+item)
     
-    shutil.copy('/usr/local/bin/pddfparse.py', device_path+"/pddfparse.py")
+    shutil.copy('/usr/local/bin/pddfparse.py', device_plugin_path+"/pddfparse.py")
+    # Take a backup of orig fancontrol
+    if os.path.exists(device_path+"/fancontrol"):
+        log_os_system("mv "+device_path+"/fancontrol"+" "+device_path+"/fancontrol.bak", 0)
+        #print "***Created fancotnrol.bak"
+    
+    # Create a link to fancontrol of PDDF
+    if os.path.exists(device_path+"/pddf/fancontrol") and not os.path.exists(device_path+"/fancontrol"):
+        shutil.copy(device_path+"/pddf/fancontrol",device_path+"/fancontrol")
+        #print "*** Copied the pddf fancontrol file "
 
     return 0
 
 def cleanup_pddf_utils():
-    device_path = get_path_to_device_plugin()
-    backup_path = "/".join([device_path, "orig"])
-    if os.path.exists(backup_path) is True:
-        for item in os.listdir(device_path):
-            if os.path.isdir(device_path+"/"+item) is False:
-                os.remove(device_path+"/"+item)
+    device_path = get_path_to_device()
+    device_plugin_path = "/".join([device_path, "plugins"])
 
-        status = log_os_system("mv "+backup_path+"/*"+" "+device_path, 1)
+    backup_path = "/".join([device_plugin_path, "orig"])
+    if os.path.exists(backup_path) is True:
+        for item in os.listdir(device_plugin_path):
+            if os.path.isdir(device_plugin_path+"/"+item) is False:
+                os.remove(device_plugin_path+"/"+item)
+
+        status = log_os_system("mv "+backup_path+"/*"+" "+device_plugin_path, 1)
         os.rmdir(backup_path)
     else:
-        print "\nERR: Unable to locate original device files...\n" 
+        print "\nERR: Unable to locate original device files...\n"
+
+    if os.path.exists(device_path+"/fancontrol"):
+        os.remove(device_path+"/fancontrol")
+        #print "Removed the fancontrol"
+
+    if os.path.exists(device_path+"/fancontrol.bak"):
+        log_os_system("mv "+device_path+"/fancontrol.bak"+" "+device_path+"/fancontrol", 0)
+        #print "***Moved fancotnrol.bak to fancontrol"
+
     return 0
 
 def driver_install():
