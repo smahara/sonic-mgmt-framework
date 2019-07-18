@@ -437,6 +437,16 @@ set /files/etc/sysctl.conf/net.core.somaxconn 512
 
 " -r $FILESYSTEM_ROOT
 
+## Config systemd
+sudo tee -a $FILESYSTEM_ROOT/etc/systemd/network/99-default.link > /dev/null <<EOF
+[Match]
+Path=/devices/virtual/net/*
+
+[Link]
+NamePolicy=kernel database onboard slot path
+MACAddressPolicy=none
+EOF
+
 ## docker-py is needed by Ansible docker module
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT easy_install pip
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install 'docker-py==1.6.0'
