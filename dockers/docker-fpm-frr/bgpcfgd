@@ -34,41 +34,6 @@ class BGPConfigDaemon:
                 self.__run_command("service quagga restart")
                 self.bgp_asn = data['bgp_asn']
 
-    def bfd_handler(self, key, data):
-        syslog.syslog(syslog.LOG_INFO, '[bgp cfgd](bfd) value for {} changed to {}'.format(key, data))
-        #get frr bfd session key
-        key_params = key.split('|')
-        cmd = 'peer {}'.format(key_params[0])
-       	if key_params[1] != 'null':
-            cmd = cmd + ' local-address ' + key_params[1]
-        if key_params[2] != 'null':
-            cmd = cmd + ' interface ' + key_params[2]
-        if not data:
-            #BFD peer is deleted
-            command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no {}'".format(cmd)
-            self.__run_command(command)
-        else:
-            #create/update case
-            command = "vtysh -c 'configure terminal' -c 'bfd' -c '{}'".format(cmd)
-            for param in data:
-                if param == 'transmit_interval':
-                    command = command + " -c 'transmit-interval {}'".format(data[param])
-                elif param == 'receive_interval':
-                    command = command + " -c 'receive-interval {}'".format(data[param])
-                elif param == 'multiplier':
-                    command = command + " -c 'detect-multiplier {}'".format(data[param])
-                elif param == 'echo_mode' and data[param] == 'true':
-                    command = command + " -c 'echo-mode'"
-                elif param == 'echo_interval':
-                    command = command + " -c 'echo-interval {}'".format(data[param])
-                elif param == 'label':
-                    command = command + " -c 'label {}'".format(data[param])
-                elif param == 'admin_status' and data[param] == 'up':
-                    command = command + " -c 'no shutdown'"
-                elif param == 'admin_status' and data[param] == 'down':
-                    command = command + " -c 'shutdown'"
-            self.__run_command(command)    
-    
     def bgp_handler(self, key, data):
         syslog.syslog(syslog.LOG_INFO, '[bgp cfgd] value for {} changed to {}'.format(key, data))
         if not data:
@@ -86,16 +51,10 @@ class BGPConfigDaemon:
                 command_mod = 'no ' if data['admin_status'] == 'up' else ''
                 command = "vtysh -c 'configure terminal' -c 'router bgp {}' -c '{}neighbor {} shutdown'".format(self.bgp_asn, command_mod, key)
                 self.__run_command(command)
-            if data.has_key('bfd'):
-                command_mod = 'no ' if data['bfd'] == '0' else ''
-                command = "vtysh -c 'configure terminal' -c 'router bgp {}' -c '{}neighbor {} bfd'".format(self.bgp_asn, command_mod, key)
-                self.__run_command(command)
             self.bgp_neighbor[key] = data
 
     def start(self):
         try:
-            self.config_db.subscribe('BFD_PEER',
-                lambda table, key, data: self.bfd_handler(key, data))
             self.config_db.subscribe('BGP_NEIGHBOR', 
                 lambda table, key, data: self.bgp_handler(key, data))
             self.config_db.subscribe('DEVICE_METADATA',
