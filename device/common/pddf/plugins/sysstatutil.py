@@ -79,6 +79,10 @@ class SYSStatusUtil():
            except IOError:
              print "system_reset%s not supported" %i
 
+
+    def dump_sysfs(self):
+        return pddfparse.cli_dump_dsysfs('sys-status')
+
 if __name__== "__main__":
     obj=SYSStatusUtil()
     #obj.get_board_info()

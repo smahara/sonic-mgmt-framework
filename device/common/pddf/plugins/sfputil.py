@@ -196,6 +196,10 @@ class SfpUtil(SfpUtilBase):
         """
         raise NotImplementedError
 
+
+    def dump_sysfs(self):
+        return pddfparse.cli_dump_dsysfs('xcvr')
+
 if __name__== "__main__":
     obj=SfpUtil()
     #for port in range(1, 32):
