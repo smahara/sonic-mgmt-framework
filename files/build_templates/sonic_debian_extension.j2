@@ -358,6 +358,9 @@ if [ -f {{service}} ]; then
     sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable {{service}}
 fi
 {% endfor %}
+if [ -f iccpd.service ]; then
+    sudo LANG=C chroot $FILESYSTEM_ROOT systemctl disable iccpd.service
+fi
 sudo LANG=C chroot $FILESYSTEM_ROOT fuser -km /sys || true
 sudo LANG=C chroot $FILESYSTEM_ROOT umount -lf /sys
 {% endif %}
