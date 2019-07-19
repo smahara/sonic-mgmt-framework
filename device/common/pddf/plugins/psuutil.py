@@ -207,6 +207,10 @@ class PsuUtil(PsuBase):
 
         return fan1_rpm
 
+
+    def dump_sysfs(self):
+        return pddfparse.cli_dump_dsysfs('psu')
+
 #if __name__== "__main__":
     #obj=PsuUtil()
     #print(obj.get_psu_status(1))

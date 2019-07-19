@@ -182,6 +182,9 @@ class FanUtil(FanBase):
         #print "Done changing the speed of all the fans ... Reading the speed to crossscheck\n"
         return True
 
+    def dump_sysfs(self):
+        return pddfparse.cli_dump_dsysfs('fan')
+
 
 
 #if __name__== "__main__":

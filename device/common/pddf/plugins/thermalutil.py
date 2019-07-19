@@ -69,6 +69,10 @@ class ThermalUtil:
 			print "temp1\t %+.1f C (high = %+.1f C, hyst = %+.1f C)" % (temp['temp1_input'], temp['temp1_max'], temp['temp1_max_hyst'])
 
 
+        def dump_sysfs(self):
+            return pddfparse.cli_dump_dsysfs('temp-sensors')
+
+
 		
 
 #temp=ThermalUtil()

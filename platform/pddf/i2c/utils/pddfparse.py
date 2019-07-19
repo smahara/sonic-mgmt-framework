@@ -1175,6 +1175,12 @@ def populate_pddf_sysfsobj():
     led_parse(data, { "cmd": "show", "target":"all", "attr":"all" })
     show_client_device()
 
+def cli_dump_dsysfs(component):
+    dev_parse(data, data['SYSTEM'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
+    dev_parse(data, data['SYSSTATUS'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
+    return data_sysfs_obj[component]
+
+
 def validate_pddf_devices(*args):
     populate_pddf_sysfsobj() 
     alist = [item for item in args]
