@@ -165,7 +165,8 @@ class FanUtil(FanBase):
             return False
         
         num_fan = self.platform['num_fans']
-        pwm = ((val*100)/625) - 1
+        duty_cycle_to_pwm = eval(plugin_data['FAN']['duty_cycle_to_pwm'])
+        pwm = duty_cycle_to_pwm(val)
         print "New Speed: %d%% - PWM value to be set is %d\n"%(val,pwm)
 
         status = 0
