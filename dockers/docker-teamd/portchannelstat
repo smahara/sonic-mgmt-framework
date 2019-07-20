@@ -214,6 +214,8 @@ def main():
             print("Invalid option")
     elif port_channel:
         if del_lag:
+            if not file_dict.has_key(port_channel):
+                return
             file_dict.pop(port_channel)
             dump_file_contents(filename,file_dict)
     else:
