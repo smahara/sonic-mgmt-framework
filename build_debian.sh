@@ -62,7 +62,7 @@ fi
 set -x -e
 
 ## docker engine version (with platform)
-DOCKER_VERSION=5:18.09.2~3-0~debian-stretch
+DOCKER_VERSION=5:19.03.0~2.3.rc3-0~debian-stretch
 LINUX_KERNEL_VERSION=4.9.0-9-2
 
 ## Working directory to prepare the file system
@@ -235,6 +235,8 @@ sudo LANG=C chroot $FILESYSTEM_ROOT apt-key add /tmp/docker.gpg
 sudo LANG=C chroot $FILESYSTEM_ROOT rm /tmp/docker.gpg
 sudo LANG=C chroot $FILESYSTEM_ROOT add-apt-repository \
                                     "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
+sudo LANG=C chroot $FILESYSTEM_ROOT add-apt-repository \
+                                    "deb [arch=amd64] https://download.docker.com/linux/debian stretch test"
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get update
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y install docker-ce=${DOCKER_VERSION}
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y remove software-properties-common gnupg2
