@@ -7,7 +7,9 @@
 {% endblock banner %}
 !
 {% block system_init %}
+{% if DEVICE_METADATA %}
 hostname {{ DEVICE_METADATA['localhost']['hostname'] }}
+{% endif %}
 password zebra
 log syslog informational
 log facility local4
@@ -77,7 +79,7 @@ ipv6 protocol bgp route-map RM_SET_SRC6
 {% endif %}
 {% endblock source_loopback %}
 !
-{% if DEVICE_METADATA['localhost'].has_key('bgp_asn') %}
+{% if DEVICE_METADATA and DEVICE_METADATA['localhost'].has_key('bgp_asn') %}
 {% block bgp_init %}
 !
 ! bgp multiple-instance
@@ -134,6 +136,9 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
 {% if bgp_session['asn'] | int != 0 %}
   neighbor {{ neighbor_addr }} remote-as {{ bgp_session['asn'] }}
   neighbor {{ neighbor_addr }} description {{ bgp_session['name'] }}
+{% if bgp_session.has_key('bfd') and bgp_session['bfd'] | int != 0 %}
+  neighbor {{ neighbor_addr }} bfd
+{% endif %}
 {# set the bgp neighbor timers if they have not default values #}
 {% if     (bgp_session['keepalive'] is defined and bgp_session['keepalive'] | int != 60)
       or  (bgp_session['holdtime'] is defined  and bgp_session['holdtime']  | int != 180) %}
@@ -212,7 +217,7 @@ router bgp {{ DEVICE_METADATA['localhost']['bgp_asn'] }}
 {% endif %}
 {% endblock bgp_peers_with_range %}
 !
-{% if DEVICE_METADATA['localhost'].has_key('bgp_asn') %}
+{% if DEVICE_METADATA and DEVICE_METADATA['localhost'].has_key('bgp_asn') %}
 maximum-paths 64
 !
 route-map ISOLATE permit 10
@@ -229,3 +234,45 @@ bgp error-handling enable
 {% endif %}
 {% endif %}
 {% endblock bgp_error_handling_init %}
+{% block bfd_peers %}
+{% if BFD_PEER %}
+bfd
+{% for (peer_key, peer_info) in BFD_PEER.iteritems() %}
+{% set opt_args = '' %}
+{% if peer_key[1] != 'null' %}
+{% set opt_args = opt_args~' '~'local-address'~' '~peer_key[1] %}
+{% endif %}
+{% if peer_key[2] != 'null' %}
+{% set opt_args = opt_args~' '~'interface'~' '~peer_key[2] %}
+{% endif %}
+  peer {{ peer_key[0] }}{{ opt_args }} 
+{# set the bfd peer timers #}
+{% if  (peer_info['transmit_interval'] is defined and peer_info['transmit_interval'] | int != 300) %}
+    transmit-interval {{ peer_info['transmit_interval'] }} 
+{% endif %}
+{% if  (peer_info['receive_interval'] is defined and peer_info['receive_interval'] | int != 300) %}
+    receive-interval {{ peer_info['receive_interval'] }}
+{% endif %}
+{% if  (peer_info['multiplier'] is defined and peer_info['multiplier'] | int != 3) %}
+    detect-multiplier {{ peer_info['multiplier'] }}
+{% endif %}
+{% if  (peer_info['echo_mode'] is defined and peer_info['echo_mode'] != 'false') %}
+    echo-mode
+{% endif %}
+{% if  (peer_info['echo_interval'] is defined and peer_info['echo_interval'] | int != 50) %}
+    echo-interval {{ peer_info['echo_interval'] }}
+{% endif %}
+{% if  (peer_info['label'] is defined and peer_info['label'] != '') %}
+    label {{ peer_info['label'] }}
+{% endif %}
+{% if  (peer_info['admin_status'] is defined and peer_info['admin_status'] == 'up') %}
+    no shutdown
+{% else %}
+    shutdown
+{% endif %}
+  !
+{% endfor %}
+!
+{% endif %}
+{% endblock bfd_peers%}
+
