@@ -20,6 +20,9 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	fi
 	cp iccpd $(DEB_PATH)/usr/bin/iccpd
 	cp src/mclagdctl/mclagdctl $(DEB_PATH)/usr/bin/mclagdctl
+	#FIXME:workaround to fix iccpd debian package build
+	chmod 0755 $(DEB_PATH)
+	chmod 0755 $(DEB_PATH)/DEBIAN
 	chmod +x $(DEB_PATH)/usr/bin/iccpd
 	chmod +x $(DEB_PATH)/usr/bin/mclagdctl
 	md5sum $(DEB_PATH)/usr/bin/iccpd > $(DEB_PATH)/DEBIAN/md5sums
