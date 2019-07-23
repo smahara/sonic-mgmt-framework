@@ -2,6 +2,7 @@
 Description=Update interfaces configuration
 Requires=updategraph.service
 After=updategraph.service
+ConditionPathExists=!/usr/bin/pde.sh
 
 [Service]
 Type=oneshot

@@ -204,7 +204,13 @@ sudo cp $IMAGE_CONFIGS/interfaces/*.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATE
 sudo cp files/dhcp/dhclient.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 
 # Copy initial interfaces configuration file, will be overwritten on first boot
+{% if enable_pde == "y" %}
+sudo cp $IMAGE_CONFIGS/interfaces/init_pde_interfaces $FILESYSTEM_ROOT/etc/network/interfaces
+{% else %}
 sudo cp $IMAGE_CONFIGS/interfaces/init_interfaces $FILESYSTEM_ROOT/etc/network/interfaces
+{% endif %}
+
+
 sudo mkdir -p $FILESYSTEM_ROOT/etc/network/interfaces.d
 
 # Copy hostcfgd files
