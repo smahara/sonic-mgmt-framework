@@ -34,6 +34,8 @@
 #  *                 Values:  yes, no
 #  * KERNEL_PROCURE_METHOD: Specifying method of obtaining kernel Debian package: download, cache, or build
 #  * KERNEL_CACHE_PATH: Full path to kernel Debian package tarball when cache procure method is used
+#  * SONIC_DPKG_CACHE_METHOD: Specifying method of obtaining the Debian packages from cache: none or cache
+#  * SONIC_DPKG_CACHE_SOURCE: Debian package cache location when cache enabled for debian packages
 #  * LOCAL_SAI_DEBS_PATH: Full path to the parent directory that holds SAI debian packages
 #
 ###############################################################################
@@ -127,6 +129,12 @@ endif
 ifneq ($(KERNEL_CACHE_PATH),)
     DOCKER_RUN += -v "$(KERNEL_CACHE_PATH):/kernel_cache"
 endif
+
+
+ifneq ($(SONIC_DPKG_CACHE_SOURCE),)
+    DOCKER_RUN += -v "$(SONIC_DPKG_CACHE_SOURCE):/dpkg_cache"
+endif
+
 
 ifneq  ($(LOCAL_SAI_DEBS_PATH),)
 override LOCAL_SAI_DEBS_PATH := $(patsubst %/,%,$(strip $(LOCAL_SAI_DEBS_PATH)))
@@ -268,6 +276,8 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            VS_PREPARE_MEM=$(VS_PREPARE_MEM) \
                            KERNEL_PROCURE_METHOD=$(KERNEL_PROCURE_METHOD) \
                            KERNEL_CACHE_PATH=$(KERNEL_CACHE_PATH) \
+                           SONIC_DPKG_CACHE_METHOD=$(SONIC_DPKG_CACHE_METHOD) \
+                           SONIC_DPKG_CACHE_SOURCE=$(SONIC_DPKG_CACHE_SOURCE) \
                            HTTP_PROXY=$(http_proxy) \
                            HTTPS_PROXY=$(https_proxy) \
                            DOCKER_USERNAME=$(DOCKER_USERNAME) \
