@@ -12,6 +12,8 @@ import os.path
 import swsssdk
 import sys
 import time
+import os
+import stat
 
 from collections import namedtuple, OrderedDict
 
@@ -176,6 +178,7 @@ def dump_file_contents(filename,file_dict):
         file = open(filename, 'w')
         pickle.dump(file_dict,file)
         file.close()
+        os.chmod(filename, stat.S_IREAD|stat.S_IWRITE|stat.S_IRGRP|stat.S_IWGRP|stat.S_IROTH|stat.S_IWOTH)
     except IOError as e:
         print e
         sys.exit(e.errno)
