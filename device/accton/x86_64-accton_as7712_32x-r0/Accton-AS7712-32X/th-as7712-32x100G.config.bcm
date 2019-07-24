@@ -1,9 +1,9 @@
 # accton_as7712_32x
 os=unix
 schan_intr_enable=0
-l2_mem_entries=8192
+l2_mem_entries=40000
 l2xmsg_mode=1
-l3_mem_entries=8192
+l3_mem_entries=40000
 parity_correction=1
 parity_enable=1
 mmu_lossless=1
