@@ -1,4 +1,4 @@
-//*
+/*
 Copyright 2019 Broadcom. All rights reserved.
 The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 */

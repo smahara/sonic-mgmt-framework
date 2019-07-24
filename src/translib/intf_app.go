@@ -290,6 +290,10 @@ func (app *IntfApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error) {
 					return GetResponse{Payload: payload, ErrSrc: AppErr}, err
 				}
 				/* Filling the counter Info to internal DS */
+				err = app.getPortOidMapForCounters(app.countersDB)
+				if err != nil {
+					return GetResponse{Payload: payload, ErrSrc: AppErr}, err
+				}
 				err = app.convertDBIntfCounterInfoToInternal(app.countersDB, ifKey)
 				if err != nil {
 					return GetResponse{Payload: payload, ErrSrc: AppErr}, err
@@ -326,6 +330,15 @@ func (app *IntfApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error) {
 		}
 		/* Filling Interface IP info to internal DS */
 		err = app.convertDBIntfIPInfoToInternal(app.appDB, "")
+		if err != nil {
+			return GetResponse{Payload: payload, ErrSrc: AppErr}, err
+		}
+		/* Filling the counter Info to internal DS */
+		err = app.getPortOidMapForCounters(app.countersDB)
+		if err != nil {
+			return GetResponse{Payload: payload, ErrSrc: AppErr}, err
+		}
+		err = app.convertDBIntfCounterInfoToInternal(app.countersDB, "")
 		if err != nil {
 			return GetResponse{Payload: payload, ErrSrc: AppErr}, err
 		}
@@ -376,34 +389,42 @@ func (app *IntfApp) doGetAllIpKeys(d *db.DB, dbSpec *db.TableSpec) ([]db.Key, er
 
 /***********  Translation Helper fn to convert DB Interface info to Internal DS   ***********/
 
-func (app *IntfApp) convertDBIntfCounterInfoToInternal(dbCl *db.DB, ifKey string) error {
-	log.Info("Counters get for all the interfaces!")
+func (app *IntfApp) getPortOidMapForCounters(dbCl *db.DB) error {
 	var err error
+	ifCountInfo, err := dbCl.GetEntry(app.portMapCountrTblTs, db.Key{Comp: []string{}})
+	if err != nil {
+		log.Info("Port-OID (Counters) get for all the interfaces failed!")
+		return err
+	}
+	if ifCountInfo.IsPopulated() {
+		app.counterPortMap.entry = ifCountInfo
+	} else {
+		return errors.New("Get for OID info from all the interfaces from Counters DB failed!")
+	}
+	return err
+
+}
+
+func (app *IntfApp) convertDBIntfCounterInfoToInternal(dbCl *db.DB, ifKey string) error {
+	var err error
+
 	if len(ifKey) > 0 {
-		ifCountInfo, err := dbCl.GetEntry(app.portMapCountrTblTs, db.Key{Comp: []string{}})
+		oid := app.counterPortMap.entry.Field[ifKey]
+		log.Infof("OID : %s received for Interface : %s", oid, ifKey)
+
+		/* Get the statistics for the port */
+		var ifStatKey db.Key
+		ifStatKey.Comp = []string{oid}
+
+		ifStatInfo, err := dbCl.GetEntry(app.intfCountrTblTs, ifStatKey)
 		if err != nil {
-			log.Info("Counters get for all the interfaces failed!")
+			log.Infof("Fetching port-stat for port : %s failed!", ifKey)
 			return err
 		}
-
-		if ifCountInfo.IsPopulated() {
-			log.Info("Count Info populated!")
-			app.counterPortMap.entry = ifCountInfo
-			oid := app.counterPortMap.entry.Field[ifKey]
-			log.Infof("OID : %s received for Interface : %s", oid, ifKey)
-
-			/* Get the statistics for the port */
-			var ifStatKey db.Key
-			ifStatKey.Comp = []string{oid}
-
-			ifStatInfo, err := dbCl.GetEntry(app.intfCountrTblTs, ifStatKey)
-			if err != nil {
-				log.Infof("Fetching port-stat for port : %s failed!", ifKey)
-				return err
-			}
-			app.portStatMap[ifKey] = dbEntry{entry: ifStatInfo}
-		} else {
-			return errors.New("Get for OID info from all the interfaces from Counters DB failed!")
+		app.portStatMap[ifKey] = dbEntry{entry: ifStatInfo}
+	} else {
+		for ifKey, _ := range app.ifTableMap {
+			app.convertDBIntfCounterInfoToInternal(dbCl, ifKey)
 		}
 	}
 	return err
