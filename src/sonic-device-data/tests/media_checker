@@ -92,8 +92,9 @@ def check_global_keys(global_media_dict):
                     print "Invalid range " + keys
                     return False
         else:
-            print "Invalid range " + keys
-            return False
+            if not check_valid_port(keys):
+                print "Invalid port " + keys
+                return False
 
         if not check_media_dict(global_media_dict[keys]):
             return False
