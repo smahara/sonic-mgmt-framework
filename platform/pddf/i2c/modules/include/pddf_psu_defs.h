@@ -57,7 +57,8 @@ typedef struct PSU_SYSFS_ATTR_DATA_ENTRY
 /* PSU CLIENT DATA - PLATFORM DATA FOR PSU CLIENT */
 typedef struct PSU_DATA
 {
-    int idx;                    // psu index
+    int idx;	// psu index
+	int num_psu_fans;
 	PSU_DATA_ATTR psu_attr;
     int len;             // no of valid attributes for this psu client
     PSU_DATA_ATTR psu_attrs[MAX_PSU_ATTRS]; 
@@ -66,7 +67,7 @@ typedef struct PSU_DATA
 typedef struct PSU_PDATA
 {
     int idx;                    // psu index
-    unsigned short addr;      // i2c address of the device
+    int num_psu_fans;      // num of fans supported by the PSU
     int len;             // no of valid attributes for this psu client
     PSU_DATA_ATTR *psu_attrs; 
 }PSU_PDATA;

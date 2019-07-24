@@ -30,6 +30,7 @@ dirname=os.path.dirname(os.path.realpath(__file__))
 with open(dirname+'/../pddf/pd-plugin.json') as pd:
     plugin_data = json.load(pd)
 
+pddf_obj = pddfparse.PddfParse()
 
 class FanUtil(FanBase):
     """PDDF generic FAN util class"""
@@ -37,19 +38,19 @@ class FanUtil(FanBase):
     def __init__(self):
         FanBase.__init__(self)
 
-        self.platform = pddfparse.get_platform()
+        self.platform = pddf_obj.get_platform()
 
     def get_num_fans(self):
         return self.platform['num_fans']
 
-    def get_fan_presence(self, idx):
+    def get_presence(self, idx):
         # 1 based fan index
         if idx<1 or idx>self.platform['num_fans']:
             print "Invalid fan index %d\n"%idx
             return False
 
         attr_name = "fan" + str(idx) + "_present"
-        sysfs_path = pddfparse.get_path("FAN-CTRL", attr_name)
+        sysfs_path = pddf_obj.get_path("FAN-CTRL", attr_name)
 
         try:
             with open(sysfs_path, 'r') as f:
@@ -61,24 +62,24 @@ class FanUtil(FanBase):
         status = (True if presence==1 else False)
         return status
 
-    def get_fan_status(self, idx):
+    def get_status(self, idx):
         # 1 based fan index
         if idx<1 or idx>self.platform['num_fans']:
             print "Invalid fan index %d\n"%idx
             return False
 
-        front_speed, rear_speed = self.get_fan_speed(idx)
+        front_speed, rear_speed = self.get_speed(idx)
         status = True if (front_speed != 0 and rear_speed != 0) else False
         return status
 
-    def get_fan_direction(self, idx):
+    def get_direction(self, idx):
         # 1 based fan index
         if idx<1 or idx>self.platform['num_fans']:
             print "Invalid fan index %d\n"%idx
             return None
 
         attr = "fan" + str(idx) + "_direction"
-        path = pddfparse.get_path("FAN-CTRL", attr)
+        path = pddf_obj.get_path("FAN-CTRL", attr)
         #print "%d-%s"%(i,path)
         try:
             with open(path, 'r') as f:
@@ -95,12 +96,12 @@ class FanUtil(FanBase):
 
         return direction
 
-    def get_direction(self):
+    def get_directions(self):
         num_fan = self.get_num_fan();
 
         for i in range(1, num_fan+1):
             attr = "fan" + str(i) + "_direction"
-            path = pddfparse.get_path("FAN-CTRL", attr)
+            path = pddf_obj.get_path("FAN-CTRL", attr)
             #print "%d-%s"%(i,path)
             try:
                 with open(path, 'r') as f:
@@ -115,7 +116,7 @@ class FanUtil(FanBase):
 
         return 0
 
-    def get_fan_speed(self, idx):
+    def get_speed(self, idx):
         # 1 based fan index
         if idx<1 or idx>self.platform['num_fans']:
             print "Invalid fan index %d\n"%idx
@@ -123,8 +124,8 @@ class FanUtil(FanBase):
 
         attr1 = "fan" + str(idx) + "_front_rpm"
         attr2 = "fan" + str(idx) + "_rear_rpm"
-        path1 = pddfparse.get_path("FAN-CTRL", attr1)
-        path2 = pddfparse.get_path("FAN-CTRL", attr2)
+        path1 = pddf_obj.get_path("FAN-CTRL", attr1)
+        path2 = pddf_obj.get_path("FAN-CTRL", attr2)
         #print %d-%s%(i,path)
         try:
             with open(path1, 'r') as f1:
@@ -137,15 +138,15 @@ class FanUtil(FanBase):
 
         return (frpm, rrpm)
 
-    def get_speed(self):
+    def get_speeds(self):
         num_fan = self.get_num_fan();
         ret = "FAN_INDEX\t\tFRONT_RPM\t\tREAR_RPM\n"
 
         for i in range(1, num_fan+1):
             attr1 = "fan" + str(i) + "_front_rpm"
             attr2 = "fan" + str(i) + "_rear_rpm"
-            path1 = pddfparse.get_path("FAN-CTRL", attr1)
-            path2 = pddfparse.get_path("FAN-CTRL", attr2)
+            path1 = pddf_obj.get_path("FAN-CTRL", attr1)
+            path2 = pddf_obj.get_path("FAN-CTRL", attr2)
             #print %d-%s%(i,path)
             try:
                 with open(path1, 'r') as f1:
@@ -172,7 +173,7 @@ class FanUtil(FanBase):
         status = 0
         for i in range(1, num_fan+1):
             attr = "fan" + str(i) + "_pwm"
-            node = pddfparse.get_path("FAN-CTRL", attr)
+            node = pddf_obj.get_path("FAN-CTRL", attr)
             try:
                 with open(node, 'w') as f:
                     f.write(str(pwm))
@@ -184,7 +185,7 @@ class FanUtil(FanBase):
         return True
 
     def dump_sysfs(self):
-        return pddfparse.cli_dump_dsysfs('fan')
+        return pddf_obj.cli_dump_dsysfs('fan')
 
 
 

@@ -212,10 +212,10 @@ free_data:
 		XCVR_PDATA *xcvr_platform_data = board_info.platform_data;
 		if (xcvr_platform_data->xcvr_attrs)
 		{
-			printk(KERN_DEBUG "%s: Unable to create i2c client. Freeing the platform subdata\n", __FUNCTION__);
+			printk(KERN_ERR "%s: Unable to create i2c client. Freeing the platform subdata\n", __FUNCTION__);
 			kfree(xcvr_platform_data->xcvr_attrs);
 		}
-		printk(KERN_DEBUG "%s: Unable to create i2c client. Freeing the platform data\n", __FUNCTION__);
+		printk(KERN_ERR "%s: Unable to create i2c client. Freeing the platform data\n", __FUNCTION__);
 		kfree(xcvr_platform_data);
 	}
 

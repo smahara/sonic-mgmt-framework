@@ -31,13 +31,14 @@ dirname=os.path.dirname(os.path.realpath(__file__))
 with open(dirname+'/../pddf/pd-plugin.json') as pd:
     plugin_data = json.load(pd)
 
+pddf_obj = pddfparse.PddfParse()
 
 class PsuUtil(PsuBase):
     """PDDF generic PSU util class"""
 
     def __init__(self):
         PsuBase.__init__(self)
-        self.platform = pddfparse.get_platform()
+        self.platform = pddf_obj.get_platform()
 
     def get_num_psus(self):
         return int(self.platform['num_psus'])
@@ -48,7 +49,7 @@ class PsuUtil(PsuBase):
 
         status = 0
         device = "PSU" + "%d"%index
-        node = pddfparse.get_path(device,"psu_power_good")
+        node = pddf_obj.get_path(device,"psu_power_good")
         try:
             with open(node, 'r') as f:
                 status = f.read()
@@ -68,7 +69,7 @@ class PsuUtil(PsuBase):
 
         status = 0
         device = "PSU" + "%d"%index
-        node = pddfparse.get_path(device,"psu_present")
+        node = pddf_obj.get_path(device,"psu_present")
         try:
             with open(node, 'r') as f:
                 status = f.read()
@@ -82,7 +83,7 @@ class PsuUtil(PsuBase):
         else:
             return False
 
-    def get_psu_mfr_info(self, idx):
+    def get_mfr_info(self, idx):
         if idx is None:
             return None
 
@@ -92,11 +93,11 @@ class PsuUtil(PsuBase):
 
         info_string = ""
         device = "PSU"+"%d"%(idx)
-        node = pddfparse.get_path(device, "psu_power_good")
-        node_model_name = pddfparse.get_path(device, "psu_model_name")
-        node_fan_dir = pddfparse.get_path(device, "psu_fan_dir")
-        node_mfr_id = pddfparse.get_path(device, "psu_mfr_id")
-        node_serial_num = pddfparse.get_path(device, "psu_serial_num")
+        node = pddf_obj.get_path(device, "psu_power_good")
+        node_model_name = pddf_obj.get_path(device, "psu_model_name")
+        node_fan_dir = pddf_obj.get_path(device, "psu_fan_dir")
+        node_mfr_id = pddf_obj.get_path(device, "psu_mfr_id")
+        node_serial_num = pddf_obj.get_path(device, "psu_serial_num")
         try:
             with open(node, 'r') as power_status:
                 status = int(power_status.read())
@@ -135,7 +136,7 @@ class PsuUtil(PsuBase):
 
         return info_string
 
-    def get_psu_output_voltage(self, idx):
+    def get_output_voltage(self, idx):
         if idx is None:
             return 0
 
@@ -144,7 +145,7 @@ class PsuUtil(PsuBase):
             return 0
 
         device = "PSU"+"%d"%(idx)
-        node = pddfparse.get_path(device, "psu_v_out")
+        node = pddf_obj.get_path(device, "psu_v_out")
         try:
             with open(node, 'r') as f:
                 v_out = int(f.read())
@@ -153,7 +154,7 @@ class PsuUtil(PsuBase):
 
         return v_out
 
-    def get_psu_output_current(self, idx):
+    def get_output_current(self, idx):
         if idx is None:
             return 0
 
@@ -162,7 +163,7 @@ class PsuUtil(PsuBase):
             return 0
 
         device = "PSU"+"%d"%(idx)
-        node = pddfparse.get_path(device, "psu_i_out")
+        node = pddf_obj.get_path(device, "psu_i_out")
         try:
             with open(node, 'r') as f:
                 i_out = int(f.read())
@@ -171,7 +172,7 @@ class PsuUtil(PsuBase):
 
         return i_out
 
-    def get_psu_output_power(self, idx):
+    def get_output_power(self, idx):
         if idx is None:
             return 0
 
@@ -180,7 +181,7 @@ class PsuUtil(PsuBase):
             return 0
 
         device = "PSU"+"%d"%(idx)
-        node = pddfparse.get_path(device, "psu_p_out")
+        node = pddf_obj.get_path(device, "psu_p_out")
         try:
             with open(node, 'r') as f:
                 p_out = int(f.read())
@@ -189,27 +190,34 @@ class PsuUtil(PsuBase):
 
         return p_out
 
-    def get_psu_fan1_rpm(self, idx):
-        if idx is None:
+    def get_fan_rpm(self, idx, fan_idx):
+        if idx is None or fan_idx is None:
             return 0
 
         if idx<1 or idx>self.platform['num_psus']:
             print "Invalid index %d\n"%idx
             return 0
 
+
         device = "PSU"+"%d"%(idx)
-        node = pddfparse.get_path(device, "psu_fan1_speed_rpm")
+        num_fans = pddf_obj.get_num_psu_fans(device)
+
+        if fan_idx<1 or fan_idx>num_fans:
+            print "Invalid PSU-fan index %d\n"%fan_idx
+            return 0
+
+        node = pddf_obj.get_path(device, "psu_fan"+str(fan_idx)+"_speed_rpm")
         try:
             with open(node, 'r') as f:
-                fan1_rpm = int(f.read())
+                fan_rpm = int(f.read())
         except IOError:
             return 0
 
-        return fan1_rpm
+        return fan_rpm
 
 
     def dump_sysfs(self):
-        return pddfparse.cli_dump_dsysfs('psu')
+        return pddf_obj.cli_dump_dsysfs('psu')
 
 #if __name__== "__main__":
     #obj=PsuUtil()
@@ -217,5 +225,4 @@ class PsuUtil(PsuBase):
     #print(obj.get_psu_status(2))
     #print(obj.get_psu_presence(1))
     #print(obj.get_psu_presence(2))
-    #obj.get_psu_info()
     #print "END\n"

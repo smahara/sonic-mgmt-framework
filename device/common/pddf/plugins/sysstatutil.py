@@ -11,6 +11,7 @@ dirname=os.path.dirname(os.path.realpath(__file__))
 with open(dirname+'/../pddf/pd-plugin.json') as pd:
     plugin_data = json.load(pd)
 
+pddf_obj = pddfparse.PddfParse()
 
 class SYSStatusUtil():
     """Platform-specific SYSStatus class"""
@@ -18,7 +19,7 @@ class SYSStatusUtil():
     def get_board_info(self):
 
         device = "SYSSTATUS"
-        node = pddfparse.get_path(device,"board_info")
+        node = pddf_obj.get_path(device,"board_info")
        
         try:
             with open(node, 'r') as f:
@@ -30,7 +31,7 @@ class SYSStatusUtil():
     def get_cpld_versio(self):
 
         device = "SYSSTATUS"
-        node = pddfparse.get_path(device,"cpld1_version")
+        node = pddf_obj.get_path(device,"cpld1_version")
    
         try:
             with open(node, 'r') as f:
@@ -42,7 +43,7 @@ class SYSStatusUtil():
     def get_power_module_status(self):
 
        device = "SYSSTATUS"
-       node = pddfparse.get_path(device,"power_module_status")
+       node = pddf_obj.get_path(device,"power_module_status")
 
        try:
            with open(node, 'r') as f:
@@ -56,7 +57,7 @@ class SYSStatusUtil():
 
         device = "SYSSTATUS"
         for i in range(1,8):
-           node = pddfparse.get_path(device,"system_reset"+str(i))
+           node = pddf_obj.get_path(device,"system_reset"+str(i))
 
            try:
              with open(node, 'r') as f:
@@ -70,7 +71,7 @@ class SYSStatusUtil():
 
         device = "SYSSTATUS"
         for i in range(1,3):
-           node = pddfparse.get_path(device,"misc"+str(i))
+           node = pddf_obj.get_path(device,"misc"+str(i))
 
            try:
              with open(node, 'r') as f:
@@ -81,10 +82,10 @@ class SYSStatusUtil():
 
 
     def dump_sysfs(self):
-        return pddfparse.cli_dump_dsysfs('sys-status')
+        return pddf_obj.cli_dump_dsysfs('sys-status')
 
-if __name__== "__main__":
-    obj=SYSStatusUtil()
+#if __name__== "__main__":
+    #obj=SYSStatusUtil()
     #obj.get_board_info()
     #obj.get_cpld_versio()
     #obj.get_power_module_status()

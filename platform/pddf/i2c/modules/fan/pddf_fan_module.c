@@ -196,7 +196,7 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 		}
 		else
 		{
-			printk(KERN_DEBUG "Unable to get the client handle for %s\n", cdata->i2c_name);
+			printk(KERN_ERR "Unable to get the client handle for %s\n", cdata->i2c_name);
 		}
 	}
 	else
@@ -212,10 +212,10 @@ free_data:
 		FAN_PDATA *fan_platform_data = board_info->platform_data;
 		if (fan_platform_data->fan_attrs)
 		{
-			printk(KERN_DEBUG "%s: Unable to create i2c client. Freeing the platform subdata\n", __FUNCTION__);
+			printk(KERN_ERR "%s: Unable to create i2c client. Freeing the platform subdata\n", __FUNCTION__);
 			kfree(fan_platform_data->fan_attrs);
 		}
-		printk(KERN_DEBUG "%s: Unable to create i2c client. Freeing the platform data\n", __FUNCTION__);
+		printk(KERN_ERR "%s: Unable to create i2c client. Freeing the platform data\n", __FUNCTION__);
 		kfree(fan_platform_data);
 	}
 clear_data:
