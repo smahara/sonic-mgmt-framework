@@ -49,17 +49,17 @@ type IntfApp struct {
 	appDB      *db.DB
 	countersDB *db.DB
 
-	ifTableMap     map[string]dbEntry
-	ifIPTableMap   map[string]map[string]dbEntry
-	counterPortMap dbEntry
-	portStatMap    map[string]dbEntry
+	ifTableMap   map[string]dbEntry
+	ifIPTableMap map[string]map[string]dbEntry
+	portOidMap   dbEntry
+	portStatMap  map[string]dbEntry
 
 	portTs             *db.TableSpec
 	portTblTs          *db.TableSpec
 	intfIPTs           *db.TableSpec
 	intfIPTblTs        *db.TableSpec
 	intfCountrTblTs    *db.TableSpec
-	portMapCountrTblTs *db.TableSpec
+	portOidCountrTblTs *db.TableSpec
 }
 
 func init() {
@@ -93,7 +93,7 @@ func (app *IntfApp) initialize(data appData) {
 	app.intfIPTs = &db.TableSpec{"INTERFACE"}
 	app.intfIPTblTs = &db.TableSpec{"INTF_TABLE"}
 	app.intfCountrTblTs = &db.TableSpec{"COUNTERS"}
-	app.portMapCountrTblTs = &db.TableSpec{"COUNTERS_PORT_NAME_MAP"}
+	app.portOidCountrTblTs = &db.TableSpec{"COUNTERS_PORT_NAME_MAP"}
 
 	app.ifTableMap = make(map[string]dbEntry)
 	app.ifIPTableMap = make(map[string]map[string]dbEntry)
@@ -391,13 +391,13 @@ func (app *IntfApp) doGetAllIpKeys(d *db.DB, dbSpec *db.TableSpec) ([]db.Key, er
 
 func (app *IntfApp) getPortOidMapForCounters(dbCl *db.DB) error {
 	var err error
-	ifCountInfo, err := dbCl.GetEntry(app.portMapCountrTblTs, db.Key{Comp: []string{}})
+	ifCountInfo, err := dbCl.GetEntry(app.portOidCountrTblTs, db.Key{Comp: []string{}})
 	if err != nil {
 		log.Info("Port-OID (Counters) get for all the interfaces failed!")
 		return err
 	}
 	if ifCountInfo.IsPopulated() {
-		app.counterPortMap.entry = ifCountInfo
+		app.portOidMap.entry = ifCountInfo
 	} else {
 		return errors.New("Get for OID info from all the interfaces from Counters DB failed!")
 	}
@@ -409,7 +409,7 @@ func (app *IntfApp) convertDBIntfCounterInfoToInternal(dbCl *db.DB, ifKey string
 	var err error
 
 	if len(ifKey) > 0 {
-		oid := app.counterPortMap.entry.Field[ifKey]
+		oid := app.portOidMap.entry.Field[ifKey]
 		log.Infof("OID : %s received for Interface : %s", oid, ifKey)
 
 		/* Get the statistics for the port */
