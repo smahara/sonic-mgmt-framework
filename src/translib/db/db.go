@@ -324,13 +324,12 @@ func (d *DB) key2redis(ts *TableSpec, key Key) string {
 				d.Opts.TableNameSeparator+
 				strings.Join(key.Comp, d.Opts.KeySeparator))
 	}
-	 if len(key.Comp) > 0 {
-                return ts.Name +
-                        d.Opts.TableNameSeparator +
-                        strings.Join(key.Comp, d.Opts.KeySeparator)
-        } else {
-                return ts.Name
-        }
+	if len(key.Comp) == 0 {
+		return ts.Name
+	}
+        return ts.Name +
+               d.Opts.TableNameSeparator +
+               strings.Join(key.Comp, d.Opts.KeySeparator)
 }
 
 func (d *DB) redis2key(ts *TableSpec, redisKey string) Key {
