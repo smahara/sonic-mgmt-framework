@@ -46,14 +46,20 @@ type IntfApp struct {
 	respJSON  interface{}
 	allIpKeys []db.Key
 
-	appDB        *db.DB
-	ifTableMap   map[string]dbEntry
-	ifIPTableMap map[string]map[string]dbEntry
+	appDB      *db.DB
+	countersDB *db.DB
 
-	portTs      *db.TableSpec
-	portTblTs   *db.TableSpec
-	intfIPTs    *db.TableSpec
-	intfIPTblTs *db.TableSpec
+	ifTableMap     map[string]dbEntry
+	ifIPTableMap   map[string]map[string]dbEntry
+	counterPortMap dbEntry
+	portStatMap    map[string]dbEntry
+
+	portTs             *db.TableSpec
+	portTblTs          *db.TableSpec
+	intfIPTs           *db.TableSpec
+	intfIPTblTs        *db.TableSpec
+	intfCountrTblTs    *db.TableSpec
+	portMapCountrTblTs *db.TableSpec
 }
 
 func init() {
@@ -86,9 +92,13 @@ func (app *IntfApp) initialize(data appData) {
 	app.portTblTs = &db.TableSpec{"PORT_TABLE"}
 	app.intfIPTs = &db.TableSpec{"INTERFACE"}
 	app.intfIPTblTs = &db.TableSpec{"INTF_TABLE"}
+	app.intfCountrTblTs = &db.TableSpec{"COUNTERS"}
+	app.portMapCountrTblTs = &db.TableSpec{"COUNTERS_PORT_NAME_MAP"}
 
 	app.ifTableMap = make(map[string]dbEntry)
 	app.ifIPTableMap = make(map[string]map[string]dbEntry)
+	app.portStatMap = make(map[string]dbEntry)
+
 }
 
 func (app *IntfApp) getAppRootObject() *ocbinds.OpenconfigInterfaces_Interfaces {
@@ -249,6 +259,7 @@ func (app *IntfApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error) {
 	log.Infof("Received GET for path %s; template: %s vars=%v", pathInfo.Path, pathInfo.Template, pathInfo.Vars)
 	var intfSubtree bool = false
 	app.appDB = dbs[db.ApplDB]
+	app.countersDB = dbs[db.CountersDB]
 
 	intfObj := app.getAppRootObject()
 
@@ -275,6 +286,11 @@ func (app *IntfApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error) {
 				}
 				/* Filling Interface IP info to internal DS */
 				err = app.convertDBIntfIPInfoToInternal(app.appDB, ifKey)
+				if err != nil {
+					return GetResponse{Payload: payload, ErrSrc: AppErr}, err
+				}
+				/* Filling the counter Info to internal DS */
+				err = app.convertDBIntfCounterInfoToInternal(app.countersDB, ifKey)
 				if err != nil {
 					return GetResponse{Payload: payload, ErrSrc: AppErr}, err
 				}
@@ -359,6 +375,40 @@ func (app *IntfApp) doGetAllIpKeys(d *db.DB, dbSpec *db.TableSpec) ([]db.Key, er
 }
 
 /***********  Translation Helper fn to convert DB Interface info to Internal DS   ***********/
+
+func (app *IntfApp) convertDBIntfCounterInfoToInternal(dbCl *db.DB, ifKey string) error {
+	log.Info("Counters get for all the interfaces!")
+	var err error
+	if len(ifKey) > 0 {
+		ifCountInfo, err := dbCl.GetEntry(app.portMapCountrTblTs, db.Key{Comp: []string{}})
+		if err != nil {
+			log.Info("Counters get for all the interfaces failed!")
+			return err
+		}
+
+		if ifCountInfo.IsPopulated() {
+			log.Info("Count Info populated!")
+			app.counterPortMap.entry = ifCountInfo
+			oid := app.counterPortMap.entry.Field[ifKey]
+			log.Infof("OID : %s received for Interface : %s", oid, ifKey)
+
+			/* Get the statistics for the port */
+			var ifStatKey db.Key
+			ifStatKey.Comp = []string{oid}
+
+			ifStatInfo, err := dbCl.GetEntry(app.intfCountrTblTs, ifStatKey)
+			if err != nil {
+				log.Infof("Fetching port-stat for port : %s failed!", ifKey)
+				return err
+			}
+			app.portStatMap[ifKey] = dbEntry{entry: ifStatInfo}
+		} else {
+			return errors.New("Get for OID info from all the interfaces from Counters DB failed!")
+		}
+	}
+	return err
+}
+
 func (app *IntfApp) convertDBIntfInfoToInternal(dbCl *db.DB, ifName string, ifKey db.Key) error {
 
 	var err error
@@ -418,6 +468,7 @@ func (app *IntfApp) convertDBIntfIPInfoToInternal(dbCl *db.DB, ifName string) er
 func (app *IntfApp) convertInternalToOCIntfInfo(ifName *string, ifInfo *ocbinds.OpenconfigInterfaces_Interfaces_Interface) {
 	app.convertInternalToOCIntfAttrInfo(ifName, ifInfo)
 	app.convertInternalToOCIntfIPAttrInfo(ifName, ifInfo)
+	app.convertInternalToOCPortStatInfo(ifName, ifInfo)
 }
 
 func (app *IntfApp) convertInternalToOCIntfAttrInfo(ifName *string, ifInfo *ocbinds.OpenconfigInterfaces_Interfaces_Interface) {
@@ -570,7 +621,89 @@ func (app *IntfApp) convertInternalToOCIntfIPAttrInfo(ifName *string, ifInfo *oc
 	}
 }
 
-///////////////////////////
+func (app *IntfApp) convertInternalToOCPortStatInfo(ifName *string, ifInfo *ocbinds.OpenconfigInterfaces_Interfaces_Interface) {
+	portStatInfo := app.portStatMap[*ifName]
+	if len(app.portStatMap) == 0 {
+		log.Infof("Port stat info not present for interface : %s", *ifName)
+		return
+	}
+	inOctet := new(uint64)
+	inOctetVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_IN_OCTETS"])
+	*inOctet = uint64(inOctetVal)
+	ifInfo.State.Counters.InOctets = inOctet
+
+	inUCastPkt := new(uint64)
+	inUCastPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_OUT_UCAST_PKTS"])
+	*inUCastPkt = uint64(inUCastPktVal)
+	ifInfo.State.Counters.InUnicastPkts = inUCastPkt
+
+	inNonUCastPkt := new(uint64)
+	inNonUCastPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_IN_NON_UCAST_PKTS"])
+	*inNonUCastPkt = uint64(inNonUCastPktVal)
+
+	inPkt := new(uint64)
+	*inPkt = *inUCastPkt + *inNonUCastPkt
+	ifInfo.State.Counters.InPkts = inPkt
+
+	inBCastPkt := new(uint64)
+	inBCastPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_IN_BROADCAST_PKTS"])
+	*inBCastPkt = uint64(inBCastPktVal)
+	ifInfo.State.Counters.InBroadcastPkts = inBCastPkt
+
+	inMCastPkt := new(uint64)
+	inMCastPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_IN_MULTICAST_PKTS"])
+	*inMCastPkt = uint64(inMCastPktVal)
+	ifInfo.State.Counters.InMulticastPkts = inMCastPkt
+
+	inErrPkt := new(uint64)
+	inErrPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_IN_ERRORS"])
+	*inErrPkt = uint64(inErrPktVal)
+	ifInfo.State.Counters.InErrors = inErrPkt
+
+	inDiscPkt := new(uint64)
+	inDiscPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_IN_DISCARDS"])
+	*inDiscPkt = uint64(inDiscPktVal)
+	ifInfo.State.Counters.InDiscards = inDiscPkt
+
+	outOctet := new(uint64)
+	outOctetVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_OUT_OCTETS"])
+	*outOctet = uint64(outOctetVal)
+	ifInfo.State.Counters.OutOctets = outOctet
+
+	outUCastPkt := new(uint64)
+	outUCastPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_OUT_UCAST_PKTS"])
+	*outUCastPkt = uint64(outUCastPktVal)
+	ifInfo.State.Counters.OutUnicastPkts = outUCastPkt
+
+	outNonUCastPkt := new(uint64)
+	outNonUCastPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_OUT_NON_UCAST_PKTS"])
+	*outNonUCastPkt = uint64(outNonUCastPktVal)
+
+	outPkt := new(uint64)
+	*outPkt = *outUCastPkt + *outNonUCastPkt
+	ifInfo.State.Counters.OutPkts = outPkt
+
+	outBCastPkt := new(uint64)
+	outBCastPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_OUT_BROADCAST_PKTS"])
+	*outBCastPkt = uint64(outBCastPktVal)
+	ifInfo.State.Counters.OutBroadcastPkts = outBCastPkt
+
+	outMCastPkt := new(uint64)
+	outMCastPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_OUT_MULTICAST_PKTS"])
+	*outMCastPkt = uint64(outMCastPktVal)
+	ifInfo.State.Counters.OutMulticastPkts = outMCastPkt
+
+	outErrPkt := new(uint64)
+	outErrPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_OUT_ERRORS"])
+	*outErrPkt = uint64(outErrPktVal)
+	ifInfo.State.Counters.OutErrors = outErrPkt
+
+	outDiscPkt := new(uint64)
+	outDiscPktVal, _ := strconv.Atoi(portStatInfo.entry.Field["SAI_PORT_STAT_IF_OUT_DISCARDS"])
+	*outDiscPkt = uint64(outDiscPktVal)
+	ifInfo.State.Counters.OutDiscards = outDiscPkt
+}
+
 func (app *IntfApp) translateCommon(d *db.DB, inpOp reqType) ([]db.WatchKeys, error) {
 	var err error
 	var keys []db.WatchKeys
