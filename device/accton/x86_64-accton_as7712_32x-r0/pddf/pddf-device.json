@@ -4,7 +4,7 @@
 		"num_psus":2,
 		"num_fans":6,
 		"num_ports":32,
-		"num_temps": 3,
+		"num_temps": 4,
 		"drivers":
 		{
 			"description":"AS7712 - Below is the list of supported PDDF drivers for various components. If any component uses some other driver, we will create the client using 'echo <dev-address> <dev-type> > <path>/new_device' method",
@@ -99,6 +99,7 @@
 				{ "chn":"1", "dev":"TEMP1" },
 				{ "chn":"1", "dev":"TEMP2" },
 				{ "chn":"1", "dev":"TEMP3" },
+				{ "chn":"1", "dev":"TEMP4" },
 				{ "chn":"2", "dev":"CPLD1" },
 				{ "chn":"3", "dev":"CPLD2" },
 				{ "chn":"4", "dev":"CPLD3" }
@@ -209,6 +210,21 @@
 		}
 	},
 	
+	"TEMP4" :
+	{
+		"dev_info": { "device_type":"TEMP_SENSOR", "device_name":"TEMP4", "device_parent":"MUX1"},
+		"i2c":
+		{
+			"topo_info": { "parent_bus":"0x11", "dev_addr":"0x4b", "dev_type":"lm75"},
+			"attr_list":
+			[
+				{ "attr_name": "temp1_max"},
+				{ "attr_name": "temp1_max_hyst"},
+				{ "attr_name": "temp1_input"}
+			]
+		}
+	},
+	
 	"CPLD1":
 	{
 		"dev_info": { "device_type":"CPLD", "device_name":"CPLD1", "device_parent":"MUX1"},
@@ -263,7 +279,7 @@
 	"PSU1":
 	{
 		"dev_info": { "device_type":"PSU", "device_name":"PSU1", "device_parent":"MUX2"}, 
-		"dev_attr": { "dev_idx":"1"},
+		"dev_attr": { "dev_idx":"1", "num_psu_fans": "1"},
 		"i2c":
 		{
 			"interface":
@@ -308,7 +324,7 @@
 	"PSU2":
 	{
 		"dev_info": { "device_type":"PSU", "device_name":"PSU2", "device_parent":"MUX2" },
-		"dev_attr": { "dev_idx":"2"},
+		"dev_attr": { "dev_idx":"2", "num_psu_fans":"1"},
 		"i2c":
 		{
 			"interface":

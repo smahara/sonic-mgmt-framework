@@ -146,6 +146,7 @@ static int psu_probe(struct i2c_client *client,
 	psu_platform_data = (PSU_PDATA *)(client->dev.platform_data);
 	num = psu_platform_data->len;
 	data->index = psu_platform_data->idx - 1;
+	data->num_psu_fans = psu_platform_data->num_psu_fans;
 	data->num_attr = num;
 
 

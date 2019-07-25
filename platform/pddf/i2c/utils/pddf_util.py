@@ -39,6 +39,9 @@ args = []
 ALL_DEVICE = {}               
 FORCE = 0
 
+# Instantiate the class pddf_obj 
+pddf_obj = pddfparse.PddfParse()
+
 if DEBUG == True:
     print sys.argv[0]
     print 'ARGV      :', sys.argv[1:]   
@@ -250,8 +253,8 @@ def driver_uninstall():
 
 def device_install():
     global FORCE
-    # trigger the pddfparse script for FAN, PSU, CPLD, MUX, etc
-    status = pddfparse.create_pddf_devices()
+    # trigger the pddf_obj script for FAN, PSU, CPLD, MUX, etc
+    status = pddf_obj.create_pddf_devices()
     if status:
         if FORCE == 0:
             return status
@@ -260,7 +263,7 @@ def device_install():
 def device_uninstall():
     global FORCE
     # Trigger the paloparse script for deletion of FAN, PSU, OPTICS, CPLD clients
-    status = pddfparse.delete_pddf_devices()
+    status = pddf_obj.delete_pddf_devices()
     if status:
         if FORCE == 0:
             return status
@@ -302,6 +305,12 @@ def do_uninstall():
                 return  status                          
     return       
 def do_switch_pddf():
+    #print "Check the platform service..."
+    status, output = log_os_system("systemctl list-units |grep as7712", 0)
+    if not 'as7712-platform-init.service' in output:
+        print "PDDF is not supported on this platform"
+        return status
+
     print "Checking system...."
     if os.path.exists('/usr/share/sonic/platform/pddf_support'):
         print PROJECT_NAME.upper() +" system is already in pddf mode...."

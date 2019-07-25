@@ -12,10 +12,11 @@ dirname=os.path.dirname(os.path.realpath(__file__))
 with open(dirname+'/../pddf/pd-plugin.json') as pd:
     plugin_data = json.load(pd)
 
+pddf_obj = pddfparse.PddfParse()
 
 class ThermalUtil:
 	def __init__(self):
-		self.platform = pddfparse.get_platform()
+		self.platform = pddf_obj.get_platform()
 		self.num_thermals = self.platform['num_temps'] 
 		self.info=[]
 
@@ -24,7 +25,7 @@ class ThermalUtil:
 
 	def get_thermal_info(self):
 		list=[]
-		pddfparse.get_device_list(list, "TEMP_SENSOR")
+		pddf_obj.get_device_list(list, "TEMP_SENSOR")
 		list.sort()
 		for dev in list:
 			data={}
@@ -36,7 +37,7 @@ class ThermalUtil:
 			data['label']=label
 			for attr in attr_list:
 				attr_name = attr['attr_name']
-				node = pddfparse.get_path(device_name, attr_name)
+				node = pddf_obj.get_path(device_name, attr_name)
         			try:
             				with open(node, 'r') as f:
                 				attr_value = int(f.read())
@@ -70,7 +71,7 @@ class ThermalUtil:
 
 
         def dump_sysfs(self):
-            return pddfparse.cli_dump_dsysfs('temp-sensors')
+            return pddf_obj.cli_dump_dsysfs('temp-sensors')
 
 
 		
