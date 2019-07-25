@@ -91,7 +91,7 @@ func (app *IntfApp) initialize(data appData) {
 	app.portTs = &db.TableSpec{Name: "PORT"}
 	app.portTblTs = &db.TableSpec{Name: "PORT_TABLE"}
 	app.intfIPTs = &db.TableSpec{Name: "INTERFACE"}
-	app.intfIPTblTs = &db.TableSpec{Name: "INTF_TABLE"}
+	app.intfIPTblTs = &db.TableSpec{Name: "INTF_TABLE", CompCt: 2}
 	app.intfCountrTblTs = &db.TableSpec{Name: "COUNTERS"}
 	app.portOidCountrTblTs = &db.TableSpec{Name: "COUNTERS_PORT_NAME_MAP"}
 
@@ -203,6 +203,11 @@ func (app *IntfApp) translateGet(dbs [db.MaxDB]*db.DB) error {
 	var err error
 	log.Info("translateGet:intf:path =", app.path)
 	return err
+}
+
+func (app *IntfApp) translateSubscribe(dbs [db.MaxDB]*db.DB, path string) (*notificationOpts, *notificationInfo, error) {
+	var err error
+	return nil, nil, err
 }
 
 func (app *IntfApp) processCreate(d *db.DB) (SetResponse, error) {
@@ -391,7 +396,7 @@ func (app *IntfApp) doGetAllIpKeys(d *db.DB, dbSpec *db.TableSpec) ([]db.Key, er
 
 func (app *IntfApp) getPortOidMapForCounters(dbCl *db.DB) error {
 	var err error
-	ifCountInfo, err := dbCl.GetEntry(app.portOidCountrTblTs, db.Key{Comp: []string{}})
+	ifCountInfo, err := dbCl.GetMapAll(app.portOidCountrTblTs)
 	if err != nil {
 		log.Info("Port-OID (Counters) get for all the interfaces failed!")
 		return err
