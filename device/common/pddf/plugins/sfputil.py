@@ -13,13 +13,6 @@ try:
 except ImportError, e:
     raise ImportError (str(e) + "- required module not found")
 
-dirname=os.path.dirname(os.path.realpath(__file__))
-
-with open(dirname+'/../pddf/pd-plugin.json') as pd:
-    plugin_data = json.load(pd)
-
-pddf_obj = pddfparse.PddfParse()
-
 class SfpUtil(SfpUtilBase):
     """Platform generic PDDF SfpUtil class"""
 
@@ -32,6 +25,12 @@ class SfpUtil(SfpUtilBase):
 
     def __init__(self):
         SfpUtilBase.__init__(self)
+        global pddf_obj
+        global plugin_data
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../pddf/pd-plugin.json')) as pd:
+            plugin_data = json.load(pd)
+
+        pddf_obj = pddfparse.PddfParse()
         self.platform = pddf_obj.get_platform()
         self._port_start = 0
         self._port_end = self.get_num_ports()
