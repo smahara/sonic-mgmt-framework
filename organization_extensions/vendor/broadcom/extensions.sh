@@ -13,14 +13,17 @@ sudo mkdir -p ${FILESYSTEM_ROOT}/usr/share/broadcom_sonic
 sudo cp -R ${VENDOR_EXT_BASE}/config_profiles \
            ${FILESYSTEM_ROOT}/usr/share/broadcom_sonic
 
+sudo cp -R ${VENDOR_EXT_BASE}/scripts \
+           ${FILESYSTEM_ROOT}/usr/share/broadcom_sonic
+
 # Choose factory default configuration profile to be applied on boot
-sudo LANG=C chroot $FILESYSTEM_ROOT /bin/bash -c 'echo "l2" > /usr/share/broadcom_sonic/config_profiles/active'
+sudo LANG=C chroot $FILESYSTEM_ROOT /bin/bash -c 'echo "l3" > /usr/share/broadcom_sonic/config_profiles/active'
 
 # Create factory default configuration hooks
 sudo mkdir -p ${FILESYSTEM_ROOT}/etc/config-setup/factory-default-hooks.d
-for script in $(ls -1 ${VENDOR_EXT_BASE}/config_profiles/common/scripts);
+for script in $(ls -1 ${VENDOR_EXT_BASE}/scripts/factory-default-hooks);
 do
-    sudo ln -sf /usr/share/broadcom_sonic/config_profiles/common/scripts/$script \
+    sudo ln -sf /usr/share/broadcom_sonic/scripts/factory-default-hooks/$script \
                 ${FILESYSTEM_ROOT}/etc/config-setup/factory-default-hooks.d/$script
 done
 

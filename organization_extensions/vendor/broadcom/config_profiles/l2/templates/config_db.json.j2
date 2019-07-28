@@ -38,9 +38,16 @@
                 "index": "{{ PORT[port].index }}",
                 "lanes": "{{ PORT[port].lanes }}",
                 "mtu":   "9100",
+{% if PORT[port].alias is defined and PORT[port].alias != "" %}
                 "alias": "{{ PORT[port].alias }}",
-                "admin_status": "up",
-                "speed": "{{ PORT[port].speed }}"
+{% endif %}
+{% if PORT[port].speed is defined and PORT[port].speed != "" %}
+                "speed": "{{ PORT[port].speed }}",
+{% endif %}
+{% if PORT[port].valid_speeds is defined and PORT[port].valid_speeds != "" %}
+                "valid_speeds": "{{ PORT[port].valid_speeds }}",
+{% endif %}
+                "admin_status": "up"
          }{%- if loop.last == False -%},{% endif %}
 
 {% endfor %}
