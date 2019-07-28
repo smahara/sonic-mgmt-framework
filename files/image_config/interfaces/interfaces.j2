@@ -25,7 +25,7 @@ iface lo {{ 'inet' if prefix | ipv4 else 'inet6' }} static
 
 # The management network interface
 auto eth0
-{% if (ZTP is defined) and (ZTP['mode'] is defined and ZTP['mode']['profile'] == 'active') %}
+{% if (ZTP_DHCP_DISABLED is not defined) and (ZTP is defined) and (ZTP['mode'] is defined and ZTP['mode']['profile'] == 'active') %}
 
 
 # ZTP out-of-band interface
@@ -45,7 +45,7 @@ iface eth0 inet6 dhcp
 # ZTP in-band interface {{ port }}
 auto {{ port }}
 allow-hotplug {{ port }}
-{% if PORT_TABLE['PORT_TABLE:'+port] is defined and PORT_TABLE['PORT_TABLE:'+port]['value']['oper_status'] == 'up' %}
+{% if PORT_DATA['PORT_TABLE:'+port] is defined and PORT_DATA['PORT_TABLE:'+port]['value']['oper_status'] == 'up' %}
 {% if ZTP['mode']['ipv4'] == 'true' %}
 iface {{ port }} inet dhcp
 {% endif %}
