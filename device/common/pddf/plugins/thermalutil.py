@@ -7,15 +7,14 @@ sys.path.append('/usr/share/sonic/platform/plugins')
 import pddfparse
 import argparse
 
-dirname=os.path.dirname(os.path.realpath(__file__))
-
-with open(dirname+'/../pddf/pd-plugin.json') as pd:
-    plugin_data = json.load(pd)
-
-pddf_obj = pddfparse.PddfParse()
-
 class ThermalUtil:
 	def __init__(self):
+                global pddf_obj
+                global plugin_data
+                with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../pddf/pd-plugin.json')) as pd:
+                    plugin_data = json.load(pd)
+
+                pddf_obj = pddfparse.PddfParse()
 		self.platform = pddf_obj.get_platform()
 		self.num_thermals = self.platform['num_temps'] 
 		self.info=[]

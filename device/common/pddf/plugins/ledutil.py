@@ -7,8 +7,6 @@ import pddfparse
 import json
 import argparse
 
-pddf_obj = pddfparse.PddfParse()
-
 class LedUtil:
     color_map = {
                  "GREEN" : "on",
@@ -17,6 +15,8 @@ class LedUtil:
 		 "ON"  : "on"
                 }
     def __init__(self):
+        global pddf_obj
+        pddf_obj = pddfparse.PddfParse()
         self.path="pddf/devices/led"
         self.cur_state_path="pddf/devices/led/cur_state"
 
