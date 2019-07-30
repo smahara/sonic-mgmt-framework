@@ -25,6 +25,8 @@ supervisorctl start portsyncd
 
 supervisorctl start neighsyncd
 
+supervisorctl start fdbsyncd
+
 supervisorctl start swssconfig
 
 supervisorctl start vrfmgrd

@@ -1,6 +1,7 @@
 orchagent
 portsyncd
 neighsyncd
+fdbsyncd
 vlanmgrd
 intfmgrd
 portmgrd
