@@ -43,6 +43,8 @@ supervisorctl start portsyncd
 
 supervisorctl start neighsyncd
 
+supervisorctl start fdbsyncd
+
 supervisorctl start teamsyncd
 
 supervisorctl start fpmsyncd
