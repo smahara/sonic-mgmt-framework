@@ -131,7 +131,7 @@ class Portchstat(object):
         """
         # Get the info from database
         eth_dict = OrderedDict()
-        fields = ["0"]*BUCKET_NUM
+        fields_po = ["0"]*BUCKET_NUM
         tup = NStats._make(fields_po)
         if file_dict: 
             if file_dict.has_key(lag):
