@@ -66,6 +66,7 @@
 #define PROJECT_NAME
 
 #define LOCAL_DEBUG                       0
+#define DRVNAME "accton_as5712_54x_fan"
 
 static struct accton_as5712_54x_fan  *fan_data = NULL;
 
@@ -133,44 +134,56 @@ static ssize_t fan_show_value(struct device *dev,
 
 extern int as5712_54x_cpld_read(unsigned short cpld_addr, u8 reg);
 extern int as5712_54x_cpld_write(unsigned short cpld_addr, u8 reg, u8 value);
+static ssize_t show_name(struct device *dev, struct device_attribute *da,
+                         char *buf);
 
 
 /*******************/
-#define _MAKE_SENSOR_DEVICE_ATTR(prj, id) \
-    static SENSOR_DEVICE_ATTR(prj##fan##id##_fault, S_IRUGO, fan_show_value, NULL, FAN##id##_FAULT); \
+#define _MAKE_SENSOR_DEVICE_ATTR(prj, id, id2) \
     static SENSOR_DEVICE_ATTR(prj##fan##id##_speed_rpm, S_IRUGO, fan_show_value, NULL, FAN##id##_SPEED); \
     static SENSOR_DEVICE_ATTR(prj##fan##id##_duty_cycle_percentage, S_IWUSR | S_IRUGO, fan_show_value,          \
                                             fan_set_duty_cycle, FAN##id##_DUTY_CYCLE);          \
     static SENSOR_DEVICE_ATTR(prj##fan##id##_direction, S_IRUGO, fan_show_value, NULL, FAN##id##_DIRECTION); \
     static SENSOR_DEVICE_ATTR(prj##fanr##id##_fault, S_IRUGO, fan_show_value, NULL, FANR##id##_FAULT); \
-    static SENSOR_DEVICE_ATTR(prj##fanr##id##_speed_rpm, S_IRUGO, fan_show_value, NULL, FANR##id##_SPEED);
+    static SENSOR_DEVICE_ATTR(prj##fanr##id##_speed_rpm, S_IRUGO, fan_show_value, NULL, FANR##id##_SPEED);\
+    static SENSOR_DEVICE_ATTR(prj##fan##id##_input, S_IRUGO, fan_show_value, NULL, FAN##id##_SPEED); \
+    static SENSOR_DEVICE_ATTR(prj##fan##id2##_input, S_IRUGO, fan_show_value, NULL, FANR##id##_SPEED);\
+    static SENSOR_DEVICE_ATTR(prj##fan##id##_fault, S_IRUGO, fan_show_value, NULL, FAN##id##_FAULT); \
+    static SENSOR_DEVICE_ATTR(prj##fan##id2##_fault, S_IRUGO, fan_show_value, NULL, FANR##id##_FAULT);
 
-#define MAKE_SENSOR_DEVICE_ATTR(prj,id) _MAKE_SENSOR_DEVICE_ATTR(prj,id)
+#define MAKE_SENSOR_DEVICE_ATTR(prj,id,id2) _MAKE_SENSOR_DEVICE_ATTR(prj,id,id2)
 
-MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 1)
-MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 2)
-MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 3)
-MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 4)
-MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 5)
+MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 1, 11)
+MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 2, 12)
+MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 3, 13)
+MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 4, 14)
+MAKE_SENSOR_DEVICE_ATTR(PROJECT_NAME, 5, 15)
+
+static SENSOR_DEVICE_ATTR(name, S_IRUGO, show_name, NULL, 0);
 /*******************/
 
-#define _MAKE_FAN_ATTR(prj, id) \
-    &sensor_dev_attr_##prj##fan##id##_fault.dev_attr.attr,     \
+#define _MAKE_FAN_ATTR(prj, id, id2) \
     &sensor_dev_attr_##prj##fan##id##_speed_rpm.dev_attr.attr,     \
     &sensor_dev_attr_##prj##fan##id##_duty_cycle_percentage.dev_attr.attr,\
     &sensor_dev_attr_##prj##fan##id##_direction.dev_attr.attr, \
     &sensor_dev_attr_##prj##fanr##id##_fault.dev_attr.attr,   \
-    &sensor_dev_attr_##prj##fanr##id##_speed_rpm.dev_attr.attr,
+    &sensor_dev_attr_##prj##fanr##id##_speed_rpm.dev_attr.attr,\
+    &sensor_dev_attr_##prj##fan##id##_input.dev_attr.attr,   \
+    &sensor_dev_attr_##prj##fan##id2##_input.dev_attr.attr,     \
+    &sensor_dev_attr_##prj##fan##id##_fault.dev_attr.attr,   \
+    &sensor_dev_attr_##prj##fan##id2##_fault.dev_attr.attr,
 
-#define MAKE_FAN_ATTR(prj, id) _MAKE_FAN_ATTR(prj, id)
+
+#define MAKE_FAN_ATTR(prj, id, id2) _MAKE_FAN_ATTR(prj, id, id2)
 
 static struct attribute *accton_as5712_54x_fan_attributes[] = {
     /* fan related attributes */
-    MAKE_FAN_ATTR(PROJECT_NAME,1)
-    MAKE_FAN_ATTR(PROJECT_NAME,2)
-    MAKE_FAN_ATTR(PROJECT_NAME,3)
-    MAKE_FAN_ATTR(PROJECT_NAME,4)
-    MAKE_FAN_ATTR(PROJECT_NAME,5)
+    MAKE_FAN_ATTR(PROJECT_NAME,1, 11)
+    MAKE_FAN_ATTR(PROJECT_NAME,2, 12)
+    MAKE_FAN_ATTR(PROJECT_NAME,3, 13)
+    MAKE_FAN_ATTR(PROJECT_NAME,4, 14)
+    MAKE_FAN_ATTR(PROJECT_NAME,5, 15)
+    &sensor_dev_attr_name.dev_attr.attr,
     NULL
 };
 /*******************/
@@ -231,6 +244,12 @@ static ssize_t fan_show_value(struct device *dev, struct device_attribute *da,
     }
 
     return ret;
+}
+
+static ssize_t show_name(struct device *dev, struct device_attribute *da,
+                         char *buf)
+{
+    return sprintf(buf, "%s\n", DRVNAME);
 }
 /*******************/
 static ssize_t fan_set_duty_cycle(struct device *dev, struct device_attribute *da,
