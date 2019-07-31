@@ -13,7 +13,7 @@
 
 		"psu_fan_dir":
 		{
-			"valmap": { "F2B":"FAN_DIRECTION_INTAKE", "B2F":"FAN_DIRECTION_EXHAUST" }
+			"valmap": { "F2B":"INTAKE", "B2F":"EXHAUST" }
 		}
 	},
 
@@ -21,7 +21,7 @@
 	{
 		"direction":
 		{
-			"valmap": {"1":"FAN_DIRECTION_INTAKE", "0":"FAN_DIRECTION_EXHAUST"}
+			"valmap": {"1":"INTAKE", "0":"EXHAUST"}
 		},
 
 		"present":
