@@ -514,7 +514,7 @@ sudo sed -i 's/EBTABLES_LOAD_ON_START="no"/EBTABLES_LOAD_ON_START="yes"/g' ${FIL
 sudo cp files/image_config/ebtables/ebtables.filter ${FILESYSTEM_ROOT}/etc
 
 ## Remove gcc and python dev pkgs
-sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y remove gcc libpython2.7-dev
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y remove libpython2.7-dev
 
 ## Update initramfs
 sudo chroot $FILESYSTEM_ROOT update-initramfs -u

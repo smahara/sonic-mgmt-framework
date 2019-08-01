@@ -163,6 +163,29 @@ sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libnss-tacplus_*.deb || \
 sudo LANG=C chroot $FILESYSTEM_ROOT pam-auth-update --remove tacplus
 sudo sed -i -e '/^passwd/s/ tacplus//' $FILESYSTEM_ROOT/etc/nsswitch.conf
 
+
+#system monitor service files
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libswsscommon*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libhiredis0*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/python-swsscommon*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libnl*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install \
+			pkg-config libdbus-1-dev libglib2.0-dev libcairo2-dev libgirepository1.0-dev
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT  apt-mark manual \
+			libgirepository1.0-dev libgirepository-1.0-1
+sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install PyGObject dbus-python
+
+
+
 # Copy crontabs
 sudo cp -f $IMAGE_CONFIGS/cron.d/* $FILESYSTEM_ROOT/etc/cron.d/
 
@@ -182,6 +205,13 @@ sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable warmboot-finalizer.service
 sudo LANG=C cp $SCRIPTS_DIR/export/export.py  $FILESYSTEM_ROOT/usr/local/bin/export.py
 sudo LANG=C cp $IMAGE_CONFIGS/export/export.service $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable export.service
+
+
+# Copy the system monitor service
+sudo LANG=C cp $SCRIPTS_DIR/system/sysmonitor.py  $FILESYSTEM_ROOT/usr/local/bin/sysmonitor.py
+sudo LANG=C cp $IMAGE_CONFIGS/systemd/sysmonitor.service $FILESYSTEM_ROOT/etc/systemd/system/
+sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable sysmonitor.service
+
 
 # Copy rsyslog configuration files and templates
 sudo cp $IMAGE_CONFIGS/rsyslog/rsyslog-config.service  $FILESYSTEM_ROOT/etc/systemd/system/
