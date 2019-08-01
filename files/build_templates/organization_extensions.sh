@@ -50,11 +50,9 @@ echo "Executing SONIC Organization Extensions"
 rv=0
 if [ -e /sonic/organization_extensions/extensions.sh ]; then
    export FILESYSTEM_ROOT
-# Disabling execution of organization extensions until all recipes are discussed and added.
-# Uncomment below lines when all recipes are ready.
 
-#   /sonic/organization_extensions/extensions.sh
-# rv=$?
+  /sonic/organization_extensions/extensions.sh
+  rv=$?
 fi
 
 echo "SONIC Organization Extensions - Done (Exit code $rv)"

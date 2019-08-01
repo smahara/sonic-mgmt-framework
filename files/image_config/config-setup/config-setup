@@ -29,13 +29,12 @@ CONFIG_SETUP_INITIALIZATION_FLAG=${CONFIG_SETUP_VAR_DIR}/pending_initialization
 usage()
 {
 cat << EOF
- Usage:  config-setup < backup | boot | factory [destination file] >
+ Usage:  config-setup < backup | boot | factory >
 
          backup  - Take a backup copy of SONiC configuration.
          boot    - Initialize/migrate SONiC configuration during system boot.
-         factory - Create factory default SONiC configuration and save
-                   it to destination file. If no destination file is provided,
-                   save it to ${CONFIG_DB_JSON}.
+         factory - Create factory default SONiC configuration and save it to
+                   to ${CONFIG_DB_JSON}.
 EOF
 }
 
@@ -45,12 +44,17 @@ run_hook() {
     local exit_status=0
 
     if [ -f $script ]; then
-        . $script
+        # Check hook for syntactical correctness before executing it
+        /bin/bash -n $script
+        exit_status=$?
+        if [ "$exit_status" -eq 0 ]; then
+            . $script
+        fi
         exit_status=$?
     fi
 
     if [ -n "$exit_status" ] && [ "$exit_status" -ne 0 ]; then
-        logger -p daemon.err "$script returned non-zero exit status $exit_status"
+        echo "$script returned non-zero exit status $exit_status"
     fi
 
     return $exit_status
@@ -109,10 +113,10 @@ function copy_config_files_and_directories()
 {
     for file_dir in $@; do
         if [ -f /etc/sonic/old_config/${file_dir} ] || [ -d /etc/sonic/old_config/${file_dir} ]; then
-            logger "Copying SONiC configuration ${file_dir} ..."
+            echo "Copying SONiC configuration ${file_dir} ..."
             cp -ar /etc/sonic/old_config/${file_dir} /etc/sonic/
         else
-            logger "Missing SONiC configuration ${file_dir} ..."
+            echo "Missing SONiC configuration ${file_dir} ..."
         fi
     done
 }
@@ -353,11 +357,7 @@ fi
 
 # Process factory default configuration creation request
 if [ "$CMD" = "factory" ]; then
-    DEST_FILE="$2"
-    if [ "${DEST_FILE}" = ""  ]; then
-       DEST_FILE=${CONFIG_DB_JSON}
-    fi
-    generate_config factory ${DEST_FILE}
+    generate_config factory ${CONFIG_DB_JSON}
 fi
 
 # Take a backup of current configuration
