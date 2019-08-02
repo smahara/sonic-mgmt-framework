@@ -41,11 +41,7 @@ def get_sonic_version_info():
         return None
     data = {}
     with open('/etc/sonic/sonic_version.yml') as stream:
-        yaml_version_list = yaml.__version__.split(".")
-        if yaml_version_list[0] == "3" and yaml_version_list[1] == "12":
-            data = yaml.load(stream)
-        else:
-            data = yaml.full_load(stream)
+        data = yaml.full_load(stream)
     return data
 
 def get_system_mac():
