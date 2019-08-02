@@ -1,0 +1,13 @@
+{
+    "fec-mode": {
+        "Ethernet0-47": {
+            "1": [ "none", "fc" ]
+        },
+        "Ethernet48-71": {
+            "1": [ "none", "fc" ],
+            "2": [ "none", "fc" ],
+            "4": [ "none", "fc" ]
+        }
+    }
+}
+
