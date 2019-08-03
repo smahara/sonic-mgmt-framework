@@ -44,6 +44,8 @@ export BUILD_NUMBER
 export BUILD_TIMESTAMP
 export CONFIGURED_PLATFORM
 
+SONIC_MAKEFILE_LIST=slave.mk rules/config rules/functions
+
 ###############################################################################
 ## Utility rules
 ## Define configuration, help etc.
@@ -264,7 +266,6 @@ export vs_build_prepare_mem=$(VS_PREPARE_MEM)
 
 MOD_CACHE_LOCK_TIMEOUT = 3600
 SONIC_DPKG_CACHE_DIR=/dpkg_cache
-
 
 # Lock macro for debian package level cache
 # Lock is implemented through flock command with the timeout value of 1 hour
@@ -495,7 +496,7 @@ $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS)) : $(DEBS_PATH)/% : .platform $$(a
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
-	$(if $($*_CACHE_MODE), $(call LOAD_CACHE,$*) )
+	$(if $(and $(filter-out none,$(SONIC_DPKG_CACHE_METHOD)),$($*_CACHE_MODE)), $(call LOAD_CACHE,$*) )
 
 	# Skip building the target if it is already loaded from cache
 	if [ -z '$($*_CACHE_LOADED)' ] ; then
@@ -510,7 +511,7 @@ $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS)) : $(DEBS_PATH)/% : .platform $$(a
 		if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && quilt pop -a -f; popd; fi
 
 		# Save the target deb into DPKG cache
-		$(if $($*_CACHE_MODE), $(call SAVE_CACHE,$*,$@))
+		$(if $(and $(filter-out none,$(SONIC_DPKG_CACHE_METHOD)),$($*_CACHE_MODE)), $(call SAVE_CACHE,$*,$@))
 
 	fi
 
@@ -524,7 +525,8 @@ SONIC_TARGET_LIST += $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS))
 #     $(SOME_NEW_DEB)_SRC_PATH = $(SRC_PATH)/project_name
 #     $(SOME_NEW_DEB)_DEPENDS = $(SOME_OTHER_DEB1) $(SOME_OTHER_DEB2) ...
 #     SONIC_DPKG_DEBS += $(SOME_NEW_DEB)
-$(addprefix $(DEBS_PATH)/, $(SONIC_DPKG_DEBS)) : $(DEBS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS)))
+$(addprefix $(DEBS_PATH)/, $(SONIC_DPKG_DEBS)) : $(DEBS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS))) \
+	$$($$*_DEP_SOURCE) $$($$*_SMDEP_SOURCE)
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
