@@ -58,6 +58,9 @@ supervisorctl start portsyncd
 echo "Start neighsyncd"
 supervisorctl start neighsyncd
 
+echo "Start vrrpsyncd"
+supervisorctl start vrrpsyncd
+
 echo "Start teamsyncd"
 supervisorctl start teamsyncd
 

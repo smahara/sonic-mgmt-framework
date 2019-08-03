@@ -45,6 +45,8 @@ supervisorctl start neighsyncd
 
 supervisorctl start teamsyncd
 
+supervisorctl start vrrpsyncd
+
 supervisorctl start fpmsyncd
 
 supervisorctl start teammgrd
