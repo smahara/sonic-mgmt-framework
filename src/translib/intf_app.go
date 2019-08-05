@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+        "unsafe"
 	"translib/db"
 	"translib/ocbinds"
 )
@@ -423,6 +424,49 @@ func (app *IntfApp) getSpecificAttr(targetUriPath string, ifKey string, oc_val *
 		} else {
 			return true, e
 		}
+        case "/openconfig-interfaces:interfaces/interface/state/admin-status":
+            val, e := app.getIntfAttr(ifKey, PORT_ADMIN_STATUS)
+                if len(val) > 0 {
+                        switch val {
+                        case "up":
+                                oc_val.AdminStatus = ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_AdminStatus_UP
+                        case "down":
+                                oc_val.AdminStatus = ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_AdminStatus_DOWN
+                        default:
+                                oc_val.AdminStatus = ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_AdminStatus_UNSET
+                        }
+                        return true, nil
+                } else {
+                        return true, e
+                }
+        case "/openconfig-interfaces:interfaces/interface/state/mtu":
+            val, e := app.getIntfAttr(ifKey, PORT_MTU)
+                if len(val) > 0 {
+                    v, e := strconv.ParseUint(val, 10, 16)
+                    if  e == nil {
+                        oc_val.Mtu = (*uint16)(unsafe.Pointer(&v))
+                        return true, nil
+                    }
+                }
+                return true, e
+        case "/openconfig-interfaces:interfaces/interface/state/ifindex":
+            val, e := app.getIntfAttr(ifKey, PORT_INDEX)
+                if len(val) > 0 {
+                    v, e := strconv.ParseUint(val, 10, 32)
+                    if  e == nil {
+                        oc_val.Ifindex = (*uint32)(unsafe.Pointer(&v))
+                        return true, nil
+                    }
+                }
+                return true, e
+        case "/openconfig-interfaces:interfaces/interface/state/description":
+            val, e := app.getIntfAttr(ifKey, PORT_DESC)
+            if e == nil {
+                oc_val.Description = &val
+                return true, nil
+            }
+            return true, e
+
 	default:
 		log.Infof("GET for " + targetUriPath + " not supported")
 	}
