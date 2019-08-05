@@ -5,8 +5,8 @@ DefaultDependencies=no
 
 [Service]
 Type=oneshot
-ExecStart=
-ExecStop=
+ExecStart=/usr/local/bin/pddf_util.py install
+ExecStop=/usr/local/bin/pddf_util.py clean
 RemainAfterExit=yes
 
 [Install]

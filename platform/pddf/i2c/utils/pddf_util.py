@@ -41,6 +41,13 @@ FORCE = 0
 
 # Instantiate the class pddf_obj 
 pddf_obj = pddfparse.PddfParse()
+try:
+    import pddf_switch_svc
+except ImportError:
+    print "Unable to find pddf_switch_svc.py. PDDF might not be supported on this platform"
+    sys.exit()
+
+
 
 if DEBUG == True:
     print sys.argv[0]
@@ -129,6 +136,7 @@ kos = [
 'modprobe pddf_psu_driver_module' ,
 'modprobe pddf_psu_module' ,
 'modprobe pddf_fan_driver_module' ,
+'modprobe -f platform_pddf_fan' ,
 'modprobe pddf_fan_module' ,
 'modprobe pddf_led_module' ,
 'modprobe pddf_sysstatus_module'
@@ -284,6 +292,9 @@ def device_uninstall():
         
 def do_install():
     print "Checking system...."
+    if not os.path.exists('/usr/share/sonic/platform/pddf_support'):
+        print PROJECT_NAME.upper() +" mode is not enabled"
+        return
 
     if driver_check()== False :
         print PROJECT_NAME.upper() +" has no PDDF driver installed...."
@@ -304,12 +315,16 @@ def do_install():
     
 def do_uninstall():
     print "Checking system...."
-    print "Remove all the devices..."
+    if not os.path.exists('/usr/share/sonic/platform/pddf_support'):
+        print PROJECT_NAME.upper() +" mode is not enabled"
+        return
+
 
     if os.path.exists('/var/log/pddf'):
-	print "rm pddf....."
+	print "Remove pddf log files....."
     	log_os_system("sudo rm -rf /var/log/pddf", 1)
 
+    print "Remove all the devices..."
     status = device_uninstall()
     if status:
         return status
@@ -326,9 +341,9 @@ def do_uninstall():
     return       
 
 def do_switch_pddf():
-    #print "Check the platform service..."
-    status, output = log_os_system("systemctl list-units |grep as7712", 0)
-    if not 'as7712-platform-init.service' in output:
+    print "Check the pddf support..."
+    status = pddf_switch_svc.check_pddf_support()
+    if not status:
         print "PDDF is not supported on this platform"
         return status
 
@@ -337,9 +352,9 @@ def do_switch_pddf():
     if os.path.exists('/usr/share/sonic/platform/pddf_support'):
         print PROJECT_NAME.upper() +" system is already in pddf mode...."
     else:
-        print "Stopping the platform service..."
-        status, output = log_os_system("systemctl stop as7712-platform-init.service", 1)
-        if status:
+        print "Stopping the platform services.."
+        status = pddf_switch_svc.stop_platform_svc()
+        if not status:
             if FORCE==0:
                 return status
 
@@ -350,9 +365,9 @@ def do_switch_pddf():
             print "/usr/share/sonic/platform path doesnt exist. Unable to set pddf mode"
             return -1
 
-        print "Re-starting the platform service..."
-        status, output = log_os_system("systemctl start as7712-platform-init.service", 1)
-        if status:
+        print "Starting the PDDF platform service..."
+        status = pddf_switch_svc.start_platform_pddf()
+        if not status:
             if FORCE==0:
                 return status
 
@@ -369,9 +384,9 @@ def do_switch_nonpddf():
     if not os.path.exists('/usr/share/sonic/platform/pddf_support'):
         print PROJECT_NAME.upper() +" system is already in non-pddf mode...."
     else:
-        print "Stopping the platform service..."
-        status, output = log_os_system("systemctl stop as7712-platform-init.service", 1)
-        if status:
+        print "Stopping the PDDF platform service..."
+        status = pddf_switch_svc.stop_platform_pddf()
+        if not status:
             if FORCE==0:
                 return status
 
@@ -382,9 +397,9 @@ def do_switch_nonpddf():
             print "/usr/share/sonic/platform path doesnt exist. Unable to set non-pddf mode"
             return -1
 
-        print "Re-starting the platform service..."
-        status, output = log_os_system("systemctl start as7712-platform-init.service", 1)
-        if status:
+        print "Starting the platform services..."
+        status = pddf_switch_svc.start_platform_svc()
+        if not status:
             if FORCE==0:
                 return status
 
