@@ -25,6 +25,7 @@ import logging.handlers
 import argparse
 from multiprocessing import Process,Value
 import multiprocessing as mp
+from ahab import Ahab
 
 from swsscommon import swsscommon
 import sonic_device_util
@@ -169,7 +170,7 @@ def subscribe_appdb(queue):
 
     while True:
         try:
-            logger.log_error( "Listerning for AppDB event...")
+            logger.log_debug( "Listerning for AppDB event...")
             REDIS_HOSTNAME = "127.0.0.1"
             REDIS_PORT = 6379
             REDIS_TIMEOUT_MS = 0
@@ -223,7 +224,7 @@ def OnJobRemoved(id, job, unit, result):
 #Sub process for listerning the systemd event on dbus
 def subscribe_service_event(queue):
 
-    logger.log_error( "Listerning for systemd service event..")
+    logger.log_debug( "Listerning for systemd service event..")
     DBusGMainLoop(set_as_default=True)
 
     bus = dbus.SystemBus()
@@ -250,6 +251,19 @@ def subscribe_service_event_thread(queue):
         time.sleep(1)
 
 
+#Handle docker events
+def docker_event_handler(event, data):
+        QUEUE.put("DOCKER_EVENT")
+
+
+
+#Listern for docker events
+def subscribe_docker_event_thread(queue):
+    ahab = Ahab(handlers=[docker_event_handler])
+    ahab.listen()
+
+
+
 #Start the thread for monitoring the APPDB and systemd service state change event 
 def system_service():
 
@@ -263,14 +277,20 @@ def system_service():
     thread_statedb = threading.Thread(target=subscribe_appdb_event_thread, name='appdb', args=(QUEUE,)) 
     thread_statedb.start()
 
+
+    thread_docker_event = threading.Thread(target=subscribe_docker_event_thread, name='docker', args=(QUEUE,)) 
+    thread_docker_event.start()
+
+
     # Queue to receive the APPDB and Systemd state change event
     while True:
         event = QUEUE.get()
-        logger.log_error( "System event [ "+event+" ] is received")
+        logger.log_debug( "System event [ "+event+" ] is received")
         check_system_status(event)
 
     thread_statedb.join()
     thread_service_event.join()
+    thread_docker_event.join()
 
 
 #Main method to lanch the process in background
