@@ -262,17 +262,10 @@ func (app *IntfApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error) {
 	pathInfo := app.path
 
 	log.Infof("Received GET for path %s; template: %s vars=%v", pathInfo.Path, pathInfo.Template, pathInfo.Vars)
-	var intfSubtree bool = false
 	app.appDB = dbs[db.ApplDB]
 	app.countersDB = dbs[db.CountersDB]
 
 	intfObj := app.getAppRootObject()
-
-	log.Info("processGet: Target Type: " + reflect.TypeOf(*app.ygotTarget).Elem().Name())
-	if reflect.TypeOf(*app.ygotTarget).Elem().Name() == "OpenconfigInterfaces_Interfaces" {
-		intfSubtree = true
-		log.Info("subtree request = ", intfSubtree)
-	}
 
 	targetUriPath, err := getYangPathFromUri(app.path.Path)
 	log.Info("URI Path = ", targetUriPath)
@@ -449,7 +442,6 @@ func (app *IntfApp) getIntfAttr(ifName string, attr string) (string, error) {
 }
 
 /***********  Translation Helper fn to convert DB Interface info to Internal DS   ***********/
-
 func (app *IntfApp) getPortOidMapForCounters(dbCl *db.DB) error {
 	var err error
 	ifCountInfo, err := dbCl.GetMapAll(app.portOidCountrTblTs)
