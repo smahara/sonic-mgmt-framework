@@ -115,22 +115,22 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 
 			/* Verify that the data is written properly */
 #if 0
-			pddf_dbg(KERN_ERR "\n\n########### xcvr_platform_data - start ##########\n");
-			pddf_dbg(KERN_ERR "dev_idx: %d\n", xcvr_platform_data->idx);
-			pddf_dbg(KERN_ERR "no_of_usr_attr: %d\n", xcvr_platform_data->len);
+			pddf_dbg(XCVR, KERN_ERR "\n\n########### xcvr_platform_data - start ##########\n");
+			pddf_dbg(XCVR, KERN_ERR "dev_idx: %d\n", xcvr_platform_data->idx);
+			pddf_dbg(XCVR, KERN_ERR "no_of_usr_attr: %d\n", xcvr_platform_data->len);
 			
 			for (i=0; i<num; i++)
 			{
-				pddf_dbg(KERN_ERR "attr: %d\n", i);
-				pddf_dbg(KERN_ERR "usr_attr_name: %s\n", xcvr_platform_data->xcvr_attrs[i].aname);
-				pddf_dbg(KERN_ERR "usr_attr_client_type: %s\n", xcvr_platform_data->xcvr_attrs[i].devtype);
-				pddf_dbg(KERN_ERR "usr_attr_clinet_addr: 0x%x\n", xcvr_platform_data->xcvr_attrs[i].devaddr);
-				pddf_dbg(KERN_ERR "usr_attr_client_offset: 0x%x\n", xcvr_platform_data->xcvr_attrs[i].offset);
-				pddf_dbg(KERN_ERR "usr_attr_client_mask: 0x%x\n", xcvr_platform_data->xcvr_attrs[i].mask);
-				pddf_dbg(KERN_ERR "usr_attr_client_exp_val: 0x%x\n", xcvr_platform_data->xcvr_attrs[i].cmpval);
-				pddf_dbg(KERN_ERR "usr_attr_len: %d\n", xcvr_platform_data->xcvr_attrs[i].len);
+				pddf_dbg(XCVR, KERN_ERR "attr: %d\n", i);
+				pddf_dbg(XCVR, KERN_ERR "usr_attr_name: %s\n", xcvr_platform_data->xcvr_attrs[i].aname);
+				pddf_dbg(XCVR, KERN_ERR "usr_attr_client_type: %s\n", xcvr_platform_data->xcvr_attrs[i].devtype);
+				pddf_dbg(XCVR, KERN_ERR "usr_attr_clinet_addr: 0x%x\n", xcvr_platform_data->xcvr_attrs[i].devaddr);
+				pddf_dbg(XCVR, KERN_ERR "usr_attr_client_offset: 0x%x\n", xcvr_platform_data->xcvr_attrs[i].offset);
+				pddf_dbg(XCVR, KERN_ERR "usr_attr_client_mask: 0x%x\n", xcvr_platform_data->xcvr_attrs[i].mask);
+				pddf_dbg(XCVR, KERN_ERR "usr_attr_client_exp_val: 0x%x\n", xcvr_platform_data->xcvr_attrs[i].cmpval);
+				pddf_dbg(XCVR, KERN_ERR "usr_attr_len: %d\n", xcvr_platform_data->xcvr_attrs[i].len);
 			}
-			pddf_dbg(KERN_ERR "########### xcvr_platform_data - start ##########\n\n");
+			pddf_dbg(XCVR, KERN_ERR "########### xcvr_platform_data - start ##########\n\n");
 #endif
 
 
@@ -146,7 +146,7 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 			//client_ptr = i2c_new_dummy(adapter, &board_info);
 			if (client_ptr != NULL) {
 				i2c_put_adapter(adapter);
-				pddf_dbg(KERN_ERR "Created a %s client: 0x%x\n", cdata->i2c_name, client_ptr);
+				pddf_dbg(XCVR, KERN_ERR "Created a %s client: 0x%x\n", cdata->i2c_name, client_ptr);
 				add_device_table(cdata->i2c_name, (void*)client_ptr);
 			}
 			else
@@ -169,7 +169,7 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 			client_ptr = i2c_new_device(adapter, &board_info);
 			if(client_ptr != NULL) {
 				i2c_put_adapter(adapter);
-				pddf_dbg(KERN_ERR "Created %s, type:%s client: 0x%x\n", cdata->i2c_name, cdata->dev_type, client_ptr);
+				pddf_dbg(XCVR, KERN_ERR "Created %s, type:%s client: 0x%x\n", cdata->i2c_name, cdata->dev_type, client_ptr);
 				add_device_table(cdata->i2c_name, (void*)client_ptr);
 			}
 			else
@@ -190,13 +190,13 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 		client_ptr = (struct i2c_client *)get_device_table(cdata->i2c_name);
 		if (client_ptr)
 		{
-			pddf_dbg(KERN_ERR "Removing %s client: 0x%x\n", cdata->i2c_name, client_ptr);
+			pddf_dbg(XCVR, KERN_ERR "Removing %s client: 0x%x\n", cdata->i2c_name, client_ptr);
 			i2c_unregister_device(client_ptr);
 			delete_device_table(cdata->i2c_name);
 		}
 		else
 		{
-			pddf_dbg(KERN_ERR "Unable to get the client handle for %s\n", cdata->i2c_name);
+			pddf_dbg(XCVR, KERN_ERR "Unable to get the client handle for %s\n", cdata->i2c_name);
 		}
 	}
 	else
@@ -233,7 +233,7 @@ int __init pddf_data_init(void)
 	struct kobject *device_kobj;
 	int ret = 0;
 
-	pddf_dbg(KERN_ERR "XCVR PDDF MODULE.. init\n");
+	pddf_dbg(XCVR, KERN_ERR "XCVR PDDF MODULE.. init\n");
 
 	device_kobj = get_device_i2c_kobj();
 	if(!device_kobj) 
@@ -253,7 +253,7 @@ int __init pddf_data_init(void)
 		kobject_put(xcvr_kobj);
 		return ret;
 	}
-	pddf_dbg("CREATED SFP I2C CLIENTS CREATION SYSFS GROUP\n");
+	pddf_dbg(XCVR, "CREATED SFP I2C CLIENTS CREATION SYSFS GROUP\n");
 
 	ret = sysfs_create_group(i2c_kobj, &pddf_xcvr_client_data_group);
 	if (ret)
@@ -263,7 +263,7 @@ int __init pddf_data_init(void)
         kobject_put(xcvr_kobj);
         return ret;
 	}
-	pddf_dbg("CREATED PDDF SFP DATA SYSFS GROUP\n");
+	pddf_dbg(XCVR, "CREATED PDDF SFP DATA SYSFS GROUP\n");
 	
 	return ret;
 }
@@ -271,12 +271,12 @@ int __init pddf_data_init(void)
 void __exit pddf_data_exit(void)
 {
 
-	pddf_dbg("XCVR PDDF MODULE.. exit\n");
+	pddf_dbg(XCVR, "XCVR PDDF MODULE.. exit\n");
 	sysfs_remove_group(i2c_kobj, &pddf_xcvr_client_data_group);
 	sysfs_remove_group(i2c_kobj, &pddf_clients_data_group);
 	kobject_put(i2c_kobj);
 	kobject_put(xcvr_kobj);
-	pddf_dbg(KERN_ERR "%s: Removed the kobjects for 'i2c' and 'xcvr'\n",__FUNCTION__);
+	pddf_dbg(XCVR, KERN_ERR "%s: Removed the kobjects for 'i2c' and 'xcvr'\n",__FUNCTION__);
 
 	return;
 }

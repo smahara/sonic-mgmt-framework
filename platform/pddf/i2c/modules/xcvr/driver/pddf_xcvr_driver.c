@@ -90,7 +90,7 @@ static int xcvr_probe(struct i2c_client *client,
 	XCVR_ATTR *attr_data;
 
 	if (client == NULL) {
-		pddf_dbg("NULL Client.. \n");
+		pddf_dbg(XCVR, "NULL Client.. \n");
 		goto exit;
 	}
 
@@ -199,11 +199,11 @@ static int xcvr_remove(struct i2c_client *client)
     kfree(data);
 
 	if (platdata_sub) {
-		pddf_dbg(KERN_DEBUG "%s: Freeing platform subdata\n", __FUNCTION__);
+		pddf_dbg(XCVR, KERN_DEBUG "%s: Freeing platform subdata\n", __FUNCTION__);
 		kfree(platdata_sub);
 	}
 	if (platdata) {
-		pddf_dbg(KERN_DEBUG "%s: Freeing platform data\n", __FUNCTION__);
+		pddf_dbg(XCVR, KERN_DEBUG "%s: Freeing platform data\n", __FUNCTION__);
 		kfree(platdata);
 	}
     
@@ -253,7 +253,7 @@ int xcvr_init(void)
             return ret;
     }
 
-	pddf_dbg(KERN_ERR "PDDF XCVR DRIVER.. init Invoked..\n");
+	pddf_dbg(XCVR, KERN_ERR "PDDF XCVR DRIVER.. init Invoked..\n");
     ret = i2c_add_driver(&xcvr_driver);
 	if (ret!=0)
 		return ret;
@@ -271,7 +271,7 @@ EXPORT_SYMBOL(xcvr_init);
 
 void __exit xcvr_exit(void)
 {
-	pddf_dbg("PDDF XCVR DRIVER.. exit\n");
+	pddf_dbg(XCVR, "PDDF XCVR DRIVER.. exit\n");
 	if (pddf_xcvr_ops.pre_exit) (pddf_xcvr_ops.pre_exit)();
     i2c_del_driver(&xcvr_driver);
 	if (pddf_xcvr_ops.post_exit) (pddf_xcvr_ops.post_exit)();

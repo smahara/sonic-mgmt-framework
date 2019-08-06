@@ -224,6 +224,19 @@ def cleanup_pddf_utils():
 
     return 0
 
+def create_pddf_log_files():
+    if not os.path.exists('/var/log/pddf'):
+    	log_os_system("sudo mkdir /var/log/pddf", 1)
+
+    log_os_system("sudo touch /var/log/pddf/led.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/psu.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/fan.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/xcvr.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/sysstatus.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/cpld.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/client.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/mux.txt", 1)
+
 def driver_install():
     global FORCE
     status, output = log_os_system("depmod", 1)
@@ -271,8 +284,10 @@ def device_uninstall():
         
 def do_install():
     print "Checking system...."
+
     if driver_check()== False :
         print PROJECT_NAME.upper() +" has no PDDF driver installed...."
+    	create_pddf_log_files()
         print "Installing...."    
         status = driver_install()
         if status:
@@ -290,6 +305,11 @@ def do_install():
 def do_uninstall():
     print "Checking system...."
     print "Remove all the devices..."
+
+    if os.path.exists('/var/log/pddf'):
+	print "rm pddf....."
+    	log_os_system("sudo rm -rf /var/log/pddf", 1)
+
     status = device_uninstall()
     if status:
         return status
@@ -304,12 +324,14 @@ def do_uninstall():
             if FORCE == 0:        
                 return  status                          
     return       
+
 def do_switch_pddf():
     #print "Check the platform service..."
     status, output = log_os_system("systemctl list-units |grep as7712", 0)
     if not 'as7712-platform-init.service' in output:
         print "PDDF is not supported on this platform"
         return status
+
 
     print "Checking system...."
     if os.path.exists('/usr/share/sonic/platform/pddf_support'):
