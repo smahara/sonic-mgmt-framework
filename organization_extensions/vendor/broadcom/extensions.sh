@@ -27,4 +27,7 @@ do
                 ${FILESYSTEM_ROOT}/etc/config-setup/factory-default-hooks.d/$script
 done
 
+# Config profiles management tool
+sudo cp ${VENDOR_EXT_BASE}/scripts/config-profiles ${FILESYSTEM_ROOT}/usr/bin
+
 exit 0
