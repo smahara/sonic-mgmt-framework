@@ -13,7 +13,7 @@ SM_DEP_LIST  := Makefile
 SM_DEP_LIST  += patch/*
 SM_DEP_LIST  += patch/preconfig/*
 SMDEP_LIST   := $(wildcard $(addprefix $(SMPATH),$(SM_DEP_LIST)))
-DEP_LIST     := $(MAKEFILE_LIST)
+DEP_LIST     := $(SONIC_MAKEFILE_LIST) rules/linux-kernel.mk
 
 LINUX_HEADERS_COMMON = linux-headers-$(KVERSION_SHORT)-common_$(KERNEL_VERSION)-$(KERNEL_SUBVERSION)_all.deb
 $(LINUX_HEADERS_COMMON)_SRC_PATH = $(SRC_PATH)/sonic-linux-kernel
