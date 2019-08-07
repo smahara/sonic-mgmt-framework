@@ -1047,7 +1047,7 @@ class PddfParse():
 
     def mux_parse_reverse(self, dev, ops):
             str = ""
-            for ch in dev['i2c']['channel']:
+            for ch in reversed(dev['i2c']['channel']):
                 ret = self.dev_parse(self.data[ch['dev']], ops)	
                 if not ret is None:
                     str += ret
