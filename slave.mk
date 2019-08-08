@@ -858,6 +858,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	export sonic_asic_platform="$(CONFIGURED_PLATFORM)"
 	export enable_organization_extensions="$(ENABLE_ORGANIZATION_EXTENSIONS)"
 	export enable_dhcp_graph_service="$(ENABLE_DHCP_GRAPH_SERVICE)"
+	export sonic_debugging_on="$(SONIC_DEBUGGING_ON)"
 	export enable_ztp="$(ENABLE_ZTP)"
 	export enable_pde="$(ENABLE_PDE)"
 	export shutdown_bgp_on_start="$(SHUTDOWN_BGP_ON_START)"
