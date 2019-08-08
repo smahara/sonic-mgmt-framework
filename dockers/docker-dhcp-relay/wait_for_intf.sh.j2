@@ -29,12 +29,18 @@ function wait_until_iface_ready
 
 
 # Wait for all interfaces to be up and ready
+{% if INTERFACE %}
 {% for (name, prefix) in INTERFACE|pfx_filter %}
 wait_until_iface_ready ${PORT_TABLE_PREFIX} {{ name }}
 {% endfor %}
+{% endif %}
+{% if VLAN_INTERFACE %}
 {% for (name, prefix) in VLAN_INTERFACE|pfx_filter %}
 wait_until_iface_ready ${VLAN_TABLE_PREFIX} {{ name }}
 {% endfor %}
+{% endif %}
+{% if PORTCHANNEL_INTERFACE %}
 {% for (name, prefix) in PORTCHANNEL_INTERFACE|pfx_filter %}
 wait_until_iface_ready ${LAG_TABLE_PREFIX} {{ name }}
 {% endfor %}
+{% endif %}
