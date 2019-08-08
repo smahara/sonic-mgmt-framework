@@ -272,7 +272,11 @@ RUN apt-get update && apt-get install -y \
         libpopt-dev \
         libnl-nf-3-dev \
         libnfnetlink-dev \
-        libipset-dev
+        libipset-dev \
+# For iptables
+        libmnl-dev \
+        libnetfilter-conntrack-dev \
+        libnftnl-dev
 
 # For smartmontools 6.6-1
 RUN apt-get -t stretch-backports install -y debhelper
