@@ -27,7 +27,8 @@ tdma_timeout_usec=3000000
 
 # portmap settings
 oversubscribe_mode=1
-pbmp_xport_xe=0x48808080f8780808dfe1e1e1fe1e1e1fe
+#pbmp_xport_xe=0x48808080f8780808dfe1e1e1fe1e1e1fe
+pbmp_xport_xe=0x7F878787F878787FDFE1E1E1FE1E1E1FE
 
 port_flex_enable=1
 
@@ -71,9 +72,6 @@ portmap_61=61:25
 portmap_62=62:25
 portmap_63=63:25
 portmap_64=64:25
-portmap_67=65:100
-portmap_71=69:100
-portmap_79=77:100
 portmap_87=85:25
 portmap_88=86:25
 portmap_89=87:25
@@ -82,6 +80,10 @@ portmap_95=93:25
 portmap_96=94:25
 portmap_97=95:25
 portmap_98=96:25
+
+portmap_67=65:100
+portmap_71=69:100
+portmap_79=77:100
 portmap_99=97:100
 portmap_107=105:100
 portmap_115=113:100
@@ -164,9 +166,6 @@ serdes_if_type_61=13
 serdes_if_type_62=13
 serdes_if_type_63=13
 serdes_if_type_64=13
-serdes_if_type_67=14
-serdes_if_type_71=14
-serdes_if_type_79=14
 serdes_if_type_87=13
 serdes_if_type_88=13
 serdes_if_type_89=13
@@ -175,11 +174,16 @@ serdes_if_type_95=13
 serdes_if_type_96=13
 serdes_if_type_97=13
 serdes_if_type_98=13
+
+serdes_if_type_67=14
+serdes_if_type_71=14
+serdes_if_type_79=14
 serdes_if_type_99=14
 serdes_if_type_107=14
 serdes_if_type_115=14
 serdes_if_type_123=14
 serdes_if_type_127=14
+
 serdes_if_type_66=11
 serdes_if_type_130=11
 
@@ -232,17 +236,48 @@ dport_map_port_96=45
 dport_map_port_95=46
 dport_map_port_98=47
 dport_map_port_97=48
-dport_map_port_99=49
-dport_map_port_107=50
-dport_map_port_115=51
-dport_map_port_123=52
-dport_map_port_79=53
-dport_map_port_67=54
-dport_map_port_71=55
-dport_map_port_127=56
 
-dport_map_port_66=57
-dport_map_port_130=58
+dport_map_port_67=49
+dport_map_port_68=50
+dport_map_port_69=51
+dport_map_port_70=52
+
+dport_map_port_71=53
+dport_map_port_72=54
+dport_map_port_73=55
+dport_map_port_74=56
+
+dport_map_port_79=57
+dport_map_port_80=58
+dport_map_port_81=59
+dport_map_port_82=60
+
+dport_map_port_99=61
+dport_map_port_100=62
+dport_map_port_101=63
+dport_map_port_102=64
+
+dport_map_port_107=65
+dport_map_port_108=66
+dport_map_port_109=67
+dport_map_port_110=68
+
+dport_map_port_115=69
+dport_map_port_116=70
+dport_map_port_117=71
+dport_map_port_118=72
+
+dport_map_port_123=73
+dport_map_port_124=74
+dport_map_port_125=75
+dport_map_port_126=76
+
+# Not able to breakout, Since overlap with mgmt port
+dport_map_port_127=77
+
+# mgmt ports
+dport_map_port_66=81
+dport_map_port_130=82
 
 
 phy_chain_tx_lane_map_physical{1.0}=0x3210
