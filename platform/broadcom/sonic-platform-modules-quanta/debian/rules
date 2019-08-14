@@ -25,7 +25,7 @@ UTILS_DIR := utils
 SERVICE_DIR := service
 CLASSES_DIR := classes
 CONF_DIR := conf
-
+SYSTEMD_DIR := systemd
 %:
 	dh $@ --with systemd,python2,python3 --buildsystem=pybuild
 
@@ -62,9 +62,11 @@ binary-indep:
 		dh_installdirs -p$(PACKAGE_PRE_NAME)-$${mod} /$(KERNEL_SRC)/$(INSTALL_MOD_DIR); \
 		dh_installdirs -p$(PACKAGE_PRE_NAME)-$${mod} /usr/local/bin; \
 		dh_installdirs -p$(PACKAGE_PRE_NAME)-$${mod} /lib/systemd/system; \
+        dh_installdirs -p$(PACKAGE_PRE_NAME)-$${mod} /lib/systemd/system.conf.d/; \
 		cp $(MOD_SRC_DIR)/$${mod}/$(MODULE_DIR)/*.ko debian/$(PACKAGE_PRE_NAME)-$${mod}/$(KERNEL_SRC)/$(INSTALL_MOD_DIR); \
 		cp $(MOD_SRC_DIR)/$${mod}/$(UTILS_DIR)/* debian/$(PACKAGE_PRE_NAME)-$${mod}/usr/local/bin/; \
 		cp $(MOD_SRC_DIR)/$${mod}/$(SERVICE_DIR)/*.service debian/$(PACKAGE_PRE_NAME)-$${mod}/lib/systemd/system/; \
+		cp $(MOD_SRC_DIR)/$${mod}/$(SYSTEMD_DIR)/*.conf debian/$(PACKAGE_PRE_NAME)-$${mod}/lib/systemd/system.conf.d/; \
 		$(PYTHON) $${mod}/setup.py install --root=$(MOD_SRC_DIR)/debian/$(PACKAGE_PRE_NAME)-$${mod} --install-layout=deb; \
 	done)
 	# Resuming debhelper scripts
