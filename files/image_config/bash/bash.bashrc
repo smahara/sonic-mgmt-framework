@@ -64,5 +64,31 @@ shopt -s histappend
 export HISTSIZE=5000
 export HISTFILESIZE=10000
 
-# after each command, append to the history file and reload
-export PROMPT_COMMAND="history -a; history -c; history -r"
+# prompt_cmd was added to support logging the user commands with logger
+# Get cmd num from history and verify it with previous cmd num
+# to ignore duplicate logging due to <return> <ctrl+c> cases
+prompt_cmd () {
+    #Get last cmd from history
+    lst_hist_cmd=$(history 1);
+    #Get the first number/cmd_idx from last cmd
+    read -a tmpnum <<<"${lst_hist_cmd//[^0-9]/ }"
+    lst_hist_cmd_idx=${tmpnum[0]}
+    exp_hist_cmd_idx=$((prv_lst_hist_cmd + 1))
+    if [ "$exp_hist_cmd_idx" == "$lst_hist_cmd_idx" ]; then
+        logger -p local5.debug "$(whoami) [$$]: $(echo $lst_hist_cmd | sed "s/^[ ]*[0-9]\+[ ]*//" )";
+    fi
+    #echo " Prv = $prv_lst_hist_cmd Lst = $lst_hist_cmd_idx "
+
+    #Add additional commands that has to be executed as part of PROMPT_COMMAND below
+    history -a; history -c; history -r;
+
+    #For any change in cmd index due to append
+    lst_hist_cmd=$(history 1);
+    read -a tmpnum <<<"${lst_hist_cmd//[^0-9]/ }"
+    lst_hist_cmd_idx=${tmpnum[0]}
+    #echo "Append Prv = $prv_lst_hist_cmd Lst = $lst_hist_cmd_idx "
+    prv_lst_hist_cmd=$lst_hist_cmd_idx
+}
+
+# after each command,log the command and append to the history file and reload
+export PROMPT_COMMAND=prompt_cmd
