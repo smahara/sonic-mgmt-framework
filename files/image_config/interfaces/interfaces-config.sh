@@ -7,7 +7,7 @@ if [ -e /etc/network/ifupdown2/policy.d/ztp_dhcp.json ]; then
     # Obtain port operational state information
     redis-dump -d 0 -k "PORT_TABLE:Ethernet*"  -y > /tmp/ztp_port_data.json
 
-    if [ ! -e /tmp/ztp_port_data.json ] || [ "$(cat /tmp/ztp_port_data.json)" = "" ]; then
+    if [ $? -ne 0 ] || [ ! -e /tmp/ztp_port_data.json ] || [ "$(cat /tmp/ztp_port_data.json)" = "" ]; then
         echo "{}" > /tmp/ztp_port_data.json
     fi
 
