@@ -94,6 +94,7 @@ class accton_as7816_monitor(object):
         global fan_state
         FAN_STATE_REMOVE = 0
         FAN_STATE_INSERT = 1
+        fan_status = True
 
         max_duty = DUTY_MAX
         fan_policy = {
@@ -125,11 +126,11 @@ class accton_as7816_monitor(object):
             if fan_status is None:
                self.syslog.error('SET new_perc to %d (FAN stauts is None. fan_num:%d)', max_duty, x)
                fan.set_fan_duty_cycle(max_duty)
-               return False
+
             if fan_status is False:
                self.syslog.warning('SET new_perc to %d (FAN fault. fan_num:%d)', max_duty, x)
                fan.set_fan_duty_cycle(max_duty)
-               return True
+
 
         #Find if current duty matched any of define duty
         #If not, set it to highest one
@@ -144,19 +145,19 @@ class accton_as7816_monitor(object):
 
         #Decide fan duty by if sum of sensors falls into any of fan_policy{}
         get_temp = thermal.get_thermal_temp()
-
+        fan_insert_after_all_fan_removed = 0
 
         if get_temp > CRITICAL_TEMP:
            self.syslog.warning('SYSTEM Temperature reaching to critical, shutdown the system')
            system_powerdown()
 
         if self.num_of_working_fans == 0:
-           self.syslog.warning('No working fans detection, shutdown the system in 60 sec')
+           self.syslog.warning('FAN: Number of working fan == 0, shutdown the system in 60 sec')
            time.sleep(60)
            for x in range(fan.get_idx_fan_start(), fan.get_num_fans()+1):
                if fan.get_fan_present(x) == 1:
                   fan_insert_after_all_fan_removed = 1
-                  self.syslog.warning('FAN insert detection, ignore the shutdown')
+                  self.syslog.warning('FAN: fan insert detection, ignore the shutdown')
 
            if fan_insert_after_all_fan_removed != 1:
               system_powerdown()
@@ -171,8 +172,11 @@ class accton_as7816_monitor(object):
                 self.syslog.info('INFO. Sum of temp %d > %d , new_duty_cycle=%d', get_temp, fan_policy[y][1], new_duty_cycle)
 
         self.syslog.info('INFO. Final duty_cycle=%d', new_duty_cycle)
-        if(new_duty_cycle != cur_duty_cycle):
-            fan.set_fan_duty_cycle(new_duty_cycle)
+
+        if(fan_status is True):
+           if(new_duty_cycle != cur_duty_cycle):
+              fan.set_fan_duty_cycle(new_duty_cycle)
+
         return True
 
 def sig_handler(signum, frame):
