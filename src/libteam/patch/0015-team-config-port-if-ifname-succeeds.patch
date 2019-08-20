@@ -1,0 +1,28 @@
+diff --git a/teamd/teamd_config.c b/teamd/teamd_config.c
+index 69b25de..8451faf 100644
+--- a/teamd/teamd_config.c
++++ b/teamd/teamd_config.c
+@@ -184,6 +184,7 @@ int teamd_config_port_update(struct teamd_context *ctx, const char *port_name,
+ 			     const char *json_port_cfg_str)
+ {
+ 	int err;
++	struct teamd_port *tdport;
+ 	json_t *port_obj;
+ 	json_t *port_new_obj;
+ 	json_error_t jerror;
+@@ -210,10 +211,13 @@ int teamd_config_port_update(struct teamd_context *ctx, const char *port_name,
+ 		teamd_log_err("%s: Failed to update existing config "
+ 			      "port object", port_name);
+ 	else {
+-		err = teamd_config_port_set(ctx, port_name, port_new_obj);
+-		if (err)
++	        tdport = teamd_get_port_by_ifname(ctx, port_name);
++		if (tdport) {
++		    err = teamd_config_port_set(ctx, port_name, port_new_obj);
++           	    if (err)
+ 			teamd_log_err("%s: Failed to update config to kernel",
+ 				      port_name);
++                 }
+ 	}
+ 
+ new_port_decref:
