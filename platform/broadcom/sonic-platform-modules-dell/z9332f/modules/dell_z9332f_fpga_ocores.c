@@ -19,7 +19,6 @@
  * @file fpga_ocores.c
  * @brief This is a driver to interface with Linux Open Cores driver for FPGA i2c access
  *
- * 2019/5/9 - PCIe Interrupt supported is added for OIR Events.
  ************************************************************************/
 #include <linux/kobject.h>
 #include <linux/kdev_t.h>
@@ -91,6 +90,7 @@ struct fpgapci_dev {
     unsigned int irq_length;
     unsigned int irq_assigned;
     unsigned int xcvr_intr_count;
+
 };
 
 static int use_irq = 1;
@@ -226,7 +226,6 @@ enum {
 #define I2C_PCI_BUS_NUM_10          10
 #define I2C_PCI_BUS_NUM_12          12
 #define I2C_PCI_BUS_NUM_16          16
-
 
 #define IRQ_LTCH_STS        		0x20
 #define PRSNT_LTCH_STS	        	0x10
@@ -654,20 +653,15 @@ static void fpgai2c_process(struct fpgalogic_i2c *i2c)
         }
     }
 
-    switch (i2c->state) {
-    case STATE_READ:
+    if (i2c->state == STATE_READ) {
         PRINT("fpgai2c_poll STATE_READ i2c->pos=%d msg->len-1 = 0x%x set FPGAI2C_REG_CMD = 0x%x\n",i2c->pos, msg->len-1,
                 i2c->pos == (msg->len-1) ?  FPGAI2C_REG_CMD_READ_NACK : FPGAI2C_REG_CMD_READ_ACK);
         fpgai2c_reg_set(i2c, FPGAI2C_REG_CMD, i2c->pos == (msg->len-1) ?
                 FPGAI2C_REG_CMD_READ_NACK : FPGAI2C_REG_CMD_READ_ACK);
-        break;
-    case STATE_WRITE:
+    } else {
         PRINT("fpgai2c_process set FPGAI2C_REG_DATA(0x%x)\n",FPGAI2C_REG_DATA);
         fpgai2c_reg_set(i2c, FPGAI2C_REG_DATA, msg->buf[i2c->pos++]);
         fpgai2c_reg_set(i2c, FPGAI2C_REG_CMD, FPGAI2C_REG_CMD_WRITE);
-        break;
-    default:
-        printk("Unexpected state, %s:%u state=%d\n", __FILE__, __LINE__, i2c->state);
     }
 }
 

@@ -16,19 +16,59 @@ try:
 except ImportError as e:
     raise ImportError("%s - required module not found" % str(e))
 
+#from xcvrd
+SFP_STATUS_REMOVED = '0'
+SFP_STATUS_INSERTED = '1'
+
+
+
+
 
 class SfpUtil(SfpUtilBase):
     """Platform-specific SfpUtil class"""
 
     PORT_START = 1
-    PORT_END = 64
-    PORTS_IN_BLOCK = 64
+    PORT_END = 34 
+    PORTS_IN_BLOCK = 34 
 
-    BASE_RES_PATH = "/sys/bus/pci/devices/0000:04:00.0/resource0"
-    OIR_FD_PATH = "/sys/bus/pci/devices/0000:04:00.0/port_msi"
+    BASE_RES_PATH = "/sys/bus/pci/devices/0000:09:00.0/resource0"
 
-    oir_fd = -1
-    epoll = -1
+    _port_to_i2c_mapping = {
+            1:  10,
+            2:  11,
+            3:  12,
+            4:  13,
+            5:  14,
+            6:  15,
+            7:  16,
+            8:  17,
+            9:  18,
+            10: 19,
+            11: 20,
+            12: 21,
+            13: 22,
+            14: 23,
+            15: 24,
+            16: 25,
+            17: 26,
+            18: 27,
+            19: 28,
+            20: 29,
+            21: 30,
+            22: 31,
+            23: 32,
+            24: 33,
+            25: 34,
+            26: 35,
+            27: 36,
+            28: 37,
+            29: 38,
+            30: 39,
+            31: 40,
+            32: 41,
+            33: 1,
+            34: 2,
+            }
 
     _port_to_eeprom_mapping = {}
 
@@ -87,13 +127,28 @@ class SfpUtil(SfpUtilBase):
             else:
                 self._global_port_pres_dict[port_num] = '0'
 
+    def mod_pres(self):
+        port_pres_mask =0
+        for port_num in range(self.port_start, (self.port_end + 1)):
+            presence = self.get_presence(port_num)
+            if(presence):
+                self._global_port_pres_dict[port_num] = '1'
+                port_val = (1 << (port_num -1))
+                port_pres_mask = (port_pres_mask | port_val)
+            else:
+                self._global_port_pres_dict[port_num] = '0'
+                port_val = ~(1 << (port_num -1))
+                port_pres_mask = (port_pres_mask & port_val)
+
+        return port_pres_mask
+
+
     def __init__(self):
         eeprom_path = "/sys/class/i2c-adapter/i2c-{0}/{0}-0050/eeprom"
 
         for x in range(self.port_start, self.port_end + 1):
-            port_num = x + 1
-            self.port_to_eeprom_mapping[x] = eeprom_path.format(port_num)
-            port_num = 0
+            self.port_to_eeprom_mapping[x] = eeprom_path.format(
+                    self._port_to_i2c_mapping[x])
         self.init_global_port_presence()
         SfpUtilBase.__init__(self)
 
@@ -116,8 +171,9 @@ class SfpUtil(SfpUtilBase):
         mask = (1 << 4)
 
         # Mask off 1st bit for presence 33,34
-        if (port_num > 62):
+        if (port_num > 32):
             mask =  (1 << 0)
+
         # ModPrsL is active low
         if reg_value & mask == 0:
             return True
@@ -230,77 +286,38 @@ class SfpUtil(SfpUtilBase):
             retval = retval.lstrip(" ")
             return retval
 
-    def check_interrupts(self, port_dict):
-            retval = 0
-            is_port_dict_updated = False
-            for port_num in range(self.port_start, (self.port_end + 1)):
-                presence = self.get_presence(port_num)
-                if(presence and self._global_port_pres_dict[port_num] == '0'):
-                    is_port_dict_updated = True
-                    self._global_port_pres_dict[port_num] = '1'
-                    port_dict[port_num] = '1'
-                elif(not presence and
-                     self._global_port_pres_dict[port_num] == '1'):
-                    is_port_dict_updated = True
-                    self._global_port_pres_dict[port_num] = '0'
-                    port_dict[port_num] = '0'
-            return retval, is_port_dict_updated
-
+    data = {'valid':0, 'last':0, 'present':0}
     def get_transceiver_change_event(self, timeout=0):
-            port_dict = {}
-            try:
-                # We get notified when there is a MSI interrupt (vector 4/5)CVR
-                # Open the sysfs file and register the epoll object
-                self.oir_fd = fdopen(open(self.OIR_FD_PATH, O_RDONLY))
-                if self.oir_fd != -1:
-                    # Do a dummy read before epoll register
-                    self.oir_fd.read()
-                    self.epoll = select.epoll()
-                    self.epoll.register(
-                        self.oir_fd.fileno(), select.EPOLLIN & select.EPOLLET)
-                else:
-                    print("get_transceiver_change_event : unable to create fd")
-                    return False, {}
+         now = time.time()
+         port_dict = {}
+         port = 0
 
-                # Check for missed interrupts by invoking self.check_interrupts
-                # which will update the port_dict.
-                while True:
-                    interrupt_count_start = self.get_register(self.OIR_FD_PATH)
-                    retval, is_port_dict_updated = \
-                        self.check_interrupts(port_dict)
-                    if ((retval == 0) and (is_port_dict_updated is True)):
-                        return True, port_dict
-                    interrupt_count_end = self.get_register(self.OIR_FD_PATH)
-                    if (interrupt_count_start == 'ERR' or
-                            interrupt_count_end == 'ERR'):
-                        print("get_transceiver_change_event : \
-                            unable to retrive interrupt count")
-                        break
+         if timeout < 2000:
+             timeout = 2000
+         timeout = (timeout) / float(1000) # Convert to secs
 
-                    # check_interrupts() itself may take upto 100s of msecs.
-                    # We detect a missed interrupt based on the count
-                    if interrupt_count_start == interrupt_count_end:
-                        break
+         if now < (self.data['last'] + timeout) and self.data['valid']:
+             return True, {}
 
-                # Block until an xcvr is inserted or removed with timeout = -1
-                events = self.epoll.poll(
-                    timeout=timeout if timeout != 0 else -1)
-                if events:
-                    # check interrupts and return the port_dict
-                    retval, is_port_dict_updated = \
-                                              self.check_interrupts(port_dict)
-                    if (retval != 0):
-                        return False, {}
+         reg_value = self.mod_pres() 
+         changed_ports = self.data['present'] ^ reg_value
+         if changed_ports:
+             for port in range (self.port_start, self.port_end+1):
+                 # Mask off the bit corresponding to our port
+                 mask = (1 << (port - 1))
+                 if changed_ports & mask:
+                     if (reg_value & mask) == 0:
+                         port_dict[port] = SFP_STATUS_REMOVED
+                     else:
+                         port_dict[port] = SFP_STATUS_INSERTED
 
-                return True, port_dict
-            except:
-                return False, {}
-            finally:
-                if self.oir_fd != -1:
-                    self.epoll.unregister(self.oir_fd.fileno())
-                    self.epoll.close()
-                    self.oir_fd.close()
-                    self.oir_fd = -1
-                    self.epoll = -1
+             # Update cache
+             self.data['present'] = reg_value
+             self.data['last'] = now
+             self.data['valid'] = 1
+	     print 'port_dict', port_dict
+             return True, port_dict
+         else:
+             return True, {}
+         return False, {}
 
-            return False, {}
