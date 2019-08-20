@@ -27,7 +27,7 @@ SONIC_CONFIG_MAKE_JOBS = 8
 # other SONiC build jobs on the same server. This requires changes to the Dockerfile.j2 FROM statement
 # in the dockers/ and platform/ subdirs to use a variable reference instead of an explicit image name.
 # The following platforms support this option: broadcom, vs
-SONIC_CONFIG_NATIVE_DOCKERD_SHARED = y
+SONIC_CONFIG_NATIVE_DOCKERD_SHARED = n
 
 # SONIC_CONFIG_ENABLE_COLORS - enable colored output in build system.
 # Comment next line to disable:
