@@ -112,6 +112,11 @@ class SfpUtil(SfpUtilBase):
         # Mask off 4th bit for presence
         mask = (1 << 4)
 
+        # Mask off 1st bit for presence 33,34
+        if (port_num > 32):
+            mask =  (1 << 0)
+
+
         # ModPrsL is active low
         if reg_value & mask == 0:
             return True
