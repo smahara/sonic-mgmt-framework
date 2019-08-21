@@ -1,0 +1,33 @@
+FROM {{ docker_broadview_load_image }}
+
+MAINTAINER Harivelam Lavanya
+
+ARG docker_container_name
+RUN [ -f /etc/rsyslog.conf ] && sed -ri "s/%syslogtag%/$docker_container_name#%syslogtag%/;" /etc/rsyslog.conf
+
+## Make apt-get non-interactive
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+
+## Install dependencies
+RUN pip install requests
+
+## Install redis-tools dependencies
+RUN apt-get -y install libpython2.7 libjemalloc1
+
+COPY \
+{% for deb in docker_broadview_debs.split(' ') -%}
+debs/{{ deb }}{{' '}}
+{%- endfor -%}
+debs/
+
+RUN dpkg -i \
+{% for deb in docker_broadview_debs.split(' ') -%}
+debs/{{ deb }}{{' '}}
+{%- endfor %}
+
+COPY ["start.sh", "/usr/bin/"]
+COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
+
+ENTRYPOINT ["/usr/bin/supervisord"]

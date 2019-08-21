@@ -434,7 +434,7 @@ ssize_t dev_operation(struct device *dev, struct device_attribute *da, const cha
 		set_status_led(da);
 	}
 	else {
-		pddf_dbg(LED, KERN_ERR "ERROR %s: Invalid value for dev_ops %s", __FUNCTION__, buf);
+		printk(KERN_ERR "PDDF_ERROR %s: Invalid value for dev_ops %s", __FUNCTION__, buf);
 	}
 	return(count);
 }

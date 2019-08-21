@@ -4,10 +4,12 @@ core_clock_frequency=1700
 dpp_clock_ratio=2:3
 pbmp_xport_xe=0x3FFFD0000FFFF40003FFFC0001FFFE
 oversubscribe_mode=1
-fpem_mem_entries=65536
+#fpem_mem_entries=65536
 l2xmsg_mode=1
 
 l3_alpm_enable=2
+l2_mem_entries=40960
+l3_mem_entries=40960
 bcm_num_cos=8
 switch_bypass_mode=0
 mmu_lossless=0

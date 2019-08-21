@@ -13,7 +13,7 @@
 #  * ENABLE_PFCWD_ON_START: Enable PFC Watchdog (PFCWD) on server-facing ports
 #  * by default for TOR switch.
 #  * ENABLE_SYNCD_RPC: Enables rpc-based syncd builds.
-#  * SONIC_INSTALL_DEBUG_TOOLS: Install debug tools and debug symbol packeages.
+#  * INSTALL_DEBUG_TOOLS: Install debug tools and debug symbol packeages.
 #  * USERNAME: Desired username -- default at rules/config
 #  * PASSWORD: Desired password -- default at rules/config
 #  * KEEP_SLAVE_ON: Keeps slave container up and active after building process concludes.
@@ -56,8 +56,8 @@ endif
 # Note: Using the greater of CE (17.05.0) and EE (17.06.1) versions that support ARG before FROM
 docker_min := 17.06.1
 docker_min_ver := $(shell echo "$(docker_min)" | awk -F. '{printf("%d%03d%03d\n",$$1,$$2,$$3);}' 2>/dev/null)
-docker_ver := $(shell docker info 2>/dev/null | grep -i "server version" | cut -d' ' -f3 | awk -F. '{printf("%d%03d%03d\n",$$1,$$2,$$3);}' 2>/dev/null)
-docker_is_valid := $(shell if [ $(docker_ver) -lt $(docker_min_ver) ] ; then echo "0"; else echo "1"; fi)
+docker_ver := $(shell docker info 2>/dev/null | grep -i "server version" | rev | cut -d' ' -f1 | rev | awk -F. '{printf("%d%03d%03d\n",$$1,$$2,$$3);}' 2>/dev/null)
+docker_is_valid := $(shell if [[ "$(docker_ver)" -lt $(docker_min_ver) ]] ; then echo "0"; else echo "1"; fi)
 ifeq (0,$(docker_is_valid))
 $(error SONiC requires Docker version $(docker_min) or later)
 endif
@@ -268,7 +268,7 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            SHUTDOWN_BGP_ON_START=$(SHUTDOWN_BGP_ON_START) \
                            SONIC_ENABLE_PFCWD_ON_START=$(ENABLE_PFCWD_ON_START) \
                            SONIC_ENABLE_SYNCD_RPC=$(ENABLE_SYNCD_RPC) \
-                           SONIC_INSTALL_DEBUG_TOOLS=$(SONIC_INSTALL_DEBUG_TOOLS) \
+                           SONIC_INSTALL_DEBUG_TOOLS=$(INSTALL_DEBUG_TOOLS) \
                            PASSWORD=$(PASSWORD) \
                            USERNAME=$(USERNAME) \
                            SONIC_BUILD_JOBS=$(SONIC_BUILD_JOBS) \

@@ -28,8 +28,7 @@ dpkg_apt /debs/{{ deb }}
 {%- endif %}
 
 
-COPY ["start.sh", "/usr/bin/"]
-#COPY ["vrrp.sh", "/usr/bin/"]
+COPY ["start.sh", "keepalived-start.sh", "/usr/bin/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 
 RUN apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
