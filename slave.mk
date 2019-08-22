@@ -344,12 +344,13 @@ define SAVE_CACHE
 endef
 
 
+DOCKER_LOCKFILE_TIMEOUT = 1200
 
 ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
 # $(call docker-image-save,from,to)
 define docker-image-save
     exec 201>"$(DOCKER_LOCKFILE_SAVE)"
-    if ! flock -x -w 600 201; then
+    if ! flock -x -w $(DOCKER_LOCKFILE_TIMEOUT) 201; then
         @echo "ERROR: Cannot obtain docker image lock for $(1) save" $(LOG)
         exit 1
     else
@@ -369,7 +370,7 @@ endef
 # $(call docker-image-load,from)
 define docker-image-load
     exec 201>"$(DOCKER_LOCKFILE_SAVE)"
-    if ! flock -x -w 600 201; then
+    if ! flock -x -w $(DOCKER_LOCKFILE_TIMEOUT) 201; then
         @echo "ERROR: Cannot obtain docker image lock for $(1) load" $(LOG)
         exit 1
     else
