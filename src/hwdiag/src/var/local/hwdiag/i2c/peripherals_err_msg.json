@@ -1,0 +1,10 @@
+{ "psu":	{ "logfile" : "ERROR\\|FAILED", 
+          	  "dmesg" : "" },
+  "sfp": 	{ "logfile" : "ERROR\\|FAILED", 
+           	  "dmesg"  : "" },
+  "sensors":	{ "logfile" : "ERROR\\|FAILED", 
+	      	  "dmesg" : "" },
+  "syseeprom":	{ "logfile" : "checksum invalid",  
+                  "dmesg" : ""}
+}
+
