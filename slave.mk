@@ -909,7 +909,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	PASSWORD="$(PASSWORD)" \
 	TARGET_MACHINE=$($*_MACHINE) \
 	IMAGE_TYPE=$($*_IMAGE_TYPE) \
-	ENABLE_PDE=$(ENABLE_PDE) \
+	BUILD_TARGET="$@" \
 		./build_image.sh $(LOG)
 
 	$(foreach docker, $($*_DOCKERS), \
