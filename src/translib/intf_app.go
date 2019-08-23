@@ -24,6 +24,14 @@ const (
 	opUpdate
 )
 
+type ifType int
+
+const (
+	ETHERNET ifType = iota
+	VLAN
+	LAG
+)
+
 type dbEntry struct {
 	op    reqType
 	entry db.Value
@@ -42,10 +50,9 @@ const (
 type Table int
 
 const (
-        IF_TABLE_MAP Table = iota
-        PORT_STAT_MAP
+	IF_TABLE_MAP Table = iota
+	PORT_STAT_MAP
 )
-
 
 type IntfApp struct {
 	path       *PathInfo
@@ -59,12 +66,17 @@ type IntfApp struct {
 	appDB      *db.DB
 	countersDB *db.DB
 
-	ifTableMap   map[string]dbEntry
-	ifIPTableMap map[string]map[string]dbEntry
-	portOidMap   dbEntry
-	portStatMap  map[string]dbEntry
+	intfType           ifType
+	ifTableMap         map[string]dbEntry
+	vlanTableMap       map[string]dbEntry
+	vlanMemberTableMap map[uint16]map[string]dbEntry
+	ifIPTableMap       map[string]map[string]dbEntry
+	portOidMap         dbEntry
+	portStatMap        map[string]dbEntry
 
 	portTs             *db.TableSpec
+	vlanTs             *db.TableSpec
+	vlanMemberTs       *db.TableSpec
 	portTblTs          *db.TableSpec
 	intfIPTs           *db.TableSpec
 	intfIPTblTs        *db.TableSpec
@@ -99,6 +111,8 @@ func (app *IntfApp) initialize(data appData) {
 	app.ygotTarget = data.ygotTarget
 
 	app.portTs = &db.TableSpec{Name: "PORT"}
+	app.vlanTs = &db.TableSpec{Name: "VLAN"}
+	app.vlanMemberTs = &db.TableSpec{Name: "VLAN_MEMBER"}
 	app.portTblTs = &db.TableSpec{Name: "PORT_TABLE"}
 	app.intfIPTs = &db.TableSpec{Name: "INTERFACE"}
 	app.intfIPTblTs = &db.TableSpec{Name: "INTF_TABLE", CompCt: 2}
@@ -106,6 +120,8 @@ func (app *IntfApp) initialize(data appData) {
 	app.portOidCountrTblTs = &db.TableSpec{Name: "COUNTERS_PORT_NAME_MAP"}
 
 	app.ifTableMap = make(map[string]dbEntry)
+	app.vlanTableMap = make(map[string]dbEntry)
+	app.vlanMemberTableMap = make(map[uint16]map[string]dbEntry)
 	app.ifIPTableMap = make(map[string]map[string]dbEntry)
 	app.portStatMap = make(map[string]dbEntry)
 }
@@ -147,6 +163,77 @@ func (app *IntfApp) translateReplace(d *db.DB) ([]db.WatchKeys, error) {
 	return keys, err
 }
 
+func (app *IntfApp) translateDeleteVlanIntf(d *db.DB, vlanName string) ([]db.WatchKeys, error) {
+	var err error
+	var keys []db.WatchKeys
+	log.Info("translateDeleteVlanIntf() called")
+	curr, err := d.GetEntry(app.vlanTs, db.Key{Comp: []string{vlanName}})
+	if err != nil {
+		errStr := "Invalid Vlan: " + vlanName
+		return keys, tlerr.InvalidArgsError{Format: errStr}
+	}
+	app.vlanTableMap[vlanName] = dbEntry{entry: curr, op: opDelete}
+	return keys, err
+}
+
+func (app *IntfApp) translateDeletePhyIntf(d *db.DB, ifName string) ([]db.WatchKeys, error) {
+	var err error
+	var keys []db.WatchKeys
+	intfObj := app.getAppRootObject()
+	intf := intfObj.Interface[ifName]
+
+	if intf.Subinterfaces == nil {
+		return keys, err
+	}
+	subIf := intf.Subinterfaces.Subinterface[0]
+	if subIf != nil {
+		if subIf.Ipv4 != nil && subIf.Ipv4.Addresses != nil {
+			for ip, _ := range subIf.Ipv4.Addresses.Address {
+				addr := subIf.Ipv4.Addresses.Address[ip]
+				if addr != nil {
+					ipAddr := addr.Ip
+					log.Info("IPv4 address = ", *ipAddr)
+					if !validIPv4(*ipAddr) {
+						errStr := "Invalid IPv4 address " + *ipAddr
+						ipValidErr := tlerr.InvalidArgsError{Format: errStr}
+						return keys, ipValidErr
+					}
+					err = app.validateIp(d, ifName, *ipAddr)
+					if err != nil {
+						errStr := "Invalid IPv4 address " + *ipAddr
+						ipValidErr := tlerr.InvalidArgsError{Format: errStr}
+						return keys, ipValidErr
+					}
+				}
+			}
+		}
+		if subIf.Ipv6 != nil && subIf.Ipv6.Addresses != nil {
+			for ip, _ := range subIf.Ipv6.Addresses.Address {
+				addr := subIf.Ipv6.Addresses.Address[ip]
+				if addr != nil {
+					ipAddr := addr.Ip
+					log.Info("IPv6 address = ", *ipAddr)
+					if !validIPv6(*ipAddr) {
+						errStr := "Invalid IPv6 address " + *ipAddr
+						ipValidErr := tlerr.InvalidArgsError{Format: errStr}
+						return keys, ipValidErr
+					}
+					err = app.validateIp(d, ifName, *ipAddr)
+					if err != nil {
+						errStr := "Invalid IPv6 address:" + *ipAddr
+						ipValidErr := tlerr.InvalidArgsError{Format: errStr}
+						return keys, ipValidErr
+					}
+				}
+			}
+		}
+	} else {
+		err = errors.New("Only subinterface index 0 is supported")
+		return keys, err
+	}
+	return keys, err
+}
+
 func (app *IntfApp) translateDelete(d *db.DB) ([]db.WatchKeys, error) {
 	var err error
 	var keys []db.WatchKeys
@@ -164,56 +251,24 @@ func (app *IntfApp) translateDelete(d *db.DB) ([]db.WatchKeys, error) {
 		log.Info("len:=", len(intfObj.Interface))
 		for ifKey, _ := range intfObj.Interface {
 			log.Info("Name:=", ifKey)
-			intf := intfObj.Interface[ifKey]
 
-			if intf.Subinterfaces == nil {
-				continue
+			err := app.getIntfTypeFromIntf(&ifKey)
+			if err != nil {
+				errStr := "Invalid Interface type:" + ifKey
+				ifValidErr := tlerr.InvalidArgsError{Format: errStr}
+				return keys, ifValidErr
 			}
-			subIf := intf.Subinterfaces.Subinterface[0]
-			if subIf != nil {
-				if subIf.Ipv4 != nil && subIf.Ipv4.Addresses != nil {
-					for ip, _ := range subIf.Ipv4.Addresses.Address {
-						addr := subIf.Ipv4.Addresses.Address[ip]
-						if addr != nil {
-							ipAddr := addr.Ip
-							log.Info("IPv4 address = ", *ipAddr)
-							if !validIPv4(*ipAddr) {
-								errStr := "Invalid IPv4 address " + *ipAddr
-								ipValidErr := tlerr.InvalidArgsError{Format: errStr}
-								return keys, ipValidErr
-							}
-							err = app.validateIp(d, ifKey, *ipAddr)
-							if err != nil {
-								errStr := "Invalid IPv4 address " + *ipAddr
-								ipValidErr := tlerr.InvalidArgsError{Format: errStr}
-								return keys, ipValidErr
-							}
-						}
-					}
+			switch app.intfType {
+			case ETHERNET:
+				keys, err = app.translateDeletePhyIntf(d, ifKey)
+				if err != nil {
+					return keys, err
 				}
-				if subIf.Ipv6 != nil && subIf.Ipv6.Addresses != nil {
-					for ip, _ := range subIf.Ipv6.Addresses.Address {
-						addr := subIf.Ipv6.Addresses.Address[ip]
-						if addr != nil {
-							ipAddr := addr.Ip
-							log.Info("IPv6 address = ", *ipAddr)
-							if !validIPv6(*ipAddr) {
-								errStr := "Invalid IPv6 address " + *ipAddr
-								ipValidErr := tlerr.InvalidArgsError{Format: errStr}
-								return keys, ipValidErr
-							}
-							err = app.validateIp(d, ifKey, *ipAddr)
-							if err != nil {
-								errStr := "Invalid IPv6 address:" + *ipAddr
-								ipValidErr := tlerr.InvalidArgsError{Format: errStr}
-								return keys, ipValidErr
-							}
-						}
-					}
+			case VLAN:
+				keys, err = app.translateDeleteVlanIntf(d, ifKey)
+				if err != nil {
+					return keys, err
 				}
-			} else {
-				err = errors.New("Only subinterface index 0 is supported")
-				return keys, err
 			}
 		}
 	} else {
@@ -292,14 +347,25 @@ func (app *IntfApp) processDelete(d *db.DB) (SetResponse, error) {
 	var resp SetResponse
 	log.Info("processDelete:intf:path =", app.path)
 
-	if len(app.ifIPTableMap) == 0 {
-		return resp, err
-	}
+	/* Delete the elements present in Interface IP table Map */
 	for ifKey, entrylist := range app.ifIPTableMap {
 		for ip, _ := range entrylist {
 			err = d.DeleteEntry(app.intfIPTs, db.Key{Comp: []string{ifKey, ip}})
 			log.Infof("Deleted IP : %s for Interface : %s", ip, ifKey)
 		}
+	}
+	/* Delete the elements present in vlanTable Map */
+	for vlanKey, dbentry := range app.vlanTableMap {
+		memberPortsVal, ok := dbentry.entry.Field["members@"]
+		if ok {
+			log.Info("MemberPorts = ", memberPortsVal)
+			memberPorts := strings.Split(memberPortsVal, ",")
+			for _, memberPort := range memberPorts {
+				log.Infof("Member Port:%s part of vlan:%s to be deleted!", memberPort, vlanKey)
+				d.DeleteEntry(app.vlanMemberTs, db.Key{Comp: []string{vlanKey, memberPort}})
+			}
+		}
+		err = d.DeleteEntry(app.vlanTs, db.Key{Comp: []string{vlanKey}})
 	}
 	return resp, err
 }
@@ -359,29 +425,27 @@ func (app *IntfApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error) {
 					return GetResponse{Payload: payload, ErrSrc: AppErr}, err
 				}
 
-                                /*Check if the request is for a specific attribute in Interfaces state COUNTERS container*/
-                                counter_val := &ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters{}
-                                ok, e = app.getSpecificCounterAttr(targetUriPath, ifKey, counter_val)
-                                if ok {
-                                        if e != nil {
-                                                return GetResponse{Payload: payload, ErrSrc: AppErr}, e
-                                        }
+				/*Check if the request is for a specific attribute in Interfaces state COUNTERS container*/
+				counter_val := &ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters{}
+				ok, e = app.getSpecificCounterAttr(targetUriPath, ifKey, counter_val)
+				if ok {
+					if e != nil {
+						return GetResponse{Payload: payload, ErrSrc: AppErr}, e
+					}
 
-                                        payload, err = dumpIetfJson(counter_val, false)
-                                        if err == nil {
-                                                return GetResponse{Payload: payload}, err
-                                        } else {
-                                                return GetResponse{Payload: payload, ErrSrc: AppErr}, err
-                                        }
-                                }
+					payload, err = dumpIetfJson(counter_val, false)
+					if err == nil {
+						return GetResponse{Payload: payload}, err
+					} else {
+						return GetResponse{Payload: payload, ErrSrc: AppErr}, err
+					}
+				}
 
-
-
-                                /* Filling Interface IP info to internal DS */
-                                 err = app.convertDBIntfIPInfoToInternal(app.appDB, ifKey)
-                                 if err != nil {
-                                         return GetResponse{Payload: payload, ErrSrc: AppErr}, err
-                                 }
+				/* Filling Interface IP info to internal DS */
+				err = app.convertDBIntfIPInfoToInternal(app.appDB, ifKey)
+				if err != nil {
+					return GetResponse{Payload: payload, ErrSrc: AppErr}, err
+				}
 
 				/* Filling the tree with the info we have in Internal DS */
 				ygot.BuildEmptyTree(ifInfo)
@@ -547,140 +611,138 @@ func (app *IntfApp) getSpecificAttr(targetUriPath string, ifKey string, oc_val *
 		return true, e
 
 	default:
-                log.Infof(targetUriPath + " - Not an interface state attribute")
+		log.Infof(targetUriPath + " - Not an interface state attribute")
 	}
 	return false, nil
 }
 
 func (app *IntfApp) getSpecificCounterAttr(targetUriPath string, ifKey string, counter_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters) (bool, error) {
 
-    var e error
+	var e error
 
-    switch targetUriPath {
-        case "/openconfig-interfaces:interfaces/interface/state/counters/in-octets":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_OCTETS", &counter_val.InOctets)
-                return true, e
+	switch targetUriPath {
+	case "/openconfig-interfaces:interfaces/interface/state/counters/in-octets":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_OCTETS", &counter_val.InOctets)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/in-unicast-pkts":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_UCAST_PKTS", &counter_val.InUnicastPkts)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/in-unicast-pkts":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_UCAST_PKTS", &counter_val.InUnicastPkts)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/in-broadcast-pkts":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_BROADCAST_PKTS", &counter_val.InBroadcastPkts)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/in-broadcast-pkts":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_BROADCAST_PKTS", &counter_val.InBroadcastPkts)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/in-multicast-pkts":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_MULTICAST_PKTS", &counter_val.InMulticastPkts)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/in-multicast-pkts":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_MULTICAST_PKTS", &counter_val.InMulticastPkts)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/in-errors":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_ERRORS", &counter_val.InErrors)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/in-errors":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_ERRORS", &counter_val.InErrors)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/in-discards":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_DISCARDS", &counter_val.InDiscards)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/in-discards":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_DISCARDS", &counter_val.InDiscards)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/in-pkts":
-                var inNonUCastPkt, inUCastPkt *uint64
-                var in_pkts uint64
+	case "/openconfig-interfaces:interfaces/interface/state/counters/in-pkts":
+		var inNonUCastPkt, inUCastPkt *uint64
+		var in_pkts uint64
 
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_NON_UCAST_PKTS", &inNonUCastPkt)
-                if e == nil {
-                    e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_UCAST_PKTS", &inUCastPkt)
-                    if e != nil {
-                        return true, e
-                    }
-                    in_pkts = *inUCastPkt + *inNonUCastPkt
-                    counter_val.InPkts = &in_pkts
-                    return true, e
-                } else {
-                    return true, e
-                }
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_NON_UCAST_PKTS", &inNonUCastPkt)
+		if e == nil {
+			e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_UCAST_PKTS", &inUCastPkt)
+			if e != nil {
+				return true, e
+			}
+			in_pkts = *inUCastPkt + *inNonUCastPkt
+			counter_val.InPkts = &in_pkts
+			return true, e
+		} else {
+			return true, e
+		}
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/out-octets":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_OCTETS", &counter_val.OutOctets)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/out-octets":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_OCTETS", &counter_val.OutOctets)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/out-unicast-pkts":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_UCAST_PKTS", &counter_val.OutUnicastPkts)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/out-unicast-pkts":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_UCAST_PKTS", &counter_val.OutUnicastPkts)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/out-broadcast-pkts":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_BROADCAST_PKTS", &counter_val.OutBroadcastPkts)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/out-broadcast-pkts":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_BROADCAST_PKTS", &counter_val.OutBroadcastPkts)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/out-multicast-pkts":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_MULTICAST_PKTS", &counter_val.OutMulticastPkts)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/out-multicast-pkts":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_MULTICAST_PKTS", &counter_val.OutMulticastPkts)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/out-errors":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_ERRORS", &counter_val.OutErrors)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/out-errors":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_ERRORS", &counter_val.OutErrors)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/out-discards":
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_DISCARDS", &counter_val.OutDiscards)
-                return true, e
+	case "/openconfig-interfaces:interfaces/interface/state/counters/out-discards":
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_DISCARDS", &counter_val.OutDiscards)
+		return true, e
 
-        case "/openconfig-interfaces:interfaces/interface/state/counters/out-pkts":
-                var outNonUCastPkt, outUCastPkt *uint64
-                var out_pkts uint64
+	case "/openconfig-interfaces:interfaces/interface/state/counters/out-pkts":
+		var outNonUCastPkt, outUCastPkt *uint64
+		var out_pkts uint64
 
-                e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_NON_UCAST_PKTS", &outNonUCastPkt)
-                if e == nil {
-                    e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_UCAST_PKTS", &outUCastPkt)
-                    if e != nil {
-                        return true, e
-                    }
-                    out_pkts = *outUCastPkt + *outNonUCastPkt
-                    counter_val.OutPkts = &out_pkts
-                    return true, e
-                } else {
-                    return true, e
-                }
+		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_NON_UCAST_PKTS", &outNonUCastPkt)
+		if e == nil {
+			e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_OUT_UCAST_PKTS", &outUCastPkt)
+			if e != nil {
+				return true, e
+			}
+			out_pkts = *outUCastPkt + *outNonUCastPkt
+			counter_val.OutPkts = &out_pkts
+			return true, e
+		} else {
+			return true, e
+		}
 
-
-        default:
-                log.Infof(targetUriPath + " - Not an interface state counter attribute")
-        }
-        return false, nil
+	default:
+		log.Infof(targetUriPath + " - Not an interface state counter attribute")
+	}
+	return false, nil
 }
 
-func (app *IntfApp)  getCounters( ifKey string, attr string, counter_val **uint64 ) error {
-    val, e := app.getIntfAttr(ifKey, attr, PORT_STAT_MAP)
-    if len(val) > 0 {
-        v, e := strconv.ParseUint(val, 10, 64)
-        if e == nil {
-            *counter_val = &v
-            return nil
-        }
-    }
-    return e
+func (app *IntfApp) getCounters(ifKey string, attr string, counter_val **uint64) error {
+	val, e := app.getIntfAttr(ifKey, attr, PORT_STAT_MAP)
+	if len(val) > 0 {
+		v, e := strconv.ParseUint(val, 10, 64)
+		if e == nil {
+			*counter_val = &v
+			return nil
+		}
+	}
+	return e
 }
 
 func (app *IntfApp) getIntfAttr(ifName string, attr string, table Table) (string, error) {
 
-        var ok bool = false
-        var entry dbEntry
+	var ok bool = false
+	var entry dbEntry
 
-        if table == IF_TABLE_MAP {
-            entry, ok = app.ifTableMap[ifName];
-        }  else if table == PORT_STAT_MAP {
-            entry, ok = app.portStatMap[ifName];
-        }  else {
-            return "", errors.New("Unsupported table")
-        }
+	if table == IF_TABLE_MAP {
+		entry, ok = app.ifTableMap[ifName]
+	} else if table == PORT_STAT_MAP {
+		entry, ok = app.portStatMap[ifName]
+	} else {
+		return "", errors.New("Unsupported table")
+	}
 
 	if ok {
-	    ifData := entry.entry
+		ifData := entry.entry
 
-	    if val, ok := ifData.Field[attr]; ok {
-		return val, nil
-	    }
+		if val, ok := ifData.Field[attr]; ok {
+			return val, nil
+		}
 	}
 	return "", errors.New("Attr " + attr + "doesn't exist in IF table Map!")
 }
-
 
 /***********  Translation Helper fn to convert DB Interface info to Internal DS   ***********/
 func (app *IntfApp) getPortOidMapForCounters(dbCl *db.DB) error {
@@ -1039,14 +1101,304 @@ func (app *IntfApp) convertInternalToOCPortStatInfo(ifName *string, ifInfo *ocbi
 	}
 }
 
+func (app *IntfApp) getVlanIdFromVlanName(vlanName *string) (string, error) {
+	if !strings.HasPrefix(*vlanName, "Vlan") {
+		return "", errors.New("Not valid vlan name : " + *vlanName)
+	}
+	id := strings.SplitAfter(*vlanName, "Vlan")
+	log.Info("Extracted VLAN-Id = ", id[1])
+	return id[1], nil
+}
+
+func (app *IntfApp) getIntfTypeFromIntf(ifName *string) error {
+	var err error
+
+	if len(*ifName) == 0 {
+		return errors.New("Interface name received is empty! Fetching if-type from interface failed!")
+	}
+	if strings.HasPrefix(*ifName, "Ethernet") {
+		app.intfType = ETHERNET
+	} else if strings.HasPrefix(*ifName, "Vlan") {
+		app.intfType = VLAN
+	} else if strings.HasPrefix(*ifName, "portchannel") {
+		app.intfType = LAG
+	} else {
+		return errors.New("Fetching Interface type from Interface name failed!")
+	}
+	return err
+}
+
+func (app *IntfApp) validateVlanExists(d *db.DB, vlanName *string) error {
+	if len(*vlanName) == 0 {
+		return errors.New("Length of VLAN name is zero")
+	}
+	entry, err := d.GetEntry(app.vlanTs, db.Key{Comp: []string{*vlanName}})
+	if err != nil || !entry.IsPopulated() {
+		errStr := "Invalid Vlan:" + *vlanName
+		return errors.New(errStr)
+	}
+	return nil
+}
+
+func (app *IntfApp) translateCommonPhyIntfConfig(ifKey *string, intf* ocbinds.OpenconfigInterfaces_Interfaces_Interface, curr *db.Value) {
+	if intf.Config == nil {
+		return
+	}
+	if intf.Config.Description != nil {
+		log.Info("Description = ", *intf.Config.Description)
+		curr.Field["description"] = *intf.Config.Description
+	} else if intf.Config.Mtu != nil {
+		log.Info("mtu:= ", *intf.Config.Mtu)
+		curr.Field["mtu"] = strconv.Itoa(int(*intf.Config.Mtu))
+	} else if intf.Config.Enabled != nil {
+		log.Info("enabled = ", *intf.Config.Enabled)
+		if *intf.Config.Enabled == true {
+			curr.Field["admin_status"] = "up"
+		} else {
+			curr.Field["admin_status"] = "down"
+		}
+	}
+	log.Info("Writing to db for ", *ifKey)
+	var entry dbEntry
+	entry.op = opUpdate
+	entry.entry = *curr
+
+	app.ifTableMap[*ifKey] = entry
+}
+
+func (app *IntfApp) translateCommonPhyIntfSubInterfaces(d *db.DB, ifKey *string, intf* ocbinds.OpenconfigInterfaces_Interfaces_Interface) error {
+	var err error
+	if intf.Subinterfaces == nil {
+		return err
+	}
+	subIf := intf.Subinterfaces.Subinterface[0]
+	if subIf != nil {
+		if subIf.Ipv4 != nil && subIf.Ipv4.Addresses != nil {
+			for ip, _ := range subIf.Ipv4.Addresses.Address {
+				addr := subIf.Ipv4.Addresses.Address[ip]
+				if addr.Config != nil {
+					log.Info("Ip:=", *addr.Config.Ip)
+					log.Info("prefix:=", *addr.Config.PrefixLength)
+					if !validIPv4(*addr.Config.Ip) {
+						errStr := "Invalid IPv4 address " + *addr.Config.Ip
+						err = tlerr.InvalidArgsError{Format: errStr}
+						return err
+					}
+					err = app.translateIpv4(d, *ifKey, *addr.Config.Ip, int(*addr.Config.PrefixLength))
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+		if subIf.Ipv6 != nil && subIf.Ipv6.Addresses != nil {
+			for ip, _ := range subIf.Ipv6.Addresses.Address {
+				addr := subIf.Ipv6.Addresses.Address[ip]
+				if addr.Config != nil {
+					log.Info("Ip:=", *addr.Config.Ip)
+					log.Info("prefix:=", *addr.Config.PrefixLength)
+					if !validIPv6(*addr.Config.Ip) {
+						errStr := "Invalid IPv6 address " + *addr.Config.Ip
+						err = tlerr.InvalidArgsError{Format: errStr}
+						return err
+					}
+					err = app.translateIpv4(d, *ifKey, *addr.Config.Ip, int(*addr.Config.PrefixLength))
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+	} else {
+		err = errors.New("Only subinterface index 0 is supported")
+		return err
+	}
+	return err
+}
+
+func (app *IntfApp) translateCommonPhyIntfEthernet(d *db.DB, ifKey *string, intf *ocbinds.OpenconfigInterfaces_Interfaces_Interface) error {
+	var err error
+
+	if intf.Ethernet == nil {
+		return err
+	}
+	if intf.Ethernet.SwitchedVlan == nil {
+		return err
+	}
+
+	switchedVlanIntf := intf.Ethernet.SwitchedVlan
+	if switchedVlanIntf.Config == nil {
+		return err
+	}
+	log.Info("Entering Switched vlan interface Config")
+
+	var accessVlanId uint16 = 0
+	trunkVlanSlice := make([]uint16, 1)
+	accessVlanFound := false
+	trunkVlanFound := false
+
+	/* check whether access VLAN info is present! */
+	if switchedVlanIntf.Config.AccessVlan != nil {
+		accessVlanId = *switchedVlanIntf.Config.AccessVlan
+		log.Infof("Vlan id : %d observed for Member port addition configuration!", accessVlanId)
+		accessVlanFound = true
+	}
+	/* check whether trunk vlan info is present! */
+	if switchedVlanIntf.Config.TrunkVlans != nil {
+		vlanUnionList := switchedVlanIntf.Config.TrunkVlans
+		if len(vlanUnionList) != 0 {
+			trunkVlanFound = true
+		}
+		for _, vlanUnion := range vlanUnionList {
+			log.Info("Type = ", reflect.TypeOf(vlanUnion))
+			vlanIdStruct, err := switchedVlanIntf.Config.To_OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union(vlanUnion)
+			if err == nil {
+				continue
+			}
+			log.Info("New Type = ", reflect.TypeOf(vlanIdStruct))
+		}
+	}
+
+	/* If access or trunk vlan is present, do the interface mode config */
+	/* Note special logic has to be there for access/trunk mode config */
+	if switchedVlanIntf.Config.InterfaceMode == ocbinds.OpenconfigVlan_VlanModeType_UNSET {
+		return err
+	}
+	ifMode := switchedVlanIntf.Config.InterfaceMode
+	switch ifMode {
+	case ocbinds.OpenconfigVlan_VlanModeType_ACCESS:
+		/* If Vlan is also present, update the cache! */
+		if accessVlanFound {
+			log.Info("Access VLAN found!")
+			vlanStr := "Vlan" + strconv.Itoa(int(accessVlanId))
+			err = app.validateVlanExists(d, &vlanStr)
+			if err != nil {
+				errStr := "Invalid VLAN: " + strconv.Itoa(int(accessVlanId))
+				err = tlerr.InvalidArgsError{Format:errStr}
+				return err
+			}
+
+			memberPortEntryMap := make(map[string]string)
+			memberPortEntry := db.Value{Field: memberPortEntryMap}
+			memberPortEntry.Field["tagging_mode"] = "untagged"
+
+			if app.vlanMemberTableMap[accessVlanId] == nil {
+				app.vlanMemberTableMap[accessVlanId] = make(map[string]dbEntry)
+			} else {
+				app.vlanMemberTableMap[accessVlanId][*ifKey] = dbEntry{entry: memberPortEntry, op: opUpdate}
+				log.Info("Untagged Port added to cache!")
+			}
+		} else {
+			/* TODO: Add the logic for just switch port access/trunk config */
+			log.Info("Will be handled in future!")
+		}
+	case ocbinds.OpenconfigVlan_VlanModeType_TRUNK:
+		if trunkVlanFound {
+			memberPortEntryMap := make(map[string]string)
+			memberPortEntry := db.Value{Field: memberPortEntryMap}
+			memberPortEntry.Field["tagging_mode"] = "untagged"
+			for _, vlanId := range trunkVlanSlice {
+				if app.vlanMemberTableMap[vlanId] == nil {
+					app.vlanMemberTableMap[vlanId] = make(map[string]dbEntry)
+				} else {
+					app.vlanMemberTableMap[vlanId][*ifKey] = dbEntry{entry: memberPortEntry, op: opUpdate}
+					log.Info("Tagged Port added to cache!")
+				}
+			}
+		} else {
+			log.Info("Will be handled in future!")
+		}
+
+	}
+	return err
+}
+
+func (app *IntfApp) translateCommonPhyIntf(d *db.DB, ifKey *string, inpOp reqType) ([]db.WatchKeys, error) {
+
+	var err error
+	var keys []db.WatchKeys
+
+	app.allIpKeys, _ = app.doGetAllIpKeys(d, app.intfIPTs)
+	intfObj := app.getAppRootObject()
+	intf := intfObj.Interface[*ifKey]
+	curr, err := d.GetEntry(app.portTs, db.Key{Comp: []string{*ifKey}})
+	if err != nil {
+		errStr := "Invalid Interface:" + *ifKey
+		ifValidErr := tlerr.InvalidArgsError{Format: errStr}
+		return keys, ifValidErr
+	}
+	if !curr.IsPopulated() {
+		log.Error("Interface ", *ifKey, " doesn't exist in DB")
+		err = errors.New("Interface: " + *ifKey + " doesn't exist in DB")
+		return keys, err
+	}
+	/* Handling Interface Config updates */
+	app.translateCommonPhyIntfConfig(ifKey, intf, &curr)
+
+	/* Handling Interface Ethernet updates */
+	err = app.translateCommonPhyIntfEthernet(d, ifKey, intf)
+	if err != nil {
+		return keys, err
+	}
+
+	/* Handling Interface SubInterfaces updates */
+	err = app.translateCommonPhyIntfSubInterfaces(d, ifKey, intf)
+	if err != nil {
+		return keys, err
+	}
+	return keys, err
+}
+
+func (app *IntfApp) translateCommonVlanIntf(d *db.DB, vlanName *string, inpOp reqType) ([]db.WatchKeys, error) {
+	var err error
+	var keys []db.WatchKeys
+	log.Info("TranslateCommonVlanIntf() called for ", *vlanName)
+	intfObj := app.getAppRootObject()
+
+	m := make(map[string]string)
+	entryVal := db.Value{Field: m}
+	entryVal.Field["vlanid"], err = app.getVlanIdFromVlanName(vlanName)
+	if err != nil {
+		return keys, err
+	}
+
+	vlan := intfObj.Interface[*vlanName]
+	curr, _ := d.GetEntry(app.vlanTs, db.Key{Comp: []string{*vlanName}})
+	if !curr.IsPopulated() {
+		log.Info("VLAN-" + *vlanName + " not present in DB, need to create it!!")
+		app.vlanTableMap[*vlanName] = dbEntry{op: opCreate, entry: entryVal}
+		return keys, nil
+	}
+	app.vlanTableMap[*vlanName] = dbEntry{op:opUpdate, entry:curr}
+
+	if vlan.Config != nil {
+		if vlan.Config.Description != nil {
+			log.Info("Description = ", *vlan.Config.Description)
+			curr.Field["description"] = *vlan.Config.Description
+		} else if vlan.Config.Mtu != nil {
+			log.Info("mtu:= ", *vlan.Config.Mtu)
+			curr.Field["mtu"] = strconv.Itoa(int(*vlan.Config.Mtu))
+		} else if vlan.Config.Enabled != nil {
+			log.Info("enabled = ", *vlan.Config.Enabled)
+			if *vlan.Config.Enabled == true {
+				curr.Field["admin_status"] = "up"
+			} else {
+				curr.Field["admin_status"] = "down"
+			}
+		}
+		log.Info("Writing to db for ", *vlanName)
+		app.vlanTableMap[*vlanName] = dbEntry{op: opUpdate, entry: curr}
+	}
+	return keys, err
+}
+
+/* TODO: Currently extracting type from Interface name, need to change it to get it from config/type attribute */
 func (app *IntfApp) translateCommon(d *db.DB, inpOp reqType) ([]db.WatchKeys, error) {
 	var err error
 	var keys []db.WatchKeys
 	pathInfo := app.path
 
 	log.Infof("Received UPDATE for path %s; vars=%v", pathInfo.Template, pathInfo.Vars)
-
-	app.allIpKeys, _ = app.doGetAllIpKeys(d, app.intfIPTs)
 
 	intfObj := app.getAppRootObject()
 
@@ -1058,89 +1410,26 @@ func (app *IntfApp) translateCommon(d *db.DB, inpOp reqType) ([]db.WatchKeys, er
 		log.Info("len:=", len(intfObj.Interface))
 		for ifKey, _ := range intfObj.Interface {
 			log.Info("Name:=", ifKey)
-			intf := intfObj.Interface[ifKey]
-			curr, err := d.GetEntry(app.portTs, db.Key{Comp: []string{ifKey}})
+			err := app.getIntfTypeFromIntf(&ifKey)
 			if err != nil {
-				errStr := "Invalid Interface:" + ifKey
+				errStr := "Invalid Interface type:" + ifKey
 				ifValidErr := tlerr.InvalidArgsError{Format: errStr}
 				return keys, ifValidErr
 			}
-			if !curr.IsPopulated() {
-				log.Error("Interface ", ifKey, " doesn't exist in DB")
-				return keys, errors.New("Interface: " + ifKey + " doesn't exist in DB")
-			}
-			if intf.Config != nil {
-				if intf.Config.Description != nil {
-					log.Info("Description = ", *intf.Config.Description)
-					curr.Field["description"] = *intf.Config.Description
-				} else if intf.Config.Mtu != nil {
-					log.Info("mtu:= ", *intf.Config.Mtu)
-					curr.Field["mtu"] = strconv.Itoa(int(*intf.Config.Mtu))
-				} else if intf.Config.Enabled != nil {
-					log.Info("enabled = ", *intf.Config.Enabled)
-					if *intf.Config.Enabled == true {
-						curr.Field["admin_status"] = "up"
-					} else {
-						curr.Field["admin_status"] = "down"
-					}
+			switch app.intfType {
+			case ETHERNET:
+				keys, err = app.translateCommonPhyIntf(d, &ifKey, inpOp)
+				if err != nil {
+					return keys, err
 				}
-				log.Info("Writing to db for ", ifKey)
-				var entry dbEntry
-				entry.op = opUpdate
-				entry.entry = curr
-
-				app.ifTableMap[ifKey] = entry
-			}
-			if intf.Subinterfaces == nil {
-				continue
-			}
-			subIf := intf.Subinterfaces.Subinterface[0]
-			if subIf != nil {
-				if subIf.Ipv4 != nil && subIf.Ipv4.Addresses != nil {
-					for ip, _ := range subIf.Ipv4.Addresses.Address {
-						addr := subIf.Ipv4.Addresses.Address[ip]
-						if addr.Config != nil {
-							log.Info("Ip:=", *addr.Config.Ip)
-							log.Info("prefix:=", *addr.Config.PrefixLength)
-							if !validIPv4(*addr.Config.Ip) {
-								errStr := "Invalid IPv4 address " + *addr.Config.Ip
-								err = tlerr.InvalidArgsError{Format: errStr}
-								return keys, err
-							}
-							err = app.translateIpv4(d, ifKey, *addr.Config.Ip, int(*addr.Config.PrefixLength))
-							if err != nil {
-								return keys, err
-							}
-						}
-					}
+			case VLAN:
+				keys, err = app.translateCommonVlanIntf(d, &ifKey, inpOp)
+				if err != nil {
+					return keys, err
 				}
-				if subIf.Ipv6 != nil && subIf.Ipv6.Addresses != nil {
-					for ip, _ := range subIf.Ipv6.Addresses.Address {
-						addr := subIf.Ipv6.Addresses.Address[ip]
-						if addr.Config != nil {
-							log.Info("Ip:=", *addr.Config.Ip)
-							log.Info("prefix:=", *addr.Config.PrefixLength)
-							if !validIPv6(*addr.Config.Ip) {
-								errStr := "Invalid IPv6 address " + *addr.Config.Ip
-								err = tlerr.InvalidArgsError{Format: errStr}
-								return keys, err
-							}
-							err = app.translateIpv4(d, ifKey, *addr.Config.Ip, int(*addr.Config.PrefixLength))
-							if err != nil {
-								return keys, err
-							}
-						}
-					}
-				}
-			} else {
-				err = errors.New("Only subinterface index 0 is supported")
-				return keys, err
 			}
 		}
-	} else {
-		err = errors.New("Not implemented")
 	}
-
 	return keys, err
 }
 
@@ -1237,6 +1526,118 @@ func (app *IntfApp) translateIpv4(d *db.DB, intf string, ip string, prefix int) 
 	return err
 }
 
+func (app* IntfApp) processUpdateIfTable(d *db.DB) (error) {
+	var err error
+	/* Updating the Interface Table */
+	for ifName, ifEntry := range app.ifTableMap {
+		if ifEntry.op == opUpdate {
+			log.Info("Updating entry for ", ifName)
+			err = d.SetEntry(app.portTs, db.Key{Comp: []string{ifName}}, ifEntry.entry)
+			if err != nil {
+				errStr := "Updating Interface table for Interface : " + ifName + " failed"
+				return errors.New(errStr)
+			}
+		}
+	}
+	return err
+}
+
+func (app* IntfApp) processUpdateIfIpTableMap(d *db.DB) (error) {
+	var err error
+	/* Updating the Interface IP table */
+	for ifName, ipEntries := range app.ifIPTableMap {
+		for ip, ipEntry := range ipEntries {
+			if ipEntry.op == opCreate {
+				log.Info("Creating entry for ", ifName, ":", ip)
+				err = d.CreateEntry(app.intfIPTs, db.Key{Comp: []string{ifName, ip}}, ipEntry.entry)
+				if err != nil {
+					errStr := "Creating entry for " + ifName + ":" + ip + " failed"
+					return errors.New(errStr)
+				}
+			} else if ipEntry.op == opDelete {
+				log.Info("Deleting entry for ", ifName, ":", ip)
+				err = d.DeleteEntry(app.intfIPTs, db.Key{Comp: []string{ifName, ip}})
+				if err != nil {
+					errStr := "Deleting entry for " + ifName + ":" + ip + " failed"
+					return errors.New(errStr)
+				}
+			}
+		}
+	}
+	return err
+}
+
+func (app* IntfApp) processUpdateVlanTableMap(d *db.DB) (error) {
+	var err error
+
+	/* Updating the VLAN table */
+	for vlanId, vlanEntry := range app.vlanTableMap {
+		switch vlanEntry.op {
+		case opCreate:
+			err = d.CreateEntry(app.vlanTs, db.Key{Comp: []string{vlanId}}, vlanEntry.entry)
+			if err != nil {
+				errStr := "Creating VLAN entry for VLAN : "+ vlanId + " failed"
+				return errors.New(errStr)
+			}
+		case opUpdate:
+			err = d.SetEntry(app.vlanTs, db.Key{Comp: []string{vlanId}}, vlanEntry.entry)
+			if err != nil {
+				errStr := "Updating VLAN entry for VLAN : " + vlanId + " failed"
+				return errors.New(errStr)
+			}
+		}
+	}
+	return err
+}
+
+func (app* IntfApp) processUpdateVlanMemberTableMap(d *db.DB) (error) {
+	var err error
+	/* Updating the VLAN member table */
+
+	/* Variable is for updating memberPortsList to VLAN table */
+	var memberPortsList strings.Builder
+
+	for vlanId, ifEntries := range app.vlanMemberTableMap {
+		ifEntryLen := len(ifEntries)
+		idx := 1
+		for ifName, ifEntry := range ifEntries {
+			/* Updating VLAN member table Map */
+			vlanStr := "Vlan" + strconv.Itoa(int(vlanId))
+			switch ifEntry.op {
+			case opCreate:
+				err = d.CreateEntry(app.vlanMemberTs, db.Key{Comp: []string{vlanStr, ifName}}, ifEntry.entry)
+				if err != nil {
+					errStr := "Creating entry for VLAN member table with vlan : " + vlanStr + " If : " + ifName + " failed"
+					return errors.New(errStr)
+				}
+			case opUpdate:
+				err = d.SetEntry(app.vlanMemberTs, db.Key{Comp: []string{vlanStr, ifName}}, ifEntry.entry)
+				if err != nil {
+					errStr := "Set entry for VLAN member table with vlan : " + vlanStr + " If : " + ifName + " failed"
+					return errors.New(errStr)
+				}
+			}
+
+			if idx != ifEntryLen {
+				memberPortsList.WriteString(ifName + ",")
+			} else {
+				memberPortsList.WriteString(ifName)
+			}
+			idx = idx + 1
+		}
+		memberPortsEntryMap := make(map[string]string)
+		memberPortsEntry := db.Value{Field: memberPortsEntryMap}
+		memberPortsEntry.Field["members@"] = memberPortsList.String()
+		/* Updating VLAN map with updated members */
+		vlanStr := "Vlan" + strconv.Itoa(int(vlanId))
+		err = d.SetEntry(app.vlanMemberTs, db.Key{Comp: []string{vlanStr}}, memberPortsEntry)
+		if err != nil {
+			return errors.New("Updating VLAN table with member ports failed")
+		}
+	}
+	return err
+}
+
 func (app *IntfApp) processCommon(d *db.DB) (SetResponse, error) {
 	var err error
 	var resp SetResponse
@@ -1244,23 +1645,24 @@ func (app *IntfApp) processCommon(d *db.DB) (SetResponse, error) {
 	log.Info("processCommon:intf:path =", app.path)
 	log.Info("ProcessCommon: Target Type is " + reflect.TypeOf(*app.ygotTarget).Elem().Name())
 
-	for key, entry := range app.ifTableMap {
-		if entry.op == opUpdate {
-			log.Info("Updating entry for ", key)
-			err = d.SetEntry(app.portTs, db.Key{Comp: []string{key}}, entry.entry)
-		}
+	err = app.processUpdateIfTable(d)
+	if err != nil {
+		return resp, err
 	}
 
-	for key, entry1 := range app.ifIPTableMap {
-		for ip, entry := range entry1 {
-			if entry.op == opCreate {
-				log.Info("Creating entry for ", key, ":", ip)
-				err = d.CreateEntry(app.intfIPTs, db.Key{Comp: []string{key, ip}}, entry.entry)
-			} else if entry.op == opDelete {
-				log.Info("Deleting entry for ", key, ":", ip)
-				err = d.DeleteEntry(app.intfIPTs, db.Key{Comp: []string{key, ip}})
-			}
-		}
+	err = app.processUpdateIfIpTableMap(d)
+	if err != nil {
+		return resp, err
+	}
+
+	err = app.processUpdateVlanTableMap(d)
+	if err != nil {
+		return resp, err
+	}
+
+	err = app.processUpdateVlanMemberTableMap(d)
+	if err != nil {
+		return resp, err
 	}
 	return resp, err
 }
