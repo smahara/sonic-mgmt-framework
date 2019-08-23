@@ -353,6 +353,12 @@ def do_switch_pddf():
     if os.path.exists('/usr/share/sonic/platform/pddf_support'):
         print PROJECT_NAME.upper() +" system is already in pddf mode...."
     else:
+        print "Stopping the pmon service ..."
+        status, output = log_os_system("systemctl stop pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
         print "Stopping the platform services.."
         status = pddf_switch_svc.stop_platform_svc()
         if not status:
@@ -384,7 +390,7 @@ def do_switch_pddf():
                         json.dump(data,fw)
 
         print "Restart the pmon service ..."
-        status, output = log_os_system("systemctl restart pmon.service", 1)
+        status, output = log_os_system("systemctl start pmon.service", 1)
         if status:
             if FORCE==0:
                 return status
@@ -396,6 +402,12 @@ def do_switch_nonpddf():
     if not os.path.exists('/usr/share/sonic/platform/pddf_support'):
         print PROJECT_NAME.upper() +" system is already in non-pddf mode...."
     else:
+        print "Stopping the pmon service ..."
+        status, output = log_os_system("systemctl stop pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
         print "Stopping the PDDF platform service..."
         status = pddf_switch_svc.stop_platform_pddf()
         if not status:
@@ -427,7 +439,7 @@ def do_switch_nonpddf():
                         json.dump(data,fw)
 
         print "Restart the pmon service ..."
-        status, output = log_os_system("systemctl restart pmon.service", 1)
+        status, output = log_os_system("systemctl start pmon.service", 1)
         if status:
             if FORCE==0:
                 return status

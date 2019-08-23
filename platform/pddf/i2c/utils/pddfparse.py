@@ -64,6 +64,12 @@ class PddfParse():
     #################################################################################################################################
     #   GENERIC DEFS
     #################################################################################################################################
+    def runcmd(self, cmd):
+        #print cmd
+        if os.system(cmd)!=0:
+            print "%s -- command failed"%cmd
+        return
+
     def get_dev_idx(self, dev, ops):
             parent=dev['dev_info']['virt_parent']
             pdev=self.data[parent]
@@ -108,31 +114,28 @@ class PddfParse():
 
             for key in attr.keys():
                     cmd="echo '%s' > /sys/kernel/%s/%s"%(attr[key], path, key)
-                    #print cmd
-                    os.system(cmd)
+                    self.runcmd(cmd)
 
     def create_psu_i2c_device(self, dev, ops):
         if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PSU']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/psu/i2c", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/psu/i2c/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
-            cmd= "echo '%s'  > /sys/kernel/pddf/devices/psu/i2c/psu_idx\n"%( self.get_dev_idx(dev, ops))
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
+            cmd= "echo '%s'  > /sys/kernel/pddf/devices/psu/i2c/psu_idx"%( self.get_dev_idx(dev, ops))
+            self.runcmd(cmd)
             for attr in dev['i2c']['attr_list']:
                     self.create_device(attr, "pddf/devices/psu/i2c", ops)
-                    cmd= "echo 'add' > /sys/kernel/pddf/devices/psu/i2c/attr_ops\n"
-                    #print cmd
-                    os.system(cmd)
+                    cmd= "echo 'add' > /sys/kernel/pddf/devices/psu/i2c/attr_ops"
+                    self.runcmd(cmd)
+                    #print ""
 
-            cmd = "echo 'add' > /sys/kernel/pddf/devices/psu/i2c/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            cmd = "echo 'add' > /sys/kernel/pddf/devices/psu/i2c/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
         else:
             cmd = "echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
+            #print "\n"
 
 
         ##os.system("sleep 1")
@@ -154,22 +157,21 @@ class PddfParse():
         if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['FAN']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/fan/i2c", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/fan/i2c/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
             self.create_device(dev['i2c']['dev_attr'], "pddf/devices/fan/i2c", ops)
             for attr in dev['i2c']['attr_list']:
                 self.create_device(attr, "pddf/devices/fan/i2c", ops)
-                cmd= "echo 'add' > /sys/kernel/pddf/devices/fan/i2c/attr_ops\n"
-                #print cmd
-                os.system(cmd)
+                cmd= "echo 'add' > /sys/kernel/pddf/devices/fan/i2c/attr_ops"
+                self.runcmd(cmd)
+                #print ""
 
-            cmd= "echo 'add' > /sys/kernel/pddf/devices/fan/i2c/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            cmd= "echo 'add' > /sys/kernel/pddf/devices/fan/i2c/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
         else:
-            cmd= "echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device\n" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd= "echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
 
         #os.system("sleep 1")
 
@@ -184,9 +186,9 @@ class PddfParse():
 
             #print "echo 'add' > /sys/kernel/pddf/devices/fan/i2c/dev_ops\n"
         #else:
-            cmd= "echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device\n" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd= "echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
 
             #os.system("sleep 1")
 
@@ -195,17 +197,16 @@ class PddfParse():
         if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['CPLD']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/cpld", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/cpld/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
             #create_device(dev['i2c']['dev_attr'], "pddf/devices/cpld", ops)
             # TODO: If attributes are provided then, use 'self.create_device' for them too
-            cmd= "echo 'add' > /sys/kernel/pddf/devices/cpld/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            cmd= "echo 'add' > /sys/kernel/pddf/devices/cpld/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
         else:
-            cmd= "echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device\n" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd= "echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
 
         #os.system("sleep 1")
 
@@ -213,37 +214,34 @@ class PddfParse():
     def create_mux_device(self, dev, ops):
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/mux", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/mux/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
             self.create_device(dev['i2c']['dev_attr'], "pddf/devices/mux", ops)
-            cmd= "echo 'add' > /sys/kernel/pddf/devices/mux/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            cmd= "echo 'add' > /sys/kernel/pddf/devices/mux/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
             #os.system("sleep 1")
 
     def create_xcvr_i2c_device(self, dev, ops):
         if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PORT_MODULE']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/xcvr/i2c", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/xcvr/i2c/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
             #create_device(dev['i2c']['dev_attr'], "pddf/devices/psu/i2c")
-            cmd="echo '%s'  > /sys/kernel/pddf/devices/xcvr/i2c/dev_idx\n"%( self.get_dev_idx(dev, ops))
-            #print cmd
-            os.system(cmd)
+            cmd="echo '%s'  > /sys/kernel/pddf/devices/xcvr/i2c/dev_idx"%( self.get_dev_idx(dev, ops))
+            self.runcmd(cmd)
             for attr in dev['i2c']['attr_list']:
                 self.create_device(attr, "pddf/devices/xcvr/i2c", ops)
-                cmd="echo 'add' > /sys/kernel/pddf/devices/xcvr/i2c/attr_ops\n"
-                #print cmd
-                os.system(cmd)
+                cmd="echo 'add' > /sys/kernel/pddf/devices/xcvr/i2c/attr_ops"
+                self.runcmd(cmd)
+                #print ""
 
-            cmd="echo 'add' > /sys/kernel/pddf/devices/xcvr/i2c/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            cmd="echo 'add' > /sys/kernel/pddf/devices/xcvr/i2c/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
         else:
-            cmd="echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device\n" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd="echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
 
         #os.system("sleep 1")
 
@@ -260,25 +258,24 @@ class PddfParse():
     def create_sysstatus_device(self, dev, ops):
         for attr in dev['attr_list']:
             self.create_device(attr, "pddf/devices/sysstatus", ops)
-            cmd= "echo 'add' > /sys/kernel/pddf/devices/sysstatus/attr_ops\n\n"
-            #print cmd
-            os.system(cmd)
+            cmd= "echo 'add' > /sys/kernel/pddf/devices/sysstatus/attr_ops"
+            self.runcmd(cmd)
+            #print "\n"
 
     def create_eeprom_device(self, dev, ops):
         if "EEPROM" in self.data['PLATFORM']['drivers'] and dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['EEPROM']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/eeprom/i2c", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/eeprom/i2c/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
             self.create_device(dev['i2c']['dev_attr'], "pddf/devices/eeprom/i2c", ops)
-            cmd = "echo 'add' > /sys/kernel/pddf/devices/eeprom/i2c/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            cmd = "echo 'add' > /sys/kernel/pddf/devices/eeprom/i2c/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
 
         else:
-            cmd= "echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device\n" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd= "echo %s 0x%x > /sys/bus/i2c/devices/i2c-%d/new_device" % (dev['i2c']['topo_info']['dev_type'], int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
 
         #os.system("sleep 1")
 
@@ -288,15 +285,14 @@ class PddfParse():
     def delete_eeprom_device(self, dev, ops):
         if "EEPROM" in self.data['PLATFORM']['drivers'] and dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['EEPROM']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/eeprom/i2c/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
-            cmd = "echo 'delete' > /sys/kernel/pddf/devices/eeprom/i2c/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
+            cmd = "echo 'delete' > /sys/kernel/pddf/devices/eeprom/i2c/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
         else:
-            cmd= "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device\n" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd= "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
         #os.system("sleep 1")
 
     def delete_sysstatus_device(self, dev, ops):
@@ -305,24 +301,21 @@ class PddfParse():
 
         #for attr in dev['attr_list']:
             #cmd= "echo '%s' > /sys/kernel/pddf/devices/sysstatus/i2c_name"%(dev['dev_info']['device_name'])
-            ##print cmd
-            #os.system(cmd)
-            #cmd= "echo 'delete' > /sys/kernel/pddf/devices/sysstatus/attr_ops\n\n"
-            ##print cmd
-            #os.system(cmd)
+            #self.runcmd(cmd)
+            #cmd= "echo 'delete' > /sys/kernel/pddf/devices/sysstatus/attr_ops"
+            #self.runcmd(cmd)
 
     def delete_xcvr_i2c_device(self, dev, ops):
         if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PORT_MODULE']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/xcvr/i2c/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
-            cmd="echo 'delete' > /sys/kernel/pddf/devices/xcvr/i2c/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
+            cmd="echo 'delete' > /sys/kernel/pddf/devices/xcvr/i2c/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
         else:
-            cmd="echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device\n" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd="echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
         #os.system("sleep 1")
 
     def delete_xcvr_device(self, dev, ops):
@@ -331,70 +324,64 @@ class PddfParse():
 
     def delete_mux_device(self, dev, ops):
             cmd= "echo '%s' > /sys/kernel/pddf/devices/mux/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
-            cmd= "echo 'delete' > /sys/kernel/pddf/devices/mux/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
+            cmd= "echo 'delete' > /sys/kernel/pddf/devices/mux/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
             #os.system("sleep 1")
 
     def delete_cpld_device(self, dev, ops):
         if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['CPLD']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/cpld/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
-            cmd= "echo 'delete' > /sys/kernel/pddf/devices/cpld/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
+            cmd= "echo 'delete' > /sys/kernel/pddf/devices/cpld/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
         else:
-            cmd= "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device\n" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd= "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
         #os.system("sleep 1")
 
     def delete_temp_sensor_device(self, dev, ops):
         # NO PDDF driver for temp_sensors device
         #if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['TEMP_SENSOR']:
             #cmd= "echo '%s' > /sys/kernel/pddf/devices/temp_sensor/i2c/i2c_name"%(dev['dev_info']['device_name'])
-            ##print cmd
-            #os.system(cmd)
-            #cmd= "echo 'add' > /sys/kernel/pddf/devices/temp_sensor/i2c/dev_ops\n"
-            ##print cmd
-            #os.system(cmd)
+            #self.runcmd(cmd)
+            #cmd= "echo 'add' > /sys/kernel/pddf/devices/temp_sensor/i2c/dev_ops"
+            #self.runcmd(cmd)
         #else:
-            cmd= "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device\n" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd= "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
 
             #os.system("sleep 1")
 
     def delete_fan_device(self, dev, ops):
         if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['FAN']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/fan/i2c/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
-            cmd= "echo 'delete' > /sys/kernel/pddf/devices/fan/i2c/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
+            cmd= "echo 'delete' > /sys/kernel/pddf/devices/fan/i2c/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
         else:
-            cmd= "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device\n" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd= "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
         #os.system("sleep 1")
 
 
     def delete_psu_i2c_device(self, dev, ops):
         if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PSU']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/psu/i2c/i2c_name"%(dev['dev_info']['device_name'])
-            #print cmd
-            os.system(cmd)
-            cmd = "echo 'delete' > /sys/kernel/pddf/devices/psu/i2c/dev_ops\n"
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
+            cmd = "echo 'delete' > /sys/kernel/pddf/devices/psu/i2c/dev_ops"
+            self.runcmd(cmd)
+            #print "\n"
         else:
-            cmd = "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device\n" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
-            #print cmd
-            os.system(cmd)
+            cmd = "echo 0x%x > /sys/bus/i2c/devices/i2c-%d/delete_device" % (int(dev['i2c']['topo_info']['dev_addr'], 0), int(dev['i2c']['topo_info']['parent_bus'], 0))
+            self.runcmd(cmd)
+            #print "\n"
         #os.system("sleep 1")
 
     def delete_psu_device(self, dev, ops):
@@ -940,8 +927,9 @@ class PddfParse():
     def get_led_device(self, device_name):
         self.create_attr('device_name', self.data[device_name]['dev_info']['device_name'], "pddf/devices/led")
         self.create_attr('index', self.data[device_name]['dev_attr']['index'], "pddf/devices/led")
-        cmd="echo 'verify'  > /sys/kernel/pddf/devices/led/dev_ops\n"
-        os.system(cmd)
+        cmd="echo 'verify'  > /sys/kernel/pddf/devices/led/dev_ops"
+        self.runcmd(cmd)
+        #print "\n"
 
     def validate_sysfs_creation(self, obj, validate_type):
             dir = '/sys/kernel/pddf/devices/'+validate_type
@@ -1131,8 +1119,7 @@ class PddfParse():
 
     def create_attr(self, key, value, path):
             cmd = "echo '%s' > /sys/kernel/%s/%s"%(value,  path, key)
-            #print cmd
-            os.system(cmd)
+            self.runcmd(cmd)
 
     def create_led_platform_device(self, key, ops):
             if ops['attr']=='all' or ops['attr']=='PLATFORM':
@@ -1153,9 +1140,9 @@ class PddfParse():
                                     elif (attr_key != 'attr_name'):
                                             state_path=path+'/'+attr['attr_name']
                                             self.create_attr(attr_key, attr[attr_key],state_path)
-                            cmd="echo '" + ops['cmd'] + '_' + attr['attr_name']+"' > /sys/kernel/pddf/devices/led/dev_ops\n"
-                            #print cmd
-                            os.system(cmd)
+                            cmd="echo '" + ops['cmd'] + '_' + attr['attr_name']+"' > /sys/kernel/pddf/devices/led/dev_ops"
+                            self.runcmd(cmd)
+                            #print "\n"
 
 
 
