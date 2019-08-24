@@ -17,7 +17,6 @@ import (
 )
 
 type reqType int
-
 const (
 	opCreate reqType = iota + 1
 	opDelete
@@ -25,11 +24,16 @@ const (
 )
 
 type ifType int
-
 const (
 	ETHERNET ifType = iota
 	VLAN
 	LAG
+)
+
+type intfModeType int
+const (
+	ACCESS intfModeType = iota
+	TRUNK
 )
 
 type dbEntry struct {
@@ -48,11 +52,15 @@ const (
 )
 
 type Table int
-
 const (
 	IF_TABLE_MAP Table = iota
 	PORT_STAT_MAP
 )
+
+type intfMode struct {
+	ifName string
+	mode   intfModeType
+}
 
 type IntfApp struct {
 	path       *PathInfo
@@ -67,6 +75,7 @@ type IntfApp struct {
 	countersDB *db.DB
 
 	intfType           ifType
+	mode               intfMode
 	ifTableMap         map[string]dbEntry
 	vlanTableMap       map[string]dbEntry
 	vlanMemberTableMap map[uint16]map[string]dbEntry
@@ -1101,7 +1110,23 @@ func (app *IntfApp) convertInternalToOCPortStatInfo(ifName *string, ifInfo *ocbi
 	}
 }
 
-func (app *IntfApp) getVlanIdFromVlanName(vlanName *string) (string, error) {
+func generateMemberPortsStringFromSlice(memberPortsList []string) *string {
+	var memberPortsStr strings.Builder
+
+	for _, memberPort := range memberPortsList {
+		idx := 1
+		if idx != len(memberPortsList) {
+			memberPortsStr.WriteString(memberPort + ",")
+		} else {
+			memberPortsStr.WriteString(memberPort)
+		}
+		idx = idx + 1
+	}
+	memberPorts := memberPortsStr.String()
+	return &(memberPorts)
+}
+
+func getVlanIdFromVlanName(vlanName *string) (string, error) {
 	if !strings.HasPrefix(*vlanName, "Vlan") {
 		return "", errors.New("Not valid vlan name : " + *vlanName)
 	}
@@ -1140,7 +1165,83 @@ func (app *IntfApp) validateVlanExists(d *db.DB, vlanName *string) error {
 	return nil
 }
 
-func (app *IntfApp) translateCommonPhyIntfConfig(ifKey *string, intf* ocbinds.OpenconfigInterfaces_Interfaces_Interface, curr *db.Value) {
+func (app *IntfApp) updateAccessModeConfig(d *db.DB, ifName *string) error {
+	if len(*ifName) == 0 {
+		return errors.New("Empty Interface name received!")
+	}
+	var vlanKeys []db.Key
+	vlanTable, err := d.GetTable(app.vlanMemberTs)
+	if err != nil {
+		return err
+	}
+
+	vlanKeys, err = vlanTable.GetKeys()
+	log.Infof("Found %d VLAN member table keys", len(vlanKeys))
+	var vlanSlice []string
+
+	/* Iterate over all vlan member keys, delete the ones which has tagged mode, keep the list of
+	   those vlans in a slice */
+	for _, vlanKey := range vlanKeys {
+		if len(vlanKeys) < 2 {
+			continue
+		}
+		if vlanKey.Get(1) == *ifName {
+			entry, err := d.GetEntry(app.vlanMemberTs, vlanKey)
+			if err != nil {
+				log.Errorf("Error found on fetching Vlan member info from App DB for Interface Name : %s", *ifName)
+				return err
+			}
+			tagInfo, ok := entry.Field["tagging_mode"]
+			if ok {
+				if tagInfo != "tagged" {
+					continue
+				}
+				vlanSlice = append(vlanSlice, vlanKey.Get(0))
+				d.DeleteEntry(app.vlanMemberTs, vlanKey)
+			}
+		}
+	}
+
+	/* Currently vlanSlice contains list of all vlans containing specific taggedPort */
+	/* TODO: Iterate through vlanSlice and update the "members@" key for VLAN table */
+	for _, vlan := range vlanSlice {
+		vlanEntry, err := d.GetEntry(app.vlanTs, db.Key{Comp: []string{vlan}})
+		if err != nil {
+			log.Errorf("Get Entry for VLAN table with Vlan:%s failed!", vlan)
+			return err
+		}
+		memberPortsInfo, ok := vlanEntry.Field["members@"]
+		if ok {
+			if !strings.Contains(memberPortsInfo, *ifName) {
+				continue
+			}
+			memberPortsList := strings.Split(memberPortsInfo, ",")
+			idx := 0
+			memberFound := false
+
+			for idxVal, memberName := range memberPortsList {
+				if memberName == *ifName {
+					memberFound = true
+					idx = idxVal
+					break
+				}
+			}
+			if memberFound {
+				memberPortsList = append(memberPortsList[:idx], memberPortsList[idx+1:]...)
+
+				memberPortsStr := generateMemberPortsStringFromSlice(memberPortsList)
+
+				vlanEntry.Field["members@"] = *memberPortsStr
+				d.SetEntry(app.vlanTs, db.Key{Comp: []string{vlan}}, vlanEntry)
+			} else {
+				continue
+			}
+		}
+	}
+	return nil
+}
+
+func (app *IntfApp) translateCommonPhyIntfConfig(ifKey *string, intf *ocbinds.OpenconfigInterfaces_Interfaces_Interface, curr *db.Value) {
 	if intf.Config == nil {
 		return
 	}
@@ -1166,7 +1267,7 @@ func (app *IntfApp) translateCommonPhyIntfConfig(ifKey *string, intf* ocbinds.Op
 	app.ifTableMap[*ifKey] = entry
 }
 
-func (app *IntfApp) translateCommonPhyIntfSubInterfaces(d *db.DB, ifKey *string, intf* ocbinds.OpenconfigInterfaces_Interfaces_Interface) error {
+func (app *IntfApp) translateCommonPhyIntfSubInterfaces(d *db.DB, ifKey *string, intf *ocbinds.OpenconfigInterfaces_Interfaces_Interface) error {
 	var err error
 	if intf.Subinterfaces == nil {
 		return err
@@ -1265,6 +1366,7 @@ func (app *IntfApp) translateCommonPhyIntfEthernet(d *db.DB, ifKey *string, intf
 		return err
 	}
 	ifMode := switchedVlanIntf.Config.InterfaceMode
+
 	switch ifMode {
 	case ocbinds.OpenconfigVlan_VlanModeType_ACCESS:
 		/* If Vlan is also present, update the cache! */
@@ -1274,10 +1376,9 @@ func (app *IntfApp) translateCommonPhyIntfEthernet(d *db.DB, ifKey *string, intf
 			err = app.validateVlanExists(d, &vlanStr)
 			if err != nil {
 				errStr := "Invalid VLAN: " + strconv.Itoa(int(accessVlanId))
-				err = tlerr.InvalidArgsError{Format:errStr}
+				err = tlerr.InvalidArgsError{Format: errStr}
 				return err
 			}
-
 			memberPortEntryMap := make(map[string]string)
 			memberPortEntry := db.Value{Field: memberPortEntryMap}
 			memberPortEntry.Field["tagging_mode"] = "untagged"
@@ -1289,8 +1390,7 @@ func (app *IntfApp) translateCommonPhyIntfEthernet(d *db.DB, ifKey *string, intf
 				log.Info("Untagged Port added to cache!")
 			}
 		} else {
-			/* TODO: Add the logic for just switch port access/trunk config */
-			log.Info("Will be handled in future!")
+			app.mode = intfMode{ifName: *ifKey, mode:ACCESS}
 		}
 	case ocbinds.OpenconfigVlan_VlanModeType_TRUNK:
 		if trunkVlanFound {
@@ -1305,8 +1405,6 @@ func (app *IntfApp) translateCommonPhyIntfEthernet(d *db.DB, ifKey *string, intf
 					log.Info("Tagged Port added to cache!")
 				}
 			}
-		} else {
-			log.Info("Will be handled in future!")
 		}
 
 	}
@@ -1357,7 +1455,7 @@ func (app *IntfApp) translateCommonVlanIntf(d *db.DB, vlanName *string, inpOp re
 
 	m := make(map[string]string)
 	entryVal := db.Value{Field: m}
-	entryVal.Field["vlanid"], err = app.getVlanIdFromVlanName(vlanName)
+	entryVal.Field["vlanid"], err = getVlanIdFromVlanName(vlanName)
 	if err != nil {
 		return keys, err
 	}
@@ -1369,7 +1467,7 @@ func (app *IntfApp) translateCommonVlanIntf(d *db.DB, vlanName *string, inpOp re
 		app.vlanTableMap[*vlanName] = dbEntry{op: opCreate, entry: entryVal}
 		return keys, nil
 	}
-	app.vlanTableMap[*vlanName] = dbEntry{op:opUpdate, entry:curr}
+	app.vlanTableMap[*vlanName] = dbEntry{op: opUpdate, entry: curr}
 
 	if vlan.Config != nil {
 		if vlan.Config.Description != nil {
@@ -1526,7 +1624,7 @@ func (app *IntfApp) translateIpv4(d *db.DB, intf string, ip string, prefix int) 
 	return err
 }
 
-func (app* IntfApp) processUpdateIfTable(d *db.DB) (error) {
+func (app *IntfApp) processUpdateIfTable(d *db.DB) error {
 	var err error
 	/* Updating the Interface Table */
 	for ifName, ifEntry := range app.ifTableMap {
@@ -1542,7 +1640,7 @@ func (app* IntfApp) processUpdateIfTable(d *db.DB) (error) {
 	return err
 }
 
-func (app* IntfApp) processUpdateIfIpTableMap(d *db.DB) (error) {
+func (app *IntfApp) processUpdateIfIpTableMap(d *db.DB) error {
 	var err error
 	/* Updating the Interface IP table */
 	for ifName, ipEntries := range app.ifIPTableMap {
@@ -1567,7 +1665,7 @@ func (app* IntfApp) processUpdateIfIpTableMap(d *db.DB) (error) {
 	return err
 }
 
-func (app* IntfApp) processUpdateVlanTableMap(d *db.DB) (error) {
+func (app *IntfApp) processUpdateVlanTableMap(d *db.DB) error {
 	var err error
 
 	/* Updating the VLAN table */
@@ -1576,7 +1674,7 @@ func (app* IntfApp) processUpdateVlanTableMap(d *db.DB) (error) {
 		case opCreate:
 			err = d.CreateEntry(app.vlanTs, db.Key{Comp: []string{vlanId}}, vlanEntry.entry)
 			if err != nil {
-				errStr := "Creating VLAN entry for VLAN : "+ vlanId + " failed"
+				errStr := "Creating VLAN entry for VLAN : " + vlanId + " failed"
 				return errors.New(errStr)
 			}
 		case opUpdate:
@@ -1590,7 +1688,7 @@ func (app* IntfApp) processUpdateVlanTableMap(d *db.DB) (error) {
 	return err
 }
 
-func (app* IntfApp) processUpdateVlanMemberTableMap(d *db.DB) (error) {
+func (app *IntfApp) processUpdateVlanMemberTableMap(d *db.DB) error {
 	var err error
 	/* Updating the VLAN member table */
 
@@ -1638,6 +1736,20 @@ func (app* IntfApp) processUpdateVlanMemberTableMap(d *db.DB) (error) {
 	return err
 }
 
+func (app *IntfApp) processUpdateInterfaceModeConfig(d *db.DB, ifName *string) error {
+	var err error
+	switch app.mode.mode {
+	case ACCESS:
+		err := app.updateAccessModeConfig(d, &app.mode.ifName)
+		if err != nil {
+			return err
+		}
+	case TRUNK:
+		break
+	}
+	return err
+}
+
 func (app *IntfApp) processCommon(d *db.DB) (SetResponse, error) {
 	var err error
 	var resp SetResponse
@@ -1651,6 +1763,11 @@ func (app *IntfApp) processCommon(d *db.DB) (SetResponse, error) {
 	}
 
 	err = app.processUpdateIfIpTableMap(d)
+	if err != nil {
+		return resp, err
+	}
+
+	err = app.processUpdateInterfaceModeConfig(d, &app.mode.ifName)
 	if err != nil {
 		return resp, err
 	}
