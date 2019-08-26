@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2019 Accton Technology Corporation
+# Copyright (C) 2017 Accton Technology Corporation
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,23 +19,24 @@
 # HISTORY:
 #    mm/dd/yyyy (A.D.)
 #    11/13/2017: Polly Hsu, Create
-#    05/08/2019: Roy Lee, changed for as7712-54x.
 # ------------------------------------------------------------------
 
 try:
     import os
     import sys, getopt
-    import commands
+    import subprocess
     import click
     import imp
     import logging
     import logging.config
     import logging.handlers
     import types
+    import signal
     import time  # this is only being used as part of the example
     import traceback
-    import signal
     from tabulate import tabulate
+    from as7712_32x.fanutil import FanUtil
+    from as7712_32x.thermalutil import ThermalUtil
 except ImportError as e:
     raise ImportError('%s - required module not found' % str(e))
 
@@ -47,11 +48,46 @@ DUTY_MAX = 100
 global log_file
 global log_console
 
+fan_state=[2, 2, 2, 2, 2, 2, 2]  #init state=2, insert=1, remove=0
+ # For AC power Front to Back :
+ #	 If any fan fail, please fan speed register to 15
+ #	 The max value of Fan speed register is 9
+ #		[LM75(48) + LM75(49) + LM75(4A)] > 174  => set Fan speed value from 4 to 5
+ #		[LM75(48) + LM75(49) + LM75(4A)] > 182  => set Fan speed value from 5 to 7
+ #		[LM75(48) + LM75(49) + LM75(4A)] > 190  => set Fan speed value from 7 to 9
+ #
+ #		[LM75(48) + LM75(49) + LM75(4A)] < 170  => set Fan speed value from 5 to 4
+ #		[LM75(48) + LM75(49) + LM75(4A)] < 178  => set Fan speed value from 7 to 5
+ #		[LM75(48) + LM75(49) + LM75(4A)] < 186  => set Fan speed value from 9 to 7
+ #
+ #
+ # For  AC power Back to Front :
+ #	 If any fan fail, please fan speed register to 15
+ # The max value of Fan speed register is 10
+ #		[LM75(48) + LM75(49) + LM75(4A)] > 140  => set Fan speed value from 4 to 5
+ #		[LM75(48) + LM75(49) + LM75(4A)] > 150  => set Fan speed value from 5 to 7
+ #		[LM75(48) + LM75(49) + LM75(4A)] > 160  => set Fan speed value from 7 to 10
+ #
+ #		[LM75(48) + LM75(49) + LM75(4A)] < 135  => set Fan speed value from 5 to 4
+ #		[LM75(48) + LM75(49) + LM75(4A)] < 145  => set Fan speed value from 7 to 5
+ #		[LM75(48) + LM75(49) + LM75(4A)] < 155  => set Fan speed value from 10 to 7
+ #
+ 
+ 
+ # 2.If no matched fan speed is found from the policy,
+ #     use FAN_DUTY_CYCLE_MIN as default speed
+ # Get current temperature
+ # 4.Decision 3: Decide new fan speed depend on fan direction/current fan speed/temperature
+
+
+
+     
 # Make a class we can use to capture stdout and sterr in the log
 class accton_as7712_monitor(object):
-    FAN_NUM_ON_MAIN_BROAD = 6
-    FAN_NUM_1_IDX = 1
-    FAN_NODE_PATH = '/sys/bus/i2c/devices/2-0066/fan*{0}_{1}'
+    # static temp var
+    _ori_temp = 0
+    _new_perc = 0
+    _ori_perc = 0
 
     llog = logging.getLogger("["+FUNCTION_NAME+"]")
     def __init__(self, log_console, log_file):
@@ -63,7 +99,7 @@ class accton_as7712_monitor(object):
         sys_handler.ident = 'common'
         sys_handler.setLevel(logging.WARNING)  #only fatal for syslog
         self.llog.addHandler(sys_handler)
-        self.llog.setLevel(logging.INFO)
+        self.llog.setLevel(logging.DEBUG)
 
         if log_file:
             fh = logging.FileHandler(log_file)
@@ -75,71 +111,103 @@ class accton_as7712_monitor(object):
         # set up logging to console
         if log_console:
             console = logging.StreamHandler()
-            console.setLevel(logging.INFO)
+            console.setLevel(logging.DEBUG)     #For debugging
             formatter = logging.Formatter('%(asctime)-15s %(name)s %(message)s')
             console.setFormatter(formatter)
             self.llog.addHandler(console)
 
-    def get_fan_to_device_path(self, fan_num, func):
-        return self.FAN_NODE_PATH.format(fan_num, func)
+    def manage_fans(self):
+        fan_policy_f2b = {
+           0: [32, 0,      174000],
+           1: [38, 170000, 182000],
+           2: [50, 178000, 190000],
+           3: [63, 186000, 0],
+        }
+        fan_policy_b2f = {
+           0: [32, 0,      140000],
+           1: [38, 135000, 150000],
+           2: [50, 145000, 160000],
+           3: [69, 155000, 0],
+        }
+ 
+        global fan_state
+        FAN_STATE_REMOVE = 0
+        FAN_STATE_INSERT = 1
 
-    def _get_fan_node_val(self, fan_num, attr):
-        if fan_num < self.FAN_NUM_1_IDX or fan_num > self.FAN_NUM_ON_MAIN_BROAD:
-            self.llog.debug('GET. Parameter error. fan_num, %d', fan_num)
-            return None
+ 
+        thermal = ThermalUtil()
+        fan = FanUtil()
+        get_temp = thermal.get_thermal_temp()            
+        
+        cur_duty_cycle = fan.get_fan_duty_cycle()
+       
+        for x in range(fan.get_idx_fan_start(), fan.get_num_fans()+1):
+            fan_status = fan.get_fan_status(x)
+            fan_present = fan.get_fan_present(x)
 
-        device_path = self.get_fan_to_device_path(fan_num, attr)
-        try:
-            status, output = commands.getstatusoutput('cat '+ device_path)
-        except IOError as e:
-            self.llog.error('GET. unable to open file: %s', str(e))
-            return None
-
-        if status:
-            self.llog.error('GET. unable to open file,  ret:%d', status)
-            return None
-
-        content = output.replace(os.linesep,"")
-        if content == '':
-            self.llog.error('GET. content is NULL. device_path:%s', device_path)
-            return None
-
-        return int(content)
-
-    def log_it(self, idx, attr, val):
-        if attr == 'present':
-            if val:
-                self.llog.warning('Info: FAN-%d present is detected', idx)
+            if fan_present == 1:
+               if fan_state[x]!=1:
+                  fan_state[x]=FAN_STATE_INSERT
+                  self.llog.warning("FAN-%d present is detected", x)
             else:
-                self.llog.warning('Alarm for FAN-%d absent is detected', idx)
-        elif attr == 'fault':
-            if val:
-                self.llog.warning('Alarm for FAN-%d failed is detected', idx)
-            else:
-                self.llog.warning('Info: FAN-%d becomes operational', idx)
+               if fan_state[x]!=0:
+                  fan_state[x]=FAN_STATE_REMOVE
+                  self.llog.warning("Alarm for FAN-%d absent is detected", x)
 
+            if fan_status is None:
+               self.llog.warning('SET new_perc to %d (FAN stauts is None. fan_num:%d)', DUTY_MAX, x)
+               fan.set_fan_duty_cycle(DUTY_MAX)
+            
+            if fan_status is False:             
+               self.llog.warning('SET new_perc to %d (FAN fault. fan_num:%d)', DUTY_MAX, x)
+               fan.set_fan_duty_cycle(DUTY_MAX)
+            
+            self.llog.debug('INFO. fan_status is True (fan_num:%d)', x)
+        
+        if fan_status is not None and fan_status is not False:
+           fan_dir=fan.get_fan_dir(1)
+           if fan_dir == 1:
+              policy = fan_policy_f2b
+           else:
+              policy = fan_policy_b2f
+           
+           new_duty_cycle = cur_duty_cycle
 
-    data = {'present':[0] * FAN_NUM_ON_MAIN_BROAD, 
-            'fault':[0] * FAN_NUM_ON_MAIN_BROAD}
-    def check_fans(self):
-        attrs = self.data.keys()
-        for x in range(self.FAN_NUM_ON_MAIN_BROAD):
-            idx = x + 1
-            for a in attrs:
-                stat = self._get_fan_node_val(idx, a)
-                if stat is None or stat is False:
-                    self.llog.error('Fan %d is %s', index, a)
-                    break
-                lst = self.data[a]
-                if lst[x] != stat:
-                    self.log_it(idx, a, stat)
-                    lst[x] = stat
-        return True
+           for x in range(0, 4):
+               if cur_duty_cycle == fan_policy_f2b[x][0]:
+                  break
+               if x == 4 :
+                  fan.set_fan_duty_cycle(policy[0][0])                
+                  break
+               # if temp > up_levle, else if temp < down_level
+               if get_temp > policy[x][2] and x != 3 :
+                  new_duty_cycle= policy[x+1][0]
+                  self.llog.debug('THERMAL temp UP, temp %d > %d , new_duty_cycle=%d', get_temp, policy[x][2], new_duty_cycle)
+               elif get_temp < policy[x][1] :
+                  new_duty_cycle= policy[x-1][0]
+                  self.llog.debug('THERMAL temp down, temp %d < %d , new_duty_cycle=%d', get_temp, policy[x][1], new_duty_cycle)
+                  break;
+
+           if new_duty_cycle == cur_duty_cycle :
+              return True
+           else:    
+              self.llog.debug('set new_duty_cycle=%d',new_duty_cycle)
+              fan.set_fan_duty_cycle(new_duty_cycle)
+           
+           return True
+         
+def sig_handler(signum, frame):
+    fan = FanUtil()
+    logging.critical('INFO:Cause signal %d, set fan speed max.', signum)
+    fan.set_fan_duty_cycle(DUTY_MAX)
+    sys.exit(0)
+
 
 def main(argv):
     log_file = '%s.log' % FUNCTION_NAME
     log_console = 0
     log_file = ""
+
     if len(sys.argv) != 1:
         try:
             opts, args = getopt.getopt(argv,'hdl')
@@ -155,12 +223,14 @@ def main(argv):
             elif opt in ('-l'):
                 log_file = '%s.log' % sys.argv[0]
 
+    signal.signal(signal.SIGINT, sig_handler)
+    signal.signal(signal.SIGTERM, sig_handler)
+
     monitor = accton_as7712_monitor(log_console, log_file)
     # Loop forever, doing something useful hopefully:
     while True:
-        monitor.check_fans()
+        monitor.manage_fans()
         time.sleep(10)
-
 
 if __name__ == '__main__':
     main(sys.argv[1:])
