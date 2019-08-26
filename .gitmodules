@@ -114,3 +114,7 @@
 	path = src/sonic-tam
 	url = ../sonic-tam.git
 	branch = buzznik_dev
+[submodule "src/sonic-mgmt-framework"]
+	path = src/sonic-mgmt-framework
+	url = ../sonic-mgmt-framework.git
+	branch = buzznik_dev
