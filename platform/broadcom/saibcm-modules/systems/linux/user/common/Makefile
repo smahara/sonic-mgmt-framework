@@ -91,6 +91,9 @@ KNET_CB := $(DEST_DIR)/$(KNET_CB_LOCAL)
 BCM_KNET_LOCAL :=linux-bcm-knet.$(KOBJ)
 BCM_KNET=$(DEST_DIR)/$(BCM_KNET_LOCAL)
 
+PSAMPLE_LOCAL := psample.$(KOBJ)
+PSAMPLE := $(DEST_DIR)/$(PSAMPLE_LOCAL)
+
 BCM_LPTP_LOCAL :=linux-bcm-ptp-clock.$(KOBJ)
 BCM_LPTP=$(DEST_DIR)/$(BCM_LPTP_LOCAL)
 
@@ -129,6 +132,16 @@ all_targets += $(KNET_CB)
 
 ifeq ($(NO_LOCAL_TARGETS),)
 LOCAL_TARGETS +=$(patsubst %,../$(platform)/%,$(KNET_CB_LOCAL))
+all_targets +=$(LOCAL_TARGETS)
+endif
+endif
+
+ifdef BUILD_PSAMPLE
+all_targets += $(PSAMPLE)
+ADD_TO_CFLAGS += -DPSAMPLE_SUPPORT
+
+ifeq ($(NO_LOCAL_TARGETS),)
+LOCAL_TARGETS +=$(patsubst %,../$(platform)/%,$(PSAMPLE_LOCAL))
 all_targets +=$(LOCAL_TARGETS)
 endif
 endif
@@ -175,6 +188,10 @@ kernel_modules:
 ifeq ($(BUILD_KNET),1)
 	$(MAKE) -j1 -C $(SDK)/systems/linux/kernel/modules kernel_version=$(kernel_version) \
 		subdirs="shared bcm-knet" override-target=linux-$(platform) CFLAGS="$(CFLAGS)"
+ifdef BUILD_PSAMPLE
+	$(MAKE) -j1 -C $(SDK)/systems/linux/kernel/modules kernel_version=$(kernel_version) \
+		subdirs="psample" override-target=linux-$(platform) CFLAGS="$(CFLAGS)"
+endif
 ifdef BUILD_KNET_CB
 	$(MAKE) -j1 -C $(SDK)/systems/linux/kernel/modules kernel_version=$(kernel_version) \
 		subdirs="knet-cb" override-target=linux-$(platform) CFLAGS="$(CFLAGS)"
@@ -198,6 +215,9 @@ $(BCM_KNET): $(KERN_BLDROOT)/linux-bcm-knet.$(KOBJ)
 $(KNET_CB): $(KERN_BLDROOT)/linux-knet-cb.$(KOBJ)
 	$(OBJCOPY) --strip-debug $< $@
 
+$(PSAMPLE): $(KERN_BLDROOT)/psample.$(KOBJ)
+	$(OBJCOPY) --strip-debug $< $@
+
 $(BCM_LPTP): $(KERN_BLDROOT)/linux-bcm-ptp-clock.$(KOBJ)
 	$(OBJCOPY) --strip-debug $< $@
 
@@ -209,14 +229,17 @@ clean::
 	$(MAKE) -C $(SDK)/systems/bde/linux/kernel $@
 	$(MAKE) -C $(SDK)/systems/bde/linux/user/kernel $@
 	$(MAKE) -C $(SDK)/systems/linux/kernel/modules \
+		subdirs="shared bcm-knet knet-cb psample" \
 		subdirs="shared bcm-knet knet-cb bcm-ptp-clock" \
 		override-target=linux-$(platform) $@
 	$(RM) $(KERNEL_BDE) $(USER_BDE)
+	$(RM) $(BCM_KNET) $(KNET_CB) $(PSAMPLE)
 	$(RM) $(BCM_KNET) $(KNET_CB) $(BCM_LPTP)
 	$(RM) $(KERN_BLDROOT)/linux-kernel-bde.$(KOBJ)
 	$(RM) $(KERN_BLDROOT)/linux-user-bde.$(KOBJ)
 	$(RM) $(KERN_BLDROOT)/linux-bcm-knet.$(KOBJ)
 	$(RM) $(KERN_BLDROOT)/linux-knet-cb.$(KOBJ)
+	$(RM) $(KERN_BLDROOT)/psample.$(KOBJ)
 	$(RM) $(KERN_BLDROOT)/linux-bcm-ptp-clock.$(KOBJ)
 	$(RM) $(LOCAL_TARGETS)
 

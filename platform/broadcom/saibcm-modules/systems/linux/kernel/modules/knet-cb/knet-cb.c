@@ -45,11 +45,16 @@
 #include <bcm-knet.h>
 #include <linux/if_vlan.h>
 
+/* Enable sflow sampling using psample */
+#ifdef PSAMPLE_SUPPORT
+#include "psample-cb.h"
+#endif
+
 MODULE_AUTHOR("Broadcom Corporation");
 MODULE_DESCRIPTION("Broadcom Linux KNET Call-Back Driver");
 MODULE_LICENSE("GPL");
 
-static int debug;
+int debug;
 LKM_MOD_PARAM(debug, "i", int, 0);
 MODULE_PARM_DESC(debug,
 "Debug level (default 0)");
@@ -264,6 +269,39 @@ strip_tag_filter_cb(uint8_t * pkt, int size, int dev_no, void *meta,
     return 0;
 }
 
+static int
+knet_filter_cb(uint8_t * pkt, int size, int dev_no, void *meta,
+                     int chan, kcom_filter_t *kf)
+{
+    /* check for filter callback handler */
+#ifdef PSAMPLE_SUPPORT
+    if (strncmp(kf->desc, PSAMPLE_CB_NAME, KCOM_FILTER_DESC_MAX) == 0) {
+        return psample_filter_cb (pkt, size, dev_no, meta, chan, kf);
+    }
+#endif
+    return strip_tag_filter_cb (pkt, size, dev_no, meta, chan, kf);
+}
+
+static int
+knet_netif_create_cb(int unit, kcom_netif_t *netif, struct net_device *dev)
+{
+    int retv = 0;
+#ifdef PSAMPLE_SUPPORT
+    retv = psample_netif_create_cb(unit, netif, dev); 
+#endif
+    return retv;
+}
+
+static int
+knet_netif_destroy_cb(int unit, kcom_netif_t *netif, struct net_device *dev)
+{
+    int retv = 0;
+#ifdef PSAMPLE_SUPPORT
+    retv = psample_netif_destroy_cb(unit, netif, dev); 
+#endif
+    return retv;
+}
+
 /*
  * Get statistics.
  * % cat /proc/linux-knet-cb
@@ -276,7 +314,6 @@ _pprint(void)
     pprintf("    %lu stripped packets\n", strip_stats.stripped);
     pprintf("    %lu packets checked\n", strip_stats.checked);
     pprintf("    %lu packets skipped\n", strip_stats.skipped);
-
     return 0;
 }
 
@@ -289,23 +326,34 @@ _cleanup(void)
     {
         bkn_tx_skb_cb_unregister(strip_tag_tx_cb);
     }
-    bkn_filter_cb_unregister(strip_tag_filter_cb);
 
+    bkn_filter_cb_unregister(knet_filter_cb);
+    bkn_netif_create_cb_unregister(knet_netif_create_cb);
+    bkn_netif_destroy_cb_unregister(knet_netif_destroy_cb);
+
+#ifdef PSAMPLE_SUPPORT
+    psample_cleanup();
+#endif
     return 0;
 }
 
 static int
 _init(void)
 {
-
     bkn_rx_skb_cb_register(strip_tag_rx_cb);
     /* strip_tag_tx_cb is currently a no-op, so no need to register */
     if (0)
     {
         bkn_tx_skb_cb_register(strip_tag_tx_cb);
     }
-    bkn_filter_cb_register(strip_tag_filter_cb);
 
+#ifdef PSAMPLE_SUPPORT
+    psample_init();
+#endif
+    
+    bkn_filter_cb_register(knet_filter_cb);
+    bkn_netif_create_cb_register(knet_netif_create_cb);
+    bkn_netif_destroy_cb_register(knet_netif_destroy_cb);
     return 0;
 }
 
