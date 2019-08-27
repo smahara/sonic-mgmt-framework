@@ -26,6 +26,7 @@ mmu_lossless=0
 l2xmsg_mode=1
 l2xmsg_hostbuf_size=8192
 ipv6_lpm_128b_enable=1
+num_ipv6_lpm_128b_entries=0
 max_vp_lags=0
 
 l3_alpm_enable=2
@@ -540,4 +541,5 @@ dport_map_port_129=126
 dport_map_port_66=127
 dport_map_port_130=128
 
-mmu_init_config="TD3-DEFAULT-LOSSLESS-P3P4"
+mmu_init_config="TD3-DELL-lossless"
+sai_preinit_cmd_file=/usr/share/sonic/hwsku/sai_preinit_cmd.soc
