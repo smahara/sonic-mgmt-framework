@@ -91,6 +91,38 @@ switch_board_led_default() {
 	resource="/sys/bus/pci/devices/0000:09:00.0/resource0"
 	python /usr/bin/pcisysfs.py --set --offset 0x24 --val 0x194 --res $resource  > /dev/null 2>&1
 }
+
+# Readout firmware version of the system and
+# store in /var/log/firmware_versions
+platform_firmware_versions() {
+
+	FIRMWARE_VERSION_FILE=/var/log/firmware_versions
+
+	rm -rf ${FIRMWARE_VERSION_FILE}
+	echo "BIOS:`dmidecode -t bios | grep   Version |  awk -F":" '{print $2}'`" > $FIRMWARE_VERSION_FILE
+	# Get FPGA version
+	r=`/usr/bin/pcisysfs.py  --get --offset 0x00 --res /sys/bus/pci/devices/0000\:09\:00.0/resource0 | sed  '1d; s/.*\(....\)$/\1/; s/\(..\{1\}\)/\1./'`
+	r_min=$(echo $r | sed 's/.*\(..\)$/0x\1/')
+	r_maj=$(echo $r | sed 's/^\(..\).*/0x\1/')
+	echo "FPGA: $((r_maj)).$((r_min))" >> $FIRMWARE_VERSION_FILE
+
+	## Get BMC Firmware Revision
+	#r=`docker exec -it pmon ipmitool mc info | awk '/Firmware Revision/ { print $NF }'`
+	r=`cat /sys/class/ipmi/ipmi0/device/bmc/firmware_revision`
+	echo "BMC: $r" >> $FIRMWARE_VERSION_FILE
+
+	#BaseBoard CPLD 0x0d on i2c bus 5 ( physical FPGA I2C-5)
+	ver=`/usr/sbin/i2cget -y 5 0x0d 0x0`
+	echo "Baseboard CPLD: $((ver))" >> $FIRMWARE_VERSION_FILE
+
+	#Switch CPLD 1 0x30 on i2c bus 4 ( physical FPGA I2C-4)
+	ver=`/usr/sbin/i2cget -y 4 0x30 0x0`
+	echo "Switch CPLD 1: $((ver))" >> $FIRMWARE_VERSION_FILE
+
+	#Switch CPLD 1 0x30 on i2c bus 4 ( physical FPGA I2C-4)
+	ver=`/usr/sbin/i2cget -y 4 0x31 0x0`
+	echo "Switch CPLD 2: $((ver))" >> $FIRMWARE_VERSION_FILE
+}
 init_devnum
 
 if [ "$1" == "init" ]; then
@@ -100,22 +132,24 @@ if [ "$1" == "init" ]; then
     modprobe ipmi_si
     modprobe cls-i2c-ocore
     modprobe cls-switchboard 
-    #modprobe mc24lc64t 
-    insmod /lib/modules/4.9.0-9-2-amd64/extra/mc24lc64t.ko
+    modprobe mc24lc64t 
+    #insmod /lib/modules/`uname -r`/extra/mc24lc64t.ko
     sys_eeprom "new_device"
-#   switch_board_qsfp_mux "new_device"
     switch_board_qsfp "new_device"
-  #  switch_board_modsel
-#    switch_board_led_default
-  #  python /usr/bin/qsfp_irq_enable.py
+  # switch_board_led_default
+  # python /usr/bin/qsfp_irq_enable.py
+    platform_firmware_versions
 
 elif [ "$1" == "deinit" ]; then
     sys_eeprom "delete_device"
     switch_board_qsfp "delete_device"
-#   switch_board_qsfp_mux "delete_device"
-
     modprobe -r i2c-mux-pca954x
     modprobe -r i2c-dev
+    modprobe -r ipmi_devintf
+    modprobe -r ipmi_si
+    modprobe -r cls-i2c-ocore
+    modprobe -r cls-switchboard 
+    modprobe -r mc24lc64t 
 else
      echo "z9332f_platform : Invalid option !"
 fi
