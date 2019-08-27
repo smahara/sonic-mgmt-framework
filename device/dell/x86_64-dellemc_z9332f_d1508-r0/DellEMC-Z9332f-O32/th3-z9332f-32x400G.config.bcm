@@ -18,7 +18,7 @@ module_64ports.0=0
 tdma_intr_enable.0=1
 ipv6_lpm_128b_enable.0=1
 stat_if_parity_enable.0=1
-oversubscribe_mode=1
+oversubscribe_mode=0
 bcm_tunnel_term_compatible_mode.0=1
 table_dma_enable.0=1
 schan_intr_enable.0=0
@@ -510,3 +510,6 @@ serdes_lane_config_media_type_27=copper
 serdes_lane_config_media_type_28=copper
 serdes_lane_config_media_type_24=copper
 
+sai_preinit_cmd_file=/usr/share/sonic/hwsku/sai_preinit_cmd.soc
+
+mmu_init_config="TH3-DELL-lossy"
