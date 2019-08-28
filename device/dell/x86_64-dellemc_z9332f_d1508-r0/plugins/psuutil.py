@@ -101,7 +101,7 @@ class PsuUtil(PsuBase):
         psu_status = int(self.get_pmc_register(psu_reg_name), 16)
         if (psu_status != 'ERR'):
             # Check for PSU presence
-            if (psu_status):
+            if (psu_status ==0x00):
                     status = 1
         return status
 
