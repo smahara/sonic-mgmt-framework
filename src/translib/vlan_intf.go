@@ -3,7 +3,6 @@ package translib
 import (
 	"errors"
 	log "github.com/golang/glog"
-	"strconv"
 	"strings"
 	"translib/db"
 	"translib/tlerr"
@@ -62,25 +61,55 @@ func (app *IntfApp) processUpdateVlanMemberTableMap(d *db.DB) error {
 	var err error
 	/* Updating the VLAN member table */
 
-	/* Variable is for updating memberPortsList to VLAN table */
-	var memberPortsList strings.Builder
+	for vlanStr, ifEntries := range app.vlanD.vlanMemberTableMap {
+		var memberPortsListStrB strings.Builder
+		var memberPortsList []string
 
-	for vlanId, ifEntries := range app.vlanD.vlanMemberTableMap {
 		ifEntryLen := len(ifEntries)
 		idx := 1
+
+		vlanEntry, err := d.GetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanStr}})
+		if !vlanEntry.IsPopulated() {
+			errStr := "Failed to retrieve memberPorts info of VLAN : " + vlanStr
+			return errors.New(errStr)
+		}
+		memberPortsExists := false
+		memberPortsListStr, ok := vlanEntry.Field["members@"]
+		if ok {
+			if len(memberPortsListStr) != 0 {
+				memberPortsListStrB.WriteString(vlanEntry.Field["members@"])
+				memberPortsList = generateMemberPortsSliceFromString(&memberPortsListStr)
+				memberPortsExists = true
+			}
+		}
+
 		for ifName, ifEntry := range ifEntries {
-			/* Updating VLAN member table Map */
-			vlanStr := "Vlan" + strconv.Itoa(int(vlanId))
 			switch ifEntry.op {
 			case opCreate:
 				log.Info("Vlan = ", vlanStr)
 				log.Info("Interface name = ", ifName)
+				if memberPortsExists {
+					if checkMemberPortExistsInList(memberPortsList, &ifName) {
+						errStr := "Interface: " + ifName + " is already part of VLAN: " + vlanStr
+						log.Error(errStr)
+						idx += 1
+						continue
+					}
+				}
 				err = d.CreateEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{vlanStr, ifName}}, ifEntry.entry)
 				if err != nil {
 					errStr := "Creating entry for VLAN member table with vlan : " + vlanStr + " If : " + ifName + " failed"
 					return errors.New(errStr)
 				}
 			case opUpdate:
+				if memberPortsExists {
+					if checkMemberPortExistsInList(memberPortsList, &ifName) {
+						errStr := "Interface: " + ifName + " is already part of VLAN: " + vlanStr
+						log.Error(errStr)
+						idx += 1
+						continue
+					}
+				}
 				err = d.SetEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{vlanStr, ifName}}, ifEntry.entry)
 				if err != nil {
 					errStr := "Set entry for VLAN member table with vlan : " + vlanStr + " If : " + ifName + " failed"
@@ -89,18 +118,16 @@ func (app *IntfApp) processUpdateVlanMemberTableMap(d *db.DB) error {
 			}
 
 			if idx != ifEntryLen {
-				memberPortsList.WriteString(ifName + ",")
+				memberPortsListStrB.WriteString(ifName + ",")
 			} else {
-				memberPortsList.WriteString(ifName)
+				memberPortsListStrB.WriteString(ifName)
 			}
 			idx = idx + 1
 		}
-		memberPortsEntryMap := make(map[string]string)
-		memberPortsEntry := db.Value{Field: memberPortsEntryMap}
-		memberPortsEntry.Field["members@"] = memberPortsList.String()
+		vlanEntry.Field["members@"] = memberPortsListStrB.String()
+
 		/* Updating VLAN map with updated members */
-		vlanStr := "Vlan" + strconv.Itoa(int(vlanId))
-		err = d.SetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanStr}}, memberPortsEntry)
+		err = d.SetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanStr}}, vlanEntry)
 		if err != nil {
 			return errors.New("Updating VLAN table with member ports failed")
 		}
@@ -142,8 +169,13 @@ func (app *IntfApp) processDeleteVlanIntf(d *db.DB) error {
 	for vlanKey, dbentry := range app.ifTableMap {
 		memberPortsVal, ok := dbentry.entry.Field["members@"]
 		if ok {
+			memberPorts := generateMemberPortsSliceFromString(&memberPortsVal)
+			/* Empty member ports */
+			if memberPorts == nil {
+				return nil
+			}
 			log.Info("MemberPorts = ", memberPortsVal)
-			memberPorts := strings.Split(memberPortsVal, ",")
+
 			for _, memberPort := range memberPorts {
 				log.Infof("Member Port:%s part of vlan:%s to be deleted!", memberPort, vlanKey)
 				err = d.DeleteEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{vlanKey, memberPort}})

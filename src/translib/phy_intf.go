@@ -90,10 +90,16 @@ func (app *IntfApp) translateCommonPhyIntfEthernet(d *db.DB, ifKey *string, intf
 	if switchedVlanIntf.Config == nil {
 		return err
 	}
+
 	log.Info("Entering Switched vlan interface Config")
+	if !app.validateIpExistsForInterface(d, ifKey) {
+		errStr := "Interface: " + *ifKey + ", IP address cannot exist with L2 modes"
+		err = tlerr.InvalidArgsError{Format: errStr}
+		return err
+	}
 
 	var accessVlanId uint16 = 0
-	var trunkVlanSlice []uint16
+	var trunkVlanSlice []string
 	accessVlanFound := false
 	trunkVlanFound := false
 
@@ -115,11 +121,11 @@ func (app *IntfApp) translateCommonPhyIntfEthernet(d *db.DB, ifKey *string, intf
 			switch vlanUnionType {
 
 			case reflect.TypeOf(ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_String{}):
-				//val := (vlanUnion).(*ocbinds.OpenconfigInterfaces_Interfaces_Interface_Aggregation_SwitchedVlan_Config_TrunkVlans_Union_String)
-				log.Info("Currently Ignoring the union of string!")
+				val := (vlanUnion).(*ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_String)
+				trunkVlanSlice = append(trunkVlanSlice, val.String)
 			case reflect.TypeOf(ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_Uint16{}):
 				val := (vlanUnion).(*ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_Uint16)
-				trunkVlanSlice = append(trunkVlanSlice, val.Uint16)
+				trunkVlanSlice = append(trunkVlanSlice, "Vlan" + strconv.Itoa(int(val.Uint16)))
 			}
 		}
 	}
@@ -145,14 +151,12 @@ func (app *IntfApp) translateCommonPhyIntfEthernet(d *db.DB, ifKey *string, intf
 			}
 			memberPortEntryMap := make(map[string]string)
 			memberPortEntry := db.Value{Field: memberPortEntryMap}
-			memberPortEntry.Field["name"] = vlanStr
-			memberPortEntry.Field["ifname"] = *ifKey
 			memberPortEntry.Field["tagging_mode"] = "untagged"
 
-			if app.vlanD.vlanMemberTableMap[accessVlanId] == nil {
-				app.vlanD.vlanMemberTableMap[accessVlanId] = make(map[string]dbEntry)
+			if app.vlanD.vlanMemberTableMap[vlanStr] == nil {
+				app.vlanD.vlanMemberTableMap[vlanStr] = make(map[string]dbEntry)
 			}
-			app.vlanD.vlanMemberTableMap[accessVlanId][*ifKey] = dbEntry{entry: memberPortEntry, op: opCreate}
+			app.vlanD.vlanMemberTableMap[vlanStr][*ifKey] = dbEntry{entry: memberPortEntry, op: opCreate}
 			log.Info("Untagged Port added to cache!")
 
 		} else {
@@ -162,14 +166,13 @@ func (app *IntfApp) translateCommonPhyIntfEthernet(d *db.DB, ifKey *string, intf
 		if trunkVlanFound {
 			memberPortEntryMap := make(map[string]string)
 			memberPortEntry := db.Value{Field: memberPortEntryMap}
-			memberPortEntry.Field["tagging_mode"] = "untagged"
+			memberPortEntry.Field["tagging_mode"] = "tagged"
 			for _, vlanId := range trunkVlanSlice {
 				if app.vlanD.vlanMemberTableMap[vlanId] == nil {
 					app.vlanD.vlanMemberTableMap[vlanId] = make(map[string]dbEntry)
-				} else {
-					app.vlanD.vlanMemberTableMap[vlanId][*ifKey] = dbEntry{entry: memberPortEntry, op: opUpdate}
-					log.Info("Tagged Port added to cache!")
 				}
+				app.vlanD.vlanMemberTableMap[vlanId][*ifKey] = dbEntry{entry: memberPortEntry, op: opUpdate}
+				log.Info("Tagged Port added to cache!")
 			}
 		}
 
@@ -318,7 +321,10 @@ func (app *IntfApp) updateAccessModeConfig(d *db.DB, ifName *string) error {
 			if memberFound {
 				memberPortsList = append(memberPortsList[:idx], memberPortsList[idx+1:]...)
 
-				memberPortsStr := generateMemberPortsStringFromSlice(memberPortsList)
+				memberPortsStr, err := generateMemberPortsStringFromSlice(memberPortsList)
+				if err != nil {
+					return err
+				}
 
 				vlanEntry.Field["members@"] = *memberPortsStr
 				d.SetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlan}}, vlanEntry)
@@ -354,6 +360,11 @@ func (app *IntfApp) processCommonPhyIntf(d *db.DB) error {
 	}
 
 	err = app.processUpdateIfIpTableMap(d)
+	if err != nil {
+		return err
+	}
+
+	err = app.processUpdateVlanMemberTableMap(d)
 	if err != nil {
 		return err
 	}

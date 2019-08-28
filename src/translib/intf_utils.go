@@ -31,7 +31,8 @@ func (app *IntfApp) getIntfTypeFromIntf(ifName *string) error {
 	return err
 }
 
-/* Validates whether the IP exists in the DB */
+/* Validates whether the specific IP exists in the DB for an Interface*/
+/* TODO: Change the name, it does updating DS as well */
 func (app *IntfApp) validateIp(dbCl *db.DB, ifName string, ip string) error {
 	app.allIpKeys, _ = app.doGetAllIpKeys(dbCl, app.intfD.intfIPTs)
 
@@ -61,6 +62,21 @@ func (app *IntfApp) validateIp(dbCl *db.DB, ifName string, ip string) error {
 		}
 	}
 	return errors.New(fmt.Sprintf("IP address : %s doesn't exist!", ip))
+}
+
+/* Validate whether the Interface has IP configuration */
+func (app *IntfApp) validateIpExistsForInterface(dbCl *db.DB, ifName *string) bool {
+	app.allIpKeys, _ = app.doGetAllIpKeys(dbCl, app.intfD.intfIPTs)
+
+	for _, key := range app.allIpKeys {
+		if len(key.Comp) < 2 {
+			continue
+		}
+		if key.Get(0) == *ifName {
+			return false
+		}
+	}
+	return true
 }
 
 /* Check for IP overlap */
@@ -156,7 +172,10 @@ func (app *IntfApp) validateInterface(dbCl *db.DB, ifName string, ifKey db.Key) 
 }
 
 /* Generate Member Ports string from Slice to update VLAN table in CONFIG DB */
-func generateMemberPortsStringFromSlice(memberPortsList []string) *string {
+func generateMemberPortsStringFromSlice(memberPortsList []string) (*string, error) {
+	if len(memberPortsList) == 0 {
+		return nil, nil
+	}
 	var memberPortsStr strings.Builder
 
 	for _, memberPort := range memberPortsList {
@@ -169,7 +188,16 @@ func generateMemberPortsStringFromSlice(memberPortsList []string) *string {
 		idx = idx + 1
 	}
 	memberPorts := memberPortsStr.String()
-	return &(memberPorts)
+	return &(memberPorts), nil
+}
+
+/* Generate list of member-ports from string */
+func generateMemberPortsSliceFromString(memberPortsStr *string) ([]string) {
+	if len(*memberPortsStr) == 0 {
+		return nil
+	}
+	memberPorts := strings.Split(*memberPortsStr, ",")
+	return memberPorts
 }
 
 /* Extract VLAN-Id from Vlan String */
@@ -180,6 +208,16 @@ func getVlanIdFromVlanName(vlanName *string) (string, error) {
 	id := strings.SplitAfter(*vlanName, "Vlan")
 	log.Info("Extracted VLAN-Id = ", id[1])
 	return id[1], nil
+}
+
+/* Validate whether member port exists in the member ports list */
+func checkMemberPortExistsInList(memberPortsList []string, memberPort *string) bool {
+	for _, port := range memberPortsList {
+		if *memberPort == port {
+			return true
+		}
+	}
+	return false
 }
 
 /* Validate IPv4 address */
