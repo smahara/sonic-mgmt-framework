@@ -21,8 +21,8 @@ class SfpUtil(SfpUtilBase):
     """Platform-specific SfpUtil class"""
 
     PORT_START = 1
-    PORT_END = 64
-    PORTS_IN_BLOCK = 64
+    PORT_END = 66
+    PORTS_IN_BLOCK = 66
 
     BASE_RES_PATH = "/sys/bus/pci/devices/0000:04:00.0/resource0"
     OIR_FD_PATH = "/sys/bus/pci/devices/0000:04:00.0/port_msi"
@@ -115,8 +115,8 @@ class SfpUtil(SfpUtilBase):
         # Mask off 4th bit for presence
         mask = (1 << 4)
 
-        # Mask off 1st bit for presence 33,34
-        if (port_num > 62):
+        # Mask off 1st bit for presence 65,66
+        if (port_num > 64):
             mask =  (1 << 0)
         # ModPrsL is active low
         if reg_value & mask == 0:
