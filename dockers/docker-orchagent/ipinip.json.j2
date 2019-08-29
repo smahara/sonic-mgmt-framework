@@ -14,6 +14,7 @@
     {%- endif %}
 {% endfor %}
 {% endif %}
+{% if INTERFACE %}
 {% for (name, prefix) in INTERFACE|pfx_filter %}
     {%- if prefix | ipv4 %}
         {%- set ipv4_addresses = ipv4_addresses.append(prefix) %}
@@ -22,6 +23,8 @@
         {%- set ipv6_addresses = ipv6_addresses.append(prefix) %}
     {%- endif %}
 {% endfor %}
+{% endif %}
+{% if PORTCHANNEL_INTERFACE %}
 {% for (name, prefix) in PORTCHANNEL_INTERFACE|pfx_filter %}
     {%- if prefix | ipv4 %}
         {%- set ipv4_addresses = ipv4_addresses.append(prefix) %}
@@ -30,6 +33,8 @@
         {%- set ipv6_addresses = ipv6_addresses.append(prefix) %}
     {%- endif %}
 {% endfor %}
+{% endif %}
+{% if VLAN_INTERFACE %}
 {% for (name, prefix) in VLAN_INTERFACE|pfx_filter %}
     {%- if prefix | ipv4 %}
         {%- set ipv4_addresses = ipv4_addresses.append(prefix) %}
@@ -38,6 +43,7 @@
         {%- set ipv6_addresses = ipv6_addresses.append(prefix) %}
     {%- endif %}
 {% endfor %}
+{% endif %}
 [
 {% if ipv4_loopback_addresses %}
     {
