@@ -38,10 +38,6 @@ import re
 import time
 from collections import namedtuple
 
-if (os.path.exists('/usr/local/bin/pddf_util.py')):
-    #print "Imported pddf_util########"
-    import pddf_util
-
 
 
 
@@ -89,21 +85,11 @@ def main():
             FORCE = 1
         else:
             logging.info('no option')                          
-    
-    global pddf_support
-    pddf_support = 0
-    if os.path.exists("/usr/share/sonic/platform"):
-        if os.path.exists("/usr/share/sonic/platform/pddf_support"):
-            pddf_support = 1
-            print "PDDF_SUPPORT is ON"
-        else:
-            print "PDDF_SUPPORT is OFF"
-
     for arg in args:            
         if arg == 'install':
-                do_install()
+           do_install()
         elif arg == 'clean':
-                do_uninstall()
+           do_uninstall()
         elif arg == 'show':
            device_traversal()
         elif arg == 'sff':
@@ -165,28 +151,6 @@ def driver_check():
     if len(lsmod) ==0:
         return False   
     return True
-
-pddf_kos = [ 'modprobe -f accton_pddf_fan_api' ]
-
-def pddf_driver_install():
-    global FORCE
-    for i in range(0,len(pddf_kos)):
-        status, output = log_os_system(pddf_kos[i], 1)
-        if status:
-            if FORCE == 0:
-                return status
-    return 0
-
-def pddf_driver_uninstall():
-    global FORCE
-    for i in range(0,len(pddf_kos)):
-        rm = pddf_kos[-(i+1)].replace("modprobe", "modprobe -rq")
-        rm = rm.replace("insmod", "rmmod")        
-        status, output = log_os_system(rm, 1)
-        if status:
-            if FORCE == 0:        
-                return status              
-    return 0
 
 
 
@@ -380,90 +344,43 @@ def system_ready():
                
 def do_install():
     print "Checking system...."
-    if pddf_support != 1:
-        if driver_check() == False:
-            print "No driver, installing...."    
-            status = driver_install()
-            if status:
-                if FORCE == 0:        
-                    return  status
-        else:
-            print PROJECT_NAME.upper()+" drivers detected...."                      
-            
-        if not device_exist():
-            print "No device, installing...."     
-            status = device_install() 
-            if status:
-                if FORCE == 0:        
-                    return  status        
-        else:
-            print PROJECT_NAME.upper()+" devices detected...."           
+    if driver_check() == False:
+        print "No driver, installing...."    
+        status = driver_install()
+        if status:
+            if FORCE == 0:        
+                return  status
     else:
-        # PDDF mode
-        if pddf_util.driver_check() == False:
-            print "No pddf driver, installing...."    
-            status = pddf_util.driver_install()
-            if status:
-                if FORCE == 0:        
-                    return  status
-            # Install Accton 7712's PDDF drivers
-            status = pddf_driver_install()
-            if status:
-                if FORCE == 0:
-                    return  status
-
-        else:
-            print PROJECT_NAME.upper()+" drivers detected...."
-  
-        print "No pddf device, installing...."     
-        status = pddf_util.device_install() 
+        print PROJECT_NAME.upper()+" drivers detected...."                      
+    if not device_exist():
+        print "No device, installing...."     
+        status = device_install() 
         if status:
             if FORCE == 0:        
                 return  status        
+    else:
+        print PROJECT_NAME.upper()+" devices detected...."           
     return
     
 def do_uninstall():
     print "Checking system...."
-    if pddf_support != 1:
-        if not device_exist():
-            print PROJECT_NAME.upper() +" has no device installed...."         
-        else:
-            print "Removing device...."     
-            status = device_uninstall() 
-            if status:
-                if FORCE == 0:            
-                    return  status  
-                    
-        if driver_check()== False :
-            print PROJECT_NAME.upper() +" has no driver installed...."
-        else:
-            print "Removing installed driver...."
-            status = driver_uninstall()
-            if status:
-                if FORCE == 0:        
-                    return  status                          
+    if not device_exist():
+        print PROJECT_NAME.upper() +" has no device installed...."         
     else:
-        # PDDF mode
-        print "Removing pddf device...."
-        status = pddf_util.device_uninstall()
+        print "Removing device...."     
+        status = device_uninstall() 
         if status:
-            if FORCE == 0:
-                return  status
-
-        if pddf_util.driver_check()== False :
-            print PROJECT_NAME.upper() +" has no driver installed...."
-        else:
-            # Remove the accton pddf drivers
-            status = pddf_driver_uninstall()
-            if status:
-                if FORCE == 0:
-                    return  status
-
-            print "Removing pddf installed driver...."
-            status = pddf_util.driver_uninstall()
-            if status:
-                if FORCE == 0:
-                    return  status
+            if FORCE == 0:            
+                return  status  
+                
+    if driver_check()== False :
+        print PROJECT_NAME.upper() +" has no driver installed...."
+    else:
+        print "Removing installed driver...."
+        status = driver_uninstall()
+        if status:
+            if FORCE == 0:        
+                return  status                          
                     
     return       
 

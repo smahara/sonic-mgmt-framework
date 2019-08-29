@@ -1,0 +1,63 @@
+#!/usr/bin/python
+
+#
+# Mainscript that parses a json file and runs individual to scripts
+# to scan for HW and ASIC errors from the system logs. 
+#
+
+import json
+import os
+import sys
+
+DIAG_JSON='/var/local/hwdiag/hwdiag-pi.json'
+SCRIPT = 'script'
+LOGFILE = 'logfile'
+DELIM_SPACE = 45
+
+logfiles = {}
+
+def printf(format, *args):
+    sys.stdout.write(format % args)
+    sys.stdout.flush()
+
+def print_result(res):
+	printf(" %s\n", res)
+
+def print_test(comp):
+	delim = DELIM_SPACE - len(comp)
+	printf("  %s",comp)
+	for i in range(0,delim):
+		printf("%c",".")
+
+with open(DIAG_JSON, 'r') as f:
+	modules = json.load(f)
+
+printf(" -------------------------------------------------------------\n")
+printf("      Broadcom SONiC Hardware Diagnoser\n")
+printf("\n")
+printf("      Note: This tool will probe and parse system components\n")
+printf("      log files and reports Switch Hardware Health.\n")
+printf(" -------------------------------------------------------------\n")
+printf("\n")
+
+for m in modules:
+	print " Diagnosing Module: " + m
+	for c in modules[m]:
+		#print "  Component: " + c
+		#print "  Script   :    " + modules[m][c][SCRIPT]
+		#print "  Logfile  :    " + modules[m][c][LOGFILE]
+		script = modules[m][c][SCRIPT]
+
+		if script == "None": continue
+
+		log = modules[m][c][LOGFILE]
+		logfiles[c] = log
+		print_test(c)
+		result = os.popen(script + " " + log).readlines()
+		print_result(result[0].strip('\n'))
+
+printf("\n")
+printf("Log files' paths:\n")
+for l in logfiles:
+    printf(" %16s : %s \n", l, logfiles[l])
+	

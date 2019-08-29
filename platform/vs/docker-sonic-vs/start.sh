@@ -47,6 +47,10 @@ supervisorctl start fdbsyncd
 
 supervisorctl start teamsyncd
 
+supervisorctl start vrrpsyncd
+
+supervisorctl start vrrpmgrd
+
 supervisorctl start fpmsyncd
 
 supervisorctl start teammgrd

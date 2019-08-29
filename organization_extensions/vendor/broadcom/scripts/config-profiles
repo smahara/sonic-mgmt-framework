@@ -1,0 +1,171 @@
+#!/bin/bash
+###########################################################################
+#Copyright 2019 Broadcom. All rights reserved. The term "Broadcom" refers #
+#to Broadcom Inc. and/or its subsidiaries.                                #
+###########################################################################
+# SONiC Configuration profiles management tool                            #
+#                                                                         #
+# This script is used to manage factory default configuration used        #
+# by SONiC SWSS.                                                          #
+#                                                                         #
+###########################################################################
+
+# Initialize constants
+CONFIG_PROFILES_PATH=/usr/share/broadcom_sonic/config_profiles
+STARTUP_CONFIG=/etc/sonic/config_db.json
+
+# Command usage and help
+usage()
+{
+cat << EOF
+ Usage:  config-profiles < check <profile-name> | factory [profile-name] |
+                           get factory | list | set factory <profile-name> >
+
+         check        - Verify if user provided configuration profile exists.
+         factory      - Load factory default config if factory default
+                        profile has changed or if startup config '${STARTUP_CONFIG}' 
+                        is not present.
+         get factory  - Display configuration profile currently marked as factory default.
+         list         - Display list of available configuration profiles.
+         set factory  - Set user provided configuration profile as factory default.
+         help | -h    - Display this text.
+EOF
+}
+
+check_config_profile()
+{
+     if [ ! -d ${CONFIG_PROFILES_PATH}/$1 ]; then
+        return 1
+     fi
+     return 0
+}
+
+factory_default_profile_set()
+{
+     if [ ! -d ${CONFIG_PROFILES_PATH}/$1 ]; then
+        return 1
+     else
+        echo $1 > ${CONFIG_PROFILES_PATH}/active
+     fi
+     return 0
+}
+
+factory_default_profile_get()
+{
+   if [ -e ${CONFIG_PROFILES_PATH}/active ]; then
+       cat ${CONFIG_PROFILES_PATH}/active
+       return 0
+   else
+       echo ""
+       return 1
+   fi
+}
+
+print_profiles_list()
+{
+   ACTIVE="$(factory_default_profile_get)"
+   printf "Factory Default: %s\n\n" ${ACTIVE}
+   printf "%-16s%-32s%s\n" Name Description
+   printf "%-16s%-32s%s\n" "-------------" "-----------------------"
+   for i in $(ls $CONFIG_PROFILES_PATH); do
+       if [ -d $CONFIG_PROFILES_PATH/$i ]; then
+            DESCR=""
+            [ -e ${CONFIG_PROFILES_PATH}/$i/description ] && \
+               DESCR="$(cat ${CONFIG_PROFILES_PATH}/$i/description)"
+            printf "%-16s%-32s\n" $i "$DESCR"
+       fi
+   done
+   return 0
+}
+
+load_factory_profile()
+{
+    PROFILE_NAME=$1
+    CURRENT_DEFAULT=$(factory_default_profile_get)
+    if [ "$PROFILE_NAME" != "" ]; then
+        if [ "$CURRENT_DEFAULT" = "${PROFILE_NAME}" ] && [ -e ${STARTUP_CONFIG} ]; then
+            echo "Startup configuration detected. Factory default configuration not applied."
+            return 2
+        fi
+        factory_default_profile_set $PROFILE_NAME
+        if [ $? -ne 0 ]; then
+            echo "Error! Configuration profile $VAL does not exist."
+            return 1
+        fi
+    else
+        if [ ! -e ${STARTUP_CONFIG} ]; then
+            PROFILE_NAME=${CURRENT_DEFAULT}
+        else
+            echo "Startup configuration detected. Factory default configuration not applied."
+            return 2
+        fi
+    fi
+
+    # Create factory default configuration
+    config-setup factory
+
+    # Load factory default configuration
+    config reload -y
+
+    return $?
+}
+
+### Execution starts here ###
+
+CMD=$1
+rv=0
+
+case "$CMD" in
+        get)
+            if [ "$2" = "factory" ]; then
+                factory_default_profile_get
+                rv=$?
+            else
+               echo "Error! Invalid input"
+               echo "Usage: config-profiles get factory"
+               rv=1
+            fi
+            ;;
+
+        set)
+            if [ "$2" != "factory" ] || [ "$3" = "" ]; then
+               echo "Error! Invalid input"
+               echo "Usage: config-profiles set factory <profile-name>"
+               rv=1
+            else
+               factory_default_profile_set $3
+               rv=$?
+            fi
+            ;;
+
+        list)
+            print_profiles_list
+            rv=$?
+            ;;
+
+        factory)
+            load_factory_profile $2
+            rv=$?
+            ;;
+
+        check)
+            if [ "$2" = "" ]; then
+                echo "Error! Invalid input"
+                echo "Usage: config-profiles check <profile-name>"
+                rv=1
+            else
+                check_config_profile $2
+                rv=$?
+            fi
+            ;;
+
+        help|-h|--help)
+            usage
+            ;;
+
+        *)
+            usage
+            rv=1
+esac
+
+exit $rv

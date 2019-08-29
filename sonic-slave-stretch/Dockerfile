@@ -266,7 +266,18 @@ RUN apt-get update && apt-get install -y \
 # For smartmontools 6.6-1
         automake1.11 \
         libselinux1-dev \
-		texi2html
+		texi2html \
+# For pkg-keepalive
+        libnl-3-dev \
+        libnl-genl-3-dev \
+        libpopt-dev \
+        libnl-nf-3-dev \
+        libnfnetlink-dev \
+        libipset-dev \
+# For iptables
+        libmnl-dev \
+        libnetfilter-conntrack-dev \
+        libnftnl-dev
 
 # For smartmontools 6.6-1
 RUN apt-get -t stretch-backports install -y debhelper

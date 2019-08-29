@@ -1,5 +1,14 @@
 #!/bin/bash
-test_log=/usr/local/bin/check_idt_status.txt
+
+pr_info()
+{
+  echo "idt_init: $1"
+}
+
+pr_err()
+{
+  echo "idt_init: ERR: $1"
+}
 
 modprobe i2c-i801
 modprobe i2c-dev
@@ -15,45 +24,40 @@ sleep 1
 
 BDID=$(printf "%d" $(i2cget -f -y 18 0x60 0))
 if [ ${BDID} -lt 15 ]; then
-    printf "Reset both MAC and PCI (write 0xD7)"
+    pr_info "Reset both MAC and PCI (write 0xD7)"
     i2cset -f -y 18 0x60 0x7 0xD7
     sleep 1
-    printf "Pull back MAC reset, keep PCIE reset (write 0xF7)"
+    pr_info "Pull back MAC reset, keep PCIE reset (write 0xF7)"
     i2cset -f -y 18 0x60 0x7 0xF7
     sleep 1
-    printf "Set to default normal state (write 0xFF)"
+    pr_info "Set to default normal state (write 0xFF)"
     i2cset -f -y 18 0x60 0x7 0xff
-    printf "remove PCI device"
+    pr_info "Remove PCI device"
     echo 1 > /sys/bus/pci/devices/0000:07:00.0/remove
-    printf "rescan PCI device"
-    echo 1 > /sys/bus/pci/rescan
-    sleep 1
-    lspci -n|grep 07:00.0 > /dev/null 2>&1
-    if [ $? -ne 0 ];then
-        echo "Broadcom Corporation Device is not detect"|tee -a $test_log
-        echo "rescan PCI again" | tee -a $test_log
+
+    for idx in $(seq 5)
+    do
+        pr_info "Rescan PCI device...${idx}"
         echo 1 > /sys/bus/pci/rescan
         sleep 1
-        lspci -n|grep 07:00.0 > /dev/null 2>&1
-        if [ $? -ne 0 ];then
-            echo "Broadcom Corporation Device NG" |tee -a $test_log
-            echo "rescan PCI again-2" |tee -a $test_log
-            echo 1 > /sys/bus/pci/rescan
-            sleep 1
-            lspci -n|grep 07:00.0 > /dev/null 2>&1
-            if [ $? -ne 0 ];then
-                echo "[ ERROR ] Broadcom Corporation Device Not detected"|tee -a $test_log
-            fi
+        lspci -n | grep 07:00.0 > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            pr_info "Broadcom device detected, exiting..."
+            break
         else
-            echo "Broadcom Corporation Device is detected" >> $test_log
-            printf "done mac_pci_reset_rescan"
+            pr_info "Broadcom device NOT FOUND, try again..."
         fi
+    done
+
+    lspci -n | grep 07:00.0 > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        pr_err "unable to reset PCI/TD3"
     fi
 fi
 
-i2cget -y 9 0x54 0 b > /dev/null
-if [ $? -ne 0 ];then
-    printf "Device 8v89307(0x54) not found\n"
+i2cget -y 9 0x54 0 b > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    pr_info "Device 8v89307(0x54) not found"
     exit 1
 fi
 echo "IDT 82V89307 "

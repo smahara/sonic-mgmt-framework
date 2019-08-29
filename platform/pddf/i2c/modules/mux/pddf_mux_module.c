@@ -108,7 +108,7 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 		if (client_ptr != NULL)
 		{
 			i2c_put_adapter(adapter);
-			pddf_dbg(KERN_ERR "Created %s client: 0x%x\n", device_ptr->i2c_name, client_ptr);
+			pddf_dbg(MUX, KERN_ERR "Created %s client: 0x%x\n", device_ptr->i2c_name, client_ptr);
 			add_device_table(device_ptr->i2c_name, (void*)client_ptr);
 		}
 		else 
@@ -123,7 +123,7 @@ static ssize_t do_device_operation(struct device *dev, struct device_attribute *
 		client_ptr = (struct i2c_client *)get_device_table(device_ptr->i2c_name);
 		if (client_ptr)
 		{
-			pddf_dbg(KERN_ERR "Removing %s client: 0x%x\n", device_ptr->i2c_name, client_ptr);
+			pddf_dbg(MUX, KERN_ERR "Removing %s client: 0x%x\n", device_ptr->i2c_name, client_ptr);
 			i2c_unregister_device(client_ptr);
 			/*TODO: Nullyfy the platform data*/
 			delete_device_table(device_ptr->i2c_name);
@@ -155,7 +155,7 @@ int __init mux_data_init(void)
 	int ret = 0;
 
 
-	pddf_dbg("MUX_DATA MODULE.. init\n");
+	pddf_dbg(MUX, "MUX_DATA MODULE.. init\n");
 
 	device_kobj = get_device_i2c_kobj();
 	if(!device_kobj) 
@@ -172,7 +172,7 @@ int __init mux_data_init(void)
         kobject_put(mux_kobj);
         return ret;
     }
-	pddf_dbg("CREATED PDDF I2C CLIENTS CREATION SYSFS GROUP\n");
+	pddf_dbg(MUX, "CREATED PDDF I2C CLIENTS CREATION SYSFS GROUP\n");
 
 	ret = sysfs_create_group(mux_kobj, &pddf_mux_client_data_group);
 	if (ret)
@@ -181,18 +181,18 @@ int __init mux_data_init(void)
         kobject_put(mux_kobj);
         return ret;
     }
-	pddf_dbg("CREATED MUX DATA SYSFS GROUP\n");
+	pddf_dbg(MUX, "CREATED MUX DATA SYSFS GROUP\n");
 
 	return ret;
 }
 
 void __exit mux_data_exit(void)
 {
-	pddf_dbg("MUX_DATA MODULE.. exit\n");
+	pddf_dbg(MUX, "MUX_DATA MODULE.. exit\n");
 	sysfs_remove_group(mux_kobj, &pddf_mux_client_data_group);
 	sysfs_remove_group(mux_kobj, &pddf_clients_data_group);
 	kobject_put(mux_kobj);
-	pddf_dbg(KERN_ERR "%s: Removed the kobjects for 'mux'\n",__FUNCTION__);
+	pddf_dbg(MUX, KERN_ERR "%s: Removed the kobjects for 'mux'\n",__FUNCTION__);
 	return;
 }
 

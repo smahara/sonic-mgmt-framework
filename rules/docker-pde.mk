@@ -32,6 +32,10 @@ $(DOCKER_PDE)_RUN_OPT += -v /etc/sonic:/etc/sonic:ro
 $(DOCKER_PDE)_RUN_OPT += -v /host/machine.conf:/host/machine.conf:ro
 $(DOCKER_PDE)_RUN_OPT += -v /usr/lib/python2.7/dist-packages:/usr/share/sonic/classes:ro
 $(DOCKER_PDE)_RUN_OPT += -v /var/log/syslog:/var/log/syslog:ro
+$(DOCKER_PDE)_RUN_OPT += -v /lib/modules:/lib/modules:ro
+$(DOCKER_PDE)_RUN_OPT += -v /boot:/boot:ro
 $(DOCKER_PDE)_BASE_IMAGE_FILES += pde-test-host:/usr/bin/pde-test-host
+$(DOCKER_PDE)_BASE_IMAGE_FILES += port_breakout.py:/usr/local/bin/port_breakout.py
+
 
 endif

@@ -160,3 +160,8 @@ led 1 prog \
  A1 28 67 56 80 28 67 56 80 28 67 56 80 28 67 56 \
  57 32 0F 87 32 0F 87 32 0F 87 32 0F 87 57 00 00
 led 1 start
+
+# Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI
+linkscan off
+rcload /usr/share/sonic/platform/preemphasis-72x10G.soc
+linkscan on

@@ -61,6 +61,9 @@ supervisorctl start neighsyncd
 echo "Start fdbsyncd"
 supervisorctl start fdbsyncd
 
+echo "Start vrrpsyncd"
+supervisorctl start vrrpsyncd
+
 echo "Start teamsyncd"
 supervisorctl start teamsyncd
 
@@ -72,6 +75,9 @@ supervisorctl start intfmgrd
 
 echo "Start vlanmgrd"
 supervisorctl start vlanmgrd
+
+echo "Start vrrpmgrd"
+supervisorctl start vrrpmgrd
 
 echo "Start zebra"
 supervisorctl start zebra

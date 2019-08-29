@@ -48,3 +48,7 @@ supervisorctl start xcvrd
 {% if not skip_psud %}
 supervisorctl start psud
 {% endif %}
+
+{% if not skip_fand %}
+supervisorctl start fand
+{% endif %}

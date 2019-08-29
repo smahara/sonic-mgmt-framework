@@ -41,6 +41,7 @@ struct psu_attr_info {
 struct psu_data {
 	struct device			*hwmon_dev;
 	u8						index;
+	int						num_psu_fans;
 	int						num_attr;
 	struct attribute		*psu_attribute_list[MAX_PSU_ATTRS];
 	struct attribute_group	psu_attribute_group;

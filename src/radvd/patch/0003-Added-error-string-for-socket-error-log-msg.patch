@@ -1,0 +1,25 @@
+From 2cb7b708a007d3eb102c5a552532ec52bb5a48f6 Mon Sep 17 00:00:00 2001
+From: Dilip Kumar <dilip.kumar@broadcom.com>
+Date: Tue, 20 Aug 2019 15:55:52 -0700
+Subject: [PATCH] Added error string for socket error log msg
+
+---
+ device-linux.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/device-linux.c b/device-linux.c
+index fc307d3..998bd04 100644
+--- a/device-linux.c
++++ b/device-linux.c
+@@ -177,7 +177,7 @@ int setup_allrouters_membership(int sock, struct Interface *iface)
+ 	if (setsockopt(sock, SOL_IPV6, IPV6_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
+ 		/* linux-2.6.12-bk4 returns error with HUP signal but keep listening */
+ 		if (errno != EADDRINUSE) {
+-			flog(LOG_ERR, "can't join ipv6-allrouters on %s", iface->props.name);
++			flog(LOG_ERR, "can't join ipv6-allrouters on %s %s", iface->props.name, strerror(errno));
+ 			return -1;
+ 		}
+ 	}
+-- 
+2.18.0
+

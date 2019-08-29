@@ -7,15 +7,15 @@ sys.path.append('/usr/share/sonic/platform/plugins')
 import pddfparse
 import argparse
 
-dirname=os.path.dirname(os.path.realpath(__file__))
-
-with open(dirname+'/../pddf/pd-plugin.json') as pd:
-    plugin_data = json.load(pd)
-
-
 class ThermalUtil:
 	def __init__(self):
-		self.platform = pddfparse.get_platform()
+                global pddf_obj
+                global plugin_data
+                with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../pddf/pd-plugin.json')) as pd:
+                    plugin_data = json.load(pd)
+
+                pddf_obj = pddfparse.PddfParse()
+		self.platform = pddf_obj.get_platform()
 		self.num_thermals = self.platform['num_temps'] 
 		self.info=[]
 
@@ -24,7 +24,7 @@ class ThermalUtil:
 
 	def get_thermal_info(self):
 		list=[]
-		pddfparse.get_device_list(list, "TEMP_SENSOR")
+		pddf_obj.get_device_list(list, "TEMP_SENSOR")
 		list.sort()
 		for dev in list:
 			data={}
@@ -36,7 +36,7 @@ class ThermalUtil:
 			data['label']=label
 			for attr in attr_list:
 				attr_name = attr['attr_name']
-				node = pddfparse.get_path(device_name, attr_name)
+				node = pddf_obj.get_path(device_name, attr_name)
         			try:
             				with open(node, 'r') as f:
                 				attr_value = int(f.read())
@@ -67,6 +67,10 @@ class ThermalUtil:
 		for temp in self.info:
 			print temp['label']
 			print "temp1\t %+.1f C (high = %+.1f C, hyst = %+.1f C)" % (temp['temp1_input'], temp['temp1_max'], temp['temp1_max_hyst'])
+
+
+        def dump_sysfs(self):
+            return pddf_obj.cli_dump_dsysfs('temp-sensors')
 
 
 		

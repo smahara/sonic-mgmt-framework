@@ -42,13 +42,13 @@ int sonic_i2c_get_mod_pres(struct i2c_client *client, XCVR_ATTR *info, struct xc
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
 		/*sfp_dbg(KERN_ERR "%s: status 0x%x\n", __FUNCTION__, status);*/
 
-		if (status > 0)
+		if (status < 0)
+			return status;
+		else
 		{
 			modpres = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nMod presence :0x%x, reg_value = 0x%x\n", modpres, status);
+			sfp_dbg(KERN_INFO "\nMod presence :0x%x, reg_value = 0x%x, devaddr=0x%x, mask=0x%x, offset=0x%x\n", modpres, status, info->devaddr, info->mask, info->offset);
 		}
-		else
-			return status;
 	}
 	else if(strcmp(info->devtype, "eeprom") == 0)
 	{
@@ -67,13 +67,13 @@ int sonic_i2c_get_mod_reset(struct i2c_client *client, XCVR_ATTR *info, struct x
 	if (strcmp(info->devtype, "cpld") == 0)
 	{
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
-		if (status > 0) 
+		if (status < 0)
+			return status;
+		else
 		{
 			modreset = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nMod Reset :0x%x, reg_value = 0x%x\n", modreset, status);
+			sfp_dbg(KERN_INFO "\nMod Reset :0x%x, reg_value = 0x%x\n", modreset, status);
 		}
-		else
-			return status;
 	} 
 	else if(strcmp(info->devtype, "eeprom") == 0)
 	{
@@ -93,13 +93,13 @@ int sonic_i2c_get_mod_intr_status(struct i2c_client *client, XCVR_ATTR *info, st
 	if (strcmp(info->devtype, "cpld") == 0)
 	{
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
-		if (status > 0)
+		if (status < 0)
+			return status;
+		else
 		{
 			mod_intr = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nModule Interrupt :0x%x, reg_value = 0x%x\n", mod_intr, status);
+			sfp_dbg(KERN_INFO "\nModule Interrupt :0x%x, reg_value = 0x%x\n", mod_intr, status);
 		}
-		else
-			return status;
 	} 
 	else if(strcmp(info->devtype, "eeprom") == 0)
 	{
@@ -119,13 +119,13 @@ int sonic_i2c_get_mod_lpmode(struct i2c_client *client, XCVR_ATTR *info, struct 
 	if (strcmp(info->devtype, "cpld") == 0)
 	{
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
-		if (status > 0)
+		if (status < 0)
+			return status;
+		else
 		{
 			lpmode = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nModule LPmode :0x%x, reg_value = 0x%x\n", lpmode, status);
+			sfp_dbg(KERN_INFO "\nModule LPmode :0x%x, reg_value = 0x%x\n", lpmode, status);
 		}
-		else
-			return status;
 	}
 	
 	data->lpmode = lpmode;
@@ -141,13 +141,13 @@ int sonic_i2c_get_mod_rxlos(struct i2c_client *client, XCVR_ATTR *info, struct x
 	if (strcmp(info->devtype, "cpld") == 0)
 	{
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
-		if (status > 0)
+		if (status < 0)
+			return status;
+		else
 		{
 			rxlos = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nModule RxLOS :0x%x, reg_value = 0x%x\n", rxlos, status);
+			sfp_dbg(KERN_INFO "\nModule RxLOS :0x%x, reg_value = 0x%x\n", rxlos, status);
 		}
-		else
-			return status;
 	} 
 	data->rxlos = rxlos;
 
@@ -162,13 +162,13 @@ int sonic_i2c_get_mod_txdisable(struct i2c_client *client, XCVR_ATTR *info, stru
 	if (strcmp(info->devtype, "cpld") == 0)
 	{
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
-		if (status > 0)
+		if (status < 0)
+			return status;
+		else
 		{
 			txdis = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nModule TxDisable :0x%x, reg_value = 0x%x\n", txdis, status);
+			sfp_dbg(KERN_INFO "\nModule TxDisable :0x%x, reg_value = 0x%x\n", txdis, status);
 		}
-		else
-			return status;
 	}
 	data->txdisable = txdis;
 
@@ -183,13 +183,13 @@ int sonic_i2c_get_mod_txfault(struct i2c_client *client, XCVR_ATTR *info, struct
 	if (strcmp(info->devtype, "cpld") == 0)
 	{
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
-		if (status > 0)
+		if (status < 0)
+			return status;
+		else
 		{
 			txflt = ((status & BIT_INDEX(info->mask)) == info->cmpval) ? 1 : 0;
-			sfp_dbg(KERN_ERR "\nModule TxFault :0x%x, reg_value = 0x%x\n", txflt, status);
+			sfp_dbg(KERN_INFO "\nModule TxFault :0x%x, reg_value = 0x%x\n", txflt, status);
 		}
-		else
-			return status;
 
 	} 
 	data->txfault = txflt;
@@ -219,7 +219,9 @@ int sonic_i2c_set_mod_reset(struct i2c_client *client, XCVR_ATTR *info, struct x
 		}
 
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
-		if (status > 0)
+		if (status < 0)
+			return status;
+		else
 		{
 			reg = status & val_mask;
 			status = board_i2c_cpld_write(info->devaddr, info->offset, reg);
@@ -251,7 +253,9 @@ int sonic_i2c_set_mod_lpmode(struct i2c_client *client, XCVR_ATTR *info, struct 
 		}
 
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
-		if (status > 0)
+		if (status < 0)
+			return status;
+		else
 		{
 			reg = status & val_mask;
 			status = board_i2c_cpld_write(info->devaddr, info->offset, reg);
@@ -283,7 +287,9 @@ int sonic_i2c_set_mod_txdisable(struct i2c_client *client, XCVR_ATTR *info, stru
 		}
 
 		status = board_i2c_cpld_read(info->devaddr , info->offset);
-		if (status > 0)
+		if (status < 0)
+			return status;
+		else
 		{
 			reg = status & val_mask;
 			status = board_i2c_cpld_write(info->devaddr, info->offset, reg);
@@ -307,8 +313,8 @@ ssize_t get_module_presence(struct device *dev, struct device_attribute *da,
 	for (i=0; i<pdata->len; i++)
     {
 		attr_data = &pdata->xcvr_attrs[i];
-		/*printk(KERN_ERR "\n attr_data->aname: %s, attr->dev_attr.attr.name:%s, attr_data->devtype:%s\n", */
-		/*attr_data->aname, attr->dev_attr.attr.name, attr_data->devtype);*/
+		/*printk(KERN_ERR "\n attr_data->devaddr: 0x%x, attr_data->mask:0x%x, attr_data->offset:0x%x\n", */
+		/*attr_data->devaddr, attr_data->mask, attr_data->offset);*/
 		if (strcmp(attr_data->aname, attr->dev_attr.attr.name) == 0)
 		{
 			attr_ops = &xcvr_ops[attr->index];

@@ -299,7 +299,7 @@ exit_free:
         struct sensor_device_attribute *ptr = (struct sensor_device_attribute *)data->fan_attribute_list[i];
         kfree(ptr);
     }
-    pddf_dbg(KERN_ERR "%s: Freed all the memory allocated for attributes\n", __FUNCTION__);
+    pddf_dbg(FAN, KERN_ERR "%s: Freed all the memory allocated for attributes\n", __FUNCTION__);
     kfree(data);
 exit:
     return status;
@@ -327,7 +327,7 @@ static int pddf_fan_remove(struct i2c_client *client)
         ptr = (struct sensor_device_attribute *)data->fan_attribute_list[i];
         kfree(ptr);
     }
-    pddf_dbg(KERN_ERR "%s: Freed all the memory allocated for attributes\n", __FUNCTION__);
+    pddf_dbg(FAN, KERN_ERR "%s: Freed all the memory allocated for attributes\n", __FUNCTION__);
     kfree(data);
 
 	if (platdata_sub) {

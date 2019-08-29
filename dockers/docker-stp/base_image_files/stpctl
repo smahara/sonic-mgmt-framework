@@ -1,9 +1,5 @@
 #!/bin/bash
 
-DOCKER_EXEC_FLAGS="i"
-# Determine whether stdout is on a terminal
-if [ -t 1 ] ; then
-    DOCKER_EXEC_FLAGS+="t"
-fi
+# -t option needed only for shell, not for commands
 
-docker exec -$DOCKER_EXEC_FLAGS stp stpctl "$@"
+docker exec -i stp stpctl "$@"

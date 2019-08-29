@@ -146,6 +146,7 @@ static int psu_probe(struct i2c_client *client,
 	psu_platform_data = (PSU_PDATA *)(client->dev.platform_data);
 	num = psu_platform_data->len;
 	data->index = psu_platform_data->idx - 1;
+	data->num_psu_fans = psu_platform_data->num_psu_fans;
 	data->num_attr = num;
 
 
@@ -232,7 +233,7 @@ exit_free:
 		struct sensor_device_attribute *ptr = (struct sensor_device_attribute *)data->psu_attribute_list[i];
 		kfree(ptr);
 		data->psu_attribute_list[i] = NULL;
-		pddf_dbg(KERN_ERR "%s: Freed all the memory allocated for attributes\n", __FUNCTION__);
+		pddf_dbg(PSU, KERN_ERR "%s: Freed all the memory allocated for attributes\n", __FUNCTION__);
 	}
     kfree(data);
 exit:
@@ -263,7 +264,7 @@ static int psu_remove(struct i2c_client *client)
 		data->psu_attribute_list[i] = NULL;
 		/*pddf_dbg(KERN_ERR "PSU%d: Freed %d: 0x%x\n", data->index+1, i, ptr);*/
 	}
-    pddf_dbg(KERN_ERR "%s: Freed all the memory allocated for attributes\n", __FUNCTION__);
+    pddf_dbg(PSU, KERN_ERR "%s: Freed all the memory allocated for attributes\n", __FUNCTION__);
     kfree(data);
 	if (platdata_sub) {
 		printk(KERN_DEBUG "%s: Freeing platform subdata\n", __FUNCTION__);
@@ -311,7 +312,7 @@ static struct i2c_driver psu_driver = {
 
 int example_fun(void)
 {
-	pddf_dbg(KERN_ERR "CALLING FUN...\n");
+	pddf_dbg(PSU, KERN_ERR "CALLING FUN...\n");
 	return 0;
 }
 EXPORT_SYMBOL(example_fun);
@@ -329,7 +330,7 @@ int psu_init(void)
             return status;
     }
 
-	pddf_dbg(KERN_ERR "GENERIC_PSU_DRIVER.. init Invoked..\n");
+	pddf_dbg(PSU, KERN_ERR "GENERIC_PSU_DRIVER.. init Invoked..\n");
     status = i2c_add_driver(&psu_driver);
     if (status!=0)
         return status;
@@ -347,7 +348,7 @@ EXPORT_SYMBOL(psu_init);
 
 void __exit psu_exit(void)
 {
-	pddf_dbg("GENERIC_PSU_DRIVER.. exit\n");
+	pddf_dbg(PSU, "GENERIC_PSU_DRIVER.. exit\n");
 	if (pddf_psu_ops.pre_exit) (pddf_psu_ops.pre_exit)();
     i2c_del_driver(&psu_driver);
 	if (pddf_psu_ops.post_exit) (pddf_psu_ops.post_exit)();
