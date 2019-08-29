@@ -13,6 +13,10 @@ RUN echo "deb http://packages.microsoft.com/repos/sonic-dev/ jessie main" >> /et
 RUN apt-get update
 
 RUN apt-get install -y net-tools \
+                       gcc \
+                       g++ \
+                       make \
+                       libffi-dev \
                        arping \
                        ndisc6 \
                        ethtool \
@@ -48,6 +52,7 @@ RUN apt-get install -y net-tools \
                        psmisc \
                        tcpdump \
                        python-scapy \
+                       python-dev \
 		       sudo
 
 RUN pip install setuptools
@@ -55,6 +60,7 @@ RUN pip install py2_ipaddress
 RUN pip install six
 RUN pip install pyroute2==0.5.3 netifaces==0.10.7
 RUN pip install monotonic==1.5
+RUN pip install pycrypto
 
 {% if docker_sonic_vs_debs.strip() -%}
 # Copy locally-built Debian package dependencies
@@ -81,6 +87,7 @@ RUN dpkg_apt() { [ -f $1 ] && { dpkg -i $1 || apt-get -y install -f; } || return
 {%- endif %}
 
 # Clean up
+RUN apt-get remove -y gcc g++ make libffi-dev
 RUN apt-get clean -y
 RUN apt-get autoclean -y
 RUN apt-get autoremove -y

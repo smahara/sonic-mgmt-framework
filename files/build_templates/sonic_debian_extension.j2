@@ -69,6 +69,10 @@ sudo mkdir -p $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/ifupdown2_*.deb || \
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
 
+# Install a more recent version of ipables  (and its dependencies via 'apt-get -y install -f')
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/iptables_*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
 # Install a more recent version of ntp  (and its dependencies via 'apt-get -y install -f')
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/ntp_*.deb || \
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
@@ -163,6 +167,33 @@ sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libnss-tacplus_*.deb || \
 sudo LANG=C chroot $FILESYSTEM_ROOT pam-auth-update --remove tacplus
 sudo sed -i -e '/^passwd/s/ tacplus//' $FILESYSTEM_ROOT/etc/nsswitch.conf
 
+#Install the HWDIAG package
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/hwdiag*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+
+#system monitor service files
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libswsscommon*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libhiredis0*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/python-swsscommon*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libnl*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
+
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install \
+			pkg-config libdbus-1-dev libglib2.0-dev libcairo2-dev libgirepository1.0-dev
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT  apt-mark manual \
+			libgirepository1.0-dev libgirepository-1.0-1
+sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install PyGObject dbus-python ahab
+
+
+
 # Copy crontabs
 sudo cp -f $IMAGE_CONFIGS/cron.d/* $FILESYSTEM_ROOT/etc/cron.d/
 
@@ -183,12 +214,20 @@ sudo LANG=C cp $SCRIPTS_DIR/export/export.py  $FILESYSTEM_ROOT/usr/local/bin/exp
 sudo LANG=C cp $IMAGE_CONFIGS/export/export.service $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable export.service
 
+
+# Copy the system monitor service
+sudo LANG=C cp $SCRIPTS_DIR/system/sysmonitor.py  $FILESYSTEM_ROOT/usr/local/bin/sysmonitor.py
+sudo LANG=C cp $IMAGE_CONFIGS/systemd/sysmonitor.service $FILESYSTEM_ROOT/etc/systemd/system/
+sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable sysmonitor.service
+
+
 # Copy rsyslog configuration files and templates
 sudo cp $IMAGE_CONFIGS/rsyslog/rsyslog-config.service  $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable rsyslog-config.service
 sudo cp $IMAGE_CONFIGS/rsyslog/rsyslog-config.sh $FILESYSTEM_ROOT/usr/bin/
 sudo cp $IMAGE_CONFIGS/rsyslog/rsyslog.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 sudo cp $IMAGE_CONFIGS/rsyslog/rsyslog.d/* $FILESYSTEM_ROOT/etc/rsyslog.d/
+sudo chmod 666 $FILESYSTEM_ROOT/etc/rsyslog.d/01-sonic-broadcom.conf
 
 # Copy logrotate.d configuration files
 sudo cp -f $IMAGE_CONFIGS/logrotate/logrotate.d/* $FILESYSTEM_ROOT/etc/logrotate.d/
@@ -204,7 +243,13 @@ sudo cp $IMAGE_CONFIGS/interfaces/*.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATE
 sudo cp files/dhcp/dhclient.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 
 # Copy initial interfaces configuration file, will be overwritten on first boot
+{% if enable_pde == "y" %}
+sudo cp $IMAGE_CONFIGS/interfaces/init_pde_interfaces $FILESYSTEM_ROOT/etc/network/interfaces
+{% else %}
 sudo cp $IMAGE_CONFIGS/interfaces/init_interfaces $FILESYSTEM_ROOT/etc/network/interfaces
+{% endif %}
+
+
 sudo mkdir -p $FILESYSTEM_ROOT/etc/network/interfaces.d
 
 # Copy hostcfgd files

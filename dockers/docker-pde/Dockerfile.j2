@@ -7,7 +7,7 @@ RUN [ -f /etc/rsyslog.conf ] && sed -ri "s/%syslogtag%/$docker_container_name#%s
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Update apt's cache of available packages
-RUN apt-get update && apt-get install -y ipmitool telnet busybox
+RUN apt-get update && apt-get install -y ipmitool telnet busybox kmod
 
 RUN pip install pytest pexpect
 
@@ -65,5 +65,4 @@ RUN mkdir -p /home/pde
 
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 COPY ["pde_init.sh", "/usr/bin/"]
-
 ENTRYPOINT ["/usr/bin/pde_init.sh"]

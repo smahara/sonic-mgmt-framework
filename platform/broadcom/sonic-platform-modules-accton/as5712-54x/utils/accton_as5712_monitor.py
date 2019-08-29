@@ -20,6 +20,7 @@
 #    mm/dd/yyyy (A.D.)
 #    11/13/2017: Polly Hsu, Create
 #    05/08/2019: Roy Lee, changed for as5712-54x.
+#....08/14/2019: Geans Pin
 # ------------------------------------------------------------------
 
 try:
@@ -48,32 +49,40 @@ DUTY_MAX = 100
 global log_file
 global log_level
 
+fan_state=[2, 2, 2, 2, 2, 2, 2]  #init state=2, insert=1, remove=0
+
+
 # Make a class we can use to capture stdout and sterr in the log
 class accton_as5712_monitor(object):
     # static temp var
     _ori_temp = 0
     _new_perc = 0
+    syslog = logging.getLogger("["+FUNCTION_NAME+"]")
 
-    def __init__(self, log_file, log_level):
-        """Needs a logger and a logger level."""
-        # set up logging to file
-        logging.basicConfig(
-            filename=log_file,
-            filemode='w',
-            level=log_level,
-            format= '[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
-            datefmt='%H:%M:%S'
-        )
+ 
+    def __init__(self, log_console, log_file, log_level=logging.INFO):
+        formatter = logging.Formatter('%(name)s %(message)s')
+        sys_handler  = logging.handlers.SysLogHandler(address = '/dev/log')
+        sys_handler.setFormatter(formatter)
+        sys_handler.ident = 'common'
+        self.syslog.setLevel(logging.WARNING)
+        self.syslog.addHandler(sys_handler)
+        #self.syslog.critical('foo syslog message')
+    
+        if log_file:
+           fh = logging.FileHandler(log_file)
+           fh.setLevel(logging.DEBUG)
+           formatter = logging.Formatter('%(asctime)-15s %(name)s %(message)s')
+           fh.setFormatter(formatter)
+           self.syslog.addHandler(fh)
+    
+        if log_console:
+           console = logging.StreamHandler()
+           console.setLevel(log_level)
+           formatter = logging.Formatter('%(asctime)-15s %(name)s %(message)s')
+           console.setFormatter(formatter)
+           self.syslog.addHandler(console)
 
-        # set up logging to console
-        if log_level == logging.DEBUG:
-            console = logging.StreamHandler()
-            console.setLevel(log_level)
-            formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-            console.setFormatter(formatter)
-            logging.getLogger('').addHandler(console)
-
-        logging.debug('SET. logfile:%s / loglevel:%d', log_file, log_level)
 
     def manage_fans(self):
         FAN_LEV1_UP_TEMP = 57700  # temperature
@@ -92,6 +101,10 @@ class accton_as5712_monitor(object):
         FAN_LEV4_DOWN_TEMP = 42700
         FAN_LEV4_SPEED_PERC = 40
 
+        global fan_state
+        FAN_STATE_REMOVE = 0
+        FAN_STATE_INSERT = 1
+
 
         thermal = ThermalUtil()
         fan = FanUtil()
@@ -107,27 +120,43 @@ class accton_as5712_monitor(object):
         new_temp = (temp1 + temp2) / 2
 
         for x in range(fan.get_idx_fan_start(), fan.get_num_fans()+1):
+
+            if fan.get_fan_speed(x) > 0:
+               fan_present = 1
+            else:
+               fan_present = 0
+
+            if fan_present == 1:
+               if fan_state[x]!=1:
+                  fan_state[x]=FAN_STATE_INSERT
+                  self.syslog.warning("FAN-%d present is detected", x)
+            else:
+               if fan_state[x]!=0:
+                  fan_state[x]=FAN_STATE_REMOVE
+                  self.syslog.warning("Alarm for FAN-%d absent is detected", x)
+
+        for x in range(fan.get_idx_fan_start(), fan.get_num_fans()+1):
             fan_stat = fan.get_fan_status(x)
-            if fan_stat is None:
-                return False
+
             if fan_stat is False:
-                self._new_perc = FAN_LEV1_SPEED_PERC
-                logging.debug('INFO. SET new_perc to %d (FAN fault. fan_num:%d)', self._new_perc, x)
-                break
-            logging.debug('INFO. fan_stat is True (fan_num:%d)', x)
+               self._new_perc = FAN_LEV1_SPEED_PERC
+               self.syslog.warning('SET new_perc to %d (FAN fault. fan_num:%d)', self._new_perc, x)
+               break;
+
+            self.syslog.info('fan_stat is True (fan_num:%d)', x)
 
         if fan_stat is not None and fan_stat is not False:
             diff = new_temp - self._ori_temp
             if diff  == 0:
-                logging.debug('INFO. RETURN. THERMAL temp not changed. %d / %d (new_temp / ori_temp)', new_temp, self._ori_temp)
+                self.syslog.info('RETURN. THERMAL temp not changed. %d / %d (new_temp / ori_temp)', new_temp, self._ori_temp)
                 return True
             else:
                 if diff >= 0:
                     is_up = True
-                    logging.debug('INFO. THERMAL temp UP %d / %d (new_temp / ori_temp)', new_temp, self._ori_temp)
+                    self.syslog.info(' THERMAL temp UP %d / %d (new_temp / ori_temp)', new_temp, self._ori_temp)
                 else:
                     is_up = False
-                    logging.debug('INFO. THERMAL temp DOWN %d / %d (new_temp / ori_temp)', new_temp, self._ori_temp)
+                    self.syslog.info(' THERMAL temp DOWN %d / %d (new_temp / ori_temp)', new_temp, self._ori_temp)
 
             if is_up is True:
                 if new_temp  >= FAN_LEV1_UP_TEMP:
@@ -138,7 +167,7 @@ class accton_as5712_monitor(object):
                     self._new_perc = FAN_LEV3_SPEED_PERC
                 else:
                     self._new_perc = FAN_LEV4_SPEED_PERC
-                logging.debug('INFO. SET. FAN_SPEED as %d (new THERMAL temp:%d)', self._new_perc, new_temp)
+                self.syslog.info(' SET. FAN_SPEED as %d (new THERMAL temp:%d)', self._new_perc, new_temp)
             else:
                 if new_temp <= FAN_LEV4_DOWN_TEMP:
                     self._new_perc = FAN_LEV4_SPEED_PERC
@@ -148,52 +177,54 @@ class accton_as5712_monitor(object):
                     self._new_perc = FAN_LEV2_SPEED_PERC
                 else:
                     self._new_perc = FAN_LEV1_SPEED_PERC
-                logging.debug('INFO. SET. FAN_SPEED as %d (new THERMAL temp:%d)', self._new_perc, new_temp)
+                self.syslog.info(' SET. FAN_SPEED as %d (new THERMAL temp:%d)', self._new_perc, new_temp)
 
         cur_perc = fan.get_fan_duty_cycle(fan.get_idx_fan_start())
         if cur_perc == self._new_perc:
-            logging.debug('INFO. RETURN. FAN speed not changed. %d / %d (new_perc / ori_perc)', self._new_perc, cur_perc)
+            self.syslog.info(' RETURN. FAN speed not changed. %d / %d (new_perc / ori_perc)', self._new_perc, cur_perc)
             return True
 
         set_stat = fan.set_fan_duty_cycle(fan.get_idx_fan_start(), self._new_perc)
         if set_stat is True:
-            logging.debug('INFO: PASS. set_fan_duty_cycle (%d)', self._new_perc)
+            self.syslog.info(' PASS. set_fan_duty_cycle (%d)', self._new_perc)
         else:
-            logging.debug('INFO: FAIL. set_fan_duty_cycle (%d)', self._new_perc)
+            self.syslog.info(' FAIL. set_fan_duty_cycle (%d)', self._new_perc)
 
-        logging.debug('INFO: GET. ori_perc is %d. ori_temp is %d', cur_perc, self._ori_temp)
+        self.syslog.info(' GET. ori_perc is %d. ori_temp is %d', cur_perc, self._ori_temp)
         self._ori_temp = new_temp
-        logging.debug('INFO: UPDATE. ori_perc to %d. ori_temp to %d', cur_perc, self._ori_temp)
+        self.syslog.info(' UPDATE. ori_perc to %d. ori_temp to %d', cur_perc, self._ori_temp)
 
         return True
 
-def handler(signum, frame):
+def sig_handler(signum, frame):
         fan = FanUtil()
-        logging.debug('INFO:Cause signal %d, set fan speed max.', signum)
+        self.syslog.critical('Cause signal %d, set fan speed max.', signum)
         fan.set_fan_duty_cycle(fan.get_idx_fan_start(), DUTY_MAX)
         sys.exit(0)
 
-def main(argv):
-    log_file = '%s.log' % FUNCTION_NAME
+def main(argv): 
     log_level = logging.INFO
+    log_console = 0
+    log_file = ""
+
     if len(sys.argv) != 1:
         try:
-            opts, args = getopt.getopt(argv,'hdl:',['lfile='])
+            opts, args = getopt.getopt(argv,'hdl')
         except getopt.GetoptError:
-            print 'Usage: %s [-d] [-l <log_file>]' % sys.argv[0]
+            print 'Usage: %s [-d]' % sys.argv[0]
             return 0
         for opt, arg in opts:
             if opt == '-h':
-                print 'Usage: %s [-d] [-l <log_file>]' % sys.argv[0]
+                print 'Usage: %s [-d] [-l]' % sys.argv[0]
                 return 0
-            elif opt in ('-d', '--debug'):
-                log_level = logging.DEBUG
-            elif opt in ('-l', '--lfile'):
-                log_file = arg
+            elif opt in ('-d'):
+                log_console = 1 
+            elif opt in ('-l'):
+                log_file = '%s.log' % sys.argv[0]
 
-    signal.signal(signal.SIGINT, handler)
-    signal.signal(signal.SIGTERM, handler)
-    monitor = accton_as5712_monitor(log_file, log_level)
+    signal.signal(signal.SIGINT, sig_handler)
+    signal.signal(signal.SIGTERM, sig_handler)
+    monitor = accton_as5712_monitor(log_console, log_file)
 
     # Loop forever, doing something useful hopefully:
     while True:

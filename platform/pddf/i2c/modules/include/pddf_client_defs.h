@@ -14,10 +14,18 @@
 #include <linux/platform_data/pca953x.h>
 #include <linux/i2c/pca954x.h>
 
+#define PSU "PDDF_PSU"
+#define LED "PDDF_LED"
+#define FAN "PDDF_FAN"
+#define CLIENT "PDDF_CLIENT"
+#define CPLD "PDDF_CPLD"
+#define MUX "PDDF_MUX"
+#define SYSSTATUS "PDDF_SYSSTATUS"
+#define XCVR "PDDF_XCVR"
 
-/*#define PDDF_DEBUG*/
+#define PDDF_DEBUG
 #ifdef PDDF_DEBUG
-#define pddf_dbg(...) printk(__VA_ARGS__)
+#define pddf_dbg(filter,...) printk("%s\t", filter); printk(KERN_CONT __VA_ARGS__)
 #else
 #define pddf_dbg(...) 
 #endif

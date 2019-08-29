@@ -5,6 +5,11 @@ if [ $? -ne 0 ];then
     sed -i '/modprobe[ \t]* linux-kernel-bde/  s/$/ usemsi=1/' /etc/init.d/opennsl-modules
 fi
 
+pr_info()
+{
+  echo "platform_init: $1"
+}
+
 #10G Merlin SFP+ Ports
 #==================================
 
@@ -15,9 +20,9 @@ modprobe i2c-dev
 i2cset -y 0 0x77 0x0 0x1
 i2cset -y 0 0x70 0x0 0x0
 i2cset -y 0 0x71 0x0 0x20
-i2cget -y 0 0x58 0 b > /dev/null
+i2cget -y 0 0x58 0 b > /dev/null 2>&1
 if [ $? -ne 0 ];then
-    echo "Device DS100(0x58) not found"
+    pr_info "Device DS100(0x58) not found"
     i2cdetect -y 0
     exit 1
 fi

@@ -13,11 +13,6 @@ try:
 except ImportError, e:
     raise ImportError (str(e) + "- required module not found")
 
-dirname=os.path.dirname(os.path.realpath(__file__))
-
-with open(dirname+'/../pddf/pd-plugin.json') as pd:
-    plugin_data = json.load(pd)
-
 class SfpUtil(SfpUtilBase):
     """Platform generic PDDF SfpUtil class"""
 
@@ -30,15 +25,21 @@ class SfpUtil(SfpUtilBase):
 
     def __init__(self):
         SfpUtilBase.__init__(self)
-        self.platform = pddfparse.get_platform()
+        global pddf_obj
+        global plugin_data
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../pddf/pd-plugin.json')) as pd:
+            plugin_data = json.load(pd)
+
+        pddf_obj = pddfparse.PddfParse()
+        self.platform = pddf_obj.get_platform()
         self._port_start = 0
         self._port_end = self.get_num_ports()
 
         for port_num in range(self._port_start, self._port_end):
             device = "PORT" + "%d"%(port_num+1)
-            port_eeprom_path = pddfparse.get_path(device,"eeprom")
+            port_eeprom_path = pddf_obj.get_path(device,"eeprom")
             self._port_to_eeprom_mapping[port_num] = port_eeprom_path
-            port_type = pddfparse.get_device_type(device)
+            port_type = pddf_obj.get_device_type(device)
             self._port_to_type_mapping[port_num] = port_type
             ret = self.populate_port_type(port_num)
 
@@ -57,7 +58,7 @@ class SfpUtil(SfpUtilBase):
 
         status = 0
         device = "PORT" + "%d"%(port_num+1)
-        port_ps = pddfparse.get_path(device,"xcvr_present")
+        port_ps = pddf_obj.get_path(device,"xcvr_present")
         #print "port_ps value is : %s"%port_ps
         try:
             reg_file = open(port_ps, 'r')
@@ -99,7 +100,7 @@ class SfpUtil(SfpUtilBase):
             return False
 
         device = "PORT" + "%d"%(port_num+1)
-        port_ps = pddfparse.get_path(device,"xcvr_reset")
+        port_ps = pddf_obj.get_path(device,"xcvr_reset")
         #print "port_ps value is : %s"%port_ps
         try:
             reg_file = open(port_ps, 'w')
@@ -123,7 +124,7 @@ class SfpUtil(SfpUtilBase):
             return False
 
         device = "PORT" + "%d"%(port_num+1)
-        port_ps = pddfparse.get_path(device,"xcvr_lpmode")
+        port_ps = pddf_obj.get_path(device,"xcvr_lpmode")
         #print "port_ps value is : %s"%port_ps
         try:
             reg_file = open(port_ps, 'w')
@@ -159,7 +160,7 @@ class SfpUtil(SfpUtilBase):
             return False
 
         device = "PORT" + "%d"%(port_num+1)
-        port_ps = pddfparse.get_path(device,"xcvr_lpmode")
+        port_ps = pddf_obj.get_path(device,"xcvr_lpmode")
         try:
             reg_file = open(port_ps, 'w')
         except IOError as e:
@@ -196,8 +197,12 @@ class SfpUtil(SfpUtilBase):
         """
         raise NotImplementedError
 
-if __name__== "__main__":
-    obj=SfpUtil()
+
+    def dump_sysfs(self):
+        return pddf_obj.cli_dump_dsysfs('xcvr')
+
+#if __name__== "__main__":
+    #obj=SfpUtil()
     #for port in range(1, 32):
         #obj.get_presence(port)
     #print "\nQSFP ports:"

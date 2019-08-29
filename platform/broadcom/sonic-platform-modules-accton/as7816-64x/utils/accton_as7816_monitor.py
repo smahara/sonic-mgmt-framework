@@ -21,6 +21,7 @@
 #    11/13/2017: Polly Hsu, Create
 #    1/10/2018: Jostar modify for as7716_32
 #    5/02/2019: Roy Lee modify for as7816_64x
+#    08/11 2019: Geans Pin
 # ------------------------------------------------------------------
 
 try:
@@ -47,21 +48,30 @@ VERSION = '1.0'
 FUNCTION_NAME = 'accton_as7816_monitor'
 DUTY_MAX = 100
 DUTY_DEF = 40
+CRITICAL_TEMP = 70000
 
 global log_console
 global log_level
+global num_of_working_fans
 
-     
+fan_state=[2, 2, 2, 2, 2, 2, 2]  #init state=2, insert=1, remove=0
+
+def system_powerdown():
+    cmd = "i2cset -y -f 14 0x25 0x11 0x08"
+    os.system(cmd)
+
+
 # Make a class we can use to capture stdout and sterr in the log
 class accton_as7816_monitor(object):
     syslog = logging.getLogger("["+FUNCTION_NAME+"]")
+    num_of_working_fans = 0
 
     def __init__(self, log_console, log_file, log_level=logging.INFO):
         formatter = logging.Formatter('%(name)s %(message)s')
         sys_handler  = logging.handlers.SysLogHandler(address = '/dev/log')
         sys_handler.setFormatter(formatter)
         sys_handler.ident = 'conmon'
-        self.syslog.setLevel(logging.WARNING)       
+        self.syslog.setLevel(logging.WARNING)
         self.syslog.addHandler(sys_handler)
         #self.syslog.critical('foo syslog message')
 
@@ -72,7 +82,6 @@ class accton_as7816_monitor(object):
             fh.setFormatter(formatter)
             self.syslog.addHandler(fh)
 
-
         if log_console:
             console = logging.StreamHandler()
             console.setLevel(log_level)
@@ -80,9 +89,13 @@ class accton_as7816_monitor(object):
             console.setFormatter(formatter)
             self.syslog.addHandler(console)
 
-        
-
     def manage_fans(self):
+
+        global fan_state
+        FAN_STATE_REMOVE = 0
+        FAN_STATE_INSERT = 1
+        fan_status = True
+
         max_duty = DUTY_MAX
         fan_policy = {
            0: [52, 0,     43000],
@@ -91,23 +104,37 @@ class accton_as7816_monitor(object):
            3: [88, 52000, 57000],
            4: [max_duty, 57000, sys.maxsize],
         }
-  
+
         thermal = ThermalUtil()
         fan = FanUtil()
+
         for x in range(fan.get_idx_fan_start(), fan.get_num_fans()+1):
             fan_status = fan.get_fan_status(x)
+            fan_present = fan.get_fan_present(x)
+
+            if fan_present == 1:
+               if fan_state[x]!=1:
+                  fan_state[x]=FAN_STATE_INSERT
+                  self.syslog.warning("FAN-%d present is detected", x)
+                  self.num_of_working_fans += 1
+            else:
+               if fan_state[x]!=0:
+                  fan_state[x]=FAN_STATE_REMOVE
+                  self.syslog.warning("Alarm for FAN-%d absent is detected", x)
+                  self.num_of_working_fans -= 1
+
             if fan_status is None:
-                self.syslog.error('SET new_perc to %d (FAN stauts is None. fan_num:%d)', max_duty, x)
-                fan.set_fan_duty_cycle(max_duty)
-                return False
-            if fan_status is False:             
-                self.syslog.warning('SET new_perc to %d (FAN fault. fan_num:%d)', max_duty, x)
-                fan.set_fan_duty_cycle(max_duty)
-                return True
- 
-        #Find if current duty matched any of define duty. 
-	    #If not, set it to highest one.
-        cur_duty_cycle = fan.get_fan_duty_cycle()       
+               self.syslog.error('SET new_perc to %d (FAN stauts is None. fan_num:%d)', max_duty, x)
+               fan.set_fan_duty_cycle(max_duty)
+
+            if fan_status is False:
+               self.syslog.warning('SET new_perc to %d (FAN fault. fan_num:%d)', max_duty, x)
+               fan.set_fan_duty_cycle(max_duty)
+
+
+        #Find if current duty matched any of define duty
+        #If not, set it to highest one
+        cur_duty_cycle = fan.get_fan_duty_cycle()
         new_duty_cycle = DUTY_DEF
         for x in range(0, len(fan_policy)):
             if cur_duty_cycle == fan_policy[x][0]:
@@ -117,7 +144,24 @@ class accton_as7816_monitor(object):
             cur_duty_cycle = max_duty
 
         #Decide fan duty by if sum of sensors falls into any of fan_policy{}
-        get_temp = thermal.get_thermal_temp()            
+        get_temp = thermal.get_thermal_temp()
+        fan_insert_after_all_fan_removed = 0
+
+        if get_temp > CRITICAL_TEMP:
+           self.syslog.warning('SYSTEM Temperature reaching to critical, shutdown the system')
+           system_powerdown()
+
+        if self.num_of_working_fans == 0:
+           self.syslog.warning('FAN: Number of working fan == 0, shutdown the system in 60 sec')
+           time.sleep(60)
+           for x in range(fan.get_idx_fan_start(), fan.get_num_fans()+1):
+               if fan.get_fan_present(x) == 1:
+                  fan_insert_after_all_fan_removed = 1
+                  self.syslog.warning('FAN: fan insert detection, ignore the shutdown')
+
+           if fan_insert_after_all_fan_removed != 1:
+              system_powerdown()
+
         for x in range(0, len(fan_policy)):
             y = len(fan_policy) - x -1 #checked from highest
             if get_temp > fan_policy[y][1] and get_temp < fan_policy[y][2] :
@@ -128,8 +172,11 @@ class accton_as7816_monitor(object):
                 self.syslog.info('INFO. Sum of temp %d > %d , new_duty_cycle=%d', get_temp, fan_policy[y][1], new_duty_cycle)
 
         self.syslog.info('INFO. Final duty_cycle=%d', new_duty_cycle)
-        if(new_duty_cycle != cur_duty_cycle):
-            fan.set_fan_duty_cycle(new_duty_cycle)
+
+        if(fan_status is True):
+           if(new_duty_cycle != cur_duty_cycle):
+              fan.set_fan_duty_cycle(new_duty_cycle)
+
         return True
 
 def sig_handler(signum, frame):

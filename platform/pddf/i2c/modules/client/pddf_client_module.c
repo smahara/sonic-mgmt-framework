@@ -205,7 +205,7 @@ void* get_attr_ext_fn( char *name)
     }
     preempt_enable();
 
-    pddf_dbg(KERN_ERR "[ FIND SYM ] symbol:%s, address:%lx\n", sym->name, sym->value);
+    pddf_dbg(CLIENT, KERN_ERR "[ FIND SYM ] symbol:%s, address:%lx\n", sym->name, sym->value);
     (( int (*)(void))sym->value)();
 
     return (void*)sym->value;
@@ -239,7 +239,7 @@ void add_device_table(char *name, void *ptr)
 	if(!hdev)return;
 	strcpy(hdev->name, name);
 	hdev->data = ptr;
-	pddf_dbg(KERN_ERR "%s: Adding ptr 0x%x to the hash table\n", __FUNCTION__, ptr);
+	pddf_dbg(CLIENT, KERN_ERR "%s: Adding ptr 0x%x to the hash table\n", __FUNCTION__, ptr);
 	hash_add(htable, &hdev->node, get_hash(hdev->name));
 }
 EXPORT_SYMBOL(add_device_table);
@@ -251,7 +251,7 @@ void* get_device_table(char *name)
 	
 	hash_for_each(htable, i, dev, node) {
 		if(strcmp(dev->name, name)==0) {
-		    pddf_dbg(KERN_ERR "found entry: %s  0x%x\n", dev->name, dev->data);
+		    pddf_dbg(CLIENT, KERN_ERR "found entry: %s  0x%x\n", dev->name, dev->data);
 			return (void *)dev->data;
 		}
 	}
@@ -267,7 +267,7 @@ void delete_device_table(char *name)
 	
 	hash_for_each(htable, i, dev, node) {
 		if(strcmp(dev->name, name)==0) {
-		    pddf_dbg(KERN_ERR "found entry to delete: %s  0x%x\n", dev->name, dev->data);
+		    pddf_dbg(CLIENT, KERN_ERR "found entry to delete: %s  0x%x\n", dev->name, dev->data);
 			hash_del(&(dev->node));
 		}
 	}
@@ -280,7 +280,7 @@ void traverse_device_table(void )
 	PDEVICE *dev=NULL;
 	int i=0;
 	hash_for_each(htable, i, dev, node) {
-		pddf_dbg(KERN_ERR "Entry[%d]: %s : 0x%x\n", i, dev->name, dev->data);
+		pddf_dbg(CLIENT, KERN_ERR "Entry[%d]: %s : 0x%x\n", i, dev->name, dev->data);
 	}
 	showall = i;
 }
@@ -301,7 +301,7 @@ int __init pddf_data_init(void)
     int ret = 0;
 
 
-    pddf_dbg("PDDF_DATA MODULE.. init\n");
+    pddf_dbg(CLIENT, "PDDF_DATA MODULE.. init\n");
 
     pddf_kobj = kobject_create_and_add("pddf", kernel_kobj);
     if(!pddf_kobj) {
@@ -320,7 +320,7 @@ int __init pddf_data_init(void)
         kobject_put(device_kobj);
         return ret;
     }
-	pddf_dbg("CREATED PDDF ALLCLIENTS CREATION SYSFS GROUP\n");
+	pddf_dbg(CLIENT, "CREATED PDDF ALLCLIENTS CREATION SYSFS GROUP\n");
 
 
 
@@ -330,12 +330,12 @@ int __init pddf_data_init(void)
 void __exit pddf_data_exit(void)
 {
 
-	pddf_dbg("PDDF_DATA MODULE.. exit\n");
+	pddf_dbg(CLIENT, "PDDF_DATA MODULE.. exit\n");
 	sysfs_remove_group(device_kobj, &pddf_allclients_data_group);
 
 	kobject_put(device_kobj);
 	kobject_put(pddf_kobj);
-	pddf_dbg(KERN_ERR "%s: Removed the kernle object for 'pddf' and 'device' \n", __FUNCTION__);
+	pddf_dbg(CLIENT, KERN_ERR "%s: Removed the kernle object for 'pddf' and 'device' \n", __FUNCTION__);
 	return;
 }
 

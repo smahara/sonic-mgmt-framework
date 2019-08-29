@@ -62,7 +62,7 @@ fi
 set -x -e
 
 ## docker engine version (with platform)
-DOCKER_VERSION=5:18.09.2~3-0~debian-stretch
+DOCKER_VERSION=5:19.03.0~2.3.rc3-0~debian-stretch
 LINUX_KERNEL_VERSION=4.9.0-9-2
 
 ## Working directory to prepare the file system
@@ -235,6 +235,8 @@ sudo LANG=C chroot $FILESYSTEM_ROOT apt-key add /tmp/docker.gpg
 sudo LANG=C chroot $FILESYSTEM_ROOT rm /tmp/docker.gpg
 sudo LANG=C chroot $FILESYSTEM_ROOT add-apt-repository \
                                     "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
+sudo LANG=C chroot $FILESYSTEM_ROOT add-apt-repository \
+                                    "deb [arch=amd64] https://download.docker.com/linux/debian stretch test"
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get update
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y install docker-ce=${DOCKER_VERSION}
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y remove software-properties-common gnupg2
@@ -311,7 +313,8 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     cgroup-tools            \
     python-argcomplete      \
     python-ipaddr           \
-    conntrack
+    conntrack               \
+    mcelog
 
 #Adds a locale to a debian system in non-interactive mode
 sudo sed -i '/^#.* en_US.* /s/^#//' $FILESYSTEM_ROOT/etc/locale.gen && \
@@ -402,7 +405,7 @@ set /files/etc/sysctl.conf/net.ipv4.conf.all.arp_accept 0
 set /files/etc/sysctl.conf/net.ipv4.conf.all.arp_announce 1
 set /files/etc/sysctl.conf/net.ipv4.conf.all.arp_filter 0
 set /files/etc/sysctl.conf/net.ipv4.conf.all.arp_notify 1
-set /files/etc/sysctl.conf/net.ipv4.conf.all.arp_ignore 2
+set /files/etc/sysctl.conf/net.ipv4.conf.all.arp_ignore 1
 
 set /files/etc/sysctl.conf/net.ipv4.neigh.default.base_reachable_time_ms 1800000
 set /files/etc/sysctl.conf/net.ipv6.neigh.default.base_reachable_time_ms 1800000
@@ -430,12 +433,22 @@ set /files/etc/sysctl.conf/net.ipv4.udp_l3mdev_accept 1
 
 set /files/etc/sysctl.conf/net.ipv6.ip_nonlocal_bind 1
 
-set /files/etc/sysctl.conf/net.core.rmem_max 2097152
-set /files/etc/sysctl.conf/net.core.wmem_max 2097152
+set /files/etc/sysctl.conf/net.core.rmem_max 16777216
+set /files/etc/sysctl.conf/net.core.wmem_max 16777216
 
 set /files/etc/sysctl.conf/net.core.somaxconn 512
 
 " -r $FILESYSTEM_ROOT
+
+## Config systemd
+sudo tee -a $FILESYSTEM_ROOT/etc/systemd/network/99-default.link > /dev/null <<EOF
+[Match]
+Path=/devices/virtual/net/*
+
+[Link]
+NamePolicy=kernel database onboard slot path
+MACAddressPolicy=none
+EOF
 
 ## docker-py is needed by Ansible docker module
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT easy_install pip
@@ -470,7 +483,7 @@ sudo cp files/dhcp/vrf $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
 sudo cp files/dhcp/dhclient.conf $FILESYSTEM_ROOT/etc/dhcp/
 
 ## Configure application core dump handler
-sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get install -y systemd-coredump
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get install -y systemd-coredump liblz4-tool
 
 ## Version file
 sudo mkdir -p $FILESYSTEM_ROOT/etc/sonic
@@ -502,7 +515,7 @@ sudo sed -i 's/EBTABLES_LOAD_ON_START="no"/EBTABLES_LOAD_ON_START="yes"/g' ${FIL
 sudo cp files/image_config/ebtables/ebtables.filter ${FILESYSTEM_ROOT}/etc
 
 ## Remove gcc and python dev pkgs
-sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y remove gcc libpython2.7-dev
+sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y remove libpython2.7-dev
 
 ## Update initramfs
 sudo chroot $FILESYSTEM_ROOT update-initramfs -u

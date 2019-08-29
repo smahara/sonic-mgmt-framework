@@ -1,5 +1,20 @@
 #!/usr/bin/env python
 
+
+"""
+Usage: %(scriptName)s [options] command object
+
+options:
+    -h | --help     : this help message
+    -d | --debug    : run with debug mode
+    -f | --force    : ignore error during installation or clean
+command:
+    install     : install drivers and generate related sysfs nodes
+    clean       : uninstall drivers and remove related sysfs nodes
+    switch-pddf     : switch to pddf mode, installing pddf drivers and generating sysfs nodes
+    switch-nonpddf  : switch to per platform, non-pddf mode
+"""
+
 import os
 import commands
 import sys, getopt
@@ -8,6 +23,7 @@ import re
 import subprocess
 import shutil
 import time
+import json
 import pddfparse
 from collections import namedtuple
 
@@ -23,6 +39,16 @@ DEBUG = False
 args = []
 ALL_DEVICE = {}               
 FORCE = 0
+
+# Instantiate the class pddf_obj 
+pddf_obj = pddfparse.PddfParse()
+try:
+    import pddf_switch_svc
+except ImportError:
+    print "Unable to find pddf_switch_svc.py. PDDF might not be supported on this platform"
+    sys.exit()
+
+
 
 if DEBUG == True:
     print sys.argv[0]
@@ -60,6 +86,10 @@ def main():
             do_install()
         elif arg == 'clean':
            do_uninstall()
+        elif arg == 'switch-pddf':
+            do_switch_pddf()
+        elif arg == 'switch-nonpddf':
+            do_switch_nonpddf()
         else:
             show_help()
             
@@ -107,6 +137,7 @@ kos = [
 'modprobe pddf_psu_driver_module' ,
 'modprobe pddf_psu_module' ,
 'modprobe pddf_fan_driver_module' ,
+'modprobe -f platform_pddf_fan' ,
 'modprobe pddf_fan_module' ,
 'modprobe pddf_led_module' ,
 'modprobe pddf_sysstatus_module'
@@ -137,50 +168,83 @@ def get_platform_and_hwsku():
 
     return (platform, hwsku)
 
-def get_path_to_device_plugin():
+def get_path_to_device():
     # Get platform and hwsku
     (platform, hwsku) = get_platform_and_hwsku()
 
     # Load platform module from source
     platform_path = "/".join([PLATFORM_ROOT_PATH, platform])
     hwsku_path = "/".join([platform_path, hwsku])
-    plugin_path = "/".join([platform_path, "plugins"])
 
-    return plugin_path
+    return platform_path
 
 def get_path_to_pddf_plugin():
     pddf_path = "/".join([PLATFORM_ROOT_PATH, "pddf/plugins"])
     return pddf_path
 
 def config_pddf_utils():
-    device_path = get_path_to_device_plugin()
+    device_path = get_path_to_device()
+    device_plugin_path = "/".join([device_path, "plugins"])
     pddf_path = get_path_to_pddf_plugin()
-    backup_path = "/".join([device_path, "orig"])
+    backup_path = "/".join([device_plugin_path, "orig"])
 
     if os.path.exists(backup_path) is False:
         os.mkdir(backup_path)
-        log_os_system("mv "+device_path+"/*.*"+" "+backup_path, 0)
+        log_os_system("mv "+device_plugin_path+"/*.*"+" "+backup_path, 0)
     
     for item in os.listdir(pddf_path):
-        shutil.copy(pddf_path+"/"+item, device_path+"/"+item)
+        shutil.copy(pddf_path+"/"+item, device_plugin_path+"/"+item)
     
-    shutil.copy('/usr/local/bin/pddfparse.py', device_path+"/pddfparse.py")
+    shutil.copy('/usr/local/bin/pddfparse.py', device_plugin_path+"/pddfparse.py")
+    # Take a backup of orig fancontrol
+    if os.path.exists(device_path+"/fancontrol"):
+        log_os_system("mv "+device_path+"/fancontrol"+" "+device_path+"/fancontrol.bak", 0)
+        #print "***Created fancotnrol.bak"
+    
+    # Create a link to fancontrol of PDDF
+    if os.path.exists(device_path+"/pddf/fancontrol") and not os.path.exists(device_path+"/fancontrol"):
+        shutil.copy(device_path+"/pddf/fancontrol",device_path+"/fancontrol")
+        #print "*** Copied the pddf fancontrol file "
 
     return 0
 
 def cleanup_pddf_utils():
-    device_path = get_path_to_device_plugin()
-    backup_path = "/".join([device_path, "orig"])
-    if os.path.exists(backup_path) is True:
-        for item in os.listdir(device_path):
-            if os.path.isdir(device_path+"/"+item) is False:
-                os.remove(device_path+"/"+item)
+    device_path = get_path_to_device()
+    device_plugin_path = "/".join([device_path, "plugins"])
 
-        status = log_os_system("mv "+backup_path+"/*"+" "+device_path, 1)
+    backup_path = "/".join([device_plugin_path, "orig"])
+    if os.path.exists(backup_path) is True:
+        for item in os.listdir(device_plugin_path):
+            if os.path.isdir(device_plugin_path+"/"+item) is False:
+                os.remove(device_plugin_path+"/"+item)
+
+        status = log_os_system("mv "+backup_path+"/*"+" "+device_plugin_path, 1)
         os.rmdir(backup_path)
     else:
-        print "\nERR: Unable to locate original device files...\n" 
+        print "\nERR: Unable to locate original device files...\n"
+
+    if os.path.exists(device_path+"/fancontrol"):
+        os.remove(device_path+"/fancontrol")
+        #print "Removed the fancontrol"
+
+    if os.path.exists(device_path+"/fancontrol.bak"):
+        log_os_system("mv "+device_path+"/fancontrol.bak"+" "+device_path+"/fancontrol", 0)
+        #print "***Moved fancotnrol.bak to fancontrol"
+
     return 0
+
+def create_pddf_log_files():
+    if not os.path.exists('/var/log/pddf'):
+    	log_os_system("sudo mkdir /var/log/pddf", 1)
+
+    log_os_system("sudo touch /var/log/pddf/led.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/psu.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/fan.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/xcvr.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/sysstatus.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/cpld.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/client.txt", 1)
+    log_os_system("sudo touch /var/log/pddf/mux.txt", 1)
 
 def driver_install():
     global FORCE
@@ -211,8 +275,8 @@ def driver_uninstall():
 
 def device_install():
     global FORCE
-    # trigger the pddfparse script for FAN, PSU, CPLD, MUX, etc
-    status = pddfparse.create_pddf_devices()
+    # trigger the pddf_obj script for FAN, PSU, CPLD, MUX, etc
+    status = pddf_obj.create_pddf_devices()
     if status:
         if FORCE == 0:
             return status
@@ -221,7 +285,7 @@ def device_install():
 def device_uninstall():
     global FORCE
     # Trigger the paloparse script for deletion of FAN, PSU, OPTICS, CPLD clients
-    status = pddfparse.delete_pddf_devices()
+    status = pddf_obj.delete_pddf_devices()
     if status:
         if FORCE == 0:
             return status
@@ -229,8 +293,13 @@ def device_uninstall():
         
 def do_install():
     print "Checking system...."
+    if not os.path.exists('/usr/share/sonic/platform/pddf_support'):
+        print PROJECT_NAME.upper() +" mode is not enabled"
+        return
+
     if driver_check()== False :
         print PROJECT_NAME.upper() +" has no PDDF driver installed...."
+    	create_pddf_log_files()
         print "Installing...."    
         status = driver_install()
         if status:
@@ -247,6 +316,15 @@ def do_install():
     
 def do_uninstall():
     print "Checking system...."
+    if not os.path.exists('/usr/share/sonic/platform/pddf_support'):
+        print PROJECT_NAME.upper() +" mode is not enabled"
+        return
+
+
+    if os.path.exists('/var/log/pddf'):
+	print "Remove pddf log files....."
+    	log_os_system("sudo rm -rf /var/log/pddf", 1)
+
     print "Remove all the devices..."
     status = device_uninstall()
     if status:
@@ -262,6 +340,111 @@ def do_uninstall():
             if FORCE == 0:        
                 return  status                          
     return       
+
+def do_switch_pddf():
+    print "Check the pddf support..."
+    status = pddf_switch_svc.check_pddf_support()
+    if not status:
+        print "PDDF is not supported on this platform"
+        return status
+
+
+    print "Checking system...."
+    if os.path.exists('/usr/share/sonic/platform/pddf_support'):
+        print PROJECT_NAME.upper() +" system is already in pddf mode...."
+    else:
+        print "Stopping the pmon service ..."
+        status, output = log_os_system("systemctl stop pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        print "Stopping the platform services.."
+        status = pddf_switch_svc.stop_platform_svc()
+        if not status:
+            if FORCE==0:
+                return status
+
+        print "Creating the pddf_support file..."
+        if os.path.exists('/usr/share/sonic/platform'):
+            status, output = log_os_system("touch /usr/share/sonic/platform/pddf_support", 1)
+        else:
+            print "/usr/share/sonic/platform path doesnt exist. Unable to set pddf mode"
+            return -1
+
+        print "Starting the PDDF platform service..."
+        status = pddf_switch_svc.start_platform_pddf()
+        if not status:
+            if FORCE==0:
+                return status
+
+        print "Disabling the 'skip_fand' from pmon daemon control script..."
+        if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
+            with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
+                data = json.load(fr)
+            if 'skip_fand' in data.keys():
+                old_val = data['skip_fand']
+                if old_val:
+                    data['skip_fand'] = False
+                    with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
+                        json.dump(data,fw)
+
+        print "Restart the pmon service ..."
+        status, output = log_os_system("systemctl start pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        return
+
+def do_switch_nonpddf():
+    print "Checking system...."
+    if not os.path.exists('/usr/share/sonic/platform/pddf_support'):
+        print PROJECT_NAME.upper() +" system is already in non-pddf mode...."
+    else:
+        print "Stopping the pmon service ..."
+        status, output = log_os_system("systemctl stop pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        print "Stopping the PDDF platform service..."
+        status = pddf_switch_svc.stop_platform_pddf()
+        if not status:
+            if FORCE==0:
+                return status
+
+        print "Removing the pddf_support file..."
+        if os.path.exists('/usr/share/sonic/platform'):
+            status, output = log_os_system("rm -f /usr/share/sonic/platform/pddf_support", 1)
+        else:
+            print "/usr/share/sonic/platform path doesnt exist. Unable to set non-pddf mode"
+            return -1
+
+        print "Starting the platform services..."
+        status = pddf_switch_svc.start_platform_svc()
+        if not status:
+            if FORCE==0:
+                return status
+
+        print "Enabeling the 'skip_fand' from pmon startup script..."
+        if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
+            with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
+                data = json.load(fr)
+            if 'skip_fand' in data.keys():
+                old_val = data['skip_fand']
+                if not old_val:
+                    data['skip_fand'] = True
+                    with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
+                        json.dump(data,fw)
+
+        print "Restart the pmon service ..."
+        status, output = log_os_system("systemctl start pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
+        return
 
 if __name__ == "__main__":
     main()

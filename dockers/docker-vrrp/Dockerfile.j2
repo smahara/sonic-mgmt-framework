@@ -1,0 +1,37 @@
+FROM {{ docker_vrrp_load_image }}
+
+ARG docker_container_name
+RUN [ -f /etc/rsyslog.conf ] && sed -ri "s/%syslogtag%/$docker_container_name#%syslogtag%/;" /etc/rsyslog.conf
+
+## Make apt-get non-interactive
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+
+RUN apt-get install -f -y libdbus-1-3 libdaemon0 libjansson4
+
+## Install redis-tools dependencies
+RUN apt-get -y install libjemalloc1
+
+{% if docker_vrrp_debs.strip() -%}
+# Copy locally-built Debian package dependencies
+COPY \
+{% for deb in docker_vrrp_debs.split(' ') -%}
+debs/{{ deb }}{{' '}}
+{%- endfor -%}
+/debs/
+
+# Install locally-built Debian packages and implicitly install their dependencies
+RUN dpkg_apt() { [ -f $1 ] && { dpkg -i $1 || apt-get -y install -f; } || return 1; }{%- for deb in docker_vrrp_debs.split(' ') %}; \
+dpkg_apt /debs/{{ deb }}
+{%- endfor %}
+{%- endif %}
+
+
+COPY ["start.sh", "keepalived-start.sh", "/usr/bin/"]
+COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
+
+RUN apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
+RUN rm -rf /debs
+
+ENTRYPOINT ["/usr/bin/supervisord"]

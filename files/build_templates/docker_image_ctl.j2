@@ -87,6 +87,19 @@ function preStartAction()
     do
       sed -i "s|S'[0-9]*'|S'0'|g" $file
     done
+    # Clear the pfcstat counters
+    for file in `ls /tmp/pfcstat*/*`
+    do
+      sed -i "s|S'[0-9]*'|S'0'|g" $file
+    done
+{%- elif docker_container_name == "pmon" %}
+    # Initialize the eeprom info in databse
+    sudo decode-syseeprom --init
+	if [ $? -ne 0 ]; then
+		echo "EEPROM info initialization into database failed"
+	else
+		echo "EEPROM info initialized in database successfully"
+	fi
 {%- else %}
     : # nothing
 {%- endif %}
@@ -213,6 +226,11 @@ start() {
 {%- else %}
         --tmpfs /tmp \
 {%- endif %}
+{%- endif %}
+{%- if sonic_debugging_on == "y" %}
+        -v /var/log/journal:/var/log/journal:ro \
+        -v /var/lib/systemd/coredump:/var/lib/systemd/coredump:ro \
+        -v /etc/machine-id:/etc/machine-id:ro \
 {%- endif %}
         -v /var/run/redis:/var/run/redis:rw \
         -v /usr/share/sonic/device/$PLATFORM:/usr/share/sonic/platform:ro \

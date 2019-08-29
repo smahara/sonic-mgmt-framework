@@ -14,4 +14,9 @@ $(SONIC_ONE_IMAGE)_INSTALLS += $(PDDF_PLATFORM_MODULE)
 #$(info +++++++ lazy_installs = $($(SONIC_ONE_IMAGE)_LAZY_INSTALLS)++++++++)
 endif
 
+ifneq ($(SONIC_ONE_PDE_IMAGE),)
+$(SONIC_ONE_PDE_IMAGE)_INSTALLS += $(PDDF_PLATFORM_MODULE)
+#$(info +++++++ lazy_installs = $($(SONIC_ONE_PDE_IMAGE)_LAZY_INSTALLS)++++++++)
+endif
+
 SONIC_STRETCH_DEBS += $(PDDF_PLATFORM_MODULE)

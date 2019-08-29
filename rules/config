@@ -59,9 +59,9 @@ ENABLE_ZTP = y
 # by default for TOR switch
 # ENABLE_PFCWD_ON_START = y
 
-# SONIC_INSTALL_DEBUG_TOOLS - installs debugging tools in baseline docker
+# INSTALL_DEBUG_TOOLS - installs debugging tools in baseline docker
 # Uncomment next line to enable:
-# SONIC_INSTALL_DEBUG_TOOLS = y
+INSTALL_DEBUG_TOOLS = y
 
 # SONIC_USE_PDDF_FRAMEWORK - Use PDDF generic drivers and plugins
 # Uncomment next line to enable:
@@ -115,6 +115,18 @@ DEFAULT_KERNEL_CACHE_PATH = /projects/csg_sonic/kern_debcache
 # group during installation.
 FRR_USER_UID = 300
 FRR_USER_GID = 300
+
+# DPKG cache allows the .deb files to be stored in the cache path. This allows the submodules
+# package to be cached and restored back if its commit hash is not modified and its dependencies are not modified.
+# SONIC_DPKG_CACHE_METHOD - Default method of deb package caching
+#	none:     no caching
+#	cache:    cache from local directory
+#	#url:      cache over remote http server (not supported)
+#	#registry: cache on the docker local/remote registry (not supported)
+# SONIC_DPKG_CACHE_SOURCE - provides the cache location detail
+SONIC_DPKG_CACHE_METHOD=cache
+SONIC_DPKG_CACHE_SOURCE=/projects/csg_sonic/dpkg_cache
+
 
 # Default VS build memory preparation
 DEFAULT_VS_PREPARE_MEM = yes
