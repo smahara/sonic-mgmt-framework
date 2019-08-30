@@ -218,6 +218,7 @@ int iccp_csm_send(struct CSM* csm, char* buf, int msg_len)
 {
     LDPHdr* ldp_hdr = (LDPHdr*)buf;
     ICCParameter* param = NULL;
+    ssize_t rc;
 
     if (csm == NULL || buf == NULL || csm->sock_fd <= 0 || msg_len <= 0)
         return MCLAG_ERROR;
@@ -235,7 +236,20 @@ int iccp_csm_send(struct CSM* csm, char* buf, int msg_len)
     if (csm->msg_log.end_index >= 128)
         csm->msg_log.end_index = 0;
 
-    return write(csm->sock_fd, buf, msg_len);
+    rc = write(csm->sock_fd, buf, msg_len);
+    if ((rc <= 0) || (rc != msg_len))
+    {
+        MLACP_SET_ICCP_TX_DBG_COUNTER(
+            csm, ntohs(param->type), ICCP_DBG_CNTR_STS_ERR);
+        ICCPD_LOG_ERR(__FUNCTION__, "Failed to write msg 0x%x, rc %d",
+            ntohs(param->type), rc);
+    }
+    else
+    {
+        MLACP_SET_ICCP_TX_DBG_COUNTER(
+            csm, ntohs(param->type), ICCP_DBG_CNTR_STS_OK);
+    }
+    return (rc);
 }
 
 /* Connection State Machine Transition */

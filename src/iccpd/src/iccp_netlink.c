@@ -499,8 +499,18 @@ void iccp_set_interface_ipadd_mac(struct LocalInterface *lif, char * mac_addr )
 
     /*send msg*/
     if (sys->sync_fd)
-        write(sys->sync_fd, msg_buf, msg_hdr->len);
-
+    {
+        if (write(sys->sync_fd,msg_buf, msg_hdr->len) == -1)
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+        }
+        else
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        }
+    }
     return;
 }
 

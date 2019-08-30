@@ -20,6 +20,7 @@
  *
  *  Maintainer: jianjun, grace Li from nephos
  */
+#include <stdbool.h>
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <net/if.h>
@@ -66,6 +67,11 @@ int iccp_mclag_config_dump(char * *buf,  int *num, int mclag_id)
             state_info.keepalive = 1;
         else
             state_info.keepalive = 0;
+
+        if (MLACP(csm).current_state == MLACP_STATE_EXCHANGE)
+            state_info.info_sync_done = 1;
+        else
+            state_info.info_sync_done = 0;
 
         if (mclag_id > 0)
         {
@@ -355,6 +361,7 @@ int iccp_local_if_dump(char * *buf,  int *num, int mclag_id)
                 memcpy(mclagd_lif.mlacp_state, "ERROR", 5);
 
             mclagd_lif.isolate_to_peer_link = lif_po->isolate_to_peer_link;
+            mclagd_lif.disable_traffic = lif_po->disable_traffic;
 
             str_buf = mclagd_lif.vlanlist;
 
@@ -476,3 +483,74 @@ int iccp_peer_if_dump(char * *buf, int *num, int mclag_id)
     return EXEC_TYPE_SUCCESS;
 }
 
+/* Allocate a buffer to return the internal debug counters
+ * The allocated buffer should include MCLAGD_REPLY_INFO_HDR byte header
+ * No buffer is allocated if error is returned
+ */
+int iccp_cmd_dbg_counter_dump(char **buf, int *data_len, int mclag_id)
+{
+    struct System *sys = NULL;
+    struct CSM *csm = NULL;
+    char *temp_ptr, *counter_buf = NULL;
+    mclagd_dbg_counter_info_t *counter_ptr;
+    int buf_size = 0;
+    int id_exist = 0;
+    int num_csm = 0;
+    bool is_first_csm;
+
+    if (!(sys = system_get_instance()))
+    {
+        ICCPD_LOG_INFO(__FUNCTION__, "cannot find sys!\n");
+        return EXEC_TYPE_NO_EXIST_SYS;
+    }
+    if (mclag_id >0)
+        num_csm = 1;
+    else
+    {
+        LIST_FOREACH(csm, &(sys->csm_list), next)
+        {
+            ++num_csm;
+        }
+    }
+    buf_size = MCLAGD_REPLY_INFO_HDR + sizeof(mclagd_dbg_counter_info_t) +
+            (sizeof(mlacp_dbg_counter_info_t) * num_csm);
+    counter_buf = (char*)malloc(buf_size);
+    if (!counter_buf)
+        return EXEC_TYPE_FAILED;
+
+    memset(counter_buf, 0, buf_size);
+    counter_ptr =
+        (mclagd_dbg_counter_info_t *)(counter_buf + MCLAGD_REPLY_INFO_HDR);
+    memcpy(&counter_ptr->system_dbg, &sys->dbg_counters, sizeof(sys->dbg_counters));
+    counter_ptr->num_iccp_counter_blocks = num_csm;
+    temp_ptr = counter_ptr->iccp_dbg_counters;
+    is_first_csm = true;
+
+    LIST_FOREACH(csm, &(sys->csm_list), next)
+    {
+        if (mclag_id >0)
+        {
+            if (csm->mlag_id == mclag_id)
+                id_exist = 1;
+            else
+                continue;
+        }
+        if (is_first_csm)
+            is_first_csm = false;
+        else
+            temp_ptr += sizeof(MLACP(csm).dbg_counters);
+
+        memcpy(temp_ptr, &MLACP(csm).dbg_counters,
+            sizeof(MLACP(csm).dbg_counters));
+    }
+
+    if (mclag_id >0 && !id_exist)
+    {
+        if (counter_buf)
+            free(counter_buf);
+        return EXEC_TYPE_NO_EXIST_MCLAGID;
+    }
+    *buf = counter_buf;
+    *data_len = buf_size - MCLAGD_REPLY_INFO_HDR;
+    return EXEC_TYPE_SUCCESS;
+}

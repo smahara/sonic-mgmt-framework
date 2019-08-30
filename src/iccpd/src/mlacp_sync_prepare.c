@@ -604,6 +604,56 @@ int mlacp_prepare_for_warm_reboot(struct CSM* csm, char* buf, size_t max_buf_siz
 }
 
 /*****************************************
+* Prepare interface up ACK message
+*
+* ***************************************/
+int mlacp_prepare_for_if_up_ack(
+    struct CSM        *csm,
+    char              *buf,
+    size_t            max_buf_size,
+    uint8_t           if_type,
+    uint16_t          if_id,
+    uint8_t           port_isolation_state)
+{
+    struct System* sys = NULL;
+    ICCHdr* icc_hdr = (ICCHdr*) buf;
+    struct mLACPIfUpAckTLV* tlv = (struct mLACPIfUpAckTLV*) &buf[sizeof(ICCHdr)];
+    size_t msg_len = sizeof(ICCHdr) + sizeof(struct mLACPIfUpAckTLV);
+
+    if(csm == NULL)
+        return -1;
+
+    if(buf == NULL)
+        return -1;
+
+    if(msg_len > max_buf_size)
+        return -1;
+
+    if((sys = system_get_instance()) == NULL)
+        return -1;
+
+    /* Prepare for sync request */
+    memset(buf, 0, max_buf_size);
+
+    icc_hdr = (ICCHdr*) buf;
+    tlv = (struct mLACPIfUpAckTLV*) &buf[sizeof(ICCHdr)];
+
+    /* ICC header */
+    mlacp_fill_icc_header(csm, icc_hdr, msg_len);
+
+    /* If up ack TLV */
+    tlv->icc_parameter.u_bit = 0;
+    tlv->icc_parameter.f_bit = 0;
+    tlv->icc_parameter.type = htons(TLV_T_MLACP_IF_UP_ACK);
+
+    tlv->icc_parameter.len = htons(sizeof(struct mLACPIfUpAckTLV) - sizeof(ICCParameter));
+    tlv->if_type = if_type;
+    tlv->if_id = htons(if_id);
+    tlv->port_isolation_state = port_isolation_state;
+    return msg_len;
+}
+
+/*****************************************
 * Tool : Prepare ICC Header
 *
 * ***************************************/

@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <time.h>
 #include <arpa/inet.h>
 #include <sys/queue.h>
@@ -39,6 +40,8 @@
 #include "../include/iccp_csm.h"
 #include "mclagdctl/mclagdctl.h"
 #include "../include/iccp_cmd_show.h"
+#include "../include/mlacp_link_handler.h"
+
 /*****************************************
 * Enum
 *
@@ -413,7 +416,7 @@ static void mlacp_clean_fdb(void)
 {
     struct IccpSyncdHDr * msg_hdr;
     char *msg_buf = g_csm_buf;
-
+    ssize_t rc;
     struct System *sys;
 
     sys = system_get_instance();
@@ -426,8 +429,20 @@ static void mlacp_clean_fdb(void)
     msg_hdr->len = sizeof(struct IccpSyncdHDr);
 
     if (sys->sync_fd)
-        write(sys->sync_fd, msg_buf, msg_hdr->len);
-
+    {
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+        if ((rc <= 0) || (rc != msg_hdr->len))
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+            ICCPD_LOG_ERR(__FUNCTION__, "Failed to write, rc %d", rc);
+        }
+        else
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        }
+    }
     ICCPD_LOG_DEBUG(__FUNCTION__, "notify mclagsyncd clear fdb");
 
     return;
@@ -440,6 +455,7 @@ void set_peerlink_mlag_port_learn(struct LocalInterface *lif, int enable)
     char *msg_buf = g_csm_buf;
     int msg_len;
     struct System *sys;
+    ssize_t rc;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -472,9 +488,76 @@ void set_peerlink_mlag_port_learn(struct LocalInterface *lif, int enable)
 
     /*send msg*/
     if (sys->sync_fd)
-        write(sys->sync_fd, msg_buf, msg_hdr->len);
-
+    {
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+        if ((rc <= 0) || (rc != msg_hdr->len))
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+            ICCPD_LOG_ERR(__FUNCTION__, "Failed to write for %s, rc %d",
+                lif->name, rc);
+        }
+        else
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        }
+    }
     return;
+}
+
+/* Send request to Mclagsyncd to enable or disable traffic on 
+ * MLAG interface
+ */
+static int mlacp_link_set_traffic_dist_mode(
+    char                    *po_name,
+    bool                    is_enable)
+{
+    struct IccpSyncdHDr     *msg_hdr;
+    mclag_sub_option_hdr_t  *sub_msg;
+    char                    *msg_buf = g_csm_buf;
+    int                     msg_len;
+    struct System           *sys;
+    ssize_t                 rc;
+
+    sys = system_get_instance();
+    if (sys == NULL)
+        return -1;
+
+    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+    msg_hdr->ver = 1;
+    msg_hdr->type = is_enable ?
+        MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_ENABLE :
+        MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_DISABLE;
+    msg_hdr->len = sizeof(struct IccpSyncdHDr);
+
+    /* Sub-message: port-channel name */
+    sub_msg =(mclag_sub_option_hdr_t*) &msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MCLAG_INTF_NAME;
+    sub_msg->op_len = strlen(po_name);
+    memcpy(sub_msg->data, po_name, sub_msg->op_len);
+
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    if (sys->sync_fd)
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+
+    if ((rc <= 0) || (rc != msg_hdr->len))
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+        ICCPD_LOG_ERR(__FUNCTION__,
+            "Failed to write traffic %s for %s, rc %d",
+            is_enable ? "enable" : "disable", po_name, rc);
+        return -1;
+    }
+    else
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "%s traffic dist for interface %s",
+            is_enable ? "Enable" : "Disable", po_name);
+        return 0;
+    }
 }
 
 static void set_peerlink_mlag_port_kernel_forward(
@@ -511,6 +594,7 @@ void update_peerlink_isolate_from_all_csm_lif(
 
     char mlag_po_buf[512];
     int src_len = 0, dst_len = 0;
+    ssize_t rc;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -605,8 +689,21 @@ void update_peerlink_isolate_from_all_csm_lif(
 
     /*send msg*/
     if (sys->sync_fd)
-        write(sys->sync_fd, msg_buf, msg_hdr->len);
-
+    {
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+        if ((rc <= 0) || (rc != msg_hdr->len))
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+            ICCPD_LOG_ERR(__FUNCTION__, "Failed to write, rc %d", rc);
+        }
+        else
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        }
+    }
+    
     return;
 }
 
@@ -983,6 +1080,7 @@ void iccp_get_fdb_change_from_syncd( void)
     struct IccpSyncdHDr * msg_hdr;
     char msg_buf[512];
     struct System *sys;
+    ssize_t rc;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -1000,7 +1098,20 @@ void iccp_get_fdb_change_from_syncd( void)
 
     /*send msg*/
     if (sys->sync_fd > 0)
-        write(sys->sync_fd, msg_buf, msg_hdr->len);
+    {
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+        if ((rc <= 0) || (rc != msg_hdr->len))
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+            ICCPD_LOG_ERR(__FUNCTION__, "Failed to write, rc %d", rc);
+        }
+        else
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        }
+    }
 
     return;
 }
@@ -1011,6 +1122,7 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type)
     char msg_buf[512];
     struct System *sys;
     struct mclag_fdb_info * mac_info;
+    ssize_t rc;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -1036,7 +1148,20 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type)
 
     /*send msg*/
     if (sys->sync_fd > 0 )
-        write(sys->sync_fd, msg_buf, msg_hdr->len);
+    {
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+        if ((rc <= 0) || (rc != msg_hdr->len))
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+            ICCPD_LOG_ERR(__FUNCTION__, "Failed to write, rc %d", rc);
+        }
+        else
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        }
+    }
 
     return;
 }
@@ -1241,6 +1366,13 @@ void mlacp_portchannel_state_handler(struct CSM* csm,
 
     update_po_if_info(csm, local_if, po_state);
 
+    /* Disable packet tx/rx on MLAG interface when it is down
+     * Traffic is re-enabled back after the interface is up and ack is
+     * received from peer
+     */
+    if (po_state == 0)
+        mlacp_link_disable_traffic_distribution(local_if);
+
     return;
 }
 
@@ -1404,13 +1536,21 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
     memcpy(MLACP(csm).remote_system.system_id, null_mac, ETHER_ADDR_LEN);
 
     /*If peer is disconnected, recover the MAC address.*/
-    if (csm->role_type == STP_ROLE_STANDBY)
+    LIST_FOREACH(lif, &(MLACP(csm).lif_list), mlacp_next)
     {
-        LIST_FOREACH(lif, &(MLACP(csm).lif_list), mlacp_next)
-        {
+        if (csm->role_type == STP_ROLE_STANDBY)
             recover_if_ipmac_on_standby(lif);
+
+        /* Re-enable traffic tx/rx for MLAG interface regardless of its state
+         */
+        if (lif->disable_traffic)
+        {
+            mlacp_link_enable_traffic_distribution(lif);
         }
     }
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Peer disconnect %u times",
+        SYSTEM_GET_SESSION_DOWN_COUNTER(sys));
+    SYSTEM_INCR_SESSION_DOWN_COUNTER(sys);
 
     return;
 }
@@ -1476,7 +1616,7 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
             free(msg);
         }
     }
-
+    SYSTEM_INCR_PEER_LINK_DOWN_COUNTER(system_get_instance());
     return;
 }
 
@@ -1901,11 +2041,51 @@ int iccp_receive_fdb_handler_from_syncd(struct System *sys)
             ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg fdb count %d vid %d mac %s port %s  optype  %d ", i, mac_info->vid, mac_info->mac, mac_info->port_name, mac_info->op_type);
             do_mac_update_from_syncd(mac_info->mac, mac_info->vid, mac_info->port_name, mac_info->type, mac_info->op_type);
         }
-
+        
         pos += msg_hdr->len;
-    }
+        SYSTEM_SET_SYNCD_RX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+    }	
 
     return 0;
+}
+
+ /*
+  * Send request to Mclagsyncd to disable traffic for MLAG interface
+  */
+ void mlacp_link_disable_traffic_distribution(struct LocalInterface *lif)
+ {
+     /* Expecting ACK from peer only after reaching EXCHANGE state */
+     if (MLACP(lif->csm).current_state != MLACP_STATE_EXCHANGE)
+         return;
+
+     /* Disable traffic distribution for all LAG member ports when LAG goes down.
+      * If MLAG interface goes down again while waiting for i/f up ack,
+      * do not need to update hardware again
+      */
+     if ((lif->type == IF_T_PORT_CHANNEL) && (!lif->po_active) &&
+              (!lif->disable_traffic))
+     {
+         if (mlacp_link_set_traffic_dist_mode(lif->name, false) == 0)
+             lif->disable_traffic = 1;
+     }
+ }
+
+ /*
+  * Send request to Mclagsyncd to enable traffic for MLAG interface
+  * Note:
+  * 1. Caller should check for LAG up before calling this API in normal case.
+  * 2. For the ICCP session down case or LAG interface is no longer MLAG
+  *    interface, this API is called regardless of the LAG state
+  */
+ void mlacp_link_enable_traffic_distribution(struct LocalInterface *lif)
+ {
+    if ((lif->type == IF_T_PORT_CHANNEL) && lif->disable_traffic)
+    {
+        if (mlacp_link_set_traffic_dist_mode(lif->name, true) == 0)
+        {
+            lif->disable_traffic = 0;
+        }
+    }
 }
 
 char * mclagd_ctl_cmd_str(int req_type)
@@ -1927,6 +2107,9 @@ char * mclagd_ctl_cmd_str(int req_type)
         case INFO_TYPE_DUMP_PEER_PORTLIST:
             return "dump peer portlist";
 
+        case INFO_TYPE_DUMP_DBG_COUNTERS:
+            return "dump debug counters";
+  
         default:
             break;
     }
@@ -2260,6 +2443,43 @@ void mclagd_ctl_handle_dump_peer_portlist(int client_fd, int mclag_id)
     return;
 }
 
+void mclagd_ctl_handle_dump_dbg_counters(int client_fd, int mclag_id)
+{
+    char * Pbuf = NULL;
+    char buf[512] = {0};
+    int data_len = 0;
+    int ret = 0;
+    struct mclagd_reply_hdr *hd = NULL;
+    int len_tmp = 0;
+
+    ret = iccp_cmd_dbg_counter_dump(&Pbuf, &data_len, mclag_id);
+    if (ret != EXEC_TYPE_SUCCESS)
+    {
+        len_tmp = sizeof(struct mclagd_reply_hdr);
+        memcpy(buf, &len_tmp, sizeof(int));
+        hd = (struct mclagd_reply_hdr *)(buf + sizeof(int));
+        hd->exec_result = ret;
+        hd->info_type = INFO_TYPE_DUMP_DBG_COUNTERS;
+        hd->data_len = 0;
+        mclagd_ctl_sock_write(client_fd, buf, MCLAGD_REPLY_INFO_HDR);
+
+        if (Pbuf)
+            free(Pbuf);
+        return;
+    }
+
+    hd = (struct mclagd_reply_hdr *)(Pbuf + sizeof(int));
+    hd->exec_result = EXEC_TYPE_SUCCESS;
+    hd->info_type = INFO_TYPE_DUMP_DBG_COUNTERS;
+    hd->data_len = data_len;
+    len_tmp = (hd->data_len + sizeof(struct mclagd_reply_hdr));
+    memcpy(Pbuf, &len_tmp, sizeof(int));
+    mclagd_ctl_sock_write(client_fd, Pbuf, MCLAGD_REPLY_INFO_HDR + hd->data_len);
+
+    if (Pbuf)
+       free(Pbuf);
+}
+
 int mclagd_ctl_interactive_process(int client_fd)
 {
     char buf[512] = { 0 };
@@ -2301,6 +2521,10 @@ int mclagd_ctl_interactive_process(int client_fd)
             mclagd_ctl_handle_dump_peer_portlist(client_fd, req->mclag_id);
             break;
 
+        case INFO_TYPE_DUMP_DBG_COUNTERS:
+             mclagd_ctl_handle_dump_dbg_counters(client_fd, req->mclag_id);
+            break;        
+        
         default:
             return MCLAG_ERROR;
     }
