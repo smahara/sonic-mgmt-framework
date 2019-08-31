@@ -31,12 +31,18 @@ type dbEntry struct {
 	entry db.Value
 }
 
+type ifVlan struct {
+	ifName     *string
+	accessVlan *string
+	trunkVlans []string
+}
+
 type vlanData struct {
 	vlanTs       *db.TableSpec
 	vlanMemberTs *db.TableSpec
 	vlanTblTs    *db.TableSpec
 
-	vlanMemberTableMap map[string]map[string]dbEntry
+	vlanMembersTableMap map[string]map[string]dbEntry
 }
 
 type intfData struct {
@@ -52,6 +58,7 @@ type intfData struct {
 	intfCountrTblTs *db.TableSpec
 
 	ifIPTableMap map[string]map[string]dbEntry
+	ifVlanInfo   *ifVlan
 }
 
 type IntfApp struct {
@@ -112,7 +119,7 @@ func (app *IntfApp) initializeVlan() {
 	app.vlanD.vlanMemberTs = &db.TableSpec{Name: "VLAN_MEMBER"}
 	app.vlanD.vlanTblTs = &db.TableSpec{Name: "VLAN_TABLE"}
 
-	app.vlanD.vlanMemberTableMap = make(map[string]map[string]dbEntry)
+	app.vlanD.vlanMembersTableMap = make(map[string]map[string]dbEntry)
 }
 
 func (app *IntfApp) initialize(data appData) {
@@ -146,15 +153,40 @@ func (app *IntfApp) translateCreate(d *db.DB) ([]db.WatchKeys, error) {
 func (app *IntfApp) translateUpdate(d *db.DB) ([]db.WatchKeys, error) {
 	var err error
 	var keys []db.WatchKeys
+	pathInfo := app.path
 
-	log.Info("translateUpdate:intf:path =", app.path)
+	log.Infof("Received UPDATE for path %s; vars=%v", pathInfo.Template, pathInfo.Vars)
 
-	keys, err = app.translateCommon(d, opUpdate)
+	intfObj := app.getAppRootObject()
 
-	if err != nil {
-		log.Info("Something wrong:=", err)
+	targetUriPath, err := getYangPathFromUri(app.path.Path)
+	log.Info("uripath:=", targetUriPath)
+	log.Info("err:=", err)
+
+	if intfObj.Interface != nil && len(intfObj.Interface) > 0 {
+		log.Info("len:=", len(intfObj.Interface))
+		for ifKey, _ := range intfObj.Interface {
+			log.Info("Name:=", ifKey)
+			err := app.getIntfTypeFromIntf(&ifKey)
+			if err != nil {
+				errStr := "Invalid Interface type:" + ifKey
+				ifValidErr := tlerr.InvalidArgsError{Format: errStr}
+				return keys, ifValidErr
+			}
+			switch app.intfType {
+			case ETHERNET:
+				keys, err = app.translateUpdatePhyIntf(d, &ifKey, opUpdate)
+				if err != nil {
+					return keys, err
+				}
+			case VLAN:
+				keys, err = app.translateUpdateVlanIntf(d, &ifKey, opUpdate)
+				if err != nil {
+					return keys, err
+				}
+			}
+		}
 	}
-
 	return keys, err
 }
 
@@ -261,10 +293,24 @@ func (app *IntfApp) processCreate(d *db.DB) (SetResponse, error) {
 }
 
 func (app *IntfApp) processUpdate(d *db.DB) (SetResponse, error) {
+	var err error
+	var resp SetResponse
 
-	log.Infof("Calling processCommon()")
+	log.Info("processUpdate:intf:path =", app.path)
+	log.Info("ProcessUpdate: Target Type is " + reflect.TypeOf(*app.ygotTarget).Elem().Name())
 
-	resp, err := app.processCommon(d)
+	switch app.intfType {
+	case ETHERNET:
+		err = app.processUpdatePhyIntf(d)
+		if err != nil {
+			return resp, err
+		}
+	case VLAN:
+		err = app.processUpdateVlanIntf(d)
+		if err != nil {
+			return resp, err
+		}
+	}
 	return resp, err
 }
 
@@ -281,7 +327,6 @@ func (app *IntfApp) processDelete(d *db.DB) (SetResponse, error) {
 	var resp SetResponse
 	log.Info("processDelete:intf:path =", app.path)
 
-	/* Delete the elements present in vlanTable Map */
 	switch app.intfType {
 	case ETHERNET:
 		err = app.processDeletePhyIntf(d)
@@ -317,66 +362,4 @@ func (app *IntfApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error) {
 		return app.processGetAllInterfaces(dbs)
 	}
 	return GetResponse{Payload: payload}, err
-}
-
-func (app *IntfApp) translateCommon(d *db.DB, inpOp reqType) ([]db.WatchKeys, error) {
-	var err error
-	var keys []db.WatchKeys
-	pathInfo := app.path
-
-	log.Infof("Received UPDATE for path %s; vars=%v", pathInfo.Template, pathInfo.Vars)
-
-	intfObj := app.getAppRootObject()
-
-	targetUriPath, err := getYangPathFromUri(app.path.Path)
-	log.Info("uripath:=", targetUriPath)
-	log.Info("err:=", err)
-
-	if intfObj.Interface != nil && len(intfObj.Interface) > 0 {
-		log.Info("len:=", len(intfObj.Interface))
-		for ifKey, _ := range intfObj.Interface {
-			log.Info("Name:=", ifKey)
-			err := app.getIntfTypeFromIntf(&ifKey)
-			if err != nil {
-				errStr := "Invalid Interface type:" + ifKey
-				ifValidErr := tlerr.InvalidArgsError{Format: errStr}
-				return keys, ifValidErr
-			}
-			switch app.intfType {
-			case ETHERNET:
-				keys, err = app.translateCommonPhyIntf(d, &ifKey, inpOp)
-				if err != nil {
-					return keys, err
-				}
-			case VLAN:
-				keys, err = app.translateCommonVlanIntf(d, &ifKey, inpOp)
-				if err != nil {
-					return keys, err
-				}
-			}
-		}
-	}
-	return keys, err
-}
-
-func (app *IntfApp) processCommon(d *db.DB) (SetResponse, error) {
-	var err error
-	var resp SetResponse
-
-	log.Info("processCommon:intf:path =", app.path)
-	log.Info("ProcessCommon: Target Type is " + reflect.TypeOf(*app.ygotTarget).Elem().Name())
-
-	switch app.intfType {
-	case ETHERNET:
-		err = app.processCommonPhyIntf(d)
-		if err != nil {
-			return resp, err
-		}
-	case VLAN:
-		err = app.processCommonVlanIntf(d)
-		if err != nil {
-			return resp, err
-		}
-	}
-	return resp, err
 }

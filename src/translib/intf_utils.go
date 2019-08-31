@@ -32,7 +32,6 @@ func (app *IntfApp) getIntfTypeFromIntf(ifName *string) error {
 }
 
 /* Validates whether the specific IP exists in the DB for an Interface*/
-/* TODO: Change the name, it does updating DS as well */
 func (app *IntfApp) validateIp(dbCl *db.DB, ifName string, ip string) error {
 	app.allIpKeys, _ = app.doGetAllIpKeys(dbCl, app.intfD.intfIPTs)
 
@@ -65,7 +64,7 @@ func (app *IntfApp) validateIp(dbCl *db.DB, ifName string, ip string) error {
 }
 
 /* Validate whether the Interface has IP configuration */
-func (app *IntfApp) validateIpExistsForInterface(dbCl *db.DB, ifName *string) bool {
+func (app *IntfApp) validateIpCfgredForInterface(dbCl *db.DB, ifName *string) bool {
 	app.allIpKeys, _ = app.doGetAllIpKeys(dbCl, app.intfD.intfIPTs)
 
 	for _, key := range app.allIpKeys {
@@ -155,12 +154,13 @@ func (app *IntfApp) validateVlanExists(d *db.DB, vlanName *string) error {
 }
 
 /* Validate whether physical interface is valid or not */
+/* TODO: This needs to be extended based on Interface type */
 func (app *IntfApp) validateInterface(dbCl *db.DB, ifName string, ifKey db.Key) error {
 	var err error
 	if len(ifName) == 0 {
 		return errors.New("Empty Interface name")
 	}
-	app.intfD.portTblTs = &db.TableSpec{Name: "PORT_TABLE"}
+
 	_, err = dbCl.GetEntry(app.intfD.portTblTs, ifKey)
 	if err != nil {
 		log.Errorf("Error found on fetching Interface info from App DB for If Name : %s", ifName)
@@ -172,9 +172,9 @@ func (app *IntfApp) validateInterface(dbCl *db.DB, ifName string, ifKey db.Key) 
 }
 
 /* Generate Member Ports string from Slice to update VLAN table in CONFIG DB */
-func generateMemberPortsStringFromSlice(memberPortsList []string) (*string, error) {
+func generateMemberPortsStringFromSlice(memberPortsList []string) *string {
 	if len(memberPortsList) == 0 {
-		return nil, nil
+		return nil
 	}
 	var memberPortsStr strings.Builder
 
@@ -188,11 +188,11 @@ func generateMemberPortsStringFromSlice(memberPortsList []string) (*string, erro
 		idx = idx + 1
 	}
 	memberPorts := memberPortsStr.String()
-	return &(memberPorts), nil
+	return &(memberPorts)
 }
 
 /* Generate list of member-ports from string */
-func generateMemberPortsSliceFromString(memberPortsStr *string) ([]string) {
+func generateMemberPortsSliceFromString(memberPortsStr *string) []string {
 	if len(*memberPortsStr) == 0 {
 		return nil
 	}
@@ -254,4 +254,38 @@ func (app *IntfApp) doGetAllIpKeys(d *db.DB, dbSpec *db.TableSpec) ([]db.Key, er
 	keys, err = intfTable.GetKeys()
 	log.Infof("Found %d INTF table keys", len(keys))
 	return keys, err
+}
+
+func (app *IntfApp) removeMemberPortFromVlan(d *db.DB, vlanName *string, ifName *string) error {
+	var err error
+
+	vlanEntry, err := d.GetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{*vlanName}})
+	if err != nil {
+		return err
+	}
+	memberPortsListStr, ok := vlanEntry.Field["members@"]
+	if ok {
+		memberPortsList := generateMemberPortsSliceFromString(&memberPortsListStr)
+		idx := 0
+		memberFound := false
+
+		for idxVal, memberName := range memberPortsList {
+			if memberName == *ifName {
+				memberFound = true
+				idx = idxVal
+				break
+			}
+		}
+		if memberFound {
+			memberPortsList = append(memberPortsList[:idx], memberPortsList[idx+1:]...)
+			if len(memberPortsList) == 0 {
+				delete(vlanEntry.Field, "members@")
+			} else {
+				memberPortsStr := generateMemberPortsStringFromSlice(memberPortsList)
+				vlanEntry.Field["members@"] = *memberPortsStr
+			}
+			d.SetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{*vlanName}}, vlanEntry)
+		}
+	}
+	return err
 }

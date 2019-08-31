@@ -29,7 +29,7 @@ const (
 	PORT_STAT_MAP
 )
 
-func (app *IntfApp) translateCommonIntfConfig(ifKey *string, intf *ocbinds.OpenconfigInterfaces_Interfaces_Interface, curr *db.Value) {
+func (app *IntfApp) translateUpdateIntfConfig(ifKey *string, intf *ocbinds.OpenconfigInterfaces_Interfaces_Interface, curr *db.Value) {
 	if intf.Config == nil {
 		return
 	}
