@@ -149,3 +149,13 @@ xgxs_lcpll_xtal_refclk
 xgxs_pdetect
 xgxs_rx_lane_map
 xgxs_tx_lane_map
+ifp_inports_support_enable
+port_flex_enable
+pdma_descriptor_prefetch_enable
+pktdma_poll_mode_channel_bitmap 
+ccmdma_intr_enable
+ccm_dma_enable
+phy_enable
+l2xlrn_thread_interval
+l2xlrn_intr_en
+serdes_lane_config_media_type
