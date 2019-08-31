@@ -9,7 +9,7 @@ import openconfig_acl_client
 from rpipe_utils import pipestr
 from openconfig_acl_client.rest import ApiException
 from scripts.render_cli import show_cli_output
-
+import utils
 import urllib3
 urllib3.disable_warnings()
 
@@ -184,7 +184,11 @@ def generate_body(func, args):
 def run(func, args):
 
     c = openconfig_acl_client.Configuration()
+
     c.verify_ssl = False
+
+    utils.set_api_key(c)
+
     aa = openconfig_acl_client.OpenconfigAclApi(api_client=openconfig_acl_client.ApiClient(configuration=c))
 
     # create a body block

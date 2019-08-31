@@ -103,6 +103,8 @@ swagger_tags = []
 swaggerDict["tags"] = swagger_tags
 swaggerDict["paths"] = OrderedDict()
 swaggerDict["definitions"] = OrderedDict()
+swaggerDict["securityDefinitions"] = {"APIKeyHeader": {"type": "apiKey", "in": "header", "name": "X-API-Key"}}
+swaggerDict["security"] = [{"APIKeyHeader": []}]
 
 def resetSwaggerDict():
     global moduleDict
@@ -130,6 +132,8 @@ def resetSwaggerDict():
     swaggerDict["tags"] = swagger_tags
     swaggerDict["paths"] = OrderedDict()
     swaggerDict["definitions"] = OrderedDict()    
+    swaggerDict["securityDefinitions"] = {"APIKeyHeader": {"type": "apiKey", "in": "header", "name": "X-API-Key"}}
+    swaggerDict["security"] = [{"APIKeyHeader": []}]
 
 def pyang_plugin_init():
     plugin.register_plugin(OpenApiPlugin())

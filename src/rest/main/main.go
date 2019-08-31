@@ -60,7 +60,7 @@ func main() {
 	flag.StringVar(&certFile, "cert", "", "Server certificate file path")
 	flag.StringVar(&keyFile, "key", "", "Server private key file path")
 	flag.StringVar(&caFile, "cacert", "", "CA certificate for client certificate validation")
-	flag.StringVar(&clientAuth, "client_auth", "none", "Client auth mode - none|cert|user")
+	flag.StringVar(&clientAuth, "client_auth", "none", "Client auth mode - none|cert|user|key")
 	flag.Parse()
 	// Suppress warning messages related to logging before flag parse
         flag.CommandLine.Parse([]string{})
@@ -71,6 +71,9 @@ func main() {
 
     if clientAuth == "user" {
         server.SetUserAuthEnable(true)
+    }
+    if clientAuth == "key" {
+    	server.SetApiKeyAuthEnable(true)
     }
 
 	router := server.NewRouter()
@@ -155,6 +158,8 @@ func getTLSClientAuthType() tls.ClientAuthType {
 	case "none":
 		return tls.RequestClientCert
 	case "user":
+		return tls.RequestClientCert
+	case "key":
 		return tls.RequestClientCert
 	case "cert":
 		if caFile == "" {

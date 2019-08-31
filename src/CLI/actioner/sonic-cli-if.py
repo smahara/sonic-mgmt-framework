@@ -7,7 +7,7 @@ import openconfig_interfaces_client
 from rpipe_utils import pipestr
 from openconfig_interfaces_client.rest import ApiException
 from scripts.render_cli import show_cli_output
-
+import utils
 import urllib3
 urllib3.disable_warnings()
 
@@ -74,6 +74,7 @@ def run(func, args):
 
     c = openconfig_interfaces_client.Configuration()
     c.verify_ssl = False
+    utils.set_api_key(c)
     aa = openconfig_interfaces_client.OpenconfigInterfacesApi(api_client=openconfig_interfaces_client.ApiClient(configuration=c))
 
     # create a body block

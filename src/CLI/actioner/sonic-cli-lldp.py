@@ -8,7 +8,7 @@ from rpipe_utils import pipestr
 from openconfig_lldp_client.rest import ApiException
 from scripts.render_cli import show_cli_output
 
-
+import utils
 import urllib3
 urllib3.disable_warnings()
 plugins = dict()
@@ -38,6 +38,7 @@ def generate_body(func, args):
 def run(func, args):
     c = openconfig_lldp_client.Configuration()
     c.verify_ssl = False
+    utils.set_api_key(c)
     aa = openconfig_lldp_client.OpenconfigLldpApi(api_client=openconfig_lldp_client.ApiClient(configuration=c))
 
     # create a body block
