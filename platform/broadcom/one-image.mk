@@ -5,6 +5,7 @@ $(SONIC_ONE_IMAGE)_MACHINE = broadcom
 $(SONIC_ONE_IMAGE)_IMAGE_TYPE = onie
 $(SONIC_ONE_IMAGE)_INSTALLS += $(BRCM_OPENNSL_KERNEL)
 $(SONIC_ONE_IMAGE)_LAZY_INSTALLS += $(DELL_S6000_PLATFORM_MODULE) \
+                               $(DELL_Z9332F_PLATFORM_MODULE) \
                                $(DELL_Z9264F_PLATFORM_MODULE) \
                                $(DELL_S5232F_PLATFORM_MODULE) \
                                $(DELL_Z9332F_PLATFORM_MODULE) \
