@@ -294,6 +294,7 @@ sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable config-setup.service
 
 # Copy SNMP configuration files
 sudo cp $IMAGE_CONFIGS/snmp/snmp.yml $FILESYSTEM_ROOT/etc/sonic/
+sudo cp $IMAGE_CONFIGS/snmp/snmp_wait.sh $FILESYSTEM_ROOT/usr/bin
 
 # Copy ASN configuration files
 sudo cp $IMAGE_CONFIGS/asn/deployment_id_asn_map.yml $FILESYSTEM_ROOT/etc/sonic/
