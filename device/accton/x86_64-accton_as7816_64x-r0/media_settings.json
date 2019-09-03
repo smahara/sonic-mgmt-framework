@@ -1,0 +1,2182 @@
+{
+    "GLOBAL_MEDIA_SETTINGS": {
+        "0": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x103f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x103f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x103f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }
+        }, 
+        "1": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x113f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x113f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x113f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }
+        }, 
+        "2": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }
+        }, 
+        "3": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }
+        }, 
+        "4": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1b4603", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x1b4603", 
+                    "lane3": "0x1b4603"
+                }
+            }
+        }, 
+        "5": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }
+        }, 
+        "6": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x174a03", 
+                    "lane1": "0x174a03", 
+                    "lane2": "0x174a03", 
+                    "lane3": "0x174a03"
+                }
+            }
+        }, 
+        "7": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x194803", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x174a03", 
+                    "lane3": "0x174a03"
+                }
+            }
+        }, 
+        "8": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }
+        }, 
+        "9": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0f3a04"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0f3a04"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0f3a04"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1d4403"
+                }
+            }
+        }, 
+        "10": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1a4703", 
+                    "lane1": "0x1a4703", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1a4703"
+                }
+            }
+        }, 
+        "11": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1b4603", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1b4603"
+                }
+            }
+        }, 
+        "12": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0a3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0a3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0a3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }
+        }, 
+        "13": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0b3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0b3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0b3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }
+        }, 
+        "14": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x093002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x093002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x093002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }
+        }, 
+        "15": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }
+        }, 
+        "16": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x082d02"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x082d02"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x082d02"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x154901", 
+                    "lane1": "0x124901", 
+                    "lane2": "0x124903", 
+                    "lane3": "0x144900"
+                }
+            }
+        }, 
+        "17": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x154900", 
+                    "lane1": "0x124904", 
+                    "lane2": "0x124901", 
+                    "lane3": "0x144902"
+                }
+            }
+        }, 
+        "18": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x154900", 
+                    "lane1": "0x124900", 
+                    "lane2": "0x124903", 
+                    "lane3": "0x144902"
+                }
+            }
+        }, 
+        "19": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x154903", 
+                    "lane1": "0x124904", 
+                    "lane2": "0x124904", 
+                    "lane3": "0x144904"
+                }
+            }
+        }, 
+        "20": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0c3002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0c3002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0c3002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x194803", 
+                    "lane1": "0x194803", 
+                    "lane2": "0x194803", 
+                    "lane3": "0x194803"
+                }
+            }
+        }, 
+        "21": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x194803", 
+                    "lane1": "0x194803", 
+                    "lane2": "0x194803", 
+                    "lane3": "0x194803"
+                }
+            }
+        }, 
+        "22": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0d3403", 
+                    "lane3": "0x0d3402"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0d3403", 
+                    "lane3": "0x0d3402"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0d3403", 
+                    "lane3": "0x0d3402"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }
+        }, 
+        "23": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0e3602", 
+                    "lane1": "0x0f3a03", 
+                    "lane2": "0x0f3d03", 
+                    "lane3": "0x0f3d03"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0e3602", 
+                    "lane1": "0x0f3a03", 
+                    "lane2": "0x0f3d03", 
+                    "lane3": "0x0f3d03"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0e3602", 
+                    "lane1": "0x0f3a03", 
+                    "lane2": "0x0f3d03", 
+                    "lane3": "0x0f3d03"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1e4303", 
+                    "lane1": "0x1e4303", 
+                    "lane2": "0x1d4403", 
+                    "lane3": "0x1e4303"
+                }
+            }
+        }, 
+        "24": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x154906", 
+                    "lane1": "0x154904", 
+                    "lane2": "0x154903", 
+                    "lane3": "0x154903"
+                }
+            }
+        }, 
+        "25": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x174902", 
+                    "lane1": "0x174902", 
+                    "lane2": "0x174902", 
+                    "lane3": "0x174905"
+                }
+            }
+        }, 
+        "26": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1a4703", 
+                    "lane1": "0x184903", 
+                    "lane2": "0x184903", 
+                    "lane3": "0x1a4703"
+                }
+            }
+        }, 
+        "27": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0b3203", 
+                    "lane1": "0x0c3403", 
+                    "lane2": "0x0c3403", 
+                    "lane3": "0x0d3403"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0b3203", 
+                    "lane1": "0x0c3403", 
+                    "lane2": "0x0c3403", 
+                    "lane3": "0x0d3403"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0b3203", 
+                    "lane1": "0x0c3403", 
+                    "lane2": "0x0c3403", 
+                    "lane3": "0x0d3403"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1a4703", 
+                    "lane1": "0x1a4703", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1a4703"
+                }
+            }
+        }, 
+        "28": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1a4505", 
+                    "lane1": "0x1a4505", 
+                    "lane2": "0x1a4505", 
+                    "lane3": "0x1a4505"
+                }
+            }
+        }, 
+        "29": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0c3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0c3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0c3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1b4603", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x1b4603", 
+                    "lane3": "0x1b4603"
+                }
+            }
+        }, 
+        "30": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1a4604", 
+                    "lane1": "0x1a4604", 
+                    "lane2": "0x1a4604", 
+                    "lane3": "0x1a4604"
+                }
+            }
+        }, 
+        "31": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0d3602", 
+                    "lane1": "0x0d3602", 
+                    "lane2": "0x0d3602", 
+                    "lane3": "0x0d3602"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0d3602", 
+                    "lane1": "0x0d3602", 
+                    "lane2": "0x0d3602", 
+                    "lane3": "0x0d3602"
+                }
+            }, 
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0d3602", 
+                    "lane1": "0x0d3602", 
+                    "lane2": "0x0d3602", 
+                    "lane3": "0x0d3602"
+                }
+            }, 
+            "FIBERSTORE-QSFP28-100G-DAC,FIBERSTORE-Q28-PC03,FIBERSTORE-Q-4S2803,FS-QSFP28-SR4-100G,BROCADE-57-1000347-01,BROCADE-57-1000326-01": {
+                "preemphasis": {
+                    "lane0": "0x1b4504", 
+                    "lane1": "0x1b4504", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1b4504"
+                }
+            }
+        }
+    }, 
+    "PORT_MEDIA_SETTINGS": {
+        "0": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x103f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x103f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "1": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x113f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x113f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "2": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "3": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "4": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1b4603", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x1b4603", 
+                    "lane3": "0x1b4603"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1b4603", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x1b4603", 
+                    "lane3": "0x1b4603"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "5": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "6": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x174a03", 
+                    "lane1": "0x174a03", 
+                    "lane2": "0x174a03", 
+                    "lane3": "0x174a03"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x174a03", 
+                    "lane1": "0x174a03", 
+                    "lane2": "0x174a03", 
+                    "lane3": "0x174a03"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "7": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x194803", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x174a03", 
+                    "lane3": "0x174a03"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x194803", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x174a03", 
+                    "lane3": "0x174a03"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "8": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "9": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1d4403"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0f3a04"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1d4403"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0f3f02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0f3a04"
+                }
+            }
+        }, 
+        "10": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1a4703", 
+                    "lane1": "0x1a4703", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1a4703"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1a4703", 
+                    "lane1": "0x1a4703", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1a4703"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "11": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1b4603", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1b4603"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1b4603", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1b4603"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3a02", 
+                    "lane1": "0x0d3a02", 
+                    "lane2": "0x0d3a02", 
+                    "lane3": "0x0d3a02"
+                }
+            }
+        }, 
+        "12": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0a3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0a3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }
+        }, 
+        "13": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0b3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3402", 
+                    "lane1": "0x0b3402", 
+                    "lane2": "0x0a3402", 
+                    "lane3": "0x0a3202"
+                }
+            }
+        }, 
+        "14": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x093002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x093002"
+                }
+            }
+        }, 
+        "15": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x154c03", 
+                    "lane1": "0x154c03", 
+                    "lane2": "0x154c03", 
+                    "lane3": "0x154c03"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }
+        }, 
+        "16": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x154901", 
+                    "lane1": "0x124901", 
+                    "lane2": "0x124903", 
+                    "lane3": "0x144900"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x082d02"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x154901", 
+                    "lane1": "0x124901", 
+                    "lane2": "0x124903", 
+                    "lane3": "0x144900"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x082d02"
+                }
+            }
+        }, 
+        "17": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x154900", 
+                    "lane1": "0x124904", 
+                    "lane2": "0x124901", 
+                    "lane3": "0x144902"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x154900", 
+                    "lane1": "0x124904", 
+                    "lane2": "0x124901", 
+                    "lane3": "0x144902"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }
+        }, 
+        "18": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x154900", 
+                    "lane1": "0x124900", 
+                    "lane2": "0x124903", 
+                    "lane3": "0x144902"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x154900", 
+                    "lane1": "0x124900", 
+                    "lane2": "0x124903", 
+                    "lane3": "0x144902"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }
+        }, 
+        "19": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x154903", 
+                    "lane1": "0x124904", 
+                    "lane2": "0x124904", 
+                    "lane3": "0x144904"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x154903", 
+                    "lane1": "0x124904", 
+                    "lane2": "0x124904", 
+                    "lane3": "0x144904"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }
+        }, 
+        "20": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x194803", 
+                    "lane1": "0x194803", 
+                    "lane2": "0x194803", 
+                    "lane3": "0x194803"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0c3002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x194803", 
+                    "lane1": "0x194803", 
+                    "lane2": "0x194803", 
+                    "lane3": "0x194803"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0c3002"
+                }
+            }
+        }, 
+        "21": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x194803", 
+                    "lane1": "0x194803", 
+                    "lane2": "0x194803", 
+                    "lane3": "0x194803"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x194803", 
+                    "lane1": "0x194803", 
+                    "lane2": "0x194803", 
+                    "lane3": "0x194803"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }
+        }, 
+        "22": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0d3403", 
+                    "lane3": "0x0d3402"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1c4503", 
+                    "lane1": "0x1c4503", 
+                    "lane2": "0x1c4503", 
+                    "lane3": "0x1c4503"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0d3403", 
+                    "lane3": "0x0d3402"
+                }
+            }
+        }, 
+        "23": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1e4303", 
+                    "lane1": "0x1e4303", 
+                    "lane2": "0x1d4403", 
+                    "lane3": "0x1e4303"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0e3602", 
+                    "lane1": "0x0f3a03", 
+                    "lane2": "0x0f3d03", 
+                    "lane3": "0x0f3d03"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1e4303", 
+                    "lane1": "0x1e4303", 
+                    "lane2": "0x1d4403", 
+                    "lane3": "0x1e4303"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0e3602", 
+                    "lane1": "0x0f3a03", 
+                    "lane2": "0x0f3d03", 
+                    "lane3": "0x0f3d03"
+                }
+            }
+        }, 
+        "24": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x154906", 
+                    "lane1": "0x154904", 
+                    "lane2": "0x154903", 
+                    "lane3": "0x154903"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x154906", 
+                    "lane1": "0x154904", 
+                    "lane2": "0x154903", 
+                    "lane3": "0x154903"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }
+        }, 
+        "25": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x174902", 
+                    "lane1": "0x174902", 
+                    "lane2": "0x174902", 
+                    "lane3": "0x174905"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x174902", 
+                    "lane1": "0x174902", 
+                    "lane2": "0x174902", 
+                    "lane3": "0x174905"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }
+        }, 
+        "26": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1a4703", 
+                    "lane1": "0x184903", 
+                    "lane2": "0x184903", 
+                    "lane3": "0x1a4703"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1a4703", 
+                    "lane1": "0x184903", 
+                    "lane2": "0x184903", 
+                    "lane3": "0x1a4703"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0a3002", 
+                    "lane1": "0x0a3002", 
+                    "lane2": "0x0a3002", 
+                    "lane3": "0x0a3002"
+                }
+            }
+        }, 
+        "27": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1a4703", 
+                    "lane1": "0x1a4703", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1a4703"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0b3203", 
+                    "lane1": "0x0c3403", 
+                    "lane2": "0x0c3403", 
+                    "lane3": "0x0d3403"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1a4703", 
+                    "lane1": "0x1a4703", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1a4703"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0b3203", 
+                    "lane1": "0x0c3403", 
+                    "lane2": "0x0c3403", 
+                    "lane3": "0x0d3403"
+                }
+            }
+        }, 
+        "28": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1a4505", 
+                    "lane1": "0x1a4505", 
+                    "lane2": "0x1a4505", 
+                    "lane3": "0x1a4505"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1a4505", 
+                    "lane1": "0x1a4505", 
+                    "lane2": "0x1a4505", 
+                    "lane3": "0x1a4505"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }
+        }, 
+        "29": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1b4603", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x1b4603", 
+                    "lane3": "0x1b4603"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0c3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1b4603", 
+                    "lane1": "0x1b4603", 
+                    "lane2": "0x1b4603", 
+                    "lane3": "0x1b4603"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0c3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }
+        }, 
+        "30": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1a4604", 
+                    "lane1": "0x1a4604", 
+                    "lane2": "0x1a4604", 
+                    "lane3": "0x1a4604"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1a4604", 
+                    "lane1": "0x1a4604", 
+                    "lane2": "0x1a4604", 
+                    "lane3": "0x1a4604"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0c3402", 
+                    "lane1": "0x0d3402", 
+                    "lane2": "0x0c3402", 
+                    "lane3": "0x0c3402"
+                }
+            }
+        }, 
+        "31": {
+            "Default": {
+                "preemphasis": {
+                    "lane0": "0x1b4504", 
+                    "lane1": "0x1b4504", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1b4504"
+                }
+            }, 
+            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+                "preemphasis": {
+                    "lane0": "0x0d3602", 
+                    "lane1": "0x0d3602", 
+                    "lane2": "0x0d3602", 
+                    "lane3": "0x0d3602"
+                }
+            }, 
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x1b4504", 
+                    "lane1": "0x1b4504", 
+                    "lane2": "0x1a4703", 
+                    "lane3": "0x1b4504"
+                }
+            }, 
+            "QSFP+-40GBASE-LR4": {
+                "preemphasis": {
+                    "lane0": "0x0d3602", 
+                    "lane1": "0x0d3602", 
+                    "lane2": "0x0d3602", 
+                    "lane3": "0x0d3602"
+                }
+            }
+        }
+    }
+}
