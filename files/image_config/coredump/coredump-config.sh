@@ -11,10 +11,4 @@ fi
 # Read sysctl conf files again
 systemctl restart systemd-sysctl
 
-# Generate coredump-manager service configuration
-# TODO
-
-# Restart coredump-manager service
-#systemctl restart core-dump-manager
-
 exit 0
