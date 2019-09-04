@@ -1,0 +1,117 @@
+#!/bin/bash
+###########################################################################
+#Copyright 2019 Broadcom. All rights reserved. The term "Broadcom" refers #
+#to Broadcom Inc. and/or its subsidiaries.                                #
+###########################################################################
+# SONiC HwSKU Setup                                                       #
+#                                                                         #
+# This script is used to initialize HWSKU.                                #
+#                                                                         #
+###########################################################################
+
+# Command usage and help
+usage()
+{
+cat << EOF
+ Usage:  config-hwsku < list | set [hwsku-name]>
+         list  - List HWSKU supported.
+         set   - Set HwSKU.
+EOF
+}
+
+# Collect all information needed to get list of HWSKU
+PLATFORM=`sonic-cfggen -H -v DEVICE_METADATA.localhost.platform`
+PLATFORM_DIR=/usr/share/sonic/device/$PLATFORM
+PRESET=(`head -n 1 /usr/share/sonic/device/$PLATFORM/default_sku`)
+DEFAULT_HWSKU=${PRESET[0]}
+HWSKU_STR_START=${PRESET[0]:0:4}
+DEFAULT_PRESET=${PRESET[1]}
+
+# Restore SONiC configuration from a backup copy
+function list_hwskus()
+{
+  echo "List of supported HWSKU:"
+  for sku in $PLATFORM_DIR/*/;
+      do
+         sku="${sku%/}";
+         sku="${sku##*/}";
+	 if [ $HWSKU_STR_START != ${sku:0:4} ]; then 
+	    continue
+	 fi
+
+         if [ "$sku" = "$DEFAULT_HWSKU" ]; then
+	    echo "$sku (Present)";
+         else
+            echo "$sku";
+         fi
+      done
+}
+
+
+# Set requested HWSKU
+# Usage: set_hwsku <hwsku_name>
+#
+
+set_hwsku()
+{
+  # Parse arguments passed
+  HWSKU=$1
+  #Validate in Supported list
+  valid_sku=0
+  for sku in $PLATFORM_DIR/*/;
+      do
+         sku="${sku%/}";
+         sku="${sku##*/}";
+	 if [ $HWSKU_STR_START != ${sku:0:4} ]; then 
+	    continue
+	 fi
+         if [ "$sku" = "$HWSKU" ]; then
+            valid_sku=1
+            break
+         fi
+      done
+  if [ $valid_sku -eq 1 ]; then
+       if [ $DEFAULT_HWSKU = $HWSKU ]; then
+          echo "Same as present HWSKU $HWSKU, Do Nothing"
+       else 
+          echo -e "Warning: This deletes existing configurations and cause switch to reboot."
+	  read -r -p "Are you sure you want to change? [y/N] " response
+	  case $response in
+	      [yY][eE][sS]|[yY])
+                  echo "Setting Default HWSKU to $HWSKU $DEFAULT_PRESET"
+                  echo "$HWSKU $DEFAULT_PRESET" > /usr/share/sonic/device/$PLATFORM/default_sku
+		  echo "Remove existing config_db.json"
+                  if [ -r /etc/sonic/config_db.json ]; then
+		      rm -rf /etc/sonic/config_db.json 
+                  fi
+                  echo "Rebooting system"
+		  reboot
+		  ;;
+	      *)
+		  exit 0
+		  ;;
+	  esac
+        fi
+  else 
+     echo "Invalid HWSKU - $HWSKU"
+  fi
+}
+
+### Execution starts here ###
+CMD=$1
+if [ "$CMD" = "" ]; then
+   usage
+   exit 1
+fi
+
+# Process switch bootup event
+if [ "$CMD" = "list" ]; then
+   list_hwskus
+fi
+
+# Create ZTP configuration
+if [ "$CMD" = "set" ]; then
+    set_hwsku $2
+fi
+
+exit 0
