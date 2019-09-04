@@ -31,12 +31,6 @@ type dbEntry struct {
 	entry db.Value
 }
 
-type ifVlan struct {
-	ifName     *string
-	accessVlan *string
-	trunkVlans []string
-}
-
 type vlanData struct {
 	vlanTs       *db.TableSpec
 	vlanMemberTs *db.TableSpec
@@ -57,8 +51,8 @@ type intfData struct {
 	intfIPTblTs     *db.TableSpec
 	intfCountrTblTs *db.TableSpec
 
-	ifIPTableMap map[string]map[string]dbEntry
-	ifVlanInfo   *ifVlan
+	ifIPTableMap   map[string]map[string]dbEntry
+	ifVlanInfoList []*ifVlan
 }
 
 type IntfApp struct {

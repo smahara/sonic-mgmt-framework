@@ -177,9 +177,9 @@ func generateMemberPortsStringFromSlice(memberPortsList []string) *string {
 		return nil
 	}
 	var memberPortsStr strings.Builder
+	idx := 1
 
 	for _, memberPort := range memberPortsList {
-		idx := 1
 		if idx != len(memberPortsList) {
 			memberPortsStr.WriteString(memberPort + ",")
 		} else {
@@ -256,7 +256,8 @@ func (app *IntfApp) doGetAllIpKeys(d *db.DB, dbSpec *db.TableSpec) ([]db.Key, er
 	return keys, err
 }
 
-func (app *IntfApp) removeMemberPortFromVlan(d *db.DB, vlanName *string, ifName *string) error {
+/* Removes Interface name as member of VLAN and update the members-list of VLAN Table */
+func (app *IntfApp) removeMembAndUpdateMembersListForVlanTbl(d *db.DB, vlanName *string, ifName *string) error {
 	var err error
 
 	vlanEntry, err := d.GetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{*vlanName}})
@@ -288,4 +289,72 @@ func (app *IntfApp) removeMemberPortFromVlan(d *db.DB, vlanName *string, ifName 
 		}
 	}
 	return err
+}
+
+/* Removal of untagged-vlan associated with interface, updates VLAN_MEMBER table and returns vlan*/
+func (app *IntfApp) removeUntaggedVlanAndUpdateVlanMembTbl(d *db.DB, ifName *string) (*string, error) {
+	if len(*ifName) == 0 {
+		return nil, errors.New("Interface name is empty for fetching list of VLANs!")
+	}
+
+	var vlanMemberKeys []db.Key
+	vlanMemberTable, err := d.GetTable(app.vlanD.vlanMemberTs)
+	if err != nil {
+		return nil, err
+	}
+
+	vlanMemberKeys, err = vlanMemberTable.GetKeys()
+	log.Infof("Found %d Vlan Member table keys", len(vlanMemberKeys))
+
+	for _, vlanMember := range vlanMemberKeys {
+		if len(vlanMember.Comp) < 2 {
+			continue
+		}
+		if vlanMember.Get(1) != *ifName {
+			continue
+		}
+		memberPortEntry, err := d.GetEntry(app.vlanD.vlanMemberTs, vlanMember)
+		if err != nil || !memberPortEntry.IsPopulated() {
+			errStr := "Get from VLAN_MEMBER table for Vlan: + " + vlanMember.Get(0) + " Interface:" + *ifName + " failed!"
+			return nil, errors.New(errStr)
+		}
+		tagMode, ok := memberPortEntry.Field["tagging_mode"]
+		if !ok {
+			errStr := "tagging_mode entry is not present for VLAN: " + vlanMember.Get(0) + " Interface: " + *ifName
+			return nil, errors.New(errStr)
+		}
+		if tagMode == "untagged" {
+			err = d.DeleteEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{vlanMember.Get(0), *ifName}})
+			if err != nil {
+				return nil, err
+			}
+			vlanName := vlanMember.Get(0)
+			return &vlanName, nil
+		}
+	}
+	errStr := "Untagged VLAN configuration doesn't exist for Interface: " + *ifName
+	return nil, tlerr.InvalidArgsError{Format: errStr}
+}
+
+/* Removal of tagged-vlan associated with interface and update VLAN_MEMBER table */
+func (app *IntfApp) removeTaggedVlanAndUpdateVlanMembTbl(d *db.DB, trunkVlan *string, ifName *string) error {
+	var err error
+	memberPortEntry, err := d.GetEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{*trunkVlan, *ifName}})
+	if err != nil || !memberPortEntry.IsPopulated() {
+		errStr := "Trunk Vlan: " + *trunkVlan + " not configured for Interface: " + *ifName
+		return errors.New(errStr)
+	}
+	tagMode, ok := memberPortEntry.Field["tagging_mode"]
+	if !ok {
+		errStr := "tagging_mode entry is not present for VLAN: " + *trunkVlan + " Interface: " + *ifName
+		return errors.New(errStr)
+	}
+	if tagMode == "tagged" {
+		err = d.DeleteEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{*trunkVlan, *ifName}})
+		if err != nil {
+			return err
+		}
+	}
+	errStr := "Tagged Vlan Configuration doesn't exist for Interface: " + *ifName
+	return tlerr.InvalidArgsError{Format: errStr}
 }

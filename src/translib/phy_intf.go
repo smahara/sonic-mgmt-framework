@@ -24,6 +24,13 @@ type intfMode struct {
 	mode   intfModeType
 }
 
+type ifVlan struct {
+	ifName     *string
+	mode       intfModeType
+	accessVlan *string
+	trunkVlans []string
+}
+
 /******* CONFIG FUNCTIONS ********/
 
 func (app *IntfApp) translateUpdatePhyIntfSubInterfaces(d *db.DB, ifKey *string, intf *ocbinds.OpenconfigInterfaces_Interfaces_Interface) error {
@@ -366,7 +373,7 @@ func (app *IntfApp) removeVlanMembFromIntfAndFetchVlanList(d *db.DB, ifName *str
 	return vlanSlice, err
 }
 
-func (app *IntfApp) removeAndUpdateMembersListForVlan(d *db.DB, ifName *string, vlan *string) error {
+func (app *IntfApp) removeAndUpdateMembersListForVlan(d *db.DB, vlan *string, ifName *string) error {
 
 	vlanEntry, err := d.GetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{*vlan}})
 	if err != nil {
@@ -485,17 +492,19 @@ func (app *IntfApp) processUpdatePhyIntf(d *db.DB) error {
 
 /* TODO: Update the Data Structure to Map, since you could get request for multiple interfaces in JSON request */
 func (app *IntfApp) translateDeletePhyIntfEthernetSwitchedVlan(d *db.DB, switchedVlanIntf *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan, ifName *string) {
-	vlanFound := false
+	log.Info("translateDeletePhyIntfEthernetSwitchedVlan() called")
 	var ifVlanInfo ifVlan
+
 	if switchedVlanIntf.Config != nil {
+		log.Info("Delete Ethernet-Config called")
 		if switchedVlanIntf.Config.AccessVlan != nil {
-			accessVlan := switchedVlanIntf.Config.AccessVlan
-			accessVlanStr := "Vlan" + strconv.Itoa(int(*accessVlan))
-			ifVlanInfo.accessVlan = &accessVlanStr
-			vlanFound = true
+			log.Info("Delete Access VLAN called!")
+			ifVlanInfo.mode = ACCESS
 		}
 		if switchedVlanIntf.Config.TrunkVlans != nil {
+			log.Info("Delete Trunk VLAN called")
 			trunkVlansUnionList := switchedVlanIntf.Config.TrunkVlans
+			ifVlanInfo.mode = TRUNK
 			for _, trunkVlanUnion := range trunkVlansUnionList {
 				trunkVlanUnionType := reflect.TypeOf(trunkVlanUnion).Elem()
 
@@ -503,17 +512,17 @@ func (app *IntfApp) translateDeletePhyIntfEthernetSwitchedVlan(d *db.DB, switche
 
 				case reflect.TypeOf(ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_String{}):
 					val := (trunkVlanUnion).(*ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_String)
-					ifVlanInfo.trunkVlans = append(app.intfD.ifVlanInfo.trunkVlans, val.String)
+					ifVlanInfo.trunkVlans = append(ifVlanInfo.trunkVlans, val.String)
 				case reflect.TypeOf(ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_Uint16{}):
 					val := (trunkVlanUnion).(*ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_Uint16)
-					ifVlanInfo.trunkVlans = append(app.intfD.ifVlanInfo.trunkVlans, "Vlan"+strconv.Itoa(int(val.Uint16)))
+					ifVlanInfo.trunkVlans = append(ifVlanInfo.trunkVlans, "Vlan"+strconv.Itoa(int(val.Uint16)))
 				}
 			}
-			vlanFound = true
 		}
-		if vlanFound {
+		if ifVlanInfo.mode != MODE_UNSET {
 			ifVlanInfo.ifName = ifName
-			app.intfD.ifVlanInfo = &ifVlanInfo
+			app.intfD.ifVlanInfoList = append(app.intfD.ifVlanInfoList, &ifVlanInfo)
+			log.Info("Updated the ifVlanInfo DS!")
 		}
 	}
 }
@@ -622,60 +631,49 @@ func (app *IntfApp) processDeletePhyIntfSubInterfaces(d *db.DB) error {
 }
 
 func (app *IntfApp) processDeletePhyIntfVlanRemoval(d *db.DB) error {
+	log.Info("processDeletePhyIntfVlanRemoval() called")
 	var err error
 
-	if app.intfD.ifVlanInfo == nil {
-		return err
-	}
-	if app.intfD.ifVlanInfo.ifName == nil {
-		return err
+	if len(app.intfD.ifVlanInfoList) == 0 {
+		log.Info("No VLAN Info present for membership removal!")
+		return nil
 	}
 
-	ifName := app.intfD.ifVlanInfo.ifName
-	accessVlan := app.intfD.ifVlanInfo.accessVlan
-	trunkVlans := app.intfD.ifVlanInfo.trunkVlans
+	for _, ifVlanInfo := range app.intfD.ifVlanInfoList {
+		if ifVlanInfo.ifName == nil {
+			return errors.New("No Interface name present for membership removal from VLAN!")
+		}
 
-	if accessVlan != nil {
-		log.Infof("Access VLAN received - %s received for Interface - %s", *accessVlan, *ifName)
-		memberPortEntry, err := d.GetEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{*accessVlan, *ifName}})
-		if err != nil || !memberPortEntry.IsPopulated() {
-			errStr := "Access Vlan: " + *accessVlan + " not configured for Interface: " + *ifName
-			return errors.New(errStr)
-		}
-		tagMode, ok := memberPortEntry.Field["tagging_mode"]
-		if !ok {
-			errStr := "tagging_mode entry is not present for VLAN: " + *accessVlan + " Interface: " + *ifName
-			return errors.New(errStr)
-		}
-		if tagMode != "untagged" {
-			errStr := "Member port: " + *ifName + " is not configured as untagged port to VLAN: " + *accessVlan
-			return errors.New(errStr)
-		}
-		err = d.DeleteEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{*accessVlan, *ifName}})
-		if err != nil {
-			return err
-		}
-		app.removeMemberPortFromVlan(d, accessVlan, ifName)
-	}
-	if trunkVlans != nil {
-		for _, trunkVlan := range trunkVlans {
-			log.Infof("Trunk VLAN received - %s for Interface - %s", trunkVlan, *ifName)
-			memberPortEntry, err := d.GetEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{trunkVlan, *ifName}})
-			if err != nil || !memberPortEntry.IsPopulated() {
-				errStr := "Trunk Vlan: " + trunkVlan + " not configured for Interface: " + *ifName
-				return errors.New(errStr)
+		ifName := ifVlanInfo.ifName
+		ifMode := ifVlanInfo.mode
+		trunkVlans := ifVlanInfo.trunkVlans
+
+		switch(ifMode) {
+		case ACCESS:
+			/* Handling Access Vlan delete */
+			log.Info("Access VLAN Delete!")
+			untagdVlan, err := app.removeUntaggedVlanAndUpdateVlanMembTbl(d, ifName)
+			if err != nil {
+				return err
 			}
-			tagMode, ok := memberPortEntry.Field["tagging_mode"]
-			if !ok {
-				errStr := "tagging_mode entry is not present for VLAN: " + trunkVlan + " Interface: " + *ifName
-				return errors.New(errStr)
+			if untagdVlan != nil {
+				app.removeMembAndUpdateMembersListForVlanTbl(d, untagdVlan, ifName)
 			}
-			if tagMode != "tagged" {
-				errStr := "Member port: " + *ifName + " is not configured as tagged port to VLAN: " + trunkVlan
-				return errors.New(errStr)
+
+		case TRUNK:
+			/* Handling trunk-vlans delete */
+			log.Info("Trunk VLAN Delete!")
+			if trunkVlans != nil {
+				log.Info("Entered trunk-vlans")
+				for _, trunkVlan := range trunkVlans {
+					log.Infof("Trunk VLAN received - %s for Interface - %s", trunkVlan, *ifName)
+					err = app.removeTaggedVlanAndUpdateVlanMembTbl(d, &trunkVlan, ifName)
+					if err != nil {
+						return err
+					}
+					app.removeMembAndUpdateMembersListForVlanTbl(d, &trunkVlan, ifName)
+				}
 			}
-			err = d.DeleteEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{trunkVlan, *ifName}})
-			app.removeMemberPortFromVlan(d, &trunkVlan, ifName)
 		}
 	}
 	return err
