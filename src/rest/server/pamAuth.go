@@ -3,7 +3,9 @@ package server
 import (
 	"net/http"
 	"os/user"
-
+	"strings"
+	"io/ioutil"
+	"fmt"
 	"github.com/golang/glog"
 	//"github.com/msteinert/pam"
 	"golang.org/x/crypto/ssh"
@@ -74,42 +76,68 @@ func IsAdminGroup(username string) bool {
 
 func PAMAuthenAndAuthor(r *http.Request, rc *RequestContext) error {
 
+
 	username, passwd, authOK := r.BasicAuth()
 	if authOK == false {
 		glog.Errorf("[%s] User info not present", rc.ID)
-		return httpError(http.StatusUnauthorized, "")
+		api_key_header := r.Header.Get("X-API-Key")
+		if api_key_header == "" {
+			glog.Errorf("[%s] Api Key not present", rc.ID)
+			return httpError(http.StatusUnauthorized, "")
+		}
+
+		api_key_parts := strings.Split(api_key_header, " ")
+		if len(api_key_parts) != 2 {
+			glog.Errorf("[%s] Invalid Api Key Format", rc.ID)
+			return httpError(http.StatusUnauthorized, "")
+		}
+		username = api_key_parts[0]
+		api_key := api_key_parts[1]
+		glog.Infof("[%s] Received user=%s", rc.ID, username)
+		filename := fmt.Sprintf("/etc/rest_api_keys/%v.key", username)
+		user_key_file_cont, err := ioutil.ReadFile(filename)
+		user_key := strings.TrimSpace(string(user_key_file_cont))
+		if err != nil {
+			glog.Errorf("[%s] Invalid Api Key User", rc.ID)
+			return httpError(http.StatusUnauthorized, "")
+		}
+
+		if api_key != string(user_key) {
+
+			glog.Infof("[%s] Failed to authenticate, invalid API Key", rc.ID)
+			return httpError(http.StatusUnauthorized, "")
+
+		}
+	} else {
+
+		glog.Infof("[%s] Received user=%s", rc.ID, username)
+		/*
+		 * mgmt-framework container does not have access to /etc/passwd, /etc/group,
+		 * /etc/shadow and /etc/tacplus_conf files of host. One option is to share
+		 * /etc of host with /etc of container. For now disable this and use ssh
+		 * for authentication.
+		 */
+		/* err := PAMAuthUser(username, passwd)
+		    if err != nil {
+				log.Printf("Authentication failed. user=%s, error:%s", username, err.Error())
+		        return err
+		    }*/
+
+		//Use ssh for authentication.
+		config := &ssh.ClientConfig{
+			User: username,
+			Auth: []ssh.AuthMethod{
+				ssh.Password(passwd),
+			},
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		}
+		_, err := ssh.Dial("tcp", "127.0.0.1:22", config)
+		if err != nil {
+			glog.Infof("[%s] Failed to authenticate; %v", rc.ID, err)
+			return httpError(http.StatusUnauthorized, "")
+		}
 	}
-
-	glog.Infof("[%s] Received user=%s", rc.ID, username)
-
-	/*
-	 * mgmt-framework container does not have access to /etc/passwd, /etc/group,
-	 * /etc/shadow and /etc/tacplus_conf files of host. One option is to share
-	 * /etc of host with /etc of container. For now disable this and use ssh
-	 * for authentication.
-	 */
-	/* err := PAMAuthUser(username, passwd)
-	    if err != nil {
-			log.Printf("Authentication failed. user=%s, error:%s", username, err.Error())
-	        return err
-	    }*/
-
-	//Use ssh for authentication.
-	config := &ssh.ClientConfig{
-		User: username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(passwd),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
-	_, err := ssh.Dial("tcp", "127.0.0.1:22", config)
-	if err != nil {
-		glog.Infof("[%s] Failed to authenticate; %v", rc.ID, err)
-		return httpError(http.StatusUnauthorized, "")
-	}
-
 	glog.Infof("[%s] Authentication passed. user=%s ", rc.ID, username)
-
 	//Allow SET request only if user belong to admin group
 	if isWriteOperation(r) && IsAdminGroup(username) == false {
 		glog.Errorf("[%s] Not an admin; cannot allow %s", rc.ID, r.Method)

@@ -60,21 +60,19 @@ func main() {
 	flag.StringVar(&certFile, "cert", "", "Server certificate file path")
 	flag.StringVar(&keyFile, "key", "", "Server private key file path")
 	flag.StringVar(&caFile, "cacert", "", "CA certificate for client certificate validation")
-	flag.StringVar(&clientAuth, "client_auth", "none", "Client auth mode - none|cert|user|key")
+	flag.StringVar(&clientAuth, "client_auth", "false", "Enable Client Auth, true|false")
 	flag.Parse()
 	// Suppress warning messages related to logging before flag parse
-        flag.CommandLine.Parse([]string{})
+	flag.CommandLine.Parse([]string{})
 
 	swagger.Load()
 
 	server.SetUIDirectory(uiDir)
+	
+	if clientAuth == "true"{
+		server.SetAuthEnable(true)
+	}
 
-    if clientAuth == "user" {
-        server.SetUserAuthEnable(true)
-    }
-    if clientAuth == "key" {
-    	server.SetApiKeyAuthEnable(true)
-    }
 
 	router := server.NewRouter()
 
@@ -154,21 +152,7 @@ func prepareCACertificates() *x509.CertPool {
 // Returns corresponding tls.ClientAuthType value. Exits the process
 // if value is not valid ('none', 'cert' or 'auth')
 func getTLSClientAuthType() tls.ClientAuthType {
-	switch clientAuth {
-	case "none":
-		return tls.RequestClientCert
-	case "user":
-		return tls.RequestClientCert
-	case "key":
-		return tls.RequestClientCert
-	case "cert":
-		if caFile == "" {
-			glog.Fatal("--cacert option is mandatory when --client_auth is 'cert'")
-		}
-		return tls.RequireAndVerifyClientCert
-	default:
-		glog.Fatalf("Invalid '--client_auth' value '%s'. "+
-			"Expecting one of 'none', 'cert' or 'user'", clientAuth)
-		return tls.RequireAndVerifyClientCert // dummy
-	}
+
+	return tls.RequestClientCert
+
 }

@@ -18,8 +18,8 @@ import (
 
 // Root directory for UI files
 var swaggerUIDir = "./ui"
-var isUserAuthEnabled = false
-var isApiKeyAuthEnabled = false
+var isAuthEnabled = false
+
 
 // SetUIDirectory functions sets directiry where Swagger UI
 // resources are maintained.
@@ -31,12 +31,10 @@ func SetUIDirectory(directory string) {
 // authentication for REST requests. By default user uthentication
 // is disabled. When enabled, the server expects clients to pass
 // user credentials as per HTTP Basic Autnetication method.
-func SetUserAuthEnable(val bool) {
-	isUserAuthEnabled = val
+func SetAuthEnable(val bool) {
+	isAuthEnabled = val
 }
-func SetApiKeyAuthEnable(val bool) {
-	isApiKeyAuthEnabled = val	
-}
+
 
 // Route registration information
 type Route struct {
@@ -124,11 +122,8 @@ func loggingMiddleware(inner http.Handler, name string) http.Handler {
 // withMiddleware function prepares the default middleware chain for
 // REST APIs.
 func withMiddleware(h http.Handler, name string) http.Handler {
-	if isUserAuthEnabled {
+	if isAuthEnabled {
 		h = authMiddleware(h)
-	}
-	if isApiKeyAuthEnabled {
-		h = authApiKeyMiddleware(h)
 	}
 
 	return loggingMiddleware(h, name)
