@@ -98,6 +98,7 @@
 #define TLV_T_MLACP_STP_INFO            0x1037//no support
 #define TLV_T_MLACP_MAC_INFO            0x1038
 #define TLV_T_MLACP_WARMBOOT_FLAG       0x1039
+#define TLV_T_MLACP_IF_UP_ACK           0x103a
 #define TLV_T_MLACP_LIST_END            0x104a //list end
 
 /* Debug */
@@ -177,6 +178,9 @@ static char* get_tlv_type_string(int type)
 
         case TLV_T_MLACP_STP_INFO:
             return "TLV_T_MLACP_STP_INFO";
+        
+        case TLV_T_MLACP_IF_UP_ACK:
+            return "TLV_T_MLACP_IF_UP_ACK";
     }
 
     return "UNKNOWN";
@@ -437,6 +441,8 @@ typedef enum mclag_msg_type_e_
     MCLAG_MSG_TYPE_FLUSH_FDB            = 3,
     MCLAG_MSG_TYPE_SET_MAC              = 4,
     MCLAG_MSG_TYPE_SET_FDB              = 5,
+    MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_ENABLE  = 7,
+    MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_DISABLE = 8,
     MCLAG_MSG_TYPE_GET_FDB_CHANGES      = 20
 }mclag_msg_type_e;
 
@@ -449,7 +455,8 @@ typedef enum mclag_sub_option_type_e_
     MCLAG_SUB_OPTION_TYPE_MAC_LEARN_ENABLE  = 3,
     MCLAG_SUB_OPTION_TYPE_MAC_LEARN_DISABLE = 4,
     MCLAG_SUB_OPTION_TYPE_SET_MAC_SRC       = 5,
-    MCLAG_SUB_OPTION_TYPE_SET_MAC_DST       = 6
+    MCLAG_SUB_OPTION_TYPE_SET_MAC_DST       = 6,
+    MCLAG_SUB_OPTION_TYPE_MCLAG_INTF_NAME   = 7
 } mclag_sub_option_type_e;
 
 

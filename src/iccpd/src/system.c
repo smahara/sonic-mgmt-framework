@@ -51,7 +51,8 @@ void system_init(struct System* sys)
 {
     if (sys == NULL )
         return;
-
+    
+    memset(sys, 0, sizeof(struct System));
     sys->server_fd = -1;
     sys->sync_fd = -1;
     sys->sync_ctrl_fd = -1;
@@ -196,4 +197,48 @@ struct CSM* system_get_csm_by_mlacp_id(int id)
     }
 
     return NULL;
+}
+
+SYNCD_TX_DBG_CNTR_MSG_e system_syncdtx_to_dbg_msg_type(uint32_t msg_type)
+{
+    switch(msg_type)
+    {
+        case MCLAG_MSG_TYPE_PORT_ISOLATE:
+            return SYNCD_TX_DBG_CNTR_MSG_PORT_ISOLATE;
+
+        case MCLAG_MSG_TYPE_PORT_MAC_LEARN_MODE:
+            return SYNCD_TX_DBG_CNTR_MSG_PORT_MAC_LEARN_MODE;
+
+        case MCLAG_MSG_TYPE_FLUSH_FDB:
+            return SYNCD_TX_DBG_CNTR_MSG_FLUSH_FDB;
+
+        case MCLAG_MSG_TYPE_SET_MAC:
+            return SYNCD_TX_DBG_CNTR_MSG_SET_IF_MAC;
+
+        case MCLAG_MSG_TYPE_SET_FDB:
+            return SYNCD_TX_DBG_CNTR_MSG_SET_FDB;
+
+        case MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_ENABLE:
+            return SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_ENABLE;
+
+        case MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_DISABLE:
+            return SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE;
+
+        case MCLAG_MSG_TYPE_GET_FDB_CHANGES:
+            return SYNCD_TX_DBG_CNTR_MSG_GET_FDB_CHANGES;
+
+        default:
+            return SYNCD_TX_DBG_CNTR_MSG_MAX;
+    }
+}
+
+SYNCD_RX_DBG_CNTR_MSG_e system_syncdrx_to_dbg_msg_type(uint32_t msg_type)
+{
+    switch(msg_type)
+    {
+        case MCLAG_SYNCD_MSG_TYPE_FDB_OPERATION:
+            return SYNCD_RX_DBG_CNTR_MSG_MAC;
+        default:
+            return SYNCD_RX_DBG_CNTR_MSG_MAX;
+    }
 }

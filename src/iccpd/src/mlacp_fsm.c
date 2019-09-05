@@ -134,6 +134,13 @@ static void mlacp_stage_sync_request_handler(struct CSM* csm, struct Msg* msg);
 static void mlacp_stage_handler(struct CSM* csm, struct Msg* msg);
 static void mlacp_exchange_handler(struct CSM* csm, struct Msg* msg);
 
+/* Interface up ack */
+static void mlacp_fsm_send_if_up_ack(
+    struct CSM       *csm,
+    uint8_t          if_type,
+    uint16_t         if_id,
+    uint8_t          port_isolation_enable);
+
 /******************************************************************
  * Sync Sender APIs
  *
@@ -353,6 +360,13 @@ static void mlacp_sync_recv_sysConf(struct CSM* csm, struct Msg* msg)
         /*NOTE: we just change the node ID local side without sending NAK msg*/
         ICCPD_LOG_DEBUG("mlacp_fsm", "    Same Node ID = %d, send NAK", MLACP(csm).remote_system.node_id);
         mlacp_sync_send_nak_handler(csm, msg);
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            sysconf->icc_parameter.type, ICCP_DBG_CNTR_STS_ERR);
+    }
+    else
+    {
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            sysconf->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
     }
 
     return;
@@ -384,6 +398,13 @@ static void mlacp_sync_recv_aggConf(struct CSM* csm, struct Msg* msg)
     if (mlacp_fsm_update_Agg_conf(csm, portconf) == MCLAG_ERROR)
     {
         mlacp_sync_send_nak_handler(csm, msg);
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            portconf->icc_parameter.type, ICCP_DBG_CNTR_STS_ERR);
+    }
+    else
+    {
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            portconf->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
     }
 
     return;
@@ -398,7 +419,22 @@ static void mlacp_sync_recv_aggState(struct CSM* csm, struct Msg* msg)
     {
         mlacp_sync_send_nak_handler(csm, msg);
         /*MLACP(csm).error_msg = "Receive a port state update on an non-existed port. It is suggest to check the environment and re-initialize mLACP again.";*/
-        return;
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            portstate->icc_parameter.type, ICCP_DBG_CNTR_STS_ERR);
+    }
+    else
+    {
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            portstate->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
+    }
+    /* Send interface up ack for MLAG interface regardless of the
+     * processing return code
+     */
+    if (portstate->agg_state == PORT_STATE_UP)
+    {
+        mlacp_fsm_send_if_up_ack(
+            csm, IF_UP_ACK_TYPE_PORT_CHANNEL, ntohs(portstate->agg_id),
+            PORT_ISOLATION_STATE_ENABLE);
     }
 
     return;
@@ -414,6 +450,8 @@ static void mlacp_sync_recv_syncData(struct CSM* csm, struct Msg* msg)
         /* Sync done*/
         MLACP(csm).wait_for_sync_data = 0;
     }
+    MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+        syncdata->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
 
     return;
 }
@@ -427,6 +465,8 @@ static void mlacp_sync_recv_syncReq(struct CSM* csm, struct Msg* msg)
 
     /* Reply the peer all sync info*/
     mlacp_sync_send_all_info_handler(csm);
+    MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+        mlacp_sync_req->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
 
     return;
 }
@@ -439,6 +479,13 @@ static void mlacp_sync_recv_portChanInfo(struct CSM* csm, struct Msg* msg)
     if (mlacp_fsm_update_port_channel_info(csm, portconf) == MCLAG_ERROR)
     {
         mlacp_sync_send_nak_handler(csm, msg);
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            portconf->icc_parameter.type, ICCP_DBG_CNTR_STS_ERR);
+    }
+    else
+    {
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            portconf->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
     }
 
     return;
@@ -450,6 +497,8 @@ static void mlacp_sync_recv_peerLlinkInfo(struct CSM* csm, struct Msg* msg)
 
     peerlink = (mLACPPeerLinkInfoTLV*)&(msg->buf[sizeof(ICCHdr)]);
     mlacp_fsm_update_peerlink_info( csm, peerlink);
+    MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+        peerlink->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
 
     return;
 }
@@ -460,6 +509,8 @@ static void mlacp_sync_recv_macInfo(struct CSM* csm, struct Msg* msg)
 
     mac_info = (struct mLACPMACInfoTLV *)&(msg->buf[sizeof(ICCHdr)]);
     mlacp_fsm_update_mac_info_from_peer(csm, mac_info);
+    MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+        mac_info->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
 
     return;
 }
@@ -470,6 +521,8 @@ static void mlacp_sync_recv_arpInfo(struct CSM* csm, struct Msg* msg)
 
     arp_info = (struct mLACPARPInfoTLV *)&(msg->buf[sizeof(ICCHdr)]);
     mlacp_fsm_update_arp_info(csm, arp_info);
+    MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+        arp_info->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
 
     return;
 }
@@ -486,6 +539,8 @@ static void mlacp_sync_recv_heartbeat(struct CSM* csm, struct Msg* msg)
 
     tlv = (struct mLACPHeartbeatTLV *)(&msg->buf[sizeof(ICCHdr)]);
     mlacp_fsm_update_heartbeat(csm, tlv);
+    MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+        tlv->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
 
     return;
 }
@@ -496,8 +551,48 @@ static void mlacp_sync_recv_warmboot(struct CSM* csm, struct Msg* msg)
 
     tlv = (struct mLACPWarmbootTLV *)(&msg->buf[sizeof(ICCHdr)]);
     mlacp_fsm_update_warmboot(csm, tlv);
+    MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+        tlv->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
 
     return;
+}
+
+
+static void mlacp_fsm_recv_if_up_ack(struct CSM* csm, struct Msg* msg)
+{
+    struct mLACPIfUpAckTLV  *tlv = NULL;
+    struct LocalInterface   *local_if = NULL;
+    uint16_t                if_id;
+
+    tlv = (struct mLACPIfUpAckTLV *)(&msg->buf[sizeof(ICCHdr)]);
+    if (tlv == NULL)
+        return;
+
+    if_id = ntohs(tlv->if_id);
+
+    if (tlv->if_type == IF_UP_ACK_TYPE_PORT_CHANNEL)
+    {
+        local_if = local_if_find_by_po_id(if_id);
+
+        ICCPD_LOG_DEBUG(__FUNCTION__,
+            " interface type/id %d/%d, local if 0x%x, active %u",
+            tlv->if_type, if_id, local_if,
+            local_if ? local_if->po_active : 0);
+
+        /* Ignore the ack if MLAG interface has gone down */
+        if (local_if && local_if->po_active)
+            mlacp_link_enable_traffic_distribution(local_if);
+
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            tlv->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
+    }
+    else
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "invalid i/f type %u, i/f ID %u",
+            tlv->if_type, if_id);
+        MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
+            tlv->icc_parameter.type, ICCP_DBG_CNTR_STS_ERR);
+    }
 }
 
 /*****************************************
@@ -926,6 +1021,10 @@ static void mlacp_sync_receiver_handler(struct CSM* csm, struct Msg* msg)
         case TLV_T_MLACP_WARMBOOT_FLAG:
             mlacp_sync_recv_warmboot(csm, msg);
             break;
+
+        case TLV_T_MLACP_IF_UP_ACK:
+            mlacp_fsm_recv_if_up_ack(csm, msg);
+            break;
     }
 
     /*ICCPD_LOG_DEBUG("mlacp_fsm", "  [Sync Recv] %s... DONE", get_tlv_type_string(icc_param->type));*/
@@ -1144,14 +1243,24 @@ static void mlacp_exchange_handler(struct CSM* csm, struct Msg* msg)
         iccp_csm_send(csm, g_csm_buf, len);
         /* Destroy old interface*/
         if (lif_purge != NULL)
+        {
+            /* Re-enable traffic distribution on MCLAG interface  */
+            if ((lif_purge->type == IF_T_PORT_CHANNEL) && lif_purge->disable_traffic)
+                mlacp_link_enable_traffic_distribution(lif_purge);
+
             LIST_REMOVE(lif_purge, mlacp_purge_next);
-    }
+        }
+    }    
 
     /* Send mlag lif*/
     LIST_FOREACH(lif, &(MLACP(csm).lif_list), mlacp_next)
     {
         if (lif->type == IF_T_PORT_CHANNEL && lif->port_config_sync)
         {
+            /* Disable traffic distribution on LAG members if LAG is down */
+            if (!lif->po_active)
+                mlacp_link_disable_traffic_distribution(lif);
+
             /* Send port channel information*/
             memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
             len = mlacp_prepare_for_Aggport_config(csm, g_csm_buf, CSM_BUFFER_SIZE, lif, 0);
@@ -1190,4 +1299,90 @@ static void mlacp_exchange_handler(struct CSM* csm, struct Msg* msg)
     }
 
     return;
+}
+
+/*****************************************
+ * Interface up ACK
+ *
+ ****************************************/
+static void mlacp_fsm_send_if_up_ack(
+    struct CSM       *csm,
+    uint8_t          if_type,
+    uint16_t         if_id,
+    uint8_t          port_isolation_enable)
+{
+    struct System* sys = NULL;
+    int msg_len = 0;
+    int rc = -10;
+
+    sys = system_get_instance();
+    if (sys == NULL)
+        return;
+
+    /* Interface up ACK is expected only after the interface is up */
+    if (MLACP(csm).current_state != MLACP_STATE_EXCHANGE)
+        return;
+
+    memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
+    msg_len = mlacp_prepare_for_if_up_ack(
+        csm, g_csm_buf, CSM_BUFFER_SIZE, if_type, if_id, port_isolation_enable);
+    if (msg_len > 0)
+        rc = iccp_csm_send(csm, g_csm_buf, msg_len);
+
+    if (rc <= 0)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "failed, interface type/id %d/%d, rc %d",
+            if_type, if_id, rc);
+    }
+    else
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__,"interface type/id %d/%d", if_type, if_id);
+    }
+}
+
+/* MLACP ICCP mesage type to debug counter type conversion */
+ICCP_DBG_CNTR_MSG_e mlacp_fsm_iccp_to_dbg_msg_type(uint32_t tlv_type)
+{
+    switch (tlv_type)
+    {
+        case TLV_T_MLACP_SYSTEM_CONFIG:
+            return ICCP_DBG_CNTR_MSG_SYS_CONFIG;
+
+        case TLV_T_MLACP_AGGREGATOR_CONFIG:
+            return ICCP_DBG_CNTR_MSG_AGGR_CONFIG;
+
+        case TLV_T_MLACP_AGGREGATOR_STATE:
+            return ICCP_DBG_CNTR_MSG_AGGR_STATE;
+
+        case TLV_T_MLACP_SYNC_REQUEST:
+            return ICCP_DBG_CNTR_MSG_SYNC_REQ;
+
+        case TLV_T_MLACP_SYNC_DATA:
+            return ICCP_DBG_CNTR_MSG_SYNC_DATA;
+
+        case TLV_T_MLACP_HEARTBEAT:
+            return ICCP_DBG_CNTR_MSG_HEART_BEAT;
+
+        case TLV_T_MLACP_PORT_CHANNEL_INFO:
+            return ICCP_DBG_CNTR_MSG_PORTCHANNEL_INFO;
+
+        case TLV_T_MLACP_PEERLINK_INFO:
+            return ICCP_DBG_CNTR_MSG_PEER_LINK_INFO;
+
+        case TLV_T_MLACP_ARP_INFO:
+            return ICCP_DBG_CNTR_MSG_ARP_INFO;
+
+        case TLV_T_MLACP_MAC_INFO:
+            return ICCP_DBG_CNTR_MSG_MAC_INFO;
+
+        case TLV_T_MLACP_WARMBOOT_FLAG:
+            return ICCP_DBG_CNTR_MSG_WARM_BOOT;
+
+        case TLV_T_MLACP_IF_UP_ACK:
+            return ICCP_DBG_CNTR_MSG_IF_UP_ACK;
+
+        default:
+            ICCPD_LOG_ERR(__FUNCTION__, "Invalid ICCP TLV type %u", tlv_type);
+            return ICCP_DBG_CNTR_MSG_MAX;
+    }
 }

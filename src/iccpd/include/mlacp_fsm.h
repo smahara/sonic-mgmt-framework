@@ -65,6 +65,69 @@ struct Remote_System
     uint32_t node_id;
 };
 
+/****************************************************************
+ * Debug counters to track message sent and received between
+ * MC-LAG peers over ICCP
+ ***************************************************************/
+typedef uint8_t ICCP_DBG_CNTR_DIR_e;
+enum ICCP_DBG_CNTR_DIR_e
+{
+    ICCP_DBG_CNTR_DIR_TX  = 0,
+    ICCP_DBG_CNTR_DIR_RX  = 1,
+    ICCP_DBG_CNTR_DIR_MAX
+};
+
+typedef uint8_t ICCP_DBG_CNTR_STS_e;
+enum ICCP_DBG_CNTR_STS_e
+{
+    ICCP_DBG_CNTR_STS_OK  = 0,
+    ICCP_DBG_CNTR_STS_ERR = 1,     /* Send error or receive processing error*/
+    ICCP_DBG_CNTR_STS_MAX
+};
+
+/* Change MCLAGDCTL_MAX_DBG_COUNTERS if ICCP_DBG_CNTR_MSG_MAX is more than 32 */
+enum ICCP_DBG_CNTR_MSG
+{
+    ICCP_DBG_CNTR_MSG_SYS_CONFIG       = 0,
+    ICCP_DBG_CNTR_MSG_AGGR_CONFIG      = 1,
+    ICCP_DBG_CNTR_MSG_AGGR_STATE       = 2,
+    ICCP_DBG_CNTR_MSG_MAC_INFO         = 3,
+    ICCP_DBG_CNTR_MSG_ARP_INFO         = 4,
+    ICCP_DBG_CNTR_MSG_PORTCHANNEL_INFO = 5,
+    ICCP_DBG_CNTR_MSG_PEER_LINK_INFO   = 6,
+    ICCP_DBG_CNTR_MSG_HEART_BEAT       = 7,
+    ICCP_DBG_CNTR_MSG_NAK              = 8,
+    ICCP_DBG_CNTR_MSG_SYNC_DATA        = 9,
+    ICCP_DBG_CNTR_MSG_SYNC_REQ         = 10,
+    ICCP_DBG_CNTR_MSG_WARM_BOOT        = 11,
+    ICCP_DBG_CNTR_MSG_IF_UP_ACK        = 12,
+    ICCP_DBG_CNTR_MSG_MAX
+};
+typedef enum ICCP_DBG_CNTR_MSG ICCP_DBG_CNTR_MSG_e;
+
+/* Count messages sent to MCLAG peer */
+#define MLACP_SET_ICCP_TX_DBG_COUNTER(csm, tlv_type, status)\
+do{\
+    ICCP_DBG_CNTR_MSG_e dbg_type;\
+    dbg_type = mlacp_fsm_iccp_to_dbg_msg_type(tlv_type);\
+    if (csm && ((dbg_type) < ICCP_DBG_CNTR_MSG_MAX) && ((status) < ICCP_DBG_CNTR_STS_MAX))\
+        ++MLACP(csm).dbg_counters.iccp_counters[dbg_type][ICCP_DBG_CNTR_DIR_TX][status];\
+}while(0);
+
+/* Count messages received from MCLAG peer */
+#define MLACP_SET_ICCP_RX_DBG_COUNTER(csm, tlv_type, status)\
+do{\
+    ICCP_DBG_CNTR_MSG_e dbg_type;\
+    dbg_type = mlacp_fsm_iccp_to_dbg_msg_type(tlv_type);\
+    if (csm && ((dbg_type) < ICCP_DBG_CNTR_MSG_MAX) && ((status) < ICCP_DBG_CNTR_STS_MAX))\
+        ++MLACP(csm).dbg_counters.iccp_counters[dbg_type][ICCP_DBG_CNTR_DIR_RX][status];\
+}while(0);
+
+typedef struct mlacp_dbg_counter_info
+{
+    uint64_t iccp_counters[ICCP_DBG_CNTR_MSG_MAX][ICCP_DBG_CNTR_DIR_MAX][ICCP_DBG_CNTR_STS_MAX];
+}mlacp_dbg_counter_info_t;
+
 struct mLACP
 {
     int id;
@@ -91,6 +154,9 @@ struct mLACP
     LIST_HEAD(lif_list, LocalInterface) lif_list;
     LIST_HEAD(lif_purge_list, LocalInterface) lif_purge_list;
     LIST_HEAD(pif_list, PeerInterface) pif_list;
+
+    /* ICCP message tx/rx debug counters */
+    mlacp_dbg_counter_info_t  dbg_counters;
 };
 
 void mlacp_init(struct CSM* csm, int all);
@@ -102,5 +168,8 @@ struct Msg* mlacp_dequeue_msg(struct CSM*);
 /* from app_csm*/
 extern int mlacp_bind_local_if(struct CSM* csm, struct LocalInterface* local_if);
 extern int mlacp_unbind_local_if(struct LocalInterface* local_if);
+
+/* Debug counter API */
+ICCP_DBG_CNTR_MSG_e mlacp_fsm_iccp_to_dbg_msg_type(uint32_t tlv_type);
 
 #endif /* _MLACP_HANDLER_H */

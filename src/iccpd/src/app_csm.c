@@ -254,7 +254,9 @@ int mlacp_bind_local_if(struct CSM* csm, struct LocalInterface* lif)
                            lif->po_id);
             return MCLAG_ERROR;
         }
-
+        /* Do not need to set traffic distribution in this case since it is
+         * handled when new MLAG interface is synced to peer
+         */
         lif_po->csm = csm;
         LIST_INSERT_HEAD(&(MLACP(csm).lif_list), lif_po, mlacp_next);
         lif_po->port_config_sync = 1;

@@ -413,6 +413,32 @@ struct mLACPWarmbootTLV
     uint8_t         warmboot;
 } __attribute__ ((packed));
 
+/*
+ * NOS: interface up ack message
+ * ACK is sent by MLAG peer after processing MLAG interface up notification.
+ * The ack indicates that port-isolation is applied on the MLAG peer node
+ */
+typedef uint8_t PORT_ISOLATION_STATE_e;
+enum PORT_ISOLATION_STATE_e
+{
+    PORT_ISOLATION_STATE_DISABLE = 0,
+    PORT_ISOLATION_STATE_ENABLE = 1
+};
+
+typedef uint8_t IF_UP_ACK_TYPE_e;
+enum IF_UP_ACK_TYPE_e
+{
+    IF_UP_ACK_TYPE_PHY_PORT = 0,
+    IF_UP_ACK_TYPE_PORT_CHANNEL = 1
+};
+
+struct mLACPIfUpAckTLV {
+    ICCParameter    icc_parameter;
+    uint8_t         if_type;
+    uint8_t         port_isolation_state;
+    uint16_t        if_id;                   /* LAG: agg_id */
+}__attribute__ ((packed));
+
 enum ARP_OP_TYPE
 {
     ARP_SYNC_LIF,

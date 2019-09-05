@@ -57,4 +57,7 @@ char *show_ip_str(uint32_t ipv4_addr);
 
 void syncd_info_close();
 int iccp_connect_syncd();
+
+void mlacp_link_disable_traffic_distribution(struct LocalInterface *lif);
+void mlacp_link_enable_traffic_distribution(struct LocalInterface *lif);
 #endif

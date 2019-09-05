@@ -28,6 +28,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include "mclagdctl.h"
+#include "../../include/mlacp_fsm.h"
+#include "../../include/system.h"
 
 static int mclagdctl_sock_fd = -1;
 char *mclagdctl_sock_path = "/var/run/iccpd/mclagdctl.sock";
@@ -93,6 +95,19 @@ static struct command_type command_types[] =
         .name = "peer",
         .enca_msg = mclagdctl_enca_dump_peer_portlist,
         .parse_msg = mclagdctl_parse_dump_peer_portlist,
+    },
+    {
+        .id = ID_CMDTYPE_D_D,
+        .parent_id = ID_CMDTYPE_D,
+        .name = "debug",
+    },
+    {
+        .id = ID_CMDTYPE_D_D_C,
+        .parent_id = ID_CMDTYPE_D_D,
+        .info_type = INFO_TYPE_DUMP_DBG_COUNTERS,
+        .name = "counters",
+        .enca_msg = mclagdctl_enca_dump_dbg_counters,
+        .parse_msg = mclagdctl_parse_dump_dbg_counters,
     },
 };
 
@@ -227,7 +242,8 @@ int mclagdctl_parse_dump_state(char *msg, int data_len)
         state_info = (struct mclagd_state*)(msg + len * count);
 
         fprintf(stdout, "%s: %s\n", "The MCLAG's keepalive is", state_info->keepalive ? "OK" : "ERROR");
-
+        fprintf(stdout, "%s: %s\n", "MCLAG info sync is",
+            state_info->info_sync_done ? "completed" : "incompleted");
         if (state_info->mclag_id <= 0)
             fprintf(stdout, "%s: %s\n", "Domain id", "Unknown");
         else
@@ -410,7 +426,7 @@ int mclagdctl_parse_dump_local_portlist(char *msg, int data_len)
 
         fprintf(stdout, "\n");
 
-        if (memcmp(lif_info->type, "PORT-CHANNEL", 12) == 0)
+        if (memcmp(lif_info->type, "PortChannel", 11) == 0)
         {
             fprintf(stdout, "%s: %d\n", "Ifindex", lif_info->ifindex);
             fprintf(stdout, "%s: %s\n", "Type", lif_info->type);
@@ -431,6 +447,7 @@ int mclagdctl_parse_dump_local_portlist(char *msg, int data_len)
                fprintf(stdout,"%s: %d\n" ,"PortchannelIsUp", lif_info->po_active);
                fprintf(stdout,"%s: %s\n", "MlacpState", lif_info->mlacp_state);*/
             fprintf(stdout, "%s: %s\n", "IsIsolateWithPeerlink", lif_info->isolate_to_peer_link ? "Yes" : "No");
+            fprintf(stdout,"%s: %s\n" ,"IsTrafficDisable", lif_info->disable_traffic ? "Yes":"No");
             fprintf(stdout, "%s: %s\n", "VlanList", lif_info->vlanlist);
         }
         else
@@ -506,6 +523,162 @@ int mclagdctl_parse_dump_peer_portlist(char *msg, int data_len)
         fprintf(stdout, "\n\n");
     }
 
+    return 0;
+}
+
+/* mclag_id parameter is optional */
+int mclagdctl_enca_dump_dbg_counters(char *msg, int mclag_id, int argc, char **argv)
+{
+    struct mclagdctl_req_hdr req;
+
+    memset(&req, 0, sizeof(struct mclagdctl_req_hdr));
+    req.info_type = INFO_TYPE_DUMP_DBG_COUNTERS;
+    req.mclag_id = mclag_id;
+    memcpy((struct mclagdctl_req_hdr *)msg, &req, sizeof(struct mclagdctl_req_hdr));
+
+    return 1;
+}
+
+static char *mclagdctl_dbg_counter_iccpid2str(ICCP_DBG_CNTR_MSG_e iccp_cntr_id)
+{
+    /* Keep the string to 15 characters.
+     * Update mclagdctl_parse_dump_dbg_counters if increase
+     */
+    switch(iccp_cntr_id)
+    {
+        case ICCP_DBG_CNTR_MSG_SYS_CONFIG:
+            return "SysConfig";
+        case ICCP_DBG_CNTR_MSG_AGGR_CONFIG:
+            return "AggrConfig";
+        case ICCP_DBG_CNTR_MSG_AGGR_STATE:
+            return "AggrState";
+        case ICCP_DBG_CNTR_MSG_MAC_INFO:
+            return "MacInfo";
+        case ICCP_DBG_CNTR_MSG_ARP_INFO:
+            return "ArpInfo";
+        case ICCP_DBG_CNTR_MSG_PORTCHANNEL_INFO:
+            return "PoInfo";
+        case ICCP_DBG_CNTR_MSG_PEER_LINK_INFO:
+            return "PeerLinkInfo";
+        case ICCP_DBG_CNTR_MSG_HEART_BEAT:
+            return "Heartbeat";
+        case ICCP_DBG_CNTR_MSG_NAK:
+            return "Nak";
+        case ICCP_DBG_CNTR_MSG_SYNC_DATA:
+            return "SyncData";
+        case ICCP_DBG_CNTR_MSG_SYNC_REQ:
+            return "SyncReq";
+        case ICCP_DBG_CNTR_MSG_WARM_BOOT:
+            return "Warmboot";
+        case ICCP_DBG_CNTR_MSG_IF_UP_ACK:
+            return "IfUpAck";
+        default:
+            return "Unknown";
+    }
+}
+
+static char *mclagdctl_dbg_counter_syncdtx2str(SYNCD_TX_DBG_CNTR_MSG_e syncdtx_id)
+{
+    /* Keep the string to 20 characters.
+     * Update mclagdctl_parse_dump_dbg_counters if increase
+     */
+    switch(syncdtx_id)
+    {
+        case SYNCD_TX_DBG_CNTR_MSG_PORT_ISOLATE:
+            return "PortIsolation";
+        case SYNCD_TX_DBG_CNTR_MSG_PORT_MAC_LEARN_MODE:
+            return "MacLearnMode";
+        case SYNCD_TX_DBG_CNTR_MSG_FLUSH_FDB:
+            return "FlushFdb";
+        case SYNCD_TX_DBG_CNTR_MSG_SET_IF_MAC:
+            return "SetIfMac";
+        case SYNCD_TX_DBG_CNTR_MSG_SET_FDB:
+            return "SetFdb";
+        case SYNCD_TX_DBG_CNTR_MSG_GET_FDB_CHANGES:
+            return "GetFdbChange";
+        case SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_ENABLE:
+            return "TrafficDistEnable";
+        case SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE:
+            return "TrafficDistDisable";
+        default:
+            return "Unknown";
+    }
+}
+
+static char *mclagdctl_dbg_counter_syncdrx2str(SYNCD_RX_DBG_CNTR_MSG_e syncdrx_id)
+{
+    /* Keep the string to 20 characters.
+     * Update mclagdctl_parse_dump_dbg_counters if increase
+     */
+    switch(syncdrx_id)
+    {
+        case SYNCD_RX_DBG_CNTR_MSG_MAC:
+            return "FdbChange";
+        default:
+            return "Unknown";
+    }
+}
+
+int mclagdctl_parse_dump_dbg_counters(char *msg, int data_len)
+{
+    mclagd_dbg_counter_info_t *dbg_counter_p;
+    system_dbg_counter_info_t *sys_counter_p;
+    mlacp_dbg_counter_info_t  *iccp_counter_p;
+    int                       i, j;
+
+    dbg_counter_p = (mclagd_dbg_counter_info_t *)msg;
+    sys_counter_p = (system_dbg_counter_info_t *)&dbg_counter_p->system_dbg;
+
+    /* Global counters */
+    fprintf(stdout, "%-20s%u\n", "ICCP session down:",
+        sys_counter_p->session_down_counter);
+    fprintf(stdout, "%-20s%u\n", "Peer link down:",
+        sys_counter_p->peer_link_down_counter);
+    fprintf(stdout, "%-20s%u\n\n", "Warmboot:", sys_counter_p->warmboot_counter);
+
+    /* ICCP daemon to Mclagsyncd messages */
+    fprintf(stdout, "%-20s%-20s%-20s\n", "ICCP to MclagSyncd", "TX_OK", "TX_ERROR");
+    fprintf(stdout, "%-20s%-20s%-20s\n", "------------------", "-----", "--------");
+    for (i = 0; i < SYNCD_TX_DBG_CNTR_MSG_MAX; ++i)
+    {
+        fprintf(stdout, "%-20s%-20lu%-20lu\n",
+            mclagdctl_dbg_counter_syncdtx2str(i),
+            sys_counter_p->syncd_tx_counters[i][0],
+            sys_counter_p->syncd_tx_counters[i][1]);
+    }
+
+    fprintf(stdout, "\n%-20s%-20s%-20s\n", "MclagSyncd to ICCP", "RX_OK", "RX_ERROR");
+    fprintf(stdout, "%-20s%-20s%-20s\n", "------------------", "-----", "--------");
+    for (i = 0; i < SYNCD_RX_DBG_CNTR_MSG_MAX; ++i)
+    {
+        fprintf(stdout, "%-20s%-20lu%-20lu\n",
+            mclagdctl_dbg_counter_syncdrx2str(i),
+            sys_counter_p->syncd_rx_counters[i][0],
+            sys_counter_p->syncd_rx_counters[i][1]);
+    }
+    /* Print ICCP messages exchanged between MLAG peers */
+    fprintf(stdout, "\n%-20s%-20s%-20s%-20s%-20s\n",
+        "ICCP to Peer", "TX_OK", "RX_OK", "TX_ERROR", "RX_ERROR");
+    fprintf(stdout, "%-20s%-20s%-20s%-20s%-20s\n",
+        "------------", "-----", "-----", "--------", "--------");
+
+    iccp_counter_p = (mlacp_dbg_counter_info_t *)dbg_counter_p->iccp_dbg_counters;
+    for (i = 0; i < dbg_counter_p->num_iccp_counter_blocks; ++i)
+    {
+        if (i > 0)
+            ++iccp_counter_p;
+
+        for (j = 0; j < ICCP_DBG_CNTR_MSG_MAX; ++j)
+        {
+            fprintf(stdout, "%-20s%-20lu%-20lu%-20lu%-20lu\n",
+                mclagdctl_dbg_counter_iccpid2str(j),
+                iccp_counter_p->iccp_counters[j][0][0],
+                iccp_counter_p->iccp_counters[j][1][0],
+                iccp_counter_p->iccp_counters[j][0][1],
+                iccp_counter_p->iccp_counters[j][1][1]);
+        }
+        fprintf(stdout, "\n");
+    }
     return 0;
 }
 
