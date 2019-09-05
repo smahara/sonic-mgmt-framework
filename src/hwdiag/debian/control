@@ -1,0 +1,13 @@
+Source: hwdiag
+Maintainer: Guru Harakere <guru.harakere@broadcom.com>
+Uploaders: Guru Harakere <guru.harakere@broadcom.com>
+Section: devel
+Priority: optional
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+Homepage: https://github.com/Azure/sonic-hwdiag
+
+Package: hwdiag
+Architecture: all
+Depends: python3
+Description: Hardware Diagnostics for SONiC

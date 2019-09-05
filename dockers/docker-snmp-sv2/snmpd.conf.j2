@@ -14,8 +14,9 @@
 #
 
 #  Listen for connections on all ip addresses, including eth0, ipv4 lo
-agentAddress udp:161
-# TODO: only support ipv4 lo addresses, add ipv6 support later
+#agentAddress udp:161
+#  Listen for connections on all ip addresses, including eth0, ipv4/6 lo
+agentAddress udp:161,udp6:161
 
 ###############################################################################
 #
@@ -26,13 +27,21 @@ agentAddress udp:161
 view   systemonly  included   .1.3.6.1.2.1.1
 view   systemonly  included   .1.3.6.1.2.1.25.1
 
-                                                 #  Default access to basic system info
+                                                 #  Default IPv4 access to basic system info
 {% if snmp_rocommunities %}
 {% for community in snmp_rocommunities %}
 rocommunity {{ community }}
 {% endfor %}
 {% else %}
 rocommunity {{ snmp_rocommunity }}
+{% endif %}
+                                                 #  Default IPv6 access to basic system info
+{% if snmp_rocommunities6 %}
+{% for community in snmp_rocommunities6 %}
+rocommunity6 {{ community }}
+{% endfor %}
+{% else %}
+rocommunity6 {{ snmp_rocommunity6 }}
 {% endif %}
 
 ###############################################################################

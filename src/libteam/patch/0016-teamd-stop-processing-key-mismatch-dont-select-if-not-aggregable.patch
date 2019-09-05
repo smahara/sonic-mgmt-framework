@@ -1,0 +1,65 @@
+diff --git a/teamd/teamd_runner_lacp.c b/teamd/teamd_runner_lacp.c
+index a9283ee..dcd4e2b 100644
+--- a/teamd/teamd_runner_lacp.c
++++ b/teamd/teamd_runner_lacp.c
+@@ -1267,6 +1267,8 @@ static int lacp_port_set_state(struct lacp_port *lacp_port,
+ 			       enum lacp_port_state new_state)
+ {
+ 	int err;
++        struct teamd_port *tdport;
++        struct lacp_port *checked_lacp_port;
+ 
+ 	if (new_state == lacp_port->state)
+ 		return 0;
+@@ -1325,6 +1327,22 @@ static int lacp_port_set_state(struct lacp_port *lacp_port,
+ 		       lacp_port_state_name[new_state]);
+ 	lacp_port->state = new_state;
+ 
++        /* Don't proceed to select the port if it is not aggregable with existing members */
++        if(new_state == PORT_STATE_CURRENT) {
++                if (!lacp_port_selected(lacp_port)) {
++                        teamd_for_each_tdport(tdport, lacp_port->ctx) {
++                                checked_lacp_port = lacp_port_get(lacp_port->lacp, tdport);
++                                if(lacp_port->tdport->ifindex == tdport->ifindex)
++                                        continue;
++                                if (lacp_port_selected(checked_lacp_port)) {
++                                        if(!lacp_ports_aggregable(lacp_port, checked_lacp_port)) {
++                                                return 0;
++                                        }
++                                }
++                        }
++               }
++        }
++
+ 	err = lacp_port_agg_update(lacp_port);
+ 	if (err)
+ 		return err;
+@@ -1411,6 +1429,8 @@ static int lacpdu_send(struct lacp_port *lacp_port)
+ static int lacpdu_process(struct lacp_port *lacp_port, struct lacpdu* lacpdu)
+ {
+ 	int err;
++        struct teamd_port *tdport;
++        struct lacp_port *checked_lacp_port;
+ 
+ 	if (!lacpdu_check(lacpdu)) {
+ 		teamd_log_warn("malformed LACP PDU came.");
+@@ -1421,6 +1441,19 @@ static int lacpdu_process(struct lacp_port *lacp_port, struct lacpdu* lacpdu)
+ 	(void)memcpy(&lacp_port->last_pdu, lacpdu, sizeof(struct lacpdu));
+ 	lacp_port->lacpdu_saved = true;
+ 
++        /* Don't process PDUs with partner key mismatch */
++        teamd_for_each_tdport(tdport, lacp_port->ctx) {
++                checked_lacp_port = lacp_port_get(lacp_port->lacp, tdport);
++                if(lacp_port->tdport->ifindex != tdport->ifindex) {
++                        if (lacp_port_selected(checked_lacp_port)) {
++                                if ((lacpdu->partner.key) && (lacp_port->partner.key)
++                                    && (lacp_port->partner.key != lacpdu->partner.key)) {
++                                        return 0;
++                                }
++                        }
++                }
++        }
++
+ 	/* Check if we have correct info about the other side */
+ 	if (memcmp(&lacpdu->actor, &lacp_port->partner,
+ 		   sizeof(struct lacpdu_info))) {

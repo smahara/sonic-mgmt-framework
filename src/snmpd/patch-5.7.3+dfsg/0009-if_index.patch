@@ -1,0 +1,46 @@
+--- a/agent/mibgroup/if-mib/data_access/interface_ioctl.c.org	2019-08-23 05:31:52.231750000 -0700
++++ b/agent/mibgroup/if-mib/data_access/interface_ioctl.c	2019-08-23 05:39:01.852200000 -0700
+@@ -389,7 +389,7 @@
+     return rc;
+ }
+ #endif /* SIOCGIFMTU */
+-
++#if 0
+ /**
+  * interface entry ifIndex ioctl wrapper
+  *
+@@ -424,7 +424,34 @@
+ #endif
+ #endif /* SIOCGIFINDEX */
+ }
++#endif
+ 
++#define PHYSICAL_INDEX_OFFSET	1
++#define PORTCHANNEL_INDEX_OFFSET	1000
++#define MGMT_INDEX_OFFSET	10000
++#define LOOPBACK_INDEX_OFFSET	20000
++#define VLAN_INDEX_OFFSET	 30000
++
++oid
++netsnmp_access_interface_ioctl_ifindex_get(int fd, const char *name)
++{
++	if( name[0] == 'E') { //Ethernet
++		return atoi(name+8)+PHYSICAL_INDEX_OFFSET;
++	}
++	else if( name[0] == 'P') { //PortChannel
++		return atoi(name+11)+PORTCHANNEL_INDEX_OFFSET;
++	}
++	else if( name[0] == 'V') { //Vlan
++		return atoi(name+4)+VLAN_INDEX_OFFSET;
++	}
++	else if( name[0] == 'e') { //eth0
++		return atoi(name+3)+MGMT_INDEX_OFFSET;
++	}
++	else if( name[0] == 'L') {
++		return atoi(name+8)+LOOPBACK_INDEX_OFFSET; //Loopback
++	}
++	return 0;
++}
+ /**
+  * check an interface for ipv4 addresses
+  *

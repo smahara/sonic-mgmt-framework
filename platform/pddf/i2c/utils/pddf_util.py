@@ -23,6 +23,7 @@ import re
 import subprocess
 import shutil
 import time
+import json
 import pddfparse
 from collections import namedtuple
 
@@ -352,6 +353,12 @@ def do_switch_pddf():
     if os.path.exists('/usr/share/sonic/platform/pddf_support'):
         print PROJECT_NAME.upper() +" system is already in pddf mode...."
     else:
+        print "Stopping the pmon service ..."
+        status, output = log_os_system("systemctl stop pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
         print "Stopping the platform services.."
         status = pddf_switch_svc.stop_platform_svc()
         if not status:
@@ -371,8 +378,19 @@ def do_switch_pddf():
             if FORCE==0:
                 return status
 
+        print "Disabling the 'skip_fand' from pmon daemon control script..."
+        if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
+            with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
+                data = json.load(fr)
+            if 'skip_fand' in data.keys():
+                old_val = data['skip_fand']
+                if old_val:
+                    data['skip_fand'] = False
+                    with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
+                        json.dump(data,fw)
+
         print "Restart the pmon service ..."
-        status, output = log_os_system("systemctl restart pmon.service", 1)
+        status, output = log_os_system("systemctl start pmon.service", 1)
         if status:
             if FORCE==0:
                 return status
@@ -384,6 +402,12 @@ def do_switch_nonpddf():
     if not os.path.exists('/usr/share/sonic/platform/pddf_support'):
         print PROJECT_NAME.upper() +" system is already in non-pddf mode...."
     else:
+        print "Stopping the pmon service ..."
+        status, output = log_os_system("systemctl stop pmon.service", 1)
+        if status:
+            if FORCE==0:
+                return status
+
         print "Stopping the PDDF platform service..."
         status = pddf_switch_svc.stop_platform_pddf()
         if not status:
@@ -403,8 +427,19 @@ def do_switch_nonpddf():
             if FORCE==0:
                 return status
 
+        print "Enabeling the 'skip_fand' from pmon startup script..."
+        if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
+            with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
+                data = json.load(fr)
+            if 'skip_fand' in data.keys():
+                old_val = data['skip_fand']
+                if not old_val:
+                    data['skip_fand'] = True
+                    with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
+                        json.dump(data,fw)
+
         print "Restart the pmon service ..."
-        status, output = log_os_system("systemctl restart pmon.service", 1)
+        status, output = log_os_system("systemctl start pmon.service", 1)
         if status:
             if FORCE==0:
                 return status

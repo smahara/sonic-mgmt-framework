@@ -5,3 +5,5 @@
 0005-Port-OpenSSL-1.1.0-with-support-for-1.0.2.patch
 0006-Enable-IPv6.patch
 0007-arp_netlink-should-drop-AF_BRIDGE-netlink-messages
+0008-ioctl-fail-debug.patch
+0009-if_index1.patch

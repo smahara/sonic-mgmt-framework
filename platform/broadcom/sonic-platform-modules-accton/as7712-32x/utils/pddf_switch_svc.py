@@ -17,6 +17,11 @@ def stop_platform_svc():
     if status:
         print "Disable as7712-platform-init.service failed %d"%status
         return False
+    
+    status, output = commands.getstatusoutput("/usr/local/bin/accton_as7712_util.py clean")
+    if status:
+        print "accton_as7712_util.py clean command failed %d"%status
+        return False
 
     # HACK , stop the pddf-platform-init service if it is active
     status, output = commands.getstatusoutput("systemctl stop pddf-platform-init.service")
@@ -27,6 +32,11 @@ def stop_platform_svc():
     return True
     
 def start_platform_svc():
+    status, output = commands.getstatusoutput("/usr/local/bin/accton_as7712_util.py install")
+    if status:
+        print "accton_as7712_util.py install command failed %d"%status
+        return False
+
     status, output = commands.getstatusoutput("systemctl enable as7712-platform-init.service")
     if status:
         print "Enable as7712-platform-init.service failed %d"%status

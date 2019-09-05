@@ -1,10 +1,28 @@
 case $reason in
     BOUND|RENEW|REBIND|REBOOT)
+        SNMP_YML="/etc/sonic/snmp.yml"
+        found4=false
+        found6=false
         if [ -n "${new_snmp_community}" ]; then
-            if [ -f /etc/sonic/snmp.yml ]; then
-                sed -i "s/^snmp_rocommunity:.*/snmp_rocommunity: $new_snmp_community/g" /etc/sonic/snmp.yml
-            else
-                echo "snmp_rocommunity: "$new_snmp_community > /etc/sonic/snmp.yml
+            if [ -f $SNMP_YML ]; then
+                if grep -q snmp_rocommunity: $SNMP_YML ; then
+                    sed -i "s/^snmp_rocommunity:.*/snmp_rocommunity: $new_snmp_community/g" $SNMP_YML
+                    found4=true
+                fi
+            fi
+            if [ "$found4" = false ] ; then
+                echo "snmp_rocommunity: "$new_snmp_community >> $SNMP_YML
+            fi
+        fi
+        if [ -n "${new_snmp_community6}" ]; then
+            if [ -f $SNMP_YML ]; then
+                if grep -q snmp_rocommunity6: $SNMP_YML ; then
+                    sed -i "s/^snmp_rocommunity6:.*/snmp_rocommunity6: $new_snmp_community6/g" $SNMP_YML
+                    found6=true
+                fi
+            fi
+            if [ "$found6" = false ] ; then
+                echo "snmp_rocommunity6: "$new_snmp_community6 >> $SNMP_YML
             fi
         fi
         ;;

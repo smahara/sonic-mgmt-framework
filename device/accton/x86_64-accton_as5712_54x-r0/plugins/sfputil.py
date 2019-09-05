@@ -14,10 +14,10 @@ class SfpUtil(SfpUtilBase):
     """Platform-specific SfpUtil class"""
 
     PORT_START = 0
-    PORT_END = 71
-    PORTS_IN_BLOCK = 72
+    PORT_END = 53
+    PORTS_IN_BLOCK = 54
     QSFP_PORT_START = 48
-    QSFP_PORT_END = 72
+    QSFP_PORT_END = 54
 
     BASE_VAL_PATH = "/sys/class/i2c-adapter/i2c-{0}/{1}-0050/"
     BASE_OOM_PATH = "/sys/bus/i2c/devices/{0}-0050/"
@@ -84,29 +84,11 @@ class SfpUtil(SfpUtilBase):
            46: [47, 48],
            47: [48, 49],
            48: [49, 50],#QSFP49
-           49: [49, 50],
-           50: [49, 50],
-           51: [49, 50],            
-           52: [50, 52],#QSFP50
-           53: [50, 52],
-           54: [50, 52],
-           55: [50, 52],
-           56: [51, 54],#QSFP51
-           57: [51, 54],
-           58: [51, 54],
-           59: [51, 54],
-           60: [52, 51],#QSFP52
-           61: [52, 51],
-           62: [52, 51],
-           63: [52, 51], 
-           64: [53, 53], #QSFP53
-           65: [53, 53],
-           66: [53, 53],
-           67: [53, 53],
-           68: [54, 55],#QSFP54          
-           69: [54, 55],          
-           70: [54, 55],          
-           71: [54, 55],          
+           49: [50, 52],#QSFP50
+           50: [51, 54],#QSFP51
+           51: [52, 51],#QSFP52
+           52: [53, 53],#QSFP53
+           53: [54, 55],#QSFP54          
            }
 
     @property

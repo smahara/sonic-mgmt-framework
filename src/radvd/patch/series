@@ -1,3 +1,4 @@
 # This series applies on GIT commit 413616c1b6a05f07f07f3ee6af0cf25a3215fe1a
 0001-Don-t-treat-out-of-range-MTU-as-an-error.patch
 0002-Fix-double-free-scenario-in-case-if-duplicate-interf.patch
+0003-Added-error-string-for-socket-error-log-msg.patch

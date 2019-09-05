@@ -9,17 +9,6 @@
 # The loopback network interface
 auto lo
 iface lo inet loopback
-# Use command 'ip addr list dev lo' to check all addresses
-{% if LOOPBACK_INTERFACE %}
-{% for (name, prefix) in LOOPBACK_INTERFACE|pfx_filter %}
-{% if name == "Loopback0" %}
-iface lo {{ 'inet' if prefix | ipv4 else 'inet6' }} static
-    address {{ prefix | ip }}
-    netmask {{ prefix | netmask if prefix | ipv4 else prefix | prefixlen }}
-#
-{% endif %}
-{% endfor %}
-{% endif %}
 {% endblock loopback %}
 {% block mgmt_interface %}
 
@@ -35,6 +24,8 @@ iface eth0 inet dhcp
 {% endif %}
 {% if ZTP['mode']['ipv6'] == 'true' %}
 iface eth0 inet6 dhcp
+    up sysctl net.ipv6.conf.$IFACE.accept_ra=1
+    down sysctl net.ipv6.conf.$IFACE.accept_ra=0
 {% endif %}
 
 {% if ZTP['mode']['inband'] == 'true' %}
@@ -82,6 +73,9 @@ iface eth0 {{ 'inet' if prefix | ipv4 else 'inet6' }} static
 {% endfor %}
 {% else %}
 iface eth0 inet dhcp
+iface eth0 inet6 dhcp
+    up sysctl net.ipv6.conf.eth0.accept_ra=1
+    down sysctl net.ipv6.conf.eth0.accept_ra=0
 {% endif %}
 {% endif %}
 #

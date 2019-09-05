@@ -9,6 +9,8 @@ set -e
 # Create a holding place for Broadcom customizations
 sudo mkdir -p ${FILESYSTEM_ROOT}/usr/share/broadcom_sonic
 
+########### Begin - Config Profiles feature ###################################
+
 # Copy supported configuration profiles
 sudo cp -R ${VENDOR_EXT_BASE}/config_profiles \
            ${FILESYSTEM_ROOT}/usr/share/broadcom_sonic
@@ -27,7 +29,19 @@ do
                 ${FILESYSTEM_ROOT}/etc/config-setup/factory-default-hooks.d/$script
 done
 
+sudo mkdir -p ${FILESYSTEM_ROOT}/etc/config-setup/config-migration-pre-hooks.d
+sudo ln -sf /usr/share/broadcom_sonic/scripts/config-profile-migration-hooks/08-config-profile-backup \
+            ${FILESYSTEM_ROOT}/etc/config-setup/config-migration-pre-hooks.d/08-config-profile-backup
+
+sudo mkdir -p ${FILESYSTEM_ROOT}/etc/config-setup/config-migration-post-hooks.d
+sudo ln -sf /usr/share/broadcom_sonic/scripts/config-profile-migration-hooks/08-config-profile-migrate \
+            ${FILESYSTEM_ROOT}/etc/config-setup/config-migration-post-hooks.d/08-config-profile-migrate
+sudo ln -sf /usr/share/broadcom_sonic/scripts/factory-default-hooks/09-swap-bcm-config \
+            ${FILESYSTEM_ROOT}/etc/config-setup/config-migration-post-hooks.d/09-swap-bcm-config
+
 # Config profiles management tool
 sudo cp ${VENDOR_EXT_BASE}/scripts/config-profiles ${FILESYSTEM_ROOT}/usr/bin
+
+########### End - Config Profiles feature  ###################################
 
 exit 0

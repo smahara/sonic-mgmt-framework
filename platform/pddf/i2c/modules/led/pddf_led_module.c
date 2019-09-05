@@ -385,6 +385,7 @@ static int load_led_ops_data(struct device_attribute *da, LED_STATUS state)
 	print_led_data(dev_list[led_type]+ptr->index);
 #endif
 	memset(ptr, 0, sizeof(LED_OPS_DATA));
+	return (0);
 }
 
 static int show_led_ops_data(struct device_attribute *da)
@@ -410,16 +411,16 @@ static int verify_led_ops_data(struct device_attribute *da)
 ssize_t dev_operation(struct device *dev, struct device_attribute *da, const char *buf, size_t count)
 {
 	if(strncmp(buf, "create_on", strlen("create_on"))==0 ) {
-		return(load_led_ops_data(da, ON));
+		load_led_ops_data(da, ON);
 	}
 	else if(strncmp(buf, "create_off", strlen("create_off"))==0 ) {
-		return(load_led_ops_data(da, OFF));
+		load_led_ops_data(da, OFF);
 	}
 	else if(strncmp(buf, "create_faulty", strlen("create_faulty"))==0 ) {
-		return(load_led_ops_data(da, FAULTY));
+		load_led_ops_data(da, FAULTY);
 	}
 	else if(strncmp(buf, "create_blink", strlen("create_blink"))==0 ) {
-		return(load_led_ops_data(da, BLINK));
+		load_led_ops_data(da, BLINK);
 	}
 	else if(strncmp(buf, "show", strlen("show"))==0 ) {
 		show_led_ops_data(da);

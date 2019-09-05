@@ -65,5 +65,4 @@ RUN mkdir -p /home/pde
 
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 COPY ["pde_init.sh", "/usr/bin/"]
-
 ENTRYPOINT ["/usr/bin/pde_init.sh"]

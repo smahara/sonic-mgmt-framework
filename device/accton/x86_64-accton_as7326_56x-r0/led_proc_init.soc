@@ -3,7 +3,7 @@
 
 linkscan off
 
-m0 load 0 0x3800 /usr/share/sonic/platform/custom_led.bin
+m0 load 0 0x3800 /usr/share/sonic/platform/custom_led-green.bin
 led auto on
 led start
 

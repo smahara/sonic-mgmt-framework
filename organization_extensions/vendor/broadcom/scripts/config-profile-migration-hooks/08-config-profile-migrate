@@ -1,0 +1,6 @@
+ACTIVE_PROFILE_FLAG=/usr/share/broadcom_sonic/config_profiles/active
+if [ -e /host/backup/config-profiles/active ]; then
+    # Restore current setting from backup copy
+    cp -f -a /host/backup/config-profiles/active ${ACTIVE_PROFILE_FLAG}
+    rm -rf /host/backup/config-profiles
+fi

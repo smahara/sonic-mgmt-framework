@@ -1,0 +1,34 @@
+{ "core": {
+	"cpu-subsystem": {
+		"script" : "/var/local/hwdiag/system/hwcheck.sh",
+		"logfile": "/var/local/hwdiag/logs/hwcheck.log"
+	},
+	"disk": {
+		"script": "/var/local/hwdiag/system/disk.sh",
+		"logfile": "/var/local/hwdiag/logs/disk.log"
+	}
+},
+"peripherals": {
+	"sensors": {
+		"script": "/var/local/hwdiag/i2c/sensors.py",
+		"logfile": "/var/local/hwdiag/logs/sensors.log"
+	},
+	"psu": {
+		"script": "/var/local/hwdiag/i2c/psu.py",
+		"logfile": "/var/local/hwdiag/logs/psu.log"
+	},
+	"sfp": {
+		"script": "/var/local/hwdiag/i2c/sfp.py",
+		"logfile": "/var/local/hwdiag/logs/sfp.log"
+	},
+	"sys-eeprom": {
+		"script": "/var/local/hwdiag/i2c/syseeprom.py",
+		"logfile": "/var/local/hwdiag/logs/syseeprom.log"
+	}
+},
+"switch": {
+	"asic": {
+		"script": "/var/local/hwdiag/asic/broadcom/asic_diag_report.sh",
+		"logfile": "/var/local/hwdiag/logs/asic.log"
+	}
+}}

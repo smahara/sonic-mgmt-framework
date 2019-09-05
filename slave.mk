@@ -44,7 +44,7 @@ export BUILD_NUMBER
 export BUILD_TIMESTAMP
 export CONFIGURED_PLATFORM
 
-SONIC_MAKEFILE_LIST=slave.mk rules/config rules/functions
+SONIC_MAKEFILE_LIST=slave.mk rules/functions
 
 ###############################################################################
 ## Utility rules
@@ -292,15 +292,18 @@ endef
 
 # Loads the deb package from debian cache
 # Cache file prefix is formed using SHA value
-# The SHA value is derived from one of the keyword type - GIT_COMMIT_SHA or GIT_CONTENT_SHA
-#   GIT_COMMIT_SHA   - SHA value of the last git commit id if it is a submodule
-#   GIT_CONTENT_SHA  - SHA value is calculated from the target dependency files content.
+# The SHA value consists of
+#   1.  12 byte SHA value from environmental flags
+#   2.  48 byte SHA value from one of the keyword type - GIT_COMMIT_SHA or GIT_CONTENT_SHA
+#          GIT_COMMIT_SHA   - SHA value of the last git commit id if it is a submodule
+#          GIT_CONTENT_SHA  - SHA value is calculated from the target dependency files content.
 #   Cache is loaded only when corresponding cache file is present in cache direcory and its dependencies are not changed.
 define LOAD_CACHE
 	$(eval MOD_SRC_PATH=$($(1)_SRC_PATH))
+	$(eval DEP_FLAGS_SHA := $(shell git hash-object $($(1)_DEP_FLAGS_FILE)|awk '{print substr($$1,0,11);}'))
 	$(eval MOD_HASH=$(if $(filter GIT_COMMIT_SHA,$($(1)_CACHE_MODE)),$(shell cd $(MOD_SRC_PATH) && git log -1 --format="%H")
-		, $(shell git hash-object $($(1)_DEP_SOURCE) $($(1)_SMDEP_SOURCE)|sha1sum|awk '{print $$1}')))
-	$(eval MOD_CACHE_FILE=$(1)-$(MOD_HASH).tgz)
+		, $(shell git hash-object $($(1)_DEP_FLAGS_FILE) $($(1)_DEP_SOURCE) $($(1)_SMDEP_SOURCE)|sha1sum|awk '{print $$1}')))
+	$(eval MOD_CACHE_FILE=$(1)-$(DEP_FLAGS_SHA)-$(MOD_HASH).tgz)
 	$(eval $(1)_MOD_CACHE_FILE=$(MOD_CACHE_FILE))
 	$(eval DRV_DEB=$(foreach pkg,$(addprefix $(DEBS_PATH)/,$(1) $($(1)_DERIVED_DEBS)),$(if $(wildcard $(pkg)),,$(pkg))))
 	$(eval $(1)_FILES_MODIFIED  := $(if $($(1)_DEP_SOURCE),$(shell git status -s $($(1)_DEP_SOURCE))) \
@@ -344,12 +347,13 @@ define SAVE_CACHE
 endef
 
 
+DOCKER_LOCKFILE_TIMEOUT = 1200
 
 ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
 # $(call docker-image-save,from,to)
 define docker-image-save
     exec 201>"$(DOCKER_LOCKFILE_SAVE)"
-    if ! flock -x -w 600 201; then
+    if ! flock -x -w $(DOCKER_LOCKFILE_TIMEOUT) 201; then
         @echo "ERROR: Cannot obtain docker image lock for $(1) save" $(LOG)
         exit 1
     else
@@ -369,7 +373,7 @@ endef
 # $(call docker-image-load,from)
 define docker-image-load
     exec 201>"$(DOCKER_LOCKFILE_SAVE)"
-    if ! flock -x -w 600 201; then
+    if ! flock -x -w $(DOCKER_LOCKFILE_TIMEOUT) 201; then
         @echo "ERROR: Cannot obtain docker image lock for $(1) load" $(LOG)
         exit 1
     else
@@ -453,6 +457,20 @@ $(addprefix $(FILES_PATH)/, $(SONIC_ONLINE_FILES)) : $(FILES_PATH)/% : .platform
 
 SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_ONLINE_FILES))
 
+# Each target defines a optional variable called '_DEP_FLAGS_FILE' that contains  a list of environment flags for that target and
+# that indicates that target needs to be rebuilt if  one of the dependent flag is changed
+# An environmental dependency flags file is created with the name as ‘<target name>.dep’  for each of the deb targets.
+# This file contains the values of target environment flags and gets updated only when there is a change in the flags value.
+# This file is added as a dependency to the target, so that any change in the file will trigger the target recompilation.
+# For Eg:
+#       target/debs/stretch/linux-headers-4.9.0-9-2-common_4.9.168-1+deb9u3_all.deb.dep
+#
+$(addsuffix .dep,$(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS) $(SONIC_DPKG_DEBS))) : \
+	$(DEBS_PATH)/%.dep : $$(eval $$*_DEP_FLAGS_FILE:=$$@)
+	@echo '$($*_DEP_FLAGS)' | cmp -s - $@ || echo '$($*_DEP_FLAGS)' > $@
+
+
+
 ###############################################################################
 ## Build targets
 ###############################################################################
@@ -492,7 +510,7 @@ SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_MAKE_FILES))
 #     $(SOME_NEW_DEB)_DEPENDS = $(SOME_OTHER_DEB1) $(SOME_OTHER_DEB2) ...
 #     SONIC_MAKE_DEBS += $(SOME_NEW_DEB)
 $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS)) : $(DEBS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS))) \
-	$$($$*_DEP_SOURCE) $$($$*_SMDEP_SOURCE)
+	$$($$*_DEP_SOURCE) $$($$*_SMDEP_SOURCE) | $(DEBS_PATH)/%.dep
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
@@ -526,7 +544,7 @@ SONIC_TARGET_LIST += $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS))
 #     $(SOME_NEW_DEB)_DEPENDS = $(SOME_OTHER_DEB1) $(SOME_OTHER_DEB2) ...
 #     SONIC_DPKG_DEBS += $(SOME_NEW_DEB)
 $(addprefix $(DEBS_PATH)/, $(SONIC_DPKG_DEBS)) : $(DEBS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS))) \
-	$$($$*_DEP_SOURCE) $$($$*_SMDEP_SOURCE)
+	$$($$*_DEP_SOURCE) $$($$*_SMDEP_SOURCE) | $(DEBS_PATH)/%.dep
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
@@ -832,6 +850,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
                 $(SONIC_DEVICE_DATA) \
                 $(PYTHON_CLICK) \
                 $(IFUPDOWN2) \
+                $(HWDIAG) \
                 $(NTP) \
                 $(LIBPAM_TACPLUS) \
                 $(LIBNSS_TACPLUS)) \
@@ -908,7 +927,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	PASSWORD="$(PASSWORD)" \
 	TARGET_MACHINE=$($*_MACHINE) \
 	IMAGE_TYPE=$($*_IMAGE_TYPE) \
-	ENABLE_PDE=$(ENABLE_PDE) \
+	BUILD_TARGET="$@" \
 		./build_image.sh $(LOG)
 
 	$(foreach docker, $($*_DOCKERS), \
@@ -942,10 +961,10 @@ SONIC_CLEAN_FILES = $(addsuffix -clean,$(addprefix $(FILES_PATH)/, \
 		   $(SONIC_COPY_FILES) \
 		   $(SONIC_MAKE_FILES)))
 
-$(SONIC_CLEAN_DEBS) : $(DEBS_PATH)/%-clean : .platform $$(addsuffix -clean,$$(addprefix $(DEBS_PATH)/,$$($$*_MAIN_DEB)))
+$(SONIC_CLEAN_DEBS) : $(DEBS_PATH)/%-clean : .platform $$(addsuffix -clean,$$(addprefix $(DEBS_PATH)/,$$($$*_MAIN_DEB))) 
 	@# remove derived or extra targets if main one is removed, because we treat them
 	@# as part of one package
-	@rm -f $(addprefix $(DEBS_PATH)/, $* $($*_DERIVED_DEBS) $($*_EXTRA_DEBS))
+	@rm -f $(addprefix $(DEBS_PATH)/, $* $($*_DERIVED_DEBS) $($*_EXTRA_DEBS)) $($*_DEP_FLAGS_FILE) 
 
 $(SONIC_CLEAN_FILES) : $(FILES_PATH)/%-clean : .platform
 	@rm -f $(FILES_PATH)/$*

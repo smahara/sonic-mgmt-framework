@@ -1,0 +1,20 @@
+# replace default config.bcm based on profile l2/l3
+set -e
+
+CONFIG_PROFILES_BASE=/usr/share/broadcom_sonic/config_profiles
+ACTIVE_PROFILE_FLAG=${CONFIG_PROFILES_BASE}/active
+
+PLATFORM=`sonic-cfggen -H -v DEVICE_METADATA.localhost.platform`
+PRESET=(`head -n 1 /usr/share/sonic/device/$PLATFORM/default_sku`)
+HW_KEY=${PRESET[0]}
+
+CONFIG_FILE_DIR=/usr/share/sonic/device/$PLATFORM/$HW_KEY
+CONFIG_FILE_ACTIVE_PROFILE_DIR=/usr/share/sonic/device/$PLATFORM/$HW_KEY/$(cat ${ACTIVE_PROFILE_FLAG})
+if [ -d ${CONFIG_FILE_ACTIVE_PROFILE_DIR} ]; then
+    STATUS="$(cmp --silent ${CONFIG_FILE_ACTIVE_PROFILE_DIR}/*config.bcm ${CONFIG_FILE_DIR}/*config.bcm; echo $?)"
+    if [ $STATUS -ne 0 ]
+    then
+        sudo cp ${CONFIG_FILE_ACTIVE_PROFILE_DIR}/*config.bcm \
+                ${CONFIG_FILE_DIR}
+    fi
+fi
