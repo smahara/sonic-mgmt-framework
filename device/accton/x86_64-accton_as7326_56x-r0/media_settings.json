@@ -577,6 +577,22 @@
             }
         }, 
         "48": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x00320a", 
+                    "lane1": "0x00320b", 
+                    "lane2": "0x00320b", 
+                    "lane3": "0x00320b"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x00320a", 
+                    "lane1": "0x00320b", 
+                    "lane2": "0x00320b", 
+                    "lane3": "0x00320b"
+                }
+            }, 
             "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x00320a", 
@@ -595,6 +611,22 @@
             }
         }, 
         "52": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x00360c", 
+                    "lane1": "0x00360d", 
+                    "lane2": "0x00360d", 
+                    "lane3": "0x00360d"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x00360c", 
+                    "lane1": "0x00360d", 
+                    "lane2": "0x00360d", 
+                    "lane3": "0x00360d"
+                }
+            }, 
             "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x00360c", 
@@ -613,6 +645,22 @@
             }
         }, 
         "56": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
             "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
@@ -631,6 +679,22 @@
             }
         }, 
         "60": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
             "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
@@ -649,6 +713,22 @@
             }
         }, 
         "64": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
             "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
@@ -667,6 +747,22 @@
             }
         }, 
         "68": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
             "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
@@ -685,6 +781,22 @@
             }
         }, 
         "72": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
             "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
@@ -703,6 +815,22 @@
             }
         }, 
         "76": {
+            "FIBERSTORE-QSFP-BD-40G": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
             "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
@@ -723,338 +851,818 @@
     }, 
     "PORT_MEDIA_SETTINGS": {
         "0": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x00320b"
                 }
             }
         }, 
         "1": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x00320b"
                 }
             }
         }, 
         "2": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x00320c"
                 }
             }
         }, 
         "3": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x00320b"
                 }
             }
         }, 
         "4": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x00320a"
                 }
             }
         }, 
         "5": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x00320b"
                 }
             }
         }, 
         "6": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d0a"
                 }
             }
         }, 
         "7": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d09"
                 }
             }
         }, 
         "8": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x00320b"
                 }
             }
         }, 
         "9": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d09"
                 }
             }
         }, 
         "10": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d08"
                 }
             }
         }, 
         "11": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d09"
                 }
             }
         }, 
         "12": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d08"
                 }
             }
         }, 
         "13": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d08"
                 }
             }
         }, 
         "14": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d08"
                 }
             }
         }, 
         "15": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d07"
                 }
             }
         }, 
         "16": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "17": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d07"
                 }
             }
         }, 
         "18": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002d07"
                 }
             }
         }, 
         "19": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "20": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002807"
                 }
             }
         }, 
         "21": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "22": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "23": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "24": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "25": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "26": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002807"
                 }
             }
         }, 
         "27": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "28": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "29": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "30": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "31": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "32": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "33": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "34": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "35": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "36": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "37": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "38": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "39": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "40": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "41": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "42": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "43": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "44": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "45": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002805"
                 }
             }
         }, 
         "46": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
         "47": {
-            "SFP": {
+            "Default": {
                 "preemphasis": {
                     "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP28": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
+            "SFP": {
+                "preemphasis": {
+                    "lane0": "0x002806"
                 }
             }
         }, 
@@ -1067,7 +1675,15 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x00320a", 
                     "lane1": "0x00320b", 
@@ -1075,12 +1691,12 @@
                     "lane3": "0x00320b"
                 }
             }, 
-            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+            "QSFP+,QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4": {
                 "preemphasis": {
-                    "lane0": "0x0a4114", 
-                    "lane1": "0x0a4114", 
-                    "lane2": "0x0a4114", 
-                    "lane3": "0x0a4114"
+                    "lane0": "0x00320a", 
+                    "lane1": "0x00320b", 
+                    "lane2": "0x00320b", 
+                    "lane3": "0x00320b"
                 }
             }
         }, 
@@ -1093,7 +1709,15 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x00360c", 
                     "lane1": "0x00360d", 
@@ -1101,12 +1725,12 @@
                     "lane3": "0x00360d"
                 }
             }, 
-            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+            "QSFP+,QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4": {
                 "preemphasis": {
-                    "lane0": "0x0a4114", 
-                    "lane1": "0x0a4114", 
-                    "lane2": "0x0a4114", 
-                    "lane3": "0x0a4114"
+                    "lane0": "0x00360c", 
+                    "lane1": "0x00360d", 
+                    "lane2": "0x00360d", 
+                    "lane3": "0x00360d"
                 }
             }
         }, 
@@ -1119,7 +1743,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1127,7 +1751,15 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "QSFP+,QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1145,7 +1777,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1153,7 +1785,15 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "QSFP+,QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1171,7 +1811,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1179,7 +1819,15 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "QSFP+,QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1197,7 +1845,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1205,7 +1853,15 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "QSFP+,QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1223,7 +1879,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1231,7 +1887,15 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "QSFP+,QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1249,7 +1913,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4,QSFP+": {
+            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -1257,7 +1921,15 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "QSFP28,QSFP28-50M,QSFP28-10M,QSFP28-2M": {
+            "BROCADE-57-1000263-01": {
+                "preemphasis": {
+                    "lane0": "0x0a4114", 
+                    "lane1": "0x0a4114", 
+                    "lane2": "0x0a4114", 
+                    "lane3": "0x0a4114"
+                }
+            }, 
+            "QSFP+,QSFP+-40GBASE-CR4-3M,QSFP+-40GBASE-SR4,QSFP+-40GBASE-SR4": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
