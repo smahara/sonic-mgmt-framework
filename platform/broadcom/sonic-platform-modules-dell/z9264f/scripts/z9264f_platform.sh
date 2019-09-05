@@ -74,6 +74,29 @@ switch_board_qsfp() {
     esac
 }
 
+#Attach/Detach 2 instances of EEPROM driver SFP+ ports
+#eeprom can dump data using below command
+switch_board_sfp() {
+        case $1 in
+        "new_device")
+                        for ((i=66;i<=67;i++));
+                        do
+                            echo sff8436 0x50 > /sys/bus/i2c/devices/i2c-$i/$1
+                        done
+                        ;;
+ 
+        "delete_device")
+                        for ((i=66;i<=67;i++));
+                        do
+                            echo 0x50 > /sys/bus/i2c/devices/i2c-$i/$1
+                        done
+                        ;;
+
+        *)              echo "z9264f_platform: switch_board_qsfp: invalid command !"
+                        ;;
+    esac
+}
+
 #Modsel 64 ports to applicable QSFP type modules
 #This enables the adapter to respond for i2c commands
 switch_board_modsel() {
@@ -92,7 +115,7 @@ platform_firmware_versions() {
 	rm -rf ${FIRMWARE_VERSION_FILE}
 	echo "BIOS: `dmidecode -s system-version `" > $FIRMWARE_VERSION_FILE
 	## Get FPGA version
-	r=`/opt/dell/os10/bin/pcisysfs.py  --get --offset 0x00 --res /sys/bus/pci/devices/0000\:04\:00.0/resource0 | sed  '1d; s/.*\(....\)$/\1/; s/\(..\{1\}\)/\1./'`
+	r=`/usr/bin/pcisysfs.py  --get --offset 0x00 --res /sys/bus/pci/devices/0000\:04\:00.0/resource0 | sed  '1d; s/.*\(....\)$/\1/; s/\(..\{1\}\)/\1./'`
 	r_min=$(echo $r | sed 's/.*\(..\)$/0x\1/')
 	r_maj=$(echo $r | sed 's/^\(..\).*/0x\1/')
 	echo "FPGA: $((r_maj)).$((r_min))" >> $FIRMWARE_VERSION_FILE
@@ -139,6 +162,7 @@ if [ "$1" == "init" ]; then
     sys_eeprom "new_device"
     switch_board_qsfp_mux "new_device"
     switch_board_qsfp "new_device"
+    switch_board_sfp "new_device"
     switch_board_modsel
     python /usr/bin/qsfp_irq_enable.py
     platform_firmware_versions
@@ -146,6 +170,7 @@ if [ "$1" == "init" ]; then
 elif [ "$1" == "deinit" ]; then
     sys_eeprom "delete_device"
     switch_board_qsfp "delete_device"
+    switch_board_sfp "delete_device"
     switch_board_qsfp_mux "delete_device"
 
     modprobe -r i2c-mux-pca954x
