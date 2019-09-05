@@ -13,9 +13,10 @@
 usage()
 {
 cat << EOF
- Usage:  config-hwsku < list | set [hwsku-name]>
+ Usage:  Config-hwsku < list | set [hwsku-name] -y>
          list  - List HWSKU supported.
          set   - Set HwSKU.
+	 -y    - To skip user confirmation 
 EOF
 }
 
@@ -26,6 +27,7 @@ PRESET=(`head -n 1 /usr/share/sonic/device/$PLATFORM/default_sku`)
 DEFAULT_HWSKU=${PRESET[0]}
 HWSKU_STR_START=${PRESET[0]:0:4}
 DEFAULT_PRESET=${PRESET[1]}
+EXECUTE=no
 
 # Restore SONiC configuration from a backup copy
 function list_hwskus()
@@ -75,7 +77,11 @@ set_hwsku()
           echo "Same as present HWSKU $HWSKU, Do Nothing"
        else 
           echo -e "Warning: This deletes existing configurations and cause switch to reboot."
-	  read -r -p "Are you sure you want to change? [y/N] " response
+          if [ ${EXECUTE} == 'no' ]; then 
+	     read -r -p "Are you sure you want to change? [y/N] " response
+	  else 
+             response='y'		  
+	  fi
 	  case $response in
 	      [yY][eE][sS]|[yY])
                   echo "Setting Default HWSKU to $HWSKU $DEFAULT_PRESET"
@@ -85,7 +91,7 @@ set_hwsku()
 		      rm -rf /etc/sonic/config_db.json 
                   fi
                   echo "Rebooting system"
-		  reboot
+		  reboot -y  	  
 		  ;;
 	      *)
 		  exit 0
@@ -111,7 +117,10 @@ fi
 
 # Create ZTP configuration
 if [ "$CMD" = "set" ]; then
-    set_hwsku $2
+   if [ "$3" == "-y"  ]; then
+      EXECUTE=yes	
+   fi
+   set_hwsku $2 
 fi
 
 exit 0
