@@ -71,6 +71,9 @@ func main() {
 	
 	if clientAuth == "true"{
 		server.SetAuthEnable(true)
+		if !server.DoesApiKeyExist("root") {
+			server.GenApiKey("root")
+		}
 	}
 
 

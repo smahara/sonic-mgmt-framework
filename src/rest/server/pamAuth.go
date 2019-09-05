@@ -9,6 +9,9 @@ import (
 	"github.com/golang/glog"
 	//"github.com/msteinert/pam"
 	"golang.org/x/crypto/ssh"
+	"crypto/rand"
+	"encoding/base64"
+	"os"
 )
 
 /*
@@ -50,6 +53,8 @@ func PAMAuthUser(u string, p string) error {
 	return err
 }
 */
+const API_KEY_LEN = 10
+const API_KEY_DIR = "/etc/rest_api_keys"
 
 func IsAdminGroup(username string) bool {
 
@@ -171,4 +176,28 @@ func authMiddleware(inner http.Handler) http.Handler {
 			inner.ServeHTTP(w, r)
 		}
 	})
+}
+
+func GenApiKey(username string) {
+	
+	b := make([]byte, API_KEY_LEN)
+	_, err := rand.Read(b)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	api_key_file := fmt.Sprintf("%v/%v.key", API_KEY_DIR, username)
+	err = ioutil.WriteFile(api_key_file, []byte(base64.StdEncoding.EncodeToString(b)), 0600)
+	if err != nil {
+	    panic(err)
+	}
+}
+
+func DoesApiKeyExist(username string) bool {
+	api_key_file := fmt.Sprintf("%v/%v.key", API_KEY_DIR, username)
+	_, err := os.Stat(api_key_file)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
