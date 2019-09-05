@@ -152,6 +152,15 @@ func (app *IntfApp) translateUpdatePhyIntfEthernet(d *db.DB, ifKey *string, intf
 				err = tlerr.InvalidArgsError{Format: errStr}
 				return err
 			}
+			exists, err := app.validateUntaggedVlanCfgred(d, ifKey)
+			if err != nil {
+				return err
+			}
+			if exists {
+				errStr := "Untagged VLAN configuration exists"
+				err = tlerr.InvalidArgsError{Format:errStr}
+				return err
+			}
 			memberPortEntryMap := make(map[string]string)
 			memberPortEntry := db.Value{Field: memberPortEntryMap}
 			memberPortEntry.Field["tagging_mode"] = "untagged"

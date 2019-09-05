@@ -358,3 +358,40 @@ func (app *IntfApp) removeTaggedVlanAndUpdateVlanMembTbl(d *db.DB, trunkVlan *st
 	errStr := "Tagged Vlan Configuration doesn't exist for Interface: " + *ifName
 	return tlerr.InvalidArgsError{Format: errStr}
 }
+
+/* Validate whether Port has any Untagged VLAN Config existing */
+func (app *IntfApp) validateUntaggedVlanCfgred(d *db.DB, ifName *string) (bool, error) {
+	var err error
+
+	var vlanMemberKeys []db.Key
+	vlanMemberTable, err := d.GetTable(app.vlanD.vlanMemberTs)
+	if err != nil {
+		return false, err
+	}
+
+	vlanMemberKeys, err = vlanMemberTable.GetKeys()
+	log.Infof("Found %d Vlan Member table keys", len(vlanMemberKeys))
+
+	for _, vlanMember := range vlanMemberKeys {
+		if len(vlanMember.Comp) < 2 {
+			continue
+		}
+		if vlanMember.Get(1) != *ifName {
+			continue
+		}
+		memberPortEntry, err := d.GetEntry(app.vlanD.vlanMemberTs, vlanMember)
+		if err != nil || !memberPortEntry.IsPopulated() {
+			errStr := "Get from VLAN_MEMBER table for Vlan: + " + vlanMember.Get(0) + " Interface:" + *ifName + " failed!"
+			return false, errors.New(errStr)
+		}
+		tagMode, ok := memberPortEntry.Field["tagging_mode"]
+		if !ok {
+			errStr := "tagging_mode entry is not present for VLAN: " + vlanMember.Get(0) + " Interface: " + *ifName
+			return false, errors.New(errStr)
+		}
+		if tagMode == "untagged" {
+			return true, nil
+		}
+	}
+	return false, nil
+}
