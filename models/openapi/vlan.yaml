@@ -16,6 +16,16 @@ tags:
 schemes:
 - "https"
 - "http"
+securityDefinitions:
+  APIKeyHeader:
+    type: "apiKey"
+    name: "X-API-Key"
+    in: "header"
+  basicAuth:
+    type: "basic"
+security:
+- APIKeyHeader: []
+- basicAuth: []
 paths:
   /vlan:
     post:
