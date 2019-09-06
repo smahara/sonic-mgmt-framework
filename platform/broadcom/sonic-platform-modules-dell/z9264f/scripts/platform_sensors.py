@@ -83,9 +83,9 @@ def print_temperature_sensors():
     print '  CPU Near Temp:                  ',\
         (get_pmc_register('CPU_temp'))
     print '  PSU FAN AirFlow Temperature 1:  ',\
-        (get_pmc_register('PSU1_AF_temp'))
+        (get_pmc_register('PSU1AF_temp'))
     print '  PSU FAN AirFlow Temperature 2:  ',\
-        (get_pmc_register('PSU2_AF_temp'))
+        (get_pmc_register('PSU2AF_temp'))
 
 ipmi_sensor_dump()
 

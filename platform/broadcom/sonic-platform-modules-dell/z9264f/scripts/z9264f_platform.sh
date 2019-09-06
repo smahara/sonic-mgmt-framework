@@ -108,6 +108,13 @@ switch_board_modsel() {
 		python /usr/bin/pcisysfs.py --set --offset $hex --val 0x10 --res $resource  > /dev/null 2>&1
 	done
 }
+
+switch_board_sfp_tx_en() {
+	resource="/sys/bus/pci/devices/0000:04:00.0/resource0"
+	python /usr/bin/pcisysfs.py --set --offset 0x4400 --val 0x60 --res $resource  > /dev/null 2>&1
+	python /usr/bin/pcisysfs.py --set --offset 0x4410 --val 0x60 --res $resource  > /dev/null 2>&1
+}
+
 # Readout firmware version of the system and 
 # store in /var/log/firmware_versions
 platform_firmware_versions() {
@@ -164,6 +171,7 @@ if [ "$1" == "init" ]; then
     switch_board_qsfp "new_device"
     switch_board_sfp "new_device"
     switch_board_modsel
+    switch_board_sfp_tx_en
     python /usr/bin/qsfp_irq_enable.py
     platform_firmware_versions
 
