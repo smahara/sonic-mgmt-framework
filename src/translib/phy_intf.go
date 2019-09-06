@@ -172,9 +172,9 @@ func (app *IntfApp) translateUpdatePhyIntfEthernet(d *db.DB, ifKey *string, intf
 		memberPortEntry := db.Value{Field: memberPortEntryMap}
 		memberPortEntry.Field["tagging_mode"] = "tagged"
 		for _, vlanId := range trunkVlanSlice {
-			err = app.validateVlanExists(d, &vlanStr)
+			err = app.validateVlanExists(d, &vlanId)
 			if err != nil {
-				errStr := "Invalid VLAN: " + strconv.Itoa(int(accessVlanId))
+				errStr := "Invalid VLAN: " + vlanId
 				err = tlerr.InvalidArgsError{Format: errStr}
 				return err
 			}
