@@ -2,7 +2,7 @@ package server
 
 import (
 	"net/http"
-	"os/user"
+	// "os/user"
 	"strings"
 	"io/ioutil"
 	"fmt"
@@ -56,27 +56,64 @@ func PAMAuthUser(u string, p string) error {
 const API_KEY_LEN = 10
 const API_KEY_DIR = "/etc/rest_api_keys"
 
-func IsAdminGroup(username string) bool {
+func IsAdminGroup(username string, passwd string) bool {
 
-	usr, err := user.Lookup(username)
+	//This does not work since we are in a container and 
+	// /etc/passwd is not the host /etc/passwd
+
+	// usr, err := user.Lookup(username)
+	// if err != nil {
+	// 	return false
+	// }
+	// gids, err := usr.GroupIds()
+	// if err != nil {
+	// 	return false
+	// }
+	// glog.V(2).Infof("User:%s, groups=%s", username, gids)
+	// admin, err := user.Lookup("admin")
+	// if err != nil {
+	// 	return false
+	// }
+	// for _, x := range gids {
+	// 	if x == admin.Gid {
+	// 		return true
+	// 	}
+	// }
+	// return false
+	config := &ssh.ClientConfig{
+		User: username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(passwd),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+	client, err := ssh.Dial("tcp", "127.0.0.1:22", config)
 	if err != nil {
+		
 		return false
 	}
-	gids, err := usr.GroupIds()
+	session, err := client.NewSession()
+	output, err := session.Output(fmt.Sprintf("id -G %v", username))
 	if err != nil {
+		
 		return false
 	}
-	glog.V(2).Infof("User:%s, groups=%s", username, gids)
-	admin, err := user.Lookup("admin")
+	user_groups := strings.Split(string(output), " ")
+	session.Close()
+	session, err = client.NewSession()
+	output, err = session.Output("id -g admin")
 	if err != nil {
+		
 		return false
 	}
-	for _, x := range gids {
-		if x == admin.Gid {
+	admin_group := strings.TrimSpace(string(output))
+	for _,g := range(user_groups) {
+		if g == admin_group {
 			return true
 		}
 	}
 	return false
+
 }
 
 func PAMAuthenAndAuthor(r *http.Request, rc *RequestContext) error {
@@ -144,7 +181,7 @@ func PAMAuthenAndAuthor(r *http.Request, rc *RequestContext) error {
 	}
 	glog.Infof("[%s] Authentication passed. user=%s ", rc.ID, username)
 	//Allow SET request only if user belong to admin group
-	if isWriteOperation(r) && IsAdminGroup(username) == false {
+	if isWriteOperation(r) && IsAdminGroup(username, passwd) == false {
 		glog.Errorf("[%s] Not an admin; cannot allow %s", rc.ID, r.Method)
 		return httpError(http.StatusForbidden, "Not an admin user")
 	}
