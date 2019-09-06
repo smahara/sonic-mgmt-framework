@@ -44,4 +44,8 @@ sudo cp ${VENDOR_EXT_BASE}/scripts/config-profiles ${FILESYSTEM_ROOT}/usr/bin
 
 ########### End - Config Profiles feature  ###################################
 
+if [ -e ${SONIC_BASE}/src/broadcom-exclusive/files/scripts/build_extensions.sh ]; then
+    ${SONIC_BASE}/src/broadcom-exclusive/files/scripts/build_extensions.sh
+fi
+
 exit 0
