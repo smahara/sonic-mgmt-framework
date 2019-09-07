@@ -6,6 +6,7 @@ os=unix
 
 bcm_stat_interval.0=1000000
 bcm_linkscan_interval.0=250000
+bcm_num_cos=10
 
 # Tuning MDIO_OUTPUT_DELAY as 0xf based on HW RD suggesstion and DVT result.
 mdio_output_delay.0=0xf

@@ -1,5 +1,6 @@
 os=unix
 
+bcm_num_cos=10
 pbmp_oversubscribe=0x3ffffffffffffffffffffffffffffffffe
 pbmp_xport_xe=0x3ffffffffffffffffffffffffffffffffe
 l2xmsg_mode=1

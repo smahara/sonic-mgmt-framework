@@ -8,6 +8,7 @@ l3_mem_entries=81920
 mmu_lossless=0
 lls_num_l2uc=12
 module_64ports=0
+bcm_num_cos=10
 
 #SFI
 serdes_if_type=9
