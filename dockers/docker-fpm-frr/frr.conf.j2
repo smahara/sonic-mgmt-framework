@@ -239,6 +239,9 @@ bgp error-handling enable
 bfd
 {% for (peer_key, peer_info) in BFD_PEER.iteritems() %}
 {% set opt_args = '' %}
+{% if peer_key|length == 4 and peer_key[3] == 'multihop' %}
+{% set opt_args = opt_args~' '~'multihop' %}
+{% endif %}
 {% if peer_key[1] != 'null' %}
 {% set opt_args = opt_args~' '~'local-address'~' '~peer_key[1] %}
 {% endif %}
