@@ -906,6 +906,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	export installer_start_scripts="$(foreach docker, $($*_DOCKERS),$(addsuffix .sh, $($(docker:-dbg.gz=.gz)_CONTAINER_NAME)))"
 	export installer_services="$(foreach docker, $($*_DOCKERS),$(addsuffix .service, $($(docker:-dbg.gz=.gz)_CONTAINER_NAME)))"
 	export installer_extra_files="$(foreach docker, $($*_DOCKERS), $(foreach file, $($(docker:-dbg.gz=.gz)_BASE_IMAGE_FILES), $($(docker:-dbg.gz=.gz)_PATH)/base_image_files/$(file)))"
+	export installer_extra_files+="$(foreach docker, $($*_DOCKERS), $(foreach file, $($(docker:-dbg.gz=.gz)_DERIVED_BASE_IMAGE_FILES), $(file)))"
 
 	j2 -f env files/initramfs-tools/union-mount.j2 onie-image.conf > files/initramfs-tools/union-mount
 	j2 -f env files/initramfs-tools/arista-convertfs.j2 onie-image.conf > files/initramfs-tools/arista-convertfs
@@ -918,6 +919,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 		chmod +x sonic_debian_extension.sh,
 	)
 
+	BUILD_TARGET="$@" \
 	USERNAME="$(USERNAME)" \
 	PASSWORD="$(PASSWORD)" \
 	NUMPROCS="$(SONIC_CONFIG_MAKE_JOBS)" \

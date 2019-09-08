@@ -5,6 +5,8 @@
 ## USAGE:
 ##   USERNAME=username PASSWORD=password ./build_debian [phase]
 ## ENVIRONMENT:
+##   BUILD_TARGET
+##          The name of the installer that is currently being created
 ##   USERNAME
 ##          The name of the default admin user
 ##   PASSWORD
