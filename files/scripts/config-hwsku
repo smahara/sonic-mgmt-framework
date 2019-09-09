@@ -1,0 +1,134 @@
+#!/bin/bash
+###########################################################################
+# SONiC default HwSKU Setup utility                                       #
+#                                                                         #
+# This script is used to set HWSKU in deafult_sku                         #
+#                                                                         #
+###########################################################################
+
+# Check for user permissions
+if [ "$EUID" != "0" ]; then
+    echo "Root privileges are required for this operation"
+    exit 1
+fi
+
+# Command usage and help
+usage()
+{
+    cat << EOF
+ Usage:  config-hwsku < list | set <hwsku-name> [-y]>
+         list  - Display supported list HWSKU for this platform.
+         set   - Set user provided HwSKU as default SKU.
+         -y    - Use this option to skip user confirmation
+EOF
+}
+
+# Collect all information needed to get list of HWSKU
+PLATFORM=`sonic-cfggen -H -v DEVICE_METADATA.localhost.platform`
+PLATFORM_DIR=/usr/share/sonic/device/$PLATFORM
+PRESET=(`head -n 1 /usr/share/sonic/device/$PLATFORM/default_sku`)
+DEFAULT_HWSKU=${PRESET[0]}
+HWSKU_STR_START=${PRESET[0]:0:4}
+DEFAULT_PRESET=${PRESET[1]}
+EXECUTE=no
+
+# Display HWSKUs supported on current platform
+list_hwskus()
+{
+    echo "List of supported HWSKU:"
+    for sku in $PLATFORM_DIR/*/;
+    do
+        sku="${sku%/}";
+        sku="${sku##*/}";
+        if [ $HWSKU_STR_START != ${sku:0:4} ]; then
+            continue
+        fi
+        if [ "$sku" = "$DEFAULT_HWSKU" ]; then
+            echo "$sku (Present)";
+        else
+            echo "$sku";
+        fi
+    done
+}
+# Set requested HWSKU
+# Usage: set_hwsku <hwsku_name>
+#
+set_hwsku()
+{
+    # Parse arguments passed
+    HWSKU=$1
+
+    # Validate in Supported list
+    valid_sku=0
+    for sku in $PLATFORM_DIR/*/;
+    do
+        sku="${sku%/}";
+        sku="${sku##*/}";
+        if [ $HWSKU_STR_START != ${sku:0:4} ]; then
+            continue
+        fi
+        if [ "$sku" = "$HWSKU" ]; then
+            valid_sku=1
+            break
+        fi
+    done
+
+    if [ $valid_sku -eq 1 ]; then
+        if [ $DEFAULT_HWSKU = $HWSKU ]; then
+            echo "Same as present HWSKU $HWSKU, no changes made"
+        else
+            echo -e "Warning: This deletes existing configurations and cause switch to reboot."
+            if [ "${EXECUTE}" = "no" ]; then
+                read -r -p "Are you sure you want to change? [y/N] " response
+            else
+                response='y'
+            fi
+            case $response in
+                [yY][eE][sS]|[yY])
+                    echo "Setting Default HWSKU to $HWSKU $DEFAULT_PRESET"
+                    echo "$HWSKU $DEFAULT_PRESET" > /usr/share/sonic/device/$PLATFORM/default_sku
+                    echo "Removng existing config_db.json"
+                    if [ -r /etc/sonic/config_db.json ]; then
+                        rm -rf /etc/sonic/config_db.json
+                    fi
+                    echo "Rebooting system"
+                    reboot -y
+                    ;;
+                *)
+                    exit 0
+                    ;;
+            esac
+        fi
+    else
+        echo "Invalid HWSKU - $HWSKU"
+        exit 1
+    fi
+}
+
+### Execution starts here ###
+CMD=$1
+if [ "$CMD" = "help" ] || \
+   [ "$CMD" = "-h" ] || [ "$CMD" = "--help" ]; then
+    usage
+    exit 0
+fi
+
+# Display supported HWSKU's for current platform
+if [ "$CMD" = "list" ]; then
+    list_hwskus
+# Set user provided HWSKU as default_SKU
+elif [ "$CMD" = "set" ]; then
+    if [ "$3" = "-y"  ]; then
+        EXECUTE=yes
+    elif [ "$3" != "" ]; then
+        usage
+        exit 1
+    fi
+    set_hwsku $2
+# Validate supported commands
+else
+    usage
+    exit 1
+fi
+
+exit 0

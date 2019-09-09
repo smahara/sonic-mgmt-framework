@@ -413,6 +413,9 @@ sudo LANG=C chroot $FILESYSTEM_ROOT umount -lf /sys
 sudo LANG=C cp $SCRIPTS_DIR/swss.sh $FILESYSTEM_ROOT/usr/local/bin/swss.sh
 sudo LANG=C cp $SCRIPTS_DIR/syncd.sh $FILESYSTEM_ROOT/usr/local/bin/syncd.sh
 
+# Copy config-hwsku script
+sudo LANG=C cp $SCRIPTS_DIR/config-hwsku $FILESYSTEM_ROOT/usr/bin/config-hwsku
+
 # Copy systemd timer configuration
 # It implements delayed start of services
 sudo cp $BUILD_TEMPLATES/snmp.timer $FILESYSTEM_ROOT/etc/systemd/system/
