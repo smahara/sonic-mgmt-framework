@@ -18,6 +18,7 @@ ipv6_lpm_128b_enable=1
 
 #Use MMU lossy configuration
 mmu_lossless=0
+bcm_num_cos=10
 
 ###################################################################################
 # SeaStone customized configuration
