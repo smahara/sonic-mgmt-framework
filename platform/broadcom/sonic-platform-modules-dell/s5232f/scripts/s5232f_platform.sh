@@ -99,7 +99,7 @@ platform_firmware_versions() {
        rm -rf ${FIRMWARE_VERSION_FILE}
        echo "BIOS: `dmidecode -s system-version `" > $FIRMWARE_VERSION_FILE
        ## Get FPGA version
-       r=`/opt/dell/os10/bin/pcisysfs.py  --get --offset 0x00 --res /sys/bus/pci/devices/0000\:04\:00.0/resource0 | sed  '1d; s/.*\(....\)$/\1/; s/\(..\{1\}\)/\1./'`
+       r=`/usr/bin/pcisysfs.py  --get --offset 0x00 --res /sys/bus/pci/devices/0000\:04\:00.0/resource0 | sed  '1d; s/.*\(....\)$/\1/; s/\(..\{1\}\)/\1./'`
        r_min=$(echo $r | sed 's/.*\(..\)$/0x\1/')
        r_maj=$(echo $r | sed 's/^\(..\).*/0x\1/')
        echo "FPGA: $((r_maj)).$((r_min))" >> $FIRMWARE_VERSION_FILE
