@@ -74,6 +74,29 @@ switch_board_qsfp() {
     esac
 }
 
+#Attach/Detach 2 instances of EEPROM driver SFP+ ports
+#eeprom can dump data using below command
+switch_board_qsfp() {
+        case $1 in
+        "new_device")
+                        for ((i=1;i<=2;i++));
+                        do
+                            echo sff8436 0x50 > /sys/bus/i2c/devices/i2c-$i/$1
+                        done
+                        ;;
+ 
+        "delete_device")
+                        for ((i=1;i<=2;i++));
+                        do
+                            echo 0x50 > /sys/bus/i2c/devices/i2c-$i/$1
+                        done
+                        ;;
+
+        *)              echo "z9332f_platform: switch_board_qsfp: invalid command !"
+                        ;;
+    esac
+}
+
 #Modsel 64 ports to applicable QSFP type modules
 #This enables the adapter to respond for i2c commands
 switch_board_modsel() {
@@ -136,6 +159,7 @@ if [ "$1" == "init" ]; then
     #insmod /lib/modules/`uname -r`/extra/mc24lc64t.ko
     sys_eeprom "new_device"
     switch_board_qsfp "new_device"
+    switch_board_sfp "new_device"
   # switch_board_led_default
   # python /usr/bin/qsfp_irq_enable.py
     platform_firmware_versions
@@ -143,6 +167,7 @@ if [ "$1" == "init" ]; then
 elif [ "$1" == "deinit" ]; then
     sys_eeprom "delete_device"
     switch_board_qsfp "delete_device"
+    switch_board_sfp "delete_device"
     modprobe -r i2c-mux-pca954x
     modprobe -r i2c-dev
     modprobe -r ipmi_devintf
