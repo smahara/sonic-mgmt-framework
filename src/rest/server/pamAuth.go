@@ -2,19 +2,21 @@ package server
 
 import (
 	"net/http"
-	// "os/user"
+	"os/user"
 	"strings"
 	"io/ioutil"
 	"fmt"
 	"github.com/golang/glog"
-	//"github.com/msteinert/pam"
-	"golang.org/x/crypto/ssh"
+	"github.com/msteinert/pam"
+	// "golang.org/x/crypto/ssh"
 	"crypto/rand"
 	"encoding/base64"
 	"os"
+	"syscall"
+	"errors"
 )
 
-/*
+
 type UserCredential struct {
 	Username string
 	Password string
@@ -52,77 +54,89 @@ func PAMAuthUser(u string, p string) error {
 	err := cred.PAMAuthenticate()
 	return err
 }
-*/
+
 const API_KEY_LEN = 10
 const API_KEY_DIR = "/etc/rest_api_keys"
 
 func IsAdminGroup(username string, passwd string) bool {
 
-	//This does not work since we are in a container and 
-	// /etc/passwd is not the host /etc/passwd
-
-	// usr, err := user.Lookup(username)
-	// if err != nil {
-	// 	return false
-	// }
-	// gids, err := usr.GroupIds()
-	// if err != nil {
-	// 	return false
-	// }
-	// glog.V(2).Infof("User:%s, groups=%s", username, gids)
-	// admin, err := user.Lookup("admin")
-	// if err != nil {
-	// 	return false
-	// }
-	// for _, x := range gids {
-	// 	if x == admin.Gid {
-	// 		return true
-	// 	}
-	// }
-	// return false
-	config := &ssh.ClientConfig{
-		User: username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(passwd),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
-	client, err := ssh.Dial("tcp", "127.0.0.1:22", config)
+	usr, err := user.Lookup(username)
 	if err != nil {
-		
 		return false
 	}
-	session, err := client.NewSession()
-	output, err := session.Output(fmt.Sprintf("id -G %v", username))
+	gids, err := usr.GroupIds()
 	if err != nil {
-		
 		return false
 	}
-	user_groups := strings.Split(string(output), " ")
-	session.Close()
-	session, err = client.NewSession()
-	output, err = session.Output("id -g admin")
+	glog.V(2).Infof("User:%s, groups=%s", username, gids)
+	admin, err := user.Lookup("admin")
 	if err != nil {
-		
 		return false
 	}
-	admin_group := strings.TrimSpace(string(output))
-	for _,g := range(user_groups) {
-		if g == admin_group {
+	for _, x := range gids {
+		if x == admin.Gid {
 			return true
 		}
 	}
 	return false
 
+	// config := &ssh.ClientConfig{
+	// 	User: username,
+	// 	Auth: []ssh.AuthMethod{
+	// 		ssh.Password(passwd),
+	// 	},
+	// 	HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	// }
+	// client, err := ssh.Dial("tcp", "127.0.0.1:22", config)
+	// if err != nil {
+		
+	// 	return false
+	// }
+	// session, err := client.NewSession()
+	// output, err := session.Output(fmt.Sprintf("id -G %v", username))
+	// if err != nil {
+		
+	// 	return false
+	// }
+	// user_groups := strings.Split(string(output), " ")
+	// session.Close()
+	// session, err = client.NewSession()
+	// output, err = session.Output("id -g admin")
+	// if err != nil {
+		
+	// 	return false
+	// }
+	// admin_group := strings.TrimSpace(string(output))
+	// for _,g := range(user_groups) {
+	// 	if g == admin_group {
+	// 		return true
+	// 	}
+	// }
+	// return false
+
 }
 
 func PAMAuthenAndAuthor(r *http.Request, rc *RequestContext) error {
 
+	root, err := os.Open("/")
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+	if err := syscall.Chroot("/host_root"); err != nil {
+		root.Close()
+		return err
+	}
+
+	
+	defer syscall.Chroot(".")
+	defer root.Chdir()
 
 	username, passwd, authOK := r.BasicAuth()
-	if authOK == false {
+	if authOK == false || username == "" {
 		glog.Errorf("[%s] User info not present", rc.ID)
 		api_key_header := r.Header.Get("X-API-Key")
+		
 		if api_key_header == "" {
 			glog.Errorf("[%s] Api Key not present", rc.ID)
 			return httpError(http.StatusUnauthorized, "")
@@ -159,25 +173,25 @@ func PAMAuthenAndAuthor(r *http.Request, rc *RequestContext) error {
 		 * /etc of host with /etc of container. For now disable this and use ssh
 		 * for authentication.
 		 */
-		/* err := PAMAuthUser(username, passwd)
-		    if err != nil {
-				log.Printf("Authentication failed. user=%s, error:%s", username, err.Error())
-		        return err
-		    }*/
+		err := PAMAuthUser(username, passwd)
+			if err != nil {
+				glog.Infof("[%s] Authentication failed. user=%s, error:%s", rc.ID, username, err.Error())
+				return err
+			}
 
 		//Use ssh for authentication.
-		config := &ssh.ClientConfig{
-			User: username,
-			Auth: []ssh.AuthMethod{
-				ssh.Password(passwd),
-			},
-			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		}
-		_, err := ssh.Dial("tcp", "127.0.0.1:22", config)
-		if err != nil {
-			glog.Infof("[%s] Failed to authenticate; %v", rc.ID, err)
-			return httpError(http.StatusUnauthorized, "")
-		}
+		// config := &ssh.ClientConfig{
+		// 	User: username,
+		// 	Auth: []ssh.AuthMethod{
+		// 		ssh.Password(passwd),
+		// 	},
+		// 	HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		// }
+		// _, err := ssh.Dial("tcp", "127.0.0.1:22", config)
+		// if err != nil {
+		// 	glog.Infof("[%s] Failed to authenticate; %v", rc.ID, err)
+		// 	return httpError(http.StatusUnauthorized, "")
+		// }
 	}
 	glog.Infof("[%s] Authentication passed. user=%s ", rc.ID, username)
 	//Allow SET request only if user belong to admin group
@@ -226,7 +240,7 @@ func GenApiKey(username string) {
 	api_key_file := fmt.Sprintf("%v/%v.key", API_KEY_DIR, username)
 	err = ioutil.WriteFile(api_key_file, []byte(base64.StdEncoding.EncodeToString(b)), 0600)
 	if err != nil {
-	    panic(err)
+		panic(err)
 	}
 }
 
