@@ -374,7 +374,7 @@ def init():
     # Load platform-specific sfputil class
     err = load_platform_sfputil()
     if err != 0:
-        sys.exit(2)
+	return
 
     # Load port info
     try:
@@ -382,7 +382,7 @@ def init():
         platform_sfputil.read_porttab_mappings(port_config_file_path)
     except Exception, e:
         log_error("ERROR reading port info (%s)" % str(e), True)
-        sys.exit(3)
+	return 
 
 
 # 'eeprom' subcommand
@@ -428,8 +428,8 @@ def presence():
             try:
                 presence = platform_sfputil.get_presence(physical_port)
             except NotImplementedError:
-                print ("ERROR This functionality is currently not implemented for this platform\n")
-                sys.exit(5)
+                print ("This functionality is currently not implemented for this platform\n")
+		return
 
             if presence:
                 output_table.append([port_name, "Present"])
@@ -469,8 +469,8 @@ def lpmode():
             try:
                 lpmode = platform_sfputil.get_low_power_mode(physical_port)
             except NotImplementedError:
-                print "ERROR This functionality is currently not implemented for this platform\n"
-                sys.exit(5)
+                print "This functionality is currently not implemented for this platform\n"
+		return
 
             if lpmode:
                 output_table.append([port_name, "On"])
