@@ -15,4 +15,4 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	pushd ./protobuf-$(PROTOBUF_VERSION)
 	dpkg-buildpackage -rfakeroot -b -us -uc  -j$(SONIC_CONFIG_MAKE_JOBS)
 	popd
-	mv $(MAIN_TARGET) $(DEST)/
+	mv $* $(DEST)/
