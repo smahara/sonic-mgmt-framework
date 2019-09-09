@@ -81,6 +81,8 @@ function preStartAction()
     fi
 {%- elif docker_container_name == "teamd" %}
     wait_for_swss_db_flush_done
+{%- elif docker_container_name == "nat" %}
+    wait_for_swss_db_flush_done
 {%- elif docker_container_name == "syncd" %}
     # Clear the portstat counters
     for file in `ls /tmp/portstat*/*`
