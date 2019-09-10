@@ -22,7 +22,6 @@ module_64ports=0
 table_dma_enable=1
 tdma_timeout_usec=5000000
 mmu_lossless=0
-bcm_num_cos=10
 
 l2xmsg_mode=1
 l2xmsg_hostbuf_size=8192

@@ -14,7 +14,7 @@ pbmp_xport_xe=0x3ffffffffffffffffffffffffffffffffe
 #
 arl_clean_timeout_usec=15000000
 asf_mem_profile=2
-bcm_num_cos=10
+bcm_num_cos=8
 bcm_stat_flags=1
 bcm_stat_jumbo=9236
 cdma_timeout_usec=15000000

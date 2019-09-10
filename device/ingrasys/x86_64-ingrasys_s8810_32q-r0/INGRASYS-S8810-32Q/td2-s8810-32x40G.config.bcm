@@ -16,7 +16,6 @@ l3_mem_entries=16384
 
 l2xmsg_mode=1
 mmu_lossless=0
-bcm_num_cos=10
 
 #Parity
 parity_correction=1

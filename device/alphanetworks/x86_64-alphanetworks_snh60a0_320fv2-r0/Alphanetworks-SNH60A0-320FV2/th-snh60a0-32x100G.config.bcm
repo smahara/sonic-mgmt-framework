@@ -20,7 +20,7 @@ bcm_linkscan_interval.0=450000
 # 2: Extreme speed profile
 
 os=unix
-bcm_num_cos=10
+
 
 
 # EagleCore ports

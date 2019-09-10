@@ -2,7 +2,7 @@
 
 # Define default OS / SAL
 os=unix
-bcm_num_cos=10
+
 l2_mem_entries=40960
 l3_mem_entries=40960
 fpem_mem_entries=32768

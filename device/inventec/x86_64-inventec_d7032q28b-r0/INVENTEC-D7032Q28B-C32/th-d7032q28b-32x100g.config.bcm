@@ -2,7 +2,7 @@
 
 # Define default OS / SAL
 os=unix
-bcm_num_cos=10
+
 l2_mem_entries=8192
 l3_mem_entries=8192
 l3_alpm_enable=2
