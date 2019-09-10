@@ -9,7 +9,7 @@ SHELL = /bin/bash
 USER = $(shell id -un)
 UID = $(shell id -u)
 GUID = $(shell id -g)
-SONIC_GET_VERSION=$(shell export BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) && export BUILD_NUMBER=$(BUILD_NUMBER) && . functions.sh && sonic_get_version)
+SONIC_GET_VERSION=$(shell export BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) && export BUILD_NUMBER=$(BUILD_NUMBER) && export BUILD_PRODUCT=$(BUILD_PRODUCT) && . functions.sh && sonic_get_version)
 
 .SECONDEXPANSION:
 
@@ -42,6 +42,7 @@ CONFIGURED_PLATFORM := $(shell [ -f .platform ] && cat .platform || echo generic
 PLATFORM_PATH = platform/$(CONFIGURED_PLATFORM)
 export BUILD_NUMBER
 export BUILD_TIMESTAMP
+export BUILD_PRODUCT
 export CONFIGURED_PLATFORM
 
 SONIC_MAKEFILE_LIST=slave.mk rules/functions
@@ -245,6 +246,7 @@ $(info "DPKG_CACHE_PATH"                 : "$(SONIC_DPKG_CACHE_SOURCE)")
 endif
 $(info "BUILD_NUMBER"                    : "$(BUILD_NUMBER)")
 $(info "BUILD_TIMESTAMP"                 : "$(BUILD_TIMESTAMP)")
+$(info "BUILD_PRODUCT"                   : "$(BUILD_PRODUCT)")
 $(info "BLDENV"                          : "$(BLDENV)")
 $(info "VS_PREPARE_MEM"                  : "$(VS_PREPARE_MEM)")
 $(info "VERSION"                         : "$(SONIC_GET_VERSION)")

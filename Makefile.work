@@ -37,6 +37,7 @@
 #  * SONIC_DPKG_CACHE_METHOD: Specifying method of obtaining the Debian packages from cache: none or cache
 #  * SONIC_DPKG_CACHE_SOURCE: Debian package cache location when cache enabled for debian packages
 #  * LOCAL_SAI_DEBS_PATH: Full path to the parent directory that holds SAI debian packages
+#  * BUILD_PRODUCT: Optional SONiC product identifier for the image we wish to build
 #
 ###############################################################################
 
@@ -260,6 +261,7 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            BLDENV=$(BLDENV) \
                            PLATFORM=$(PLATFORM) \
                            BUILD_NUMBER=$(BUILD_NUMBER) \
+                           BUILD_PRODUCT=$(BUILD_PRODUCT) \
                            BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) \
                            SLAVE_TAG=$(SLAVE_TAG) \
                            ENABLE_DHCP_GRAPH_SERVICE=$(ENABLE_DHCP_GRAPH_SERVICE) \

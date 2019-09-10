@@ -54,6 +54,7 @@ sonic_get_version() {
     local describe=$(git describe --tags)
     local latest_tag=$(git describe --tags --abbrev=0)
     local branch_name=$(git rev-parse --abbrev-ref HEAD)
+    local build_product=${BUILD_PRODUCT:+-${BUILD_PRODUCT}}
     if [ -n "$(git status --untracked-files=no -s --ignore-submodules)" ]; then
         local dirty="-dirty-$BUILD_TIMESTAMP"
     fi
@@ -61,8 +62,8 @@ sonic_get_version() {
     ## Check if we are on tagged commit
     ## Note: escape the version string by sed: / -> _
     if [ -n "$latest_tag" ] && [ "$describe" == "$latest_tag" ]; then
-        echo "${latest_tag}${dirty}" | sed 's/\//_/g'
+        echo "${latest_tag}${build_product}${dirty}" | sed 's/\//_/g'
     else
-        echo "${branch_name}.${BUILD_NUMBER}${dirty:--$(git rev-parse --short HEAD)}" | sed 's/\//_/g'
+        echo "${branch_name}.${BUILD_NUMBER}${build_product}${dirty:--$(git rev-parse --short HEAD)}" | sed 's/\//_/g'
     fi
 }
