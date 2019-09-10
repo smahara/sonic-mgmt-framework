@@ -110,6 +110,7 @@ void local_if_init(struct LocalInterface* local_if)
     local_if->type = IF_T_UNKNOW;
     local_if->changed = 1;
     local_if->port_config_sync = 0;
+    local_if->standby_mac_update = 0;
     local_if->is_peer_link = 0;
     local_if->is_arp_accept = 0;
     local_if->l3_mode = 0;
@@ -723,7 +724,7 @@ int set_sys_arp_accept_flag(char* ifname, int flag)
         memset(cmd, 0, 64);
         snprintf(cmd, 63, "echo %d > /proc/sys/net/ipv4/conf/%s/arp_accept", flag, ifname);
         if (system(cmd))
-            ICCPD_LOG_DEBUG(__func__, "Failed to execute cmd = %s", flag, cmd);
+            ICCPD_LOG_DEBUG(__func__, "Failed to execute flag %d, cmd = %s", flag, cmd);
     }
 
     fclose(file_ptr);
