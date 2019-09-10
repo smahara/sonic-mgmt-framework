@@ -4,7 +4,6 @@ pbmp_xport_xe.0=0x1fffffffffffffffffffffffffffffffe
 miim_intr_enable=0
 schan_intr_enable=0
 bcm_stat_interval=2000000
-bcm_num_cos=10
 serdes_firmware_mode_xe=0x2
 
 portmap_1=16:10
