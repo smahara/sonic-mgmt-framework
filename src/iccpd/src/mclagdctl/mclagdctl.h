@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include "../../include/system.h"
 
+#define ETHER_ADDR_LEN 6
 #define MCLAGDCTL_PARA1_LEN 16
 #define MCLAGDCTL_PARA2_LEN 32
 #define MCLAGDCTL_PARA3_LEN 64
@@ -133,7 +134,7 @@ struct mclagd_mac_msg
 {
     unsigned char     op_type;/*add or del*/
     unsigned char     fdb_type;/*static or dynamic*/
-    char     mac_str[ETHER_ADDR_STR_LEN];
+    uint8_t     mac_addr[ETHER_ADDR_LEN];
     unsigned short vid;
     /*Current if name that set in chip*/
     char     ifname[MCLAGDCTL_MAX_L_PORT_NANE];

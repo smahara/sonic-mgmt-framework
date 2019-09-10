@@ -240,14 +240,13 @@ int iccp_mac_dump(char * *buf, int *num, int mclag_id)
                 continue;
         }
 
-        TAILQ_FOREACH(msg, &MLACP(csm).mac_list, tail)
+        RB_FOREACH (iccpd_mac, mac_rb_tree, &MLACP(csm).mac_rb)
         {
             memset(&mclagd_mac, 0, sizeof(struct mclagd_mac_msg));
-            iccpd_mac = (struct MACMsg*)msg->buf;
 
             mclagd_mac.op_type = iccpd_mac->op_type;
             mclagd_mac.fdb_type = iccpd_mac->fdb_type;
-            memcpy(mclagd_mac.mac_str, iccpd_mac->mac_str, ETHER_ADDR_STR_LEN);
+            memcpy(mclagd_mac.mac_addr, iccpd_mac->mac_addr, ETHER_ADDR_LEN);
             mclagd_mac.vid = iccpd_mac->vid;
             memcpy(mclagd_mac.ifname, iccpd_mac->ifname, strlen(iccpd_mac->ifname));
             memcpy(mclagd_mac.origin_ifname, iccpd_mac->origin_ifname, strlen(iccpd_mac->origin_ifname));
@@ -266,7 +265,7 @@ int iccp_mac_dump(char * *buf, int *num, int mclag_id)
                     return EXEC_TYPE_FAILED;
             }
         }
-    }
+        }
 
     *buf = mac_buf;
     *num = mac_num;

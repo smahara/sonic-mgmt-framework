@@ -43,6 +43,18 @@ char *mclagdctl_sock_path = "/var/run/iccpd/mclagdctl.sock";
    mclagdctl -i dump portlist peer
  */
 
+#define ETHER_ADDR_LEN 6
+char mac_print_str[18];
+
+char *mac_addr_to_str(uint8_t* mac_addr)
+{
+    memset(mac_print_str, 0, sizeof(mac_print_str));
+    snprintf(mac_print_str, sizeof(mac_print_str), "%02x:%02x:%02x:%02x:%02x:%02x",
+        mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+
+    return mac_print_str;
+}
+
 static struct command_type command_types[] =
 {
     {
@@ -371,7 +383,8 @@ int mclagdctl_parse_dump_mac(char *msg, int data_len)
         else
             fprintf(stdout, "%-5s", "D");
 
-        fprintf(stdout, "%-20s", mac_info->mac_str);
+        fprintf(stdout, "-20s", mac_addr_to_str(mac_info->mac_addr));
+
         fprintf(stdout, "%-5d", mac_info->vid);
         fprintf(stdout, "%-20s", mac_info->ifname);
         fprintf(stdout, "%-20s", mac_info->origin_ifname);

@@ -791,6 +791,29 @@ int iccp_csm_init_msg(struct Msg** msg, char* data, int len)
     return MCLAG_ERROR;
 }
 
+/* MAC Message initialization */
+int iccp_csm_init_mac_msg(struct MACMsg **mac_msg, char* data, int len)
+{
+    struct MACMsg* iccp_mac_msg = NULL;
+
+    if (mac_msg == NULL)
+        return -2;
+
+    if (data == NULL || len <= 0)
+        return MCLAG_ERROR;
+
+    iccp_mac_msg = (struct MACMsg*)malloc(sizeof(struct MACMsg));
+    if (iccp_mac_msg == NULL)
+       return -3;
+
+    memset(iccp_mac_msg, 0, sizeof(struct MACMsg));
+    memcpy(iccp_mac_msg, data, len);
+
+    *mac_msg = iccp_mac_msg;
+
+    return 0;
+}
+
 void iccp_csm_stp_role_count(struct CSM *csm)
 {
     /* decide the role, lower ip to be active & socket client*/

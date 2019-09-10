@@ -28,6 +28,9 @@
 
 #include "../include/msg_format.h"
 #include "../include/port.h"
+#include "../include/openbsd_tree.h"
+#include "../include/mlacp_tlv.h"
+
 
 #define MLACP_SYSCONF_NODEID_MSB_MASK       0x80
 #define MLACP_SYSCONF_NODEID_NODEID_MASK    0x70
@@ -349,8 +352,9 @@ struct mLACPVLANInfoTLV
 /* Mac entry Information TLV*/
 struct mLACPMACData
 {
-    uint8_t         type;/*add or del*/
-    char     mac_str[ETHER_ADDR_STR_LEN];
+    uint8_t     type;/*add or del*/
+    uint8_t     mac_type;
+    uint8_t     mac_addr[ETHER_ADDR_LEN];
     uint16_t vid;
     /*Current if name that set in chip*/
     char     ifname[MAX_L_PORT_NAME];
@@ -467,10 +471,12 @@ enum MAC_TYPE
 
 struct MACMsg
 {
+    RB_ENTRY(MACMsg) mac_entry_rb;
+    uint16_t    vid;
+    uint8_t     mac_addr[ETHER_ADDR_LEN];
     uint8_t     op_type;    /*add or del*/
     uint8_t     fdb_type;   /*static or dynamic*/
-    char     mac_str[ETHER_ADDR_STR_LEN];
-    uint16_t vid;
+
     /*Current if name that set in chip*/
     char     ifname[MAX_L_PORT_NAME];
     /*if we set the mac to peer-link, origin_ifname store the
@@ -478,5 +484,8 @@ struct MACMsg
     char     origin_ifname[MAX_L_PORT_NAME];
     uint8_t age_flag;/*local or peer is age?*/
 };
+
+RB_HEAD(mac_rb_tree, MACMsg);
+RB_PROTOTYPE(mac_rb_tree, MACMsg, mac_entry_rb, MACMsg_compare);
 
 #endif /* MLACP_TLV_H_ */

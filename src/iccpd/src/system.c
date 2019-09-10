@@ -28,6 +28,9 @@
 #include "../include/iccp_netlink.h"
 #include "../include/scheduler.h"
 
+#define ETHER_ADDR_LEN 6
+char mac_print_str[18];
+
 /* Singleton */
 struct System* system_get_instance()
 {
@@ -73,7 +76,6 @@ void system_init(struct System* sys)
     sys->telnet_port = 2015;
     FD_ZERO(&(sys->readfd));
     sys->readfd_count = 0;
-    sys->csm_trans_time = 0;
     sys->need_sync_team_again = 0;
     sys->need_sync_netlink_again = 0;
     scheduler_server_sock_init();
@@ -224,9 +226,6 @@ SYNCD_TX_DBG_CNTR_MSG_e system_syncdtx_to_dbg_msg_type(uint32_t msg_type)
         case MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_DISABLE:
             return SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE;
 
-        case MCLAG_MSG_TYPE_GET_FDB_CHANGES:
-            return SYNCD_TX_DBG_CNTR_MSG_GET_FDB_CHANGES;
-
         default:
             return SYNCD_TX_DBG_CNTR_MSG_MAX;
     }
@@ -241,4 +240,13 @@ SYNCD_RX_DBG_CNTR_MSG_e system_syncdrx_to_dbg_msg_type(uint32_t msg_type)
         default:
             return SYNCD_RX_DBG_CNTR_MSG_MAX;
     }
+}
+
+char *mac_addr_to_str(uint8_t mac_addr[ETHER_ADDR_LEN])
+{
+    memset(mac_print_str, 0, sizeof(mac_print_str));
+    snprintf(mac_print_str, sizeof(mac_print_str), "%02x:%02x:%02x:%02x:%02x:%02x",
+        mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+
+    return mac_print_str;
 }

@@ -29,6 +29,8 @@
 
 #define MAX_MSG_LOG_SIZE    128
 
+#define ETHER_ADDR_LEN 6
+
 /*
  * RFC 5561
  * 4.  Capability Message
@@ -443,7 +445,6 @@ typedef enum mclag_msg_type_e_
     MCLAG_MSG_TYPE_SET_FDB              = 5,
     MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_ENABLE  = 7,
     MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_DISABLE = 8,
-    MCLAG_MSG_TYPE_GET_FDB_CHANGES      = 20
 }mclag_msg_type_e;
 
 
@@ -481,7 +482,7 @@ typedef struct mclag_sub_option_hdr_t_
 
 struct mclag_fdb_info
 {
-    char mac[32];
+    uint8_t     mac[ETHER_ADDR_LEN];
     unsigned int vid;
     char port_name[32];
     short type;     /*dynamic or static*/

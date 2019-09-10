@@ -164,7 +164,6 @@ struct System
     int telnet_port;
     fd_set readfd; /*record socket need to listen*/
     int readfd_count;
-    time_t csm_trans_time;
     int need_sync_team_again;
     int need_sync_netlink_again;
 
@@ -180,5 +179,7 @@ void system_finalize();
 void system_init(struct System*);
 SYNCD_TX_DBG_CNTR_MSG_e system_syncdtx_to_dbg_msg_type(uint32_t msg_type);
 SYNCD_RX_DBG_CNTR_MSG_e system_syncdrx_to_dbg_msg_type(uint32_t msg_type);
+
+char *mac_addr_to_str(uint8_t mac_addr[ETHER_ADDR_LEN]);
 
 #endif /* SYSTEM_H_ */
