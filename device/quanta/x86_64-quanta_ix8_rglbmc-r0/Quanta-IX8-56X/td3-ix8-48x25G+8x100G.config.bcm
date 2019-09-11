@@ -25,15 +25,6 @@ skip_L2_USER_ENTRY=0
 stable_size=0x5500000
 tdma_timeout_usec=3000000
 
-# IFA Settings
-num_queues_pci=46
-num_queues_uc0=1
-num_queues_uc1=1
-flow_init_mode=1
-ifa_enable=1
-sai_ifa_config=0x80000000000000002
-sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
-
 # portmap settings
 oversubscribe_mode=1
 #pbmp_xport_xe=0x48808080f8780808dfe1e1e1fe1e1e1fe
