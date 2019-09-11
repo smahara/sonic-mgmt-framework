@@ -52,8 +52,8 @@ index a9283ee..dcd4e2b 100644
 +                checked_lacp_port = lacp_port_get(lacp_port->lacp, tdport);
 +                if(lacp_port->tdport->ifindex != tdport->ifindex) {
 +                        if (lacp_port_selected(checked_lacp_port)) {
-+                                if ((lacpdu->partner.key) && (lacp_port->partner.key)
-+                                    && (lacp_port->partner.key != lacpdu->partner.key)) {
++                                if ((checked_lacp_port->partner.key) && (lacp_port->partner.key)
++                                    && (lacp_port->partner.key != checked_lacp_port->partner.key)) {
 +                                        return 0;
 +                                }
 +                        }
