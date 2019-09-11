@@ -153,7 +153,7 @@ class FanUtil(FanBase):
         node = self.FAN_DUTY_PATH
         try:
             with open(node, 'w') as dc:
-                dc.write(str(pwm))
+                dc.write(str(val))
         except IOError:
             return False
 
