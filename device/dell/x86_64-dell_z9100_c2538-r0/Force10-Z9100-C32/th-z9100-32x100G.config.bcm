@@ -231,3 +231,4 @@ dport_map_port_4=31
 dport_map_port_3=32
 
 mmu_init_config="MSFT-TH-Tier1"
+sai_postinit_cmd_file=/usr/share/sonic/hwsku/led_proc_init.soc

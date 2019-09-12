@@ -24,7 +24,7 @@ EOF
 PLATFORM=`sonic-cfggen -H -v DEVICE_METADATA.localhost.platform`
 PLATFORM_DIR=/usr/share/sonic/device/$PLATFORM
 PRESET=(`head -n 1 /usr/share/sonic/device/$PLATFORM/default_sku`)
-DEFAULT_HWSKU=${PRESET[0]}
+RESENT_HWSKU=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["hwsku"]'`
 HWSKU_STR_START=${PRESET[0]:0:4}
 DEFAULT_PRESET=${PRESET[1]}
 EXECUTE=no
@@ -41,7 +41,7 @@ function list_hwskus()
 	    continue
 	 fi
 
-         if [ "$sku" = "$DEFAULT_HWSKU" ]; then
+         if [ "$sku" = "$PRESENT_HWSKU" ]; then
 	    echo "$sku (Present)";
          else
             echo "$sku";
@@ -73,7 +73,7 @@ set_hwsku()
          fi
       done
   if [ $valid_sku -eq 1 ]; then
-       if [ $DEFAULT_HWSKU = $HWSKU ]; then
+       if [ $PRESENT_HWSKU = $HWSKU ]; then
           echo "Same as present HWSKU $HWSKU, Do Nothing"
        else 
           echo -e "Warning: This deletes existing configurations and cause switch to reboot."
