@@ -357,6 +357,7 @@ developer :
 	@sed -i 's|# INSTALL_DEBUG_TOOLS = y|INSTALL_DEBUG_TOOLS = y|' rules/config
 	@sed -i 's|#SONIC_DEBUGGING_ON = y|SONIC_DEBUGGING_ON = y|' rules/config
 	@sed -i 's|DEFAULT_KERNEL_PROCURE_METHOD = build|DEFAULT_KERNEL_PROCURE_METHOD = cache|' rules/config
+	@sed -i 's|SONIC_DPKG_CACHE_METHOD=none|SONIC_DPKG_CACHE_METHOD=cache|' rules/config
 
 initpde:
 	@for submodule in $(PDESUBMODULES) ; do \

@@ -124,7 +124,7 @@ FRR_USER_GID = 300
 #	#url:      cache over remote http server (not supported)
 #	#registry: cache on the docker local/remote registry (not supported)
 # SONIC_DPKG_CACHE_SOURCE - provides the cache location detail
-SONIC_DPKG_CACHE_METHOD=cache
+SONIC_DPKG_CACHE_METHOD=none
 SONIC_DPKG_CACHE_SOURCE=/projects/csg_sonic/dpkg_cache
 
 # Default VS build memory preparation
