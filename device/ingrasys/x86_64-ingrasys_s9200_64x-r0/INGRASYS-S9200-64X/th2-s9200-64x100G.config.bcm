@@ -17,6 +17,7 @@ parity_enable=1
 
 l2xmsg_mode=1
 mmu_lossless=0
+bcm_num_cos=10
 
 # core_clock_frequency can be 1125, 850, 765, 672, 645 or 545
 #core_clock_frequency=1125
