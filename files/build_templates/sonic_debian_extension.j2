@@ -311,6 +311,7 @@ sudo cp $IMAGE_CONFIGS/caclmgrd/caclmgrd $FILESYSTEM_ROOT/usr/bin/
 
 ## Increase the systemd service startup timeout
 sudo sed -i "s/.*DefaultTimeoutStartSec.*/DefaultTimeoutStartSec=180s/g" $FILESYSTEM_ROOT/etc/systemd/system.conf
+sudo sed -i "s/.*DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=180s/g" $FILESYSTEM_ROOT/etc/systemd/system.conf
 
 ## Allow systemd-coredump to perform cleanup of core files and not tmpfiles.d
 sudo sed -i "/\/var\/lib\/systemd\/coredump/d" $FILESYSTEM_ROOT/usr/lib/tmpfiles.d/systemd.conf
