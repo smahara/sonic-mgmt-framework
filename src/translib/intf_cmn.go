@@ -326,13 +326,12 @@ func (app *IntfApp) convertDBIntfCounterInfoToInternal(dbCl *db.DB, ifName *stri
 
 func (app *IntfApp) convertDBIfVlanListInfoToInternal(dbCl *db.DB, ts *db.TableSpec, ifName *string) error {
 	var err error
-	var vlanMemberKeys []db.Key
 
 	vlanMemberTable, err := dbCl.GetTable(ts)
 	if err != nil {
 		return err
 	}
-	vlanMemberKeys, err = vlanMemberTable.GetKeys()
+	vlanMemberKeys, err := vlanMemberTable.GetKeys()
 	if err != nil {
 		return err
 	}
@@ -344,6 +343,7 @@ func (app *IntfApp) convertDBIfVlanListInfoToInternal(dbCl *db.DB, ts *db.TableS
 		}
 		vlanId := vlanMember.Get(0)
 		ifName := vlanMember.Get(1)
+		log.Infof("Received Vlan: %s for Interface: %s", vlanId, ifName)
 
 		memberPortEntry, err := dbCl.GetEntry(ts, vlanMember)
 		if err != nil {
@@ -354,6 +354,7 @@ func (app *IntfApp) convertDBIfVlanListInfoToInternal(dbCl *db.DB, ts *db.TableS
 			return errors.New(errStr)
 		}
 
+		/* vlanMembersTableMap is used as DS for ifName to list of VLANs */
 		if app.vlanD.vlanMembersTableMap[ifName] == nil {
 			app.vlanD.vlanMembersTableMap[ifName] = make(map[string]dbEntry)
 			app.vlanD.vlanMembersTableMap[ifName][vlanId] = dbEntry{entry: memberPortEntry}
@@ -361,6 +362,7 @@ func (app *IntfApp) convertDBIfVlanListInfoToInternal(dbCl *db.DB, ts *db.TableS
 			app.vlanD.vlanMembersTableMap[ifName][vlanId] = dbEntry{entry: memberPortEntry}
 		}
 	}
+	log.Infof("Updated the vlan-member-table ds for Interface: %s", *ifName)
 	return err
 }
 
@@ -433,7 +435,7 @@ func (app *IntfApp) processGetConvertDBPhyIfInfoToDS(ifName *string) error {
 		return err
 	}
 
-	err = app.convertDBIfVlanListInfoToInternal(app.appDB, app.vlanD.vlanMemberTs, ifName)
+	err = app.convertDBIfVlanListInfoToInternal(app.appDB, app.vlanD.vlanMemberTblTs, ifName)
 	if err != nil {
 		return err
 	}
@@ -572,8 +574,6 @@ func (app *IntfApp) convertInternalToOCIntfVlanListInfo(ifName *string, ifInfo *
 			vlanId, err := strconv.Atoi(vlanIdStr)
 			vlanIdCast := uint16(vlanId)
 
-			log.Info("Vlan-Id = ", vlanId)
-
 			tagMode := tagEntry.entry.Field["tagging_mode"]
 			if tagMode == "untagged" {
 				if err != nil {
@@ -581,10 +581,12 @@ func (app *IntfApp) convertInternalToOCIntfVlanListInfo(ifName *string, ifInfo *
 					return errors.New(errStr)
 				}
 				ifInfo.Ethernet.SwitchedVlan.State.AccessVlan = &(vlanIdCast)
+				log.Infof("Adding access-vlan: %d succesful!", vlanIdCast)
 			} else {
 				taggedMemberPresent = true
 				trunkVlan, _ := ifInfo.Ethernet.SwitchedVlan.State.To_OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_State_TrunkVlans_Union(vlanIdCast)
 				ifInfo.Ethernet.SwitchedVlan.State.TrunkVlans = append(ifInfo.Ethernet.SwitchedVlan.State.TrunkVlans, trunkVlan)
+				log.Infof("Adding trunk-vlan: %d succesful!", trunkVlan)
 			}
 
 		}
