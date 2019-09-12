@@ -96,7 +96,7 @@ function preStartAction()
     done
 {%- elif docker_container_name == "pmon" %}
     # Initialize the eeprom info in databse
-    sudo /usr/bin/sysupdate.py && sudo decode-syseeprom --init
+    sudo /usr/bin/sysupdate.py 2>/dev/null && sudo decode-syseeprom --init
 	if [ $? -ne 0 ]; then
 		echo "EEPROM info initialization into database failed"
 	else
