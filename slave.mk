@@ -73,6 +73,10 @@ distclean : .platform clean
 list :
 	@$(foreach target,$(SONIC_TARGET_LIST),echo $(target);)
 
+# dummy target useful for trying makefile changes
+noop :
+	@echo "Nothing to do (noop)"
+
 ###############################################################################
 ## Include other rules
 ###############################################################################
@@ -89,10 +93,6 @@ ifeq ($(SONIC_ENABLE_SYNCD_RPC),y)
 ENABLE_SYNCD_RPC = y
 endif
 
-ifeq ($(SONIC_INSTALL_DEBUG_TOOLS),y)
-INSTALL_DEBUG_TOOLS = y
-endif
-
 include $(RULES_PATH)/config
 include $(RULES_PATH)/functions
 include $(RULES_PATH)/*.mk
@@ -100,6 +100,21 @@ ifneq ($(CONFIGURED_PLATFORM), undefined)
 include $(PLATFORM_PATH)/rules.mk
 endif
 
+ifneq ($(SONIC_DEBUGGING_ON_PARAM),)
+SONIC_DEBUGGING_ON = $(SONIC_DEBUGGING_ON_PARAM)
+endif
+
+ifneq ($(SONIC_PROFILING_ON_PARAM),)
+SONIC_PROFILING_ON = $(SONIC_PROFILING_ON_PARAM)
+endif
+
+ifneq ($(SONIC_COVERAGE_ON_PARAM),)
+SONIC_COVERAGE_ON = $(SONIC_COVERAGE_ON_PARAM)
+endif
+
+ifneq ($(SONIC_INSTALL_DEBUG_TOOLS),)
+INSTALL_DEBUG_TOOLS = $(SONIC_INSTALL_DEBUG_TOOLS)
+endif
 
 ifeq ($(SONIC_USE_PDDF_FRAMEWORK),y)
 PDDF_SUPPORT = y
@@ -1013,6 +1028,6 @@ jessie : $$(addprefix $(TARGET_PATH)/,$$(SONIC_JESSIE_DOCKERS_FOR_INSTALLERS))
 ## Standard targets
 ###############################################################################
 
-.PHONY : $(SONIC_CLEAN_DEBS) $(SONIC_CLEAN_FILES) $(SONIC_CLEAN_TARGETS) $(SONIC_CLEAN_STDEB_DEBS) $(SONIC_CLEAN_WHEELS) $(SONIC_PHONY_TARGETS) clean distclean configure
+.PHONY : $(SONIC_CLEAN_DEBS) $(SONIC_CLEAN_FILES) $(SONIC_CLEAN_TARGETS) $(SONIC_CLEAN_STDEB_DEBS) $(SONIC_CLEAN_WHEELS) $(SONIC_PHONY_TARGETS) clean distclean configure noop
 
 .INTERMEDIATE : $(SONIC_INSTALL_TARGETS) $(SONIC_INSTALL_WHEELS) $(DOCKER_LOAD_TARGETS) docker-start .platform
