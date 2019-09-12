@@ -191,6 +191,9 @@ class Handler(FileSystemEventHandler):
         if event.is_directory:
             return None
 
+        if g_exp_ctx['config'] != 'enable':
+            return None
+
         elif event.event_type == 'created' or \
              event.event_type == 'modified':
             logger.debug("Received created/modified event - %s." % event.src_path )
@@ -207,10 +210,12 @@ def export_daemon():
     if not os.path.exists('/var/lib/systemd/coredump'):
         os.mkdir('/var/lib/systemd/coredump')
 
-    observer = Observer()
-    event_handler = Handler()
-    observer.schedule(event_handler, g_exp_ctx['coredir'], recursive=True)
-    observer.start()
+    if g_exp_ctx['config'] == 'enable':
+        observer = Observer()
+        event_handler = Handler()
+        observer.schedule(event_handler, g_exp_ctx['coredir'], recursive=True)
+        observer.start()
+
     try:
 
         g_last_ts = curr_ts = time.time()
@@ -246,8 +251,9 @@ def export_daemon():
         logger.exception(str(e))
         #traceback.print_exc(file=STDERR)
 
-    observer.stop()
-    observer.join()
+    if g_exp_ctx['config'] == 'enable':
+        observer.stop()
+        observer.join()
 
 
 if __name__ == "__main__":
