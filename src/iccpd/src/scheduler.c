@@ -106,12 +106,6 @@ static int scheduler_transit_fsm()
         iccp_csm_transit(csm);
         app_csm_transit(csm);
         mlacp_fsm_transit(csm);
-
-        if (MLACP(csm).current_state == MLACP_STATE_EXCHANGE && (time(NULL) - sys->csm_trans_time) >= 60)
-        {
-            iccp_get_fdb_change_from_syncd();
-            sys->csm_trans_time = time(NULL);
-        }
     }
 
     local_if_change_flag_clear();

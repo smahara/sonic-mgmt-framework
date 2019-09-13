@@ -322,13 +322,16 @@ int mlacp_prepare_for_mac_info_to_peer(struct CSM* csm, char* buf, size_t max_bu
 
     MacData = (struct mLACPMACData *)&buf[sizeof(ICCHdr) + sizeof(struct mLACPMACInfoTLV) + sizeof(struct mLACPMACData) * count];
     MacData->type = mac_msg->op_type;
-    sprintf(MacData->mac_str, "%s", mac_msg->mac_str);
+    MacData->mac_type = mac_msg->fdb_type;
+    memcpy(MacData->mac_addr, mac_msg->mac_addr,ETHER_ADDR_LEN);
     sprintf(MacData->ifname, "%s", mac_msg->origin_ifname);
     MacData->vid = htons(mac_msg->vid);
 
     #if 1
     ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg type = TLV_T_MLACP_MAC_INFO");
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg if name %s  mac  = %s, vid = %d, type = %d count %d msg len %d", mac_msg->origin_ifname,  mac_msg->mac_str, mac_msg->vid, mac_msg->op_type, count, msg_len);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg if name %s  mac  = %s, "
+            "vid = %d, type = %d count %d msg len %d", mac_msg->origin_ifname,
+            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->op_type, count, msg_len);
     #endif
 
     return msg_len;
