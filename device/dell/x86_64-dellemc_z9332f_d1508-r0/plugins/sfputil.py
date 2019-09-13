@@ -286,38 +286,22 @@ class SfpUtil(SfpUtilBase):
             retval = retval.lstrip(" ")
             return retval
 
-    data = {'valid':0, 'last':0, 'present':0}
-    def get_transceiver_change_event(self, timeout=0):
-         now = time.time()
-         port_dict = {}
-         port = 0
+    def get_transceiver_change_event(self):
+        port_dict = {}
+        while True:
+            for port_num in range(self.port_start, (self.port_end + 1)):
+                presence = self.get_presence(port_num)
+                if(presence and self._global_port_pres_dict[port_num] == '0'):
+                    self._global_port_pres_dict[port_num] = '1'
+                    port_dict[port_num] = '1'
+                elif(not presence and
+                     self._global_port_pres_dict[port_num] == '1'):
+                    self._global_port_pres_dict[port_num] = '0'
+                    port_dict[port_num] = '0'
 
-         if timeout < 2000:
-             timeout = 2000
-         timeout = (timeout) / float(1000) # Convert to secs
+                if(len(port_dict) > 0):
+                    return True, port_dict
 
-         if now < (self.data['last'] + timeout) and self.data['valid']:
-             return True, {}
+            time.sleep(0.5)
 
-         reg_value = self.mod_pres() 
-         changed_ports = self.data['present'] ^ reg_value
-         if changed_ports:
-             for port in range (self.port_start, self.port_end+1):
-                 # Mask off the bit corresponding to our port
-                 mask = (1 << (port - 1))
-                 if changed_ports & mask:
-                     if (reg_value & mask) == 0:
-                         port_dict[port] = SFP_STATUS_REMOVED
-                     else:
-                         port_dict[port] = SFP_STATUS_INSERTED
-
-             # Update cache
-             self.data['present'] = reg_value
-             self.data['last'] = now
-             self.data['valid'] = 1
-	     print 'port_dict', port_dict
-             return True, port_dict
-         else:
-             return True, {}
-         return False, {}
 

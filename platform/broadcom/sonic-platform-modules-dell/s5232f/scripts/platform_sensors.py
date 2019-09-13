@@ -27,6 +27,8 @@ PSU_PRESENCE = "PSU{0}_stat"
 # Use this for older firmware
 # PSU_PRESENCE="PSU{0}_prsnt"
 
+IPMI_PSU1_DATA_DOCKER = "ipmitool raw 0x04 0x2d 0x31 |  awk '{print substr($0,9,1)}'"
+IPMI_PSU2_DATA_DOCKER = "ipmitool raw 0x04 0x2d 0x32 |  awk '{print substr($0,9,1)}'"
 ipmi_sdr_list = ""
 
 # Dump sensor registers
@@ -163,6 +165,33 @@ for tray in range(1, S5232F_MAX_FAN_TRAYS + 1):
     else:
         print '\n  Fan Tray ' + str(tray + 1) + ':     Not present'
 
+    def get_psu_presence(index):
+        """
+        Retrieves the presence status of power supply unit (PSU) defined
+                by index <index>
+        :param index: An integer, index of the PSU of which to query status
+        :return: Boolean, True if PSU is plugged, False if not
+        """
+        status = 0
+        ret_status = 1
+
+        if index == 1:
+           status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
+        elif index == 2:
+           ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU2_DATA_DOCKER)
+
+        #if ret_status:
+         #   print ipmi_cmd_ret
+         #   logging.error('Failed to execute ipmitool')
+         #   sys.exit(0)
+
+        psu_status = ipmi_cmd_ret
+
+        if psu_status == '1':
+           status = 1
+
+        return status
+
 
 # Print the information for PSU1, PSU2
 def print_psu(psu):
@@ -237,8 +266,8 @@ def print_psu(psu):
 
 print('\nPSUs:')
 for psu in range(1, S5232F_MAX_PSUS + 1):
-    psu_presence = PSU_PRESENCE.format(psu)
-    if (get_pmc_register(psu_presence)):
+    #psu_presence = PSU_PRESENCE.format(psu)
+    if (get_psu_presence(psu)):
         print_psu(psu)
     else:
         print '\n  PSU ', psu, 'Not present'
