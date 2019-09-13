@@ -157,6 +157,13 @@ platform_firmware_versions() {
 	echo "Slave CPLD 4: $((r_maj)).$((r_min))" >> $FIRMWARE_VERSION_FILE
 }
 
+#This enables the led control for CPU and default states 
+switch_board_led_default() {
+	resource="/sys/bus/pci/devices/0000:04:00.0/resource0"
+	python /usr/bin/pcisysfs.py --set --offset 0x24 --val 0x194 --res $resource  > /dev/null 2>&1
+}
+
+
 init_devnum
 
 if [ "$1" == "init" ]; then
@@ -173,6 +180,7 @@ if [ "$1" == "init" ]; then
     switch_board_modsel
     switch_board_sfp_tx_en
     python /usr/bin/qsfp_irq_enable.py
+    switch_board_led_default
     platform_firmware_versions
 
 elif [ "$1" == "deinit" ]; then

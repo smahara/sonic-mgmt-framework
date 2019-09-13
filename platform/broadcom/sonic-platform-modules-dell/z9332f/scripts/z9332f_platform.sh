@@ -111,8 +111,7 @@ switch_board_modsel() {
 
 #This enables the led control for CPU and default states 
 switch_board_led_default() {
-	resource="/sys/bus/pci/devices/0000:09:00.0/resource0"
-	python /usr/bin/pcisysfs.py --set --offset 0x24 --val 0x194 --res $resource  > /dev/null 2>&1
+	/usr/sbin/i2cset -y 5 0x0d 0x62 0xd0
 }
 
 # Readout firmware version of the system and
@@ -160,7 +159,7 @@ if [ "$1" == "init" ]; then
     sys_eeprom "new_device"
     switch_board_qsfp "new_device"
     switch_board_sfp "new_device"
-  # switch_board_led_default
+    switch_board_led_default
   # python /usr/bin/qsfp_irq_enable.py
     platform_firmware_versions
 
