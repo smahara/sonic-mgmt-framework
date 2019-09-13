@@ -378,3 +378,4 @@ xgxs_tx_lane_map_93.0=0x132
 xgxs_tx_lane_map_96.0=0x123
 xgxs_tx_lane_map_97.0=0x123
 mmu_init_config="MSFT-TH-Tier0"
+sai_postinit_cmd_file=/usr/share/sonic/hwsku/led_proc_init.soc
