@@ -94,10 +94,9 @@ ENABLE_SYNCD_RPC = y
 endif
 
 include $(RULES_PATH)/config
-include $(RULES_PATH)/functions
-include $(RULES_PATH)/*.mk
-ifneq ($(CONFIGURED_PLATFORM), undefined)
-include $(PLATFORM_PATH)/rules.mk
+
+ifneq ($(SONIC_INSTALL_DEBUG_TOOLS),)
+INSTALL_DEBUG_TOOLS = $(SONIC_INSTALL_DEBUG_TOOLS)
 endif
 
 ifneq ($(SONIC_DEBUGGING_ON_PARAM),)
@@ -112,8 +111,10 @@ ifneq ($(SONIC_COVERAGE_ON_PARAM),)
 SONIC_COVERAGE_ON = $(SONIC_COVERAGE_ON_PARAM)
 endif
 
-ifneq ($(SONIC_INSTALL_DEBUG_TOOLS),)
-INSTALL_DEBUG_TOOLS = $(SONIC_INSTALL_DEBUG_TOOLS)
+include $(RULES_PATH)/functions
+include $(RULES_PATH)/*.mk
+ifneq ($(CONFIGURED_PLATFORM), undefined)
+include $(PLATFORM_PATH)/rules.mk
 endif
 
 ifeq ($(SONIC_USE_PDDF_FRAMEWORK),y)
@@ -256,6 +257,7 @@ $(info "KERNEL_PROCURE_METHOD"           : "$(KERNEL_PROCURE_METHOD)")
 ifeq ($(KERNEL_PROCURE_METHOD),cache)
 $(info "KERNEL_CACHE_PATH"               : "$(KERNEL_CACHE_PATH)")
 endif
+$(info "SONIC_DPKG_CACHE_METHOD"         : "$(SONIC_DPKG_CACHE_METHOD)")
 ifeq ($(SONIC_DPKG_CACHE_METHOD),cache)
 $(info "DPKG_CACHE_PATH"                 : "$(SONIC_DPKG_CACHE_SOURCE)")
 endif
