@@ -145,9 +145,9 @@ class PsuUtil(PsuBase):
         except IOError:
             return None
 
-        if 'F2B' in direction:
+        if 'CR' in direction:
            return "INTAKE"
-        elif 'B2F' in direction:
+        elif 'DR' in direction:
            return "EXHAUST"
         else:
            return direction.rstrip()
