@@ -24,7 +24,7 @@ EOF
 PLATFORM=`sonic-cfggen -H -v DEVICE_METADATA.localhost.platform`
 PLATFORM_DIR=/usr/share/sonic/device/$PLATFORM
 PRESET=(`head -n 1 /usr/share/sonic/device/$PLATFORM/default_sku`)
-RESENT_HWSKU=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["hwsku"]'`
+PRESENT_HWSKU=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["hwsku"]'`
 HWSKU_STR_START=${PRESET[0]:0:4}
 DEFAULT_PRESET=${PRESET[1]}
 EXECUTE=no
