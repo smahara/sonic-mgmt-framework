@@ -1,578 +1,578 @@
 {
     "GLOBAL_MEDIA_SETTINGS": {
         "0": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x00320b"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "1": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x00320b"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "2": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x00320c"
                 }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
-                }
             }
         }, 
         "3": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x00320b"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "4": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x00320a"
                 }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
-                }
             }
         }, 
         "5": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x00320b"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "6": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d0a"
                 }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
-                }
             }
         }, 
         "7": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d09"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "8": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x00320b"
                 }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
-                }
             }
         }, 
         "9": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d09"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "10": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d08"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "11": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d09"
                 }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
-                }
             }
         }, 
         "12": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d08"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "13": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d08"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "14": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d08"
                 }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
-                }
             }
         }, 
         "15": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d07"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "16": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "17": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d07"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "18": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002d07"
                 }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
-                }
             }
         }, 
         "19": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "20": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002807"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "21": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "22": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "23": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "24": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "25": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "26": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002807"
                 }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
-                }
             }
         }, 
         "27": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "28": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "29": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "30": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "31": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "32": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "33": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "34": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "35": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "36": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "37": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "38": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "39": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "40": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "41": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "42": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "43": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "44": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "45": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002805"
                 }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
-                }
             }
         }, 
         "46": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
         "47": {
+            "FS-QSFP28-100G-DAC,FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
+                "preemphasis": {
+                    "lane0": "0x0a4114"
+                }
+            }, 
             "BROCADE-SFP-10GSR-85,FIBERSTORE-Q-4SPC03,BROCADE-57-0000075-01,FIT HON TENG-CURCP14-CCF05-EF,FIT HON TENG-CUFCP13-DCF05-EF,FIT HON TENG-CUFCP14-CCF05-EF,FS-SFP-GB-GE-T,FOUNDRY NETWORKS-ABCU-5700RZ-FD,FOUNDRY NETWORKS-33210-100": {
                 "preemphasis": {
                     "lane0": "0x002806"
-                }
-            }, 
-            "FIBERSTORE-SFP28-25GSR-85,FIBERSTORE-Q-4S2803,FIT HON TENG-CUFCP32-DCF05-EF,FIT HON TENG-CUFCP34-CCF05-EF": {
-                "preemphasis": {
-                    "lane0": "0x0a4114"
                 }
             }
         }, 
@@ -585,7 +585,7 @@
                     "lane3": "0x00320b"
                 }
             }, 
-            "BROCADE-57-1000263-01": {
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-Q-4SPC03,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x00320a", 
                     "lane1": "0x00320b", 
@@ -593,7 +593,7 @@
                     "lane3": "0x00320b"
                 }
             }, 
-            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x00320a", 
                     "lane1": "0x00320b", 
@@ -619,7 +619,7 @@
                     "lane3": "0x00360d"
                 }
             }, 
-            "BROCADE-57-1000263-01": {
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-Q-4SPC03,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x00360c", 
                     "lane1": "0x00360d", 
@@ -627,7 +627,7 @@
                     "lane3": "0x00360d"
                 }
             }, 
-            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x00360c", 
                     "lane1": "0x00360d", 
@@ -653,7 +653,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "BROCADE-57-1000263-01": {
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-Q-4SPC03,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -661,7 +661,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -687,7 +687,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "BROCADE-57-1000263-01": {
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-Q-4SPC03,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -695,7 +695,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -721,7 +721,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "BROCADE-57-1000263-01": {
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-Q-4SPC03,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -729,7 +729,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -755,7 +755,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "BROCADE-57-1000263-01": {
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-Q-4SPC03,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -763,7 +763,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -789,7 +789,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "BROCADE-57-1000263-01": {
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-Q-4SPC03,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -797,7 +797,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -823,7 +823,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "BROCADE-57-1000263-01": {
+            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-Q-4SPC03,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
@@ -831,7 +831,7 @@
                     "lane3": "0x0a4114"
                 }
             }, 
-            "FS-QSFP-4SFP10G-DAC,FIBERSTORE-QSFP-SR4,FIBERSTORE-QSFP-SR4-40G,BROCADE-57-1000128-01,FIT HON TENG-CURCP14-CCF05-EF": {
+            "BROCADE-57-1000263-01": {
                 "preemphasis": {
                     "lane0": "0x0a4114", 
                     "lane1": "0x0a4114", 
