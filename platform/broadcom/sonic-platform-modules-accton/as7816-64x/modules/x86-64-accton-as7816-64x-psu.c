@@ -61,7 +61,7 @@ struct as7816_64x_psu_data {
     u8  index;           /* PSU index */
     u8  status;          /* Status(present/power_good) register read from CPLD */
     char model_name[9]; /* Model name, read from eeprom */
-    char *fan_dir;
+    char fan_dir[3];
 };
 
 enum as7816_64x_psu_sysfs_attributes {
@@ -280,12 +280,18 @@ static struct as7816_64x_psu_data *as7816_64x_psu_update_device(struct device *d
             else {
                 data->model_name[ARRAY_SIZE(data->model_name)-1] = '\0';
             }
-			
-           if (strcmp(data->model_name, "YM2851FCR") == 0)
-               data->fan_dir = "F2B";
-           else
-               data->fan_dir = "B2F";
-			    
+
+            status = as7816_64x_psu_read_block(client, 0x29, data->fan_dir,
+                                               ARRAY_SIZE(data->fan_dir)-1);
+
+            if (status < 0) {
+                data->fan_dir[0] = '\0';
+                dev_dbg(&client->dev, "unable to read fan direction from (0x%x)\n", client->addr);
+            }
+            else {
+                data->fan_dir[ARRAY_SIZE(data->fan_dir)-1] = '\0';
+            }
+
         }
 		data->last_updated = jiffies;
 		data->valid = 1;
