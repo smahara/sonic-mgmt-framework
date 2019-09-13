@@ -383,7 +383,7 @@ int mclagdctl_parse_dump_mac(char *msg, int data_len)
         else
             fprintf(stdout, "%-5s", "D");
 
-        fprintf(stdout, "-20s", mac_addr_to_str(mac_info->mac_addr));
+        fprintf(stdout, "-%20s", mac_addr_to_str(mac_info->mac_addr));
 
         fprintf(stdout, "%-5d", mac_info->vid);
         fprintf(stdout, "%-20s", mac_info->ifname);
@@ -460,7 +460,7 @@ int mclagdctl_parse_dump_local_portlist(char *msg, int data_len)
                fprintf(stdout,"%s: %d\n" ,"PortchannelIsUp", lif_info->po_active);
                fprintf(stdout,"%s: %s\n", "MlacpState", lif_info->mlacp_state);*/
             fprintf(stdout, "%s: %s\n", "IsIsolateWithPeerlink", lif_info->isolate_to_peer_link ? "Yes" : "No");
-            fprintf(stdout,"%s: %s\n" ,"IsTrafficDisable", lif_info->disable_traffic ? "Yes":"No");
+            fprintf(stdout,"%s: %s\n" ,"IsTrafficDisable", lif_info->is_traffic_disable ? "Yes":"No");
             fprintf(stdout, "%s: %s\n", "VlanList", lif_info->vlanlist);
         }
         else
@@ -613,6 +613,18 @@ static char *mclagdctl_dbg_counter_syncdtx2str(SYNCD_TX_DBG_CNTR_MSG_e syncdtx_i
             return "TrafficDistEnable";
         case SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE:
             return "TrafficDistDisable";
+        case SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_STATE:
+            return "SetIccpState";
+        case SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_ROLE:
+            return "SetIccpRole";
+        case SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_SYSTEM_ID:
+            return "SetSystemId";
+        case SYNCD_TX_DBG_CNTR_MSG_DEL_ICCP_INFO:
+            return "DelIccpInfo";
+        case SYNCD_TX_DBG_CNTR_MSG_SET_REMOTE_IF_STATE:
+            return "SetRemoteIntfSts";
+        case SYNCD_TX_DBG_CNTR_MSG_DEL_REMOTE_IF_INFO:
+            return "DelRemoteIntf";
         default:
             return "Unknown";
     }

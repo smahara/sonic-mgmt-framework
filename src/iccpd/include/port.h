@@ -25,6 +25,7 @@
 #define PORT_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
 #include <sys/queue.h>
 
@@ -116,7 +117,7 @@ struct LocalInterface
 
     uint8_t changed;
     uint8_t port_config_sync;
-    uint8_t disable_traffic;   /* Disable traffic tx/rx  */ 
+    bool is_traffic_disable;   /* Disable traffic tx/rx  */ 
     uint8_t standby_mac_update;
 
     LIST_HEAD(local_vlan_list, VLAN_ID) vlan_list;
@@ -127,7 +128,7 @@ struct LocalInterface
     LIST_ENTRY(LocalInterface) mlacp_purge_next;
 };
 
-struct LocalInterface* local_if_create(int ifindex, char* ifname, int type);
+struct LocalInterface* local_if_create(int ifindex, char* ifname, int type, uint8_t state);
 struct LocalInterface* local_if_find_by_name(const char* ifname);
 struct LocalInterface* local_if_find_by_ifindex(int ifindex);
 struct LocalInterface* local_if_find_by_po_id(int po_id);

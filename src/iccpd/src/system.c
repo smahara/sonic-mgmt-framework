@@ -29,7 +29,7 @@
 #include "../include/scheduler.h"
 
 #define ETHER_ADDR_LEN 6
-char mac_print_str[18];
+char mac_print_str[ETHER_ADDR_STR_LEN];
 
 /* Singleton */
 struct System* system_get_instance()
@@ -54,7 +54,7 @@ void system_init(struct System* sys)
 {
     if (sys == NULL )
         return;
-    
+
     memset(sys, 0, sizeof(struct System));
     sys->server_fd = -1;
     sys->sync_fd = -1;
@@ -93,11 +93,16 @@ void system_finalize()
     if ((sys = system_get_instance()) == NULL )
         return;
 
-    ICCPD_LOG_INFO(__FUNCTION__, "System resource pool is destructing.");
+    ICCPD_LOG_NOTICE(__FUNCTION__,
+        "System resource pool is destructing. Warmboot exit (%d)",
+        sys->warmboot_exit);
 
     while (!LIST_EMPTY(&(sys->csm_list)))
     {
         csm = LIST_FIRST(&(sys->csm_list));
+        /* Remove ICCP info from STATE_DB if it is not warm reboot */
+        if (sys->warmboot_exit != WARM_REBOOT)
+            mlacp_link_del_iccp_info(csm->mlag_id);
         iccp_csm_finalize(csm);
     }
 
@@ -225,6 +230,24 @@ SYNCD_TX_DBG_CNTR_MSG_e system_syncdtx_to_dbg_msg_type(uint32_t msg_type)
 
         case MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_DISABLE:
             return SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE;
+
+        case MCLAG_MSG_TYPE_SET_ICCP_STATE:
+            return SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_STATE;
+
+        case MCLAG_MSG_TYPE_SET_ICCP_ROLE:
+            return SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_ROLE;
+
+        case MCLAG_MSG_TYPE_SET_ICCP_SYSTEM_ID:
+            return SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_SYSTEM_ID;
+
+        case MCLAG_MSG_TYPE_SET_REMOTE_IF_STATE:
+            return SYNCD_TX_DBG_CNTR_MSG_SET_REMOTE_IF_STATE;
+
+        case MCLAG_MSG_TYPE_DEL_ICCP_INFO:
+            return SYNCD_TX_DBG_CNTR_MSG_DEL_ICCP_INFO;
+
+        case MCLAG_MSG_TYPE_DEL_REMOTE_IF_INFO:
+            return SYNCD_TX_DBG_CNTR_MSG_DEL_REMOTE_IF_INFO;
 
         default:
             return SYNCD_TX_DBG_CNTR_MSG_MAX;

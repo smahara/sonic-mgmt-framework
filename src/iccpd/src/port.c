@@ -132,7 +132,7 @@ void vlan_info_init(struct VLAN_ID* vlan)
     return;
 }
 
-struct LocalInterface* local_if_create(int ifindex, char* ifname, int type)
+struct LocalInterface* local_if_create(int ifindex, char* ifname, int type, uint8_t state)
 {
     struct System* sys = NULL;
     struct LocalInterface* local_if = NULL;
@@ -175,6 +175,7 @@ struct LocalInterface* local_if_create(int ifindex, char* ifname, int type)
             return NULL;
 
         local_if->po_id =  atoi(&ifname[i]);
+        local_if->po_active = (state == PORT_STATE_UP) ? 1 : 0;
     }
 
     if (ifname)

@@ -23,6 +23,7 @@
 #ifndef __MLACP_LINK_HANDLER__
 #define __MLACP_LINK_HANDLER__
 
+#include <stdbool.h>
 #include "../include/iccp_csm.h"
 #include "../include/mlacp_tlv.h"
 
@@ -59,4 +60,11 @@ int iccp_connect_syncd();
 
 void mlacp_link_disable_traffic_distribution(struct LocalInterface *lif);
 void mlacp_link_enable_traffic_distribution(struct LocalInterface *lif);
+int mlacp_link_set_iccp_state(int mlag_id, bool is_oper_up);
+int mlacp_link_set_iccp_role(int mlag_id, bool is_active_role, uint8_t *system_id);
+int mlacp_link_set_iccp_system_id(int mlag_id, uint8_t *system_id);
+int mlacp_link_del_iccp_info(int mlag_id);
+int mlacp_link_set_remote_if_state(int mlag_id, char *po_name, bool is_oper_up);
+int mlacp_link_del_remote_if_info(int mlag_id, char *po_name);
+
 #endif

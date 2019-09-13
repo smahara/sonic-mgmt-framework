@@ -25,11 +25,14 @@
 #define MSG_FORMAT_H_
 #include <sys/types.h>
 #include <stdint.h>
-
+#include "../include/port.h"
 
 #define MAX_MSG_LOG_SIZE    128
 
 #define ETHER_ADDR_LEN 6
+
+/* Header version for message sent from ICCPd to Mclagsyncd */
+#define ICCPD_TO_MCLAGSYNCD_HDR_VERSION  1
 
 /*
  * RFC 5561
@@ -180,7 +183,7 @@ static char* get_tlv_type_string(int type)
 
         case TLV_T_MLACP_STP_INFO:
             return "TLV_T_MLACP_STP_INFO";
-        
+
         case TLV_T_MLACP_IF_UP_ACK:
             return "TLV_T_MLACP_IF_UP_ACK";
     }
@@ -445,6 +448,12 @@ typedef enum mclag_msg_type_e_
     MCLAG_MSG_TYPE_SET_FDB              = 5,
     MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_ENABLE  = 7,
     MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_DISABLE = 8,
+    MCLAG_MSG_TYPE_SET_ICCP_STATE           = 9,
+    MCLAG_MSG_TYPE_SET_ICCP_ROLE            = 10,
+    MCLAG_MSG_TYPE_SET_ICCP_SYSTEM_ID       = 11,
+    MCLAG_MSG_TYPE_DEL_ICCP_INFO            = 12,
+    MCLAG_MSG_TYPE_SET_REMOTE_IF_STATE      = 13,
+    MCLAG_MSG_TYPE_DEL_REMOTE_IF_INFO       = 14
 }mclag_msg_type_e;
 
 
@@ -457,7 +466,11 @@ typedef enum mclag_sub_option_type_e_
     MCLAG_SUB_OPTION_TYPE_MAC_LEARN_DISABLE = 4,
     MCLAG_SUB_OPTION_TYPE_SET_MAC_SRC       = 5,
     MCLAG_SUB_OPTION_TYPE_SET_MAC_DST       = 6,
-    MCLAG_SUB_OPTION_TYPE_MCLAG_INTF_NAME   = 7
+    MCLAG_SUB_OPTION_TYPE_MCLAG_INTF_NAME   = 7,
+    MCLAG_SUB_OPTION_TYPE_MCLAG_ID          = 8,
+    MCLAG_SUB_OPTION_TYPE_ICCP_ROLE         = 9,
+    MCLAG_SUB_OPTION_TYPE_SYSTEM_ID         = 10,
+    MCLAG_SUB_OPTION_TYPE_OPER_STATUS       = 11
 } mclag_sub_option_type_e;
 
 

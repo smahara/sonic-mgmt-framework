@@ -42,11 +42,15 @@ extern void update_if_ipmac_on_standby(struct LocalInterface* lif_po);
 int mlacp_fsm_update_system_conf(struct CSM* csm, mLACPSysConfigTLV*sysconf)
 {
     struct LocalInterface* lif = NULL;
+    uint8_t old_remote_system_id[ETHER_ADDR_LEN];
 
     /*NOTE
        a little tricky, we change the NodeID local side if collision happened first time*/
     if (sysconf->node_id == MLACP(csm).node_id)
         MLACP(csm).node_id++;
+
+    if (csm->role_type == STP_ROLE_STANDBY)
+        memcpy(old_remote_system_id, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
 
     memcpy(MLACP(csm).remote_system.system_id, sysconf->sys_id, ETHER_ADDR_LEN);
     MLACP(csm).remote_system.system_priority = ntohs(sysconf->sys_priority);
@@ -64,6 +68,12 @@ int mlacp_fsm_update_system_conf(struct CSM* csm, mLACPSysConfigTLV*sysconf)
         update_if_ipmac_on_standby(lif);
     }
 
+    /* On standby, update system ID upon receiving change from active */
+    if ((csm->role_type == STP_ROLE_STANDBY) &&
+        (memcmp(old_remote_system_id, sysconf->sys_id, ETHER_ADDR_LEN) != 0))
+    {
+        mlacp_link_set_iccp_system_id(csm->mlag_id, sysconf->sys_id);
+    }
     return 0;
 }
 
@@ -89,7 +99,12 @@ int mlacp_fsm_update_Agg_conf(struct CSM* csm, mLACPAggConfigTLV* portconf)
     {
         /*Purge*/
         if (pif != NULL )
+        {
+            /* Delete remote interface info from STATE_DB */
+            if (csm)
+                mlacp_link_del_remote_if_info(csm->mlag_id, pif->name);
             peer_if_destroy(pif);
+        }
         else
             MLACP(csm).need_to_sync = 1;
         /*ICCPD_LOG_INFO("mlacp_fsm",
@@ -150,6 +165,15 @@ int mlacp_fsm_update_Aggport_state(struct CSM* csm, mLACPAggPortStateTLV* tlv)
         peer_if->po_active = po_active;
         ICCPD_LOG_DEBUG(__FUNCTION__, "Update  Msg for %s  state %s", peer_if->name, tlv->agg_state ? "down" : "up");
 
+        /* Update remote interface state if ICCP reaches EXCHANGE state.
+         * Otherwise, it is updated after the session comes up
+         */
+        if (MLACP(csm).current_state == MLACP_STATE_EXCHANGE)
+        {
+            mlacp_link_set_remote_if_state(
+                csm->mlag_id, peer_if->name,
+                (tlv->agg_state == PORT_STATE_UP)? true : false);
+        }
         break;
     }
 
