@@ -27,7 +27,7 @@ EOF
 PLATFORM=`sonic-cfggen -H -v DEVICE_METADATA.localhost.platform`
 PLATFORM_DIR=/usr/share/sonic/device/$PLATFORM
 PRESET=(`head -n 1 /usr/share/sonic/device/$PLATFORM/default_sku`)
-DEFAULT_HWSKU=${PRESET[0]}
+PRESENT_HWSKU=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["hwsku"]'`
 HWSKU_STR_START=${PRESET[0]:0:4}
 DEFAULT_PRESET=${PRESET[1]}
 EXECUTE=no
@@ -43,7 +43,8 @@ list_hwskus()
         if [ $HWSKU_STR_START != ${sku:0:4} ]; then
             continue
         fi
-        if [ "$sku" = "$DEFAULT_HWSKU" ]; then
+
+        if [ "$sku" = "$PRESENT_HWSKU" ]; then
             echo "$sku (Present)";
         else
             echo "$sku";
@@ -74,7 +75,7 @@ set_hwsku()
     done
 
     if [ $valid_sku -eq 1 ]; then
-        if [ $DEFAULT_HWSKU = $HWSKU ]; then
+        if [ $PRESENT_HWSKU = $HWSKU ]; then
             echo "Same as present HWSKU $HWSKU, no changes made"
         else
             echo -e "Warning: This deletes existing configurations and cause switch to reboot."
@@ -87,7 +88,7 @@ set_hwsku()
                 [yY][eE][sS]|[yY])
                     echo "Setting Default HWSKU to $HWSKU $DEFAULT_PRESET"
                     echo "$HWSKU $DEFAULT_PRESET" > /usr/share/sonic/device/$PLATFORM/default_sku
-                    echo "Removng existing config_db.json"
+                    echo "Removing existing config_db.json"
                     if [ -r /etc/sonic/config_db.json ]; then
                         rm -rf /etc/sonic/config_db.json
                     fi
