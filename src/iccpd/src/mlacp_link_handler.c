@@ -421,10 +421,13 @@ static void mlacp_clean_fdb(void)
 
     sys = system_get_instance();
     if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
+    }
     memset(msg_buf, 0, CSM_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
-    msg_hdr->ver = 1;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_FLUSH_FDB;
     msg_hdr->len = sizeof(struct IccpSyncdHDr);
 
@@ -459,13 +462,16 @@ void set_peerlink_mlag_port_learn(struct LocalInterface *lif, int enable)
 
     sys = system_get_instance();
     if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
+    }
 
     if (!lif)
         return;
     memset(msg_buf, 0, CSM_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
-    msg_hdr->ver = 1;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_PORT_MAC_LEARN_MODE;
 
     msg_hdr->len = sizeof(struct IccpSyncdHDr);
@@ -522,11 +528,14 @@ static int mlacp_link_set_traffic_dist_mode(
 
     sys = system_get_instance();
     if (sys == NULL)
-        return -1;
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return MCLAG_ERROR;
+    }
 
     memset(msg_buf, 0, CSM_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
-    msg_hdr->ver = 1;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = is_enable ?
         MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_ENABLE :
         MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_DISABLE;
@@ -549,13 +558,384 @@ static int mlacp_link_set_traffic_dist_mode(
         ICCPD_LOG_ERR(__FUNCTION__,
             "Failed to write traffic %s for %s, rc %d",
             is_enable ? "enable" : "disable", po_name, rc);
-        return -1;
+        return MCLAG_ERROR;
     }
     else
     {
         SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
         ICCPD_LOG_DEBUG(__FUNCTION__, "%s traffic dist for interface %s",
             is_enable ? "Enable" : "Disable", po_name);
+        return 0;
+    }
+}
+
+/* Send request to Mclagsyncd to update ICCP state
+ * The message includes MLAG id and ICCP state
+ */
+int mlacp_link_set_iccp_state(
+    int                     mlag_id,
+    bool                    is_oper_up)
+{
+    struct IccpSyncdHDr     *msg_hdr;
+    mclag_sub_option_hdr_t  *sub_msg;
+    char                    *msg_buf = g_csm_buf;
+    struct System           *sys;
+    ssize_t                 rc;
+
+    sys = system_get_instance();
+    if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return MCLAG_ERROR;
+    }
+    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
+    msg_hdr->type = MCLAG_MSG_TYPE_SET_ICCP_STATE;
+    msg_hdr->len = sizeof(struct IccpSyncdHDr);
+
+    /* Sub-message: mlag ID */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MCLAG_ID;
+    sub_msg->op_len = sizeof(mlag_id);
+    memcpy(sub_msg->data, &mlag_id, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    /* Sub-message: operational status */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_OPER_STATUS;
+    sub_msg->op_len = sizeof(is_oper_up);
+    memcpy(sub_msg->data, &is_oper_up, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    if (sys->sync_fd)
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+
+    if ((rc <= 0) || (rc != msg_hdr->len))
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+        ICCPD_LOG_ERR(__FUNCTION__,
+            "Failed to write mlag %d, ICCP status %s, rc %d",
+            mlag_id, is_oper_up ? "up" : "down", rc);
+        return MCLAG_ERROR;
+    }
+    else
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Set mlag %d, ICCP status %s",
+            mlag_id, is_oper_up ? "up" : "down");
+        return 0;
+    }
+}
+
+/* Send request to Mclagsyncd to update ICCP role
+ * The message includes MLAG id and ICCP active/standby role. System ID
+ * is also included for active role
+ */
+int mlacp_link_set_iccp_role(
+    int                     mlag_id,
+    bool                    is_active_role,
+    uint8_t                 *system_id)
+{
+    struct IccpSyncdHDr     *msg_hdr;
+    mclag_sub_option_hdr_t  *sub_msg;
+    char                    *msg_buf = g_csm_buf;
+    struct System           *sys;
+    ssize_t                 rc;
+
+    sys = system_get_instance();
+    if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return MCLAG_ERROR;
+    }
+
+    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
+    msg_hdr->type = MCLAG_MSG_TYPE_SET_ICCP_ROLE;
+    msg_hdr->len = sizeof(struct IccpSyncdHDr);
+
+    /* Sub-message: mlag ID */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MCLAG_ID;
+    sub_msg->op_len = sizeof(mlag_id);
+    memcpy(sub_msg->data, &mlag_id, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    /* Sub-message: active/standby role */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_ICCP_ROLE;
+    sub_msg->op_len = sizeof(is_active_role);
+    memcpy(sub_msg->data, &is_active_role, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    /* Sub-message: system ID if it is active role */
+    if (is_active_role)
+    {
+        sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+        sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_SYSTEM_ID;
+        sub_msg->op_len = ETHER_ADDR_LEN;
+        memcpy(sub_msg->data, system_id, sub_msg->op_len);
+        msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+    }
+    if (sys->sync_fd)
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+
+    if ((rc <= 0) || (rc != msg_hdr->len))
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+        ICCPD_LOG_ERR(__FUNCTION__,
+            "Failed to write mlag %d, ICCP role %s, rc %d",
+            mlag_id, is_active_role ? "active" : "standby", rc);
+        return MCLAG_ERROR;
+    }
+    else
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Set mlag %d, ICCP role to %s",
+            mlag_id, is_active_role ? "active" : "standby");
+        return 0;
+    }
+}
+
+/* Send request to Mclagsyncd to update ICCP system ID
+ * The message includes MLAG id and system id
+ */
+int mlacp_link_set_iccp_system_id(
+    int                     mlag_id,
+    uint8_t                 *system_id)
+{
+    struct IccpSyncdHDr     *msg_hdr;
+    mclag_sub_option_hdr_t  *sub_msg;
+    char                    *msg_buf = g_csm_buf;
+    struct System           *sys;
+    ssize_t                 rc;
+
+    sys = system_get_instance();
+    if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return MCLAG_ERROR;
+    }
+
+    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
+    msg_hdr->type = MCLAG_MSG_TYPE_SET_ICCP_SYSTEM_ID;
+    msg_hdr->len = sizeof(struct IccpSyncdHDr);
+
+    /* Sub-message: mlag ID */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MCLAG_ID;
+    sub_msg->op_len = sizeof(mlag_id);
+    memcpy(sub_msg->data, &mlag_id, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    /* Sub-message: system ID */
+    sub_msg = (mclag_sub_option_hdr_t*)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_SYSTEM_ID;
+    sub_msg->op_len = ETHER_ADDR_LEN;
+    memcpy(sub_msg->data, system_id, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    if (sys->sync_fd)
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+
+    if ((rc <= 0) || (rc != msg_hdr->len))
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+        ICCPD_LOG_ERR(__FUNCTION__,
+            "Failed to write mlag %d, ICCP system ID %s, rc %d",
+            mlag_id, mac_addr_to_str(system_id), rc);
+        return MCLAG_ERROR;
+    }
+    else
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        ICCPD_LOG_DEBUG(__FUNCTION__,
+            "Set mlag %d, ICCP system ID to %s",
+            mlag_id, mac_addr_to_str(system_id));
+        return 0;
+    }
+}
+
+/* Send request to Mclagsyncd to remove MCLAG table entry.
+ * The message includes MLAG id
+ */
+int mlacp_link_del_iccp_info(
+    int                     mlag_id)
+{
+    struct IccpSyncdHDr     *msg_hdr;
+    mclag_sub_option_hdr_t  *sub_msg;
+    char                    *msg_buf = g_csm_buf;
+    struct System           *sys;
+    ssize_t                 rc;
+
+    sys = system_get_instance();
+    if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return MCLAG_ERROR;
+    }
+
+    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
+    msg_hdr->type = MCLAG_MSG_TYPE_DEL_ICCP_INFO;
+    msg_hdr->len = sizeof(struct IccpSyncdHDr);
+
+    /* Sub-message: mlag ID */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MCLAG_ID;
+    sub_msg->op_len = sizeof(mlag_id);
+    memcpy(sub_msg->data, &mlag_id, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    if (sys->sync_fd)
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+
+    if ((rc <= 0) || (rc != msg_hdr->len))
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+        ICCPD_LOG_ERR(__FUNCTION__,
+            "Failed to write mlag %d delete request, rc %d", mlag_id, rc);
+        return MCLAG_ERROR;
+    }
+    else
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Delete mlag %d", mlag_id);
+        return 0;
+    }
+}
+
+
+/* Send request to Mclagsyncd to update remote interface state
+ * The message includes MLAG id, LAG interface name and operational status
+ */
+int mlacp_link_set_remote_if_state(
+    int                     mlag_id,
+    char                    *po_name,
+    bool                    is_oper_up)
+{
+    struct IccpSyncdHDr     *msg_hdr;
+    mclag_sub_option_hdr_t  *sub_msg;
+    char                    *msg_buf = g_csm_buf;
+    struct System           *sys;
+    ssize_t                 rc;
+
+    sys = system_get_instance();
+    if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return MCLAG_ERROR;
+    }
+
+    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
+    msg_hdr->type = MCLAG_MSG_TYPE_SET_REMOTE_IF_STATE;
+    msg_hdr->len = sizeof(struct IccpSyncdHDr);
+
+    /* Sub-message: mlag ID */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MCLAG_ID;
+    sub_msg->op_len = sizeof(mlag_id);
+    memcpy(sub_msg->data, &mlag_id, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    /* Sub-message: MLAG interface name */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MCLAG_INTF_NAME;
+    sub_msg->op_len = strlen(po_name);
+    memcpy(sub_msg->data, po_name, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    /* Sub-message: operational status */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_OPER_STATUS;
+    sub_msg->op_len = sizeof(is_oper_up);
+    memcpy(sub_msg->data, &is_oper_up, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    if (sys->sync_fd)
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+
+    if ((rc <= 0) || (rc != msg_hdr->len))
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+        ICCPD_LOG_ERR(__FUNCTION__,
+            "Failed to write mlag %d, remote if %s status %s, rc %d",
+            mlag_id, po_name, is_oper_up ? "up" : "down", rc);
+        return MCLAG_ERROR;
+    }
+    else
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Set mlag %d, remote if %s status %s",
+            mlag_id, po_name, is_oper_up ? "up" : "down");
+        return 0;
+    }
+}
+
+
+/* Send request to Mclagsyncd to remove remote interface table entry
+ * The message includes MLAG id and remote interface name
+ */
+int mlacp_link_del_remote_if_info(
+   int                  mlag_id,
+   char                 *po_name)
+{
+    struct IccpSyncdHDr     *msg_hdr;
+    mclag_sub_option_hdr_t  *sub_msg;
+    char                    *msg_buf = g_csm_buf;
+    struct System           *sys;
+    ssize_t                 rc;
+
+    sys = system_get_instance();
+    if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return MCLAG_ERROR;
+    }
+
+    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
+    msg_hdr->type = MCLAG_MSG_TYPE_DEL_REMOTE_IF_INFO;
+    msg_hdr->len = sizeof(struct IccpSyncdHDr);
+
+    /* Sub-message: mlag ID */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MCLAG_ID;
+    sub_msg->op_len = sizeof(mlag_id);
+    memcpy(sub_msg->data, &mlag_id, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    /* Sub-message: MLAG interface name */
+    sub_msg = (mclag_sub_option_hdr_t *)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MCLAG_INTF_NAME;
+    sub_msg->op_len = strlen(po_name);
+    memcpy(sub_msg->data, po_name, sub_msg->op_len);
+    msg_hdr->len += (sizeof(mclag_sub_option_hdr_t) + sub_msg->op_len);
+
+    if (sys->sync_fd)
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+
+    if ((rc <= 0) || (rc != msg_hdr->len))
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+        ICCPD_LOG_ERR(__FUNCTION__,
+            "Failed to write mlag %d, del remote if %s, rc %d",
+            mlag_id, po_name, rc);
+        return MCLAG_ERROR;
+    }
+    else
+    {
+        SYSTEM_SET_SYNCD_TX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Delete mlag %d, remote if %s",
+            mlag_id, po_name);
         return 0;
     }
 }
@@ -598,7 +978,10 @@ void update_peerlink_isolate_from_all_csm_lif(
 
     sys = system_get_instance();
     if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
+    }
 
     if (!csm || !csm->peer_link_if)
         return;
@@ -607,7 +990,7 @@ void update_peerlink_isolate_from_all_csm_lif(
     memset(mlag_po_buf, 0, 511);
 
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
-    msg_hdr->ver = 1;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_PORT_ISOLATE;
     msg_hdr->len = sizeof(struct IccpSyncdHDr);
 
@@ -703,7 +1086,7 @@ void update_peerlink_isolate_from_all_csm_lif(
                 sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
         }
     }
-    
+
     return;
 }
 
@@ -1085,12 +1468,15 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type)
 
     sys = system_get_instance();
     if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
+    }
 
     memset(msg_buf, 0, 512);
 
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
-    msg_hdr->ver = 1;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_SET_FDB;
 
     /*mac msg */
@@ -1376,6 +1762,7 @@ static void mlacp_conn_handler_fdb(struct CSM* csm)
 void mlacp_peer_conn_handler(struct CSM* csm)
 {
     struct LocalInterface *lif = NULL;
+    struct PeerInterface* peer_if;
     static int first_time = 0;
     struct System* sys = NULL;
 
@@ -1383,7 +1770,10 @@ void mlacp_peer_conn_handler(struct CSM* csm)
         return;
 
     if ((sys = system_get_instance()) == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
+    }
 
     if (csm->peer_link_if)
     {
@@ -1435,6 +1825,16 @@ void mlacp_peer_conn_handler(struct CSM* csm)
         }
     }
 
+    /* Send ICCP up update to Mclagsyncd */
+    mlacp_link_set_iccp_state(csm->mlag_id, true);
+
+    /* Send remote interface status update to Mclagsyncd */
+    LIST_FOREACH(peer_if, &(MLACP(csm).pif_list), mlacp_next)
+    {
+        mlacp_link_set_remote_if_state(
+            csm->mlag_id, peer_if->name,
+            (peer_if->state == PORT_STATE_UP)? true : false);
+    }
     return;
 }
 
@@ -1443,6 +1843,7 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
 {
     uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     struct LocalInterface* lif = NULL;
+    struct PeerInterface* peer_if;
     struct Msg* msg = NULL;
     struct MACMsg* mac_msg = NULL;
     struct System* sys = NULL;
@@ -1451,7 +1852,10 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
         return;
 
     if ((sys = system_get_instance()) == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
+    }
 
     /*If warm reboot, don't change FDB and MAC address*/
     if (sys->warmboot_exit == WARM_REBOOT)
@@ -1499,7 +1903,7 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
 
         /* Re-enable traffic tx/rx for MLAG interface regardless of its state
          */
-        if (lif->disable_traffic)
+        if (lif->is_traffic_disable)
         {
             mlacp_link_enable_traffic_distribution(lif);
         }
@@ -1508,6 +1912,20 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
         SYSTEM_GET_SESSION_DOWN_COUNTER(sys));
     SYSTEM_INCR_SESSION_DOWN_COUNTER(sys);
 
+    /* Send ICCP down update to Mclagsyncd */
+    mlacp_link_set_iccp_state(csm->mlag_id, false);
+
+    /* On standby, system ID is reverted back to its local system ID.
+     * Update Mclagsyncd
+     * */
+    if (csm->role_type == STP_ROLE_STANDBY)
+        mlacp_link_set_iccp_system_id(csm->mlag_id, MLACP(csm).system_id);
+
+    /* Delete remote interface info */
+    LIST_FOREACH(peer_if, &(MLACP(csm).pif_list), mlacp_next)
+    {
+        mlacp_link_del_remote_if_info(csm->mlag_id, peer_if->name);
+    }
     return;
 }
 
@@ -1610,8 +2028,10 @@ int iccp_connect_syncd()
     struct epoll_event event;
 
     if ((sys = system_get_instance()) == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         goto conn_fail;
-
+    }
     if (sys->sync_fd >= 0)
         return 0;
 
@@ -1672,7 +2092,10 @@ void syncd_info_close()
     struct System* sys = NULL;
 
     if ((sys = system_get_instance()) == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
+    }
 
     if (sys->sync_fd > 0)
     {
@@ -1705,7 +2128,10 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
     struct LocalInterface *lif_po = NULL, *mac_lif = NULL;
 
     if (!(sys = system_get_instance()))
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
+    }
 
     /* create MAC msg*/
     memset(buf, 0, MAX_BUFSIZE);
@@ -1999,10 +2425,10 @@ int iccp_receive_fdb_handler_from_syncd(struct System *sys)
                 mac_info->port_name, mac_info->op_type);
             do_mac_update_from_syncd(mac_info->mac, mac_info->vid, mac_info->port_name, mac_info->type, mac_info->op_type);
         }
-        
+
         pos += msg_hdr->len;
         SYSTEM_SET_SYNCD_RX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
-    }	
+    }
 
     return 0;
 }
@@ -2021,10 +2447,10 @@ int iccp_receive_fdb_handler_from_syncd(struct System *sys)
       * do not need to update hardware again
       */
      if ((lif->type == IF_T_PORT_CHANNEL) && (!lif->po_active) &&
-              (!lif->disable_traffic))
+              (!lif->is_traffic_disable))
      {
          if (mlacp_link_set_traffic_dist_mode(lif->name, false) == 0)
-             lif->disable_traffic = 1;
+             lif->is_traffic_disable = true;
      }
  }
 
@@ -2037,11 +2463,11 @@ int iccp_receive_fdb_handler_from_syncd(struct System *sys)
   */
  void mlacp_link_enable_traffic_distribution(struct LocalInterface *lif)
  {
-    if ((lif->type == IF_T_PORT_CHANNEL) && lif->disable_traffic)
+    if ((lif->type == IF_T_PORT_CHANNEL) && lif->is_traffic_disable)
     {
         if (mlacp_link_set_traffic_dist_mode(lif->name, true) == 0)
         {
-            lif->disable_traffic = 0;
+            lif->is_traffic_disable = false;
         }
     }
 }
@@ -2067,7 +2493,7 @@ char * mclagd_ctl_cmd_str(int req_type)
 
         case INFO_TYPE_DUMP_DBG_COUNTERS:
             return "dump debug counters";
-  
+
         default:
             break;
     }
@@ -2084,7 +2510,10 @@ int mclagd_ctl_sock_create()
     int ret = 0;
 
     if ((sys = system_get_instance()) == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return MCLAG_ERROR;
+    }
 
     if (sys->sync_ctrl_fd > 0)
         return sys->sync_ctrl_fd;
@@ -2481,8 +2910,8 @@ int mclagd_ctl_interactive_process(int client_fd)
 
         case INFO_TYPE_DUMP_DBG_COUNTERS:
              mclagd_ctl_handle_dump_dbg_counters(client_fd, req->mclag_id);
-            break;        
-        
+            break;
+
         default:
             return MCLAG_ERROR;
     }

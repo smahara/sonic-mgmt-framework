@@ -501,6 +501,9 @@ int unset_local_system_id( )
     LIST_FOREACH(csm, &(sys->csm_list), next)
     {
         memcpy(MLACP(csm).system_id, null_mac, ETHER_ADDR_LEN);
+
+        /* Remove ICCP info from STATE_DB */
+        mlacp_link_del_iccp_info(csm->mlag_id);
     }
 
     return 0;

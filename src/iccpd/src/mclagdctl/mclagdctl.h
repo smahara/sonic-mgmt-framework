@@ -18,6 +18,7 @@
  *  Maintainer: Jim Jiang from nephos
  */
 #include <stdint.h>
+#include <stdbool.h>
 #include "../../include/system.h"
 
 #define ETHER_ADDR_LEN 6
@@ -161,7 +162,7 @@ struct mclagd_local_if
     unsigned char po_active;
     char mlacp_state[MCLAGDCTL_PARA1_LEN];
     unsigned char isolate_to_peer_link;
-    unsigned char disable_traffic;
+    bool is_traffic_disable;
     char vlanlist[MCLAGDCTL_PARA3_LEN];
 };
 

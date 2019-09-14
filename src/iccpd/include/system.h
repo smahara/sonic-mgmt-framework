@@ -52,6 +52,8 @@ struct CSM;
     #define MAX_BUFSIZE 4096
 #endif
 
+extern char mac_print_str[ETHER_ADDR_STR_LEN];
+
 /* Debug counters */
 /* Debug counters to track messages ICCPd sent to MclagSyncd */
 typedef uint8_t SYNCD_DBG_CNTR_STS_e;
@@ -73,6 +75,12 @@ enum SYNCD_TX_DBG_CNTR_MSG_e
     SYNCD_TX_DBG_CNTR_MSG_GET_FDB_CHANGES            = 5,
     SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_ENABLE    = 6,
     SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE   = 7,
+    SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_STATE             = 8,
+    SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_ROLE              = 9,
+    SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_SYSTEM_ID         = 10,
+    SYNCD_TX_DBG_CNTR_MSG_DEL_ICCP_INFO              = 11,
+    SYNCD_TX_DBG_CNTR_MSG_SET_REMOTE_IF_STATE        = 12,
+    SYNCD_TX_DBG_CNTR_MSG_DEL_REMOTE_IF_INFO         = 13,
     SYNCD_TX_DBG_CNTR_MSG_MAX
 };
 

@@ -1265,12 +1265,12 @@ static void mlacp_exchange_handler(struct CSM* csm, struct Msg* msg)
         if (lif_purge != NULL)
         {
             /* Re-enable traffic distribution on MCLAG interface  */
-            if ((lif_purge->type == IF_T_PORT_CHANNEL) && lif_purge->disable_traffic)
+            if ((lif_purge->type == IF_T_PORT_CHANNEL) && lif_purge->is_traffic_disable)
                 mlacp_link_enable_traffic_distribution(lif_purge);
 
             LIST_REMOVE(lif_purge, mlacp_purge_next);
         }
-    }    
+    }
 
     /* Send mlag lif*/
     LIST_FOREACH(lif, &(MLACP(csm).lif_list), mlacp_next)
@@ -1402,7 +1402,8 @@ ICCP_DBG_CNTR_MSG_e mlacp_fsm_iccp_to_dbg_msg_type(uint32_t tlv_type)
             return ICCP_DBG_CNTR_MSG_IF_UP_ACK;
 
         default:
-            ICCPD_LOG_ERR(__FUNCTION__, "Invalid ICCP TLV type %u", tlv_type);
+            ICCPD_LOG_DEBUG(__FUNCTION__, "No debug counter for TLV type %u",
+                tlv_type);
             return ICCP_DBG_CNTR_MSG_MAX;
     }
 }

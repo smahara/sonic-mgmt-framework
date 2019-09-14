@@ -360,7 +360,7 @@ int iccp_local_if_dump(char * *buf,  int *num, int mclag_id)
                 memcpy(mclagd_lif.mlacp_state, "ERROR", 5);
 
             mclagd_lif.isolate_to_peer_link = lif_po->isolate_to_peer_link;
-            mclagd_lif.disable_traffic = lif_po->disable_traffic;
+            mclagd_lif.is_traffic_disable = lif_po->is_traffic_disable;
 
             str_buf = mclagd_lif.vlanlist;
 

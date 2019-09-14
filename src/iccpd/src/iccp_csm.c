@@ -824,12 +824,16 @@ void iccp_csm_stp_role_count(struct CSM *csm)
             /* Active*/
             ICCPD_LOG_INFO(__FUNCTION__, "Role: [Active]");
             csm->role_type = STP_ROLE_ACTIVE;
+            /* Send ICCP role update and system ID */
+            mlacp_link_set_iccp_role(csm->mlag_id, true, MLACP(csm).system_id);
         }
         else
         {
             /* Standby*/
             ICCPD_LOG_INFO(__FUNCTION__, "Role [Standby]");
             csm->role_type = STP_ROLE_STANDBY;
+            /* Send ICCP role update */
+            mlacp_link_set_iccp_role(csm->mlag_id, false, NULL);
         }
     }
 }

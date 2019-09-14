@@ -726,7 +726,8 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
         lif = local_if_find_by_name(ifname);
         if (!lif)
         {
-            lif = local_if_create(ifindex, ifname, IF_T_VXLAN);
+            lif = local_if_create(ifindex, ifname, IF_T_VXLAN,
+                (op_state == IF_OPER_UP) ? PORT_STATE_UP : PORT_STATE_DOWN);
             lif->state = PORT_STATE_UP;
         }
         return;
@@ -750,14 +751,14 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
             if ((strncmp(ifname,
                          if_whitelist[i].ifname, strlen(if_whitelist[i].ifname)) == 0))
             {
-                lif = local_if_create(ifindex, ifname, if_whitelist[i].type);
-
-                lif->state = PORT_STATE_DOWN;
-
-                if (IF_OPER_UP == op_state )
-                {
-                    lif->state = PORT_STATE_UP;
-                }
+                /* Provide state info when local_if is created so that po_active
+                 * flag can be set correctly instead of assuming it is always
+                 * active. This helps address the issue where MLAG interface
+                 * up update to remote MLAG peer is not sent if port-channel
+                 * is configured as MLAG interface when it is down
+                 */
+                lif = local_if_create(ifindex, ifname, if_whitelist[i].type,
+                    (op_state == IF_OPER_UP) ? PORT_STATE_UP : PORT_STATE_DOWN);
 
                 switch (addr_type)
                 {
