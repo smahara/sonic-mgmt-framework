@@ -8,6 +8,9 @@
 ## PARAMETERS:
 ##   FILESYSTEM_ROOT
 ##          Path to debian file system root directory
+if [ -z "$CONFIGURED_ARCH" ]; then
+    CONFIGURED_ARCH=amd64
+fi
 
 FILESYSTEM_ROOT=$1
 [ -n "$FILESYSTEM_ROOT" ] || {
@@ -378,6 +381,20 @@ sudo cp $IMAGE_CONFIGS/platform/rc.local $FILESYSTEM_ROOT/etc/
 
 ## copy blacklist file
 sudo cp $IMAGE_CONFIGS/platform/linux_kernel_bde.conf $FILESYSTEM_ROOT/etc/modprobe.d/
+
+# Enable psample drivers to support sFlow on vs
+{% if sonic_asic_platform == "vs" %}
+sudo tee -a $FILESYSTEM_ROOT/etc/modules-load.d/modules.conf > /dev/null <<EOF
+psample
+act_sample
+EOF
+{% endif %}
+
+## Bind docker path
+if [[ $CONFIGURED_ARCH == armhf || $CONFIGURED_ARCH == arm64 ]]; then
+    sudo mkdir -p $FILESYSTEM_ROOT/dockerfs
+    sudo mount --bind dockerfs $FILESYSTEM_ROOT/dockerfs 
+fi
 
 {% if installer_images.strip() -%}
 sudo chroot $FILESYSTEM_ROOT docker info
