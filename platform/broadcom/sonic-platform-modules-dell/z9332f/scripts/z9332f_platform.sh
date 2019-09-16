@@ -76,7 +76,7 @@ switch_board_qsfp() {
 
 #Attach/Detach 2 instances of EEPROM driver SFP+ ports
 #eeprom can dump data using below command
-switch_board_qsfp() {
+switch_board_sfp() {
         case $1 in
         "new_device")
                         for ((i=1;i<=2;i++));
