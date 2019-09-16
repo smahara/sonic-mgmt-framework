@@ -296,15 +296,18 @@ func (app *IntfApp) processUpdatePhyIntfSubInterfaces(d *db.DB) error {
 /* Adding member to VLAN requires updation of VLAN Table and VLAN Member Table */
 func (app *IntfApp) processUpdatePhyIntfVlanAdd(d *db.DB) error {
 	var err error
+	var isMembersListUpdate bool
+
 	/* Updating the VLAN member table */
 
-	for vlanStr, ifEntries := range app.vlanD.vlanMembersTableMap {
+	for vlanName, ifEntries := range app.vlanD.vlanMembersTableMap {
 		var memberPortsListStrB strings.Builder
 		var memberPortsList []string
+		isMembersListUpdate = false
 
-		vlanEntry, err := d.GetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanStr}})
+		vlanEntry, err := d.GetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanName}})
 		if !vlanEntry.IsPopulated() {
-			errStr := "Failed to retrieve memberPorts info of VLAN : " + vlanStr
+			errStr := "Failed to retrieve memberPorts info of VLAN : " + vlanName
 			return errors.New(errStr)
 		}
 		memberPortsExists := false
@@ -322,22 +325,28 @@ func (app *IntfApp) processUpdatePhyIntfVlanAdd(d *db.DB) error {
 			/* Reason why it's ignored is, if we return, it leads to sync data issues between VlanT and VlanMembT */
 			if memberPortsExists {
 				if checkMemberPortExistsInList(memberPortsList, &ifName) {
-					errStr := "Interface: " + ifName + " is already part of VLAN: " + vlanStr
-					log.Error(errStr)
-					continue
+					/* Since translib doesn't support rollback, we need to keep the DB consistent at this point,
+					   and throw the error message */
+					vlanEntry.Field["members@"] = memberPortsListStrB.String()
+					err = d.SetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanName}}, vlanEntry)
+					vlanId := vlanName[len("Vlan"):len(vlanName)]
+					errStr := "Interface: " + ifName + " is already part of VLAN: " + vlanId
+					return tlerr.InvalidArgsError{Format: errStr}
 				}
 			}
+
+			isMembersListUpdate = true
 			switch ifEntry.op {
 			case opCreate:
-				err = d.CreateEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{vlanStr, ifName}}, ifEntry.entry)
+				err = d.CreateEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{vlanName, ifName}}, ifEntry.entry)
 				if err != nil {
-					errStr := "Creating entry for VLAN member table with vlan : " + vlanStr + " If : " + ifName + " failed"
+					errStr := "Creating entry for VLAN member table with vlan : " + vlanName + " If : " + ifName + " failed"
 					return errors.New(errStr)
 				}
 			case opUpdate:
-				err = d.SetEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{vlanStr, ifName}}, ifEntry.entry)
+				err = d.SetEntry(app.vlanD.vlanMemberTs, db.Key{Comp: []string{vlanName, ifName}}, ifEntry.entry)
 				if err != nil {
-					errStr := "Set entry for VLAN member table with vlan : " + vlanStr + " If : " + ifName + " failed"
+					errStr := "Set entry for VLAN member table with vlan : " + vlanName + " If : " + ifName + " failed"
 					return errors.New(errStr)
 				}
 			}
@@ -348,9 +357,12 @@ func (app *IntfApp) processUpdatePhyIntfVlanAdd(d *db.DB) error {
 			}
 		}
 		log.Infof("Member ports = %s", memberPortsListStrB.String())
+		if !isMembersListUpdate {
+			continue
+		}
 		vlanEntry.Field["members@"] = memberPortsListStrB.String()
 
-		err = d.SetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanStr}}, vlanEntry)
+		err = d.SetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanName}}, vlanEntry)
 		if err != nil {
 			return errors.New("Updating VLAN table with member ports failed")
 		}
