@@ -242,6 +242,7 @@ sudo cp $IMAGE_CONFIGS/interfaces/interfaces-config.sh $FILESYSTEM_ROOT/usr/bin/
 sudo cp $IMAGE_CONFIGS/interfaces/*.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 sudo cp files/dhcp/dhclient.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 sudo cp files/dhcp/ifupdown2_policy.json $FILESYSTEM_ROOT/etc/network/ifupdown2/policy.d
+sudo cp files/dhcp/90-dhcp6-systcl.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 
 # Copy initial interfaces configuration file, will be overwritten on first boot
 {% if enable_pde == "y" %}
