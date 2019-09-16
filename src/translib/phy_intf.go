@@ -260,6 +260,18 @@ func (app *IntfApp) processUpdatePhyIntfSubInterfaces(d *db.DB) error {
 	var err error
 	/* Updating the Interface IP table */
 	for ifName, ipEntries := range app.intfD.ifIPTableMap {
+		/* Note: when the interface comes as L2, before IP config, an INTERFACE table entry with
+		   ifName alone has to be created, otherwise IP config wont take place. */
+		ifEntry, err := d.GetEntry(app.intfD.intfIPTs, db.Key{Comp: []string{ifName}})
+		if err != nil || !ifEntry.IsPopulated() {
+			m := make(map[string]string)
+			m["NULL"] = "NULL"
+			err = d.CreateEntry(app.intfD.intfIPTs, db.Key{Comp: []string{ifName}}, db.Value{Field: m})
+			if err != nil {
+				return err
+			}
+			log.Infof("Created Interface entry with Interface name : %s alone!", ifName)
+		}
 		for ip, ipEntry := range ipEntries {
 			if ipEntry.op == opCreate {
 				log.Info("Creating entry for ", ifName, ":", ip)

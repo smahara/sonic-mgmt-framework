@@ -51,8 +51,8 @@ func (app *IntfApp) translateUpdateIntfConfig(ifKey *string, intf *ocbinds.Openc
 	app.ifTableMap[*ifKey] = dbEntry{op: opUpdate, entry: *curr}
 }
 
-func (app *IntfApp) getSpecificAttr(targetUriPath string, ifKey string, oc_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_State) (bool, error) {
-	switch targetUriPath {
+func (app *IntfApp) getSpecificIfStateAttr(targetUriPath *string, ifKey *string, oc_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_State) (bool, error) {
+	switch *targetUriPath {
 	case "/openconfig-interfaces:interfaces/interface/state/oper-status":
 		val, e := app.getIntfAttr(ifKey, OPER_STATUS, IF_TABLE_MAP)
 		if len(val) > 0 {
@@ -110,9 +110,49 @@ func (app *IntfApp) getSpecificAttr(targetUriPath string, ifKey string, oc_val *
 			return true, nil
 		}
 		return true, e
-
 	default:
-		log.Infof(targetUriPath + " - Not an interface state attribute")
+		log.Infof(*targetUriPath + " - Not an interface state attribute")
+	}
+	return false, nil
+}
+
+func (app *IntfApp) getSpecificIfVlanAttr(targetUriPath *string, ifKey *string, oc_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_State) (bool, error) {
+	switch *targetUriPath {
+	case "/openconfig-interfaces:interfaces/interface/openconfig-if-ethernet:ethernet/openconfig-vlan:switched-vlan/state/access-vlan":
+		log.Info("Hit")
+		_, accessVlanName, e := app.getIntfVlanAttr(ifKey, ACCESS)
+		if e != nil {
+			return true, e
+		}
+		vlanName := *accessVlanName
+		vlanIdStr := vlanName[len("Vlan"):len(vlanName)]
+		vlanId, err := strconv.Atoi(vlanIdStr)
+		if err != nil {
+			errStr := "Conversion of string to int failed for " + vlanIdStr
+			return true, errors.New(errStr)
+		}
+		vlanIdCast := uint16(vlanId)
+
+		oc_val.AccessVlan = &vlanIdCast
+		return true, nil
+	case "/openconfig-interfaces:interfaces/interface/openconfig-if-ethernet:ethernet/openconfig-vlan:switched-vlan/state/trunk-vlans":
+		trunkVlans, _, e := app.getIntfVlanAttr(ifKey, TRUNK)
+		if e != nil {
+			return true, e
+		}
+		for _, vlanName := range trunkVlans {
+			vlanIdStr := vlanName[len("Vlan"):len(vlanName)]
+			vlanId, err := strconv.Atoi(vlanIdStr)
+			if err != nil {
+				errStr := "Conversion of string to int failed for " + vlanIdStr
+				return true, errors.New(errStr)
+			}
+			vlanIdCast := uint16(vlanId)
+
+			trunkVlan, _ := oc_val.To_OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_State_TrunkVlans_Union(vlanIdCast)
+			oc_val.TrunkVlans = append(oc_val.TrunkVlans, trunkVlan)
+		}
+		return true, nil
 	}
 	return false, nil
 }
@@ -211,7 +251,7 @@ func (app *IntfApp) getSpecificCounterAttr(targetUriPath string, ifKey string, c
 }
 
 func (app *IntfApp) getCounters(ifKey string, attr string, counter_val **uint64) error {
-	val, e := app.getIntfAttr(ifKey, attr, PORT_STAT_MAP)
+	val, e := app.getIntfAttr(&ifKey, attr, PORT_STAT_MAP)
 	if len(val) > 0 {
 		v, e := strconv.ParseUint(val, 10, 64)
 		if e == nil {
@@ -222,15 +262,15 @@ func (app *IntfApp) getCounters(ifKey string, attr string, counter_val **uint64)
 	return e
 }
 
-func (app *IntfApp) getIntfAttr(ifName string, attr string, table Table) (string, error) {
+func (app *IntfApp) getIntfAttr(ifName *string, attr string, table Table) (string, error) {
 
 	var ok bool = false
 	var entry dbEntry
 
 	if table == IF_TABLE_MAP {
-		entry, ok = app.ifTableMap[ifName]
+		entry, ok = app.ifTableMap[*ifName]
 	} else if table == PORT_STAT_MAP {
-		entry, ok = app.intfD.portStatMap[ifName]
+		entry, ok = app.intfD.portStatMap[*ifName]
 	} else {
 		return "", errors.New("Unsupported table")
 	}
@@ -245,18 +285,65 @@ func (app *IntfApp) getIntfAttr(ifName string, attr string, table Table) (string
 	return "", errors.New("Attr " + attr + "doesn't exist in IF table Map!")
 }
 
+func (app *IntfApp) getIntfVlanAttr(ifName *string, ifMode intfModeType) ([]string, *string, error) {
+
+	vlanEntries, ok := app.vlanD.vlanMembersTableMap[*ifName]
+	if !ok {
+		errStr := "Cannot find info for Interface: " + *ifName + " from VLAN_MEMBERS_TABLE!"
+		return nil, nil, errors.New(errStr)
+	}
+	switch ifMode {
+	case ACCESS:
+		for vlanKey, tagEntry := range vlanEntries {
+			tagMode, ok := tagEntry.entry.Field["tagging_mode"]
+			if ok {
+				if tagMode == "untagged" {
+					log.Info("Untagged VLAN found!")
+					return nil, &vlanKey, nil
+				}
+			}
+		}
+	case TRUNK:
+		var trunkVlans []string
+		for vlanKey, tagEntry := range vlanEntries {
+			tagMode, ok := tagEntry.entry.Field["tagging_mode"]
+			if ok {
+				if tagMode == "tagged" {
+					trunkVlans = append(trunkVlans, vlanKey)
+				}
+			}
+		}
+		return trunkVlans, nil, nil
+	}
+	return nil, nil, nil
+}
+
 func (app *IntfApp) processGetSpecificAttr(targetUriPath *string, ifKey *string) (bool, *GetResponse, error) {
 	var err error
 	var payload []byte
 
+	log.Info("processGetSpecificAttr() hit")
 	/*Check if the request is for a specific attribute in Interfaces state container*/
-	oc_val := &ocbinds.OpenconfigInterfaces_Interfaces_Interface_State{}
-	ok, e := app.getSpecificAttr(*targetUriPath, *ifKey, oc_val)
+	ocStateVal := &ocbinds.OpenconfigInterfaces_Interfaces_Interface_State{}
+	ok, e := app.getSpecificIfStateAttr(targetUriPath, ifKey, ocStateVal)
 	if ok {
 		if e != nil {
 			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), e
 		}
-		payload, err = dumpIetfJson(oc_val, false)
+		payload, err = dumpIetfJson(ocStateVal, false)
+		if err != nil {
+			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), err
+		}
+	}
+
+	/*Check if the request is for a specific attribute in Interfaces Ethernet container*/
+	ocEthernetVlanStateVal := &ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_State{}
+	ok, e = app.getSpecificIfVlanAttr(targetUriPath, ifKey, ocEthernetVlanStateVal)
+	if ok {
+		if e != nil {
+			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), e
+		}
+		payload, err = dumpIetfJson(ocEthernetVlanStateVal, false)
 		if err != nil {
 			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), err
 		}
@@ -525,21 +612,22 @@ func (app *IntfApp) convertInternalToOCIntfAttrInfo(ifName *string, ifInfo *ocbi
 				var speedEnum ocbinds.E_OpenconfigIfEthernet_ETHERNET_SPEED
 
 				switch speed {
-				case "40000":
-					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_40GB
-					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_40GB
-				case "25000":
-					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_25GB
-					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_25GB
-				case "10000":
-					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_10GB
-					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_10GB
-				case "5000":
-					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_5GB
-					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_5GB
+				case "2500":
+					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_2500MB
 				case "1000":
 					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_1GB
-					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_1GB
+				case "5000":
+					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_5GB
+				case "10000":
+					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_10GB
+				case "25000":
+					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_25GB
+				case "40000":
+					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_40GB
+				case "50000":
+					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_50GB
+				case "100000":
+					speedEnum = ocbinds.OpenconfigIfEthernet_ETHERNET_SPEED_SPEED_100GB
 				default:
 					log.Infof("Not supported speed: %s!", speed)
 				}
