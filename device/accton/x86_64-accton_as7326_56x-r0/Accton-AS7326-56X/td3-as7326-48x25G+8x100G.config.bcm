@@ -1,3 +1,10 @@
+#BFD HW-Assist
+pci_cmcs_num=2
+num_queues_pci=46
+num_queues_uc0=1
+num_queues_uc1=1
+bfd_cosq=46
+
 l3_alpm_ipv6_128b_bkt_rsvd=1
 bcm_tunnel_term_compatible_mode=1
 bcm_num_cos=8
