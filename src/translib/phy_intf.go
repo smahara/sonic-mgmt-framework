@@ -437,18 +437,13 @@ func (app *IntfApp) processUpdatePhyIntf(d *db.DB) error {
 /* Note: Reason why we don't use multi-map, which we use for config is because RESTCONF doesn't supply the access-vlan value
  * or it will give only the single instance of trunk-vlan for deletion */
 func (app *IntfApp) translateDeletePhyIntfEthernetSwitchedVlan(d *db.DB, switchedVlanIntf *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan, ifName *string) {
-	log.Info("translateDeletePhyIntfEthernetSwitchedVlan() called")
 	var ifVlanInfo ifVlan
 
 	if switchedVlanIntf.Config != nil {
-		log.Info("Delete Ethernet-Config called")
-
 		if switchedVlanIntf.Config.AccessVlan != nil {
-			log.Info("Delete Access VLAN called!")
 			ifVlanInfo.mode = ACCESS
 		}
 		if switchedVlanIntf.Config.TrunkVlans != nil {
-			log.Info("Delete Trunk VLAN called")
 			trunkVlansUnionList := switchedVlanIntf.Config.TrunkVlans
 			ifVlanInfo.mode = TRUNK
 			for _, trunkVlanUnion := range trunkVlansUnionList {
@@ -468,7 +463,6 @@ func (app *IntfApp) translateDeletePhyIntfEthernetSwitchedVlan(d *db.DB, switche
 		if ifVlanInfo.mode != MODE_UNSET {
 			ifVlanInfo.ifName = ifName
 			app.intfD.ifVlanInfoList = append(app.intfD.ifVlanInfoList, &ifVlanInfo)
-			log.Info("Updated the ifVlanInfo DS!")
 		}
 	}
 }
@@ -577,7 +571,6 @@ func (app *IntfApp) processDeletePhyIntfSubInterfaces(d *db.DB) error {
 }
 
 func (app *IntfApp) processDeletePhyIntfVlanRemoval(d *db.DB) error {
-	log.Info("processDeletePhyIntfVlanRemoval() called")
 	var err error
 
 	if len(app.intfD.ifVlanInfoList) == 0 {
@@ -610,9 +603,7 @@ func (app *IntfApp) processDeletePhyIntfVlanRemoval(d *db.DB) error {
 			/* Handling trunk-vlans delete */
 			log.Info("Trunk VLAN Delete!")
 			if trunkVlans != nil {
-				log.Info("Entered trunk-vlans")
 				for _, trunkVlan := range trunkVlans {
-					log.Infof("Trunk VLAN received - %s for Interface - %s", trunkVlan, *ifName)
 					err = app.removeTaggedVlanAndUpdateVlanMembTbl(d, &trunkVlan, ifName)
 					if err != nil {
 						return err

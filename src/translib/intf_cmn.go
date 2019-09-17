@@ -34,13 +34,10 @@ func (app *IntfApp) translateUpdateIntfConfig(ifKey *string, intf *ocbinds.Openc
 		return
 	}
 	if intf.Config.Description != nil {
-		log.Info("Description = ", *intf.Config.Description)
 		curr.Field["description"] = *intf.Config.Description
 	} else if intf.Config.Mtu != nil {
-		log.Info("mtu:= ", *intf.Config.Mtu)
 		curr.Field["mtu"] = strconv.Itoa(int(*intf.Config.Mtu))
 	} else if intf.Config.Enabled != nil {
-		log.Info("enabled = ", *intf.Config.Enabled)
 		if *intf.Config.Enabled == true {
 			curr.Field["admin_status"] = "up"
 		} else {
@@ -119,7 +116,6 @@ func (app *IntfApp) getSpecificIfStateAttr(targetUriPath *string, ifKey *string,
 func (app *IntfApp) getSpecificIfVlanAttr(targetUriPath *string, ifKey *string, oc_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_State) (bool, error) {
 	switch *targetUriPath {
 	case "/openconfig-interfaces:interfaces/interface/openconfig-if-ethernet:ethernet/openconfig-vlan:switched-vlan/state/access-vlan":
-		log.Info("Hit")
 		_, accessVlanName, e := app.getIntfVlanAttr(ifKey, ACCESS)
 		if e != nil {
 			return true, e
@@ -322,7 +318,6 @@ func (app *IntfApp) processGetSpecificAttr(targetUriPath *string, ifKey *string)
 	var err error
 	var payload []byte
 
-	log.Info("processGetSpecificAttr() hit")
 	/*Check if the request is for a specific attribute in Interfaces state container*/
 	ocStateVal := &ocbinds.OpenconfigInterfaces_Interfaces_Interface_State{}
 	ok, e := app.getSpecificIfStateAttr(targetUriPath, ifKey, ocStateVal)
@@ -843,7 +838,6 @@ func (app *IntfApp) convertInternalToOCPortStatInfo(ifName *string, ifInfo *ocbi
 }
 
 func (app *IntfApp) convertInternalToOCIntfInfo(ifName *string, ifInfo *ocbinds.OpenconfigInterfaces_Interfaces_Interface) {
-	log.Info("Interface name for filling = ", *ifName)
 	app.convertInternalToOCIntfAttrInfo(ifName, ifInfo)
 	app.convertInternalToOCIntfVlanListInfo(ifName, ifInfo)
 	app.convertInternalToOCIntfIPAttrInfo(ifName, ifInfo)
