@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CLISH_MODULE
+    xmlns="http://www.dellemc.com/sonic/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema
+                        http://www.dellemc.com/sonic/XMLSchema/clish.xsd"
+    >
+<!--=========================================================================-->
+
+<!-- Config mode -->
+<VIEW name="configure-view">
+<!--spanning-tree mode -->
+    <COMMAND
+        name = "spanning-tree mode"
+        help = "Configure spanning tree"
+
+        >
+        <PARAM
+            name = "pvst"
+            help = "Enable PVST+ (based on IEEE 802.1D)"
+            ptype = "STRING"
+            optional = "true"
+            >
+        </PARAM>
+      <ACTION>
+      python $SONIC_CLI_ROOT/sonic-cli.py
+      </ACTION>
+      <PARAM
+          name = "rapid-pvst"
+          help = "Enable rapid PVST+ (based on IEEE 802.1w)"
+          ptype = "STRING"
+          optional = "true"
+          >
+      </PARAM>
+    <ACTION>
+    python $SONIC_CLI_ROOT/sonic-cli.py
+    </ACTION>
+    </COMMAND>
+
+    <!-- no spanning-tree mode -->
+    <COMMAND
+        name = "no spanning-tree mode"
+        help = "Unconfigure spanning tree"
+
+        >
+        <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli.py
+        </ACTION>
+        </COMMAND>
+
+        <!-- spanning-tree vlan -->
+        <COMMAND
+            name = "spanning-tree"
+            help = "Configure spanning tree"
+
+            >
+            <PARAM
+                name = "vlan"
+                help = "select vlan range option 1 to 4094"
+                ptype = "SUBCOMMAND"
+                mode = "subcommand"
+                >
+                <PARAM
+                  name="vlan-range"
+                  help="Range ex: 1-100,200,300-400"
+                  ptype="RANGE_1_4094"
+                  >
+            </PARAM>
+            <!-- spanning-tree [vlan] forward_delay <seconds> -->
+            <PARAM
+                name="forward_delay"
+                help="Set the forward delay time for the spanning tree"
+                ptype="SUBCOMMAND"
+                mode="subcommand"
+                               >
+            <PARAM
+                name="seconds"
+                help="Number of seconds for the forward delay timer"
+                ptype="RANGE_4_30"
+
+                >
+              </PARAM>
+            </PARAM>
+
+        <!-- spanning-tree [vlan] hello <seconds> -->
+            <PARAM
+                name="hello"
+                help="Configure the hello interval in seconds for transmission of bpdus"
+                ptype="SUBCOMMAND"
+                mode="subcommand"
+                               >
+            <PARAM
+                name="seconds"
+                help="Number of seconds"
+                ptype="RANGE_1_10"
+
+                >
+              </PARAM>
+            </PARAM>
+
+            <!-- spanning-tree [vlan] max-age <seconds> -->
+            <PARAM
+                name="max-age"
+                help="Set maximum time to listen for root bridge in seconds"
+                ptype="SUBCOMMAND"
+                mode="subcommand"
+                               >
+            <PARAM
+                name="seconds"
+                help="Number of seconds"
+                ptype="RANGE_6_40"
+
+                >
+              </PARAM>
+            </PARAM>
+
+            <!-- spanning-tree [vlan] priority <value> -->
+            <PARAM
+                name="priority"
+                help="Set bridge priority in increments of 4096 (default = 32768)"
+                ptype="SUBCOMMAND"
+                mode="subcommand"
+                               >
+            <PARAM
+                name="value"
+                help="0 -61440"
+                ptype="RANGE_0_61440"
+
+                >
+              </PARAM>
+            </PARAM>
+
+              <!-- spanning-tree [vlan] force-version <0|2> -->
+              <PARAM
+                  name="force-version"
+                  help="Set the force version for the rapid pvst"
+                  ptype="SUBCOMMAND"
+                  mode="subcommand"
+                                 >
+              <PARAM
+                  name="value"
+                  help="0 | 2"
+                  ptype="RANGE_0_2"
+
+                  >
+                </PARAM>
+              </PARAM>
+            </PARAM>
+            <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli.py
+            </ACTION>
+
+       <!--no spanning-tree vlan   -->
+            <COMMAND
+       name="no spanning-tree "
+       help="Unconfigure spanning tree"
+       >
+       <PARAM
+         name = "vlan"
+         help = "range 1 to 4094"
+         ptype = "SUBCOMMAND"
+         mode = "subcommand"
+         >
+         <PARAM
+           name="vlan-range"
+           help="Range ex: 1-100,200,300-400"
+           ptype="RANGE_1_4094"
+           >
+     </PARAM>
+     <PARAM
+         name="forward_delay"
+         help="Set the forward delay time for the spanning tree"
+         ptype="SUBCOMMAND"
+         mode="subcommand"
+                        >
+
+     </PARAM>
+
+ <!-- spanning-tree [vlan] hello <seconds> -->
+     <PARAM
+         name="hello"
+         help="Configure the hello interval in seconds for transmission of bpdus"
+         ptype="SUBCOMMAND"
+         mode="subcommand"
+                        >
+
+     </PARAM>
+
+     <!-- spanning-tree [vlan] max-age <seconds> -->
+     <PARAM
+         name="max-age"
+         help="Set maximum time to listen for root bridge in seconds"
+         ptype="SUBCOMMAND"
+         mode="subcommand"
+                        >
+     </PARAM>
+
+     <!-- spanning-tree [vlan] priority <value> -->
+     <PARAM
+         name="priority"
+         help="Set bridge priority in increments of 4096 (default = 32768)"
+         ptype="SUBCOMMAND"
+         mode="subcommand"
+                        >
+     </PARAM>
+
+       <!-- spanning-tree [vlan] force-version <0|2> -->
+       <PARAM
+           name="force-version"
+           help="Set the force version for the rapid pvst"
+           ptype="SUBCOMMAND"
+           mode="subcommand"
+                          >
+       </PARAM>
+     </PARAM>
+      <ACTION>python $SONIC_CLI_ROOT/sonic-cli.py delete_openconfig_</ACTION>
+     </COMMAND>
+
+              </VIEW>
+
+              <!-- Configure Interface -->
+
+    <VIEW name="configure-if-view">
+      <COMMAND
+        name="spanning-tree"
+        help = "Configure spanning tree on intreface">
+
+        <!-- <MACRO name="ACG-OPTIONS" arg=""></MACRO> -->
+           <PARAM
+              name="vlan"
+              help="Select vlan range option"
+              ptype="SUBCOMMAND"
+              mode="subcommand">
+              <PARAM
+                name="vlan-range"
+                help="Range ex: 1-100,200,300-400"
+                ptype="RANGE_1_4094" >
+
+              <!-- spanning-tree [vlan] cost <value> -->
+              <PARAM
+                  name="cost"
+                  help="Set  the port level cost value for a VLAN"
+                  ptype="SUBCOMMAND"
+                  mode="subcommand"
+                                 >
+              <PARAM
+                  name="value"
+                  help="range 1- 200000000"
+                  ptype="RANGE_0_200000000">
+                </PARAM>
+              </PARAM>
+
+              <PARAM
+                  name="port-priority"
+                  help="Set the port level priority value for a VLAN"
+                  ptype="SUBCOMMAND"
+                  mode="subcommand"
+                                 >
+              <PARAM
+                  name="value"
+                  help="range 0 - 240"
+                  ptype="RANGE_0_240">
+                </PARAM>
+              </PARAM>
+
+              <PARAM
+                  name="edge_port"
+                  help="Can be set to enabled or disabled"
+                  ptype="SUBCOMMAND"
+                  mode="subcommand"
+                                 />
+              </PARAM>
+
+
+
+
+        <PARAM
+            name="link-type"
+            help="point-to-point or shared. Can be disabled or enabled"
+            ptype="SUBCOMMAND"
+            mode="subcommand"
+                           >
+        <PARAM
+            name="point-to-point"
+            help="Take the interface as point-to-point"
+            ptype="SUBCOMMAND"
+            mode="subcommand"
+            />
+            <PARAM
+                name="shared"
+                help="Take the interface as shared"
+                ptype="SUBCOMMAND"
+                mode="subcommand"
+                />
+
+        </PARAM>
+
+        <PARAM
+            name="force_migration_check"
+            help= "forces the given port to send one RST BPDU"
+            ptype="SUBCOMMAND"
+            mode="subcommand"
+                           >
+                         </PARAM>
+
+          </COMMAND>
+
+          <!-- no spanning-tree -->
+          <COMMAND
+
+              name="no spanning-tree"
+              help = "Unconfigure spanning tree on intreface">
+
+              <!-- <MACRO name="ACG-OPTIONS" arg=""></MACRO> -->
+                 <PARAM
+                    name="vlan"
+                    help="Select vlan range option"
+                    ptype="SUBCOMMAND"
+                    mode="subcommand">
+
+
+                    <!-- spanning-tree [vlan] cost <value> -->
+                    <PARAM
+                        name="cost"
+                        help="Set  the port level cost value for a VLAN"
+                        ptype="SUBCOMMAND"
+                        mode="subcommand"
+                                       >
+
+                    </PARAM>
+
+                    <PARAM
+                        name="port-priority"
+                        help="Set the port level priority value for a VLAN"
+                        ptype="SUBCOMMAND"
+                        mode="subcommand">
+
+                    </PARAM>
+
+                    <PARAM
+                        name="edge_port"
+                        help="Can be set to enabled or disabled"
+                        ptype="SUBCOMMAND"
+                        mode="subcommand"
+                                       >
+                    </PARAM>
+
+
+
+
+              <PARAM
+                  name="link-type"
+                  help="point-to-point or shared. Can be disabled or enabled"
+                  ptype="SUBCOMMAND"
+                  mode="subcommand"
+                                 >
+            </PARAM>
+
+              <PARAM
+                  name="force_migration_check"
+                  help= "forces the given port to send one RST BPDU"
+                  ptype="SUBCOMMAND"
+                  mode="subcommand"
+                                 >
+                               </PARAM>
+            </COMMAND>
+
+
+            <COMMAND
+                name="spanning-tree"
+                help = "Configure spanning tree on intreface">
+                  <ACTION> </ACTION>
+             </COMMAND>
+
+             <COMMAND
+                 name="no spanning-tree"
+                 help = "unConfigure spanning tree on intreface">
+                   <ACTION> </ACTION>
+              </COMMAND>
+
+      </VIEW>
+
+      <!-- Show Commands -->
+
+      <VIEW name="enable-view">
+        <COMMAND name = "show spanning-tree vlan"
+       help = "Display spanning-tree information on the given vlan."
+       >
+
+       <PARAM
+           name = "vlan"
+           help="range 1 - 4094"
+           ptype="RANGE_1_4094"
+           >
+           <ACTION></ACTION>
+       </PARAM>
+
+     </COMMAND>
+     <COMMAND name = "show spanning-tree statistics"
+    help = "Display spanning-tree statistics"
+    >
+
+    <PARAM
+        name = "vlan"
+        help="range 1 - 4094"
+        ptype="RANGE_1_4094"
+        >
+        <ACTION></ACTION>
+    </PARAM>
+
+  </COMMAND>
+
+</VIEW>
+</CLISH_MODULE>
+
