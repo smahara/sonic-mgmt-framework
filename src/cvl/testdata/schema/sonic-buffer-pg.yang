@@ -23,10 +23,10 @@ module sonic-buffer-pg {
 	}
 
 	organization
-		"BRCM";
+		"SONiC";
 
 	contact
-		"BRCM";
+		"SONiC";
 
 	description
 		"SONIC BUFFER PG";
@@ -51,7 +51,10 @@ module sonic-buffer-pg {
 
 			leaf pg_num {
 				type string {
-					pattern "[0-7]((-)[0-7])?";
+					pattern "[0-7]((-)[0-7])?"{
+						error-message "Invalid Buffer PG number";
+						error-app-tag pg-num-invalid;
+					}
 				}
 			}
 

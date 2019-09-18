@@ -1,8 +1,21 @@
-///////////////////////////////////////////////////
-//
-// Copyright 2019 Broadcom Inc.
-//
-///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//  Copyright 2019 Broadcom. The term Broadcom refers to Broadcom Inc. and/or //
+//  its subsidiaries.                                                         //
+//                                                                            //
+//  Licensed under the Apache License, Version 2.0 (the "License");           //
+//  you may not use this file except in compliance with the License.          //
+//  You may obtain a copy of the License at                                   //
+//                                                                            //
+//     http://www.apache.org/licenses/LICENSE-2.0                             //
+//                                                                            //
+//  Unless required by applicable law or agreed to in writing, software       //
+//  distributed under the License is distributed on an "AS IS" BASIS,         //
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  //  
+//  See the License for the specific language governing permissions and       //
+//  limitations under the License.                                            //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 /*
 Package translib implements APIs like Create, Get, Subscribe etc.
@@ -16,9 +29,6 @@ Redis ABNF format and persisting them in the Redis DB.
 It can also translate the ABNF format to YANG specific JSON IETF format
 
 This package can also talk to non-DB clients.
-
-Example: TBD
-
 */
 
 package translib
@@ -696,25 +706,25 @@ func getAppModule (path string) (*appInterface, *appInfo, error) {
     aInfo, err := getAppModuleInfo(path)
 
     if err != nil {
-        return nil, &aInfo, err
+        return nil, aInfo, err
     }
 
     app, err = getAppInterface(aInfo.appType)
 
     if err != nil {
-        return nil, &aInfo, err
+        return nil, aInfo, err
     }
 
-	return &app, &aInfo, err
+	return &app, aInfo, err
 }
 
 func appInitialize (app *appInterface, appInfo *appInfo, path string, payload *[]byte, opCode int) error {
-	var err error
-	var input []byte
+    var err error
+    var input []byte
 
-	if payload != nil {
-		input = *payload
-	}
+    if payload != nil {
+        input = *payload
+    }
 
     if appInfo.isNative {
         log.Info("Native MSFT format")
@@ -731,5 +741,5 @@ func appInitialize (app *appInterface, appInfo *appInfo, path string, payload *[
         (*app).initialize(data)
     }
 
-	return err
+    return err
 }

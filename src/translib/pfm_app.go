@@ -1,3 +1,21 @@
+//////////////////////////////////////////////////////////////////////////
+//
+// Copyright 2019 Dell, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+//////////////////////////////////////////////////////////////////////////
+
 package translib
 
 import (
@@ -8,6 +26,7 @@ import (
     "translib/ocbinds"
     "github.com/openconfig/ygot/ygot"
     "os"
+    "translib/tlerr"
     "io/ioutil"
     log "github.com/golang/glog"
 )
@@ -188,7 +207,9 @@ func (app *PlatformApp) getSysEepromFromFile (eeprom *ocbinds.OpenconfigPlatform
     jsonFile, err := os.Open("/mnt/platform/syseeprom")
     if err != nil {
         log.Infof("syseeprom.json open failed")
-        return err
+        errStr := "Information not available or Not supported"
+        terr := tlerr.NotFoundError{Format: errStr}
+        return terr
     }
 
     defer jsonFile.Close()
@@ -335,6 +356,9 @@ func (app *PlatformApp) getSysEepromJson () (GetResponse, error) {
         pf_comp,_ := pf_cpts.NewComponent("System Eeprom")
         ygot.BuildEmptyTree(pf_comp)
         err = app.getSysEepromFromFile(pf_comp.State, true)
+        if err != nil {
+            return GetResponse{Payload: payload}, err
+        }
         payload, err = dumpIetfJson((*app.ygotRoot).(*ocbinds.Device), true)
     case "/openconfig-platform:components/component":
         compName := app.path.Var("name")
@@ -342,6 +366,9 @@ func (app *PlatformApp) getSysEepromJson () (GetResponse, error) {
             pf_comp,_ := pf_cpts.NewComponent("System Eeprom")
             ygot.BuildEmptyTree(pf_comp)
             err = app.getSysEepromFromFile(pf_comp.State, true)
+            if err != nil {
+                return GetResponse{Payload: payload}, err
+            }
             payload, err = dumpIetfJson(pf_cpts, false)
         } else {
             if compName != "System Eeprom" {
@@ -351,6 +378,9 @@ func (app *PlatformApp) getSysEepromJson () (GetResponse, error) {
             if pf_comp != nil {
                 ygot.BuildEmptyTree(pf_comp)
                 err = app.getSysEepromFromFile(pf_comp.State, true)
+                if err != nil {
+                    return GetResponse{Payload: payload}, err
+                }
                 payload, err = dumpIetfJson(pf_cpts.Component[compName], false)
             } else {
                 err = errors.New("Invalid input component name")
@@ -363,6 +393,9 @@ func (app *PlatformApp) getSysEepromJson () (GetResponse, error) {
             if pf_comp != nil {
                 ygot.BuildEmptyTree(pf_comp)
                 err = app.getSysEepromFromFile(pf_comp.State, true)
+                if err != nil {
+                    return GetResponse{Payload: payload}, err
+                }
                 payload, err = dumpIetfJson(pf_cpts.Component[compName], false)
             } else {
                 err = errors.New("Invalid input component name")
@@ -381,6 +414,9 @@ func (app *PlatformApp) getSysEepromJson () (GetResponse, error) {
                 if pf_comp != nil {
                     ygot.BuildEmptyTree(pf_comp)
                     err = app.getSysEepromFromFile(pf_comp.State, false)
+                    if err != nil {
+                        return GetResponse{Payload: payload}, err
+                    }
                     payload, err = dumpIetfJson(pf_cpts.Component[compName].State, false)
                 } else {
                     err = errors.New("Invalid input component name")
