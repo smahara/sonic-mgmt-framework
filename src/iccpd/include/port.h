@@ -29,6 +29,11 @@
 #include <time.h>
 #include <sys/queue.h>
 
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
+#endif /* INET_ADDRSTRLEN */
+
+
 #define ETHER_ADDR_LEN 6
 #define ETHER_ADDR_STR_LEN 18
 /*
