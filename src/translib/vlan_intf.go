@@ -67,16 +67,17 @@ func (app *IntfApp) processUpdateVlanIntf(d *db.DB) error {
 
 /********* DELETE FUNCTIONS ********/
 
-func (app *IntfApp) translateDeleteVlanIntf(d *db.DB, vlanName string) ([]db.WatchKeys, error) {
+func (app *IntfApp) translateDeleteVlanIntf(d *db.DB, vlan *string) ([]db.WatchKeys, error) {
 	var err error
 	var keys []db.WatchKeys
-	curr, err := d.GetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanName}})
+	curr, err := d.GetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{*vlan}})
 	if err != nil {
+		vlanName := *vlan
 		vlanId := vlanName[len("Vlan"):len(vlanName)]
 		errStr := "Invalid Vlan: " + vlanId
 		return keys, tlerr.InvalidArgsError{Format: errStr}
 	}
-	app.ifTableMap[vlanName] = dbEntry{entry: curr, op: opDelete}
+	app.ifTableMap[*vlan] = dbEntry{entry: curr, op: opDelete}
 	return keys, err
 }
 

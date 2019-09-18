@@ -535,19 +535,19 @@ func (app *IntfApp) translateDeletePhyIntfSubInterfaces(d *db.DB, intf *ocbinds.
 	return err
 }
 
-func (app *IntfApp) translateDeletePhyIntf(d *db.DB, ifName string) ([]db.WatchKeys, error) {
+func (app *IntfApp) translateDeletePhyIntf(d *db.DB, ifName *string) ([]db.WatchKeys, error) {
 	var err error
 	var keys []db.WatchKeys
 
 	intfObj := app.getAppRootObject()
-	intf := intfObj.Interface[ifName]
+	intf := intfObj.Interface[*ifName]
 
-	err = app.translateDeletePhyIntfSubInterfaces(d, intf, &ifName)
+	err = app.translateDeletePhyIntfSubInterfaces(d, intf, ifName)
 	if err != nil {
 		return keys, err
 	}
 
-	err = app.translateDeletePhyIntfEthernet(d, intf, &ifName)
+	err = app.translateDeletePhyIntfEthernet(d, intf, ifName)
 	if err != nil {
 		return keys, err
 	}

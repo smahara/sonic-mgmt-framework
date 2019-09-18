@@ -220,12 +220,12 @@ func (app *IntfApp) translateDelete(d *db.DB) ([]db.WatchKeys, error) {
 			}
 			switch app.intfType {
 			case ETHERNET:
-				keys, err = app.translateDeletePhyIntf(d, ifKey)
+				keys, err = app.translateDeletePhyIntf(d, &ifKey)
 				if err != nil {
 					return keys, err
 				}
 			case VLAN:
-				keys, err = app.translateDeleteVlanIntf(d, ifKey)
+				keys, err = app.translateDeleteVlanIntf(d, &ifKey)
 				if err != nil {
 					return keys, err
 				}

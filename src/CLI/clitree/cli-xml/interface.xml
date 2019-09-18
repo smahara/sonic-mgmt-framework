@@ -213,30 +213,6 @@ limitations under the License.
 				ptype="SUBCOMMAND"
 				mode="switch"
 				>
-				<!--
-				<PARAM
-					name="mode"
-					help="Enter the port mode access/trunk"
-					ptype="SUBCOMMAND"
-					mode="subcommand"
-					>
-					<PARAM
-						name="mode subcommands"
-						help="Mode Subcommands"
-						ptype="SUBCOMMAND"
-						mode="switch"
-						>
-						<PARAM
-							name="access"
-							help="Port mode access"
-							ptype="SUBCOMMAND"
-							mode="subcommand"
-							>
-						</PARAM>
-					</PARAM>
-				</PARAM>
-				-->
-
 				<PARAM
 					name="access"
 					help="Set access mode characteristics of the interface"

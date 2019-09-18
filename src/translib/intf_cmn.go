@@ -153,11 +153,11 @@ func (app *IntfApp) getSpecificIfVlanAttr(targetUriPath *string, ifKey *string, 
 	return false, nil
 }
 
-func (app *IntfApp) getSpecificCounterAttr(targetUriPath string, ifKey string, counter_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters) (bool, error) {
+func (app *IntfApp) getSpecificCounterAttr(targetUriPath *string, ifKey *string, counter_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters) (bool, error) {
 
 	var e error
 
-	switch targetUriPath {
+	switch *targetUriPath {
 	case "/openconfig-interfaces:interfaces/interface/state/counters/in-octets":
 		e = app.getCounters(ifKey, "SAI_PORT_STAT_IF_IN_OCTETS", &counter_val.InOctets)
 		return true, e
@@ -241,13 +241,13 @@ func (app *IntfApp) getSpecificCounterAttr(targetUriPath string, ifKey string, c
 		}
 
 	default:
-		log.Infof(targetUriPath + " - Not an interface state counter attribute")
+		log.Infof(*targetUriPath + " - Not an interface state counter attribute")
 	}
 	return false, nil
 }
 
-func (app *IntfApp) getCounters(ifKey string, attr string, counter_val **uint64) error {
-	val, e := app.getIntfAttr(&ifKey, attr, PORT_STAT_MAP)
+func (app *IntfApp) getCounters(ifKey *string, attr string, counter_val **uint64) error {
+	val, e := app.getIntfAttr(ifKey, attr, PORT_STAT_MAP)
 	if len(val) > 0 {
 		v, e := strconv.ParseUint(val, 10, 64)
 		if e == nil {
@@ -352,7 +352,7 @@ func (app *IntfApp) processGetSpecificCounterAttr(targetUriPath *string, ifKey *
 
 	/*Check if the request is for a specific attribute in Interfaces state COUNTERS container*/
 	counter_val := &ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters{}
-	ok, e := app.getSpecificCounterAttr(*targetUriPath, *ifKey, counter_val)
+	ok, e := app.getSpecificCounterAttr(targetUriPath, ifKey, counter_val)
 	if ok {
 		if e != nil {
 			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), e
