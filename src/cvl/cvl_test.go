@@ -221,7 +221,7 @@ func prepareDb() {
 		fmt.Printf("read file %v err: %v", fileName, err)
 	}
 
-	port_map := loadConfig("", PortsMapByte)
+	port_map = loadConfig("", PortsMapByte)
 
 	loadConfigDB(rclient, port_map)
 	loadConfigDB(rclient, depDataMap)
@@ -2609,7 +2609,7 @@ func TestLogging(t *testing.T) {
 }
 
 func TestValidateEditConfig_DepData_Through_Cache(t *testing.T) {
-	depDataMap := map[string]interface{} {
+	depDataMap1 := map[string]interface{} {
 		"PORT" : map[string]interface{} {
 			"Ethernet3" : map[string]interface{} {
 				"alias":"hundredGigE1",
@@ -2625,7 +2625,7 @@ func TestValidateEditConfig_DepData_Through_Cache(t *testing.T) {
 	}
 
 	//Prepare data in Redis
-	loadConfigDB(rclient, depDataMap)
+	loadConfigDB(rclient, depDataMap1)
 
 	//Modify entry
 	depDataMap = map[string]interface{} {
@@ -2662,6 +2662,7 @@ func TestValidateEditConfig_DepData_Through_Cache(t *testing.T) {
 	}
 
 	unloadConfigDB(rclient, depDataMap)
+	unloadConfigDB(rclient, depDataMap1)
 }
 
 /* Delete field for an existing key.*/
