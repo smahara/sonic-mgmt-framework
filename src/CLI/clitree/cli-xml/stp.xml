@@ -24,7 +24,8 @@
             >
         </PARAM>
       <ACTION>
-      python $SONIC_CLI_ROOT/sonic-cli.py
+	      builtin="clish_nop"
+	      
       </ACTION>
       <PARAM
           name = "rapid-pvst"
@@ -34,7 +35,8 @@
           >
       </PARAM>
     <ACTION>
-    python $SONIC_CLI_ROOT/sonic-cli.py
+  
+ builtin="clish_nop"
     </ACTION>
     </COMMAND>
 
@@ -44,8 +46,9 @@
         help = "Unconfigure spanning tree"
 
         >
-        <ACTION>
-        python $SONIC_CLI_ROOT/sonic-cli.py
+	<ACTION>
+	builtin="clish_nop"
+  			
         </ACTION>
         </COMMAND>
 
@@ -148,7 +151,8 @@
               </PARAM>
             </PARAM>
             <ACTION>
-            python $SONIC_CLI_ROOT/sonic-cli.py
+        	builtin="clish_nop"
+    
             </ACTION>
 
        <!--no spanning-tree vlan   -->
@@ -214,7 +218,8 @@
                           >
        </PARAM>
      </PARAM>
-      <ACTION>python $SONIC_CLI_ROOT/sonic-cli.py delete_openconfig_</ACTION>
+     <ACTION>_builtin="clish_nop"
+</ACTION>
      </COMMAND>
 
               </VIEW>
@@ -303,7 +308,7 @@
             mode="subcommand"
                            >
                          </PARAM>
-
+	 <ACTION builtin ="clish_nop"></ACTION>
           </COMMAND>
 
           <!-- no spanning-tree -->
@@ -363,20 +368,22 @@
                   ptype="SUBCOMMAND"
                   mode="subcommand"
                                  >
-                               </PARAM>
+ 
+			 </PARAM>
+			 <ACTION builtin ="clish_nop"></ACTION>	 
             </COMMAND>
 
 
             <COMMAND
                 name="spanning-tree"
                 help = "Configure spanning tree on intreface">
-                  <ACTION> </ACTION>
+                  <ACTION builtin="clish_nop"> </ACTION>
              </COMMAND>
 
              <COMMAND
                  name="no spanning-tree"
                  help = "unConfigure spanning tree on intreface">
-                   <ACTION> </ACTION>
+	<ACTION builtin="clish_nop"></ACTION>
               </COMMAND>
 
       </VIEW>
@@ -393,9 +400,9 @@
            help="range 1 - 4094"
            ptype="RANGE_1_4094"
            >
-           <ACTION></ACTION>
+           
        </PARAM>
-
+     <ACTION builtin="clish_nop"></ACTION>
      </COMMAND>
      <COMMAND name = "show spanning-tree statistics"
     help = "Display spanning-tree statistics"
@@ -406,8 +413,8 @@
         help="range 1 - 4094"
         ptype="RANGE_1_4094"
         >
-        <ACTION></ACTION>
     </PARAM>
+<ACTION builtin="clish_nop"></ACTION>
 
   </COMMAND>
 
