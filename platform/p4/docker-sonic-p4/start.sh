@@ -79,6 +79,9 @@ supervisorctl start vlanmgrd
 echo "Start vrrpmgrd"
 supervisorctl start vrrpmgrd
 
+echo "Start aclsvcd"
+supervisorctl start aclsvcd
+
 echo "Start zebra"
 supervisorctl start zebra
 
