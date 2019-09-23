@@ -118,3 +118,7 @@
 	path = src/sonic-mgmt-framework
 	url = ../sonic-mgmt-framework.git
 	branch = buzznik_dev
+[submodule "src/broadcom-exclusive"]
+	path = src/broadcom-exclusive
+	url = ../broadcom-exclusive.git
+	branch = buzznik_dev
