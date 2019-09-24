@@ -228,15 +228,32 @@ func getVlanIdFromVlanName(vlanName *string) (string, error) {
 	return id[1], nil
 }
 
-/* Validate whether member port exists in the member ports list */
-func checkMemberPortExistsInList(memberPortsList []string, memberPort *string) bool {
+/* Convert tagging mode to Interface Mode type */
+func convertTaggingModeToInterfaceModeType(tagMode *string, ifMode *intfModeType) {
+	switch *tagMode {
+	case "untagged":
+		*ifMode = ACCESS
+	case "tagged":
+		*ifMode = TRUNK
+	}
+}
+
+/* Validate whether member port exists in the member ports list and return the configured Interface mode */
+func checkMemberPortExistsInListAndGetMode(d *db.DB, memberPortsList []string, memberPort *string, vlanName *string, ifMode *intfModeType) bool {
 	for _, port := range memberPortsList {
 		if *memberPort == port {
+			tagModeEntry, err := d.GetEntry(&db.TableSpec{Name:"VLAN_MEMBER"}, db.Key{Comp: []string{*vlanName, *memberPort}})
+			if err != nil {
+				return false
+			}
+			tagMode := tagModeEntry.Field["tagging_mode"]
+			convertTaggingModeToInterfaceModeType(&tagMode, ifMode)
 			return true
 		}
 	}
 	return false
 }
+
 
 /* Validate IPv4 address */
 func validIPv4(ipAddress string) bool {
@@ -343,7 +360,7 @@ func (app *IntfApp) removeTaggedVlanAndUpdateVlanMembTbl(d *db.DB, trunkVlan *st
 }
 
 /* Validate whether Port has any Untagged VLAN Config existing */
-func (app *IntfApp) validateUntaggedVlanCfgredForIf(d *db.DB, ifName *string) (bool, error) {
+func (app *IntfApp) validateUntaggedVlanCfgredForIf(d *db.DB, ifName *string, accessVlan *string) (bool, error) {
 	var err error
 
 	var vlanMemberKeys []db.Key
@@ -373,6 +390,7 @@ func (app *IntfApp) validateUntaggedVlanCfgredForIf(d *db.DB, ifName *string) (b
 			return false, errors.New(errStr)
 		}
 		if tagMode == "untagged" {
+			*accessVlan = vlanMember.Get(0)
 			return true, nil
 		}
 	}

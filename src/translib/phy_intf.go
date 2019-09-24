@@ -157,19 +157,25 @@ func (app *IntfApp) translateUpdatePhyIntfEthernet(d *db.DB, ifKey *string, intf
 
 	/* Update the DS based on access-vlan/trunk-vlans config */
 	if accessVlanFound {
-		vlanStr := "Vlan" + strconv.Itoa(int(accessVlanId))
-		err = app.validateVlanExists(d, &vlanStr)
+		accessVlan := "Vlan" + strconv.Itoa(int(accessVlanId))
+		err = app.validateVlanExists(d, &accessVlan)
 		if err != nil {
 			errStr := "Invalid VLAN: " + strconv.Itoa(int(accessVlanId))
 			err = tlerr.InvalidArgsError{Format: errStr}
 			return err
 		}
-		exists, err := app.validateUntaggedVlanCfgredForIf(d, ifKey)
+		var cfgredAccessVlan string
+		exists, err := app.validateUntaggedVlanCfgredForIf(d, ifKey, &cfgredAccessVlan)
 		if err != nil {
 			return err
 		}
 		if exists {
-			errStr := "Untagged VLAN configuration exists"
+			if cfgredAccessVlan == accessVlan {
+				log.Infof("Untagged VLAN: %s already configured, not updating the cache!", accessVlan)
+				goto TRUNKCONFIG
+			}
+			vlanId := cfgredAccessVlan[len("Vlan"):len(cfgredAccessVlan)]
+			errStr := "Untagged VLAN: " + vlanId + " configuration exists"
 			err = tlerr.InvalidArgsError{Format: errStr}
 			return err
 		}
@@ -177,15 +183,14 @@ func (app *IntfApp) translateUpdatePhyIntfEthernet(d *db.DB, ifKey *string, intf
 		memberPortEntry := db.Value{Field: memberPortEntryMap}
 		memberPortEntry.Field["tagging_mode"] = "untagged"
 
-		if app.vlanD.vlanMembersTableMap[vlanStr] == nil {
-			app.vlanD.vlanMembersTableMap[vlanStr] = make(map[string]dbEntry)
+		if app.vlanD.vlanMembersTableMap[accessVlan] == nil {
+			app.vlanD.vlanMembersTableMap[accessVlan] = make(map[string]dbEntry)
 		}
-		app.vlanD.vlanMembersTableMap[vlanStr][*ifKey] = dbEntry{entry: memberPortEntry, op: opCreate}
+		app.vlanD.vlanMembersTableMap[accessVlan][*ifKey] = dbEntry{entry: memberPortEntry, op: opCreate}
 		log.Info("Untagged Port added to cache!")
-
 	}
 
-	if trunkVlanFound {
+	TRUNKCONFIG: if trunkVlanFound {
 		memberPortEntryMap := make(map[string]string)
 		memberPortEntry := db.Value{Field: memberPortEntryMap}
 		memberPortEntry.Field["tagging_mode"] = "tagged"
@@ -342,14 +347,31 @@ func (app *IntfApp) processUpdatePhyIntfVlanAdd(d *db.DB) error {
 			/* Adding the following validation, just to avoid an another db-get in translate fn */
 			/* Reason why it's ignored is, if we return, it leads to sync data issues between VlanT and VlanMembT */
 			if memberPortsExists {
-				if checkMemberPortExistsInList(memberPortsList, &ifName) {
+				var existingIfMode intfModeType
+				if checkMemberPortExistsInListAndGetMode(d, memberPortsList, &ifName, &vlanName, &existingIfMode) {
 					/* Since translib doesn't support rollback, we need to keep the DB consistent at this point,
-					   and throw the error message */
-					vlanEntry.Field["members@"] = memberPortsListStrB.String()
-					err = d.SetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanName}}, vlanEntry)
-					vlanId := vlanName[len("Vlan"):len(vlanName)]
-					errStr := "Interface: " + ifName + " is already part of VLAN: " + vlanId
-					return tlerr.InvalidArgsError{Format: errStr}
+					and throw the error message */
+					var cfgReqIfMode intfModeType
+					tagMode := ifEntry.entry.Field["tagging_mode"]
+					convertTaggingModeToInterfaceModeType(&tagMode, &cfgReqIfMode)
+
+					if cfgReqIfMode == existingIfMode {
+						continue
+					} else {
+						vlanEntry.Field["members@"] = memberPortsListStrB.String()
+						err = d.SetEntry(app.vlanD.vlanTs, db.Key{Comp: []string{vlanName}}, vlanEntry)
+
+						vlanId := vlanName[len("Vlan"):len(vlanName)]
+
+						var errStr string
+						switch existingIfMode {
+						case ACCESS:
+							errStr = "Untagged VLAN: " + vlanId + " configuration exists for Interface: " + ifName
+						case TRUNK:
+							errStr = "Tagged VLAN: " + vlanId + " configuration exists for Interface: " + ifName
+						}
+						return tlerr.InvalidArgsError{Format: errStr}
+					}
 				}
 			}
 
