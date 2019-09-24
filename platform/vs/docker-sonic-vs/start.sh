@@ -53,6 +53,8 @@ supervisorctl start vrrpmgrd
 
 supervisorctl start fpmsyncd
 
+supervisorctl start ipmcfpmsyncd
+
 supervisorctl start teammgrd
 
 supervisorctl start vrfmgrd
