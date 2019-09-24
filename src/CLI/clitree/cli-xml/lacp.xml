@@ -1,0 +1,80 @@
+g?xml version="1.0" encoding="UTF-8"?>
+<CLISH_MODULE
+    xmlns="http://www.dellemc.com/sonic/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema
+    http://www.dellemc.com/sonic/XMLSchema/clish.xsd"
+    >
+    <VIEW name="enable-view">
+        <!--show lacp -->
+    <COMMAND
+         name="show lacp"
+         help="Show lacp information"
+         >
+         <PARAM
+             name="lacp-subcommands"
+             help="LACP subcommands"
+             mode="switch"
+             ptype="SUBCOMMAND"
+             >
+             <PARAM
+                  name="system-priority"
+                  help="LACP system priority"
+                  ptype="SUBCOMMAND"
+                  mode="subcommand"
+                  >
+             </PARAM>
+             <PARAM
+                  name="port-channel"
+                  help="Port-channel name"
+                  ptype="SUBCOMMAND"
+                  mode="subcommand"
+                  >
+                  <PARAM
+                        name="interface"
+                        help="Select an interface"
+                        ptype="SUBCOMMAND"
+                        optional="true"
+                        mode="subcommand"
+                        >
+                        <PARAM
+                            name="interface-switch"
+                            help="Select an interface"
+                            ptype="SUBCOMMAND"
+                            mode="switch"
+                            >
+                            <PARAM
+                                name="port-channel"
+                                help="Port-channel interface"
+                                ptype="SUBCOMMAND"
+                                mode="subcommand"
+                                >
+                                <PARAM
+                                    name="portch_id"
+                                    help="Port-channel ID"
+                                    ptype="UINT"
+                                />
+                            </PARAM>
+                        </PARAM>
+                    </PARAM>
+                </PARAM>
+
+         </PARAM>
+         <ACTION>
+            if test "${lacp-subcommands}" = "system-priority"; then&#xA;
+                python $SONIC_CLI_ROOT/sonic-cli-lacp-port-channel.py get_openconfig_lacp_lacp_state_system_priority show_lacp_sys_priority.j2 ${__full_line}&#xA;
+            elif test "${lacp-subcommands}" = "port-channel";then&#xA;
+                if test "${interface}" = ""; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-lacp-port-channel.py get_openconfig_lacp_lacp_interfaces show_lacp_port_channel.j2 ${__full_line}&#xA;
+                else&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-lacp-port-channel.py get_openconfig_lacp_lacp_interfaces_interface PortChannel${portch_id} show_lacp_port_channel.j2 ${__full_line}&#xA;
+                fi
+            fi
+         </ACTION>
+    </COMMAND>
+    </VIEW>
+
+    </CLISH_MODULE>
+
+

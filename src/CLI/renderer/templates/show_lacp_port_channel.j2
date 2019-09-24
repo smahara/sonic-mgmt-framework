@@ -1,0 +1,13 @@
+{% for intf in json_output['openconfig-lacp:lacp']['interfaces']['interface'] %}
+{% for if_intf in json_output['openconfig-interfaces:interfaces']['interface'] %}
+{% if if_intf['name'] == intf['name'] %}
+{{intf['name']}} admin {{if_intf['state']['admin-status']}} oper {{if_intf['state']['oper-status']}} mode {{intf['state']['lacp-mode']}} interval {{intf['state']['interval']}}
+{% endif %}
+{% endfor %}
+Actor System ID: Priority {{intf['state']['system-priority']}} Address {{intf['state']['system-id-mac']}}
+{% for mem in intf['members']['member'] %}
+Port {{mem['name'] }}
+Actor Port {{mem['state']['port-num']}}  Address {{mem['state']['system-id']}} Key {{mem['state']['oper-key']}}
+Partner Port {{mem['state']['partner-port-num']}}  Address {{mem['state']['partner-id']}} Key {{mem['state']['partner-key']}}
+{% endfor %}
+{% endfor %}
