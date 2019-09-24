@@ -42,10 +42,6 @@
 #define IFNAMSIZ 16
 #endif /*IFNAMSIZ*/
 
-#ifndef INET_ADDRSTRLEN
-#define INET_ADDRSTRLEN 16
-#endif /* INET_ADDRSTRLEN */
-
 /* For socket binding */
 #define ICCP_TCP_PORT 8888
 #define MAX_ACCEPT_CONNETIONS 20

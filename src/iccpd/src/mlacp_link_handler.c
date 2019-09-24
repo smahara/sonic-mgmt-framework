@@ -40,6 +40,7 @@
 #include "../include/iccp_csm.h"
 #include "mclagdctl/mclagdctl.h"
 #include "../include/iccp_cmd_show.h"
+#include "../include/iccp_cli.h"
 #include "../include/mlacp_link_handler.h"
 
 /*****************************************
@@ -2383,55 +2384,153 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
     return;
 }
 
-int iccp_receive_fdb_handler_from_syncd(struct System *sys)
+
+int iccp_mclagsyncd_mclag_domain_cfg_handler(struct System *sys, char *msg_buf)
 {
-    char *msg_buf = g_csm_buf;
-    struct IccpSyncdHDr *msg_hdr;
-    struct mclag_fdb_info * mac_info;
-    size_t pos = 0;
+    struct IccpSyncdHDr * msg_hdr;
+    struct mclag_domain_cfg_info* cfg_info;
+    int count, i = 0;
+    char system_mac_str[ETHER_ADDR_STR_LEN];
+    
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+
+    count = (msg_hdr->len- sizeof(struct IccpSyncdHDr ))/sizeof(struct mclag_domain_cfg_info);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "recv domain cfg msg ; count %d   ",count);  
+
+    for (i =0; i<count; i++)
+    {
+        cfg_info = (struct mclag_domain_cfg_info *)((char *)(msg_buf) + sizeof(struct IccpSyncdHDr) + i * sizeof(struct mclag_domain_cfg_info));
+
+        memcpy(system_mac_str, mac_addr_to_str(cfg_info->system_mac), sizeof(system_mac_str));
+
+        ICCPD_LOG_DEBUG(__FUNCTION__, "recv cfg msg ; domain_id:%d  op_type:%d local_ip:%s peer_ip:%s peer_ifname:%s system_mac:%s",cfg_info->domain_id, cfg_info->op_type,
+                cfg_info->local_ip, cfg_info->peer_ip, cfg_info->peer_ifname, system_mac_str);  
+
+        if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
+        {
+            set_mc_lag_by_id(cfg_info->domain_id);
+            set_local_address(cfg_info->domain_id, cfg_info->local_ip);
+            set_peer_address(cfg_info->domain_id, cfg_info->peer_ip);
+            set_peer_link(cfg_info->domain_id, cfg_info->peer_ifname);
+            set_local_system_id(system_mac_str);
+        }
+        else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL)
+        {
+            unset_mc_lag_by_id(cfg_info->domain_id);
+        }
+    }
+    return 0;
+}
+
+int iccp_mclagsyncd_mclag_iface_cfg_handler(struct System *sys, char *msg_buf)
+{
+    struct IccpSyncdHDr * msg_hdr;
+    struct mclag_iface_cfg_info* cfg_info;
+    int count, i = 0;
+    
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+
+    count = (msg_hdr->len- sizeof(struct IccpSyncdHDr))/sizeof(struct mclag_iface_cfg_info);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "recv domain cfg msg ; count %d   ",count);  
+
+    for (i =0; i<count; i++)
+    {
+        cfg_info = (struct mclag_iface_cfg_info*)((char *)(msg_buf) + sizeof(struct IccpSyncdHDr) + i * sizeof(struct mclag_iface_cfg_info));
+        ICCPD_LOG_DEBUG(__FUNCTION__, "recv mclag iface cfg msg ; domain_id:%d op_type:%d mclag_iface:%s ",cfg_info->domain_id, cfg_info->op_type, cfg_info->mclag_iface);  
+
+        if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
+        {
+            iccp_cli_attach_mclag_domain_to_port_channel(cfg_info->domain_id, cfg_info->mclag_iface);
+        }
+        else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL)
+        {
+            iccp_cli_detach_mclag_domain_to_port_channel(cfg_info->mclag_iface);
+        }
+    }
+    return 0;
+}
+
+int iccp_receive_fdb_handler_from_syncd(struct System *sys, char *msg_buf)
+{
     int count = 0;
     int i = 0;
-    int n = 0;
+    struct IccpSyncdHDr * msg_hdr;
+    struct mclag_fdb_info * mac_info;
+
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+
+    count = (msg_hdr->len- sizeof(struct IccpSyncdHDr))/sizeof(struct mclag_fdb_info);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg fdb count %d   ",count );  
+
+    for (i =0; i<count;i++)
+    {
+        mac_info = (struct mclag_fdb_info *)&msg_buf[sizeof(struct IccpSyncdHDr )+ i * sizeof(struct mclag_fdb_info)];
+        ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg fdb count %d vid %d mac %s port %s  optype  %d ",i, mac_info->vid, mac_info->mac, mac_info->port_name, mac_info->op_type);  
+
+        do_mac_update_from_syncd(mac_info->mac, mac_info->vid, mac_info->port_name, mac_info->type, mac_info->op_type);
+    }
+    return 0;
+}
+
+int iccp_mclagsyncd_msg_handler(struct System *sys)
+{
+    int num_bytes_rxed = 0;
+    char *msg_buf = g_csm_buf;
+    struct IccpSyncdHDr * msg_hdr;
+    size_t pos = 0;
 
     if (sys == NULL)
         return MCLAG_ERROR;
-
     memset(msg_buf, 0, CSM_BUFFER_SIZE);
 
-    n = read(sys->sync_fd, msg_buf, CSM_BUFFER_SIZE);
-    if (n <= 0)
-    {
-        ICCPD_LOG_ERR(__FUNCTION__, "read msg error!!!" );
-        return MCLAG_ERROR;
-    }
+    num_bytes_rxed = read(sys->sync_fd, msg_buf, CSM_BUFFER_SIZE);
 
-    while (pos < n)
+    if (num_bytes_rxed <= 0)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "fd %d read error ret = %d  errno = %d ",sys->sync_fd, num_bytes_rxed, errno);  
+        return MCLAG_ERROR;
+    }	
+
+    while (pos < num_bytes_rxed) //iterate through all msgs
     {
         msg_hdr = (struct IccpSyncdHDr *)&msg_buf[pos];
-        if (msg_hdr->ver != 1 || msg_hdr->type != MCLAG_SYNCD_MSG_TYPE_FDB_OPERATION )
+        ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg version %d type %d len %d  ",msg_hdr->ver , msg_hdr->type, msg_hdr->len);  
+        if (!msg_hdr->len)
         {
-            ICCPD_LOG_ERR(__FUNCTION__, "msg version or type wrong!!!!! ");
-            return MCLAG_ERROR;
+            ICCPD_LOG_ERR(__FUNCTION__, "msg length zero!!!!! ");  
+            return MCLAG_ERROR; 
+        }
+        if (msg_hdr->ver != 1)
+        {
+            ICCPD_LOG_ERR(__FUNCTION__, "msg version %d wrong!!!!! ", msg_hdr->ver);  
+            pos += msg_hdr->len;
+            continue;
         }
 
-        count = ( msg_hdr->len - sizeof(struct IccpSyncdHDr )) / sizeof(struct mclag_fdb_info);
-        ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg fdb count %d ", count);
-
-        for (i = 0; i < count; i++)
+        if (msg_hdr->type == MCLAG_SYNCD_MSG_TYPE_FDB_OPERATION)
         {
-            mac_info = (struct mclag_fdb_info *)&msg_buf[pos + sizeof(struct IccpSyncdHDr ) + i * sizeof(struct mclag_fdb_info)];
-            ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg fdb count %d vid %d mac %s "
-                "port %s  optype  %d ", i, mac_info->vid, mac_addr_to_str(mac_info->mac),
-                mac_info->port_name, mac_info->op_type);
-            do_mac_update_from_syncd(mac_info->mac, mac_info->vid, mac_info->port_name, mac_info->type, mac_info->op_type);
+            iccp_receive_fdb_handler_from_syncd(sys, &msg_buf[pos]);
         }
-
+        else if (msg_hdr->type == MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_DOMAIN)
+        {
+            iccp_mclagsyncd_mclag_domain_cfg_handler(sys, &msg_buf[pos]);
+        }
+        else if (msg_hdr->type == MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_IFACE)
+        {
+            iccp_mclagsyncd_mclag_iface_cfg_handler(sys, &msg_buf[pos]);
+        }
+        else 
+        {
+            ICCPD_LOG_ERR(__FUNCTION__, "recv unknown msg type %d ", msg_hdr->type);          
+            pos += msg_hdr->len;
+            continue;
+        }
         pos += msg_hdr->len;
         SYSTEM_SET_SYNCD_RX_DBG_COUNTER(sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
     }
-
     return 0;
 }
+
 
  /*
   * Send request to Mclagsyncd to disable traffic for MLAG interface

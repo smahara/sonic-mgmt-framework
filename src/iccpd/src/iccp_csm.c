@@ -185,11 +185,13 @@ void iccp_csm_finalize(struct CSM* csm)
     /* Release all Connection State Machine instance */
     app_csm_finalize(csm);
 
-    LIST_FOREACH(cif, &(csm->if_bind_list), csm_next)
+    while (!LIST_EMPTY(&(csm->if_bind_list)))
     {
-        LIST_REMOVE(cif, csm_next);
+        cif = LIST_FIRST(&(csm->if_bind_list));
+        LIST_REMOVE(cif,csm_next);
+        free(cif);
     }
-
+            
     /* Release iccp_csm */
     pthread_mutex_destroy(&(csm->conn_mutex));
     iccp_csm_msg_list_finalize(csm);

@@ -434,8 +434,10 @@ struct AppDisconnectCauseTLV
 /*syncd send msg type to iccpd*/
 typedef enum mclag_syncd_msg_type_e_
 {
-    MCLAG_SYNCD_MSG_TYPE_NONE           = 0,
-    MCLAG_SYNCD_MSG_TYPE_FDB_OPERATION  = 1
+    MCLAG_SYNCD_MSG_TYPE_NONE             = 0,
+    MCLAG_SYNCD_MSG_TYPE_FDB_OPERATION    = 1,
+    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_DOMAIN = 2,
+    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_IFACE  = 3
 }mclag_syncd_msg_type_e;
 
 typedef enum mclag_msg_type_e_
@@ -473,6 +475,11 @@ typedef enum mclag_sub_option_type_e_
     MCLAG_SUB_OPTION_TYPE_OPER_STATUS       = 11
 } mclag_sub_option_type_e;
 
+enum MCLAG_DOMAIN_CFG_OP_TYPE {
+    MCLAG_CFG_OPER_ADD = 1,       //Add 
+    MCLAG_CFG_OPER_DEL = 2      //Delete
+};
+
 
 struct IccpSyncdHDr
 {
@@ -498,9 +505,29 @@ struct mclag_fdb_info
     uint8_t     mac[ETHER_ADDR_LEN];
     unsigned int vid;
     char port_name[32];
-    short type;     /*dynamic or static*/
-    short op_type;  /*add or del*/
+    short type;    /*dynamic or static*/
+    short op_type; /*add or del*/
 };
+
+struct mclag_domain_cfg_info
+{
+    int op_type;/*add/del domain; add/del mclag domain */
+    int domain_id;
+    int keepalive_time;
+    int session_timeout;
+    char local_ip[INET_ADDRSTRLEN];
+    char peer_ip[INET_ADDRSTRLEN];
+    char peer_ifname[MAX_L_PORT_NAME];
+    uint8_t  system_mac[ETHER_ADDR_LEN];
+};
+
+struct mclag_iface_cfg_info
+{
+    int op_type;/*add/del domain; add/del mclag iface */
+    int domain_id;
+    char mclag_iface[MAX_L_PORT_NAME];
+};
+
 
 /* For storing message log: For Notification TLV */
 struct MsgTypeSet
