@@ -1,120 +1,120 @@
 [submodule "sonic-swss-common"]
 	path = src/sonic-swss-common
 	url = ../sonic-swss-common.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "sonic-linux-kernel"]
 	path = src/sonic-linux-kernel
 	url = ../../sonic/sonic-linux-kernel.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "sonic-sairedis"]
 	path = src/sonic-sairedis
 	url = ../sonic-sairedis.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "sonic-swss"]
 	path = src/sonic-swss
 	url = ../sonic-swss.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/p4c-bm/p4c-bm"]
 	path = platform/p4/p4c-bm/p4c-bm
 	url = ../p4c-bm.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/p4-hlir/p4-hlir"]
 	path = platform/p4/p4-hlir/p4-hlir
 	url = ../p4-hlir.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "quagga"]
 	path = src/sonic-quagga
 	url = ../sonic-quagga.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "sonic-dbsyncd"]
 	path = src/sonic-dbsyncd
 	url = ../sonic-dbsyncd.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-py-swsssdk"]
 	path = src/sonic-py-swsssdk
 	url = ../sonic-py-swsssdk.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-snmpagent"]
 	path = src/sonic-snmpagent
 	url = ../sonic-snmpagent.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/ptf"]
 	path = src/ptf
 	url = ../ptf.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-utilities"]
 	path = src/sonic-utilities
 	url = ../sonic-utilities.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "platform/broadcom/sonic-platform-modules-arista"]
 	path = platform/broadcom/sonic-platform-modules-arista
 	url = ../sonic.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-platform-common"]
 	path = src/sonic-platform-common
 	url = ../sonic-platform-common.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-platform-daemons"]
 	path = src/sonic-platform-daemons
 	url = ../sonic-platform-daemons.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-stp"]
 	path = src/sonic-stp
 	url = ../sonic-stp.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-frr/frr"]
 	path = src/sonic-frr/frr
 	url = ../sonic-frr.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "platform/p4/p4-hlir/p4-hlir-v1.1"]
 	path = platform/p4/p4-hlir/p4-hlir-v1.1
 	url = ../p4-hlir.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "platform/p4/SAI-P4-BM"]
 	path = platform/p4/SAI-P4-BM
 	url = ../SAI-P4-BM.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "platform/barefoot/sonic-platform-modules-arista"]
 	path = platform/barefoot/sonic-platform-modules-arista
 	url = ../sonic.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "platform/mellanox/hw-management/hw-mgmt"]
 	path = platform/mellanox/hw-management/hw-mgmt
 	url = ../hw-mgmt.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/redis-dump-load"]
 	path = src/redis-dump-load
 	url = ../redis-dump-load.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "platform/mellanox/mlnx-sai/SAI-Implementation"]
 	path = platform/mellanox/mlnx-sai/SAI-Implementation
 	url = ../SAI-Implementation.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-broadview"]
 	path = src/sonic-broadview
 	url = ../sonic-broadview.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-telemetry"]
 	path = src/sonic-telemetry
 	url = ../sonic-telemetry.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-ztp"]
 	path = src/sonic-ztp
 	url = ../sonic-ztp.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-platform-pde"]
 	path = src/sonic-platform-pde
 	url = ../sonic-platform-pde.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-tam"]
 	path = src/sonic-tam
 	url = ../sonic-tam.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/sonic-mgmt-framework"]
 	path = src/sonic-mgmt-framework
 	url = ../sonic-mgmt-framework.git
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
 [submodule "src/broadcom-exclusive"]
 	path = src/broadcom-exclusive
 	url = ../broadcom-exclusive
-	branch = broadcom_sonic
+	branch = broadcom_sonic.2.x
