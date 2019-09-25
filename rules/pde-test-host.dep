@@ -1,0 +1,10 @@
+
+SPATH       := $($(PDE_TEST_HOST)_SRC_PATH)
+DEP_FILES   := $(SONIC_COMMON_FILES_LIST) rules/pde-test-host.mk rules/pde-test-host.dep   
+DEP_FILES   += $(SONIC_COMMON_BASE_FILES_LIST)
+DEP_FILES   += $(shell git ls-files $(SPATH))
+
+$(PDE_TEST_HOST)_CACHE_MODE  := GIT_CONTENT_SHA 
+$(PDE_TEST_HOST)_DEP_FLAGS   := $(SONIC_COMMON_FLAGS_LIST)
+$(PDE_TEST_HOST)_DEP_FILES   := $(DEP_FILES)
+

@@ -14,4 +14,4 @@ $(eval $(call add_derived_package,$(LIBHIREDIS),$(LIBHIREDIS_DEV)))
 
 LIBHIREDIS_DBG = libhiredis-dbg_$(HIREDIS_VERSION_FULL)_$(CONFIGURED_ARCH).deb
 LIBHIREDIS_DBG = libhiredis0.14-dbgsym_$(HIREDIS_VERSION_FULL)_$(CONFIGURED_ARCH).deb
-$(eval $(call add_derived_package,$(LIBHIREDIS),$(LIBHIREDIS_DBG)))
+#$(eval $(call add_derived_package,$(LIBHIREDIS),$(LIBHIREDIS_DBG)))

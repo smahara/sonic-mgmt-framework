@@ -9,3 +9,5 @@ LIBEBPF_DBG = libebpf-dbg_$(BPF_VERSION)_amd64.deb
 $(LIBEBPF_DBG)_DEPENDS += $(LIBEBPF)
 $(eval $(call add_derived_package,$(LIBEBPF),$(LIBEBPF_DBG)))
 
+export LIBEBPF LIBEBPF_DBG BPF_VERSION
+

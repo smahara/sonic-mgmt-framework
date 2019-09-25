@@ -133,12 +133,11 @@ FRR_USER_GID = 300
 # package to be cached and restored back if its commit hash is not modified and its dependencies are not modified.
 # SONIC_DPKG_CACHE_METHOD - Default method of deb package caching
 #	none:     no caching
-#	cache:    cache from local directory
-#	#url:      cache over remote http server (not supported)
-#	#registry: cache on the docker local/remote registry (not supported)
+#	cache:    use cache if exists else build the source and update the cache
+#	rebuild:  rebuild the source and update cache
 # SONIC_DPKG_CACHE_SOURCE - provides the cache location detail
-SONIC_DPKG_CACHE_METHOD=none
-SONIC_DPKG_CACHE_SOURCE=/projects/csg_sonic/dpkg_cache
+SONIC_DPKG_CACHE_METHOD ?= none
+SONIC_DPKG_CACHE_SOURCE ?= /projects/csg_sonic/dpkg_cache
 
 # Default VS build memory preparation
 DEFAULT_VS_PREPARE_MEM = yes

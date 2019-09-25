@@ -14,7 +14,7 @@ LIBLLDPCTL = liblldpctl-dev_$(LLDPD_VERSION_FULL)_$(CONFIGURED_ARCH).deb
 $(eval $(call add_derived_package,$(LLDPD),$(LIBLLDPCTL)))
 
 LLDPD_DBG = lldpd-dbgsym_$(LLDPD_VERSION_FULL)_$(CONFIGURED_ARCH).deb
-$(eval $(call add_derived_package,$(LLDPD),$(LLDPD_DBG)))
+#$(eval $(call add_derived_package,$(LLDPD),$(LLDPD_DBG)))
 
 # Export these variables so they can be used in a sub-make
 export LLDPD_VERSION
