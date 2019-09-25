@@ -1,3 +1,8 @@
+#BFD HW-Assist
+num_queues_pci=36
+num_queues_uc0=4
+num_queues_uc1=4
+
 # Old LPM only configuration
 # l2_mem_entries=163840
 # l3_mem_entries=90112

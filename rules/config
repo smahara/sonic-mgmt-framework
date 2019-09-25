@@ -130,6 +130,9 @@ SONIC_DPKG_CACHE_SOURCE=/projects/csg_sonic/dpkg_cache
 # Default VS build memory preparation
 DEFAULT_VS_PREPARE_MEM = yes
 
+# ENABLE_SYSTEM_SFLOW - build docker-sonic-sflow for sFlow support
+ENABLE_SFLOW = y
+
 # Docker local registry server info where
 # Docker base images are pushed and pulled from the local docker registry
 DOCKER_REGISTRY_SERVER=10.75.139.137:5000

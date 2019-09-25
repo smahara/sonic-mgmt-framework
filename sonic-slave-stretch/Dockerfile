@@ -265,7 +265,8 @@ RUN apt-get update && apt-get install -y \
         rrdtool \
 # For smartmontools 6.6-1
         automake1.11 \
-        libselinux1-dev\
+        libselinux1-dev \
+		texi2html \
 # For pkg-keepalive
         libnl-3-dev \
         libnl-genl-3-dev \

@@ -4,7 +4,7 @@ dpp_clock_ratio=2:3
 
 oversubscribe_mode=1
 
-pbmp_xport_xe=0x4888888888888888c2222222222222222
+pbmp_xport_xe=0x3ffffffffffffffffffffffffffffffffe
 
 parity_enable=0
 mem_cache_enable=0
@@ -12,6 +12,7 @@ mem_cache_enable=0
 l2_mem_entries=32768
 l3_mem_entries=16384
 fpem_mem_entries=131072
+ifp_inports_support_enable=1
 l2xmsg_mode=1
 
 # Platform specfic

@@ -43,6 +43,8 @@ supervisorctl start portsyncd
 
 supervisorctl start neighsyncd
 
+supervisorctl start fdbsyncd
+
 supervisorctl start teamsyncd
 
 supervisorctl start vrrpsyncd
@@ -50,6 +52,8 @@ supervisorctl start vrrpsyncd
 supervisorctl start vrrpmgrd
 
 supervisorctl start fpmsyncd
+
+supervisorctl start ipmcfpmsyncd
 
 supervisorctl start teammgrd
 
