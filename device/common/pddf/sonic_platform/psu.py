@@ -23,6 +23,7 @@ import json
 
 try:
     from sonic_platform_base.psu_base import PsuBase
+    from sonic_platform.fan import Fan
 except ImportError as e:
     raise ImportError (str(e) + "- required module not found")
 
@@ -40,8 +41,9 @@ class Psu(PsuBase):
         pddf_obj = pddfparse.PddfParse()
         self.platform = pddf_obj.get_platform()
         self.psu_index = index
-
-        self.num_psu_fans = pddf_obj.get_num_psu_fans('PSU{}'.format(index))
+        
+        self._fan_list = []     # _fan_list under PsuBase class is a global variable, hence we need to use _fan_list per class instatiation
+        self.num_psu_fans = int(pddf_obj.get_num_psu_fans('PSU{}'.format(index)))
         for psu_fan_idx in range(self.num_psu_fans):
             psu_fan = Fan(psu_fan_idx+1, True, self.psu_index)
             self._fan_list.append(psu_fan)
@@ -65,7 +67,7 @@ class Psu(PsuBase):
         """
         if 'name' in plugin_data['PSU']:
             for fname in plugin_data['PSU']['name']:
-                if fname[str(self.psu_index)]
+                return fname[str(self.psu_index)]
         else:
             return "PSU{}".format(self.psu_index)
 
@@ -131,7 +133,7 @@ class Psu(PsuBase):
 
         return serial.rstrip('\n')
 
-    def get_status(self, index):
+    def get_status(self):
         """
         Retrieves the operational status of the device
 

@@ -7,8 +7,11 @@
 #
 #############################################################################
 
+
 try:
     import os
+    import sys
+    sys.path.append('/usr/share/sonic/platform')
     from sonic_platform_base.platform_base import PlatformBase
     from sonic_platform.chassis import Chassis
 except ImportError as e:
@@ -24,3 +27,8 @@ class Platform(PlatformBase):
         PlatformBase.__init__(self)
         self._chassis = Chassis()
 
+
+
+# For testing, remove later on
+#if __name__=="__main__":
+    #obj = Platform()
