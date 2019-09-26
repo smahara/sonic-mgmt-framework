@@ -135,7 +135,7 @@ limitations under the License.
              ptype="VLAN_ID"
              >
          </PARAM>
-     <ACTION builtin="clish_nop"></ACTION>
+     <ACTION>python $SONIC_CLI_ROOT/sonic-cli-if.py patch_openconfig_interfaces_interfaces_interface Vlan${vlan-id}</ACTION>
      </COMMAND>
 
      <!-- no interface commands -->
@@ -162,7 +162,11 @@ limitations under the License.
                 />
              </PARAM>
          </PARAM>
-     <ACTION builtin="clish_nop"></ACTION>
+      <ACTION>
+          if test "${if-subcommands}" = "vlan"; then&#xA;
+              python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_interfaces_interfaces_interface Vlan${vlan-id}&#xA;
+          fi
+     </ACTION>
      </COMMAND>
      </VIEW>
      <VIEW
@@ -278,7 +282,13 @@ limitations under the License.
                     </PARAM>
                 </PARAM>
           </PARAM>
-       <ACTION builtin="clish_nop"></ACTION>
+       <ACTION>
+         if test "${switchport-subcommands}" = "access"; then&#xA;
+             python $SONIC_CLI_ROOT/sonic-cli-if.py patch_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config ${iface} ACCESS ${vlan-id}&#xA;
+         else&#xA;
+             python $SONIC_CLI_ROOT/sonic-cli-if.py patch_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config ${iface} TRUNK ${vlan-id}&#xA;
+        fi
+       </ACTION>
        </COMMAND>
 
        <COMMAND 
@@ -334,7 +344,13 @@ limitations under the License.
                     </PARAM>
                </PARAM>
            </PARAM>
-      <ACTION builtin="clish_nop"></ACTION>
+      <ACTION>
+          if test "${switchport-subcommands}" = "access"; then&#xA;
+              python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_access_vlan ${iface} ACCESS&#xA;
+          else&#xA;
+              python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans ${iface} TRUNK ${vlan-id}&#xA;
+          fi
+      </ACTION>
       </COMMAND>
 </VIEW>
 <VIEW
