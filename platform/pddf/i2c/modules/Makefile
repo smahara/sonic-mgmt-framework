@@ -1,2 +1,2 @@
 
-subdir-m := client cpld xcvr mux psu fan led sysstatus
+subdir-m := client cpld xcvr mux gpio psu fan led sysstatus
