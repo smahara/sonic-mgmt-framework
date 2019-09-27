@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 #############################################################################
-# DELLEMC S6100
 #
 # Module contains an implementation of SONiC Platform Base API and
 # provides the platform information
@@ -20,9 +19,10 @@ try:
     from sonic_platform.sfp import Sfp
     from sonic_platform.psu import Psu
     from sonic_platform.fan import Fan
-    from sonic_platform.module import Module
     from sonic_platform.thermal import Thermal
     from eeprom import Eeprom
+    import json
+    import pddfparse
 except ImportError as e:
     raise ImportError(str(e) + "- required module not found")
 
@@ -52,6 +52,12 @@ class Chassis(ChassisBase):
 
         for i in range(1,self.platform['num_psus']+1):
             psu = Psu(i)
+            # for testing, remove the below lines later on 
+            #print "%s"%psu.get_name()
+            #print "Status: %d"%psu.get_status()
+            #print "Model: %s"%psu.get_model()
+            #print "FanName: %s"%psu._fan_list[0].get_name()
+            #print "FanSpeed: %d%%"%psu._fan_list[0].get_speed()
             self._psu_list.append(psu)
 
         for i in range(1,self.platform['num_temps']+1):

@@ -84,12 +84,19 @@ class PddfParse():
             return cache[aa]
 
         string = None
-        op={ "cmd": "show_attr", "target":target, "attr":attr }
-        #print self.data[target]
-        if target in self.data.keys():
-            string = self.dev_parse(self.data[target], op)
-        #print "[test] str is %s" %str
-            string = string.rstrip('\n')
+        #print self.data[target]r
+        for bb in filter(re.compile(target).search,self.data.keys()):
+            path = self.dev_parse(self.data[bb], { "cmd": "show_attr", "target":bb, "attr":attr })
+            if path != "":
+                string = path
+            #print "[%s]: %s"%(bb,string)
+
+        string = string.rstrip()
+
+        #if target in self.data.keys():
+            #string = self.dev_parse(self.data[target], op)
+            ##print "[test] str is %s" %str
+            #string = string.rstrip('\n')
 
         cache[aa]=string
         return string

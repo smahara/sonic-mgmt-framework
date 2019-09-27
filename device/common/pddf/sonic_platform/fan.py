@@ -44,7 +44,7 @@ class Fan(FanBase):
         self.fan_index = idx
         self.is_psu_fan = is_psu_fan
         if self.is_psu_fan:
-            self.psu_index = psu_index
+            self.fans_psu_index = psu_index
 
         self.is_rear = False #TODO: Should this be included in __init__ arguments
         self.fantray_index = idx #TODO: Should this be included in __init__ arguments
@@ -59,7 +59,7 @@ class Fan(FanBase):
         else:
             if 'name' in plugin_data['FAN']:
                 for fname in plugin_data['FAN']['name']:
-                    if fname[str(self.fan_index)]
+                    return fname[str(self.fan_index)]
             else:
                 return "FAN{}".format(self.fan_index)
 
@@ -123,7 +123,7 @@ class Fan(FanBase):
         """
         if self.is_psu_fan:
             attr = "psu_fan_dir"
-            device = "PSU{}".format(self.psu_index)
+            device = "PSU{}".format(self.fans_psu_index)
             path = pddf_obj.get_path(device, "psu_fan_dir")
         else:
             attr = "fan" + str(self.fan_index) + "_direction"
@@ -155,7 +155,7 @@ class Fan(FanBase):
         """
         if self.is_psu_fan:
             attr = "psu_fan{}_speed_rpm".format(self.fan_index)
-            device = "PSU{}".format(self.psu_index)
+            device = "PSU{}".format(self.fans_psu_index)
             path = pddf_obj.get_path(device, attr)
             if path is None:
                 return 0
@@ -165,7 +165,8 @@ class Fan(FanBase):
             except IOError:
                 return 0
             
-            speed_percentage = (speed*100)/PSU_FAN_MAX_SPEED
+            max_speed = int(plugin_data['PSU']['PSU_FAN_MAX_SPEED'])
+            speed_percentage = (speed*100)/max_speed
             return speed_percentage
         else:
             attr = "fan" + str(self.fan_index) + "_pwm"
