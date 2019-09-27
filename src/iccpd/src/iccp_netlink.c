@@ -1316,7 +1316,6 @@ static int iccp_netlink_route_sock_event_handler(struct System *sys)
 }
 
 extern int iccp_get_receive_fdb_sock_fd(struct System *sys);
-extern int iccp_receive_fdb_handler_from_syncd(struct System *sys);
 
 /* cond HIDDEN_SYMBOLS */
 struct iccp_eventfd
@@ -1445,8 +1444,7 @@ int iccp_handle_events(struct System * sys)
 
         if (events[i].data.fd == sys->sync_fd)
         {
-            iccp_receive_fdb_handler_from_syncd(sys);
-
+            iccp_mclagsyncd_msg_handler(sys);
             continue;
         }
 

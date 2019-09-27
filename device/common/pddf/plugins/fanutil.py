@@ -48,7 +48,8 @@ class FanUtil(FanBase):
 
         attr_name = "fan" + str(idx) + "_present"
         sysfs_path = pddf_obj.get_path("FAN-CTRL", attr_name)
-
+        if sysfs_path is None:
+            return False
         try:
             with open(sysfs_path, 'r') as f:
                 presence = int(f.read())
@@ -77,6 +78,8 @@ class FanUtil(FanBase):
 
         attr = "fan" + str(idx) + "_direction"
         path = pddf_obj.get_path("FAN-CTRL", attr)
+        if path is None:
+            return None
         try:
             with open(path, 'r') as f:
                 val = f.read()
@@ -97,6 +100,8 @@ class FanUtil(FanBase):
         for i in range(1, num_fan+1):
             attr = "fan" + str(i) + "_direction"
             path = pddf_obj.get_path("FAN-CTRL", attr)
+            if path is None:
+                return False
             #print "%d-%s"%(i,path)
             try:
                 with open(path, 'r') as f:
@@ -119,6 +124,8 @@ class FanUtil(FanBase):
 
         attr = "fan" + str(idx) + "_front_rpm"
         path = pddf_obj.get_path("FAN-CTRL", attr)
+        if path is None:
+            return 0
         try:
             with open(path, 'r') as f:
                 frpm = int(f.read())
@@ -135,6 +142,8 @@ class FanUtil(FanBase):
 
         attr = "fan" + str(idx) + "_rear_rpm"
         path = pddf_obj.get_path("FAN-CTRL", attr)
+        if path is None:
+            return 0
         try:
             with open(path, 'r') as f:
                 rrpm = int(f.read())
@@ -151,7 +160,11 @@ class FanUtil(FanBase):
             attr1 = "fan" + str(i) + "_front_rpm"
             attr2 = "fan" + str(i) + "_rear_rpm"
             path1 = pddf_obj.get_path("FAN-CTRL", attr1)
+            if path1 is None:
+                return False
             path2 = pddf_obj.get_path("FAN-CTRL", attr2)
+            if path2 is None:
+                return False
             try:
                 with open(path1, 'r') as f1:
                     frpm = int(f1.read())
@@ -178,6 +191,8 @@ class FanUtil(FanBase):
         for i in range(1, num_fan+1):
             attr = "fan" + str(i) + "_pwm"
             node = pddf_obj.get_path("FAN-CTRL", attr)
+            if node is None:
+                return False
             try:
                 with open(node, 'w') as f:
                     f.write(str(pwm))

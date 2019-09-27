@@ -50,6 +50,8 @@ class PsuUtil(PsuBase):
         status = 0
         device = "PSU" + "%d"%index
         node = pddf_obj.get_path(device,"psu_power_good")
+        if node is None:
+            return False
         try:
             with open(node, 'r') as f:
                 status = f.read()
@@ -69,6 +71,8 @@ class PsuUtil(PsuBase):
         status = 0
         device = "PSU" + "%d"%index
         node = pddf_obj.get_path(device,"psu_present")
+        if node is None:
+            return False
         try:
             with open(node, 'r') as f:
                 status = f.read()
@@ -91,6 +95,8 @@ class PsuUtil(PsuBase):
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_power_good")
+        if node is None:
+            return False
         try:
             with open(node, 'r') as power_status:
                 status = int(power_status.read())
@@ -112,6 +118,8 @@ class PsuUtil(PsuBase):
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_model_name")
+        if node is None:
+            return None
         try:
             with open(node, 'r') as f:
                 model = f.read()
@@ -130,6 +138,8 @@ class PsuUtil(PsuBase):
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_mfr_id")
+        if node is None:
+            return None
         try:
             with open(node, 'r') as f:
                 mfr = f.read()
@@ -148,6 +158,8 @@ class PsuUtil(PsuBase):
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_serial_num")
+        if node is None:
+            return None
         try:
             with open(node, 'r') as f:
                 serial = f.read()
@@ -166,6 +178,8 @@ class PsuUtil(PsuBase):
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_fan_dir")
+        if node is None:
+            return None
         try:
             with open(node, 'r') as f:
                 direction = f.read()
@@ -192,6 +206,8 @@ class PsuUtil(PsuBase):
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_v_out")
+        if node is None:
+            return 0
         try:
             with open(node, 'r') as f:
                 v_out = int(f.read())
@@ -210,6 +226,8 @@ class PsuUtil(PsuBase):
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_i_out")
+        if node is None:
+            return 0
         try:
             with open(node, 'r') as f:
                 i_out = int(f.read())
@@ -228,6 +246,8 @@ class PsuUtil(PsuBase):
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_p_out")
+        if node is None:
+            return 0
         try:
             with open(node, 'r') as f:
                 p_out = int(f.read())
@@ -253,6 +273,8 @@ class PsuUtil(PsuBase):
             return 0
 
         node = pddf_obj.get_path(device, "psu_fan"+str(fan_idx)+"_speed_rpm")
+        if node is None:
+            return 0
         try:
             with open(node, 'r') as f:
                 fan_rpm = int(f.read())

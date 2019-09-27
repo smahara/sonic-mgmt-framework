@@ -132,12 +132,13 @@ kos = [
 'modprobe pddf_cpld_module'  ,
 'modprobe pddf_xcvr_module',
 'modprobe pddf_mux_module'  ,
+'modprobe pddf_gpio_module'  ,
 'modprobe pddf_cpld_driver' ,
 'modprobe pddf_xcvr_driver_module' ,
 'modprobe pddf_psu_driver_module' ,
 'modprobe pddf_psu_module' ,
 'modprobe pddf_fan_driver_module' ,
-'modprobe -f platform_pddf_fan' ,
+#'modprobe -f platform_pddf_fan' ,
 'modprobe pddf_fan_module' ,
 'modprobe pddf_led_module' ,
 'modprobe pddf_sysstatus_module'
@@ -235,7 +236,7 @@ def cleanup_pddf_utils():
 
 def create_pddf_log_files():
     if not os.path.exists('/var/log/pddf'):
-    	log_os_system("sudo mkdir /var/log/pddf", 1)
+        log_os_system("sudo mkdir /var/log/pddf", 1)
 
     log_os_system("sudo touch /var/log/pddf/led.txt", 1)
     log_os_system("sudo touch /var/log/pddf/psu.txt", 1)
@@ -299,7 +300,7 @@ def do_install():
 
     if driver_check()== False :
         print PROJECT_NAME.upper() +" has no PDDF driver installed...."
-    	create_pddf_log_files()
+        create_pddf_log_files()
         print "Installing...."    
         status = driver_install()
         if status:
@@ -322,8 +323,8 @@ def do_uninstall():
 
 
     if os.path.exists('/var/log/pddf'):
-	print "Remove pddf log files....."
-    	log_os_system("sudo rm -rf /var/log/pddf", 1)
+        print "Remove pddf log files....."
+        log_os_system("sudo rm -rf /var/log/pddf", 1)
 
     print "Remove all the devices..."
     status = device_uninstall()

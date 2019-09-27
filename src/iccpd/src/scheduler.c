@@ -303,8 +303,9 @@ void scheduler_init()
     iccp_sys_local_if_list_get_init();
     iccp_sys_local_if_list_get_addr();
     /*Interfaces must be created before this func called*/
-    iccp_config_from_file(sys->config_file_path);
-
+    //no need to create iccpd config from startup file, it will be done through
+    //cli
+    
     /*Get kernel ARP info */
     iccp_arp_get_init();
 

@@ -383,7 +383,7 @@ int mclagdctl_parse_dump_mac(char *msg, int data_len)
         else
             fprintf(stdout, "%-5s", "D");
 
-        fprintf(stdout, "-%20s", mac_addr_to_str(mac_info->mac_addr));
+        fprintf(stdout, "%-20s", mac_addr_to_str(mac_info->mac_addr));
 
         fprintf(stdout, "%-5d", mac_info->vid);
         fprintf(stdout, "%-20s", mac_info->ifname);

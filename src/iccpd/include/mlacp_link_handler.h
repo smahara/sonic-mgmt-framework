@@ -67,4 +67,6 @@ int mlacp_link_del_iccp_info(int mlag_id);
 int mlacp_link_set_remote_if_state(int mlag_id, char *po_name, bool is_oper_up);
 int mlacp_link_del_remote_if_info(int mlag_id, char *po_name);
 
+int iccp_mclagsyncd_msg_handler(struct System *sys);
+
 #endif
