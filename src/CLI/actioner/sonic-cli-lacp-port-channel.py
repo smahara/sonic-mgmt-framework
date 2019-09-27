@@ -81,7 +81,7 @@ def run(func, args):
                         'openconfig-lacp:lacp': {
                                     'interfaces': {
                                                     'interface': [
-                                                                  {'name': "PortChannel1001",
+                                                                  {'name': "PortChannel1",
                                                                    'state': {
                                                                               'interval': "slow",
                                                                               'lacp-mode': "active",
@@ -115,7 +115,7 @@ def run(func, args):
                                                                                               ]
                                                                                }
                                                                   },
-                                                                  {'name': "PortChannel1005",
+                                                                  {'name': "PortChannel5",
                                                                    'state': {
                                                                               'interval': "slow",
                                                                               'lacp-mode': "active",
@@ -157,14 +157,14 @@ def run(func, args):
 
                         'openconfig-interfaces:interfaces': {
                                                     'interface': [ {
-                                                                        "name": "PortChannel1001",
+                                                                        "name": "PortChannel1",
                                                                         "state": {
                                                                             "admin-status" : "up",
                                                                             "oper-status" : "down"
                                                                         }
                                                                     },
                                                                     {
-                                                                        "name": "PortChannel1005",
+                                                                        "name": "PortChannel5",
                                                                         "state": {
                                                                             "admin-status" : "up",
                                                                             "oper-status" : "down"
@@ -180,7 +180,7 @@ def run(func, args):
                             'openconfig-lacp:lacp': {
                                     'interfaces': {
                                                     'interface': [
-                                                                  {'name': "PortChannel1001",
+                                                                  {'name': "PortChannel1",
                                                                    'state': {
                                                                               'interval': "slow",
                                                                               'lacp-mode': "active",
@@ -221,7 +221,7 @@ def run(func, args):
 
                                 'openconfig-interfaces:interfaces': {
                                                     'interface': [ {
-                                                                        "name": "PortChannel1001",
+                                                                        "name": "PortChannel1",
                                                                         "state": {
                                                                             "admin-status" : "up",
                                                                             "oper-status" : "down"
