@@ -1,6 +1,8 @@
 FROM {{ docker_pde_load_image }}
 
 ARG docker_container_name
+ENV PYTHONPATH=/usr/share/sonic/platform
+
 RUN [ -f /etc/rsyslog.conf ] && sed -ri "s/%syslogtag%/$docker_container_name#%syslogtag%/;" /etc/rsyslog.conf
 
 # Make apt-get non-interactive
