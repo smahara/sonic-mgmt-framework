@@ -1,9 +1,9 @@
-sleep 10
-linkscan off
-m0 load 0 0x3800 /usr/share/sonic/platform/custom_led.bin
-led auto on
-led start
-linkscan on
+#sleep 10
+#linkscan off
+#m0 load 0 0x3800 /usr/share/sonic/platform/custom_led.bin
+#led auto on
+#led start
+#linkscan on
 
 rcload /usr/share/sonic/platform/preemphasis-32x400G.soc
 

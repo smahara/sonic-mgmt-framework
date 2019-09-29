@@ -16,7 +16,7 @@ mmu_port_num_mc_queue.0=1
 module_64ports.0=1
 multicast_l2_range.0=511
 oversubscribe_mode=1
-
+led_fw_path="/usr/share/sonic/platform/"
 
 # portmap settings
 pbmp_xport_xe.0=0x3ffffffffffffffffffffffffffffffffffffffe

@@ -40,6 +40,7 @@ l3_alpm_ipv6_128b_bkt_rsvd
 l3_intf_vlan_split_egress
 l3_max_ecmp_mode
 l3_mem_entries
+led_fw_path
 lls_num_l2uc
 load_firmware
 logical_ports
