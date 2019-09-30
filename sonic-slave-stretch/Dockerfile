@@ -321,6 +321,10 @@ RUN pip3 install redis
 # For supervisor build
 RUN pip install meld3 mock
 
+# For mgmt-framework build
+RUN pip install mmh3
+RUN pip3 install mmh3
+
 # For vs image build
 RUN pip install pexpect==4.6.0
 
