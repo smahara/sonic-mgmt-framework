@@ -110,7 +110,6 @@ void local_if_init(struct LocalInterface* local_if)
     local_if->type = IF_T_UNKNOW;
     local_if->changed = 1;
     local_if->port_config_sync = 0;
-    local_if->standby_mac_update = 0;
     local_if->is_peer_link = 0;
     local_if->is_arp_accept = 0;
     local_if->l3_mode = 0;
@@ -595,6 +594,8 @@ int local_if_add_vlan(struct LocalInterface* local_if, uint16_t vid)
     vlan->vid = vid;
     vlan->vlan_removed = 0;
     vlan->vlan_itf = local_if_find_by_name(vlan_name);
+
+    update_if_ipmac_on_standby(local_if);
     return 0;
 }
 
