@@ -67,6 +67,37 @@ function getBootType()
     echo "${TYPE}"
 }
 
+{%- if docker_container_name == "iccpd" %}
+# This function cleans up the tables with specific prefixes from the database
+# $1 the index of the database
+# $2 the string of a list of table prefixes
+function clean_up_tables()
+{
+    redis-cli -n $1 EVAL "
+    local tables = {$2}
+    for i = 1, table.getn(tables) do
+        local matches = redis.call('KEYS', tables[i])
+        for j,name in ipairs(matches) do
+            redis.call('DEL', name)
+        end
+    end" 0
+}
+
+# This function cleans up MCLAG tables populated by ICCPd in STATE_DB
+# if ICCPd is brought down for due to non-warmboot
+function iccpPreStopAction()
+{
+    BOOT_TYPE=`getBootType`
+    debug "WB type $BOOT_TYPE"
+    if [[ "$BOOT_TYPE" == "warm" || "$BOOT_TYPE" == "fastfast" ]]; then
+        debug "ICCP starts warm reboot"
+    else
+        debug "ICCP deletes MCLAG tables in STATE_DB"
+        clean_up_tables 6 "'MCLAG_TABLE*', 'MCLAG_REMOTE_INTF_TABLE*'"
+    fi
+}
+{%- endif %}
+
 function preStartAction()
 {
 {%- if docker_container_name == "database" %}
@@ -262,6 +293,9 @@ wait() {
 }
 
 stop() {
+{%- if docker_container_name == "iccpd" %}
+    iccpPreStopAction
+{%- endif %}
     docker stop {{docker_container_name}}
 }
 
