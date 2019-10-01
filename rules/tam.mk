@@ -14,3 +14,8 @@ $(TAM_DBG)_DEPENDS += $(TAM)
 $(TAM_DBG)_RDEPENDS += $(TAM)
 $(eval $(call add_derived_package,$(TAM),$(TAM_DBG)))
 
+# SONiC IFA Manager
+SONIC_IFA_MGR = ifamgrd
+$(SONIC_IFA_MGR)_PATH = $(SRC_PATH)/sonic-tam/ifamgr
+SONIC_COPY_FILES += $(SONIC_IFA_MGR)
+
