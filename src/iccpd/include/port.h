@@ -123,7 +123,6 @@ struct LocalInterface
     uint8_t changed;
     uint8_t port_config_sync;
     bool is_traffic_disable;   /* Disable traffic tx/rx  */ 
-    uint8_t standby_mac_update;
 
     LIST_HEAD(local_vlan_list, VLAN_ID) vlan_list;
 

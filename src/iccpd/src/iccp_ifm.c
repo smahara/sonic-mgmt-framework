@@ -735,7 +735,6 @@ void iccp_parse_if_vlan_info_from_netlink(struct nlmsghdr *n)
                     vinfo = RTA_DATA(i);
 
                     local_if_add_vlan(lif, vinfo->vid);
-                    update_if_ipmac_on_standby(lif);
                 }
 
                 /*After update vlan list, remove unused item*/

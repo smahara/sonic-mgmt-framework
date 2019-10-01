@@ -573,18 +573,13 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
             /*If the po is under a vlan, update vlan mac*/
             if (local_if_is_l3_mode(vlan->vlan_itf))
             {
-                if (vlan->vlan_itf->standby_mac_update == 1) {
-                    continue;
-                }
                 ret =  iccp_netlink_if_hwaddr_set(vlan->vlan_itf->ifindex,  MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
                 if (ret != 0)
                 {
                     ICCPD_LOG_ERR(__FUNCTION__, " set %s mac error, ret = %d", vlan->vlan_itf->name, ret);
                 }
 
-                ICCPD_LOG_DEBUG(__FUNCTION__," ifname %s, mac_upd %d", vlan->vlan_itf->name, vlan->vlan_itf->standby_mac_update);
                 iccp_set_interface_ipadd_mac(vlan->vlan_itf, macaddr );
-                vlan->vlan_itf->standby_mac_update = 1;
             }
         }
     }
