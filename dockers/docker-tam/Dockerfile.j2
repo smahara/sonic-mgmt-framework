@@ -12,6 +12,7 @@ RUN apt-get update
 
 ## Install dependencies
 RUN apt-get install -y gdb
+RUN apt-get -y install libpython2.7
 
 ## Copy locally built debian packages
 ## Install locally built debian packages in docker
@@ -27,7 +28,7 @@ debs/{{ deb }}{{' '}}
 {%- endfor %}
 
 COPY ["start.sh", "/usr/bin/"]
-##COPY ["files/bvmgrd", "/usr/bin/"]
+COPY ["files/ifamgrd", "/usr/bin/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 
 ENTRYPOINT ["/usr/bin/supervisord"]
