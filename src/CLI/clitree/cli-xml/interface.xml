@@ -82,8 +82,8 @@ limitations under the License.
    </COMMAND>
 
    <COMMAND
-       name="show vlan"
-       help="Show vlan commands"
+       name="show Vlan"
+       help="Show Vlan commands"
        ptype="SUBCOMMAND"
        mode="subcommand"
        >
@@ -95,11 +95,19 @@ limitations under the License.
            >
        </PARAM>
    <ACTION>
-       python $SONIC_CLI_ROOT/sonic-cli-if.py get_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_state show_vlan.j2
+       if test "${id}" = ""; then
+          python $SONIC_CLI_ROOT/sonic-cli-vlan.py get_sonic_vlan_sonic_vlan_state "" show_vlan.j2 ${__full_line}
+       else
+          python $SONIC_CLI_ROOT/sonic-cli-vlan.py get_sonic_vlan_sonic_vlan_state Vlan${id} show_vlan.j2 ${__full_line}
+       fi
    </ACTION>
    </COMMAND>
 
    </VIEW>
+
+   <VIEW
+       name="configure-view"
+       >
     <!-- interface commands -->
     <COMMAND
         name="interface"
@@ -122,7 +130,7 @@ limitations under the License.
      </COMMAND>
 
      <COMMAND
-         name="interface vlan"
+         name="interface Vlan"
          help="Vlan Interface Configuration"
          mode="subcommand"
          ptype="SUBCOMMAND"
@@ -150,7 +158,7 @@ limitations under the License.
              ptype="SUBCOMMAND"
              >
              <PARAM
-                name="vlan"
+                name="Vlan"
                 help="Delete vlan"
                 mode="subcommand"
                 ptype="SUBCOMMAND"
@@ -174,7 +182,6 @@ limitations under the License.
         prompt="${SYSTEM_NAME}(conf-if-${iface})# "
         depth="2"
         >
-        <!-- Inheritance -->
         <NAMESPACE
             ref="configure-view"
             help="false"
@@ -240,7 +247,7 @@ limitations under the License.
                     mode="subcommand"
                     >
                     <PARAM
-                        name="vlan"
+                        name="Vlan"
                         help="Set VLAN when interface is in access mode"
                         ptype="SUBCOMMAND"
                         mode="subcommand"
@@ -267,7 +274,7 @@ limitations under the License.
                         mode="subcommand"
                         >
                         <PARAM
-                            name="vlan"
+                            name="Vlan"
                             help="Configure trunking parameters on an interface"
                             ptype="SUBCOMMAND"
                             mode="subcommand"
@@ -308,7 +315,7 @@ limitations under the License.
                    mode="subcommand"
                    >
                    <PARAM
-                       name="vlan"
+                       name="Vlan"
                        help="Remove VLAN when interface is in access mode"
                        ptype="SUBCOMMAND"
                        mode="subcommand"
@@ -329,7 +336,7 @@ limitations under the License.
                         mode="subcommand"
                         >
                         <PARAM
-                            name="vlan"
+                            name="Vlan"
                             help="Remove trunking parameters on an interface"
                             ptype="SUBCOMMAND"
                             mode="subcommand"
