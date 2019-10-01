@@ -156,10 +156,14 @@ class SfpUtil(SfpUtilBase):
     @property
     def port_end(self):
         return self._port_end
-	
+
+    @property
+    def osfp_ports(self):
+        return range(0, self.ports_in_block + 1)
+
     @property
     def qsfp_ports(self):
-        return range(0, self.ports_in_block + 1)
+        return {}
 
     @property 
     def port_to_eeprom_mapping(self):
