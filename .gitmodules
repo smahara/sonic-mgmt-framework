@@ -113,4 +113,4 @@
 [submodule "src/sonic-mgmt-framework"]
 	path = src/sonic-mgmt-framework
 	url = ../sonic-mgmt-framework.git
-	branch = dell_sonic
+	branch = master
