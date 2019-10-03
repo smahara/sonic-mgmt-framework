@@ -79,6 +79,8 @@ def generate_body(func, args):
            body = {"openconfig-vlan:config": {"interface-mode": "TRUNK","trunk-vlans": [int(args[2])]}}
     elif func.__name__ == 'delete_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_access_vlan':
         keypath = [args[0]]
+    elif func.__name__ == 'delete_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans':
+        keypath = [args[0], args[2]]
     elif func.__name__ == 'delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_config_prefix_length':
        keypath = [args[0], 0, args[1]]
     elif func.__name__ == 'delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_config_prefix_length':
@@ -179,10 +181,6 @@ def run(func, args):
 
     try:
         # Temporary code for #show vlan command with dummy data
-        if func.__name__ == "get_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_state":
-            api_response = {'Vlan100': {'Ethernet20': 'tagged', 'Ethernet40': 'untagged'}}
-            show_cli_output(args[0], api_response)
-            return
         if body is not None:
            api_response = getattr(aa,func.__name__)(*keypath, body=body)
         else :

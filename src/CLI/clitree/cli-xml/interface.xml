@@ -95,11 +95,11 @@ limitations under the License.
            >
        </PARAM>
    <ACTION>
-       if test "${id}" = ""; then
-          python $SONIC_CLI_ROOT/sonic-cli-vlan.py get_sonic_vlan_sonic_vlan_state "" show_vlan.j2 ${__full_line}
-       else
-          python $SONIC_CLI_ROOT/sonic-cli-vlan.py get_sonic_vlan_sonic_vlan_state Vlan${id} show_vlan.j2 ${__full_line}
-       fi
+       if test "${id}" = ""; then&#xA;
+          python $SONIC_CLI_ROOT/sonic-cli-vlan.py get_sonic_vlan_sonic_vlan_state "" show_vlan.j2 ${__full_line}&#xA;
+       else&#xA;
+          python $SONIC_CLI_ROOT/sonic-cli-vlan.py get_sonic_vlan_sonic_vlan_state Vlan${id} show_vlan.j2 ${__full_line}&#xA;
+       fi&#xA;
    </ACTION>
    </COMMAND>
 

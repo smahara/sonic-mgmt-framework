@@ -190,7 +190,8 @@ func (app *IntfApp) translateUpdatePhyIntfEthernet(d *db.DB, ifKey *string, intf
 		log.Info("Untagged Port added to cache!")
 	}
 
-	TRUNKCONFIG: if trunkVlanFound {
+TRUNKCONFIG:
+	if trunkVlanFound {
 		memberPortEntryMap := make(map[string]string)
 		memberPortEntry := db.Value{Field: memberPortEntryMap}
 		memberPortEntry.Field["tagging_mode"] = "tagged"
@@ -476,7 +477,8 @@ func (app *IntfApp) processUpdatePhyIntf(d *db.DB) error {
 
 /* Note: Reason why we don't use multi-map, which we use for config is because RESTCONF doesn't supply the access-vlan value
  * or it will give only the single instance of trunk-vlan for deletion */
-func (app *IntfApp) translateDeletePhyIntfEthernetSwitchedVlan(d *db.DB, switchedVlanIntf *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan, ifName *string) {
+func (app *IntfApp) translateDeletePhyIntfEthernetSwitchedVlan(d *db.DB, switchedVlanIntf *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan, ifName *string) error {
+	var err error
 	var ifVlanInfo ifVlan
 
 	if switchedVlanIntf.Config != nil {
@@ -493,7 +495,14 @@ func (app *IntfApp) translateDeletePhyIntfEthernetSwitchedVlan(d *db.DB, switche
 
 				case reflect.TypeOf(ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_String{}):
 					val := (trunkVlanUnion).(*ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_String)
-					ifVlanInfo.trunkVlans = append(ifVlanInfo.trunkVlans, val.String)
+					vlanName := "Vlan" + val.String
+					err = app.validateVlanExists(d, &vlanName)
+					if err != nil {
+						errStr := "Invalid VLAN: " + val.String
+						err = tlerr.InvalidArgsError{Format: errStr}
+						return err
+					}
+					ifVlanInfo.trunkVlans = append(ifVlanInfo.trunkVlans, vlanName)
 				case reflect.TypeOf(ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_Uint16{}):
 					val := (trunkVlanUnion).(*ocbinds.OpenconfigInterfaces_Interfaces_Interface_Ethernet_SwitchedVlan_Config_TrunkVlans_Union_Uint16)
 					ifVlanInfo.trunkVlans = append(ifVlanInfo.trunkVlans, "Vlan"+strconv.Itoa(int(val.Uint16)))
@@ -505,6 +514,7 @@ func (app *IntfApp) translateDeletePhyIntfEthernetSwitchedVlan(d *db.DB, switche
 			app.intfD.ifVlanInfoList = append(app.intfD.ifVlanInfoList, &ifVlanInfo)
 		}
 	}
+	return err
 }
 
 func (app *IntfApp) translateDeletePhyIntfEthernet(d *db.DB, intf *ocbinds.OpenconfigInterfaces_Interfaces_Interface, ifName *string) error {
@@ -516,8 +526,10 @@ func (app *IntfApp) translateDeletePhyIntfEthernet(d *db.DB, intf *ocbinds.Openc
 		return err
 	}
 	switchedVlanIntf := intf.Ethernet.SwitchedVlan
-	app.translateDeletePhyIntfEthernetSwitchedVlan(d, switchedVlanIntf, ifName)
-
+	err = app.translateDeletePhyIntfEthernetSwitchedVlan(d, switchedVlanIntf, ifName)
+	if err != nil {
+		return err
+	}
 	return err
 }
 
