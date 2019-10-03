@@ -525,7 +525,7 @@ static int mlacp_link_set_traffic_dist_mode(
     char                    *msg_buf = g_csm_buf;
     int                     msg_len;
     struct System           *sys;
-    ssize_t                 rc;
+    ssize_t                 rc = 0;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -581,12 +581,23 @@ int mlacp_link_set_iccp_state(
     mclag_sub_option_hdr_t  *sub_msg;
     char                    *msg_buf = g_csm_buf;
     struct System           *sys;
-    ssize_t                 rc;
+    ssize_t                 rc = 0;
 
     sys = system_get_instance();
     if (sys == NULL)
     {
         ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return MCLAG_ERROR;
+    }
+    /* On startup, session down processing is triggered as part of
+     * peer link info setting before the socket to Mclagsyncd is setup.
+     * Check for valid socket to log a notification instead of an error
+     */
+    if ((sys->sync_fd <= 0) && (!is_oper_up))
+    {
+        ICCPD_LOG_NOTICE(__FUNCTION__,
+            "Unconnected socket to Mclagsyncd, skip mlag %d ICCP down update",
+            mlag_id);
         return MCLAG_ERROR;
     }
     memset(msg_buf, 0, CSM_BUFFER_SIZE);
@@ -642,7 +653,7 @@ int mlacp_link_set_iccp_role(
     mclag_sub_option_hdr_t  *sub_msg;
     char                    *msg_buf = g_csm_buf;
     struct System           *sys;
-    ssize_t                 rc;
+    ssize_t                 rc = 0;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -711,7 +722,7 @@ int mlacp_link_set_iccp_system_id(
     mclag_sub_option_hdr_t  *sub_msg;
     char                    *msg_buf = g_csm_buf;
     struct System           *sys;
-    ssize_t                 rc;
+    ssize_t                 rc = 0;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -771,7 +782,7 @@ int mlacp_link_del_iccp_info(
     mclag_sub_option_hdr_t  *sub_msg;
     char                    *msg_buf = g_csm_buf;
     struct System           *sys;
-    ssize_t                 rc;
+    ssize_t                 rc = 0;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -824,7 +835,7 @@ int mlacp_link_set_remote_if_state(
     mclag_sub_option_hdr_t  *sub_msg;
     char                    *msg_buf = g_csm_buf;
     struct System           *sys;
-    ssize_t                 rc;
+    ssize_t                 rc = 0;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -892,7 +903,7 @@ int mlacp_link_del_remote_if_info(
     mclag_sub_option_hdr_t  *sub_msg;
     char                    *msg_buf = g_csm_buf;
     struct System           *sys;
-    ssize_t                 rc;
+    ssize_t                 rc = 0;
 
     sys = system_get_instance();
     if (sys == NULL)
@@ -1109,6 +1120,9 @@ static void set_peerlink_mlag_port_isolate(
 
     ICCPD_LOG_DEBUG(__FUNCTION__, "%s  port-isolate from %s to %s",
                     enable ? "Enable" : "Disable", csm->peer_link_if->name, lif->name);
+    ICCPD_LOG_DEBUG("ICCP_FSM", "Set port isolation %s: mlag_if %s, members %s",
+        enable ? "enable" : "disable", lif->name, lif->portchannel_member_buf);
+
     update_peerlink_isolate_from_all_csm_lif(csm);
 
     /* Kernel also needs to block traffic from peerlink to mlag-port*/
@@ -1178,15 +1192,15 @@ void update_peerlink_isolate_from_pif(
         if (pif_po_state == 1)
         {
             /* both peer-pair link up, enable port-isolate*/
-            ICCPD_LOG_DEBUG(__FUNCTION__, " Enable port-isolate from %s to %s",
-                            csm->peer_link_if->name, lif->name);
+            ICCPD_LOG_DEBUG("ICCP_FSM", "Enable port-isolate: from peer_link %s to mlag_if %s",
+                csm->peer_link_if->name, lif->name);
             set_peerlink_mlag_port_isolate(csm, lif, 1);
         }
         else
         {
             /* local link up, and peer link changes to down, disable port-isolate*/
-            ICCPD_LOG_DEBUG(__FUNCTION__, "Disable port-isolate from %s to %s",
-                            csm->peer_link_if->name, lif->name);
+            ICCPD_LOG_DEBUG("ICCP_FSM", "Disable port-isolate: from peer_link %s to mlag_if %s",
+                csm->peer_link_if->name, lif->name);
             set_peerlink_mlag_port_isolate(csm, lif, 0);
         }
     }
@@ -1405,6 +1419,12 @@ void update_stp_peer_link(struct CSM *csm,
 
     if (!csm || !pif)
         return;
+
+    ICCPD_LOG_DEBUG("ICCP_FSM",
+        "PEER_MLAG_IF %s %s: po_active %d, new_state %s, sync_state %s",
+        pif->name, new_create ? "add" : "update",
+        pif->po_active, po_state ? "up" : "down", mlacp_state(csm));
+
     if (new_create == 0 && po_state == pif->po_active)
         return;
 
@@ -1707,6 +1727,14 @@ void mlacp_portchannel_state_handler(struct CSM* csm,
     if (!csm || !local_if)
         return;
 
+    ICCPD_LOG_DEBUG("ICCP_FSM",
+        "MLAG_IF(%s) %s %s: state %s, po_active %d, traffic_dis %d, sync_state %s",
+        local_if_is_l3_mode(local_if) ? "L3" : "L2",
+        local_if->name, po_state ? "up" : "down",
+        (local_if->state == PORT_STATE_UP) ? "up" : "down",
+        local_if->po_active, local_if->is_traffic_disable,
+        mlacp_state(csm));
+
     update_peerlink_isolate_from_lif(csm, local_if, po_state);
 
     update_l2_mac_state(csm, local_if, po_state);
@@ -1780,6 +1808,10 @@ void mlacp_peer_conn_handler(struct CSM* csm)
     {
         set_peerlink_mlag_port_learn(csm->peer_link_if, 0);
     }
+
+    ICCPD_LOG_DEBUG("ICCP_FSM", "ICCP session up: warm reboot %s, role %s",
+        (sys->warmboot_start == WARM_REBOOT) ? "yes" : "no",
+        (csm->role_type == STP_ROLE_STANDBY) ? "standby" : "active");
 
     /*If peer connect again, don't flush FDB*/
     if (first_time == 0)
@@ -1857,7 +1889,14 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
         ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
     }
-
+    if (MLACP(csm).current_state != MLACP_STATE_INIT)
+    {
+        ICCPD_LOG_DEBUG("ICCP_FSM",
+            "ICCP session down: warm reboot %s, role %s, sync_state %s",
+            (sys->warmboot_exit == WARM_REBOOT) ? "yes" : "no",
+            (csm->role_type == STP_ROLE_STANDBY) ? "standby" : "active",
+            mlacp_state(csm));
+    }
     /*If warm reboot, don't change FDB and MAC address*/
     if (sys->warmboot_exit == WARM_REBOOT)
         return;
@@ -1938,6 +1977,9 @@ void mlacp_peerlink_up_handler(struct CSM* csm)
     if (!csm)
         return;
 
+    ICCPD_LOG_DEBUG("ICCP_FSM", "PEER_LINK %s up: sync_state %s",
+        csm->peer_itf_name, mlacp_state(csm));
+
     /*If peer link up, set all the mac that point to the peer-link in ASIC*/
     RB_FOREACH (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb)
     {
@@ -1962,6 +2004,9 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
 
     if (!csm)
         return;
+
+    ICCPD_LOG_DEBUG("ICCP_FSM", "PEER_LINK %s down: sync_state %s",
+        csm->peer_itf_name, mlacp_state(csm));
 
     /*If peer link down, remove all the mac that point to the peer-link*/
     RB_FOREACH (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb)
@@ -2537,6 +2582,8 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
   */
  void mlacp_link_disable_traffic_distribution(struct LocalInterface *lif)
  {
+     int    rc;
+
      /* Expecting ACK from peer only after reaching EXCHANGE state */
      if (MLACP(lif->csm).current_state != MLACP_STATE_EXCHANGE)
          return;
@@ -2548,7 +2595,10 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
      if ((lif->type == IF_T_PORT_CHANNEL) && (!lif->po_active) &&
               (!lif->is_traffic_disable))
      {
-         if (mlacp_link_set_traffic_dist_mode(lif->name, false) == 0)
+         rc = mlacp_link_set_traffic_dist_mode(lif->name, false);
+         ICCPD_LOG_DEBUG("ICCP_FSM", "MLAG_IF %s: set traffic disable, rc %d",
+             lif->name, rc);
+         if (rc == 0)
              lif->is_traffic_disable = true;
      }
  }
@@ -2562,12 +2612,15 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
   */
  void mlacp_link_enable_traffic_distribution(struct LocalInterface *lif)
  {
+    int     rc;
+
     if ((lif->type == IF_T_PORT_CHANNEL) && lif->is_traffic_disable)
     {
-        if (mlacp_link_set_traffic_dist_mode(lif->name, true) == 0)
-        {
+        rc = mlacp_link_set_traffic_dist_mode(lif->name, true);
+        ICCPD_LOG_DEBUG("ICCP_FSM", "MLAG_IF %s: set traffic enable, rc %d",
+            lif->name, rc);
+        if (rc == 0)
             lif->is_traffic_disable = false;
-        }
     }
 }
 

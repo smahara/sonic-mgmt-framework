@@ -52,6 +52,9 @@ int unset_mc_lag_id( struct CSM *csm, uint16_t id)
     if (!csm)
         return MCLAG_ERROR;
 
+    /* Remove ICCP info from STATE_DB */
+    mlacp_link_del_iccp_info(csm->mlag_id);
+
     /* Mlag-ID, RG-ID, MLACP-ID*/
     csm->mlag_id = 0;
     csm->iccp_info.icc_rg_id = 0;
@@ -501,9 +504,6 @@ int unset_local_system_id( )
     LIST_FOREACH(csm, &(sys->csm_list), next)
     {
         memcpy(MLACP(csm).system_id, null_mac, ETHER_ADDR_LEN);
-
-        /* Remove ICCP info from STATE_DB */
-        mlacp_link_del_iccp_info(csm->mlag_id);
     }
 
     return 0;

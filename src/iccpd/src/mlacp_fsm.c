@@ -39,6 +39,7 @@
 #include "../include/mlacp_sync_prepare.h"
 #include "../include/mlacp_link_handler.h"
 #include "../include/mlacp_sync_update.h"
+#include "../include/system.h"
 
 #include <signal.h>
 
@@ -121,7 +122,6 @@ RB_GENERATE(mac_rb_tree, MACMsg, mac_entry_rb, MACMsg_compare);
 * Static Function
 *
 * ***************************************/
-static char *mlacp_state(struct CSM* csm);
 static void mlacp_resync_arp(struct CSM* csm);
 static void mlacp_resync_mac(struct CSM* csm);
 /* Sync Sender APIs*/
@@ -382,7 +382,7 @@ static void mlacp_sync_recv_sysConf(struct CSM* csm, struct Msg* msg)
     if (mlacp_fsm_update_system_conf(csm, sysconf) == MCLAG_ERROR)
     {
         /*NOTE: we just change the node ID local side without sending NAK msg*/
-        ICCPD_LOG_DEBUG("mlacp_fsm", "    Same Node ID = %d, send NAK", MLACP(csm).remote_system.node_id);
+        ICCPD_LOG_DEBUG("ICCP_FSM", "RX same Node ID = %d, send NAK", MLACP(csm).remote_system.node_id);
         mlacp_sync_send_nak_handler(csm, msg);
         MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
             sysconf->icc_parameter.type, ICCP_DBG_CNTR_STS_ERR);
@@ -473,7 +473,10 @@ static void mlacp_sync_recv_syncData(struct CSM* csm, struct Msg* msg)
     {
         /* Sync done*/
         MLACP(csm).wait_for_sync_data = 0;
+        ICCPD_LOG_DEBUG("ICCP_FSM", "RX sync done");
     }
+    else
+        ICCPD_LOG_DEBUG("ICCP_FSM", "RX sync start");
     MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
         syncdata->icc_parameter.type, ICCP_DBG_CNTR_STS_OK);
 
@@ -486,6 +489,9 @@ static void mlacp_sync_recv_syncReq(struct CSM* csm, struct Msg* msg)
 
     mlacp_sync_req = (mLACPSyncReqTLV*)&msg->buf[sizeof(ICCHdr)];
     MLACP(csm).sync_req_num = ntohs(mlacp_sync_req->req_num);
+
+    ICCPD_LOG_DEBUG("ICCP_FSM", "RX sync_requrest: req_no %d",
+        MLACP(csm).sync_req_num);
 
     /* Reply the peer all sync info*/
     mlacp_sync_send_all_info_handler(csm);
@@ -598,10 +604,9 @@ static void mlacp_fsm_recv_if_up_ack(struct CSM* csm, struct Msg* msg)
     {
         local_if = local_if_find_by_po_id(if_id);
 
-        ICCPD_LOG_DEBUG(__FUNCTION__,
-            " interface type/id %d/%d, local if 0x%x, active %u",
-            tlv->if_type, if_id, local_if,
-            local_if ? local_if->po_active : 0);
+        ICCPD_LOG_DEBUG("ICCP_FSM",
+            "RX if_up_ack: po_id %d, local if 0x%x, active %u",
+            if_id, local_if, local_if ? local_if->po_active : 0);
 
         /* Ignore the ack if MLAG interface has gone down */
         if (local_if && local_if->po_active)
@@ -612,7 +617,7 @@ static void mlacp_fsm_recv_if_up_ack(struct CSM* csm, struct Msg* msg)
     }
     else
     {
-        ICCPD_LOG_ERR(__FUNCTION__, "invalid i/f type %u, i/f ID %u",
+        ICCPD_LOG_ERR("ICCP_FSM", "RX if_up_ack: invalid i/f type %u, i/f ID %u",
             tlv->if_type, if_id);
         MLACP_SET_ICCP_RX_DBG_COUNTER(csm,
             tlv->icc_parameter.type, ICCP_DBG_CNTR_STS_ERR);
@@ -787,7 +792,7 @@ void mlacp_fsm_transit(struct CSM* csm)
 }
 
 /* Helper function for dumping application state machine */
-static char* mlacp_state(struct CSM* csm)
+char* mlacp_state(struct CSM* csm)
 {
     if (csm == NULL )
         return "MLACP_NULL";
@@ -1044,6 +1049,11 @@ static void mlacp_sync_receiver_handler(struct CSM* csm, struct Msg* msg)
 
         case TLV_T_MLACP_IF_UP_ACK:
             mlacp_fsm_recv_if_up_ack(csm, msg);
+            break;
+
+        default:
+            ICCPD_LOG_ERR("ICCP_FSM", "Receive unsupported msg 0x%x from peer",
+                icc_param->type);
             break;
     }
 

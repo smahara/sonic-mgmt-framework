@@ -287,6 +287,8 @@ void iccp_get_start_type(struct System* sys)
     if (strstr(g_csm_buf, "SONIC_BOOT_TYPE=warm"))
         sys->warmboot_start = WARM_REBOOT;
 
+    ICCPD_LOG_DEBUG("ICCP_FSM", "Start ICCP: warm reboot %s",
+        (sys->warmboot_start == WARM_REBOOT)? "yes" : "no");
     return;
 }
 
@@ -348,7 +350,7 @@ void mlacp_sync_send_warmboot_flag()
             iccp_csm_send(csm, g_csm_buf, msg_len);
         }
     }
-
+    ICCPD_LOG_DEBUG("ICCP_FSM", "Send warmboot flag to peer. Start warmboot");
     return;
 }
 
