@@ -28,7 +28,7 @@
 #define __TO_R_EXP(bacc)	(int32_t)(tos32(((BSWAP_32(bacc) & 0xf0) >> 4), 4))
 #define __TO_B_EXP(bacc)	(int32_t)(tos32((BSWAP_32(bacc) & 0xf), 4))
 
-#define SENSOR_ATTR_MAX			16
+#define SENSOR_ATTR_MAX			17
 #define SENSOR_ATTR_NAME_LENGTH	20
 
 #define SENSOR_GET_CAP_LABEL	0x001
@@ -51,6 +51,8 @@
 #define SENSOR_GET_CAP_DIRECTION	0x2000
 #define SENSOR_GET_CAP_FAN_PRESENT	0x4000
 #define SENSOR_GET_CAP_PSU_PRESENT	0x8000
+
+#define SENSOR_GET_CAP_MFRID	0x10000
 
 #define SDR_SENSOR_TYPE_TEMP	0x01
 #define SDR_SENSOR_TYPE_VOLT	0x02
@@ -106,7 +108,7 @@ struct ipmi_sensor_data {
 	uint8_t sensor_type;
 	uint8_t sensor_idstring[SENSOR_ATTR_NAME_LENGTH];
 
-	uint16_t capability;
+	uint32_t capability;
 
 	struct header_info {
 		uint8_t header_type;
@@ -908,6 +910,7 @@ void ipmi_sdr_set_sensor_factor(uint8_t idx, struct sdr_record_full_sensor *sens
 			if ((strncmp(g_sensor_data[idx].sensor_idstring + 11, "OUT", 3)) == 0) {
 				g_sensor_data[idx].capability |= SENSOR_GET_CAP_MODEL;
 				g_sensor_data[idx].capability |= SENSOR_GET_CAP_SN;
+				g_sensor_data[idx].capability |= SENSOR_GET_CAP_MFRID;
 				g_sensor_data[idx].capability |= SENSOR_GET_CAP_PSU_PRESENT;
 			}
 			sprintf(g_sensor_data[idx].attrinfo.attr_type_str, "power");
@@ -1176,6 +1179,12 @@ static ssize_t show_sn(struct device *dev, struct device_attribute *devattr, cha
 	return ipmi_get_psu_info(attr->index + DEBUGUSE_SHIFT, 0x9e, buf);
 }
 
+static ssize_t show_mfrid(struct device *dev, struct device_attribute *devattr, char *buf)
+{
+	struct sensor_device_attribute *attr = to_sensor_dev_attr(devattr);
+	return ipmi_get_psu_info(attr->index + DEBUGUSE_SHIFT, 0x99, buf);
+}
+
 static ssize_t show_pwm(struct device *dev, struct device_attribute *devattr, char *buf)
 {
 	uint8_t returnData[1] = { 0 };
@@ -1268,7 +1277,7 @@ static ssize_t(*const attr_show_func_ptr[SENSOR_ATTR_MAX]) (struct device *dev, 
 	, show_unc, show_ucr, show_unr
 	, show_model, show_sn, show_pwm
 	, show_controlmode, show_direction, show_fanpresent
-	, show_psupresent
+	, show_psupresent, show_mfrid
 };
 
 static ssize_t(*const attr_store_func_ptr[SENSOR_ATTR_MAX]) (struct device *dev, struct device_attribute *devattr, const char *buf, size_t count) =
@@ -1278,7 +1287,7 @@ static ssize_t(*const attr_store_func_ptr[SENSOR_ATTR_MAX]) (struct device *dev,
 	, NULL, NULL, NULL
 	, NULL, NULL, store_pwm
 	, store_controlmode, NULL, NULL
-	, NULL
+	, NULL, NULL
 };
 
 static const char *const sensor_attrnames[SENSOR_ATTR_MAX] =
@@ -1288,7 +1297,7 @@ static const char *const sensor_attrnames[SENSOR_ATTR_MAX] =
 	, "%s%d_ncrit", "%s%d_crit", "%s%d_max"
 	, "%s%d_model", "%s%d_sn", "%s%d_pwm"
 	, "%s%d_controlmode", "%s%d_direction", "%s%d_present"
-	, "%s%d_present"
+	, "%s%d_present", "%s%d_mfrid"
 };
 
 static int32_t create_sensor_attrs(int32_t attr_no)
