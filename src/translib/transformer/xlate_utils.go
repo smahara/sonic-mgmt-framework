@@ -11,35 +11,22 @@ import (
     log "github.com/golang/glog"
 )
 
-/* Create db key from datd xpath(request) */
-func keyFromXpathCreate(keyList []string) string {
-    keyOut := ""
-    for i, k := range keyList {
-        if i > 0 { keyOut += "_" }
-        if strings.Contains(k, ":") {
-            k = strings.Split(k, ":")[1]
-        }
-        keyOut += strings.Split(k, "=")[1]
-    }
-    return keyOut
-}
-
 /* Create db key from data xpath(request) */
 func keyCreate(keyPrefix string, xpath string, data interface{}, dbKeySep string) string {
 	_, ok := xYangSpecMap[xpath]
 	if ok {
 		if xYangSpecMap[xpath].yangEntry != nil {
 			yangEntry := xYangSpecMap[xpath].yangEntry
-			keyConcat := dbKeySep
+			delim := dbKeySep
 			if len(xYangSpecMap[xpath].delim) > 0 {
-				keyConcat = xYangSpecMap[xpath].delim
-				log.Infof("key concatenater(\"%v\") found for xpath %v ", keyConcat, xpath)
+				delim = xYangSpecMap[xpath].delim
+				log.Infof("key concatenater(\"%v\") found for xpath %v ", delim, xpath)
 			}
 
-			if len(keyPrefix) > 0 { keyPrefix += dbKeySep }
+			if len(keyPrefix) > 0 { keyPrefix += delim }
 			keyVal := ""
 			for i, k := range (strings.Split(yangEntry.Key, " ")) {
-				if i > 0 { keyVal = keyVal + keyConcat }
+				if i > 0 { keyVal = keyVal + delim }
 				val := fmt.Sprint(data.(map[string]interface{})[k])
 				if strings.Contains(val, ":") {
 					val = strings.Split(val, ":")[1]
@@ -223,10 +210,10 @@ func isCvlYang(path string) bool {
 }
 
 func sonicKeyDataAdd(dbIndex db.DBNum, keyNameList []string, keyStr string, resultMap map[string]interface{}) {
-    keyValList := strings.Split(keyStr, ":")
-	if dbIndex == db.ConfigDB {
-    	keyValList = strings.Split(keyStr, "|")
-	}
+	var dbOpts db.Options
+	dbOpts = getDBOptions(dbIndex)
+	keySeparator := dbOpts.KeySeparator
+    keyValList := strings.Split(keyStr, keySeparator)
 	
     if len(keyNameList) != len(keyValList) {
         return
@@ -405,4 +392,28 @@ func findInMap(m map[string]string, str string) string {
 
 	// str doesn't exist in map m.
 	return ""
+}
+
+func getDBOptions(dbNo db.DBNum) db.Options {
+        var opt db.Options
+
+        switch dbNo {
+        case db.ApplDB, db.CountersDB:
+                opt = getDBOptionsWithSeparator(dbNo, "", ":", ":")
+                break
+        case db.FlexCounterDB, db.AsicDB, db.LogLevelDB, db.ConfigDB, db.StateDB:
+                opt = getDBOptionsWithSeparator(dbNo, "", "|", "|")
+                break
+        }
+
+        return opt
+}
+
+func getDBOptionsWithSeparator(dbNo db.DBNum, initIndicator string, tableSeparator string, keySeparator string) db.Options {
+        return(db.Options {
+                    DBNo              : dbNo,
+                    InitIndicator     : initIndicator,
+                    TableNameSeparator: tableSeparator,
+                    KeySeparator      : keySeparator,
+                      })
 }
