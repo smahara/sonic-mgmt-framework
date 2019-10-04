@@ -88,6 +88,10 @@ module sonic-vlan {
                     }
                 }
             }
+
+            leaf admin_status {
+                type scommon:admin-status;
+            }
         }
 
         list VLAN_MEMBER { 

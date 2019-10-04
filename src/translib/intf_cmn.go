@@ -68,6 +68,7 @@ func (app *IntfApp) translateUpdateIntfConfig(ifKey *string, intf *ocbinds.Openc
 
 func (app *IntfApp) getSpecificIfStateAttr(targetUriPath *string, ifKey *string, oc_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_State) (bool, error) {
 	switch *targetUriPath {
+
 	case "/openconfig-interfaces:interfaces/interface/state/oper-status":
 		val, e := app.getIntfAttr(ifKey, OPER_STATUS, IF_TABLE_MAP)
 		if len(val) > 0 {
@@ -347,6 +348,23 @@ func (app *IntfApp) processGetSpecificAttr(targetUriPath *string, ifKey *string)
 		if err != nil {
 			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), err
 		}
+		return ok, &(GetResponse{Payload: payload}), err
+
+	}
+
+	/*Check if the request is for a specific attribute in Interfaces state COUNTERS container*/
+	counter_val := &ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters{}
+	ok, e = app.getSpecificCounterAttr(targetUriPath, ifKey, counter_val)
+	if ok {
+		if e != nil {
+			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), e
+		}
+
+		payload, err = dumpIetfJson(counter_val, false)
+		if err != nil {
+			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), err
+		}
+		return ok, &(GetResponse{Payload: payload}), err
 	}
 
 	/*Check if the request is for a specific attribute in Interfaces Ethernet container*/
@@ -360,26 +378,7 @@ func (app *IntfApp) processGetSpecificAttr(targetUriPath *string, ifKey *string)
 		if err != nil {
 			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), err
 		}
-	}
-	return ok, &(GetResponse{Payload: payload}), err
-}
-
-func (app *IntfApp) processGetSpecificCounterAttr(targetUriPath *string, ifKey *string) (bool, *GetResponse, error) {
-	var err error
-	var payload []byte
-
-	/*Check if the request is for a specific attribute in Interfaces state COUNTERS container*/
-	counter_val := &ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters{}
-	ok, e := app.getSpecificCounterAttr(targetUriPath, ifKey, counter_val)
-	if ok {
-		if e != nil {
-			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), e
-		}
-
-		payload, err = dumpIetfJson(counter_val, false)
-		if err != nil {
-			return ok, &(GetResponse{Payload: payload, ErrSrc: AppErr}), err
-		}
+		return ok, &(GetResponse{Payload: payload}), err
 	}
 	return ok, &(GetResponse{Payload: payload}), err
 }
@@ -584,6 +583,9 @@ func (app *IntfApp) processGetConvertDBIfInfoToDS(ifName *string) error {
 func (app *IntfApp) convertInternalToOCIntfAttrInfo(ifName *string, ifInfo *ocbinds.OpenconfigInterfaces_Interfaces_Interface) {
 
 	/* Handling the Interface attributes */
+	if ifInfo.Config == nil || ifInfo.State == nil {
+		return
+	}
 	if entry, ok := app.ifTableMap[*ifName]; ok {
 		ifData := entry.entry
 
@@ -644,8 +646,14 @@ func (app *IntfApp) convertInternalToOCIntfAttrInfo(ifName *string, ifInfo *ocbi
 				default:
 					log.Infof("Not supported speed: %s!", speed)
 				}
-				ifInfo.Ethernet.Config.PortSpeed = speedEnum
-				ifInfo.Ethernet.State.PortSpeed = speedEnum
+				if ifInfo.Ethernet != nil {
+					if ifInfo.Ethernet.Config != nil {
+						ifInfo.Ethernet.Config.PortSpeed = speedEnum
+					}
+					if ifInfo.Ethernet.State != nil {
+						ifInfo.Ethernet.State.PortSpeed = speedEnum
+					}
+				}
 			case INDEX:
 				ifIdxStr := ifData.Get(ifAttr)
 				ifIdxNum, err := strconv.Atoi(ifIdxStr)
@@ -663,6 +671,9 @@ func (app *IntfApp) convertInternalToOCIntfAttrInfo(ifName *string, ifInfo *ocbi
 
 func (app *IntfApp) convertInternalToOCIntfVlanListInfo(ifName *string, ifInfo *ocbinds.OpenconfigInterfaces_Interfaces_Interface) error {
 	var err error
+	if ifInfo.Ethernet == nil || ifInfo.Ethernet.SwitchedVlan == nil || ifInfo.Ethernet.SwitchedVlan.State == nil {
+		return nil
+	}
 	taggedMemberPresent := false
 
 	if len(*ifName) < 0 {
@@ -706,6 +717,9 @@ func (app *IntfApp) convertInternalToOCIntfIPAttrInfo(ifName *string, ifInfo *oc
 	subIntf, err := ifInfo.Subinterfaces.NewSubinterface(0)
 	if err != nil {
 		log.Error("Creation of subinterface subtree failed!")
+		return
+	}
+	if subIntf == nil {
 		return
 	}
 	ygot.BuildEmptyTree(subIntf)
@@ -772,6 +786,9 @@ func (app *IntfApp) convertInternalToOCIntfIPAttrInfo(ifName *string, ifInfo *oc
 func (app *IntfApp) convertInternalToOCPortStatInfo(ifName *string, ifInfo *ocbinds.OpenconfigInterfaces_Interfaces_Interface) {
 	if len(app.intfD.portStatMap) == 0 {
 		log.Errorf("Port stat info not present for interface : %s", *ifName)
+		return
+	}
+	if ifInfo.State == nil || ifInfo.State.Counters == nil {
 		return
 	}
 	if portStatInfo, ok := app.intfD.portStatMap[*ifName]; ok {
@@ -892,6 +909,7 @@ func (app *IntfApp) processGetSpecificIntf(dbs [db.MaxDB]*db.DB, targetUriPath *
 			}
 			switch app.intfType {
 			case ETHERNET:
+				/* First, convert the data to the DS and check for the request type */
 				err = app.processGetConvertDBPhyIfInfoToDS(&ifKey)
 				if err != nil {
 					return GetResponse{Payload: payload, ErrSrc: AppErr}, err
@@ -902,10 +920,6 @@ func (app *IntfApp) processGetSpecificIntf(dbs [db.MaxDB]*db.DB, targetUriPath *
 					return *resp, err
 				}
 
-				ok, resp, err = app.processGetSpecificCounterAttr(targetUriPath, &ifKey)
-				if ok {
-					return *resp, err
-				}
 			case VLAN:
 				err = app.processGetConvertDBVlanIfInfoToDS(&ifKey)
 				if err != nil {

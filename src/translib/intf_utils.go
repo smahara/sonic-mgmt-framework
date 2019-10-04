@@ -330,13 +330,10 @@ func (app *IntfApp) removeUntaggedVlanAndUpdateVlanMembTbl(d *db.DB, ifName *str
 				return nil, err
 			}
 			return &vlanName, nil
-		} else {
-			vlanId := vlanName[len("Vlan"):len(vlanName)]
-			errStr := "Untagged VLAN: " + vlanId + " configuration doesn't exist for Interface: " + *ifName
-			return nil, tlerr.InvalidArgsError{Format: errStr}
 		}
 	}
-	return nil, nil
+	errStr := "Untagged VLAN configuration doesn't exist for Interface: " + *ifName
+	return nil, tlerr.InvalidArgsError{Format: errStr}
 }
 
 /* Removal of tagged-vlan associated with interface and update VLAN_MEMBER table */
