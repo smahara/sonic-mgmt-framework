@@ -925,6 +925,11 @@ func (app *IntfApp) processGetSpecificIntf(dbs [db.MaxDB]*db.DB, targetUriPath *
 				if err != nil {
 					return GetResponse{Payload: payload, ErrSrc: AppErr}, err
 				}
+
+				ok, resp, err := app.processGetSpecificAttr(targetUriPath, &ifKey)
+				if ok {
+					return *resp, err
+				}
 			}
 
 			ifInfo := intfObj.Interface[ifKey]
