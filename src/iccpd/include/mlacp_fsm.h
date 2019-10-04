@@ -166,6 +166,7 @@ void mlacp_finalize(struct CSM* csm);
 void mlacp_fsm_transit(struct CSM* csm);
 void mlacp_enqueue_msg(struct CSM*, struct Msg*);
 struct Msg* mlacp_dequeue_msg(struct CSM*);
+char* mlacp_state(struct CSM* csm);
 
 /* from app_csm*/
 extern int mlacp_bind_local_if(struct CSM* csm, struct LocalInterface* local_if);

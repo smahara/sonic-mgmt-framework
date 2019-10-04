@@ -34,6 +34,7 @@
 #include "../include/iccp_consistency_check.h"
 #include "../include/port.h"
 #include "../include/openbsd_tree.h"
+
 /*****************************************
 * Port-Conf Update
 *
@@ -43,6 +44,12 @@ int mlacp_fsm_update_system_conf(struct CSM* csm, mLACPSysConfigTLV*sysconf)
 {
     struct LocalInterface* lif = NULL;
     uint8_t old_remote_system_id[ETHER_ADDR_LEN];
+
+    ICCPD_LOG_DEBUG("ICCP_FSM", "RX system_conf: systemID %s, priority %d, remote nodeID %d, nodeID %d",
+        mac_addr_to_str(MLACP(csm).remote_system.system_id),
+        MLACP(csm).remote_system.system_priority,
+        MLACP(csm).remote_system.node_id,
+        MLACP(csm).node_id);
 
     /*NOTE
        a little tricky, we change the NodeID local side if collision happened first time*/
@@ -55,13 +62,6 @@ int mlacp_fsm_update_system_conf(struct CSM* csm, mLACPSysConfigTLV*sysconf)
     memcpy(MLACP(csm).remote_system.system_id, sysconf->sys_id, ETHER_ADDR_LEN);
     MLACP(csm).remote_system.system_priority = ntohs(sysconf->sys_priority);
     MLACP(csm).remote_system.node_id = sysconf->node_id;
-
-    ICCPD_LOG_DEBUG(__FUNCTION__, "   SystemID [%02X:%02X:%02X:%02X:%02X:%02X]. SystemPriority [%d], Remote NodeID [%d], NodeID [%d]",
-                    MLACP(csm).remote_system.system_id[0], MLACP(csm).remote_system.system_id[1], MLACP(csm).remote_system.system_id[2],
-                    MLACP(csm).remote_system.system_id[3], MLACP(csm).remote_system.system_id[4], MLACP(csm).remote_system.system_id[5],
-                    MLACP(csm).remote_system.system_priority,
-                    MLACP(csm).remote_system.node_id,
-                    MLACP(csm).node_id);
 
     LIST_FOREACH(lif, &(MLACP(csm).lif_list), mlacp_next)
     {
@@ -87,9 +87,9 @@ int mlacp_fsm_update_Agg_conf(struct CSM* csm, mLACPAggConfigTLV* portconf)
     uint8_t po_active;
     uint8_t new_create = 0;
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "    Port name  %s, po id %d  flag %d MAC[%02x:%02x:%02x:%02x:%02x:%02x] ",
-                    portconf->agg_name, ntohs(portconf->agg_id), portconf->flags, portconf->mac_addr[0], portconf->mac_addr[1], portconf->mac_addr[2],
-                    portconf->mac_addr[3], portconf->mac_addr[4], portconf->mac_addr[5] );
+    ICCPD_LOG_DEBUG("ICCP_FSM", "RX aggrport_config: name %s, po_id %d, flag 0x%x, MAC %s",
+        portconf->agg_name, ntohs(portconf->agg_id), portconf->flags,
+        mac_addr_to_str(portconf->mac_addr));
 
     /* Looking for the peer port instance, is any peer if exist?*/
     pif = peer_if_find_by_name(csm, portconf->agg_name);
@@ -145,7 +145,10 @@ int mlacp_fsm_update_Aggport_state(struct CSM* csm, mLACPAggPortStateTLV* tlv)
 
     if (csm == NULL || tlv == NULL)
         return MCLAG_ERROR;
-    ICCPD_LOG_DEBUG(__FUNCTION__, "  po id %d  state %d  ", ntohs(tlv->agg_id), tlv->agg_state);
+
+    ICCPD_LOG_DEBUG("ICCP_FSM", "RX aggrport_state: po_id %d, state %s, sync_state %s",
+        ntohs(tlv->agg_id), (tlv->agg_state == PORT_STATE_UP) ? "up" : "down",
+        mlacp_state(csm));
 
     po_active = (tlv->agg_state == PORT_STATE_UP);
 
@@ -722,7 +725,8 @@ int mlacp_fsm_update_port_channel_info(struct CSM* csm,
 
         iccp_consistency_check(peer_if->name);
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "port channel %s info  ip %s l3 mode  %d", peer_if->name, show_ip_str( tlv->ipv4_addr), peer_if->l3_mode);
+        ICCPD_LOG_DEBUG("ICCP_FSM", "RX po_info: %s ip %s l3 mode  %d",
+            peer_if->name, show_ip_str( tlv->ipv4_addr), peer_if->l3_mode);
         break;
     }
 
@@ -775,7 +779,8 @@ int mlacp_fsm_update_warmboot(struct CSM* csm, struct mLACPWarmbootTLV* tlv)
         return MCLAG_ERROR;
 
     time(&csm->peer_warm_reboot_time);
-
+    ICCPD_LOG_DEBUG("ICCP_FSM", "RX peer warm reboot: start, sync_state %s",
+        mlacp_state(csm));
     return 0;
 }
 

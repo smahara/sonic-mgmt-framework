@@ -91,6 +91,10 @@ int mlacp_prepare_for_sync_request_tlv(struct CSM* csm, char* buf, size_t max_bu
     tlv->port_num_agg_id = 0;
     tlv->actor_key = 0;
 
+    ICCPD_LOG_DEBUG("ICCP_FSM", "TX sync_request: role %s, sync_state %s",
+        (csm->role_type == STP_ROLE_STANDBY) ? "standby" : "active",
+        mlacp_state(csm));
+
     return msg_len;
 }
 
@@ -138,6 +142,7 @@ int mlacp_prepare_for_sync_data_tlv(struct CSM* csm, char* buf, size_t max_buf_s
     else
         tlv->flags = htons(0x01);
 
+    ICCPD_LOG_DEBUG("ICCP_CSM", "TX sync %s", end ? "end" : "start");
     return msg_len;
 }
 
@@ -182,6 +187,10 @@ int mlacp_prepare_for_sys_config(struct CSM* csm, char* buf, size_t max_buf_size
     memcpy(tlv->sys_id, MLACP(csm).system_id, ETHER_ADDR_LEN);
     tlv->sys_priority = htons(MLACP(csm).system_priority);
     tlv->node_id = MLACP(csm).node_id;
+
+    ICCPD_LOG_DEBUG("ICCP_FSM", "TX sys_config: systemID %s, priority %u, nodeID %u",
+        mac_addr_to_str(MLACP(csm).system_id), MLACP(csm).system_priority,
+        MLACP(csm).node_id);
     return msg_len;
 }
 
@@ -232,6 +241,8 @@ int mlacp_prepare_for_Aggport_state(struct CSM* csm, char* buf, size_t max_buf_s
     tlv->actor_key = 0;
     tlv->agg_state = local_if->state;
 
+    ICCPD_LOG_DEBUG("ICCP_FSM", "TX aggrport_state: %s is %s",
+        local_if->name, (local_if->state == PORT_STATE_UP) ? "up" : "down");
     return msg_len;
 }
 
@@ -280,6 +291,8 @@ int mlacp_prepare_for_Aggport_config(struct CSM* csm,
     memcpy(tlv->agg_name, lif->name, MAX_L_PORT_NAME);
     memcpy(tlv->mac_addr, lif->mac_addr, ETHER_ADDR_LEN);
 
+    ICCPD_LOG_DEBUG("ICCP_FSM", "TX aggrport_config: %s, purge_flag %d, mac %s",
+        lif->name, purge_flag, mac_addr_to_str(lif->mac_addr));
     return msg_len;
 }
 
@@ -465,6 +478,8 @@ int mlacp_prepare_for_port_channel_info(struct CSM* csm, char* buf,
     }
 
     ICCPD_LOG_DEBUG(__FUNCTION__, "  port channel %d: addr = %s  l3 mode %d", port_channel->po_id, show_ip_str( tlv->ipv4_addr),  tlv->l3_mode);
+    ICCPD_LOG_DEBUG("ICCP_FSM", "TX po_info: %s has %d vlans",
+        port_channel->name, num_of_vlan_id);
 
     return msg_len;
 }
@@ -515,9 +530,8 @@ int mlacp_prepare_for_port_peerlink_info(struct CSM* csm, char* buf,
     memcpy(tlv->if_name, peerlink_port->name, MAX_L_PORT_NAME);
     tlv->port_type = peerlink_port->type;
 
-
-    ICCPD_LOG_DEBUG(__FUNCTION__, "  peerlink port info  portname %s  type  = %d", tlv->if_name, tlv->port_type);
-
+    ICCPD_LOG_DEBUG("ICCP_FSM", "TX peerlink_info: name %s, type %d",
+        peerlink_port->name, peerlink_port->type);
     return msg_len;
 }
 
@@ -603,6 +617,7 @@ int mlacp_prepare_for_warm_reboot(struct CSM* csm, char* buf, size_t max_buf_siz
 
     tlv->icc_parameter.len = htons(sizeof(struct mLACPWarmbootTLV) - sizeof(ICCParameter));
     tlv->warmboot = 0x1;
+    ICCPD_LOG_DEBUG("ICCP_FSM", "TX start warm reboot");
     return msg_len;
 }
 
@@ -653,6 +668,9 @@ int mlacp_prepare_for_if_up_ack(
     tlv->if_type = if_type;
     tlv->if_id = htons(if_id);
     tlv->port_isolation_state = port_isolation_state;
+
+    ICCPD_LOG_DEBUG("ICCP_FSM", "TX if_up_ack: PortChannel%d, isolation_set %d",
+        if_id, port_isolation_state);
     return msg_len;
 }
 

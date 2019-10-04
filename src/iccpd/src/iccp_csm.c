@@ -20,7 +20,7 @@
  *
  *  Maintainer: jianjun, grace Li from nephos
  */
-
+#include <pthread.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -221,6 +221,7 @@ int iccp_csm_send(struct CSM* csm, char* buf, int msg_len)
     LDPHdr* ldp_hdr = (LDPHdr*)buf;
     ICCParameter* param = NULL;
     ssize_t rc;
+    uint16_t tlv_type;
 
     if (csm == NULL || buf == NULL || csm->sock_fd <= 0 || msg_len <= 0)
         return MCLAG_ERROR;
@@ -238,18 +239,19 @@ int iccp_csm_send(struct CSM* csm, char* buf, int msg_len)
     if (csm->msg_log.end_index >= 128)
         csm->msg_log.end_index = 0;
 
+    tlv_type = ntohs(param->type);
     rc = write(csm->sock_fd, buf, msg_len);
     if ((rc <= 0) || (rc != msg_len))
     {
         MLACP_SET_ICCP_TX_DBG_COUNTER(
-            csm, ntohs(param->type), ICCP_DBG_CNTR_STS_ERR);
-        ICCPD_LOG_ERR(__FUNCTION__, "Failed to write msg 0x%x, rc %d",
-            ntohs(param->type), rc);
+            csm, tlv_type, ICCP_DBG_CNTR_STS_ERR);
+        ICCPD_LOG_ERR("ICCP_FSM", "Failed to write msg %s/0x%x, rc %d",
+            get_tlv_type_string(tlv_type), tlv_type, rc);
     }
     else
     {
         MLACP_SET_ICCP_TX_DBG_COUNTER(
-            csm, ntohs(param->type), ICCP_DBG_CNTR_STS_OK);
+            csm, tlv_type, ICCP_DBG_CNTR_STS_OK);
     }
     return (rc);
 }

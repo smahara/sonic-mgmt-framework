@@ -201,6 +201,10 @@ int mlacp_bind_local_if(struct CSM* csm, struct LocalInterface* lif)
     if (lif->csm == csm)
         return 0;
 
+    ICCPD_LOG_DEBUG("ICCP_FSM",
+        "MLAG_IF %s bind: LIF/current CSM 0x%x/0x%x, sync_state %s, cfg_sync/changed %d/%d",
+        lif->name, lif->csm, csm, mlacp_state(csm), lif->port_config_sync, lif->changed);
+
     /* remove purge from the csm*/
     do {
         LIST_FOREACH(lifp, &(MLACP(csm).lif_purge_list), mlacp_purge_next)
@@ -227,8 +231,12 @@ int mlacp_bind_local_if(struct CSM* csm, struct LocalInterface* lif)
     LIST_INSERT_HEAD(&(MLACP(csm).lif_list), lif, mlacp_next);
     lif->csm = csm;
     if (lif->type == IF_T_PORT_CHANNEL)
+    {
         lif->port_config_sync = 1;
-
+        /* Peer assume interface is up. Send update if it is down */
+        if (!lif->po_active)
+            lif->changed = 1;
+    }
     ICCPD_LOG_INFO(__FUNCTION__, "%s: MLACP bind on csm %p", lif->name, csm);
     if (lif->type == IF_T_PORT_CHANNEL)
         return 0;
@@ -273,6 +281,10 @@ int mlacp_unbind_local_if(struct LocalInterface* lif)
 
     if (lif->csm == NULL )
         return 0;
+
+    ICCPD_LOG_DEBUG("ICCP_FSM",
+        "MLAG_IF %s unbind: traffic_disable %d, sync_state %s",
+        lif->name, lif->is_traffic_disable, mlacp_state(lif->csm));
 
     ICCPD_LOG_INFO(__FUNCTION__, "%s: MLACP un-bind from csm %p", lif->name, lif->csm);
     LIST_REMOVE(lif, mlacp_next);
