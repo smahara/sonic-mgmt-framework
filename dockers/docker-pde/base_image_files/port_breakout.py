@@ -22,7 +22,7 @@ else:
 sonic_platforms = {
     "x86_64-accton_as9716_32d-r0": {
         "breakout": {
-            "0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120,124": [ "4x100", "4x50", "2x100", "2x200", "4x25", "4x10" ]
+            "0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120,124": [ "1x400", "4x100", "4x50", "2x100", "2x200", "4x25", "4x10" ]
         }
     },
     "x86_64-accton_as7326_56x-r0": {
@@ -42,7 +42,7 @@ sonic_platforms = {
     },
     "x86_64-accton_as7726_32x-r0": {
         "breakout": {
-            "0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120": [ "4x25", "4x10" ]
+            "0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120": [ "4x25", "4x10", "1x100", "1x40" ]
         }
     },
     "x86_64-quanta_ix8_rglbmc-r0": {
@@ -52,7 +52,7 @@ sonic_platforms = {
     },
     "x86_64-quanta_ix9_bwde-r0": {
          "breakout": {
-             "0,8,16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240,248": [ "4x100", "4x25", "4x10", "4x50", "2x200", "2x100" ]
+             "0,8,16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240,248": [ "1x400", "4x100", "4x25", "4x10", "4x50", "2x200", "2x100" ]
         }
     }
 }
@@ -172,12 +172,13 @@ bko_dict_4 = {
 }
 
 bko_dict_8 = {
-    "2x200": { "lanes":8, "speed":200, "step":4, "bko":1, "name": "PAM4_twohundredGigE" },
-    "2x100": { "lanes":8, "speed":100, "step":4, "bko":1, "name": "NRZ_hundredGigE" },
-    "4x100": { "lanes":8, "speed":100, "step":2, "bko":1, "name": "PAM4_hundredGigE" },
-    "4x50":  { "lanes":8, "speed":50,  "step":2, "bko":1, "name": "NRZ_fiftyGigE" },
-    "4x25":  { "lanes":4, "speed":25,  "step":1, "bko":1, "name": "NRZ_twentyfiveGigE" },
-    "4x10":  { "lanes":4, "speed":10,  "step":1, "bko":1, "name": "NRZ_tenGigE" },
+    "1x400": { "lanes":8, "speed":400, "step":8, "bko":0, "name": "fourhundredGigE" },
+    "2x200": { "lanes":8, "speed":200, "step":4, "bko":1, "name": "twohundredGigE" },
+    "2x100": { "lanes":8, "speed":100, "step":4, "bko":1, "name": "hundredGigE" },
+    "4x100": { "lanes":8, "speed":100, "step":2, "bko":1, "name": "hundredGigE" },
+    "4x50":  { "lanes":8, "speed":50,  "step":2, "bko":1, "name": "fiftyGigE" },
+    "4x25":  { "lanes":4, "speed":25,  "step":1, "bko":1, "name": "twentyfiveGigE" },
+    "4x10":  { "lanes":4, "speed":10,  "step":1, "bko":1, "name": "tenGigE" },
 }
 
 bko_dict = bko_dict_4
@@ -207,8 +208,8 @@ def get_bkout_lanes(opt):
     return bko_dict[opt]["lanes"]
 
 def get_bkout_ports(port, opt):
-    lanes = bko_dict[opt]["lanes"]
-    step  = get_bkout_step(opt)
+    lanes = 4
+    step  = 1
 
     if not port.startswith(INTERFACE_KEY):
         return None
@@ -269,13 +270,12 @@ def break_in_ini(port, ini_file, opt):
     f_out = open(new_file, 'w') 
 
     first_port = True
-
     title = []
 
     for line in f_in.readlines():
         line.strip()
         if len(line.rstrip()) == 0:
-            break
+            continue
 
         if re.search("^#", line) is not None:
             # The current format is: # name lanes alias index speed
@@ -287,13 +287,12 @@ def break_in_ini(port, ini_file, opt):
             continue
 
         line = line.lstrip()
-
         line_port = line.split()[0]
 
         if line_port in get_bkout_ports(port, opt):
             oidx, olanes, name, oporti, fp_idx = get_info_in_ini(line, title)
 
-            if get_is_bkout(opt) and len(olanes) == 1:
+            if get_is_bkout(opt) and len(olanes) < get_bkout_lanes(opt):
                 print("Port %s Already breakout ..." % (port))
                 print("Existing ...")
                 f_in.close()
@@ -305,12 +304,15 @@ def break_in_ini(port, ini_file, opt):
             #
             # Non-Breakout case
             #
+            if not get_is_bkout(opt) and not first_port:
+                print("--- {} removed".format(line_port))
+                continue
+
             if not get_is_bkout(opt) and first_port:
                 idx = oidx
                 lanes = []
                 for i in range(0, get_bkout_lanes(opt), 1):
                     lanes.append(str(int(olanes[0])+i))
-                
                 porti = oporti
 
             if get_is_bkout(opt):
@@ -323,7 +325,6 @@ def break_in_ini(port, ini_file, opt):
             # Ethernet20      69,70,71,72           hundredGigE6
             #
             print("    %s" % line.rstrip())
-
 
             # Generate new interface line
             for i in range(0, min(len(lanes), get_bkout_lanes(opt)), step):
@@ -369,7 +370,7 @@ def break_in_ini(port, ini_file, opt):
                 # valid_speeds
                 #
                 if 'valid_speeds' in title:
-                    temp_str = get_bkout_subport_speed(opt) * 1000
+                    temp_str = str(get_bkout_subport_speed(opt) * 1000)
                     if get_bkout_subport_speed(opt) == 100:
                         if get_bkout_step(opt) == 4:
                             # NRZ mode
@@ -380,7 +381,7 @@ def break_in_ini(port, ini_file, opt):
                     elif get_bkout_subport_speed(opt) == 40:
                         temp_str = "100000,40000"
 
-                    new_intf += "%-10s " % temp_str
+                    new_intf += "%s" % temp_str
 
 
                 if not get_is_bkout(opt) and first_port:
@@ -451,6 +452,10 @@ def break_in_bcm(port, lanes, bcm_file, opt):
         lp, pp, sp =  parse_port_bcm(line)
         if pp not in lanes:
             f_out.write(oline)
+            continue
+
+        if not get_is_bkout(opt) and not first_port:
+            print("--- portmap_{} removed".format(lp))
             continue
 
         #### generate new port map
@@ -691,11 +696,6 @@ def check_vaildation(platform, hwsku, port, opt):
             return False
         if len(ini_lanes) == 0:
             print("port %s does not exist." % (port))
-            return False
-
-        ### need re-visit for 2x50 case, etc
-        if port_found != get_bkout_lanes(opt):
-            print("Port %s can not non-breakout." % (port))
             return False
 
     return True
