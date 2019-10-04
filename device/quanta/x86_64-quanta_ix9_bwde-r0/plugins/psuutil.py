@@ -3,6 +3,7 @@
 # Platform-specific PSU status interface for SONiC
 #
 
+import logging
 import os.path
 
 try:
@@ -12,6 +13,11 @@ except ImportError as e:
 
 class PsuUtil(PsuBase):
     """Platform-specific PSUutil class"""
+
+    HWMON_PATH = '/sys/class/hwmon/hwmon2/'
+    PSU1_PREFIX = 'power39_'
+    PSU2_PREFIX = 'power49_'
+    MAX_PSUS = 2
 
     def __init__(self):
         PsuBase.__init__(self)
@@ -26,20 +32,30 @@ class PsuUtil(PsuBase):
         try:
             with open(attr_path, 'r') as fd:
                 retval = fd.read()
-        except Exception as error:
+        except Exception:
             logging.error("Unable to open ", attr_path, " file !")
 
         retval = retval.rstrip('\r\n')
         return retval
+
+    def get_attr_filename(self, index, attr):
+        if (index == 1):
+            attr_file = self.PSU1_PREFIX + attr
+        elif (index == 2):
+            attr_file = self.PSU2_PREFIX + attr
+        else:
+            logging.error("Invalid PSU number:", index)
+            return ''
+
+        return attr_file
 
     def get_num_psus(self):
         """
         Retrieves the number of PSUs available on the device
         :return: An integer, the number of PSUs available on the device
          """
-        MAX_PSUS = 2
 
-        return MAX_PSUS
+        return self.MAX_PSUS
 
     def get_psu_status(self, index):
         """
@@ -49,16 +65,13 @@ class PsuUtil(PsuBase):
         :return: Boolean, True if PSU is operating properly, False if PSU is\
         faulty
         """
-        status = 0
-        if (index == 1):
-            attr_file = 'power39_input'
-        elif (index == 2):
-            attr_file = 'power49_input'
-        else:
-            logging.error("Invalid PSU number:", index)
+        status = False
+
+        attr_filename = self.get_attr_filename(index, 'input')
+        if attr_filename == '':
             return status
 
-        attr_path = '/sys/class/hwmon/hwmon2/' + attr_file
+        attr_path = self.HWMON_PATH + attr_filename
         attr_value = self.get_attr_value(attr_path)
 
         if (attr_value != 'ERR'):
@@ -66,7 +79,7 @@ class PsuUtil(PsuBase):
 
             # Check PSU status
             if (attr_value != 0.0):
-                status = 1
+                status = True
 
         return status
 
@@ -77,22 +90,163 @@ class PsuUtil(PsuBase):
         :param index: An integer, index of the PSU of which to query status
         :return: Boolean, True if PSU is plugged, False if not
         """
-        status = 0
-        if (index == 1):
-            attr_file = 'power39_present'
-        elif (index == 2):
-            attr_file = 'power49_present'
-        else:
-            logging.error("Invalid PSU number:", index)
+        status = False
+
+        attr_filename = self.get_attr_filename(index, 'present')        
+        if attr_filename == '':
             return status
 
-        attr_path = '/sys/class/hwmon/hwmon2/' + attr_file
-        attr_value = self.get_attr_value(attr_path)
-
-        if (attr_value != 'ERR'):
+        attr_path = self.HWMON_PATH + attr_filename
+        attr_value = self.get_attr_value(attr_path)        
+		
+        if (attr_value != 'ERR'):            
             attr_value = int(attr_value, 16)
             # Check PSU status
             if (attr_value == 1):
-                status = 1
+                status = True
 
         return status
+
+    def get_powergood_status(self, index):
+        status = False
+
+        attr_filename = self.get_attr_filename(index, 'input')
+        if attr_filename == '':
+            return status
+
+        attr_path = self.HWMON_PATH + attr_filename
+        attr_value = self.get_attr_value(attr_path)
+
+        if (attr_value != 'ERR'):
+            attr_value = float(attr_value)
+
+            # Check PSU status
+            if (attr_value != 0.0):
+                status = True
+
+        return status
+
+    def get_model(self, index):
+        attr_filename = self.get_attr_filename(index, 'model')
+        if attr_filename == '':
+            return ''
+
+        attr_path = self.HWMON_PATH + attr_filename
+        attr_value = self.get_attr_value(attr_path)
+
+        if (attr_value != 'ERR'):
+            return attr_value.rstrip()
+
+    def get_mfr_id(self, index):
+        attr_filename = self.get_attr_filename(index, 'mfrid')
+        if attr_filename == '':
+            return ''
+
+        attr_path = self.HWMON_PATH + attr_filename
+        attr_value = self.get_attr_value(attr_path)
+
+        if (attr_value != 'ERR'):
+            return attr_value.rstrip()
+
+    def get_serial(self, index):
+        attr_filename = self.get_attr_filename(index, 'sn')
+        if attr_filename == '':
+            return ''
+
+        attr_path = self.HWMON_PATH + attr_filename
+        attr_value = self.get_attr_value(attr_path)
+
+        if (attr_value != 'ERR'):
+            return attr_value.rstrip()
+
+    def get_direction(self, index):
+        if (index == 1):
+            direction_file = 'fan37_direction'
+        elif (index == 2):
+            direction_file = 'fan47_direction'
+        else:
+            logging.error("Invalid PSU number:", index)
+            return ''
+
+        direction = self.get_attr_value(self.HWMON_PATH + direction_file)
+        direction = direction.rstrip()
+
+        """
+        1: FB 2: BF
+        Since the fan is at rear of the switch, FB means Exhaust; BF means Intake
+        """
+        if direction == '2':
+            return "INTAKE"
+        else:
+            return "EXHAUST"
+
+    def get_output_voltage(self, index):
+        if (index == 1):
+            attr_file = 'in44_input'
+        elif (index == 2):
+            attr_file = 'in54_input'
+        else:
+            logging.error("Invalid PSU number:", index)
+            return 0
+
+        voltage = self.get_attr_value(self.HWMON_PATH + attr_file)
+        voltage = voltage.rstrip()        
+
+        if (voltage != 'ERR'):
+            voltage, dummy = voltage.split('.', 1)
+            voltage = float(voltage)
+        else:
+            return 0
+
+        return int(voltage)
+
+    def get_output_current(self, index):
+        if (index == 1):
+            attr_file = 'curr36_input'
+        elif (index == 2):
+            attr_file = 'curr46_input'
+        else:
+            logging.error("Invalid PSU number:", index)
+            return 0
+
+        current = self.get_attr_value(self.HWMON_PATH + attr_file)
+        current = current.rstrip()
+        if (current != 'ERR'):
+            current = float(current)
+        else:
+            return 0
+
+        return int(current)
+
+    def get_output_power(self, index):
+        attr_filename = self.get_attr_filename(index, 'input')
+        if attr_filename == '':
+            return 0
+
+        attr_path = self.HWMON_PATH + attr_filename
+        attr_value = self.get_attr_value(attr_path)
+
+        if (attr_value != 'ERR'):
+            attr_value = float(attr_value)*1000
+        else:
+            return 0
+
+        return int(attr_value)
+
+    def get_fan_rpm(self, index, fan_idx):
+        if (index == 1):
+            rpm_file = 'fan37_input'
+        elif (index == 2):
+            rpm_file = 'fan47_input'
+        else:
+            logging.error("Invalid PSU number:", index)
+            return 0
+
+        rpm = self.get_attr_value(self.HWMON_PATH + rpm_file)
+        rpm = rpm.rstrip()
+        if (rpm != 'ERR'):
+            rpm = float(rpm)
+        else:
+            return 0
+
+        return int(rpm)
