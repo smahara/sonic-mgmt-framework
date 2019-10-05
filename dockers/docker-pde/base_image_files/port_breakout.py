@@ -423,7 +423,7 @@ def parse_port_bcm(bcm_str):
 # portmap_87=84:25
 # 
 #
-def break_in_bcm(port, lanes, bcm_file, opt):
+def break_in_bcm(port, lanes, bcm_file, opt, platform):
     print("Breaking %s to %s in bcm ..." % (port, opt))
 
     bak_file = bcm_file + ".bak"
@@ -436,6 +436,7 @@ def break_in_bcm(port, lanes, bcm_file, opt):
     f_out = open(new_file, 'w') 
 
     first_port = True
+    fec_removed = False
     print lanes
     for oline in f_in.readlines():
         line = oline.lstrip()
@@ -444,6 +445,9 @@ def break_in_bcm(port, lanes, bcm_file, opt):
             f_out.write(oline)
             continue
 
+        ### when running in unbreakout mode, the FEC setting per breakout should be removed
+        if not get_is_bkout(opt) and line.startswith("port_fec") and fec_removed:
+           continue
         if not line.startswith("portmap"):
             f_out.write(oline)
             continue
@@ -452,8 +456,12 @@ def break_in_bcm(port, lanes, bcm_file, opt):
         lp, pp, sp =  parse_port_bcm(line)
         if pp not in lanes:
             f_out.write(oline)
+            fec_removed = False
             continue
 
+        if not get_is_bkout(opt):
+           fec_removed = True
+ 
         if not get_is_bkout(opt) and not first_port:
             print("--- portmap_{} removed".format(lp))
             continue
@@ -467,6 +475,7 @@ def break_in_bcm(port, lanes, bcm_file, opt):
                 new_intf = "portmap_%d.%s=%d:%d:%d" % ((int(nlp) + (i / step)), unit, (int(pp)+i), get_bkout_subport_speed(opt), get_bkout_step(opt))
             else:
                 new_intf = "portmap_%d=%d:%d:%d" % ((int(lp) + (i / step)), (int(pp)+i), get_bkout_subport_speed(opt), get_bkout_step(opt))
+                fec_intf = "port_fec_"+ str(int(lp) + (i/step)) +"=3"
 
             if not get_is_bkout(opt) and first_port:
                 f_out.write(new_intf)
@@ -476,6 +485,10 @@ def break_in_bcm(port, lanes, bcm_file, opt):
             if get_is_bkout(opt):
                 f_out.write(new_intf)
                 f_out.write("\n")
+                ### generate default FEC only for IX9 platform
+                if opt == "4x100" and platform == "x86_64-quanta_ix9_bwde-r0": 
+                   f_out.write(fec_intf) 
+                   f_out.write("\n") 
                 print "===>" + new_intf
 
     print "--------------------------------------------------------"
@@ -564,7 +577,7 @@ def break_a_port(port, opt, platform, hwsku):
     cfg_file = get_cfg_file(platform, hwsku)
 
     lanes = break_in_ini(port, ini_file, opt)
-    break_in_bcm(port, lanes, bcm_file, opt)
+    break_in_bcm(port, lanes, bcm_file, opt, platform)
     break_in_cfg(port, cfg_file, lanes, opt)
 
 def usage():
