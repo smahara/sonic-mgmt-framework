@@ -99,6 +99,9 @@ int iccp_mclag_config_dump(char * *buf,  int *num, int mclag_id)
         if (peer_link_if)
             memcpy(state_info.peer_link_mac, peer_link_if->mac_addr, 6);
 
+        state_info.keepalive_time  = csm->keepalive_time;
+        state_info.session_timeout = csm->session_timeout;
+
         state_info.role = csm->role_type;
 
         str_size = MCLAGDCTL_PORT_MEMBER_BUF_LEN;

@@ -41,6 +41,7 @@
 #include "mclagdctl/mclagdctl.h"
 #include "../include/iccp_cmd_show.h"
 #include "../include/iccp_cli.h"
+#include "../include/iccp_cmd.h"
 #include "../include/mlacp_link_handler.h"
 
 /*****************************************
@@ -60,6 +61,8 @@ typedef enum route_manipulate_type
 *
 * ***************************************/
 char g_ipv4_str[INET_ADDRSTRLEN];
+char g_iccp_mlagsyncd_recv_buf[ICCP_MLAGSYNCD_RECV_MSG_BUFFER_SIZE] = { 0 };
+
 
 /*****************************************
 * Tool : show ip string
@@ -1656,7 +1659,7 @@ static void update_l2_mac_state(struct CSM *csm,
                     /*Is need to delete the old item before add?(Old item probably is static)*/
                     if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
                     {
-                        memcpy(mac_msg->ifname, csm->peer_itf_name, IFNAMSIZ);
+                        memcpy(mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
                         add_mac_to_chip(mac_msg, MAC_TYPE_DYNAMIC);
                     }
                     else
@@ -1664,7 +1667,7 @@ static void update_l2_mac_state(struct CSM *csm,
                         /*must redirect but peerlink is down, del mac from ASIC*/
                         /*if peerlink change to up, mac will add back to ASIC*/
                         del_mac_from_chip(mac_msg);
-                        memcpy(mac_msg->ifname, csm->peer_itf_name, IFNAMSIZ);
+                        memcpy(mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
                     }
 
                     ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, flag %d, redirect MAC to peer-link: %s, "
@@ -2401,7 +2404,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                     /*If local if is down, redirect the mac to peer-link*/
                     if (strlen(csm->peer_itf_name) != 0)
                     {
-                        memcpy(&mac_info->ifname, csm->peer_itf_name, IFNAMSIZ);
+                        memcpy(&mac_info->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
 
                         if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
                         {
@@ -2442,18 +2445,41 @@ int iccp_mclagsyncd_mclag_domain_cfg_handler(struct System *sys, char *msg_buf)
     count = (msg_hdr->len- sizeof(struct IccpSyncdHDr ))/sizeof(struct mclag_domain_cfg_info);
     ICCPD_LOG_DEBUG(__FUNCTION__, "recv domain cfg msg ; count %d   ",count);  
 
-    for (i =0; i<count; i++)
+    for (i = 0; i < count; i++)
     {
         cfg_info = (struct mclag_domain_cfg_info *)((char *)(msg_buf) + sizeof(struct IccpSyncdHDr) + i * sizeof(struct mclag_domain_cfg_info));
 
         memcpy(system_mac_str, mac_addr_to_str(cfg_info->system_mac), sizeof(system_mac_str));
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "recv cfg msg ; domain_id:%d  op_type:%d local_ip:%s peer_ip:%s peer_ifname:%s system_mac:%s",cfg_info->domain_id, cfg_info->op_type,
-                cfg_info->local_ip, cfg_info->peer_ip, cfg_info->peer_ifname, system_mac_str);  
+        ICCPD_LOG_DEBUG(__FUNCTION__, "recv cfg msg ; domain_id:%d op_type:%d local_ip:%s peer_ip:%s peer_ifname:%s system_mac:%s session_timeout:%d keepalive_time:%d",cfg_info->domain_id, cfg_info->op_type, cfg_info->local_ip, cfg_info->peer_ip, cfg_info->peer_ifname, system_mac_str, cfg_info->session_timeout, cfg_info->keepalive_time);  
 
-        if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
+        if (cfg_info->op_type == MCLAG_CFG_KEEPALIVE_TIME)
+        {
+            if (cfg_info->keepalive_time != -1)
+            {
+                set_keepalive_time(cfg_info->domain_id, cfg_info->keepalive_time);
+            }
+        }
+        else if (cfg_info->op_type == MCLAG_CFG_SESSION_TIMEOUT)
+        {
+            if (cfg_info->keepalive_time != -1)
+            {
+                set_session_timeout(cfg_info->domain_id, cfg_info->session_timeout);
+            }
+        }
+        else if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
         {
             set_mc_lag_by_id(cfg_info->domain_id);
+
+            if (cfg_info->keepalive_time != -1)
+            {
+                set_keepalive_time(cfg_info->domain_id, cfg_info->keepalive_time);
+            }
+            if (cfg_info->session_timeout != -1)
+            {
+                set_session_timeout(cfg_info->domain_id, cfg_info->session_timeout);
+            }
+
             set_local_address(cfg_info->domain_id, cfg_info->local_ip);
             set_peer_address(cfg_info->domain_id, cfg_info->peer_ip);
             set_peer_link(cfg_info->domain_id, cfg_info->peer_ifname);
@@ -2520,9 +2546,9 @@ int iccp_receive_fdb_handler_from_syncd(struct System *sys, char *msg_buf)
 int iccp_mclagsyncd_msg_handler(struct System *sys)
 {
     int num_bytes_rxed = 0;
-    char *msg_buf = g_csm_buf;
+    char *msg_buf = g_iccp_mlagsyncd_recv_buf;
     struct IccpSyncdHDr * msg_hdr;
-    size_t pos = 0;
+    int pos = 0;
 
     if (sys == NULL)
         return MCLAG_ERROR;
@@ -2538,8 +2564,8 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
 
     while (pos < num_bytes_rxed) //iterate through all msgs
     {
-        msg_hdr = (struct IccpSyncdHDr *)&msg_buf[pos];
-        ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg version %d type %d len %d  ",msg_hdr->ver , msg_hdr->type, msg_hdr->len);  
+        msg_hdr = (struct IccpSyncdHDr *)(&msg_buf[pos]);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg version %d type %d len %d pos:%d num_bytes_rxed:%d ",msg_hdr->ver , msg_hdr->type, msg_hdr->len, pos, num_bytes_rxed);  
         if (!msg_hdr->len)
         {
             ICCPD_LOG_ERR(__FUNCTION__, "msg length zero!!!!! ");  

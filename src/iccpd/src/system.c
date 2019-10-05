@@ -260,6 +260,10 @@ SYNCD_RX_DBG_CNTR_MSG_e system_syncdrx_to_dbg_msg_type(uint32_t msg_type)
     {
         case MCLAG_SYNCD_MSG_TYPE_FDB_OPERATION:
             return SYNCD_RX_DBG_CNTR_MSG_MAC;
+        case MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_DOMAIN:
+            return SYNCD_RX_DBG_CNTR_MSG_CFG_MCLAG_DOMAIN;
+        case MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_IFACE:
+            return SYNCD_RX_DBG_CNTR_MSG_CFG_MCLAG_IFACE;
         default:
             return SYNCD_RX_DBG_CNTR_MSG_MAX;
     }

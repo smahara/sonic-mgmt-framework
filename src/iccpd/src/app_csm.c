@@ -282,15 +282,15 @@ int mlacp_unbind_local_if(struct LocalInterface* lif)
     if (lif->csm == NULL )
         return 0;
 
-    ICCPD_LOG_DEBUG("ICCP_FSM",
-        "MLAG_IF %s unbind: traffic_disable %d, sync_state %s",
-        lif->name, lif->is_traffic_disable, mlacp_state(lif->csm));
+    ICCPD_LOG_DEBUG("ICCP_FSM", "MLAG_IF %s unbind: traffic_disable %d, sync_state %s", lif->name, lif->is_traffic_disable, mlacp_state(lif->csm));
 
     ICCPD_LOG_INFO(__FUNCTION__, "%s: MLACP un-bind from csm %p", lif->name, lif->csm);
     LIST_REMOVE(lif, mlacp_next);
 
     if (MLACP(lif->csm).current_state  == MLACP_STATE_EXCHANGE && lif->type == IF_T_PORT_CHANNEL)
+    {
         LIST_INSERT_HEAD(&(MLACP(lif->csm).lif_purge_list), lif, mlacp_purge_next);
+    }
     if (lif->type == IF_T_PORT)
         lif->po_id = -1;
     lif->csm = NULL;

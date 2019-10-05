@@ -27,6 +27,10 @@
 #include "../include/iccp_csm.h"
 #include "../include/mlacp_tlv.h"
 
+#define ICCP_MLAGSYNCD_RECV_MSG_BUFFER_SIZE CSM_BUFFER_SIZE
+
+extern char g_iccp_recv_buf[];
+
 /*****************************************
 * Link Handler
 *

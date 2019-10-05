@@ -255,7 +255,7 @@ int mclagdctl_parse_dump_state(char *msg, int data_len)
 
         fprintf(stdout, "%s: %s\n", "The MCLAG's keepalive is", state_info->keepalive ? "OK" : "ERROR");
         fprintf(stdout, "%s: %s\n", "MCLAG info sync is",
-            state_info->info_sync_done ? "completed" : "incompleted");
+            state_info->info_sync_done ? "completed" : "incomplete");
         if (state_info->mclag_id <= 0)
             fprintf(stdout, "%s: %s\n", "Domain id", "Unknown");
         else
@@ -264,6 +264,8 @@ int mclagdctl_parse_dump_state(char *msg, int data_len)
         fprintf(stdout, "%s: %s\n", "Local Ip", state_info->local_ip);
         fprintf(stdout, "%s: %s\n", "Peer Ip", state_info->peer_ip);
         fprintf(stdout, "%s: %s\n", "Peer Link Interface", state_info->peer_link_if);
+        fprintf(stdout, "%s: %d\n", "Keepalive time",      state_info->keepalive_time);
+        fprintf(stdout, "%s: %d\n", "sesssion Timeout ",   state_info->session_timeout);
 
         fprintf(stdout, "%s: %02x:%02x:%02x:%02x:%02x:%02x \n",
                 "Peer Link Mac",
@@ -639,6 +641,10 @@ static char *mclagdctl_dbg_counter_syncdrx2str(SYNCD_RX_DBG_CNTR_MSG_e syncdrx_i
     {
         case SYNCD_RX_DBG_CNTR_MSG_MAC:
             return "FdbChange";
+        case SYNCD_RX_DBG_CNTR_MSG_CFG_MCLAG_DOMAIN:
+            return "CfgMclag";
+        case SYNCD_RX_DBG_CNTR_MSG_CFG_MCLAG_IFACE:
+            return "CfgMclagIface";
         default:
             return "Unknown";
     }

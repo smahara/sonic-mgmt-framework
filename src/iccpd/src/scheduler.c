@@ -71,7 +71,7 @@ static void heartbeat_check(struct CSM *csm)
         return;
     }
 
-    if ( (time(NULL) - csm->heartbeat_update_time) > HEARTBEAT_TIMEOUT_SEC)
+    if ( (time(NULL) - csm->heartbeat_update_time) > csm->session_timeout)
     {
         /* hearbeat timeout*/
         ICCPD_LOG_INFO(__FUNCTION__, "iccpd connection timeout (heartbeat)");

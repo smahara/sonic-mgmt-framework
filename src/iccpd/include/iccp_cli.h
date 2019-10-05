@@ -65,5 +65,8 @@ int set_local_system_id(const char* mac);
 int unset_local_system_id( );
 
 
+int set_keepalive_time(int mid, int keepalive_time);
+int set_session_timeout(int mid, int session_timeout_val);
+
 
 #endif

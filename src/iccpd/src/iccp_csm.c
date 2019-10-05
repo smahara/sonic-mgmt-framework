@@ -121,6 +121,8 @@ void iccp_csm_init(struct CSM* csm)
     memset(csm->peer_ip, 0, INET_ADDRSTRLEN);
     memset(csm->iccp_info.sender_name, 0, MAX_L_ICC_SENDER_NAME);
     csm->iccp_info.icc_rg_id = 0x0;
+    csm->keepalive_time      = CONNECT_INTERVAL_SEC; 
+    csm->session_timeout     = HEARTBEAT_TIMEOUT_SEC;
 }
 
 /* Connection State Machine instance status reset */
@@ -231,7 +233,7 @@ int iccp_csm_send(struct CSM* csm, char* buf, int msg_len)
     else
         param = (struct ICCParameter*)&buf[sizeof(ICCHdr)];
 
-    /*ICCPD_LOG_DEBUG(__FUNCTION__, "Send(%d): len=[%d] msg_type=[%s (0x%X, 0x%X)]", csm->sock_fd, msg_len, get_tlv_type_string(param->type), ldp_hdr->msg_type, param->type);*/
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Send(%d): len=[%d] msg_type=[%s (0x%X, 0x%X)]", csm->sock_fd, msg_len, get_tlv_type_string(param->type), ldp_hdr->msg_type, param->type);
     csm->msg_log.msg[csm->msg_log.end_index].msg_id = ntohl(ldp_hdr->msg_id);
     csm->msg_log.msg[csm->msg_log.end_index].type = ntohs(ldp_hdr->msg_type);
     csm->msg_log.msg[csm->msg_log.end_index].tlv = ntohs(param->type);

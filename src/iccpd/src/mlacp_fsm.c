@@ -344,7 +344,7 @@ static void mlacp_sync_send_heartbeat(struct CSM* csm)
     int msg_len = 0;
 
     if ((csm->heartbeat_send_time == 0) ||
-        ((time(NULL) - csm->heartbeat_send_time) > 1))
+        ((time(NULL) - csm->heartbeat_send_time) > csm->keepalive_time))
     {
         memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
         msg_len = mlacp_prepare_for_heartbeat(csm, g_csm_buf, CSM_BUFFER_SIZE);
