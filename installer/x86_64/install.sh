@@ -44,6 +44,11 @@ if [ -r ./onie-image.conf ]; then
 . ./onie-image.conf
 fi
 
+NOS_NAME=%%NOS_NAME%%
+if [ -r ./sonic_branding.yml ]; then
+    NOS_NAME=$(grep nos_name ./sonic_branding.yml | cut -f2- -d: | xargs)
+fi
+
 echo "ONIE Installer: platform: $platform"
 
 # Make sure run as root or under 'sudo'
@@ -134,8 +139,14 @@ demo_type="%%DEMO_TYPE%%"
 image_version="%%IMAGE_VERSION%%"
 timestamp="$(date -u +%Y%m%d)"
 
-demo_volume_label="SONiC-${demo_type}"
-demo_volume_revision_label="SONiC-${demo_type}-${image_version}"
+if [ "$NOS_NAME" = "" ]; then
+    demo_volume_label="SONiC-${demo_type}"
+    demo_volume_revision_label="SONiC-${demo_type}-${image_version}"
+    NOS_NAME="${demo_volume_label}"
+else
+    demo_volume_label="SONiC-${demo_type}"
+    demo_volume_revision_label="${NOS_NAME}-${image_version}"
+fi
 
 # auto-detect whether BIOS or UEFI
 if [ -d "/sys/firmware/efi/efivars" ] ; then
@@ -489,6 +500,16 @@ fi
 mkdir -p $demo_mnt/$image_dir/$DOCKERFS_DIR
 unzip -op $ONIE_INSTALLER_PAYLOAD "$FILESYSTEM_DOCKERFS" | tar xz $TAR_EXTRA_OPTION -f - -C $demo_mnt/$image_dir/$DOCKERFS_DIR
 
+if [ -r ./sonic_branding.yml ]; then
+    cp -f sonic_branding.yml $demo_mnt/$image_dir
+fi
+
+if [ -r ./first_boot.sh ]; then
+    cp -f ./first_boot.sh $demo_mnt/$image_dir
+fi
+
+echo $NOS_NAME > $demo_mnt/$image_dir/nos_name
+
 if [ "$install_env" = "onie" ]; then
     # Store machine description in target file system
     if [ -f /etc/machine-build.conf ]; then
@@ -590,7 +611,7 @@ fi
 cat <<EOF >> $grub_cfg
 menuentry '$demo_grub_entry' {
         search --no-floppy --label --set=root $demo_volume_label
-        echo    'Loading $demo_volume_label $demo_type kernel ...'
+        echo    'Loading $NOS_NAME $demo_type kernel ...'
         insmod gzio
         if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
         insmod part_msdos
@@ -599,7 +620,7 @@ menuentry '$demo_grub_entry' {
                 net.ifnames=0 biosdevname=0 \
                 loop=$image_dir/$FILESYSTEM_SQUASHFS loopfstype=squashfs                       \
                 apparmor=1 security=apparmor varlog_size=$VAR_LOG_SIZE usbcore.autosuspend=-1 $ONIE_PLATFORM_EXTRA_CMDLINE_LINUX
-        echo    'Loading $demo_volume_label $demo_type initial ramdisk ...'
+        echo    'Loading $NOS_NAME $demo_type initial ramdisk ...'
         initrd  /$image_dir/boot/initrd.img-4.9.0-9-2-amd64
 }
 EOF
@@ -625,4 +646,4 @@ fi
 
 cd /
 
-echo "Installed SONiC base image $demo_volume_label successfully"
+echo "Installed SONiC base image $NOS_NAME successfully"
