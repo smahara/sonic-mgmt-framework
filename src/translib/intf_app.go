@@ -164,6 +164,9 @@ func (app *IntfApp) translateCreate(d *db.DB) ([]db.WatchKeys, error) {
 	return keys, err
 }
 
+/* Reason why we don't have the Interface Type validation at beginning is due to,
+   the fact that, you could get mixture of different interfaces from GNMI or rest.
+   So Ideally, you need to initialize the DS for all the interface types. */
 func (app *IntfApp) translateUpdate(d *db.DB) ([]db.WatchKeys, error) {
 	var err error
 	var keys []db.WatchKeys
