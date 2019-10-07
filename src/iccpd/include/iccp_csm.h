@@ -38,9 +38,6 @@
 
 #define CSM_BUFFER_SIZE 65536
 
-#ifndef IFNAMSIZ
-#define IFNAMSIZ 16
-#endif /*IFNAMSIZ*/
 
 /* For socket binding */
 #define ICCP_TCP_PORT 8888
@@ -104,10 +101,13 @@ struct CSM
     time_t heartbeat_send_time;
     time_t heartbeat_update_time;
     time_t peer_warm_reboot_time;
-    char peer_itf_name[IFNAMSIZ];
+    char peer_itf_name[MAX_L_PORT_NAME];
     char peer_ip[INET_ADDRSTRLEN];
     char sender_ip[INET_ADDRSTRLEN];
     void* sock_read_event_ptr;
+    
+    int keepalive_time;
+    int session_timeout;
     
     /* Msg queue */
     TAILQ_HEAD(msg_list, Msg) msg_list;

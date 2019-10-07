@@ -476,8 +476,10 @@ typedef enum mclag_sub_option_type_e_
 } mclag_sub_option_type_e;
 
 enum MCLAG_DOMAIN_CFG_OP_TYPE {
-    MCLAG_CFG_OPER_ADD = 1,       //Add 
-    MCLAG_CFG_OPER_DEL = 2      //Delete
+    MCLAG_CFG_OPER_ADD        = 1,     //Add 
+    MCLAG_CFG_OPER_DEL        = 2,     //Delete
+    MCLAG_CFG_KEEPALIVE_TIME  = 3,     //configure Keepalive timer value
+    MCLAG_CFG_SESSION_TIMEOUT = 4      //configure Session Timeout value
 };
 
 
@@ -511,7 +513,7 @@ struct mclag_fdb_info
 
 struct mclag_domain_cfg_info
 {
-    int op_type;/*add/del domain; add/del mclag domain */
+    int op_type; /*add/del mclag domain */
     int domain_id;
     int keepalive_time;
     int session_timeout;
@@ -523,7 +525,7 @@ struct mclag_domain_cfg_info
 
 struct mclag_iface_cfg_info
 {
-    int op_type;/*add/del domain; add/del mclag iface */
+    int op_type; /*add/del mclag iface */
     int domain_id;
     char mclag_iface[MAX_L_PORT_NAME];
 };

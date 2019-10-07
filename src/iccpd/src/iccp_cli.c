@@ -86,8 +86,11 @@ int set_peer_link(int mid, const char* ifname)
     if (csm == NULL)
         return MCLAG_ERROR;
 
-    if (len > IFNAMSIZ)
+    if (len > MAX_L_PORT_NAME)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Peer-link %s, Strlen %d greater than MAX:%d ", ifname, strlen, MAX_L_PORT_NAME);
         return MCLAG_ERROR;
+    }
 
     if (strlen(csm->peer_itf_name) > 0)
     {
@@ -117,7 +120,7 @@ int set_peer_link(int mid, const char* ifname)
                        csm->mlag_id, ifname);
     }
 
-    memset(csm->peer_itf_name, 0, IFNAMSIZ);
+    memset(csm->peer_itf_name, 0, MAX_L_PORT_NAME);
     memcpy(csm->peer_itf_name, ifname, len);
 
     /* update peer-link link handler*/
@@ -158,7 +161,7 @@ int unset_peer_link(int mid)
     scheduler_session_disconnect_handler(csm);
 
     /* clean peer-link*/
-    memset(csm->peer_itf_name, 0, IFNAMSIZ);
+    memset(csm->peer_itf_name, 0, MAX_L_PORT_NAME);
     if (csm->peer_link_if)
     {
         csm->peer_link_if->is_peer_link = 0;
@@ -285,6 +288,42 @@ int unset_peer_address(int mid)
     return 0;
 }
 
+int set_keepalive_time(int mid, int keepalive_time)
+{
+    struct CSM* csm = NULL;
+    size_t len = 0;
+
+    csm = system_get_csm_by_mlacp_id(mid);
+    if (csm == NULL)
+        return MCLAG_ERROR;
+
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Set keepalive_time : %d", keepalive_time);
+
+    if (csm->keepalive_time != keepalive_time)
+    {
+        csm->keepalive_time = keepalive_time;
+        //reset heartbeat send time to send keepalive immediately
+        csm->heartbeat_send_time = 0;
+    }
+    return 0;
+}
+
+int set_session_timeout(int mid, int session_timeout_val)
+{
+    struct CSM* csm = NULL;
+    size_t len = 0;
+
+    csm = system_get_csm_by_mlacp_id(mid);
+    if (csm == NULL)
+        return MCLAG_ERROR;
+
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Set session timeout : %d", session_timeout_val);
+
+    csm->session_timeout = session_timeout_val;
+    return 0;
+}
+
+
 int iccp_cli_attach_mclag_domain_to_port_channel( int domain, const char* ifname)
 {
     struct CSM* csm = NULL;
@@ -366,8 +405,11 @@ int iccp_cli_detach_mclag_domain_to_port_channel( const char* ifname)
     ICCPD_LOG_DEBUG(__FUNCTION__, "detach mclag id = %d from ifname = %s",
                     csm->mlag_id, lif_po->name);
 
-    /* process link state handler before detaching it.*/
-    mlacp_mlag_link_del_handler(csm, lif_po);
+    /* process link state handler before detaching it.
+     * update peer link state, po state, update l2 mac state to peer
+     */
+    mlacp_portchannel_state_handler(csm, lif_po, 0);
+
 
     unbind_poid = lif_po->po_id;
     mlacp_unbind_local_if(lif_po);

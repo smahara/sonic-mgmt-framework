@@ -256,7 +256,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
                         if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
                         {
                             /*Redirect the mac to peer-link*/
-                            memcpy(&mac_msg->ifname, csm->peer_itf_name, IFNAMSIZ);
+                            memcpy(&mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
 
                             /*Send mac add message to mclagsyncd*/
                             add_mac_to_chip(mac_msg, MAC_TYPE_DYNAMIC);
@@ -268,7 +268,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
                             del_mac_from_chip(mac_msg);
 
                             /*Redirect the mac to peer-link*/
-                            memcpy(&mac_msg->ifname, csm->peer_itf_name, IFNAMSIZ);
+                            memcpy(&mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
                         }
                     }
                     else
@@ -377,7 +377,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
             else
             {
                 /*Redirect the mac to peer-link*/
-                memcpy(&mac_msg->ifname, csm->peer_itf_name, IFNAMSIZ);
+                memcpy(&mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
 
                 ICCPD_LOG_DEBUG(__FUNCTION__, "Redirect to peerlink for orphan port or portchannel is down,"
                     " Add local age flag: %d   ifname %s, add %s vlan-id %d, op_type %d",
