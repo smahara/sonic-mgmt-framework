@@ -35,6 +35,7 @@
 #include <msg_format.h>
 #include <system.h>
 #include <logger.h>
+#include <assert.h>
 #include "../include/mlacp_tlv.h"
 #include "../include/mlacp_sync_prepare.h"
 #include "../include/mlacp_link_handler.h"
@@ -55,6 +56,18 @@
             TAILQ_REMOVE(&(list), msg, tail); \
             free(msg->buf); \
             free(msg); \
+        } \
+        TAILQ_INIT(&(list)); \
+    }
+
+#define MLACP_MAC_MSG_QUEUE_REINIT(list) \
+    { \
+        struct MACMsg* mac_msg = NULL; \
+        while (!TAILQ_EMPTY(&(list))) { \
+            mac_msg = TAILQ_FIRST(&(list)); \
+            TAILQ_REMOVE(&(list), mac_msg, tail); \
+            if (mac_msg->op_type == MAC_SYNC_DEL) \
+                free(mac_msg); \
         } \
         TAILQ_INIT(&(list)); \
     }
@@ -237,19 +250,26 @@ static void mlacp_sync_send_aggState(struct CSM* csm)
 static void mlacp_sync_send_syncMacInfo(struct CSM* csm)
 {
     int msg_len = 0;
-    struct Msg* msg = NULL;
+    struct MACMsg* mac_msg = NULL;
     int count = 0;
 
     memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
 
     while (!TAILQ_EMPTY(&(MLACP(csm).mac_msg_list)))
     {
-        msg = TAILQ_FIRST(&(MLACP(csm).mac_msg_list));
-        TAILQ_REMOVE(&(MLACP(csm).mac_msg_list), msg, tail);
-        msg_len = mlacp_prepare_for_mac_info_to_peer(csm, g_csm_buf, CSM_BUFFER_SIZE, (struct MACMsg*)msg->buf, count);
+        mac_msg = TAILQ_FIRST(&(MLACP(csm).mac_msg_list));
+        MAC_TAILQ_REMOVE(&(MLACP(csm).mac_msg_list), mac_msg, tail);
+
+        msg_len = mlacp_prepare_for_mac_info_to_peer(csm, g_csm_buf, CSM_BUFFER_SIZE, mac_msg, count);
         count++;
-        free(msg->buf);
-        free(msg);
+
+        //free mac_msg if marked for delete.
+        if (mac_msg->op_type == MAC_SYNC_DEL)
+        {
+            assert(!(mac_msg->mac_entry_rb.rbt_parent));
+            free(mac_msg);
+        }
+
         if (count >= MAX_MAC_ENTRY_NUM)
         {
             iccp_csm_send(csm, g_csm_buf, msg_len);
@@ -642,7 +662,7 @@ void mlacp_init(struct CSM* csm, int all)
 
     MLACP_MSG_QUEUE_REINIT(MLACP(csm).mlacp_msg_list);
     MLACP_MSG_QUEUE_REINIT(MLACP(csm).arp_msg_list);
-    MLACP_MSG_QUEUE_REINIT(MLACP(csm).mac_msg_list);
+    MLACP_MAC_MSG_QUEUE_REINIT(MLACP(csm).mac_msg_list);
     PIF_QUEUE_REINIT(MLACP(csm).pif_list);
     LIF_PURGE_QUEUE_REINIT(MLACP(csm).lif_purge_list);
 
@@ -673,7 +693,7 @@ void mlacp_finalize(struct CSM* csm)
     /* msg destroy*/
     MLACP_MSG_QUEUE_REINIT(MLACP(csm).mlacp_msg_list);
     MLACP_MSG_QUEUE_REINIT(MLACP(csm).arp_msg_list);
-    MLACP_MSG_QUEUE_REINIT(MLACP(csm).mac_msg_list);
+    MLACP_MAC_MSG_QUEUE_REINIT(MLACP(csm).mac_msg_list);
     MLACP_MSG_QUEUE_REINIT(MLACP(csm).arp_list);
 
     RB_INIT(mac_rb_tree, &MLACP(csm).mac_rb );
@@ -713,7 +733,7 @@ void mlacp_fsm_transit(struct CSM* csm)
         {
             MLACP_MSG_QUEUE_REINIT(MLACP(csm).mlacp_msg_list);
             MLACP_MSG_QUEUE_REINIT(MLACP(csm).arp_msg_list);
-            MLACP_MSG_QUEUE_REINIT(MLACP(csm).mac_msg_list);
+            MLACP_MAC_MSG_QUEUE_REINIT(MLACP(csm).mac_msg_list);
             MLACP(csm).current_state = MLACP_STATE_INIT;
         }
         return;
@@ -856,27 +876,37 @@ struct Msg* mlacp_dequeue_msg(struct CSM* csm)
     return msg;
 }
 
+void mlacp_sync_mac(struct CSM* csm)
+{
+    struct MACMsg* mac_msg = NULL;
+    RB_FOREACH (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb)
+    {
+       mac_msg->op_type = MAC_SYNC_ADD;
+       mac_msg->age_flag &= ~MAC_AGE_PEER;
+
+       if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
+       {
+           TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
+       }
+
+       ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface %s, "
+           "MAC %s vlan %d, age_flag %d", mac_msg->ifname,
+           mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+    }
+    return;
+}
 /******************************************
 * When peerlink ready, prepare the MACMsg
 *
 ******************************************/
 static void mlacp_resync_mac(struct CSM* csm)
 {
-    struct MACMsg* mac_msg = NULL;
-    struct Msg *msg_send = NULL;
+    if (!csm)
+        return;
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Re-sync MAC addresses to peer ");
+    mlacp_sync_mac(csm);
 
-    RB_FOREACH (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb)
-    {
-       mac_msg->op_type = MAC_SYNC_ADD;
-       if (iccp_csm_init_msg(&msg_send, (char*)mac_msg, sizeof(struct MACMsg)) == 0)
-       {
-           mac_msg->age_flag &= ~MAC_AGE_PEER;
-           TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), msg_send, tail);
-           ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue: %s, "
-                "add %s vlan-id %d, age_flag %d", mac_msg->ifname,
-                mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
-       }
-    }
+    return;
 }
 
 /******************************************

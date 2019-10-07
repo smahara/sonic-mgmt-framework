@@ -609,8 +609,6 @@ static char *mclagdctl_dbg_counter_syncdtx2str(SYNCD_TX_DBG_CNTR_MSG_e syncdtx_i
             return "SetIfMac";
         case SYNCD_TX_DBG_CNTR_MSG_SET_FDB:
             return "SetFdb";
-        case SYNCD_TX_DBG_CNTR_MSG_GET_FDB_CHANGES:
-            return "GetFdbChange";
         case SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_ENABLE:
             return "TrafficDistEnable";
         case SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE:
