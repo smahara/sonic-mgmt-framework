@@ -116,5 +116,5 @@
 	branch = broadcom_sonic_2.x
 [submodule "src/broadcom-exclusive"]
 	path = src/broadcom-exclusive
-	url = ../broadcom-exclusive
+	url = ../broadcom-exclusive.git
 	branch = broadcom_sonic_2.x
