@@ -73,6 +73,7 @@ class Psu(PsuBase):
     """Platform-specific PSU class"""
 
     def __init__(self, psu_index):
+        PsuBase.__init__(self)
         fan = PsuFan(psu_index)
         self._fan_list.append(fan)
         self.index = psu_index + 1
@@ -93,7 +94,6 @@ class Psu(PsuBase):
             2: "13-005b",
             1: "17-0059",
         }
-        PsuBase.__init__(self)
 
     def get_name(self):
         """
