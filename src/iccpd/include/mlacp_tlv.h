@@ -483,6 +483,8 @@ struct MACMsg
        original if name that learned from chip*/
     char     origin_ifname[MAX_L_PORT_NAME];
     uint8_t age_flag;/*local or peer is age?*/
+
+    TAILQ_ENTRY(MACMsg) tail;     // entry into mac_msg_list
 };
 
 RB_HEAD(mac_rb_tree, MACMsg);

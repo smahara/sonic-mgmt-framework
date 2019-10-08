@@ -149,7 +149,7 @@ struct mLACP
     TAILQ_HEAD(mlacp_msg_list, Msg) mlacp_msg_list;
     TAILQ_HEAD(arp_msg_list, Msg) arp_msg_list;
     TAILQ_HEAD(arp_info_list, Msg) arp_list;
-    TAILQ_HEAD(mac_msg_list, Msg) mac_msg_list;
+    TAILQ_HEAD(mac_msg_list, MACMsg) mac_msg_list;
 
     struct mac_rb_tree mac_rb;
 
