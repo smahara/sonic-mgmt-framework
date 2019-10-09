@@ -207,10 +207,6 @@ DEB_BUILD_OPTIONS_GENERIC += "parallel=$(SONIC_CONFIG_MAKE_JOBS)"
 export DEB_BUILD_OPTIONS := "$(DEB_BUILD_OPTIONS_GENERIC)"
 export SONIC_CONFIG_MAKE_JOBS
 
-ifeq ($(ENABLE_PDE),y)
-override ENABLE_ZTP :=
-endif
-
 ###############################################################################
 ## Routing stack related exports
 ###############################################################################
