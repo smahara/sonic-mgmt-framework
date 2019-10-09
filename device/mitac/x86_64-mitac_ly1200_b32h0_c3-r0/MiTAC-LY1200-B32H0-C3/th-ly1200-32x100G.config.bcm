@@ -1,6 +1,7 @@
 ### BMS (start)
 ## Global settings
 bcm_num_cos=10
+default_cpu_tx_queue=9
 dport_map_indexed=0
 
 ## Switch settings

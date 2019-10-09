@@ -21,6 +21,7 @@ bcm_linkscan_interval.0=450000
 
 os=unix
 bcm_num_cos=10
+default_cpu_tx_queue=9
 
 
 # EagleCore ports

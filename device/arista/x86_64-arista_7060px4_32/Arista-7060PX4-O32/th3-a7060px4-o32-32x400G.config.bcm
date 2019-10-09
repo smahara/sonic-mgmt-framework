@@ -2,6 +2,7 @@ PHY_AN_ALLOW_PLL_CHANGE=1
 arl_clean_timeout_usec=15000000
 asf_mem_profile.0=2
 bcm_num_cos.0=8
+default_cpu_tx_queue=7
 bcm_stat_flags=1
 bcm_stat_jumbo.0=9236
 cdma_timeout_usec.0=15000000

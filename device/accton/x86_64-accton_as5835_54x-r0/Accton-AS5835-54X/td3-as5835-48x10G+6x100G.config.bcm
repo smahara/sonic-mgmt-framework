@@ -18,6 +18,7 @@ l2_mem_entries=32768
 #fpem_mem_entries=16384
 l2xmsg_mode=1
 bcm_num_cos=10
+default_cpu_tx_queue=9
 
 #FC0
 dport_map_port_1=1

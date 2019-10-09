@@ -4,6 +4,7 @@ l2_mem_entries=40960
 l2xmsg_mode=1
 l3_mem_entries=40960
 bcm_num_cos=10
+default_cpu_tx_queue=9
 mem_cache_enable=0
 parity_correction=0
 parity_enable=0

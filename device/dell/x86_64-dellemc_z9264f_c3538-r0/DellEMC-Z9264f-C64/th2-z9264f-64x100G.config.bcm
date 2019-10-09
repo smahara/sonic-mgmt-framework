@@ -11,6 +11,7 @@ l3_alpm_enable=2
 l2_mem_entries=40960
 l3_mem_entries=40960
 bcm_num_cos=10
+default_cpu_tx_queue=9
 switch_bypass_mode=0
 mmu_lossless=0
 lpm_scaling_enable=0
