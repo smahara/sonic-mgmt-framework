@@ -13,7 +13,10 @@
 #  * ENABLE_PFCWD_ON_START: Enable PFC Watchdog (PFCWD) on server-facing ports
 #  * by default for TOR switch.
 #  * ENABLE_SYNCD_RPC: Enables rpc-based syncd builds.
-#  * INSTALL_DEBUG_TOOLS: Install debug tools and debug symbol packeages.
+#  * INSTALL_DEBUG_TOOLS: Install debug tools and debug symbol packages.
+#  * SONIC_DEBUGGING_ON: Include debug symbols in Debian packages.
+#  * SONIC_PROFILING_ON: Include debug symbols and disable code optimizations in Debian packages.
+#  * SONIC_COVERAGE_ON: Build using code coverage flags and generate coverage data during compilation.
 #  * USERNAME: Desired username -- default at rules/config
 #  * PASSWORD: Desired password -- default at rules/config
 #  * KEEP_SLAVE_ON: Keeps slave container up and active after building process concludes.
@@ -37,6 +40,7 @@
 #  * SONIC_DPKG_CACHE_METHOD: Specifying method of obtaining the Debian packages from cache: none or cache
 #  * SONIC_DPKG_CACHE_SOURCE: Debian package cache location when cache enabled for debian packages
 #  * LOCAL_SAI_DEBS_PATH: Full path to the parent directory that holds SAI debian packages
+#  * BUILD_PRODUCT: Optional SONiC product identifier for the image we wish to build
 #
 ###############################################################################
 
@@ -260,6 +264,7 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            BLDENV=$(BLDENV) \
                            PLATFORM=$(PLATFORM) \
                            BUILD_NUMBER=$(BUILD_NUMBER) \
+                           BUILD_PRODUCT=$(BUILD_PRODUCT) \
                            BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) \
                            SLAVE_TAG=$(SLAVE_TAG) \
                            ENABLE_DHCP_GRAPH_SERVICE=$(ENABLE_DHCP_GRAPH_SERVICE) \
@@ -269,6 +274,9 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            SONIC_ENABLE_PFCWD_ON_START=$(ENABLE_PFCWD_ON_START) \
                            SONIC_ENABLE_SYNCD_RPC=$(ENABLE_SYNCD_RPC) \
                            SONIC_INSTALL_DEBUG_TOOLS=$(INSTALL_DEBUG_TOOLS) \
+                           SONIC_DEBUGGING_ON_PARAM=$(SONIC_DEBUGGING_ON) \
+                           SONIC_PROFILING_ON_PARAM=$(SONIC_PROFILING_ON) \
+                           SONIC_COVERAGE_ON_PARAM=$(SONIC_COVERAGE_ON) \
                            PASSWORD=$(PASSWORD) \
                            USERNAME=$(USERNAME) \
                            SONIC_BUILD_JOBS=$(SONIC_BUILD_JOBS) \
@@ -299,7 +307,7 @@ PDESUBMODULES = src/sonic-linux-kernel \
                 src/sonic-sairedis \
                 src/sonic-platform-pde
 
-.PHONY: sonic-slave-build sonic-slave-bash init initpde reset
+.PHONY: sonic-slave-build sonic-slave-bash init initpde reset developer
 
 .DEFAULT_GOAL :=  all
 
@@ -344,6 +352,12 @@ sonic-slave-bash :
 showtag:
 	@echo $(SLAVE_IMAGE):$(SLAVE_TAG)
 	@echo $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG)
+
+developer :
+	@sed -i 's|# INSTALL_DEBUG_TOOLS = y|INSTALL_DEBUG_TOOLS = y|' rules/config
+	@sed -i 's|#SONIC_DEBUGGING_ON = y|SONIC_DEBUGGING_ON = y|' rules/config
+	@sed -i 's|DEFAULT_KERNEL_PROCURE_METHOD = build|DEFAULT_KERNEL_PROCURE_METHOD = cache|' rules/config
+	@sed -i 's|SONIC_DPKG_CACHE_METHOD=none|SONIC_DPKG_CACHE_METHOD=cache|' rules/config
 
 initpde:
 	@for submodule in $(PDESUBMODULES) ; do \

@@ -81,6 +81,8 @@ function preStartAction()
     fi
 {%- elif docker_container_name == "teamd" %}
     wait_for_swss_db_flush_done
+{%- elif docker_container_name == "nat" %}
+    wait_for_swss_db_flush_done
 {%- elif docker_container_name == "syncd" %}
     # Clear the portstat counters
     for file in `ls /tmp/portstat*/*`
@@ -94,7 +96,7 @@ function preStartAction()
     done
 {%- elif docker_container_name == "pmon" %}
     # Initialize the eeprom info in databse
-    sudo decode-syseeprom --init
+    sudo /usr/bin/sysupdate.py 2>/dev/null && sudo decode-syseeprom --init
 	if [ $? -ne 0 ]; then
 		echo "EEPROM info initialization into database failed"
 	else

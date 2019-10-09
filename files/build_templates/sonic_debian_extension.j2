@@ -242,6 +242,7 @@ sudo cp $IMAGE_CONFIGS/interfaces/interfaces-config.sh $FILESYSTEM_ROOT/usr/bin/
 sudo cp $IMAGE_CONFIGS/interfaces/*.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 sudo cp files/dhcp/dhclient.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 sudo cp files/dhcp/ifupdown2_policy.json $FILESYSTEM_ROOT/etc/network/ifupdown2/policy.d
+sudo cp files/dhcp/90-dhcp6-systcl.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 
 # Copy initial interfaces configuration file, will be overwritten on first boot
 {% if enable_pde == "y" %}
@@ -307,6 +308,11 @@ sudo cp $IMAGE_CONFIGS/sudoers/sudoers.lecture $FILESYSTEM_ROOT/etc/
 sudo cp $IMAGE_CONFIGS/caclmgrd/caclmgrd.service  $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable caclmgrd.service
 sudo cp $IMAGE_CONFIGS/caclmgrd/caclmgrd $FILESYSTEM_ROOT/usr/bin/
+
+
+## Increase the systemd service startup timeout
+sudo sed -i "s/.*DefaultTimeoutStartSec.*/DefaultTimeoutStartSec=180s/g" $FILESYSTEM_ROOT/etc/systemd/system.conf
+sudo sed -i "s/.*DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=180s/g" $FILESYSTEM_ROOT/etc/systemd/system.conf
 
 ## Allow systemd-coredump to perform cleanup of core files and not tmpfiles.d
 sudo sed -i "/\/var\/lib\/systemd\/coredump/d" $FILESYSTEM_ROOT/usr/lib/tmpfiles.d/systemd.conf
@@ -413,6 +419,9 @@ sudo LANG=C chroot $FILESYSTEM_ROOT umount -lf /sys
 sudo LANG=C cp $SCRIPTS_DIR/swss.sh $FILESYSTEM_ROOT/usr/local/bin/swss.sh
 sudo LANG=C cp $SCRIPTS_DIR/syncd.sh $FILESYSTEM_ROOT/usr/local/bin/syncd.sh
 
+# Copy config-hwsku script
+sudo LANG=C cp $SCRIPTS_DIR/config-hwsku $FILESYSTEM_ROOT/usr/bin/config-hwsku
+
 # Copy systemd timer configuration
 # It implements delayed start of services
 sudo cp $BUILD_TEMPLATES/snmp.timer $FILESYSTEM_ROOT/etc/systemd/system/
@@ -426,6 +435,9 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get autor
 {% if file.strip() -%}
 {% set src = file.split(':')[0] -%}
 {% set dst = file.split(':')[1] -%}
+if [ ! -d $FILESYSTEM_ROOT/$(dirname {{dst}}) ]; then
+    sudo mkdir -p $FILESYSTEM_ROOT/$(dirname {{dst}})
+fi
 sudo cp {{src}} $FILESYSTEM_ROOT/{{dst}}
 {% endif -%}
 {% endfor -%}

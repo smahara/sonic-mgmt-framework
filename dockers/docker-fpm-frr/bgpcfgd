@@ -39,6 +39,8 @@ class BGPConfigDaemon:
         #get frr bfd session key
         key_params = key.split('|')
         cmd = 'peer {}'.format(key_params[0])
+        if len(key_params) == 4 and key_params[3] == 'multihop':
+            cmd = cmd + ' multihop '
        	if key_params[1] != 'null':
             cmd = cmd + ' local-address ' + key_params[1]
         if key_params[2] != 'null':

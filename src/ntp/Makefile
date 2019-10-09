@@ -22,6 +22,7 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 
 	# Add the additional patch
 	cp ../patch/bug1970-UNLINK_EXPR_SLIST_empty_list.patch debian/patches/
+	cp ../patch/update_ENOBUFS_log_level.patch debian/patches/
 	cat ../patch/series  >> debian/patches/series
 
 	# Update the changelog

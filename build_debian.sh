@@ -5,6 +5,8 @@
 ## USAGE:
 ##   USERNAME=username PASSWORD=password ./build_debian [phase]
 ## ENVIRONMENT:
+##   BUILD_TARGET
+##          The name of the installer that is currently being created
 ##   USERNAME
 ##          The name of the default admin user
 ##   PASSWORD
@@ -425,9 +427,6 @@ set /files/etc/sysctl.conf/net.ipv6.conf.default.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.all.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.keep_addr_on_down 1
 
-set /files/etc/sysctl.conf/net.ipv6.conf.eth0.accept_ra_defrtr 0
-set /files/etc/sysctl.conf/net.ipv6.conf.eth0.accept_ra 0
-
 set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 0
 set /files/etc/sysctl.conf/net.ipv4.udp_l3mdev_accept 1
 
@@ -525,6 +524,9 @@ sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y autoremove
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get autoclean
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get clean
 sudo LANG=C chroot $FILESYSTEM_ROOT bash -c 'rm -rf /usr/share/doc/* /usr/share/locale/* /var/lib/apt/lists/* /tmp/*'
+
+## Clean up /etc/resolv.conf so that it does not contain any DNS information related to the build
+sudo rm -f $FILESYSTEM_ROOT/etc/resolv.conf
 
 ## Clean up proxy
 [ -n "$http_proxy" ] && sudo rm -f $FILESYSTEM_ROOT/etc/apt/apt.conf.d/01proxy

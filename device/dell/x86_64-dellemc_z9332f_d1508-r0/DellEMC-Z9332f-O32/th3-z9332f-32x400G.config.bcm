@@ -28,7 +28,6 @@ lls_num_l2uc.0=10
 miim_intr_enable.0=0
 table_dma_enable=1
 max_vp_lags.0=0
-num_ipv6_lpm_128b_entries.0=0
 tdma_intr_enable=1
 tdma_timeout_usec.0=5000000
 parity_correction.0=1
@@ -36,6 +35,9 @@ mmu_lossless.0=0
 pktdma_poll_mode_channel_bitmap=1
 l3_max_ecmp_mode.0=1
 l3_alpm_enable=2
+l3_alpm_ipv6_128b_bkt_rsvd=1
+l2_mem_entries=40960
+l3_mem_entries=40960
 
 l2xlrn_thread_interval=50000
 l2xlrn_intr_en=0

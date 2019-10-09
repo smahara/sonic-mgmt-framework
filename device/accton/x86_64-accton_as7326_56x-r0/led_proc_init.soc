@@ -4,7 +4,6 @@
 linkscan off
 
 m0 load 0 0x3800 /usr/share/sonic/platform/custom_led-green.bin
-led auto on
 led start
 
 # Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI

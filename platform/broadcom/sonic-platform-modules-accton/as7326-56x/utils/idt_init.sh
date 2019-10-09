@@ -1,13 +1,13 @@
 #!/bin/bash
 
+LOGFILE=/var/log/idt_init.log
+
 pr_info()
 {
+  # syslog
   echo "idt_init: $1"
-}
-
-pr_err()
-{
-  echo "idt_init: ERR: $1"
+  # saving the log into a file
+  echo "[$(date +'%D %T')] $1" >> ${LOGFILE}
 }
 
 modprobe i2c-i801
@@ -22,6 +22,19 @@ echo pca9548 0x70 > /sys/bus/i2c/devices/i2c-1/new_device
 echo pca9548 0x71 > /sys/bus/i2c/devices/i2c-1/new_device
 sleep 1
 
+#
+# The following TD3/PCI reset only works on R0C units,
+# and it will cause a cold reboot on R01 boards when issuing
+#
+#   $ i2cset -f -y 18 0x60 0x7 0xD7
+#
+# As a result, this reset logic is intentionally disabled on R01 boards
+# and Accton indicated the reset will be taken care of in BIOS on R01.
+#
+# Note:
+# It has been verified on a R01 unit, the SAI/SDK is alwaying coming up
+# after a fast-reboot, 10 out of 10 attempts
+#
 BDID=$(printf "%d" $(i2cget -f -y 18 0x60 0))
 if [ ${BDID} -lt 15 ]; then
     pr_info "Reset both MAC and PCI (write 0xD7)"
@@ -48,10 +61,12 @@ if [ ${BDID} -lt 15 ]; then
             pr_info "Broadcom device NOT FOUND, try again..."
         fi
     done
-
     lspci -n | grep 07:00.0 > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        pr_err "unable to reset PCI/TD3"
+        pr_info "Broadcom device NOT FOUND, TD3/PCI reset failed"
+    else
+        # Allow 5 seconds delay after TD3/PCI reset
+        sleep 5
     fi
 fi
 
@@ -60,8 +75,8 @@ if [ $? -ne 0 ]; then
     pr_info "Device 8v89307(0x54) not found"
     exit 1
 fi
-echo "IDT 82V89307 "
-echo "idt init 1"
+pr_info "IDT 82V89307 detected"
+pr_info "idt init 1"
 # Title = --- IDT 82V89307 Registers ---
 #Select to Page 0
 i2cset -y 9 0x54 0x2D 0x00
@@ -158,7 +173,7 @@ i2cset -y 9 0x54 0x02 0x05
 i2cset -y 9 0x54 0x01 0x33
 i2cset -y 9 0x54 0x00 0x91
 
-echo "idt init 2"
+pr_info "idt init 2"
 # PreDivider_Parameters
 #IN1
 i2cset -y 9 0x54 0x23 0x05
@@ -173,7 +188,7 @@ i2cset -y 9 0x54 0x23 0x03
 i2cset -y 9 0x54 0x24 0x00
 i2cset -y 9 0x54 0x25 0x00
 
-echo "idt init 3"
+pr_info "idt init 3"
 # Page1_Parameters
 #Select to Page 1
 i2cset -y 9 0x54 0x2D 0x01
@@ -193,5 +208,5 @@ i2cset -y 9 0x54 0x3D 0x20
 #Return to Page 0
 i2cset -y 9 0x54 0x2D 0x00
 
-echo "idt init 4"
+pr_info "idt init 4"
 

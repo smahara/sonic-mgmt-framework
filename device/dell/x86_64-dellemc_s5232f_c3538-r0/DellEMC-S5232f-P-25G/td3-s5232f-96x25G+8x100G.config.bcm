@@ -22,16 +22,17 @@ module_64ports=0
 table_dma_enable=1
 tdma_timeout_usec=5000000
 mmu_lossless=0
+bcm_num_cos=10
 
 l2xmsg_mode=1
 l2xmsg_hostbuf_size=8192
-ipv6_lpm_128b_enable=0
-num_ipv6_lpm_128b_entries=0
+ipv6_lpm_128b_enable=1
 max_vp_lags=0
 
 l3_alpm_enable=2
-l2_mem_entries=32768
-l3_mem_entries=16384
+l3_alpm_ipv6_128b_bkt_rsvd=1
+l2_mem_entries=40960
+l3_mem_entries=40960
 l3_max_ecmp_mode=1 
 
 bcm_tunnel_term_compatible_mode=1

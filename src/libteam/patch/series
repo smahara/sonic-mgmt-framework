@@ -9,3 +9,4 @@
 0009-teamd-ignore-lacp-state-if-fallback.patch
 0015-team-config-port-if-ifname-succeeds.patch
 0016-teamd-stop-processing-key-mismatch-dont-select-if-not-aggregable.patch
+0017-libteam-change-loglevel-to-info-if-netlink-msg-is-unparsable.patch

@@ -25,10 +25,4 @@
 		"script": "/var/local/hwdiag/i2c/syseeprom.py",
 		"logfile": "/var/local/hwdiag/logs/syseeprom.log"
 	}
-},
-"switch": {
-	"asic": {
-		"script": "/var/local/hwdiag/asic/broadcom/asic_diag_report.sh",
-		"logfile": "/var/local/hwdiag/logs/asic.log"
-	}
 }}
