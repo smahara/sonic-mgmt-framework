@@ -23,12 +23,8 @@ def call_method(name, args):
     return method(args)
 
 def generate_body(func, args):
-    print "run"
     body = None
     keypath = []
-    print "printing args"
-    print args[0]
-    print "done printing args"
 
     # Get the rules of all ECN table entries.
     if func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile_wred_profile':
@@ -111,12 +107,9 @@ def run(func, args):
     c = sonic_wred_profile_client.Configuration()
     c.verify_ssl = False
     aa = sonic_wred_profile_client.SonicWredProfileApi(api_client=sonic_wred_profile_client.ApiClient(configuration=c))
-    print "run"
 
     # create a body block
     keypath, body = generate_body(func, args)
-    print keypath
-    print body
 
     try:
         if body is not None:
@@ -144,7 +137,7 @@ def run(func, args):
                 else:
                      return
     except ApiException as e:
-        #print("Exception when calling get_sonic_wred_profile_sonic_wred_profile ->%s : %s\n" %(func.__name__, e))
+        print("Exception when calling get_sonic_wred_profile_sonic_wred_profile ->%s : %s\n" %(func.__name__, e))
         if e.body != "":
             body = json.loads(e.body)
             if "ietf-restconf:errors" in body:
