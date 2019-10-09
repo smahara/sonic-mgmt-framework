@@ -1,0 +1,215 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE CLISH_MODULE [
+<!ENTITY START_PORT_ID "1">
+<!ENTITY MAX_PORT_ID "32">
+<!ENTITY START_SUB_PORT_ID "1">
+<!ENTITY MAX_SUB_PORT_ID "4">
+<!ENTITY MAX_MTU "9216">
+]>
+<CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
+  <!--=========================================================================-->
+  <VIEW name="enable-view">
+
+    <!--show ecn -->
+    <COMMAND name="show wred" help="Show configured WRED profiles">
+      <ACTION> python $SONIC_CLI_ROOT/sonic-cli-ecn.py get_sonic_wred_profile_sonic_wred_profile show_ecn.j2 </ACTION>
+      <xi:include href="include/pipe.xml"/>
+    </COMMAND>
+
+  </VIEW>
+  <VIEW name="configure-view">
+    <!-- ecn -->
+    <COMMAND
+        name="wred"
+        help="ECN Configuration"
+        mode="subcommand"
+        ptype="SUBCOMMAND"
+        view="configure-prof-view"
+        viewid="prof_id=${name}"
+        >
+        <PARAM
+                name="name"
+                help="WRED Profile"
+                ptype="STRING_32"
+                >
+        </PARAM>
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile ${name}</ACTION>
+    </COMMAND>
+
+    <!-- no ecn -->
+    <COMMAND name="no wred" help="Unconfigure a WRED profile">
+      <PARAM name="name" help="Name of the WRED profile" ptype="STRING_32"> </PARAM>
+      <ACTION> python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile ${name} </ACTION>
+    </COMMAND>
+
+  </VIEW>
+
+<VIEW
+    name="configure-prof-view"
+    prompt="${SYSTEM_NAME}(conf-wred-${prof_id})# "
+    depth="2"
+    >
+    <!-- Inheritance -->
+    <NAMESPACE
+        ref="configure-view"
+        help="false"
+        completion="false"
+        />
+
+    <COMMAND
+        name="no"
+        help="Negate a command or set its defaults"
+        />
+    <COMMAND
+        name="yellow-min-threshold"
+        help="Configure yellow minimum threshold of the profile">
+        <PARAM
+            name="yellow-min-threshold"
+            help="Configure the minimum threshold for yellow queue"
+            ptype="UINT" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_min_threshold ${prof_id} ${yellow-min-threshold} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no yellow-min-threshold"
+        help="Default the yellow minimum threshold" >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_min_threshold ${prof_id} 0 </ACTION>
+    </COMMAND>
+
+    <COMMAND
+        name="yellow-max-threshold"
+        help="Configure yellow maximum threshold of the profile">
+        <PARAM
+            name="yellow-max-threshold"
+            help="Configure the maximum number of yellow minimum threshold in the profile"
+            ptype="UINT" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_max_threshold ${prof_id} ${yellow-max-threshold} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no yellow-max-threshold"
+        help="Default yellow maximum threshold" >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_max_threshold ${prof_id} 0 </ACTION>
+    </COMMAND>
+
+    <COMMAND
+        name="yellow-drop-rate"
+        help="Configure yellow drop rate of the profile">
+        <PARAM
+            name="yellow-drop-rate"
+            help="Configure the drop rate of yellow in the profile"
+            ptype="UINT" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_drop_rate ${prof_id} ${yellow-drop-rate} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no yellow-drop-rate"
+        help="Default yellow drop rate" >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_drop_rate ${prof_id} 0 </ACTION>
+    </COMMAND>
+
+
+    <COMMAND
+        name="green-max-threshold"
+        help="Configure green maximum threshold of the profile">
+        <PARAM
+            name="green-max-threshold"
+            help="Configure the green maximum threshold in the profile"
+            ptype="UINT" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_green_max_threshold ${prof_id} ${green-max-threshold} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no green-max-threshold"
+        help="Default the green maximum threshold " >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_green_max_threshold ${prof_id} 0 </ACTION>
+    </COMMAND>
+
+    <COMMAND
+        name="green-min-threshold"
+        help="Configure green minimum threshold of the profile">
+        <PARAM
+            name="green-min-threshold"
+            help="Configure green minimum threshold in the profile"
+            ptype="UINT" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_green_min_threshold ${prof_id} ${green-min-threshold} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no green-min-threshold"
+        help="Default the green minimum threshold" >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_green_min_threshold ${prof_id} 0 </ACTION>
+    </COMMAND>
+
+    <COMMAND
+        name="green-drop-rate"
+        help="Configure green drop rate of the profile">
+        <PARAM
+            name="green-drop-rate"
+            help="Configure the drop rate of green in the profile"
+            ptype="UINT" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_green_drop_rate ${prof_id} ${green-drop-rate} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no green-drop-rate"
+        help="Default the green drop rate" >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_green_drop_rate ${prof_id} 0 </ACTION>
+    </COMMAND>
+
+    <COMMAND
+        name="red-max-threshold"
+        help="Configure red maximum threshold of the profile">
+        <PARAM
+            name="red-max-threshold"
+            help="Configure the red maximum threshold in the profile"
+            ptype="UINT" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_red_max_threshold ${prof_id} ${red-max-threshold} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no red-max-threshold"
+        help="Default red maximum threshold" >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_red_max_threshold ${prof_id} 0 </ACTION>
+    </COMMAND>
+
+    <COMMAND
+        name="red-min-threshold"
+        help="Configure red minimum threshold of the profile">
+        <PARAM
+            name="red-min-threshold"
+            help="Configure the red minimum threshold in the profile"
+            ptype="UINT" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_red_min_threshold ${prof_id} ${red-min-threshold} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no red-min-threshold"
+        help="Default red minimum threshold" >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_red_min_threshold ${prof_id} 0 </ACTION>
+    </COMMAND>
+
+    <COMMAND
+        name="red-drop-rate"
+        help="Configure red drop rate of the profile">
+        <PARAM
+            name="red-drop-rate"
+            help="Configure the drop rate of red in the profile"
+            ptype="UINT" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_red_drop_rate ${prof_id} ${red-drop-rate} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no red-drop-rate"
+        help="Default the red drop rate" >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_red_drop_rate ${prof_id} 0 </ACTION>
+    </COMMAND>
+
+    <COMMAND
+        name="ecn"
+        help="Configure ecn of the profile">
+        <PARAM
+            name="ecn"
+            help="Configure the drop rate of red in the profile"
+            ptype="ECN_OPTION" />
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_ecn ${prof_id} ${ecn} </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no ecn"
+        help="Default the maximum number of links in a port channel" >
+        <ACTION>python $SONIC_CLI_ROOT/sonic-cli-ecn.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_ecn ${prof_id} "ecn_none"</ACTION>
+    </COMMAND>
+    </VIEW>
+</CLISH_MODULE>
+

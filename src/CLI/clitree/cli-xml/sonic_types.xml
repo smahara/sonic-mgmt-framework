@@ -483,4 +483,11 @@ limitations under the License.
         help="Hexadecimal Type"
 	/>
     <!--=======================================================-->
+     <PTYPE
+        name="ECN_OPTION"
+        method="select"
+        pattern="ecn_none(ecn_none) ecn_green(ecn_green) ecn_yellow(ecn_yellow) ecn_red(ecn_red) ecn_green_yello(ecn_green_yellow) ecn_green_red(ecn_green_red) ecn_yellow_red(ecn_yellow_red) ecn_all(ecn_all)"
+        help="ECN Options"
+        />
+    <!--=======================================================-->
 </CLISH_MODULE>
