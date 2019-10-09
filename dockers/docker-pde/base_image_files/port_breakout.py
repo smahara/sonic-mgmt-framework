@@ -51,7 +51,7 @@ sonic_platforms = {
         }
     },
     "x86_64-quanta_ix9_bwde-r0": {
-         "breakout": {
+        "breakout": {
              "0,8,16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240,248": [ "1x400", "4x100", "4x25", "4x10", "4x50", "2x200", "2x100" ]
         }
     }
@@ -704,9 +704,6 @@ def check_vaildation(platform, hwsku, port, opt):
         return False
 
     if not get_is_bkout(opt):
-        if len(ini_lanes) != get_bkout_lanes(opt):
-            print("Port %s can not non-breakout." % (port))
-            return False
         if len(ini_lanes) == 0:
             print("port %s does not exist." % (port))
             return False
