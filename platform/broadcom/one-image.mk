@@ -53,3 +53,5 @@ $(SONIC_ONE_IMAGE)_DOCKERS = $(SONIC_INSTALL_DOCKER_IMAGES)
 endif
 
 SONIC_INSTALLERS += $(SONIC_ONE_IMAGE)
+
+-include $(SRC_PATH)/broadcom-exclusive/installers.mk

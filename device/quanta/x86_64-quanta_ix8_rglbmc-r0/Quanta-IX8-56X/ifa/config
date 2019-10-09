@@ -1,0 +1,8 @@
+# IFA Settings
+num_queues_pci=46
+num_queues_uc0=1
+num_queues_uc1=1
+flow_init_mode=1
+ifa_enable=1
+sai_ifa_config=0x80000000000000002
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json

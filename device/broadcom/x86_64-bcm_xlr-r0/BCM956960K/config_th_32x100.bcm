@@ -75,3 +75,4 @@ phy_xaui_tx_polarity_flip_ce27=0x8
 phy_xaui_rx_polarity_flip_ce27=0x8
 l2xmsg_mode=1
 fpem_mem_entries=32768
+bcm_num_cos=10

@@ -1,6 +1,6 @@
 l3_alpm_ipv6_128b_bkt_rsvd=1
 bcm_tunnel_term_compatible_mode=1
-bcm_num_cos=8
+bcm_num_cos=10
 core_clock_frequency=1525
 dpp_clock_ratio=2:3
 l2_mem_entries=40000
@@ -12,7 +12,8 @@ bcm_stat_interval=2000000
 cdma_timeout_usec=3000000
 stable_size=0x5500000
 ifp_inports_support_enable=1
-pbmp_xport_xe=0x7F878787F878787FDFE1E1E1FE1E1E1FE
+# Updated port bitmap with bits corresponding to 9 and 73 ports
+pbmp_xport_xe=0x7F878787F87878FFDFE1E1E1FE1E1E3FE
 port_flex_enable=1
 ipv6_lpm_128b_enable=0x1
 l3_max_ecmp_mode=1
@@ -23,6 +24,17 @@ skip_L2_USER_ENTRY=0
 schan_intr_enable=0
 tdma_timeout_usec=3000000
 parity_enable=1
+
+# IFA Settings
+num_queues_pci=46
+num_queues_uc0=1
+num_queues_uc1=1
+flow_init_mode=1
+ifa_enable=1
+sai_ifa_config=0x8000000000000000200
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
+portmap_9=9:10
+portmap_75=73:10
 
 dport_map_port_1=6
 dport_map_port_2=2

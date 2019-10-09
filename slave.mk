@@ -9,7 +9,7 @@ SHELL = /bin/bash
 USER = $(shell id -un)
 UID = $(shell id -u)
 GUID = $(shell id -g)
-SONIC_GET_VERSION=$(shell export BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) && export BUILD_NUMBER=$(BUILD_NUMBER) && . functions.sh && sonic_get_version)
+SONIC_GET_VERSION=$(shell export BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) && export BUILD_NUMBER=$(BUILD_NUMBER) && export BUILD_PRODUCT=$(BUILD_PRODUCT) && . functions.sh && sonic_get_version)
 
 .SECONDEXPANSION:
 
@@ -42,6 +42,7 @@ CONFIGURED_PLATFORM := $(shell [ -f .platform ] && cat .platform || echo generic
 PLATFORM_PATH = platform/$(CONFIGURED_PLATFORM)
 export BUILD_NUMBER
 export BUILD_TIMESTAMP
+export BUILD_PRODUCT
 export CONFIGURED_PLATFORM
 
 SONIC_MAKEFILE_LIST=slave.mk rules/functions
@@ -72,6 +73,10 @@ distclean : .platform clean
 list :
 	@$(foreach target,$(SONIC_TARGET_LIST),echo $(target);)
 
+# dummy target useful for trying makefile changes
+noop :
+	@echo "Nothing to do (noop)"
+
 ###############################################################################
 ## Include other rules
 ###############################################################################
@@ -88,17 +93,29 @@ ifeq ($(SONIC_ENABLE_SYNCD_RPC),y)
 ENABLE_SYNCD_RPC = y
 endif
 
-ifeq ($(SONIC_INSTALL_DEBUG_TOOLS),y)
-INSTALL_DEBUG_TOOLS = y
+include $(RULES_PATH)/config
+
+ifneq ($(SONIC_INSTALL_DEBUG_TOOLS),)
+INSTALL_DEBUG_TOOLS = $(SONIC_INSTALL_DEBUG_TOOLS)
 endif
 
-include $(RULES_PATH)/config
+ifneq ($(SONIC_DEBUGGING_ON_PARAM),)
+SONIC_DEBUGGING_ON = $(SONIC_DEBUGGING_ON_PARAM)
+endif
+
+ifneq ($(SONIC_PROFILING_ON_PARAM),)
+SONIC_PROFILING_ON = $(SONIC_PROFILING_ON_PARAM)
+endif
+
+ifneq ($(SONIC_COVERAGE_ON_PARAM),)
+SONIC_COVERAGE_ON = $(SONIC_COVERAGE_ON_PARAM)
+endif
+
 include $(RULES_PATH)/functions
 include $(RULES_PATH)/*.mk
 ifneq ($(CONFIGURED_PLATFORM), undefined)
 include $(PLATFORM_PATH)/rules.mk
 endif
-
 
 ifeq ($(SONIC_USE_PDDF_FRAMEWORK),y)
 PDDF_SUPPORT = y
@@ -240,11 +257,13 @@ $(info "KERNEL_PROCURE_METHOD"           : "$(KERNEL_PROCURE_METHOD)")
 ifeq ($(KERNEL_PROCURE_METHOD),cache)
 $(info "KERNEL_CACHE_PATH"               : "$(KERNEL_CACHE_PATH)")
 endif
+$(info "SONIC_DPKG_CACHE_METHOD"         : "$(SONIC_DPKG_CACHE_METHOD)")
 ifeq ($(SONIC_DPKG_CACHE_METHOD),cache)
 $(info "DPKG_CACHE_PATH"                 : "$(SONIC_DPKG_CACHE_SOURCE)")
 endif
 $(info "BUILD_NUMBER"                    : "$(BUILD_NUMBER)")
 $(info "BUILD_TIMESTAMP"                 : "$(BUILD_TIMESTAMP)")
+$(info "BUILD_PRODUCT"                   : "$(BUILD_PRODUCT)")
 $(info "BLDENV"                          : "$(BLDENV)")
 $(info "VS_PREPARE_MEM"                  : "$(VS_PREPARE_MEM)")
 $(info "VERSION"                         : "$(SONIC_GET_VERSION)")
@@ -906,6 +925,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	export installer_start_scripts="$(foreach docker, $($*_DOCKERS),$(addsuffix .sh, $($(docker:-dbg.gz=.gz)_CONTAINER_NAME)))"
 	export installer_services="$(foreach docker, $($*_DOCKERS),$(addsuffix .service, $($(docker:-dbg.gz=.gz)_CONTAINER_NAME)))"
 	export installer_extra_files="$(foreach docker, $($*_DOCKERS), $(foreach file, $($(docker:-dbg.gz=.gz)_BASE_IMAGE_FILES), $($(docker:-dbg.gz=.gz)_PATH)/base_image_files/$(file)))"
+	export installer_extra_files+="$(foreach docker, $($*_DOCKERS), $(foreach file, $($(docker:-dbg.gz=.gz)_DERIVED_BASE_IMAGE_FILES), $(file)))"
 
 	j2 -f env files/initramfs-tools/union-mount.j2 onie-image.conf > files/initramfs-tools/union-mount
 	j2 -f env files/initramfs-tools/arista-convertfs.j2 onie-image.conf > files/initramfs-tools/arista-convertfs
@@ -918,6 +938,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 		chmod +x sonic_debian_extension.sh,
 	)
 
+	BUILD_TARGET="$@" \
 	USERNAME="$(USERNAME)" \
 	PASSWORD="$(PASSWORD)" \
 	NUMPROCS="$(SONIC_CONFIG_MAKE_JOBS)" \
@@ -1009,6 +1030,6 @@ jessie : $$(addprefix $(TARGET_PATH)/,$$(SONIC_JESSIE_DOCKERS_FOR_INSTALLERS))
 ## Standard targets
 ###############################################################################
 
-.PHONY : $(SONIC_CLEAN_DEBS) $(SONIC_CLEAN_FILES) $(SONIC_CLEAN_TARGETS) $(SONIC_CLEAN_STDEB_DEBS) $(SONIC_CLEAN_WHEELS) $(SONIC_PHONY_TARGETS) clean distclean configure
+.PHONY : $(SONIC_CLEAN_DEBS) $(SONIC_CLEAN_FILES) $(SONIC_CLEAN_TARGETS) $(SONIC_CLEAN_STDEB_DEBS) $(SONIC_CLEAN_WHEELS) $(SONIC_PHONY_TARGETS) clean distclean configure noop
 
 .INTERMEDIATE : $(SONIC_INSTALL_TARGETS) $(SONIC_INSTALL_WHEELS) $(DOCKER_LOAD_TARGETS) docker-start .platform
