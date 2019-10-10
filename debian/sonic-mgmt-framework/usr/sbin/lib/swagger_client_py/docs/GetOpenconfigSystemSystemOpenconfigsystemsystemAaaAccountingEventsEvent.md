@@ -1,0 +1,12 @@
+# GetOpenconfigSystemSystemOpenconfigsystemsystemAaaAccountingEventsEvent
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**event_type** | **str** |  | 
+**config** | [**OpenconfigSystemSystemOpenconfigsystemsystemAaaAccountingEventsConfig**](OpenconfigSystemSystemOpenconfigsystemsystemAaaAccountingEventsConfig.md) |  | [optional] 
+**state** | [**OpenconfigSystemSystemOpenconfigsystemsystemAaaAccountingEventsConfig**](OpenconfigSystemSystemOpenconfigsystemsystemAaaAccountingEventsConfig.md) |  | [optional] 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

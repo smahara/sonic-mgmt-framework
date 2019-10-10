@@ -1,0 +1,34 @@
+module sonic-watermark-telemetry{
+        namespace "http://github.com/Azure/sonic-telemetry";
+        prefix swtel;
+
+        import ietf-yang-types{
+                prefix yang;
+        }
+        import ietf-inet-types {
+		            prefix inet;
+	     }
+
+	      import sonic-common {
+            		prefix cmn;
+	    }
+
+        organization
+               "BRCM";
+        contact
+             "BRCM";
+        description
+            "SONIC WATERMARK_TELEMETRY";
+        revision 2019-10-03{
+              description
+                      "Initial revision.";
+      }
+
+              container WATERMARK_TABLE{
+                            leaf telemetry_interval{
+                                    type uint64;
+                            }
+
+
+		}
+}

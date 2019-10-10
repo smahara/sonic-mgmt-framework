@@ -1,0 +1,272 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE CLISH_MODULE [
+<!ENTITY START_PORT_ID "1">
+<!ENTITY MAX_PORT_ID "32">
+<!ENTITY START_SUB_PORT_ID "1">
+<!ENTITY MAX_SUB_PORT_ID "4">
+<!ENTITY MAX_MTU "9276">
+]>
+<CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
+  <!--=========================================================================-->
+  <VIEW name="enable-view">
+    <!--show ip access-lists -->
+    <COMMAND name="show ip access-lists" help="Show IPv4 access-lists information">
+      <PARAM name="access-list-name" help="Access list name" ptype="STRING" optional="true"> </PARAM>
+      <ACTION> if test "${access-list-name}" = ""; then
+ python $SONIC_CLI_ROOT/sonic-cli.py get_openconfig_acl_acl_acl_sets show_access_list.j2
+ else
+ python $SONIC_CLI_ROOT/sonic-cli.py get_openconfig_acl_acl_acl_sets_acl_set_acl_entries ${access-list-name} ACL_IPV4 show_access_list.j2
+ fi
+ </ACTION>
+      <xi:include href="include/pipe.xml"/>
+    </COMMAND>
+    <!--show ip access-group -->
+    <COMMAND name="show ip access-group" help="Show IPv4 access-group information">
+      <ACTION> python $SONIC_CLI_ROOT/sonic-cli.py get_openconfig_acl_acl_interfaces show_access_group.j2 </ACTION>
+      <xi:include href="include/pipe.xml"/>
+    </COMMAND>
+  </VIEW>
+  <!--MODE : interface -->
+  <VIEW name="configure-if-view">
+    <!-- ip access-group -->
+    <COMMAND name="ip access-group" help="Specify access control for packets">
+      <PARAM name="access-list-name" help="Name of access-list (Max size 140)" ptype="STRING"/>
+      <PARAM name="direction-switch" help="Configure the direction to apply the access list" ptype="SUBCOMMAND" mode="switch">
+        <PARAM name="in" help="Apply access-list in incoming direction" ptype="SUBCOMMAND" mode="subcommand"/>
+        <PARAM name="out" help="Apply access-list in outgoing direction" ptype="SUBCOMMAND" mode="subcommand"/>
+      </PARAM>
+      <ACTION> if test "${direction-switch}" = "in"; then
+ python $SONIC_CLI_ROOT/sonic-cli.py patch_list_openconfig_acl_acl_interfaces_interface ${access-list-name} ACL_IPV4 ${iface} ingress
+ else
+ python $SONIC_CLI_ROOT/sonic-cli.py patch_list_openconfig_acl_acl_interfaces_interface ${access-list-name} ACL_IPV4 ${iface} egress
+ fi
+ </ACTION>
+    </COMMAND>
+    <!-- no ip access-group -->
+    <COMMAND name="no ip access-group" help="Specify access control for packets">
+      <PARAM name="access-list-name" help="Name of access-list (Max size 140)" ptype="STRING"/>
+      <PARAM name="direction-switch" help="Configure the direction to apply the access list" ptype="SUBCOMMAND" mode="switch">
+        <PARAM name="in" help="Apply access-list in incoming direction" ptype="SUBCOMMAND" mode="subcommand"/>
+        <PARAM name="out" help="Apply access-list in outgoing direction" ptype="SUBCOMMAND" mode="subcommand"/>
+      </PARAM>
+      <ACTION> if test "${direction-switch}" = "in"; then
+ python $SONIC_CLI_ROOT/sonic-cli.py delete_openconfig_acl_acl_interfaces_interface_ingress_acl_sets_ingress_acl_set ${iface} ${access-list-name} ACL_IPV4
+ else
+ python $SONIC_CLI_ROOT/sonic-cli.py delete_openconfig_acl_acl_interfaces_interface_egress_acl_sets_egress_acl_set ${iface} ${access-list-name} ACL_IPV4
+ fi
+ </ACTION>
+    </COMMAND>
+  </VIEW>
+  <VIEW name="configure-view">
+    <!-- ip access-list -->
+    <COMMAND name="ip access-list" help="Configure IPv4 access-list" view="configure-acl-ipv4-view" viewid="name=${access-list-name}">
+      <PARAM name="access-list-name" help="Name of the IPv4 access-list (Max size 140)" ptype="STRING"> </PARAM>
+      <ACTION>python $SONIC_CLI_ROOT/sonic-cli.py patch_openconfig_acl_acl_acl_sets_acl_set ${access-list-name} ACL_IPV4</ACTION>
+    </COMMAND>
+    <!-- no ip access-list -->
+    <COMMAND name="no ip access-list" help="Configure IPv4 access-list">
+      <PARAM name="access-list-name" help="Name of the IPv4 access-list (Max size 140)" ptype="STRING"> </PARAM>
+      <ACTION>python $SONIC_CLI_ROOT/sonic-cli.py delete_openconfig_acl_acl_acl_sets_acl_set ${access-list-name} ACL_IPV4</ACTION>
+    </COMMAND>
+  </VIEW>
+  <VIEW name="configure-acl-ipv4-view" prompt="${SYSTEM_NAME}(config-ipv4-acl)# " depth="2">
+    <NAMESPACE ref="hidden-view" help="false" completion="false"/>
+    <NAMESPACE ref="enable-view" help="false" completion="false"/>
+    <NAMESPACE ref="enable-view" help="true" prefix="do" completion="true"/>
+    <COMMAND name="exit" help="Exit from current mode" lock="false">
+            	  <ACTION builtin="clish_nested_up"/>
+  </COMMAND>
+    <COMMAND name="end" help="Exit to the exec Mode" view="enable-view"/>
+    <!-- Inheritance -->
+    <NAMESPACE ref="configure-view" help="false" completion="false"/>
+    <!-- show configuration -->
+    <COMMAND name="show configuration" help="Current configuration">
+      <ACTION builtin="clish_nop"> </ACTION>
+      <xi:include href="include/pipe.xml"/>
+    </COMMAND>
+    <COMMAND name="no" help="Negate a command or set its defaults"> </COMMAND>
+    <COMMAND name="no seq" help="Sequence number">
+      <PARAM name="seq-no" help="Sequence number" ptype="RANGE_1_4294967295"/>
+      <ACTION>python $SONIC_CLI_ROOT/sonic-cli.py delete_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry ${name} ACL_IPV4 ${seq-no}</ACTION>
+    </COMMAND>
+    <COMMAND name="seq" help="Sequence number">
+      <PARAM name="seq-no" help="Sequence number" ptype="RANGE_1_4294967295">
+        <PARAM name="seq-options" help="" ptype="SUBCOMMAND" mode="switch">
+          <PARAM name="deny" help="Configure deny criteria" ptype="SUBCOMMAND" mode="subcommand">
+            <PARAM name="deny-options" help="" ptype="SUBCOMMAND" mode="switch">
+              <!-- deny <0-255> -->
+              <PARAM name="protocol" help="Protocol number(1,2,6,17,46,47,51,103,115)" ptype="RANGE_0_255">
+                <PARAM name="src-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="src-prefix" help="Source prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="src-any" help="Any source address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dest-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="dest-prefix" help="Destination prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="dest-any" help="Any destination address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dscp" help="Consider only packets matching DSCP value, range:0-63" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                  <PARAM name="dscp-val" help="Consider only packets matching DSCP value" ptype="RANGE_0_63"/>
+                </PARAM>
+              </PARAM>
+              <!-- deny icmp -->
+              <PARAM name="icmp" help="ICMP address" ptype="SUBCOMMAND" mode="subcommand">
+                <PARAM name="src-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="src-prefix" help="Source prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="src-any" help="Any source address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dest-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="dest-prefix" help="Destination prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="dest-any" help="Any destination address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dscp" help="Consider only packets matching DSCP value, range:0-63" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                  <PARAM name="dscp-val" help="Consider only packets matching DSCP value" ptype="RANGE_0_63"/>
+                </PARAM>
+              </PARAM>
+              <!-- deny tcp -->
+              <PARAM name="tcp" help="TCP packets" ptype="SUBCOMMAND" mode="subcommand">
+                <PARAM name="src-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="src-prefix" help="Source prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="src-any" help="Any source address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="src-port-options-switch" help="" ptype="SUBCOMMAND" mode="switch" optional="true">
+                  <PARAM name="src-eq" help="Match only packets on a given port number" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                    <PARAM name="src-port-number" help="port number" ptype="RANGE_0_65535"/>
+                  </PARAM>
+                </PARAM>
+                <PARAM name="dest-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="dest-prefix" help="Destination prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="dest-any" help="Any destination address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dst-port-options-switch" help="" ptype="SUBCOMMAND" mode="switch" optional="true">
+                  <PARAM name="dst-eq" help="Match only packets on a given port number" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                    <PARAM name="dst-port-number" help="port number" ptype="RANGE_0_65535"/>
+                  </PARAM>
+                </PARAM>
+                <PARAM name="dscp" help="Consider only packets matching DSCP value, range:0-63" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                  <PARAM name="dscp-val" help="Consider only packets matching DSCP value" ptype="RANGE_0_63"/>
+                </PARAM>
+                <PARAM name="fin" help="Match on the FIN bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="syn" help="Match on the SYN bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="rst" help="Match on the RST bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="psh" help="Match on the PSH bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="ack" help="Match on the ACK bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="urg" help="Match on the URG bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+              </PARAM>
+              <!-- permit udp -->
+              <PARAM name="udp" help="UDP packets" ptype="SUBCOMMAND" mode="subcommand">
+                <PARAM name="src-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="src-prefix" help="Source prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="src-any" help="Any source address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="src-port-options-switch" help="" ptype="SUBCOMMAND" mode="switch" optional="true">
+                  <PARAM name="src-eq" help="Match only packets on a given port number" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                    <PARAM name="src-port-number" help="port number" ptype="RANGE_0_65535"/>
+                  </PARAM>
+                </PARAM>
+                <PARAM name="dest-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="dest-prefix" help="Destination prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="dest-any" help="Any destination address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dst-port-options-switch" help="" ptype="SUBCOMMAND" mode="switch" optional="true">
+                  <PARAM name="dst-eq" help="Match only packets on a given port number" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                    <PARAM name="dst-port-number" help="port number" ptype="RANGE_0_65535"/>
+                  </PARAM>
+                </PARAM>
+                <PARAM name="dscp" help="Consider only packets matching DSCP value, range:0-63" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                  <PARAM name="dscp-val" help="Consider only packets matching DSCP value" ptype="RANGE_0_63"/>
+                </PARAM>
+              </PARAM>
+            </PARAM>
+          </PARAM>
+          <PARAM name="permit" help="Configure permit criteria" ptype="SUBCOMMAND" mode="subcommand">
+            <PARAM name="permit-options" help="" ptype="SUBCOMMAND" mode="switch">
+              <!-- permit <0-255> -->
+              <PARAM name="proto-num" help="Protocol number(1,2,6,17,46,47,51,103,115)" ptype="RANGE_0_255">
+                <PARAM name="src-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="src-prefix" help="Source prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="src-any" help="Any source address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dest-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="dest-prefix" help="Destination prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="dest-any" help="Any destination address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dscp" help="Consider only packets matching DSCP value, range:0-63" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                  <PARAM name="dscp-val" help="Consider only packets matching DSCP value" ptype="RANGE_0_63"/>
+                </PARAM>
+              </PARAM>
+              <!-- permit icmp -->
+              <PARAM name="icmp" help="ICMP address" ptype="SUBCOMMAND" mode="subcommand">
+                <PARAM name="src-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="src-prefix" help="Source prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="src-any" help="Any source address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dest-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="dest-prefix" help="Destination prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="dest-any" help="Any destination address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dscp" help="Consider only packets matching DSCP value, range:0-63" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                  <PARAM name="dscp-val" help="Consider only packets matching DSCP value" ptype="RANGE_0_63"/>
+                </PARAM>
+              </PARAM>
+              <!-- permit tcp -->
+              <PARAM name="tcp" help="TCP packets" ptype="SUBCOMMAND" mode="subcommand">
+                <PARAM name="src-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="src-prefix" help="Source prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="src-any" help="Any source address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="src-port-options-switch" help="" ptype="SUBCOMMAND" mode="switch" optional="true">
+                  <PARAM name="src-eq" help="Match only packets on a given port number" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                    <PARAM name="src-port-number" help="port number" ptype="RANGE_0_65535"/>
+                  </PARAM>
+                </PARAM>
+                <PARAM name="dest-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="dest-prefix" help="Destination prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="dest-any" help="Any destination address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dst-port-options-switch" help="" ptype="SUBCOMMAND" mode="switch" optional="true">
+                  <PARAM name="dst-eq" help="Match only packets on a given port number" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                    <PARAM name="dst-port-number" help="port number" ptype="RANGE_0_65535"/>
+                  </PARAM>
+                </PARAM>
+                <PARAM name="dscp" help="Consider only packets matching DSCP value, range:0-63" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                  <PARAM name="dscp-val" help="Consider only packets matching DSCP value" ptype="RANGE_0_63"/>
+                </PARAM>
+                <PARAM name="fin" help="Match on the FIN bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="syn" help="Match on the SYN bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="rst" help="Match on the RST bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="psh" help="Match on the PSH bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="ack" help="Match on the ACK bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+                <PARAM name="urg" help="Match on the URG bit" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
+              </PARAM>
+              <!-- permit udp -->
+              <PARAM name="udp" help="UDP packets" ptype="SUBCOMMAND" mode="subcommand">
+                <PARAM name="src-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="src-prefix" help="Source prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="src-any" help="Any source address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="src-port-options-switch" help="" ptype="SUBCOMMAND" mode="switch" optional="true">
+                  <PARAM name="src-eq" help="Match only packets on a given port number" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                    <PARAM name="src-port-number" help="port number" ptype="RANGE_0_65535"/>
+                  </PARAM>
+                </PARAM>
+                <PARAM name="dest-options-switch" help="" ptype="SUBCOMMAND" mode="switch">
+                  <PARAM name="dest-prefix" help="Destination prefix" ptype="IP_ADDR_MASK"> </PARAM>
+                  <PARAM name="dest-any" help="Any destination address" ptype="SUBCOMMAND" mode="subcommand" value="any"> </PARAM>
+                </PARAM>
+                <PARAM name="dst-port-options-switch" help="" ptype="SUBCOMMAND" mode="switch" optional="true">
+                  <PARAM name="dst-eq" help="Match only packets on a given port number" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                    <PARAM name="dst-port-number" help="port number" ptype="RANGE_0_65535"/>
+                  </PARAM>
+                </PARAM>
+                <PARAM name="dscp" help="Consider only packets matching DSCP value, range:0-63" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+                  <PARAM name="dscp-val" help="Consider only packets matching DSCP value" ptype="RANGE_0_63"/>
+                </PARAM>
+              </PARAM>
+            </PARAM>
+          </PARAM>
+        </PARAM>
+      </PARAM>
+      <ACTION> python $SONIC_CLI_ROOT/sonic-cli.py patch_list_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry ${name} ACL_IPV4 ${__params} </ACTION>
+    </COMMAND>
+  </VIEW>
+</CLISH_MODULE>

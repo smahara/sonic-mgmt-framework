@@ -1,0 +1,78 @@
+<!-- HTML for static distribution bundle build -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>SONiC REST UI </title>
+  </head>
+
+  <style>
+    table {
+      border-collapse: collapse;
+      border-top: 1px solid #ddd;
+    }
+
+    td, th {
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    tr:hover {
+      background-color:#f5f5f5;
+    }
+
+    /*tr:nth-child(odd) {
+      background-color: #f2f2f2;
+    }*/
+  </style>
+
+  <body>
+      <div style="margin-left:15px">
+        <h1>SONiC REST API explorer</h1>
+        <p>Please click on any of the links below to explore its corresponding REST APIs
+        <table cellspacing="15">
+            <tr>
+                <th>Model</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><a href="./model.html?urls.primaryName=openconfig-acl.yaml" >openconfig-acl</a></td>
+                <td>REST APIs for openconfig-acl</td>
+            </tr> 
+            <tr>
+                <td><a href="./model.html?urls.primaryName=openconfig-interfaces.yaml" >openconfig-interfaces</a></td>
+                <td>REST APIs for openconfig-interfaces</td>
+            </tr> 
+            <tr>
+                <td><a href="./model.html?urls.primaryName=openconfig-lldp.yaml" >openconfig-lldp</a></td>
+                <td>REST APIs for openconfig-lldp</td>
+            </tr> 
+            <tr>
+                <td><a href="./model.html?urls.primaryName=openconfig-platform.yaml" >openconfig-platform</a></td>
+                <td>REST APIs for openconfig-platform</td>
+            </tr> 
+            <tr>
+                <td><a href="./model.html?urls.primaryName=openconfig-spanning-tree.yaml" >openconfig-spanning-tree</a></td>
+                <td>REST APIs for openconfig-spanning-tree</td>
+            </tr> 
+            <tr>
+                <td><a href="./model.html?urls.primaryName=openconfig-system.yaml" >openconfig-system</a></td>
+                <td>REST APIs for openconfig-system</td>
+            </tr> 
+            <tr>
+                <td><a href="./model.html?urls.primaryName=openconfig-telemetry.yaml" >openconfig-telemetry</a></td>
+                <td>REST APIs for openconfig-telemetry</td>
+            </tr> 
+            <tr>
+                <td><a href="./model.html?urls.primaryName=sonic-watermark-telemetry.yaml" >sonic-watermark-telemetry</a></td>
+                <td>REST APIs for sonic-watermark-telemetry</td>
+            </tr> 
+            <tr>
+                <td><a href="./model.html?urls.primaryName=vlan.yaml" >vlan</a></td>
+                <td>REST APIs for vlan</td>
+            </tr> 
+        </table>
+      </div>
+  </body>
+</html>

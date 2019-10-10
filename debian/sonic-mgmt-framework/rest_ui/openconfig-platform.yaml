@@ -1,0 +1,5864 @@
+---
+swagger: "2.0"
+info:
+  description: "Network management Open APIs for Sonic."
+  version: "1.0.0"
+  title: "Sonic Network Management APIs"
+basePath: "/restconf/data"
+tags:
+- name: "openconfig-platform"
+  description: "Operations for openconfig-platform"
+- name: "openconfig-alarms"
+  description: "Operations for openconfig-alarms"
+schemes:
+- "https"
+- "http"
+paths:
+  /openconfig-platform:components:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components\nEnclosing container\
+        \ for the components in the system."
+      operationId: "get_openconfig_platform_components"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: post_list_openconfig_platform_components_component\n\
+        List of components, keyed by component name."
+      operationId: "post_list_openconfig_platform_components_component"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_list_openconfig_platform_components_component"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components\nEnclosing container\
+        \ for the components in the system."
+      operationId: "put_openconfig_platform_components"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components\nEnclosing\
+        \ container for the components in the system."
+      operationId: "delete_openconfig_platform_components"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components\nEnclosing container\
+        \ for the components in the system."
+      operationId: "patch_openconfig_platform_components"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component\nList\
+        \ of components, keyed by component name."
+      operationId: "get_openconfig_platform_components_component"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: post_openconfig_platform_components_component_config\n\
+        Configuration data for each component"
+      operationId: "post_openconfig_platform_components_component_config"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_openconfig_platform_components_component_config"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component\nList\
+        \ of components, keyed by component name."
+      operationId: "put_openconfig_platform_components_component"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component\n\
+        List of components, keyed by component name."
+      operationId: "delete_openconfig_platform_components_component"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component\n\
+        List of components, keyed by component name."
+      operationId: "patch_openconfig_platform_components_component"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_list_openconfig_platform_components_component\n\
+        List of components, keyed by component name."
+      operationId: "get_list_openconfig_platform_components_component"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_list_openconfig_platform_components_component\n\
+        List of components, keyed by component name."
+      operationId: "put_list_openconfig_platform_components_component"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_list_openconfig_platform_components_component"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_list_openconfig_platform_components_component\n\
+        List of components, keyed by component name."
+      operationId: "delete_list_openconfig_platform_components_component"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_list_openconfig_platform_components_component\n\
+        List of components, keyed by component name."
+      operationId: "patch_list_openconfig_platform_components_component"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_list_openconfig_platform_components_component"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/config:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_config\n\
+        Configuration data for each component"
+      operationId: "get_openconfig_platform_components_component_config"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_config"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_config\n\
+        Configuration data for each component"
+      operationId: "put_openconfig_platform_components_component_config"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_config"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_config\n\
+        Configuration data for each component"
+      operationId: "patch_openconfig_platform_components_component_config"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_config"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state\n\
+        Operational state data for each component"
+      operationId: "get_openconfig_platform_components_component_state"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/name:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_name\n\
+        Device name for the component -- this may not be a\nconfigurable parameter\
+        \ on many implementations.  Where\ncomponent preconfiguration is supported,\
+        \ for example,\nthe component name may be configurable."
+      operationId: "get_openconfig_platform_components_component_state_name"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_name"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/type:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_type\n\
+        Type of component as identified by the system"
+      operationId: "get_openconfig_platform_components_component_state_type"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_type"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/id:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_id\n\
+        Unique identifier assigned by the system for the\ncomponent"
+      operationId: "get_openconfig_platform_components_component_state_id"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_id"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/location:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_location\n\
+        System-supplied description of the location of the\ncomponent within the system.\
+        \ This could be a bay position,\nslot number, socket location, etc. For component\
+        \ types that\nhave an explicit slot-id attribute, such as linecards, the\n\
+        system should populate the more specific slot-id."
+      operationId: "get_openconfig_platform_components_component_state_location"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_location"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/description:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_description\n\
+        System-supplied description of the component"
+      operationId: "get_openconfig_platform_components_component_state_description"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_description"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/mfg-name:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_mfg_name\n\
+        System-supplied identifier for the manufacturer of the\ncomponent.  This data\
+        \ is particularly useful when a\ncomponent manufacturer is different than\
+        \ the overall\ndevice vendor."
+      operationId: "get_openconfig_platform_components_component_state_mfg_name"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_mfg_name"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/mfg-date:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_mfg_date\n\
+        System-supplied representation of the component's\nmanufacturing date."
+      operationId: "get_openconfig_platform_components_component_state_mfg_date"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_mfg_date"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/hardware-version:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_hardware_version\n\
+        For hardware components, this is the hardware revision of\nthe component."
+      operationId: "get_openconfig_platform_components_component_state_hardware_version"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_hardware_version"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/firmware-version:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_firmware_version\n\
+        For hardware components, this is the version of associated\nfirmware that\
+        \ is running on the component, if applicable."
+      operationId: "get_openconfig_platform_components_component_state_firmware_version"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_firmware_version"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/software-version:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_software_version\n\
+        For software components such as operating system or other\nsoftware module,\
+        \ this is the version of the currently\nrunning software."
+      operationId: "get_openconfig_platform_components_component_state_software_version"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_software_version"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/serial-no:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_serial_no\n\
+        System-assigned serial number of the component."
+      operationId: "get_openconfig_platform_components_component_state_serial_no"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_serial_no"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/part-no:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_part_no\n\
+        System-assigned part number for the component.  This should\nbe present in\
+        \ particular if the component is also an FRU\n(field replaceable unit)"
+      operationId: "get_openconfig_platform_components_component_state_part_no"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_part_no"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/removable:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_removable\n\
+        If true, this component is removable or is a field\nreplaceable unit"
+      operationId: "get_openconfig_platform_components_component_state_removable"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_removable"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/oper-status:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_oper_status\n\
+        If applicable, this reports the current operational status\nof the component."
+      operationId: "get_openconfig_platform_components_component_state_oper_status"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_oper_status"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/empty:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_empty\n\
+        The empty leaf may be used by the device to indicate that a\ncomponent position\
+        \ exists but is not populated.  Using this\nflag, it is possible for the management\
+        \ system to learn how\nmany positions are available (e.g., occupied vs. empty\n\
+        linecard slots in a chassis)."
+      operationId: "get_openconfig_platform_components_component_state_empty"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_empty"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/parent:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_parent\n\
+        Reference to the name of the parent component.  Note that\nthis reference\
+        \ must be kept synchronized with the\ncorresponding subcomponent reference\
+        \ from the parent\ncomponent."
+      operationId: "get_openconfig_platform_components_component_state_parent"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_parent"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature\n\
+        Temperature in degrees Celsius of the component. Values include\nthe instantaneous,\
+        \ average, minimum, and maximum statistics. If\navg/min/max statistics are\
+        \ not supported, the target is expected\nto just supply the instant value"
+      operationId: "get_openconfig_platform_components_component_state_temperature"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/instant:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_instant\n\
+        The instantaneous value of the statistic."
+      operationId: "get_openconfig_platform_components_component_state_temperature_instant"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_instant"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/avg:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_avg\n\
+        The arithmetic mean value of the statistic over the\nsampling period."
+      operationId: "get_openconfig_platform_components_component_state_temperature_avg"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_avg"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/min:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_min\n\
+        The minimum value of the statistic over the sampling\nperiod"
+      operationId: "get_openconfig_platform_components_component_state_temperature_min"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_min"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/max:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_max\n\
+        The maximum value of the statistic over the sampling\nperiod"
+      operationId: "get_openconfig_platform_components_component_state_temperature_max"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_max"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/interval:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_interval\n\
+        If supported by the system, this reports the time interval\nover which the\
+        \ min/max/average statistics are computed by\nthe system."
+      operationId: "get_openconfig_platform_components_component_state_temperature_interval"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_interval"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/min-time:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_min_time\n\
+        The absolute time at which the minimum value occurred.\nThe value is the timestamp\
+        \ in nanoseconds relative to\n the Unix Epoch (Jan 1, 1970 00:00:00 UTC)."
+      operationId: "get_openconfig_platform_components_component_state_temperature_min_time"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_min_time"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/max-time:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_max_time\n\
+        The absolute time at which the maximum value occurred.\nThe value is the timestamp\
+        \ in nanoseconds relative to\n the Unix Epoch (Jan 1, 1970 00:00:00 UTC)."
+      operationId: "get_openconfig_platform_components_component_state_temperature_max_time"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_max_time"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/alarm-status:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_alarm_status\n\
+        A value of true indicates the alarm has been raised or\nasserted.  The value\
+        \ should be false when the alarm is\ncleared."
+      operationId: "get_openconfig_platform_components_component_state_temperature_alarm_status"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_alarm_status"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/alarm-threshold:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_alarm_threshold\n\
+        The threshold value that was crossed for this alarm."
+      operationId: "get_openconfig_platform_components_component_state_temperature_alarm_threshold"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_alarm_threshold"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/temperature/alarm-severity:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_temperature_alarm_severity\n\
+        The severity of the current alarm."
+      operationId: "get_openconfig_platform_components_component_state_temperature_alarm_severity"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_temperature_alarm_severity"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/memory:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_memory\n\
+        For components that have associated memory, these values\nreport information\
+        \ about available and utilized memory."
+      operationId: "get_openconfig_platform_components_component_state_memory"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_memory"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/memory/available:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_memory_available\n\
+        The available memory physically installed, or logically\nallocated to the\
+        \ component."
+      operationId: "get_openconfig_platform_components_component_state_memory_available"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_memory_available"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/memory/utilized:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_memory_utilized\n\
+        The memory currently in use by processes running on\nthe component, not considering\
+        \ reserved memory that is\nnot available for use."
+      operationId: "get_openconfig_platform_components_component_state_memory_utilized"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_memory_utilized"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/allocated-power:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_allocated_power\n\
+        Power allocated by the system for the component."
+      operationId: "get_openconfig_platform_components_component_state_allocated_power"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_allocated_power"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/used-power:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_state_used_power\n\
+        Actual power used by the component."
+      operationId: "get_openconfig_platform_components_component_state_used_power"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_state_used_power"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/openconfig-alarms:equipment-failure:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_alarms_components_component_state_equipment_failure\n\
+        If true, the hardware indicates that the component's physical equipment\n\
+        has failed"
+      operationId: "get_openconfig_alarms_components_component_state_equipment_failure"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_alarms_components_component_state_equipment_failure"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/state/openconfig-alarms:equipment-mismatch:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_alarms_components_component_state_equipment_mismatch\n\
+        If true, the hardware indicates that the component inserted into the\naffected\
+        \ component's physical location is of a different type than what\nis configured"
+      operationId: "get_openconfig_alarms_components_component_state_equipment_mismatch"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_alarms_components_component_state_equipment_mismatch"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/properties:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_properties\n\
+        Enclosing container "
+      operationId: "get_openconfig_platform_components_component_properties"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_properties"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: post_list_openconfig_platform_components_component_properties_property\n\
+        List of system properties for the component"
+      operationId: "post_list_openconfig_platform_components_component_properties_property"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_list_openconfig_platform_components_component_properties_property"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_properties\n\
+        Enclosing container "
+      operationId: "put_openconfig_platform_components_component_properties"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_properties"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_properties\n\
+        Enclosing container "
+      operationId: "delete_openconfig_platform_components_component_properties"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_properties\n\
+        Enclosing container "
+      operationId: "patch_openconfig_platform_components_component_properties"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_properties"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/properties/property={name}:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_properties_property\n\
+        List of system properties for the component"
+      operationId: "get_openconfig_platform_components_component_properties_property"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_properties_property"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: post_openconfig_platform_components_component_properties_property_config\n\
+        Configuration data for each property"
+      operationId: "post_openconfig_platform_components_component_properties_property_config"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_openconfig_platform_components_component_properties_property_config"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_properties_property\n\
+        List of system properties for the component"
+      operationId: "put_openconfig_platform_components_component_properties_property"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_properties_property"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_properties_property\n\
+        List of system properties for the component"
+      operationId: "delete_openconfig_platform_components_component_properties_property"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_properties_property\n\
+        List of system properties for the component"
+      operationId: "patch_openconfig_platform_components_component_properties_property"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_properties_property"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/properties/property:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_list_openconfig_platform_components_component_properties_property\n\
+        List of system properties for the component"
+      operationId: "get_list_openconfig_platform_components_component_properties_property"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_properties_property"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_list_openconfig_platform_components_component_properties_property\n\
+        List of system properties for the component"
+      operationId: "put_list_openconfig_platform_components_component_properties_property"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_list_openconfig_platform_components_component_properties_property"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_list_openconfig_platform_components_component_properties_property\n\
+        List of system properties for the component"
+      operationId: "delete_list_openconfig_platform_components_component_properties_property"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_list_openconfig_platform_components_component_properties_property\n\
+        List of system properties for the component"
+      operationId: "patch_list_openconfig_platform_components_component_properties_property"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_list_openconfig_platform_components_component_properties_property"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/properties/property={name}/config:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_properties_property_config\n\
+        Configuration data for each property"
+      operationId: "get_openconfig_platform_components_component_properties_property_config"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_properties_property_config"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: post_openconfig_platform_components_component_properties_property_config_value\n\
+        Property values can take on a variety of types.  Signed and\nunsigned integer\
+        \ types may be provided in smaller sizes,\ne.g., int8, uint16, etc."
+      operationId: "post_openconfig_platform_components_component_properties_property_config_value"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_openconfig_platform_components_component_properties_property_config_value"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_properties_property_config\n\
+        Configuration data for each property"
+      operationId: "put_openconfig_platform_components_component_properties_property_config"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_properties_property_config"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_properties_property_config\n\
+        Configuration data for each property"
+      operationId: "patch_openconfig_platform_components_component_properties_property_config"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_properties_property_config"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/properties/property={name}/config/value:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_properties_property_config_value\n\
+        Property values can take on a variety of types.  Signed and\nunsigned integer\
+        \ types may be provided in smaller sizes,\ne.g., int8, uint16, etc."
+      operationId: "get_openconfig_platform_components_component_properties_property_config_value"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_properties_property_config_value"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_properties_property_config_value\n\
+        Property values can take on a variety of types.  Signed and\nunsigned integer\
+        \ types may be provided in smaller sizes,\ne.g., int8, uint16, etc."
+      operationId: "put_openconfig_platform_components_component_properties_property_config_value"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_properties_property_config_value"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_properties_property_config_value\n\
+        Property values can take on a variety of types.  Signed and\nunsigned integer\
+        \ types may be provided in smaller sizes,\ne.g., int8, uint16, etc."
+      operationId: "delete_openconfig_platform_components_component_properties_property_config_value"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_properties_property_config_value\n\
+        Property values can take on a variety of types.  Signed and\nunsigned integer\
+        \ types may be provided in smaller sizes,\ne.g., int8, uint16, etc."
+      operationId: "patch_openconfig_platform_components_component_properties_property_config_value"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_properties_property_config_value"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/properties/property={name}/state:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_properties_property_state\n\
+        Operational state data for each property"
+      operationId: "get_openconfig_platform_components_component_properties_property_state"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_properties_property_state"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/properties/property={name}/state/name:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_properties_property_state_name\n\
+        System-supplied name of the property -- this is typically\nnon-configurable"
+      operationId: "get_openconfig_platform_components_component_properties_property_state_name"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_properties_property_state_name"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/properties/property={name}/state/value:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_properties_property_state_value\n\
+        Property values can take on a variety of types.  Signed and\nunsigned integer\
+        \ types may be provided in smaller sizes,\ne.g., int8, uint16, etc."
+      operationId: "get_openconfig_platform_components_component_properties_property_state_value"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_properties_property_state_value"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/properties/property={name}/state/configurable:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_properties_property_state_configurable\n\
+        Indication whether the property is user-configurable"
+      operationId: "get_openconfig_platform_components_component_properties_property_state_configurable"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the property name."
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_properties_property_state_configurable"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/subcomponents:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_subcomponents\n\
+        Enclosing container for subcomponent references"
+      operationId: "get_openconfig_platform_components_component_subcomponents"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_subcomponents"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: post_list_openconfig_platform_components_component_subcomponents_subcomponent\n\
+        List of subcomponent references"
+      operationId: "post_list_openconfig_platform_components_component_subcomponents_subcomponent"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_list_openconfig_platform_components_component_subcomponents_subcomponent"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_subcomponents\n\
+        Enclosing container for subcomponent references"
+      operationId: "put_openconfig_platform_components_component_subcomponents"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_subcomponents"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_subcomponents\n\
+        Enclosing container for subcomponent references"
+      operationId: "delete_openconfig_platform_components_component_subcomponents"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_subcomponents\n\
+        Enclosing container for subcomponent references"
+      operationId: "patch_openconfig_platform_components_component_subcomponents"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_subcomponents"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/subcomponents/subcomponent={name}:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_subcomponents_subcomponent\n\
+        List of subcomponent references"
+      operationId: "get_openconfig_platform_components_component_subcomponents_subcomponent"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_subcomponents_subcomponent"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: post_openconfig_platform_components_component_subcomponents_subcomponent_config\n\
+        Configuration data for the subcomponent"
+      operationId: "post_openconfig_platform_components_component_subcomponents_subcomponent_config"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_openconfig_platform_components_component_subcomponents_subcomponent_config"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_subcomponents_subcomponent\n\
+        List of subcomponent references"
+      operationId: "put_openconfig_platform_components_component_subcomponents_subcomponent"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_subcomponents_subcomponent"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_subcomponents_subcomponent\n\
+        List of subcomponent references"
+      operationId: "delete_openconfig_platform_components_component_subcomponents_subcomponent"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_subcomponents_subcomponent\n\
+        List of subcomponent references"
+      operationId: "patch_openconfig_platform_components_component_subcomponents_subcomponent"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_subcomponents_subcomponent"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/subcomponents/subcomponent:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_list_openconfig_platform_components_component_subcomponents_subcomponent\n\
+        List of subcomponent references"
+      operationId: "get_list_openconfig_platform_components_component_subcomponents_subcomponent"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_subcomponents_subcomponent"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_list_openconfig_platform_components_component_subcomponents_subcomponent\n\
+        List of subcomponent references"
+      operationId: "put_list_openconfig_platform_components_component_subcomponents_subcomponent"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_list_openconfig_platform_components_component_subcomponents_subcomponent"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_list_openconfig_platform_components_component_subcomponents_subcomponent\n\
+        List of subcomponent references"
+      operationId: "delete_list_openconfig_platform_components_component_subcomponents_subcomponent"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_list_openconfig_platform_components_component_subcomponents_subcomponent\n\
+        List of subcomponent references"
+      operationId: "patch_list_openconfig_platform_components_component_subcomponents_subcomponent"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_list_openconfig_platform_components_component_subcomponents_subcomponent"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/subcomponents/subcomponent={name}/config:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_subcomponents_subcomponent_config\n\
+        Configuration data for the subcomponent"
+      operationId: "get_openconfig_platform_components_component_subcomponents_subcomponent_config"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_subcomponents_subcomponent_config"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_subcomponents_subcomponent_config\n\
+        Configuration data for the subcomponent"
+      operationId: "put_openconfig_platform_components_component_subcomponents_subcomponent_config"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_subcomponents_subcomponent_config"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_subcomponents_subcomponent_config\n\
+        Configuration data for the subcomponent"
+      operationId: "patch_openconfig_platform_components_component_subcomponents_subcomponent_config"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_subcomponents_subcomponent_config"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/subcomponents/subcomponent={name}/state:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_subcomponents_subcomponent_state\n\
+        Operational state data for the subcomponent"
+      operationId: "get_openconfig_platform_components_component_subcomponents_subcomponent_state"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_subcomponents_subcomponent_state"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/subcomponents/subcomponent={name}/state/name:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_subcomponents_subcomponent_state_name\n\
+        Reference to the name of the subcomponent"
+      operationId: "get_openconfig_platform_components_component_subcomponents_subcomponent_state_name"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_subcomponents_subcomponent_state_name"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/chassis:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_chassis\n\
+        Data for chassis components"
+      operationId: "get_openconfig_platform_components_component_chassis"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_chassis"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_chassis\n\
+        Data for chassis components"
+      operationId: "put_openconfig_platform_components_component_chassis"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_chassis"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_chassis\n\
+        Data for chassis components"
+      operationId: "delete_openconfig_platform_components_component_chassis"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_chassis\n\
+        Data for chassis components"
+      operationId: "patch_openconfig_platform_components_component_chassis"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_chassis"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/port:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_port\n\
+        Data for physical port components"
+      operationId: "get_openconfig_platform_components_component_port"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_port"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_port\n\
+        Data for physical port components"
+      operationId: "put_openconfig_platform_components_component_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_port"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_port\n\
+        Data for physical port components"
+      operationId: "delete_openconfig_platform_components_component_port"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_port\n\
+        Data for physical port components"
+      operationId: "patch_openconfig_platform_components_component_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_port"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/power-supply:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_power_supply\n\
+        Data for power supply components"
+      operationId: "get_openconfig_platform_components_component_power_supply"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_power_supply"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_power_supply\n\
+        Data for power supply components"
+      operationId: "put_openconfig_platform_components_component_power_supply"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_power_supply"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_power_supply\n\
+        Data for power supply components"
+      operationId: "delete_openconfig_platform_components_component_power_supply"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_power_supply\n\
+        Data for power supply components"
+      operationId: "patch_openconfig_platform_components_component_power_supply"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_power_supply"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/fan:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_fan\n\
+        Data for fan components"
+      operationId: "get_openconfig_platform_components_component_fan"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_fan"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_fan\n\
+        Data for fan components"
+      operationId: "put_openconfig_platform_components_component_fan"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_fan"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_fan\n\
+        Data for fan components"
+      operationId: "delete_openconfig_platform_components_component_fan"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_fan\n\
+        Data for fan components"
+      operationId: "patch_openconfig_platform_components_component_fan"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_fan"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/fabric:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_fabric\n\
+        Data for fabric components"
+      operationId: "get_openconfig_platform_components_component_fabric"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_fabric"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_fabric\n\
+        Data for fabric components"
+      operationId: "put_openconfig_platform_components_component_fabric"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_fabric"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_fabric\n\
+        Data for fabric components"
+      operationId: "delete_openconfig_platform_components_component_fabric"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_fabric\n\
+        Data for fabric components"
+      operationId: "patch_openconfig_platform_components_component_fabric"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_fabric"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/storage:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_storage\n\
+        Data for storage components"
+      operationId: "get_openconfig_platform_components_component_storage"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_storage"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_storage\n\
+        Data for storage components"
+      operationId: "put_openconfig_platform_components_component_storage"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_storage"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_storage\n\
+        Data for storage components"
+      operationId: "delete_openconfig_platform_components_component_storage"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_storage\n\
+        Data for storage components"
+      operationId: "patch_openconfig_platform_components_component_storage"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_storage"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/cpu:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_cpu\n\
+        Data for cpu components"
+      operationId: "get_openconfig_platform_components_component_cpu"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_cpu"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_cpu\n\
+        Data for cpu components"
+      operationId: "put_openconfig_platform_components_component_cpu"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_cpu"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_cpu\n\
+        Data for cpu components"
+      operationId: "delete_openconfig_platform_components_component_cpu"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_cpu\n\
+        Data for cpu components"
+      operationId: "patch_openconfig_platform_components_component_cpu"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_cpu"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/integrated-circuit:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_integrated_circuit\n\
+        Data for chip components, such as ASIC, NPUs, etc."
+      operationId: "get_openconfig_platform_components_component_integrated_circuit"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_integrated_circuit"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_integrated_circuit\n\
+        Data for chip components, such as ASIC, NPUs, etc."
+      operationId: "put_openconfig_platform_components_component_integrated_circuit"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_integrated_circuit"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_integrated_circuit\n\
+        Data for chip components, such as ASIC, NPUs, etc."
+      operationId: "delete_openconfig_platform_components_component_integrated_circuit"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_integrated_circuit\n\
+        Data for chip components, such as ASIC, NPUs, etc."
+      operationId: "patch_openconfig_platform_components_component_integrated_circuit"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_integrated_circuit"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-platform:components/component={name}/backplane:
+    get:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: get_openconfig_platform_components_component_backplane\n\
+        Data for backplane components"
+      operationId: "get_openconfig_platform_components_component_backplane"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_platform_components_component_backplane"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: put_openconfig_platform_components_component_backplane\n\
+        Data for backplane components"
+      operationId: "put_openconfig_platform_components_component_backplane"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_openconfig_platform_components_component_backplane"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: delete_openconfig_platform_components_component_backplane\n\
+        Data for backplane components"
+      operationId: "delete_openconfig_platform_components_component_backplane"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "openconfig-platform"
+      description: "OperationId: patch_openconfig_platform_components_component_backplane\n\
+        Data for backplane components"
+      operationId: "patch_openconfig_platform_components_component_backplane"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the component name"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_openconfig_platform_components_component_backplane"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+definitions:
+  openconfig_platform_components:
+    type: "object"
+    properties:
+      openconfig-platform:components:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents"
+  post_openconfig_platform_components:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components"
+  put_openconfig_platform_components:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components"
+  patch_openconfig_platform_components:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components"
+  get_openconfig_platform_components:
+    type: "object"
+    properties:
+      openconfig-platform:components:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents"
+  openconfig_platform_components_component:
+    type: "object"
+    properties:
+      openconfig-platform:component:
+        type: "array"
+        items:
+          $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_component"
+  put_openconfig_platform_components_component:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component"
+  patch_openconfig_platform_components_component:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component"
+  get_openconfig_platform_components_component:
+    type: "object"
+    properties:
+      openconfig-platform:component:
+        type: "array"
+        items:
+          $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_component"
+  post_list_openconfig_platform_components_component:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component"
+  put_list_openconfig_platform_components_component:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component"
+  patch_list_openconfig_platform_components_component:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component"
+  openconfig_platform_components_component_config:
+    type: "object"
+    properties:
+      openconfig-platform:config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+  post_openconfig_platform_components_component_config:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_config"
+    - $ref: "#/definitions/openconfig_platform_components_component_properties"
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents"
+    - $ref: "#/definitions/openconfig_platform_components_component_chassis"
+    - $ref: "#/definitions/openconfig_platform_components_component_port"
+    - $ref: "#/definitions/openconfig_platform_components_component_power_supply"
+    - $ref: "#/definitions/openconfig_platform_components_component_fan"
+    - $ref: "#/definitions/openconfig_platform_components_component_fabric"
+    - $ref: "#/definitions/openconfig_platform_components_component_storage"
+    - $ref: "#/definitions/openconfig_platform_components_component_cpu"
+    - $ref: "#/definitions/openconfig_platform_components_component_integrated_circuit"
+    - $ref: "#/definitions/openconfig_platform_components_component_backplane"
+  put_openconfig_platform_components_component_config:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_config"
+  patch_openconfig_platform_components_component_config:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_config"
+  get_openconfig_platform_components_component_config:
+    type: "object"
+    properties:
+      openconfig-platform:config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+  get_openconfig_platform_components_component_state:
+    type: "object"
+    properties:
+      openconfig-platform:state:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_state"
+  get_openconfig_platform_components_component_state_name:
+    type: "object"
+    properties:
+      openconfig-platform:name:
+        type: "string"
+  get_openconfig_platform_components_component_state_type:
+    type: "object"
+    properties:
+      openconfig-platform:type:
+        type: "string"
+  get_openconfig_platform_components_component_state_id:
+    type: "object"
+    properties:
+      openconfig-platform:id:
+        type: "string"
+  get_openconfig_platform_components_component_state_location:
+    type: "object"
+    properties:
+      openconfig-platform:location:
+        type: "string"
+  get_openconfig_platform_components_component_state_description:
+    type: "object"
+    properties:
+      openconfig-platform:description:
+        type: "string"
+  get_openconfig_platform_components_component_state_mfg_name:
+    type: "object"
+    properties:
+      openconfig-platform:mfg-name:
+        type: "string"
+  get_openconfig_platform_components_component_state_mfg_date:
+    type: "object"
+    properties:
+      openconfig-platform:mfg-date:
+        type: "string"
+  get_openconfig_platform_components_component_state_hardware_version:
+    type: "object"
+    properties:
+      openconfig-platform:hardware-version:
+        type: "string"
+  get_openconfig_platform_components_component_state_firmware_version:
+    type: "object"
+    properties:
+      openconfig-platform:firmware-version:
+        type: "string"
+  get_openconfig_platform_components_component_state_software_version:
+    type: "object"
+    properties:
+      openconfig-platform:software-version:
+        type: "string"
+  get_openconfig_platform_components_component_state_serial_no:
+    type: "object"
+    properties:
+      openconfig-platform:serial-no:
+        type: "string"
+  get_openconfig_platform_components_component_state_part_no:
+    type: "object"
+    properties:
+      openconfig-platform:part-no:
+        type: "string"
+  get_openconfig_platform_components_component_state_removable:
+    type: "object"
+    properties:
+      openconfig-platform:removable:
+        type: "boolean"
+        format: "boolean"
+  get_openconfig_platform_components_component_state_oper_status:
+    type: "object"
+    properties:
+      openconfig-platform:oper-status:
+        type: "string"
+  get_openconfig_platform_components_component_state_empty:
+    type: "object"
+    properties:
+      openconfig-platform:empty:
+        type: "boolean"
+        format: "boolean"
+  get_openconfig_platform_components_component_state_parent:
+    type: "object"
+    properties:
+      openconfig-platform:parent:
+        type: "string"
+  get_openconfig_platform_components_component_state_temperature:
+    type: "object"
+    properties:
+      openconfig-platform:temperature:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_state_temperature"
+  get_openconfig_platform_components_component_state_temperature_instant:
+    type: "object"
+    properties:
+      openconfig-platform:instant:
+        type: "number"
+        format: "double"
+  get_openconfig_platform_components_component_state_temperature_avg:
+    type: "object"
+    properties:
+      openconfig-platform:avg:
+        type: "number"
+        format: "double"
+  get_openconfig_platform_components_component_state_temperature_min:
+    type: "object"
+    properties:
+      openconfig-platform:min:
+        type: "number"
+        format: "double"
+  get_openconfig_platform_components_component_state_temperature_max:
+    type: "object"
+    properties:
+      openconfig-platform:max:
+        type: "number"
+        format: "double"
+  get_openconfig_platform_components_component_state_temperature_interval:
+    type: "object"
+    properties:
+      openconfig-platform:interval:
+        type: "integer"
+        format: "int64"
+  get_openconfig_platform_components_component_state_temperature_min_time:
+    type: "object"
+    properties:
+      openconfig-platform:min-time:
+        type: "integer"
+        format: "int64"
+  get_openconfig_platform_components_component_state_temperature_max_time:
+    type: "object"
+    properties:
+      openconfig-platform:max-time:
+        type: "integer"
+        format: "int64"
+  get_openconfig_platform_components_component_state_temperature_alarm_status:
+    type: "object"
+    properties:
+      openconfig-platform:alarm-status:
+        type: "boolean"
+        format: "boolean"
+  get_openconfig_platform_components_component_state_temperature_alarm_threshold:
+    type: "object"
+    properties:
+      openconfig-platform:alarm-threshold:
+        type: "integer"
+        format: "int32"
+  get_openconfig_platform_components_component_state_temperature_alarm_severity:
+    type: "object"
+    properties:
+      openconfig-platform:alarm-severity:
+        type: "string"
+  get_openconfig_platform_components_component_state_memory:
+    type: "object"
+    properties:
+      openconfig-platform:memory:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_state_memory"
+  get_openconfig_platform_components_component_state_memory_available:
+    type: "object"
+    properties:
+      openconfig-platform:available:
+        type: "integer"
+        format: "int64"
+  get_openconfig_platform_components_component_state_memory_utilized:
+    type: "object"
+    properties:
+      openconfig-platform:utilized:
+        type: "integer"
+        format: "int64"
+  get_openconfig_platform_components_component_state_allocated_power:
+    type: "object"
+    properties:
+      openconfig-platform:allocated-power:
+        type: "integer"
+        format: "int32"
+  get_openconfig_platform_components_component_state_used_power:
+    type: "object"
+    properties:
+      openconfig-platform:used-power:
+        type: "integer"
+        format: "int32"
+  get_openconfig_alarms_components_component_state_equipment_failure:
+    type: "object"
+    properties:
+      openconfig-alarms:equipment-failure:
+        type: "boolean"
+        format: "boolean"
+  get_openconfig_alarms_components_component_state_equipment_mismatch:
+    type: "object"
+    properties:
+      openconfig-alarms:equipment-mismatch:
+        type: "boolean"
+        format: "boolean"
+  openconfig_platform_components_component_properties:
+    type: "object"
+    properties:
+      openconfig-platform:properties:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_properties"
+  put_openconfig_platform_components_component_properties:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties"
+  patch_openconfig_platform_components_component_properties:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties"
+  get_openconfig_platform_components_component_properties:
+    type: "object"
+    properties:
+      openconfig-platform:properties:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_properties"
+  openconfig_platform_components_component_properties_property:
+    type: "object"
+    properties:
+      openconfig-platform:property:
+        type: "array"
+        items:
+          $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_properties_property"
+  put_openconfig_platform_components_component_properties_property:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property"
+  patch_openconfig_platform_components_component_properties_property:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property"
+  get_openconfig_platform_components_component_properties_property:
+    type: "object"
+    properties:
+      openconfig-platform:property:
+        type: "array"
+        items:
+          $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_properties_property"
+  post_list_openconfig_platform_components_component_properties_property:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property"
+  put_list_openconfig_platform_components_component_properties_property:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property"
+  patch_list_openconfig_platform_components_component_properties_property:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property"
+  openconfig_platform_components_component_properties_property_config:
+    type: "object"
+    properties:
+      openconfig-platform:config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_properties_config"
+  post_openconfig_platform_components_component_properties_property_config:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property_config"
+  put_openconfig_platform_components_component_properties_property_config:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property_config"
+  patch_openconfig_platform_components_component_properties_property_config:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property_config"
+  get_openconfig_platform_components_component_properties_property_config:
+    type: "object"
+    properties:
+      openconfig-platform:config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_properties_config"
+  openconfig_platform_components_component_properties_property_config_value:
+    type: "object"
+    properties:
+      openconfig-platform:value:
+        type: "string"
+  post_openconfig_platform_components_component_properties_property_config_value:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property_config_value"
+  put_openconfig_platform_components_component_properties_property_config_value:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property_config_value"
+  patch_openconfig_platform_components_component_properties_property_config_value:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_properties_property_config_value"
+  get_openconfig_platform_components_component_properties_property_config_value:
+    type: "object"
+    properties:
+      openconfig-platform:value:
+        type: "string"
+  get_openconfig_platform_components_component_properties_property_state:
+    type: "object"
+    properties:
+      openconfig-platform:state:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_properties_state"
+  get_openconfig_platform_components_component_properties_property_state_name:
+    type: "object"
+    properties:
+      openconfig-platform:name:
+        type: "string"
+  get_openconfig_platform_components_component_properties_property_state_value:
+    type: "object"
+    properties:
+      openconfig-platform:value:
+        type: "string"
+  get_openconfig_platform_components_component_properties_property_state_configurable:
+    type: "object"
+    properties:
+      openconfig-platform:configurable:
+        type: "boolean"
+        format: "boolean"
+  openconfig_platform_components_component_subcomponents:
+    type: "object"
+    properties:
+      openconfig-platform:subcomponents:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_subcomponents"
+  put_openconfig_platform_components_component_subcomponents:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents"
+  patch_openconfig_platform_components_component_subcomponents:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents"
+  get_openconfig_platform_components_component_subcomponents:
+    type: "object"
+    properties:
+      openconfig-platform:subcomponents:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_subcomponents"
+  openconfig_platform_components_component_subcomponents_subcomponent:
+    type: "object"
+    properties:
+      openconfig-platform:subcomponent:
+        type: "array"
+        items:
+          $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_subcomponents_subcomponent"
+  put_openconfig_platform_components_component_subcomponents_subcomponent:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents_subcomponent"
+  patch_openconfig_platform_components_component_subcomponents_subcomponent:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents_subcomponent"
+  get_openconfig_platform_components_component_subcomponents_subcomponent:
+    type: "object"
+    properties:
+      openconfig-platform:subcomponent:
+        type: "array"
+        items:
+          $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_subcomponents_subcomponent"
+  post_list_openconfig_platform_components_component_subcomponents_subcomponent:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents_subcomponent"
+  put_list_openconfig_platform_components_component_subcomponents_subcomponent:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents_subcomponent"
+  patch_list_openconfig_platform_components_component_subcomponents_subcomponent:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents_subcomponent"
+  openconfig_platform_components_component_subcomponents_subcomponent_config:
+    type: "object"
+    properties:
+      openconfig-platform:config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+  post_openconfig_platform_components_component_subcomponents_subcomponent_config:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents_subcomponent_config"
+  put_openconfig_platform_components_component_subcomponents_subcomponent_config:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents_subcomponent_config"
+  patch_openconfig_platform_components_component_subcomponents_subcomponent_config:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_subcomponents_subcomponent_config"
+  get_openconfig_platform_components_component_subcomponents_subcomponent_config:
+    type: "object"
+    properties:
+      openconfig-platform:config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+  get_openconfig_platform_components_component_subcomponents_subcomponent_state:
+    type: "object"
+    properties:
+      openconfig-platform:state:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+  get_openconfig_platform_components_component_subcomponents_subcomponent_state_name:
+    type: "object"
+    properties:
+      openconfig-platform:name:
+        type: "string"
+  openconfig_platform_components_component_chassis:
+    type: "object"
+    properties:
+      openconfig-platform:chassis:
+        type: "object"
+        properties: {}
+  put_openconfig_platform_components_component_chassis:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_chassis"
+  patch_openconfig_platform_components_component_chassis:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_chassis"
+  get_openconfig_platform_components_component_chassis:
+    type: "object"
+    properties:
+      openconfig-platform:chassis:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_component_port:
+    type: "object"
+    properties:
+      openconfig-platform:port:
+        type: "object"
+        properties: {}
+  put_openconfig_platform_components_component_port:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_port"
+  patch_openconfig_platform_components_component_port:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_port"
+  get_openconfig_platform_components_component_port:
+    type: "object"
+    properties:
+      openconfig-platform:port:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_component_power_supply:
+    type: "object"
+    properties:
+      openconfig-platform:power-supply:
+        type: "object"
+        properties: {}
+  put_openconfig_platform_components_component_power_supply:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_power_supply"
+  patch_openconfig_platform_components_component_power_supply:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_power_supply"
+  get_openconfig_platform_components_component_power_supply:
+    type: "object"
+    properties:
+      openconfig-platform:power-supply:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_component_fan:
+    type: "object"
+    properties:
+      openconfig-platform:fan:
+        type: "object"
+        properties: {}
+  put_openconfig_platform_components_component_fan:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_fan"
+  patch_openconfig_platform_components_component_fan:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_fan"
+  get_openconfig_platform_components_component_fan:
+    type: "object"
+    properties:
+      openconfig-platform:fan:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_component_fabric:
+    type: "object"
+    properties:
+      openconfig-platform:fabric:
+        type: "object"
+        properties: {}
+  put_openconfig_platform_components_component_fabric:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_fabric"
+  patch_openconfig_platform_components_component_fabric:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_fabric"
+  get_openconfig_platform_components_component_fabric:
+    type: "object"
+    properties:
+      openconfig-platform:fabric:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_component_storage:
+    type: "object"
+    properties:
+      openconfig-platform:storage:
+        type: "object"
+        properties: {}
+  put_openconfig_platform_components_component_storage:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_storage"
+  patch_openconfig_platform_components_component_storage:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_storage"
+  get_openconfig_platform_components_component_storage:
+    type: "object"
+    properties:
+      openconfig-platform:storage:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_component_cpu:
+    type: "object"
+    properties:
+      openconfig-platform:cpu:
+        type: "object"
+        properties: {}
+  put_openconfig_platform_components_component_cpu:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_cpu"
+  patch_openconfig_platform_components_component_cpu:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_cpu"
+  get_openconfig_platform_components_component_cpu:
+    type: "object"
+    properties:
+      openconfig-platform:cpu:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_component_integrated_circuit:
+    type: "object"
+    properties:
+      openconfig-platform:integrated-circuit:
+        type: "object"
+        properties: {}
+  put_openconfig_platform_components_component_integrated_circuit:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_integrated_circuit"
+  patch_openconfig_platform_components_component_integrated_circuit:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_integrated_circuit"
+  get_openconfig_platform_components_component_integrated_circuit:
+    type: "object"
+    properties:
+      openconfig-platform:integrated-circuit:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_component_backplane:
+    type: "object"
+    properties:
+      openconfig-platform:backplane:
+        type: "object"
+        properties: {}
+  put_openconfig_platform_components_component_backplane:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_backplane"
+  patch_openconfig_platform_components_component_backplane:
+    allOf:
+    - $ref: "#/definitions/openconfig_platform_components_component_backplane"
+  get_openconfig_platform_components_component_backplane:
+    type: "object"
+    properties:
+      openconfig-platform:backplane:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_openconfigplatformcomponents_config:
+    properties:
+      name:
+        type: "string"
+  openconfig_platform_components_openconfigplatformcomponents_properties_config:
+    properties:
+      name:
+        type: "string"
+      value:
+        type: "string"
+  openconfig_platform_components_openconfigplatformcomponents_properties_property:
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+      config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_properties_config"
+  openconfig_platform_components_openconfigplatformcomponents_properties:
+    properties:
+      property:
+        type: "array"
+        items:
+          $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_properties_property"
+  openconfig_platform_components_openconfigplatformcomponents_subcomponents_subcomponent:
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+      config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+  openconfig_platform_components_openconfigplatformcomponents_subcomponents:
+    properties:
+      subcomponent:
+        type: "array"
+        items:
+          $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_subcomponents_subcomponent"
+  openconfig_platform_components_openconfigplatformcomponents_component:
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+      config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+      properties:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_properties"
+      subcomponents:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_subcomponents"
+      chassis:
+        type: "object"
+        properties: {}
+      port:
+        type: "object"
+        properties: {}
+      power-supply:
+        type: "object"
+        properties: {}
+      fan:
+        type: "object"
+        properties: {}
+      fabric:
+        type: "object"
+        properties: {}
+      storage:
+        type: "object"
+        properties: {}
+      cpu:
+        type: "object"
+        properties: {}
+      integrated-circuit:
+        type: "object"
+        properties: {}
+      backplane:
+        type: "object"
+        properties: {}
+  openconfig_platform_components_openconfigplatformcomponents:
+    properties:
+      component:
+        type: "array"
+        items:
+          $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_component"
+  get_openconfig_platform_components_openconfigplatformcomponents_state_temperature:
+    properties:
+      instant:
+        type: "number"
+        format: "double"
+      avg:
+        type: "number"
+        format: "double"
+      min:
+        type: "number"
+        format: "double"
+      max:
+        type: "number"
+        format: "double"
+      interval:
+        type: "integer"
+        format: "int64"
+      min-time:
+        type: "integer"
+        format: "int64"
+      max-time:
+        type: "integer"
+        format: "int64"
+      alarm-status:
+        type: "boolean"
+        format: "boolean"
+      alarm-threshold:
+        type: "integer"
+        format: "int32"
+      alarm-severity:
+        type: "string"
+  get_openconfig_platform_components_openconfigplatformcomponents_state_memory:
+    properties:
+      available:
+        type: "integer"
+        format: "int64"
+      utilized:
+        type: "integer"
+        format: "int64"
+  get_openconfig_platform_components_openconfigplatformcomponents_state:
+    properties:
+      name:
+        type: "string"
+      type:
+        type: "string"
+      id:
+        type: "string"
+      location:
+        type: "string"
+      description:
+        type: "string"
+      mfg-name:
+        type: "string"
+      mfg-date:
+        type: "string"
+      hardware-version:
+        type: "string"
+      firmware-version:
+        type: "string"
+      software-version:
+        type: "string"
+      serial-no:
+        type: "string"
+      part-no:
+        type: "string"
+      removable:
+        type: "boolean"
+        format: "boolean"
+      oper-status:
+        type: "string"
+      empty:
+        type: "boolean"
+        format: "boolean"
+      parent:
+        type: "string"
+      temperature:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_state_temperature"
+      memory:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_state_memory"
+      allocated-power:
+        type: "integer"
+        format: "int32"
+      used-power:
+        type: "integer"
+        format: "int32"
+      openconfig-alarms:equipment-failure:
+        type: "boolean"
+        format: "boolean"
+      openconfig-alarms:equipment-mismatch:
+        type: "boolean"
+        format: "boolean"
+  get_openconfig_platform_components_openconfigplatformcomponents_properties_state:
+    properties:
+      name:
+        type: "string"
+      value:
+        type: "string"
+      configurable:
+        type: "boolean"
+        format: "boolean"
+  get_openconfig_platform_components_openconfigplatformcomponents_properties_property:
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+      config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_properties_config"
+      state:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_properties_state"
+  get_openconfig_platform_components_openconfigplatformcomponents_properties:
+    properties:
+      property:
+        type: "array"
+        items:
+          $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_properties_property"
+  get_openconfig_platform_components_openconfigplatformcomponents_subcomponents_subcomponent:
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+      config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+      state:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+  get_openconfig_platform_components_openconfigplatformcomponents_subcomponents:
+    properties:
+      subcomponent:
+        type: "array"
+        items:
+          $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_subcomponents_subcomponent"
+  get_openconfig_platform_components_openconfigplatformcomponents_component:
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+      config:
+        $ref: "#/definitions/openconfig_platform_components_openconfigplatformcomponents_config"
+      state:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_state"
+      properties:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_properties"
+      subcomponents:
+        $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_subcomponents"
+      chassis:
+        type: "object"
+        properties: {}
+      port:
+        type: "object"
+        properties: {}
+      power-supply:
+        type: "object"
+        properties: {}
+      fan:
+        type: "object"
+        properties: {}
+      fabric:
+        type: "object"
+        properties: {}
+      storage:
+        type: "object"
+        properties: {}
+      cpu:
+        type: "object"
+        properties: {}
+      integrated-circuit:
+        type: "object"
+        properties: {}
+      backplane:
+        type: "object"
+        properties: {}
+  get_openconfig_platform_components_openconfigplatformcomponents:
+    properties:
+      component:
+        type: "array"
+        items:
+          $ref: "#/definitions/get_openconfig_platform_components_openconfigplatformcomponents_component"

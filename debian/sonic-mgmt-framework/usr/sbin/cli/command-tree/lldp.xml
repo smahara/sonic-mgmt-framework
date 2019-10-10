@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE CLISH_MODULE [
+<!ENTITY START_PORT_ID "1">
+<!ENTITY MAX_PORT_ID "32">
+<!ENTITY START_SUB_PORT_ID "1">
+<!ENTITY MAX_SUB_PORT_ID "4">
+<!ENTITY MAX_MTU "9276">
+]>
+<CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
+  <VIEW name="enable-view">
+    <COMMAND name="show lldp" help="Show lldp information">
+      <ACTION> python $SONIC_CLI_ROOT/sonic-cli-lldp.py get_openconfig_lldp_lldp_interfaces lldp_show.j2 ${__full_line}</ACTION>
+      <xi:include href="include/pipe.xml"/>
+    </COMMAND>
+    <COMMAND name="show lldp table" help="Show lldp table information">
+      <ACTION> python $SONIC_CLI_ROOT/sonic-cli-lldp.py get_openconfig_lldp_lldp_interfaces lldp_show.j2 ${__full_line} </ACTION>
+      <xi:include href="include/pipe.xml"/>
+    </COMMAND>
+    <COMMAND name="show lldp neighbor" help="Show lldp neighbor information">
+      <PARAM name="ifname" help="Interface name" ptype="STRING" optional="true"> </PARAM>
+      <ACTION> if test "${ifname}" = ""; then
+ python $SONIC_CLI_ROOT/sonic-cli-lldp.py get_openconfig_lldp_lldp_interfaces lldp_neighbor_show.j2 ${__full_line}
+ else
+ python $SONIC_CLI_ROOT/sonic-cli-lldp.py get_openconfig_lldp_lldp_interfaces_interface lldp_neighbor_show.j2 ${ifname} ${__full_line}
+ fi
+ </ACTION>
+      <xi:include href="include/pipe.xml"/>
+    </COMMAND>
+  </VIEW>
+</CLISH_MODULE>

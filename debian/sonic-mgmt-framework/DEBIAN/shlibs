@@ -1,0 +1,4 @@
+libclish 1 sonic-mgmt-framework
+libkonf 1 sonic-mgmt-framework
+liblub 1 sonic-mgmt-framework
+libtinyrl 1 sonic-mgmt-framework

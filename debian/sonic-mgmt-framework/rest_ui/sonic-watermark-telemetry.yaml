@@ -1,0 +1,337 @@
+---
+swagger: "2.0"
+info:
+  description: "Network management Open APIs for Sonic."
+  version: "1.0.0"
+  title: "Sonic Network Management APIs"
+basePath: "/restconf/data"
+tags:
+- name: "sonic-watermark-telemetry"
+  description: "Operations for sonic-watermark-telemetry"
+schemes:
+- "https"
+- "http"
+paths:
+  /sonic-watermark-telemetry:WATERMARK_TABLE:
+    get:
+      tags:
+      - "sonic-watermark-telemetry"
+      description: "OperationId: get_sonic_watermark_telemetry_watermark_table\n"
+      operationId: "get_sonic_watermark_telemetry_watermark_table"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_watermark_telemetry_watermark_table"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-watermark-telemetry"
+      description: "OperationId: post_sonic_watermark_telemetry_watermark_table_interval\n"
+      operationId: "post_sonic_watermark_telemetry_watermark_table_interval"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_watermark_telemetry_watermark_table_interval"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-watermark-telemetry"
+      description: "OperationId: put_sonic_watermark_telemetry_watermark_table\n"
+      operationId: "put_sonic_watermark_telemetry_watermark_table"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_watermark_telemetry_watermark_table"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-watermark-telemetry"
+      description: "OperationId: delete_sonic_watermark_telemetry_watermark_table\n"
+      operationId: "delete_sonic_watermark_telemetry_watermark_table"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-watermark-telemetry"
+      description: "OperationId: patch_sonic_watermark_telemetry_watermark_table\n"
+      operationId: "patch_sonic_watermark_telemetry_watermark_table"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_watermark_telemetry_watermark_table"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-watermark-telemetry:WATERMARK_TABLE/interval:
+    get:
+      tags:
+      - "sonic-watermark-telemetry"
+      description: "OperationId: get_sonic_watermark_telemetry_watermark_table_interval\n"
+      operationId: "get_sonic_watermark_telemetry_watermark_table_interval"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_watermark_telemetry_watermark_table_interval"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-watermark-telemetry"
+      description: "OperationId: put_sonic_watermark_telemetry_watermark_table_interval\n"
+      operationId: "put_sonic_watermark_telemetry_watermark_table_interval"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_watermark_telemetry_watermark_table_interval"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-watermark-telemetry"
+      description: "OperationId: delete_sonic_watermark_telemetry_watermark_table_interval\n"
+      operationId: "delete_sonic_watermark_telemetry_watermark_table_interval"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-watermark-telemetry"
+      description: "OperationId: patch_sonic_watermark_telemetry_watermark_table_interval\n"
+      operationId: "patch_sonic_watermark_telemetry_watermark_table_interval"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_watermark_telemetry_watermark_table_interval"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+definitions:
+  sonic_watermark_telemetry_watermark_table:
+    type: "object"
+    properties:
+      sonic-watermark-telemetry:WATERMARK_TABLE:
+        $ref: "#/definitions/sonic_watermark_telemetry_watermark_table_sonicwatermarktelemetryWATERMARK_TABLE"
+  post_sonic_watermark_telemetry_watermark_table:
+    allOf:
+    - $ref: "#/definitions/sonic_watermark_telemetry_watermark_table"
+  put_sonic_watermark_telemetry_watermark_table:
+    allOf:
+    - $ref: "#/definitions/sonic_watermark_telemetry_watermark_table"
+  patch_sonic_watermark_telemetry_watermark_table:
+    allOf:
+    - $ref: "#/definitions/sonic_watermark_telemetry_watermark_table"
+  get_sonic_watermark_telemetry_watermark_table:
+    type: "object"
+    properties:
+      sonic-watermark-telemetry:WATERMARK_TABLE:
+        $ref: "#/definitions/sonic_watermark_telemetry_watermark_table_sonicwatermarktelemetryWATERMARK_TABLE"
+  sonic_watermark_telemetry_watermark_table_interval:
+    type: "object"
+    properties:
+      sonic-watermark-telemetry:interval:
+        type: "integer"
+        format: "int64"
+  post_sonic_watermark_telemetry_watermark_table_interval:
+    allOf:
+    - $ref: "#/definitions/sonic_watermark_telemetry_watermark_table_interval"
+  put_sonic_watermark_telemetry_watermark_table_interval:
+    allOf:
+    - $ref: "#/definitions/sonic_watermark_telemetry_watermark_table_interval"
+  patch_sonic_watermark_telemetry_watermark_table_interval:
+    allOf:
+    - $ref: "#/definitions/sonic_watermark_telemetry_watermark_table_interval"
+  get_sonic_watermark_telemetry_watermark_table_interval:
+    type: "object"
+    properties:
+      sonic-watermark-telemetry:interval:
+        type: "integer"
+        format: "int64"
+  sonic_watermark_telemetry_watermark_table_sonicwatermarktelemetryWATERMARK_TABLE:
+    properties:
+      interval:
+        type: "integer"
+        format: "int64"

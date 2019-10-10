@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE CLISH_MODULE [
+<!ENTITY START_PORT_ID "1">
+<!ENTITY MAX_PORT_ID "32">
+<!ENTITY START_SUB_PORT_ID "1">
+<!ENTITY MAX_SUB_PORT_ID "4">
+<!ENTITY MAX_MTU "9276">
+<!ENTITY VLAN_NUM "(409[0-3]|40[0-8][0-9]|[1-3][0-9]{3}|[1-9][0-9]{2}|[1-9][0-9]|[1-9])">
+]>
+<CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
+  <!--=========================================================================-->
+  <PTYPE name="STP_FORWARD_DELAY" method="integer" pattern="4..30" help="range is 4 to 30 seconds"/>
+  <!--=======================================================-->
+  <PTYPE name="STP_HELLO_TIME" method="integer" pattern="1..10" help="range is 1 to 10 seconds"/>
+  <!--=======================================================-->
+  <PTYPE name="STP_MAX_AGE" method="integer" pattern="6..40" help="range is 6 to 40 seconds"/>
+  <!--=======================================================-->
+  <PTYPE name="STP_PRIORITY" method="integer" pattern="0..61440" help="range is 0 to 61440. Increments of 4096"/>
+  <!--=======================================================-->
+  <PTYPE name="STP_FORCE_VERSION" method="integer" pattern="( [0] | [2])" help="range is 4 to 30 seconds"/>
+  <!--=======================================================-->
+  <PTYPE name="STP_COST" method="integer" pattern="1..200000000" help="range is 1 to 200000000"/>
+  <!--=======================================================-->
+  <PTYPE name="STP_PORT_PRIORITY" method="integer" pattern="0..240" help="range is 0 to 240"/>
+  <!--=======================================================-->
+  <PTYPE name="STP_VLAN_ID" method="integer" pattern="0..4094" help="range is 1 to 4094"/>
+  <!--=======================================================-->
+  <!-- Config mode -->
+  <VIEW name="enable-view">
+    <COMMAND name="show spanning-tree" help="Show spanning tree information">
+      <PARAM name="vlan" help="Spanning tree information for VLAN" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+        <PARAM name="vlan-id" help="valid VLAN id" ptype="STP_VLAN_ID"> </PARAM>
+      </PARAM>
+      <ACTION> python $SONIC_CLI_ROOT/sonic-cli-stp.py show_stp.j2 ${vlan-id} </ACTION>
+      <xi:include href="include/pipe.xml"/>
+    </COMMAND>
+    <COMMAND name="show spanning-tree statistics" help="Show spanning tree statistics information">
+      <PARAM name="vlan" help="Spanning tree statistics for a VLAN" ptype="SUBCOMMAND" mode="subcommand" optional="true">
+        <PARAM name="vlan-id" help="valid VLAN id" ptype="STP_VLAN_ID"> </PARAM>
+      </PARAM>
+      <ACTION> python $SONIC_CLI_ROOT/sonic-cli-stp.py show_stp_stats.j2 ${vlan-id} </ACTION>
+      <xi:include href="include/pipe.xml"/>
+    </COMMAND>
+  </VIEW>
+  <VIEW name="configure-view">
+    <COMMAND name="spanning-tree" help="Configure spanning tree"> </COMMAND>
+    <COMMAND name="spanning-tree mode" help="Configure spanning tree">
+    <PARAM name="mode-subcmds" help="spannig tree subcommands" ptype="SUBCOMMAND" mode="switch" optional="true">
+            <PARAM name="pvst" help="Enable PVST+ (based on IEEE 802.1D)" ptype="SUBCOMMAND" mode="subcommand" optional="true"> </PARAM>
+            <PARAM name="rpvst" help="Enable rapid PVST+ (based on IEEE 802.1w)" ptype="SUBCOMMAND" mode="subcommand" optional="true"> </PARAM>
+      </PARAM>
+      <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_global_config_enabled_protocol ${__params}
+        </ACTION>
+   </COMMAND>
+
+    <COMMAND name="spanning-tree vlan" help="Configure spanning tree">
+        <PARAM name="vlan-range" help="Range ex: 1-100,200,300-400" ptype="UINT16"> </PARAM>
+    <PARAM name="stp-vlan-subcmds" help="spannig tree subcommands" ptype="SUBCOMMAND" mode="switch" optional="true">
+        <PARAM name="forward-time" help="Set the forward delay time for the spanning tree" ptype="SUBCOMMAND" mode="subcommand">
+              <PARAM name="seconds" help="Number of seconds for the forward delay timer" ptype="STP_FORWARD_DELAY"> </PARAM>
+            </PARAM>
+        <PARAM name="hello-time" help="Set the forward delay time for the spanning tree" ptype="SUBCOMMAND" mode="subcommand">
+              <PARAM name="seconds" help="Number of seconds for the forward delay timer" ptype="STP_HELLO_TIME"> </PARAM>
+            </PARAM>
+
+        <PARAM name="max-age" help="Set the max age time for the spanning tree" ptype="SUBCOMMAND" mode="subcommand">
+              <PARAM name="seconds" help="Number of seconds for max age timer" ptype="STP_MAX_AGE"> </PARAM>
+        </PARAM>
+        <PARAM name="priority" help="Set the priority for the spanning tree" ptype="SUBCOMMAND" mode="subcommand">
+              <PARAM name="seconds" help="Number of seconds for max age timer" ptype="STP_PRIORITY"> </PARAM>
+        </PARAM>
+        </PARAM>
+      <ACTION>
+        if test "${stp-vlan-subcmds}" = "forward-time";then
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_rapid_pvst_vlan_config_forwarding_delay ${__params}
+        elif test "${stp-vlan-subcmds}" = "hello-time";then
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_rapid_pvst_vlan_config_hello_time ${__params}
+        elif test "${stp-vlan-subcmds}" = "max-age";then
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_rapid_pvst_vlan_config_max_age ${__params}
+        elif test "${stp-vlan-subcmds}" = "priority";then
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_rapid_pvst_vlan_config_bridge_priority ${__params}
+        fi
+        </ACTION>
+     </COMMAND>
+<COMMAND name="spanning-tree forward-time" help="Set the forward delay time for the spanning tree" ptype="SUBCOMMAND" mode="subcommand">
+          <PARAM name="seconds" help="Number of seconds for the forward delay timer" ptype="STP_FORWARD_DELAY"> </PARAM>
+        <ACTION> builtin="clish_nop"</ACTION>
+    </COMMAND>
+
+        <COMMAND name="spanning-tree hello-time" help="Set the hello time for the spanning tree" ptype="SUBCOMMAND" mode="subcommand">
+          <PARAM name="seconds" help="Number of seconds for the hello timer" ptype="STP_HELLO_TIME"> </PARAM>
+        <ACTION> builtin="clish_nop"</ACTION>
+    </COMMAND>
+        <COMMAND name="spanning-tree max-age" help="Set the max age time for the spanning tree" ptype="SUBCOMMAND" mode="subcommand">
+          <PARAM name="seconds" help="Number of seconds for max age timer" ptype="STP_MAX_AGE"> </PARAM>
+        <ACTION> builtin="clish_nop"</ACTION>
+    </COMMAND>
+        <COMMAND name="spanning-tree priority" help="Set the priority for the spanning tree" ptype="SUBCOMMAND" mode="subcommand">
+          <PARAM name="seconds" help="Number of seconds for max age timer" ptype="STP_PRIORITY"> </PARAM>
+        <ACTION> builtin="clish_nop"</ACTION>
+    </COMMAND>
+
+</VIEW>
+
+
+<VIEW name="configure-if-view">
+<COMMAND name="spanning-tree" help = "Configure spanning tree on intreface">
+      <PARAM name="stp-if-subcmds" help="spannig tree interface subcommands" ptype="SUBCOMMAND" mode="switch">
+              <PARAM name="bpduguard" help="Enables bpdu guard on the interface" ptype="SUBCOMMAND" mode="subcommand" > </PARAM>
+              <PARAM name="cost" help="Set  the port level cost value for a VLAN" ptype="SUBCOMMAND" mode="subcommand" >
+              <PARAM name="value" help="range 1- 200000000" ptype="STP_COST"> </PARAM>
+              </PARAM>
+              <PARAM name="enable" help="Enables spanning-tree on the interface" ptype="SUBCOMMAND" mode="subcommand" > </PARAM>
+
+              <PARAM name="portfast" help="Enables portfast on the interface" ptype="SUBCOMMAND" mode="subcommand" > </PARAM>
+              <PARAM name="port-priority" help="Set the port level priority value for a VLAN" ptype="SUBCOMMAND" mode="subcommand" >
+              <PARAM name="value" help="range 0 - 240" ptype="STP_PORT_PRIORITY"> </PARAM>
+              </PARAM>
+              <PARAM name="rootguard" help="Enables port fast  on the uplink interface" ptype="SUBCOMMAND" mode="subcommand" > </PARAM>
+              <PARAM name="uplinkfast" help="Enables port fast  on the uplink interface" ptype="SUBCOMMAND" mode="subcommand" > </PARAM>
+        </PARAM>
+      <ACTION>
+        if test "${stp-if-subcmds}" = "bpduguard";then
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_bpdu_guard ${iface} True
+        elif test "${stp-if-subcmds}" = "portfast";then
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py  patch_openconfig_spanning_tree_stp_interfaces_interface_config_edge_port ${iface} True
+        elif test "${stp-if-subcmds}" = "rootguard";then
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_guard ${iface} True
+        fi
+        builtin="clish_nop"
+        </ACTION>
+
+</COMMAND>
+
+<COMMAND name="spanning-tree vlan" help = "Configure spanning tree on intreface">
+              <PARAM name="vlan-range" help="Range ex: 1-100,200,300-400" ptype="UINT16" > </PARAM>
+              <PARAM name="stp-if-vlan-subcmds" help="spannig tree interface subcommands" ptype="SUBCOMMAND" mode="switch">
+              <!-- spanning-tree [vlan] cost <value> -->
+              <PARAM name="cost" help="Set  the port level cost value for a VLAN" ptype="SUBCOMMAND" mode="subcommand" >
+              <PARAM name="value" help="range 1- 200000000" ptype="STP_COST"> </PARAM>
+              </PARAM>
+
+              <PARAM name="port-priority" help="Set the port level priority value for a VLAN" ptype="SUBCOMMAND" mode="subcommand" >
+              <PARAM name="value" help="range 0 - 240" ptype="STP_PORT_PRIORITY"> </PARAM>
+              </PARAM>
+        </PARAM>
+      <ACTION> builtin="clish_nop"</ACTION>
+</COMMAND>
+</VIEW>
+</CLISH_MODULE>

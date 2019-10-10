@@ -1,0 +1,10 @@
+# GetOpenconfigInterfacesInterfacesInterfaceStateCounters
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**openconfig_interfacescounters** | [**GetOpenconfigInterfacesInterfacesOpenconfiginterfacesinterfacesStateCounters**](GetOpenconfigInterfacesInterfacesOpenconfiginterfacesinterfacesStateCounters.md) |  | [optional] 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+
