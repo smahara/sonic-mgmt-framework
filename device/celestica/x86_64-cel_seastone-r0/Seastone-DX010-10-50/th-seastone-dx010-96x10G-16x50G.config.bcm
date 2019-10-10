@@ -17,6 +17,7 @@ l3_alpm_enable=2
 ipv6_lpm_128b_enable=1
 mmu_lossless=0
 bcm_num_cos=10
+default_cpu_tx_queue=9
 
 ###################################################################################
 # Celestica Customize for SeaStone

@@ -4,6 +4,7 @@ parity_enable=1
 parity_correction=0
 
 bcm_num_cos=8
+default_cpu_tx_queue=7
 l2_mem_entries=16384
 l3_mem_entries=16384
 lpm_scaling_enable=1

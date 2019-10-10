@@ -3,6 +3,7 @@
 # Define default OS / SAL
 os=unix
 bcm_num_cos=10
+default_cpu_tx_queue=9
 l2_mem_entries=8192
 l3_mem_entries=8192
 l3_alpm_enable=2

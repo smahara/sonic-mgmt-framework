@@ -13,6 +13,7 @@ l2_mem_entries=40960
 l2xmsg_mode=1
 mmu_lossless=0
 bcm_num_cos=10
+default_cpu_tx_queue=9
 
 #Parity
 parity_correction=1

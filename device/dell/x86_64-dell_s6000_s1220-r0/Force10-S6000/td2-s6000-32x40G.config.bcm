@@ -24,6 +24,7 @@ stat_if_parity_enable=0
 
 #
 bcm_num_cos=8
+default_cpu_tx_queue=7
 bcm_stat_interval=2000000
 l2xmsg_hostbuf_size=8192
 l2xmsg_mode=1
