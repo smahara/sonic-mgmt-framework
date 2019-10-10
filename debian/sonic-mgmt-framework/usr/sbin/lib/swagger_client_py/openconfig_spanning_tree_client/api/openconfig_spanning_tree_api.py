@@ -33,6 +33,204 @@ class OpenconfigSpanningTreeApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
+    def del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(self, enabled_protocol, **kwargs):  # noqa: E501
+        """del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol  # noqa: E501
+
+        OperationId: del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol List of the spanning tree protocols enabled on the device  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(enabled_protocol, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str enabled_protocol: List of the spanning tree protocols enabled on the device (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol_with_http_info(enabled_protocol, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol_with_http_info(enabled_protocol, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol_with_http_info(self, enabled_protocol, **kwargs):  # noqa: E501
+        """del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol  # noqa: E501
+
+        OperationId: del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol List of the spanning tree protocols enabled on the device  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol_with_http_info(enabled_protocol, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str enabled_protocol: List of the spanning tree protocols enabled on the device (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['enabled_protocol']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'enabled_protocol' is set
+        if ('enabled_protocol' not in params or
+                params['enabled_protocol'] is None):
+            raise ValueError("Missing the required parameter `enabled_protocol` when calling `del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'enabled_protocol' in params:
+            path_params['enabled-protocol'] = params['enabled_protocol']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-spanning-tree:stp/global/config/enabled-protocol={enabled-protocol}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(self, mst_id, vlan, **kwargs):  # noqa: E501
+        """del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan  # noqa: E501
+
+        OperationId: del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan list of vlans mapped to the MST instance  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(mst_id, vlan, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param int mst_id: Reference to the list key (required)
+        :param str vlan: list of vlans mapped to the MST instance (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan_with_http_info(mst_id, vlan, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan_with_http_info(mst_id, vlan, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan_with_http_info(self, mst_id, vlan, **kwargs):  # noqa: E501
+        """del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan  # noqa: E501
+
+        OperationId: del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan list of vlans mapped to the MST instance  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan_with_http_info(mst_id, vlan, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param int mst_id: Reference to the list key (required)
+        :param str vlan: list of vlans mapped to the MST instance (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['mst_id', 'vlan']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'mst_id' is set
+        if ('mst_id' not in params or
+                params['mst_id'] is None):
+            raise ValueError("Missing the required parameter `mst_id` when calling `del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan`")  # noqa: E501
+        # verify the required parameter 'vlan' is set
+        if ('vlan' not in params or
+                params['vlan'] is None):
+            raise ValueError("Missing the required parameter `vlan` when calling `del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'mst_id' in params:
+            path_params['mst-id'] = params['mst_id']  # noqa: E501
+        if 'vlan' in params:
+            path_params['vlan'] = params['vlan']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-spanning-tree:stp/mstp/mst-instances/mst-instance={mst-id}/config/vlan={vlan}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def delete_list_openconfig_spanning_tree_stp_interfaces_interface(self, **kwargs):  # noqa: E501
         """delete_list_openconfig_spanning_tree_stp_interfaces_interface  # noqa: E501
 
@@ -6230,6 +6428,204 @@ class OpenconfigSpanningTreeApi(object):
             post_params=form_params,
             files=local_var_files,
             response_type='GetOpenconfigSpanningTreeStpRstpInterfacesInterface',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(self, enabled_protocol, **kwargs):  # noqa: E501
+        """get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol  # noqa: E501
+
+        OperationId: get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol List of the spanning tree protocols enabled on the device  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(enabled_protocol, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str enabled_protocol: List of the spanning tree protocols enabled on the device (required)
+        :return: GetOpenconfigSpanningTreeStpGlobalConfigEnabledProtocol
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol_with_http_info(enabled_protocol, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol_with_http_info(enabled_protocol, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol_with_http_info(self, enabled_protocol, **kwargs):  # noqa: E501
+        """get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol  # noqa: E501
+
+        OperationId: get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol List of the spanning tree protocols enabled on the device  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol_with_http_info(enabled_protocol, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str enabled_protocol: List of the spanning tree protocols enabled on the device (required)
+        :return: GetOpenconfigSpanningTreeStpGlobalConfigEnabledProtocol
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['enabled_protocol']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'enabled_protocol' is set
+        if ('enabled_protocol' not in params or
+                params['enabled_protocol'] is None):
+            raise ValueError("Missing the required parameter `enabled_protocol` when calling `get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'enabled_protocol' in params:
+            path_params['enabled-protocol'] = params['enabled_protocol']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-spanning-tree:stp/global/config/enabled-protocol={enabled-protocol}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSpanningTreeStpGlobalConfigEnabledProtocol',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(self, mst_id, vlan, **kwargs):  # noqa: E501
+        """get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan  # noqa: E501
+
+        OperationId: get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan list of vlans mapped to the MST instance  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(mst_id, vlan, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param int mst_id: Reference to the list key (required)
+        :param str vlan: list of vlans mapped to the MST instance (required)
+        :return: GetOpenconfigSpanningTreeStpMstpMstInstancesMstInstanceConfigVlan
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan_with_http_info(mst_id, vlan, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan_with_http_info(mst_id, vlan, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan_with_http_info(self, mst_id, vlan, **kwargs):  # noqa: E501
+        """get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan  # noqa: E501
+
+        OperationId: get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan list of vlans mapped to the MST instance  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan_with_http_info(mst_id, vlan, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param int mst_id: Reference to the list key (required)
+        :param str vlan: list of vlans mapped to the MST instance (required)
+        :return: GetOpenconfigSpanningTreeStpMstpMstInstancesMstInstanceConfigVlan
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['mst_id', 'vlan']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'mst_id' is set
+        if ('mst_id' not in params or
+                params['mst_id'] is None):
+            raise ValueError("Missing the required parameter `mst_id` when calling `get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan`")  # noqa: E501
+        # verify the required parameter 'vlan' is set
+        if ('vlan' not in params or
+                params['vlan'] is None):
+            raise ValueError("Missing the required parameter `vlan` when calling `get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'mst_id' in params:
+            path_params['mst-id'] = params['mst_id']  # noqa: E501
+        if 'vlan' in params:
+            path_params['vlan'] = params['vlan']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-spanning-tree:stp/mstp/mst-instances/mst-instance={mst-id}/config/vlan={vlan}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSpanningTreeStpMstpMstInstancesMstInstanceConfigVlan',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),

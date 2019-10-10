@@ -29,6 +29,66 @@ class TestOpenconfigInterfacesApi(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(self):
+        """Test case for del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address
+
+        """
+        pass
+
+    def test_del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(self):
+        """Test case for del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface
+
+        """
+        pass
+
+    def test_del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(self):
+        """Test case for del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address
+
+        """
+        pass
+
+    def test_del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(self):
+        """Test case for del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface
+
+        """
+        pass
+
+    def test_del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(self):
+        """Test case for del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address
+
+        """
+        pass
+
+    def test_del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(self):
+        """Test case for del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface
+
+        """
+        pass
+
+    def test_del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(self):
+        """Test case for del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address
+
+        """
+        pass
+
+    def test_del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(self):
+        """Test case for del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface
+
+        """
+        pass
+
+    def test_del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans(self):
+        """Test case for del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans
+
+        """
+        pass
+
+    def test_del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans(self):
+        """Test case for del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans
+
+        """
+        pass
+
     def test_delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address(self):
         """Test case for delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address
 
@@ -1309,6 +1369,66 @@ class TestOpenconfigInterfacesApi(unittest.TestCase):
 
     def test_get_list_openconfig_interfaces_interfaces_interface_subinterfaces_subinterface(self):
         """Test case for get_list_openconfig_interfaces_interfaces_interface_subinterfaces_subinterface
+
+        """
+        pass
+
+    def test_get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(self):
+        """Test case for get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address
+
+        """
+        pass
+
+    def test_get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(self):
+        """Test case for get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface
+
+        """
+        pass
+
+    def test_get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(self):
+        """Test case for get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address
+
+        """
+        pass
+
+    def test_get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(self):
+        """Test case for get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface
+
+        """
+        pass
+
+    def test_get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(self):
+        """Test case for get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address
+
+        """
+        pass
+
+    def test_get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(self):
+        """Test case for get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface
+
+        """
+        pass
+
+    def test_get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(self):
+        """Test case for get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address
+
+        """
+        pass
+
+    def test_get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(self):
+        """Test case for get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface
+
+        """
+        pass
+
+    def test_get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans(self):
+        """Test case for get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans
+
+        """
+        pass
+
+    def test_get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans(self):
+        """Test case for get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans
 
         """
         pass

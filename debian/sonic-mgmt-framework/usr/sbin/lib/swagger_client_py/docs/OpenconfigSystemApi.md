@@ -4,6 +4,14 @@ All URIs are relative to *https://localhost/restconf/data*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**del_llist_openconfig_system_system_aaa_accounting_config_accounting_method**](OpenconfigSystemApi.md#del_llist_openconfig_system_system_aaa_accounting_config_accounting_method) | **DELETE** /openconfig-system:system/aaa/accounting/config/accounting-method&#x3D;{accounting-method} | 
+[**del_llist_openconfig_system_system_aaa_authentication_config_authentication_method**](OpenconfigSystemApi.md#del_llist_openconfig_system_system_aaa_authentication_config_authentication_method) | **DELETE** /openconfig-system:system/aaa/authentication/config/authentication-method&#x3D;{authentication-method} | 
+[**del_llist_openconfig_system_system_aaa_authorization_config_authorization_method**](OpenconfigSystemApi.md#del_llist_openconfig_system_system_aaa_authorization_config_authorization_method) | **DELETE** /openconfig-system:system/aaa/authorization/config/authorization-method&#x3D;{authorization-method} | 
+[**del_llist_openconfig_system_system_dns_config_search**](OpenconfigSystemApi.md#del_llist_openconfig_system_system_dns_config_search) | **DELETE** /openconfig-system:system/dns/config/search&#x3D;{search} | 
+[**del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias**](OpenconfigSystemApi.md#del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias) | **DELETE** /openconfig-system:system/dns/host-entries/host-entry&#x3D;{hostname}/config/alias&#x3D;{alias} | 
+[**del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address**](OpenconfigSystemApi.md#del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address) | **DELETE** /openconfig-system:system/dns/host-entries/host-entry&#x3D;{hostname}/config/ipv4-address&#x3D;{ipv4-address} | 
+[**del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address**](OpenconfigSystemApi.md#del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address) | **DELETE** /openconfig-system:system/dns/host-entries/host-entry&#x3D;{hostname}/config/ipv6-address&#x3D;{ipv6-address} | 
+[**del_llist_openconfig_system_system_grpc_server_config_listen_addresses**](OpenconfigSystemApi.md#del_llist_openconfig_system_system_grpc_server_config_listen_addresses) | **DELETE** /openconfig-system:system/grpc-server/config/listen-addresses&#x3D;{listen-addresses} | 
 [**delete_list_openconfig_system_system_aaa_accounting_events_event**](OpenconfigSystemApi.md#delete_list_openconfig_system_system_aaa_accounting_events_event) | **DELETE** /openconfig-system:system/aaa/accounting/events/event | 
 [**delete_list_openconfig_system_system_aaa_authentication_users_user**](OpenconfigSystemApi.md#delete_list_openconfig_system_system_aaa_authentication_users_user) | **DELETE** /openconfig-system:system/aaa/authentication/users/user | 
 [**delete_list_openconfig_system_system_aaa_authorization_events_event**](OpenconfigSystemApi.md#delete_list_openconfig_system_system_aaa_authorization_events_event) | **DELETE** /openconfig-system:system/aaa/authorization/events/event | 
@@ -151,6 +159,14 @@ Method | HTTP request | Description
 [**get_list_openconfig_system_system_ntp_ntp_keys_ntp_key**](OpenconfigSystemApi.md#get_list_openconfig_system_system_ntp_ntp_keys_ntp_key) | **GET** /openconfig-system:system/ntp/ntp-keys/ntp-key | 
 [**get_list_openconfig_system_system_ntp_servers_server**](OpenconfigSystemApi.md#get_list_openconfig_system_system_ntp_servers_server) | **GET** /openconfig-system:system/ntp/servers/server | 
 [**get_list_openconfig_system_system_processes_process**](OpenconfigSystemApi.md#get_list_openconfig_system_system_processes_process) | **GET** /openconfig-system:system/processes/process | 
+[**get_llist_openconfig_system_system_aaa_accounting_config_accounting_method**](OpenconfigSystemApi.md#get_llist_openconfig_system_system_aaa_accounting_config_accounting_method) | **GET** /openconfig-system:system/aaa/accounting/config/accounting-method&#x3D;{accounting-method} | 
+[**get_llist_openconfig_system_system_aaa_authentication_config_authentication_method**](OpenconfigSystemApi.md#get_llist_openconfig_system_system_aaa_authentication_config_authentication_method) | **GET** /openconfig-system:system/aaa/authentication/config/authentication-method&#x3D;{authentication-method} | 
+[**get_llist_openconfig_system_system_aaa_authorization_config_authorization_method**](OpenconfigSystemApi.md#get_llist_openconfig_system_system_aaa_authorization_config_authorization_method) | **GET** /openconfig-system:system/aaa/authorization/config/authorization-method&#x3D;{authorization-method} | 
+[**get_llist_openconfig_system_system_dns_config_search**](OpenconfigSystemApi.md#get_llist_openconfig_system_system_dns_config_search) | **GET** /openconfig-system:system/dns/config/search&#x3D;{search} | 
+[**get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias**](OpenconfigSystemApi.md#get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias) | **GET** /openconfig-system:system/dns/host-entries/host-entry&#x3D;{hostname}/config/alias&#x3D;{alias} | 
+[**get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address**](OpenconfigSystemApi.md#get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address) | **GET** /openconfig-system:system/dns/host-entries/host-entry&#x3D;{hostname}/config/ipv4-address&#x3D;{ipv4-address} | 
+[**get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address**](OpenconfigSystemApi.md#get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address) | **GET** /openconfig-system:system/dns/host-entries/host-entry&#x3D;{hostname}/config/ipv6-address&#x3D;{ipv6-address} | 
+[**get_llist_openconfig_system_system_grpc_server_config_listen_addresses**](OpenconfigSystemApi.md#get_llist_openconfig_system_system_grpc_server_config_listen_addresses) | **GET** /openconfig-system:system/grpc-server/config/listen-addresses&#x3D;{listen-addresses} | 
 [**get_openconfig_system_system**](OpenconfigSystemApi.md#get_openconfig_system_system) | **GET** /openconfig-system:system | 
 [**get_openconfig_system_system_aaa**](OpenconfigSystemApi.md#get_openconfig_system_system_aaa) | **GET** /openconfig-system:system/aaa | 
 [**get_openconfig_system_system_aaa_accounting**](OpenconfigSystemApi.md#get_openconfig_system_system_aaa_accounting) | **GET** /openconfig-system:system/aaa/accounting | 
@@ -856,6 +872,380 @@ Method | HTTP request | Description
 [**put_openconfig_system_system_telnet_server_config_session_limit**](OpenconfigSystemApi.md#put_openconfig_system_system_telnet_server_config_session_limit) | **PUT** /openconfig-system:system/telnet-server/config/session-limit | 
 [**put_openconfig_system_system_telnet_server_config_timeout**](OpenconfigSystemApi.md#put_openconfig_system_system_telnet_server_config_timeout) | **PUT** /openconfig-system:system/telnet-server/config/timeout | 
 
+
+# **del_llist_openconfig_system_system_aaa_accounting_config_accounting_method**
+> del_llist_openconfig_system_system_aaa_accounting_config_accounting_method(accounting_method)
+
+
+
+OperationId: del_llist_openconfig_system_system_aaa_accounting_config_accounting_method An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+accounting_method = 'accounting_method_example' # str | An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system.
+
+try:
+    api_instance.del_llist_openconfig_system_system_aaa_accounting_config_accounting_method(accounting_method)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->del_llist_openconfig_system_system_aaa_accounting_config_accounting_method: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **accounting_method** | **str**| An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_system_system_aaa_authentication_config_authentication_method**
+> del_llist_openconfig_system_system_aaa_authentication_config_authentication_method(authentication_method)
+
+
+
+OperationId: del_llist_openconfig_system_system_aaa_authentication_config_authentication_method Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+authentication_method = 'authentication_method_example' # str | Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access.
+
+try:
+    api_instance.del_llist_openconfig_system_system_aaa_authentication_config_authentication_method(authentication_method)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->del_llist_openconfig_system_system_aaa_authentication_config_authentication_method: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **authentication_method** | **str**| Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_system_system_aaa_authorization_config_authorization_method**
+> del_llist_openconfig_system_system_aaa_authorization_config_authorization_method(authorization_method)
+
+
+
+OperationId: del_llist_openconfig_system_system_aaa_authorization_config_authorization_method Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+authorization_method = 'authorization_method_example' # str | Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists.
+
+try:
+    api_instance.del_llist_openconfig_system_system_aaa_authorization_config_authorization_method(authorization_method)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->del_llist_openconfig_system_system_aaa_authorization_config_authorization_method: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **authorization_method** | **str**| Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_system_system_dns_config_search**
+> del_llist_openconfig_system_system_dns_config_search(search)
+
+
+
+OperationId: del_llist_openconfig_system_system_dns_config_search An ordered list of domains to search when resolving a host name.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+search = 'search_example' # str | An ordered list of domains to search when resolving a host name.
+
+try:
+    api_instance.del_llist_openconfig_system_system_dns_config_search(search)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->del_llist_openconfig_system_system_dns_config_search: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **search** | **str**| An ordered list of domains to search when resolving a host name. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias**
+> del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(hostname, alias)
+
+
+
+OperationId: del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias Additional aliases for the hostname
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+hostname = 'hostname_example' # str | Reference to the hostname list key
+alias = 'alias_example' # str | Additional aliases for the hostname
+
+try:
+    api_instance.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(hostname, alias)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **hostname** | **str**| Reference to the hostname list key | 
+ **alias** | **str**| Additional aliases for the hostname | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address**
+> del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(hostname, ipv4_address)
+
+
+
+OperationId: del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address List of IPv4 addressses for the host entry
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+hostname = 'hostname_example' # str | Reference to the hostname list key
+ipv4_address = 'ipv4_address_example' # str | List of IPv4 addressses for the host entry
+
+try:
+    api_instance.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(hostname, ipv4_address)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **hostname** | **str**| Reference to the hostname list key | 
+ **ipv4_address** | **str**| List of IPv4 addressses for the host entry | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address**
+> del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(hostname, ipv6_address)
+
+
+
+OperationId: del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address List of IPv6 addresses for the host entry
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+hostname = 'hostname_example' # str | Reference to the hostname list key
+ipv6_address = 'ipv6_address_example' # str | List of IPv6 addresses for the host entry
+
+try:
+    api_instance.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(hostname, ipv6_address)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **hostname** | **str**| Reference to the hostname list key | 
+ **ipv6_address** | **str**| List of IPv6 addresses for the host entry | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_system_system_grpc_server_config_listen_addresses**
+> del_llist_openconfig_system_system_grpc_server_config_listen_addresses(listen_addresses)
+
+
+
+OperationId: del_llist_openconfig_system_system_grpc_server_config_listen_addresses The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+listen_addresses = 'listen_addresses_example' # str | The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address
+
+try:
+    api_instance.del_llist_openconfig_system_system_grpc_server_config_listen_addresses(listen_addresses)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->del_llist_openconfig_system_system_grpc_server_config_listen_addresses: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **listen_addresses** | **str**| The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_list_openconfig_system_system_aaa_accounting_events_event**
 > delete_list_openconfig_system_system_aaa_accounting_events_event()
@@ -7283,6 +7673,388 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**GetOpenconfigSystemSystemProcessesProcess**](GetOpenconfigSystemSystemProcessesProcess.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_system_system_aaa_accounting_config_accounting_method**
+> GetOpenconfigSystemSystemAaaAccountingConfigAccountingMethod get_llist_openconfig_system_system_aaa_accounting_config_accounting_method(accounting_method)
+
+
+
+OperationId: get_llist_openconfig_system_system_aaa_accounting_config_accounting_method An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+accounting_method = 'accounting_method_example' # str | An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system.
+
+try:
+    api_response = api_instance.get_llist_openconfig_system_system_aaa_accounting_config_accounting_method(accounting_method)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->get_llist_openconfig_system_system_aaa_accounting_config_accounting_method: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **accounting_method** | **str**| An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system. | 
+
+### Return type
+
+[**GetOpenconfigSystemSystemAaaAccountingConfigAccountingMethod**](GetOpenconfigSystemSystemAaaAccountingConfigAccountingMethod.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_system_system_aaa_authentication_config_authentication_method**
+> GetOpenconfigSystemSystemAaaAuthenticationConfigAuthenticationMethod get_llist_openconfig_system_system_aaa_authentication_config_authentication_method(authentication_method)
+
+
+
+OperationId: get_llist_openconfig_system_system_aaa_authentication_config_authentication_method Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+authentication_method = 'authentication_method_example' # str | Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access.
+
+try:
+    api_response = api_instance.get_llist_openconfig_system_system_aaa_authentication_config_authentication_method(authentication_method)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->get_llist_openconfig_system_system_aaa_authentication_config_authentication_method: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **authentication_method** | **str**| Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access. | 
+
+### Return type
+
+[**GetOpenconfigSystemSystemAaaAuthenticationConfigAuthenticationMethod**](GetOpenconfigSystemSystemAaaAuthenticationConfigAuthenticationMethod.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_system_system_aaa_authorization_config_authorization_method**
+> GetOpenconfigSystemSystemAaaAuthorizationConfigAuthorizationMethod get_llist_openconfig_system_system_aaa_authorization_config_authorization_method(authorization_method)
+
+
+
+OperationId: get_llist_openconfig_system_system_aaa_authorization_config_authorization_method Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+authorization_method = 'authorization_method_example' # str | Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists.
+
+try:
+    api_response = api_instance.get_llist_openconfig_system_system_aaa_authorization_config_authorization_method(authorization_method)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->get_llist_openconfig_system_system_aaa_authorization_config_authorization_method: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **authorization_method** | **str**| Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists. | 
+
+### Return type
+
+[**GetOpenconfigSystemSystemAaaAuthorizationConfigAuthorizationMethod**](GetOpenconfigSystemSystemAaaAuthorizationConfigAuthorizationMethod.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_system_system_dns_config_search**
+> GetOpenconfigSystemSystemDnsConfigSearch get_llist_openconfig_system_system_dns_config_search(search)
+
+
+
+OperationId: get_llist_openconfig_system_system_dns_config_search An ordered list of domains to search when resolving a host name.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+search = 'search_example' # str | An ordered list of domains to search when resolving a host name.
+
+try:
+    api_response = api_instance.get_llist_openconfig_system_system_dns_config_search(search)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->get_llist_openconfig_system_system_dns_config_search: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **search** | **str**| An ordered list of domains to search when resolving a host name. | 
+
+### Return type
+
+[**GetOpenconfigSystemSystemDnsConfigSearch**](GetOpenconfigSystemSystemDnsConfigSearch.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias**
+> GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigAlias get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(hostname, alias)
+
+
+
+OperationId: get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias Additional aliases for the hostname
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+hostname = 'hostname_example' # str | Reference to the hostname list key
+alias = 'alias_example' # str | Additional aliases for the hostname
+
+try:
+    api_response = api_instance.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(hostname, alias)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **hostname** | **str**| Reference to the hostname list key | 
+ **alias** | **str**| Additional aliases for the hostname | 
+
+### Return type
+
+[**GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigAlias**](GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigAlias.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address**
+> GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv4Address get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(hostname, ipv4_address)
+
+
+
+OperationId: get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address List of IPv4 addressses for the host entry
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+hostname = 'hostname_example' # str | Reference to the hostname list key
+ipv4_address = 'ipv4_address_example' # str | List of IPv4 addressses for the host entry
+
+try:
+    api_response = api_instance.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(hostname, ipv4_address)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **hostname** | **str**| Reference to the hostname list key | 
+ **ipv4_address** | **str**| List of IPv4 addressses for the host entry | 
+
+### Return type
+
+[**GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv4Address**](GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv4Address.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address**
+> GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv6Address get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(hostname, ipv6_address)
+
+
+
+OperationId: get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address List of IPv6 addresses for the host entry
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+hostname = 'hostname_example' # str | Reference to the hostname list key
+ipv6_address = 'ipv6_address_example' # str | List of IPv6 addresses for the host entry
+
+try:
+    api_response = api_instance.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(hostname, ipv6_address)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **hostname** | **str**| Reference to the hostname list key | 
+ **ipv6_address** | **str**| List of IPv6 addresses for the host entry | 
+
+### Return type
+
+[**GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv6Address**](GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv6Address.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_system_system_grpc_server_config_listen_addresses**
+> GetOpenconfigSystemSystemGrpcServerConfigListenAddresses get_llist_openconfig_system_system_grpc_server_config_listen_addresses(listen_addresses)
+
+
+
+OperationId: get_llist_openconfig_system_system_grpc_server_config_listen_addresses The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_system_client
+from openconfig_system_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_system_client.OpenconfigSystemApi()
+listen_addresses = 'listen_addresses_example' # str | The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address
+
+try:
+    api_response = api_instance.get_llist_openconfig_system_system_grpc_server_config_listen_addresses(listen_addresses)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSystemApi->get_llist_openconfig_system_system_grpc_server_config_listen_addresses: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **listen_addresses** | **str**| The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address | 
+
+### Return type
+
+[**GetOpenconfigSystemSystemGrpcServerConfigListenAddresses**](GetOpenconfigSystemSystemGrpcServerConfigListenAddresses.md)
 
 ### Authorization
 

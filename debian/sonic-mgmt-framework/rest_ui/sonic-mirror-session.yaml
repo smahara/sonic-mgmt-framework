@@ -1,0 +1,1712 @@
+---
+swagger: "2.0"
+info:
+  description: "Network management Open APIs for Sonic."
+  version: "1.0.0"
+  title: "Sonic Network Management APIs"
+basePath: "/restconf/data"
+tags:
+- name: "sonic-mirror-session"
+  description: "Operations for sonic-mirror-session"
+schemes:
+- "https"
+- "http"
+paths:
+  /sonic-mirror-session:sonic-mirror-session:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_sonic_mirror_session_sonic_mirror_session\n"
+      operationId: "get_sonic_mirror_session_sonic_mirror_session"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: post_sonic_mirror_session_sonic_mirror_session_mirror_session\n"
+      operationId: "post_sonic_mirror_session_sonic_mirror_session_mirror_session"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_mirror_session_sonic_mirror_session_mirror_session"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_sonic_mirror_session_sonic_mirror_session\n"
+      operationId: "put_sonic_mirror_session_sonic_mirror_session"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_mirror_session_sonic_mirror_session"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_sonic_mirror_session_sonic_mirror_session\n"
+      operationId: "delete_sonic_mirror_session_sonic_mirror_session"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_sonic_mirror_session_sonic_mirror_session\n"
+      operationId: "patch_sonic_mirror_session_sonic_mirror_session"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_mirror_session_sonic_mirror_session"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-mirror-session:sonic-mirror-session/MIRROR_SESSION:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_sonic_mirror_session_sonic_mirror_session_mirror_session\n"
+      operationId: "get_sonic_mirror_session_sonic_mirror_session_mirror_session"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session_mirror_session"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: post_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list\n"
+      operationId: "post_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_sonic_mirror_session_sonic_mirror_session_mirror_session\n"
+      operationId: "put_sonic_mirror_session_sonic_mirror_session_mirror_session"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_mirror_session_sonic_mirror_session_mirror_session"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_sonic_mirror_session_sonic_mirror_session_mirror_session\n"
+      operationId: "delete_sonic_mirror_session_sonic_mirror_session_mirror_session"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_sonic_mirror_session_sonic_mirror_session_mirror_session\n"
+      operationId: "patch_sonic_mirror_session_sonic_mirror_session_mirror_session"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_mirror_session_sonic_mirror_session_mirror_session"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-mirror-session:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST={name}:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list\n"
+      operationId: "get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: post_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip\n"
+      operationId: "post_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list\n"
+      operationId: "put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list\n"
+      operationId: "delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list\n"
+      operationId: "patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-mirror-session:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list\n"
+      operationId: "get_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list\n"
+      operationId: "put_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list\n"
+      operationId: "delete_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list\n"
+      operationId: "patch_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-mirror-session:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST={name}/src_ip:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip\n"
+      operationId: "get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip\n"
+      operationId: "put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip\n"
+      operationId: "delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip\n"
+      operationId: "patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-mirror-session:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST={name}/dst_ip:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip\n"
+      operationId: "get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip\n"
+      operationId: "put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip\n"
+      operationId: "delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip\n"
+      operationId: "patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-mirror-session:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST={name}/gre_type:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type\n"
+      operationId: "get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type\n"
+      operationId: "put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type\n"
+      operationId: "delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type\n"
+      operationId: "patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-mirror-session:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST={name}/dscp:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp\n"
+      operationId: "get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp\n"
+      operationId: "put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp\n"
+      operationId: "delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp\n"
+      operationId: "patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-mirror-session:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST={name}/ttl:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl\n"
+      operationId: "get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl\n"
+      operationId: "put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl\n"
+      operationId: "delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl\n"
+      operationId: "patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-mirror-session:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST={name}/queue:
+    get:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue\n"
+      operationId: "get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue\n"
+      operationId: "put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue\n"
+      operationId: "delete_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-mirror-session"
+      description: "OperationId: patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue\n"
+      operationId: "patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+definitions:
+  sonic_mirror_session_sonic_mirror_session:
+    type: "object"
+    properties:
+      sonic-mirror-session:sonic-mirror-session:
+        $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession"
+  post_sonic_mirror_session_sonic_mirror_session:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session"
+  put_sonic_mirror_session_sonic_mirror_session:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session"
+  patch_sonic_mirror_session_sonic_mirror_session:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session"
+  get_sonic_mirror_session_sonic_mirror_session:
+    type: "object"
+    properties:
+      sonic-mirror-session:sonic-mirror-session:
+        $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession"
+  sonic_mirror_session_sonic_mirror_session_mirror_session:
+    type: "object"
+    properties:
+      sonic-mirror-session:MIRROR_SESSION:
+        $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession_MIRROR_SESSION"
+  post_sonic_mirror_session_sonic_mirror_session_mirror_session:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session"
+  put_sonic_mirror_session_sonic_mirror_session_mirror_session:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session"
+  patch_sonic_mirror_session_sonic_mirror_session_mirror_session:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session"
+  get_sonic_mirror_session_sonic_mirror_session_mirror_session:
+    type: "object"
+    properties:
+      sonic-mirror-session:MIRROR_SESSION:
+        $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession_MIRROR_SESSION"
+  sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list:
+    type: "object"
+    properties:
+      sonic-mirror-session:MIRROR_SESSION_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession_MIRROR_SESSION_MIRROR_SESSION_LIST"
+  put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+  patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+  get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list:
+    type: "object"
+    properties:
+      sonic-mirror-session:MIRROR_SESSION_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession_MIRROR_SESSION_MIRROR_SESSION_LIST"
+  post_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+  put_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+  patch_list_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list"
+  sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip:
+    type: "object"
+    properties:
+      sonic-mirror-session:src_ip:
+        type: "string"
+  post_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+  put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+  patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip"
+  get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_src_ip:
+    type: "object"
+    properties:
+      sonic-mirror-session:src_ip:
+        type: "string"
+  sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip:
+    type: "object"
+    properties:
+      sonic-mirror-session:dst_ip:
+        type: "string"
+  put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+  patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip"
+  get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dst_ip:
+    type: "object"
+    properties:
+      sonic-mirror-session:dst_ip:
+        type: "string"
+  sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type:
+    type: "object"
+    properties:
+      sonic-mirror-session:gre_type:
+        type: "string"
+  put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+  patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type"
+  get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_gre_type:
+    type: "object"
+    properties:
+      sonic-mirror-session:gre_type:
+        type: "string"
+  sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp:
+    type: "object"
+    properties:
+      sonic-mirror-session:dscp:
+        type: "integer"
+        format: "int32"
+  put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+  patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp"
+  get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_dscp:
+    type: "object"
+    properties:
+      sonic-mirror-session:dscp:
+        type: "integer"
+        format: "int32"
+  sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl:
+    type: "object"
+    properties:
+      sonic-mirror-session:ttl:
+        type: "integer"
+        format: "int32"
+  put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+  patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl"
+  get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_ttl:
+    type: "object"
+    properties:
+      sonic-mirror-session:ttl:
+        type: "integer"
+        format: "int32"
+  sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue:
+    type: "object"
+    properties:
+      sonic-mirror-session:queue:
+        type: "integer"
+        format: "int32"
+  put_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+  patch_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue:
+    allOf:
+    - $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue"
+  get_sonic_mirror_session_sonic_mirror_session_mirror_session_mirror_session_list_queue:
+    type: "object"
+    properties:
+      sonic-mirror-session:queue:
+        type: "integer"
+        format: "int32"
+  sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession_MIRROR_SESSION_MIRROR_SESSION_LIST:
+    required:
+    - "name"
+    properties:
+      name:
+        type: "string"
+      src_ip:
+        type: "string"
+      dst_ip:
+        type: "string"
+      gre_type:
+        type: "string"
+      dscp:
+        type: "integer"
+        format: "int32"
+      ttl:
+        type: "integer"
+        format: "int32"
+      queue:
+        type: "integer"
+        format: "int32"
+  sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession_MIRROR_SESSION:
+    properties:
+      MIRROR_SESSION_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession_MIRROR_SESSION_MIRROR_SESSION_LIST"
+  sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession:
+    properties:
+      MIRROR_SESSION:
+        $ref: "#/definitions/sonic_mirror_session_sonic_mirror_session_sonicmirrorsessionsonicmirrorsession_MIRROR_SESSION"

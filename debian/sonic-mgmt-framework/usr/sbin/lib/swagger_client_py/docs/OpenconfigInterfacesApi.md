@@ -4,6 +4,16 @@ All URIs are relative to *https://localhost/restconf/data*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address**](OpenconfigInterfacesApi.md#del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/config/virtual-address&#x3D;{virtual-address} | 
+[**del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**](OpenconfigInterfacesApi.md#del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/interface-tracking/config/track-interface&#x3D;{track-interface} | 
+[**del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address**](OpenconfigInterfacesApi.md#del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv6/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/config/virtual-address&#x3D;{virtual-address} | 
+[**del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**](OpenconfigInterfacesApi.md#del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv6/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/interface-tracking/config/track-interface&#x3D;{track-interface} | 
+[**del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address**](OpenconfigInterfacesApi.md#del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-if-ip:ipv4/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/config/virtual-address&#x3D;{virtual-address} | 
+[**del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**](OpenconfigInterfacesApi.md#del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-if-ip:ipv4/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/interface-tracking/config/track-interface&#x3D;{track-interface} | 
+[**del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address**](OpenconfigInterfacesApi.md#del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-if-ip:ipv6/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/config/virtual-address&#x3D;{virtual-address} | 
+[**del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**](OpenconfigInterfacesApi.md#del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-if-ip:ipv6/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/interface-tracking/config/track-interface&#x3D;{track-interface} | 
+[**del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans**](OpenconfigInterfacesApi.md#del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-if-aggregate:aggregation/openconfig-vlan:switched-vlan/config/trunk-vlans&#x3D;{trunk-vlans} | 
+[**del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans**](OpenconfigInterfacesApi.md#del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-if-ethernet:ethernet/openconfig-vlan:switched-vlan/config/trunk-vlans&#x3D;{trunk-vlans} | 
 [**delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address**](OpenconfigInterfacesApi.md#delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/addresses/address | 
 [**delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group**](OpenconfigInterfacesApi.md#delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/addresses/address&#x3D;{ip}/vrrp/vrrp-group | 
 [**delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_neighbors_neighbor**](OpenconfigInterfacesApi.md#delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_neighbors_neighbor) | **DELETE** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/neighbors/neighbor | 
@@ -218,6 +228,16 @@ Method | HTTP request | Description
 [**get_list_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_neighbors_neighbor**](OpenconfigInterfacesApi.md#get_list_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_neighbors_neighbor) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-if-ip:ipv6/neighbors/neighbor | 
 [**get_list_openconfig_interfaces_interfaces_interface**](OpenconfigInterfacesApi.md#get_list_openconfig_interfaces_interfaces_interface) | **GET** /openconfig-interfaces:interfaces/interface | 
 [**get_list_openconfig_interfaces_interfaces_interface_subinterfaces_subinterface**](OpenconfigInterfacesApi.md#get_list_openconfig_interfaces_interfaces_interface_subinterfaces_subinterface) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface | 
+[**get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address**](OpenconfigInterfacesApi.md#get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/config/virtual-address&#x3D;{virtual-address} | 
+[**get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**](OpenconfigInterfacesApi.md#get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/interface-tracking/config/track-interface&#x3D;{track-interface} | 
+[**get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address**](OpenconfigInterfacesApi.md#get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv6/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/config/virtual-address&#x3D;{virtual-address} | 
+[**get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**](OpenconfigInterfacesApi.md#get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv6/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/interface-tracking/config/track-interface&#x3D;{track-interface} | 
+[**get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address**](OpenconfigInterfacesApi.md#get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-if-ip:ipv4/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/config/virtual-address&#x3D;{virtual-address} | 
+[**get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**](OpenconfigInterfacesApi.md#get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-if-ip:ipv4/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/interface-tracking/config/track-interface&#x3D;{track-interface} | 
+[**get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address**](OpenconfigInterfacesApi.md#get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-if-ip:ipv6/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/config/virtual-address&#x3D;{virtual-address} | 
+[**get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**](OpenconfigInterfacesApi.md#get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-if-ip:ipv6/addresses/address&#x3D;{ip}/vrrp/vrrp-group&#x3D;{virtual-router-id}/interface-tracking/config/track-interface&#x3D;{track-interface} | 
+[**get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans**](OpenconfigInterfacesApi.md#get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-if-aggregate:aggregation/openconfig-vlan:switched-vlan/config/trunk-vlans&#x3D;{trunk-vlans} | 
+[**get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans**](OpenconfigInterfacesApi.md#get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-if-ethernet:ethernet/openconfig-vlan:switched-vlan/config/trunk-vlans&#x3D;{trunk-vlans} | 
 [**get_openconfig_if_aggregate_interfaces_interface_aggregation**](OpenconfigInterfacesApi.md#get_openconfig_if_aggregate_interfaces_interface_aggregation) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-if-aggregate:aggregation | 
 [**get_openconfig_if_aggregate_interfaces_interface_aggregation_config**](OpenconfigInterfacesApi.md#get_openconfig_if_aggregate_interfaces_interface_aggregation_config) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-if-aggregate:aggregation/config | 
 [**get_openconfig_if_aggregate_interfaces_interface_aggregation_config_lag_type**](OpenconfigInterfacesApi.md#get_openconfig_if_aggregate_interfaces_interface_aggregation_config_lag_type) | **GET** /openconfig-interfaces:interfaces/interface&#x3D;{name}/openconfig-if-aggregate:aggregation/config/lag-type | 
@@ -1239,6 +1259,526 @@ Method | HTTP request | Description
 [**put_openconfig_vlan_interfaces_interface_subinterfaces_subinterface_vlan_config**](OpenconfigInterfacesApi.md#put_openconfig_vlan_interfaces_interface_subinterfaces_subinterface_vlan_config) | **PUT** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-vlan:vlan/config | 
 [**put_openconfig_vlan_interfaces_interface_subinterfaces_subinterface_vlan_config_vlan_id**](OpenconfigInterfacesApi.md#put_openconfig_vlan_interfaces_interface_subinterfaces_subinterface_vlan_config_vlan_id) | **PUT** /openconfig-interfaces:interfaces/interface&#x3D;{name}/subinterfaces/subinterface&#x3D;{index}/openconfig-vlan:vlan/config/vlan-id | 
 
+
+# **del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address**
+> del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(name, ip, virtual_router_id, virtual_address)
+
+
+
+OperationId: del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address Configure one or more virtual addresses for the VRRP group
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+virtual_address = 'virtual_address_example' # str | Configure one or more virtual addresses for the VRRP group
+
+try:
+    api_instance.del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(name, ip, virtual_router_id, virtual_address)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **virtual_address** | **str**| Configure one or more virtual addresses for the VRRP group | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**
+> del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, ip, virtual_router_id, track_interface)
+
+
+
+OperationId: del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+track_interface = 'track_interface_example' # str | Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+try:
+    api_instance.del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, ip, virtual_router_id, track_interface)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **track_interface** | **str**| Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address**
+> del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(name, ip, virtual_router_id, virtual_address)
+
+
+
+OperationId: del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address Configure one or more virtual addresses for the VRRP group
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+virtual_address = 'virtual_address_example' # str | Configure one or more virtual addresses for the VRRP group
+
+try:
+    api_instance.del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(name, ip, virtual_router_id, virtual_address)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **virtual_address** | **str**| Configure one or more virtual addresses for the VRRP group | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**
+> del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, ip, virtual_router_id, track_interface)
+
+
+
+OperationId: del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+track_interface = 'track_interface_example' # str | Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+try:
+    api_instance.del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, ip, virtual_router_id, track_interface)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **track_interface** | **str**| Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address**
+> del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(name, index, ip, virtual_router_id, virtual_address)
+
+
+
+OperationId: del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address Configure one or more virtual addresses for the VRRP group
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+index = 56 # int | The index number of the subinterface -- used to address the logical interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+virtual_address = 'virtual_address_example' # str | Configure one or more virtual addresses for the VRRP group
+
+try:
+    api_instance.del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(name, index, ip, virtual_router_id, virtual_address)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **index** | **int**| The index number of the subinterface -- used to address the logical interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **virtual_address** | **str**| Configure one or more virtual addresses for the VRRP group | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**
+> del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, index, ip, virtual_router_id, track_interface)
+
+
+
+OperationId: del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+index = 56 # int | The index number of the subinterface -- used to address the logical interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+track_interface = 'track_interface_example' # str | Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+try:
+    api_instance.del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, index, ip, virtual_router_id, track_interface)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **index** | **int**| The index number of the subinterface -- used to address the logical interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **track_interface** | **str**| Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address**
+> del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(name, index, ip, virtual_router_id, virtual_address)
+
+
+
+OperationId: del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address Configure one or more virtual addresses for the VRRP group
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+index = 56 # int | The index number of the subinterface -- used to address the logical interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+virtual_address = 'virtual_address_example' # str | Configure one or more virtual addresses for the VRRP group
+
+try:
+    api_instance.del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(name, index, ip, virtual_router_id, virtual_address)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **index** | **int**| The index number of the subinterface -- used to address the logical interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **virtual_address** | **str**| Configure one or more virtual addresses for the VRRP group | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**
+> del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, index, ip, virtual_router_id, track_interface)
+
+
+
+OperationId: del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+index = 56 # int | The index number of the subinterface -- used to address the logical interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+track_interface = 'track_interface_example' # str | Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+try:
+    api_instance.del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, index, ip, virtual_router_id, track_interface)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **index** | **int**| The index number of the subinterface -- used to address the logical interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **track_interface** | **str**| Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans**
+> del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans(name, trunk_vlans)
+
+
+
+OperationId: del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x<y - ranges are assumed to be inclusive (such that the VLAN range is x <= range <= y.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+trunk_vlans = 'trunk_vlans_example' # str | Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x<y - ranges are assumed to be inclusive (such that the VLAN range is x <= range <= y.
+
+try:
+    api_instance.del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans(name, trunk_vlans)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **trunk_vlans** | **str**| Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x&lt;y - ranges are assumed to be inclusive (such that the VLAN range is x &lt;&#x3D; range &lt;&#x3D; y. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans**
+> del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans(name, trunk_vlans)
+
+
+
+OperationId: del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x<y - ranges are assumed to be inclusive (such that the VLAN range is x <= range <= y.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+trunk_vlans = 'trunk_vlans_example' # str | Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x<y - ranges are assumed to be inclusive (such that the VLAN range is x <= range <= y.
+
+try:
+    api_instance.del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans(name, trunk_vlans)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **trunk_vlans** | **str**| Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x&lt;y - ranges are assumed to be inclusive (such that the VLAN range is x &lt;&#x3D; range &lt;&#x3D; y. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address**
 > delete_list_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address(name)
@@ -11490,6 +12030,536 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**GetOpenconfigInterfacesInterfacesInterfaceSubinterfacesSubinterface**](GetOpenconfigInterfacesInterfacesInterfaceSubinterfacesSubinterface.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address**
+> GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv4AddressesAddressVrrpVrrpGroupConfigVirtualAddress get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(name, ip, virtual_router_id, virtual_address)
+
+
+
+OperationId: get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address Configure one or more virtual addresses for the VRRP group
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+virtual_address = 'virtual_address_example' # str | Configure one or more virtual addresses for the VRRP group
+
+try:
+    api_response = api_instance.get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(name, ip, virtual_router_id, virtual_address)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **virtual_address** | **str**| Configure one or more virtual addresses for the VRRP group | 
+
+### Return type
+
+[**GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv4AddressesAddressVrrpVrrpGroupConfigVirtualAddress**](GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv4AddressesAddressVrrpVrrpGroupConfigVirtualAddress.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**
+> GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv4AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, ip, virtual_router_id, track_interface)
+
+
+
+OperationId: get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+track_interface = 'track_interface_example' # str | Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+try:
+    api_response = api_instance.get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, ip, virtual_router_id, track_interface)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **track_interface** | **str**| Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface. | 
+
+### Return type
+
+[**GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv4AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface**](GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv4AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address**
+> GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv6AddressesAddressVrrpVrrpGroupConfigVirtualAddress get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(name, ip, virtual_router_id, virtual_address)
+
+
+
+OperationId: get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address Configure one or more virtual addresses for the VRRP group
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+virtual_address = 'virtual_address_example' # str | Configure one or more virtual addresses for the VRRP group
+
+try:
+    api_response = api_instance.get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(name, ip, virtual_router_id, virtual_address)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **virtual_address** | **str**| Configure one or more virtual addresses for the VRRP group | 
+
+### Return type
+
+[**GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv6AddressesAddressVrrpVrrpGroupConfigVirtualAddress**](GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv6AddressesAddressVrrpVrrpGroupConfigVirtualAddress.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**
+> GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv6AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, ip, virtual_router_id, track_interface)
+
+
+
+OperationId: get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+track_interface = 'track_interface_example' # str | Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+try:
+    api_response = api_instance.get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, ip, virtual_router_id, track_interface)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **track_interface** | **str**| Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface. | 
+
+### Return type
+
+[**GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv6AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface**](GetOpenconfigIfIpInterfacesInterfaceRoutedVlanIpv6AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address**
+> GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv4AddressesAddressVrrpVrrpGroupConfigVirtualAddress get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(name, index, ip, virtual_router_id, virtual_address)
+
+
+
+OperationId: get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address Configure one or more virtual addresses for the VRRP group
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+index = 56 # int | The index number of the subinterface -- used to address the logical interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+virtual_address = 'virtual_address_example' # str | Configure one or more virtual addresses for the VRRP group
+
+try:
+    api_response = api_instance.get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address(name, index, ip, virtual_router_id, virtual_address)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **index** | **int**| The index number of the subinterface -- used to address the logical interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **virtual_address** | **str**| Configure one or more virtual addresses for the VRRP group | 
+
+### Return type
+
+[**GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv4AddressesAddressVrrpVrrpGroupConfigVirtualAddress**](GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv4AddressesAddressVrrpVrrpGroupConfigVirtualAddress.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**
+> GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv4AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, index, ip, virtual_router_id, track_interface)
+
+
+
+OperationId: get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+index = 56 # int | The index number of the subinterface -- used to address the logical interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+track_interface = 'track_interface_example' # str | Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+try:
+    api_response = api_instance.get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, index, ip, virtual_router_id, track_interface)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **index** | **int**| The index number of the subinterface -- used to address the logical interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **track_interface** | **str**| Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface. | 
+
+### Return type
+
+[**GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv4AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface**](GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv4AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address**
+> GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv6AddressesAddressVrrpVrrpGroupConfigVirtualAddress get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(name, index, ip, virtual_router_id, virtual_address)
+
+
+
+OperationId: get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address Configure one or more virtual addresses for the VRRP group
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+index = 56 # int | The index number of the subinterface -- used to address the logical interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+virtual_address = 'virtual_address_example' # str | Configure one or more virtual addresses for the VRRP group
+
+try:
+    api_response = api_instance.get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address(name, index, ip, virtual_router_id, virtual_address)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **index** | **int**| The index number of the subinterface -- used to address the logical interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **virtual_address** | **str**| Configure one or more virtual addresses for the VRRP group | 
+
+### Return type
+
+[**GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv6AddressesAddressVrrpVrrpGroupConfigVirtualAddress**](GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv6AddressesAddressVrrpVrrpGroupConfigVirtualAddress.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface**
+> GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv6AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, index, ip, virtual_router_id, track_interface)
+
+
+
+OperationId: get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+index = 56 # int | The index number of the subinterface -- used to address the logical interface
+ip = 'ip_example' # str | References the configured IP address
+virtual_router_id = 56 # int | References the configured virtual router id for this VRRP group
+track_interface = 'track_interface_example' # str | Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface.
+
+try:
+    api_response = api_instance.get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface(name, index, ip, virtual_router_id, track_interface)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **index** | **int**| The index number of the subinterface -- used to address the logical interface | 
+ **ip** | **str**| References the configured IP address | 
+ **virtual_router_id** | **int**| References the configured virtual router id for this VRRP group | 
+ **track_interface** | **str**| Sets a list of one or more interfaces that should be tracked for up/down events to dynamically change the priority state of the VRRP group, and potentially change the mastership if the tracked interface going down lowers the priority sufficiently.  Any of the tracked interfaces going down will cause the priority to be lowered. Some implementations may only support a single tracked interface. | 
+
+### Return type
+
+[**GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv6AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface**](GetOpenconfigIfIpInterfacesInterfaceSubinterfacesSubinterfaceIpv6AddressesAddressVrrpVrrpGroupInterfaceTrackingConfigTrackInterface.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans**
+> GetOpenconfigVlanInterfacesInterfaceAggregationSwitchedVlanConfigTrunkVlans get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans(name, trunk_vlans)
+
+
+
+OperationId: get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x<y - ranges are assumed to be inclusive (such that the VLAN range is x <= range <= y.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+trunk_vlans = 'trunk_vlans_example' # str | Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x<y - ranges are assumed to be inclusive (such that the VLAN range is x <= range <= y.
+
+try:
+    api_response = api_instance.get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans(name, trunk_vlans)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **trunk_vlans** | **str**| Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x&lt;y - ranges are assumed to be inclusive (such that the VLAN range is x &lt;&#x3D; range &lt;&#x3D; y. | 
+
+### Return type
+
+[**GetOpenconfigVlanInterfacesInterfaceAggregationSwitchedVlanConfigTrunkVlans**](GetOpenconfigVlanInterfacesInterfaceAggregationSwitchedVlanConfigTrunkVlans.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans**
+> GetOpenconfigVlanInterfacesInterfaceEthernetSwitchedVlanConfigTrunkVlans get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans(name, trunk_vlans)
+
+
+
+OperationId: get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x<y - ranges are assumed to be inclusive (such that the VLAN range is x <= range <= y.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_interfaces_client
+from openconfig_interfaces_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_interfaces_client.OpenconfigInterfacesApi()
+name = 'name_example' # str | References the configured name of the interface
+trunk_vlans = 'trunk_vlans_example' # str | Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x<y - ranges are assumed to be inclusive (such that the VLAN range is x <= range <= y.
+
+try:
+    api_response = api_instance.get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans(name, trunk_vlans)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigInterfacesApi->get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| References the configured name of the interface | 
+ **trunk_vlans** | **str**| Specify VLANs, or ranges thereof, that the interface may carry when in trunk mode.  If not specified, all VLANs are allowed on the interface. Ranges are specified in the form x..y, where x&lt;y - ranges are assumed to be inclusive (such that the VLAN range is x &lt;&#x3D; range &lt;&#x3D; y. | 
+
+### Return type
+
+[**GetOpenconfigVlanInterfacesInterfaceEthernetSwitchedVlanConfigTrunkVlans**](GetOpenconfigVlanInterfacesInterfaceEthernetSwitchedVlanConfigTrunkVlans.md)
 
 ### Authorization
 

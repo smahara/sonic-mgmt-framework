@@ -4,6 +4,7 @@ All URIs are relative to *https://localhost/restconf/data*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement**](OpenconfigLldpApi.md#del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement) | **DELETE** /openconfig-lldp:lldp/config/suppress-tlv-advertisement&#x3D;{suppress-tlv-advertisement} | 
 [**delete_list_openconfig_lldp_lldp_interfaces_interface**](OpenconfigLldpApi.md#delete_list_openconfig_lldp_lldp_interfaces_interface) | **DELETE** /openconfig-lldp:lldp/interfaces/interface | 
 [**delete_openconfig_lldp_lldp**](OpenconfigLldpApi.md#delete_openconfig_lldp_lldp) | **DELETE** /openconfig-lldp:lldp | 
 [**delete_openconfig_lldp_lldp_config**](OpenconfigLldpApi.md#delete_openconfig_lldp_lldp_config) | **DELETE** /openconfig-lldp:lldp/config | 
@@ -21,6 +22,7 @@ Method | HTTP request | Description
 [**get_list_openconfig_lldp_lldp_interfaces_interface_neighbors_neighbor**](OpenconfigLldpApi.md#get_list_openconfig_lldp_lldp_interfaces_interface_neighbors_neighbor) | **GET** /openconfig-lldp:lldp/interfaces/interface&#x3D;{name}/neighbors/neighbor | 
 [**get_list_openconfig_lldp_lldp_interfaces_interface_neighbors_neighbor_capabilities_capability**](OpenconfigLldpApi.md#get_list_openconfig_lldp_lldp_interfaces_interface_neighbors_neighbor_capabilities_capability) | **GET** /openconfig-lldp:lldp/interfaces/interface&#x3D;{name}/neighbors/neighbor&#x3D;{id}/capabilities/capability | 
 [**get_list_openconfig_lldp_lldp_interfaces_interface_neighbors_neighbor_custom_tlvs_tlv**](OpenconfigLldpApi.md#get_list_openconfig_lldp_lldp_interfaces_interface_neighbors_neighbor_custom_tlvs_tlv) | **GET** /openconfig-lldp:lldp/interfaces/interface&#x3D;{name}/neighbors/neighbor&#x3D;{id}/custom-tlvs/tlv | 
+[**get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement**](OpenconfigLldpApi.md#get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement) | **GET** /openconfig-lldp:lldp/config/suppress-tlv-advertisement&#x3D;{suppress-tlv-advertisement} | 
 [**get_openconfig_lldp_lldp**](OpenconfigLldpApi.md#get_openconfig_lldp_lldp) | **GET** /openconfig-lldp:lldp | 
 [**get_openconfig_lldp_lldp_config**](OpenconfigLldpApi.md#get_openconfig_lldp_lldp_config) | **GET** /openconfig-lldp:lldp/config | 
 [**get_openconfig_lldp_lldp_config_chassis_id**](OpenconfigLldpApi.md#get_openconfig_lldp_lldp_config_chassis_id) | **GET** /openconfig-lldp:lldp/config/chassis-id | 
@@ -121,6 +123,52 @@ Method | HTTP request | Description
 [**put_openconfig_lldp_lldp_interfaces_interface_config**](OpenconfigLldpApi.md#put_openconfig_lldp_lldp_interfaces_interface_config) | **PUT** /openconfig-lldp:lldp/interfaces/interface&#x3D;{name}/config | 
 [**put_openconfig_lldp_lldp_interfaces_interface_config_enabled**](OpenconfigLldpApi.md#put_openconfig_lldp_lldp_interfaces_interface_config_enabled) | **PUT** /openconfig-lldp:lldp/interfaces/interface&#x3D;{name}/config/enabled | 
 
+
+# **del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement**
+> del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement(suppress_tlv_advertisement)
+
+
+
+OperationId: del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement Indicates whether the local system should suppress the advertisement of particular TLVs with the LLDP PDUs that it transmits. Where a TLV type is specified within this list, it should not be included in any LLDP PDU transmitted by the local agent.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_lldp_client
+from openconfig_lldp_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_lldp_client.OpenconfigLldpApi()
+suppress_tlv_advertisement = 'suppress_tlv_advertisement_example' # str | Indicates whether the local system should suppress the advertisement of particular TLVs with the LLDP PDUs that it transmits. Where a TLV type is specified within this list, it should not be included in any LLDP PDU transmitted by the local agent.
+
+try:
+    api_instance.del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement(suppress_tlv_advertisement)
+except ApiException as e:
+    print("Exception when calling OpenconfigLldpApi->del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **suppress_tlv_advertisement** | **str**| Indicates whether the local system should suppress the advertisement of particular TLVs with the LLDP PDUs that it transmits. Where a TLV type is specified within this list, it should not be included in any LLDP PDU transmitted by the local agent. | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_list_openconfig_lldp_lldp_interfaces_interface**
 > delete_list_openconfig_lldp_lldp_interfaces_interface()
@@ -852,6 +900,53 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**GetOpenconfigLldpLldpInterfacesInterfaceNeighborsNeighborCustomTlvsTlv**](GetOpenconfigLldpLldpInterfacesInterfaceNeighborsNeighborCustomTlvsTlv.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement**
+> GetOpenconfigLldpLldpConfigSuppressTlvAdvertisement get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement(suppress_tlv_advertisement)
+
+
+
+OperationId: get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement Indicates whether the local system should suppress the advertisement of particular TLVs with the LLDP PDUs that it transmits. Where a TLV type is specified within this list, it should not be included in any LLDP PDU transmitted by the local agent.
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_lldp_client
+from openconfig_lldp_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_lldp_client.OpenconfigLldpApi()
+suppress_tlv_advertisement = 'suppress_tlv_advertisement_example' # str | Indicates whether the local system should suppress the advertisement of particular TLVs with the LLDP PDUs that it transmits. Where a TLV type is specified within this list, it should not be included in any LLDP PDU transmitted by the local agent.
+
+try:
+    api_response = api_instance.get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement(suppress_tlv_advertisement)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigLldpApi->get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **suppress_tlv_advertisement** | **str**| Indicates whether the local system should suppress the advertisement of particular TLVs with the LLDP PDUs that it transmits. Where a TLV type is specified within this list, it should not be included in any LLDP PDU transmitted by the local agent. | 
+
+### Return type
+
+[**GetOpenconfigLldpLldpConfigSuppressTlvAdvertisement**](GetOpenconfigLldpLldpConfigSuppressTlvAdvertisement.md)
 
 ### Authorization
 

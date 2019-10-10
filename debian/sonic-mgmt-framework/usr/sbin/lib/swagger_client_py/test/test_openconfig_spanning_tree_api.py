@@ -29,6 +29,18 @@ class TestOpenconfigSpanningTreeApi(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(self):
+        """Test case for del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol
+
+        """
+        pass
+
+    def test_del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(self):
+        """Test case for del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan
+
+        """
+        pass
+
     def test_delete_list_openconfig_spanning_tree_stp_interfaces_interface(self):
         """Test case for delete_list_openconfig_spanning_tree_stp_interfaces_interface
 
@@ -433,6 +445,18 @@ class TestOpenconfigSpanningTreeApi(unittest.TestCase):
 
     def test_get_list_openconfig_spanning_tree_stp_rstp_interfaces_interface(self):
         """Test case for get_list_openconfig_spanning_tree_stp_rstp_interfaces_interface
+
+        """
+        pass
+
+    def test_get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(self):
+        """Test case for get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol
+
+        """
+        pass
+
+    def test_get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(self):
+        """Test case for get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan
 
         """
         pass

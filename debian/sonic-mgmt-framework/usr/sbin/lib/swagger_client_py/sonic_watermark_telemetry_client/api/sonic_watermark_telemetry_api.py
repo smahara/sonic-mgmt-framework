@@ -33,13 +33,13 @@ class SonicWatermarkTelemetryApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def delete_sonic_watermark_telemetry_watermark_table(self, **kwargs):  # noqa: E501
-        """delete_sonic_watermark_telemetry_watermark_table  # noqa: E501
+    def delete_sonic_watermark_telemetry_sonic_watermark_telemetry(self, **kwargs):  # noqa: E501
+        """delete_sonic_watermark_telemetry_sonic_watermark_telemetry  # noqa: E501
 
-        OperationId: delete_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        OperationId: delete_sonic_watermark_telemetry_sonic_watermark_telemetry   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.delete_sonic_watermark_telemetry_watermark_table(async_req=True)
+        >>> thread = api.delete_sonic_watermark_telemetry_sonic_watermark_telemetry(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -49,18 +49,18 @@ class SonicWatermarkTelemetryApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.delete_sonic_watermark_telemetry_watermark_table_with_http_info(**kwargs)  # noqa: E501
+            return self.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(**kwargs)  # noqa: E501
         else:
-            (data) = self.delete_sonic_watermark_telemetry_watermark_table_with_http_info(**kwargs)  # noqa: E501
+            (data) = self.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(**kwargs)  # noqa: E501
             return data
 
-    def delete_sonic_watermark_telemetry_watermark_table_with_http_info(self, **kwargs):  # noqa: E501
-        """delete_sonic_watermark_telemetry_watermark_table  # noqa: E501
+    def delete_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(self, **kwargs):  # noqa: E501
+        """delete_sonic_watermark_telemetry_sonic_watermark_telemetry  # noqa: E501
 
-        OperationId: delete_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        OperationId: delete_sonic_watermark_telemetry_sonic_watermark_telemetry   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.delete_sonic_watermark_telemetry_watermark_table_with_http_info(async_req=True)
+        >>> thread = api.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -80,7 +80,7 @@ class SonicWatermarkTelemetryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method delete_sonic_watermark_telemetry_watermark_table" % key
+                    " to method delete_sonic_watermark_telemetry_sonic_watermark_telemetry" % key
                 )
             params[key] = val
         del params['kwargs']
@@ -105,7 +105,7 @@ class SonicWatermarkTelemetryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/sonic-watermark-telemetry:WATERMARK_TABLE', 'DELETE',
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry', 'DELETE',
             path_params,
             query_params,
             header_params,
@@ -120,13 +120,13 @@ class SonicWatermarkTelemetryApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def delete_sonic_watermark_telemetry_watermark_table_interval(self, **kwargs):  # noqa: E501
-        """delete_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+    def delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self, **kwargs):  # noqa: E501
+        """delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
 
-        OperationId: delete_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        OperationId: delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.delete_sonic_watermark_telemetry_watermark_table_interval(async_req=True)
+        >>> thread = api.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -136,18 +136,18 @@ class SonicWatermarkTelemetryApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.delete_sonic_watermark_telemetry_watermark_table_interval_with_http_info(**kwargs)  # noqa: E501
+            return self.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(**kwargs)  # noqa: E501
         else:
-            (data) = self.delete_sonic_watermark_telemetry_watermark_table_interval_with_http_info(**kwargs)  # noqa: E501
+            (data) = self.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(**kwargs)  # noqa: E501
             return data
 
-    def delete_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, **kwargs):  # noqa: E501
-        """delete_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+    def delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(self, **kwargs):  # noqa: E501
+        """delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
 
-        OperationId: delete_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        OperationId: delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.delete_sonic_watermark_telemetry_watermark_table_interval_with_http_info(async_req=True)
+        >>> thread = api.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -167,7 +167,7 @@ class SonicWatermarkTelemetryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method delete_sonic_watermark_telemetry_watermark_table_interval" % key
+                    " to method delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table" % key
                 )
             params[key] = val
         del params['kwargs']
@@ -192,7 +192,7 @@ class SonicWatermarkTelemetryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/sonic-watermark-telemetry:WATERMARK_TABLE/interval', 'DELETE',
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry/WATERMARK_TABLE', 'DELETE',
             path_params,
             query_params,
             header_params,
@@ -207,38 +207,38 @@ class SonicWatermarkTelemetryApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_sonic_watermark_telemetry_watermark_table(self, **kwargs):  # noqa: E501
-        """get_sonic_watermark_telemetry_watermark_table  # noqa: E501
+    def delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self, **kwargs):  # noqa: E501
+        """delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
 
-        OperationId: get_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        OperationId: delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_sonic_watermark_telemetry_watermark_table(async_req=True)
+        >>> thread = api.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :return: GetSonicWatermarkTelemetryWatermarkTable
+        :return: None
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.get_sonic_watermark_telemetry_watermark_table_with_http_info(**kwargs)  # noqa: E501
+            return self.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(**kwargs)  # noqa: E501
         else:
-            (data) = self.get_sonic_watermark_telemetry_watermark_table_with_http_info(**kwargs)  # noqa: E501
+            (data) = self.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(**kwargs)  # noqa: E501
             return data
 
-    def get_sonic_watermark_telemetry_watermark_table_with_http_info(self, **kwargs):  # noqa: E501
-        """get_sonic_watermark_telemetry_watermark_table  # noqa: E501
+    def delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, **kwargs):  # noqa: E501
+        """delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
 
-        OperationId: get_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        OperationId: delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_sonic_watermark_telemetry_watermark_table_with_http_info(async_req=True)
+        >>> thread = api.delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :return: GetSonicWatermarkTelemetryWatermarkTable
+        :return: None
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -254,7 +254,7 @@ class SonicWatermarkTelemetryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method get_sonic_watermark_telemetry_watermark_table" % key
+                    " to method delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval" % key
                 )
             params[key] = val
         del params['kwargs']
@@ -279,14 +279,14 @@ class SonicWatermarkTelemetryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/sonic-watermark-telemetry:WATERMARK_TABLE', 'GET',
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry/WATERMARK_TABLE/interval', 'DELETE',
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='GetSonicWatermarkTelemetryWatermarkTable',  # noqa: E501
+            response_type=None,  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -294,38 +294,38 @@ class SonicWatermarkTelemetryApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_sonic_watermark_telemetry_watermark_table_interval(self, **kwargs):  # noqa: E501
-        """get_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+    def get_sonic_watermark_telemetry_sonic_watermark_telemetry(self, **kwargs):  # noqa: E501
+        """get_sonic_watermark_telemetry_sonic_watermark_telemetry  # noqa: E501
 
-        OperationId: get_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        OperationId: get_sonic_watermark_telemetry_sonic_watermark_telemetry   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_sonic_watermark_telemetry_watermark_table_interval(async_req=True)
+        >>> thread = api.get_sonic_watermark_telemetry_sonic_watermark_telemetry(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :return: GetSonicWatermarkTelemetryWatermarkTableInterval
+        :return: GetSonicWatermarkTelemetrySonicWatermarkTelemetry
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.get_sonic_watermark_telemetry_watermark_table_interval_with_http_info(**kwargs)  # noqa: E501
+            return self.get_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(**kwargs)  # noqa: E501
         else:
-            (data) = self.get_sonic_watermark_telemetry_watermark_table_interval_with_http_info(**kwargs)  # noqa: E501
+            (data) = self.get_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(**kwargs)  # noqa: E501
             return data
 
-    def get_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, **kwargs):  # noqa: E501
-        """get_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+    def get_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(self, **kwargs):  # noqa: E501
+        """get_sonic_watermark_telemetry_sonic_watermark_telemetry  # noqa: E501
 
-        OperationId: get_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        OperationId: get_sonic_watermark_telemetry_sonic_watermark_telemetry   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_sonic_watermark_telemetry_watermark_table_interval_with_http_info(async_req=True)
+        >>> thread = api.get_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :return: GetSonicWatermarkTelemetryWatermarkTableInterval
+        :return: GetSonicWatermarkTelemetrySonicWatermarkTelemetry
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -341,7 +341,7 @@ class SonicWatermarkTelemetryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method get_sonic_watermark_telemetry_watermark_table_interval" % key
+                    " to method get_sonic_watermark_telemetry_sonic_watermark_telemetry" % key
                 )
             params[key] = val
         del params['kwargs']
@@ -366,14 +366,14 @@ class SonicWatermarkTelemetryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/sonic-watermark-telemetry:WATERMARK_TABLE/interval', 'GET',
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry', 'GET',
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='GetSonicWatermarkTelemetryWatermarkTableInterval',  # noqa: E501
+            response_type='GetSonicWatermarkTelemetrySonicWatermarkTelemetry',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -381,39 +381,213 @@ class SonicWatermarkTelemetryApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def patch_sonic_watermark_telemetry_watermark_table(self, body, **kwargs):  # noqa: E501
-        """patch_sonic_watermark_telemetry_watermark_table  # noqa: E501
+    def get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self, **kwargs):  # noqa: E501
+        """get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
 
-        OperationId: patch_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        OperationId: get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.patch_sonic_watermark_telemetry_watermark_table(body, async_req=True)
+        >>> thread = api.get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param PatchSonicWatermarkTelemetryWatermarkTable body: (required)
+        :return: GetSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTable
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(**kwargs)  # noqa: E501
+        else:
+            (data) = self.get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(**kwargs)  # noqa: E501
+            return data
+
+    def get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(self, **kwargs):  # noqa: E501
+        """get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
+
+        OperationId: get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :return: GetSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTable
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = []  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table" % key
+                )
+            params[key] = val
+        del params['kwargs']
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry/WATERMARK_TABLE', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTable',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self, **kwargs):  # noqa: E501
+        """get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+
+        OperationId: get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :return: GetSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTableInterval
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(**kwargs)  # noqa: E501
+        else:
+            (data) = self.get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(**kwargs)  # noqa: E501
+            return data
+
+    def get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, **kwargs):  # noqa: E501
+        """get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+
+        OperationId: get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :return: GetSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTableInterval
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = []  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval" % key
+                )
+            params[key] = val
+        del params['kwargs']
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry/WATERMARK_TABLE/interval', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTableInterval',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def patch_sonic_watermark_telemetry_sonic_watermark_telemetry(self, body, **kwargs):  # noqa: E501
+        """patch_sonic_watermark_telemetry_sonic_watermark_telemetry  # noqa: E501
+
+        OperationId: patch_sonic_watermark_telemetry_sonic_watermark_telemetry   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.patch_sonic_watermark_telemetry_sonic_watermark_telemetry(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PatchSonicWatermarkTelemetrySonicWatermarkTelemetry body: (required)
         :return: None
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.patch_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
+            return self.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(body, **kwargs)  # noqa: E501
         else:
-            (data) = self.patch_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
+            (data) = self.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(body, **kwargs)  # noqa: E501
             return data
 
-    def patch_sonic_watermark_telemetry_watermark_table_with_http_info(self, body, **kwargs):  # noqa: E501
-        """patch_sonic_watermark_telemetry_watermark_table  # noqa: E501
+    def patch_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(self, body, **kwargs):  # noqa: E501
+        """patch_sonic_watermark_telemetry_sonic_watermark_telemetry  # noqa: E501
 
-        OperationId: patch_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        OperationId: patch_sonic_watermark_telemetry_sonic_watermark_telemetry   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.patch_sonic_watermark_telemetry_watermark_table_with_http_info(body, async_req=True)
+        >>> thread = api.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param PatchSonicWatermarkTelemetryWatermarkTable body: (required)
+        :param PatchSonicWatermarkTelemetrySonicWatermarkTelemetry body: (required)
         :return: None
                  If the method is called asynchronously,
                  returns the request thread.
@@ -430,14 +604,14 @@ class SonicWatermarkTelemetryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method patch_sonic_watermark_telemetry_watermark_table" % key
+                    " to method patch_sonic_watermark_telemetry_sonic_watermark_telemetry" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'body' is set
         if ('body' not in params or
                 params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `patch_sonic_watermark_telemetry_watermark_table`")  # noqa: E501
+            raise ValueError("Missing the required parameter `body` when calling `patch_sonic_watermark_telemetry_sonic_watermark_telemetry`")  # noqa: E501
 
         collection_formats = {}
 
@@ -465,205 +639,7 @@ class SonicWatermarkTelemetryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/sonic-watermark-telemetry:WATERMARK_TABLE', 'PATCH',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type=None,  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def patch_sonic_watermark_telemetry_watermark_table_interval(self, body, **kwargs):  # noqa: E501
-        """patch_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
-
-        OperationId: patch_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.patch_sonic_watermark_telemetry_watermark_table_interval(body, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param PatchSonicWatermarkTelemetryWatermarkTableInterval body: (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.patch_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
-        else:
-            (data) = self.patch_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
-            return data
-
-    def patch_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, body, **kwargs):  # noqa: E501
-        """patch_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
-
-        OperationId: patch_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.patch_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param PatchSonicWatermarkTelemetryWatermarkTableInterval body: (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['body']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method patch_sonic_watermark_telemetry_watermark_table_interval" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'body' is set
-        if ('body' not in params or
-                params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `patch_sonic_watermark_telemetry_watermark_table_interval`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-
-        query_params = []
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        if 'body' in params:
-            body_params = params['body']
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/yang-data+json'])  # noqa: E501
-
-        # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/yang-data+json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = []  # noqa: E501
-
-        return self.api_client.call_api(
-            '/sonic-watermark-telemetry:WATERMARK_TABLE/interval', 'PATCH',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type=None,  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def post_sonic_watermark_telemetry_watermark_table_interval(self, body, **kwargs):  # noqa: E501
-        """post_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
-
-        OperationId: post_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.post_sonic_watermark_telemetry_watermark_table_interval(body, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param PostSonicWatermarkTelemetryWatermarkTableInterval body: (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.post_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
-        else:
-            (data) = self.post_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
-            return data
-
-    def post_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, body, **kwargs):  # noqa: E501
-        """post_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
-
-        OperationId: post_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.post_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param PostSonicWatermarkTelemetryWatermarkTableInterval body: (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['body']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method post_sonic_watermark_telemetry_watermark_table_interval" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'body' is set
-        if ('body' not in params or
-                params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `post_sonic_watermark_telemetry_watermark_table_interval`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-
-        query_params = []
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        if 'body' in params:
-            body_params = params['body']
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/yang-data+json'])  # noqa: E501
-
-        # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/yang-data+json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = []  # noqa: E501
-
-        return self.api_client.call_api(
-            '/sonic-watermark-telemetry:WATERMARK_TABLE', 'POST',
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry', 'PATCH',
             path_params,
             query_params,
             header_params,
@@ -678,39 +654,39 @@ class SonicWatermarkTelemetryApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def put_sonic_watermark_telemetry_watermark_table(self, body, **kwargs):  # noqa: E501
-        """put_sonic_watermark_telemetry_watermark_table  # noqa: E501
+    def patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self, body, **kwargs):  # noqa: E501
+        """patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
 
-        OperationId: put_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        OperationId: patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.put_sonic_watermark_telemetry_watermark_table(body, async_req=True)
+        >>> thread = api.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param PutSonicWatermarkTelemetryWatermarkTable body: (required)
+        :param PatchSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTable body: (required)
         :return: None
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.put_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
+            return self.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
         else:
-            (data) = self.put_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
+            (data) = self.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
             return data
 
-    def put_sonic_watermark_telemetry_watermark_table_with_http_info(self, body, **kwargs):  # noqa: E501
-        """put_sonic_watermark_telemetry_watermark_table  # noqa: E501
+    def patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(self, body, **kwargs):  # noqa: E501
+        """patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
 
-        OperationId: put_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        OperationId: patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.put_sonic_watermark_telemetry_watermark_table_with_http_info(body, async_req=True)
+        >>> thread = api.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param PutSonicWatermarkTelemetryWatermarkTable body: (required)
+        :param PatchSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTable body: (required)
         :return: None
                  If the method is called asynchronously,
                  returns the request thread.
@@ -727,14 +703,14 @@ class SonicWatermarkTelemetryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method put_sonic_watermark_telemetry_watermark_table" % key
+                    " to method patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'body' is set
         if ('body' not in params or
                 params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `put_sonic_watermark_telemetry_watermark_table`")  # noqa: E501
+            raise ValueError("Missing the required parameter `body` when calling `patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table`")  # noqa: E501
 
         collection_formats = {}
 
@@ -762,7 +738,7 @@ class SonicWatermarkTelemetryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/sonic-watermark-telemetry:WATERMARK_TABLE', 'PUT',
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry/WATERMARK_TABLE', 'PATCH',
             path_params,
             query_params,
             header_params,
@@ -777,39 +753,39 @@ class SonicWatermarkTelemetryApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def put_sonic_watermark_telemetry_watermark_table_interval(self, body, **kwargs):  # noqa: E501
-        """put_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+    def patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self, body, **kwargs):  # noqa: E501
+        """patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
 
-        OperationId: put_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        OperationId: patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.put_sonic_watermark_telemetry_watermark_table_interval(body, async_req=True)
+        >>> thread = api.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param PutSonicWatermarkTelemetryWatermarkTableInterval body: (required)
+        :param PatchSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTableInterval body: (required)
         :return: None
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.put_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
+            return self.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
         else:
-            (data) = self.put_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
+            (data) = self.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
             return data
 
-    def put_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, body, **kwargs):  # noqa: E501
-        """put_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+    def patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, body, **kwargs):  # noqa: E501
+        """patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
 
-        OperationId: put_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        OperationId: patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.put_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, async_req=True)
+        >>> thread = api.patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param PutSonicWatermarkTelemetryWatermarkTableInterval body: (required)
+        :param PatchSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTableInterval body: (required)
         :return: None
                  If the method is called asynchronously,
                  returns the request thread.
@@ -826,14 +802,14 @@ class SonicWatermarkTelemetryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method put_sonic_watermark_telemetry_watermark_table_interval" % key
+                    " to method patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'body' is set
         if ('body' not in params or
                 params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `put_sonic_watermark_telemetry_watermark_table_interval`")  # noqa: E501
+            raise ValueError("Missing the required parameter `body` when calling `patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval`")  # noqa: E501
 
         collection_formats = {}
 
@@ -861,7 +837,502 @@ class SonicWatermarkTelemetryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/sonic-watermark-telemetry:WATERMARK_TABLE/interval', 'PUT',
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry/WATERMARK_TABLE/interval', 'PATCH',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self, body, **kwargs):  # noqa: E501
+        """post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
+
+        OperationId: post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PostSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTable body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
+        else:
+            (data) = self.post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
+            return data
+
+    def post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(self, body, **kwargs):  # noqa: E501
+        """post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
+
+        OperationId: post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PostSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTable body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self, body, **kwargs):  # noqa: E501
+        """post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+
+        OperationId: post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PostSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTableInterval body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
+        else:
+            (data) = self.post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
+            return data
+
+    def post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, body, **kwargs):  # noqa: E501
+        """post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+
+        OperationId: post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PostSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTableInterval body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry/WATERMARK_TABLE', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def put_sonic_watermark_telemetry_sonic_watermark_telemetry(self, body, **kwargs):  # noqa: E501
+        """put_sonic_watermark_telemetry_sonic_watermark_telemetry  # noqa: E501
+
+        OperationId: put_sonic_watermark_telemetry_sonic_watermark_telemetry   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_sonic_watermark_telemetry_sonic_watermark_telemetry(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PutSonicWatermarkTelemetrySonicWatermarkTelemetry body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.put_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(body, **kwargs)  # noqa: E501
+        else:
+            (data) = self.put_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(body, **kwargs)  # noqa: E501
+            return data
+
+    def put_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(self, body, **kwargs):  # noqa: E501
+        """put_sonic_watermark_telemetry_sonic_watermark_telemetry  # noqa: E501
+
+        OperationId: put_sonic_watermark_telemetry_sonic_watermark_telemetry   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_sonic_watermark_telemetry_sonic_watermark_telemetry_with_http_info(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PutSonicWatermarkTelemetrySonicWatermarkTelemetry body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method put_sonic_watermark_telemetry_sonic_watermark_telemetry" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `put_sonic_watermark_telemetry_sonic_watermark_telemetry`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry', 'PUT',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self, body, **kwargs):  # noqa: E501
+        """put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
+
+        OperationId: put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PutSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTable body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
+        else:
+            (data) = self.put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(body, **kwargs)  # noqa: E501
+            return data
+
+    def put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(self, body, **kwargs):  # noqa: E501
+        """put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table  # noqa: E501
+
+        OperationId: put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_with_http_info(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PutSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTable body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry/WATERMARK_TABLE', 'PUT',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self, body, **kwargs):  # noqa: E501
+        """put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+
+        OperationId: put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PutSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTableInterval body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
+        else:
+            (data) = self.put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, **kwargs)  # noqa: E501
+            return data
+
+    def put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(self, body, **kwargs):  # noqa: E501
+        """put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval  # noqa: E501
+
+        OperationId: put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval_with_http_info(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PutSonicWatermarkTelemetrySonicWatermarkTelemetryWatermarkTableInterval body: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/sonic-watermark-telemetry:sonic-watermark-telemetry/WATERMARK_TABLE/interval', 'PUT',
             path_params,
             query_params,
             header_params,

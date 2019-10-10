@@ -29,6 +29,54 @@ class TestOpenconfigSystemApi(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_del_llist_openconfig_system_system_aaa_accounting_config_accounting_method(self):
+        """Test case for del_llist_openconfig_system_system_aaa_accounting_config_accounting_method
+
+        """
+        pass
+
+    def test_del_llist_openconfig_system_system_aaa_authentication_config_authentication_method(self):
+        """Test case for del_llist_openconfig_system_system_aaa_authentication_config_authentication_method
+
+        """
+        pass
+
+    def test_del_llist_openconfig_system_system_aaa_authorization_config_authorization_method(self):
+        """Test case for del_llist_openconfig_system_system_aaa_authorization_config_authorization_method
+
+        """
+        pass
+
+    def test_del_llist_openconfig_system_system_dns_config_search(self):
+        """Test case for del_llist_openconfig_system_system_dns_config_search
+
+        """
+        pass
+
+    def test_del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(self):
+        """Test case for del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias
+
+        """
+        pass
+
+    def test_del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(self):
+        """Test case for del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address
+
+        """
+        pass
+
+    def test_del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(self):
+        """Test case for del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address
+
+        """
+        pass
+
+    def test_del_llist_openconfig_system_system_grpc_server_config_listen_addresses(self):
+        """Test case for del_llist_openconfig_system_system_grpc_server_config_listen_addresses
+
+        """
+        pass
+
     def test_delete_list_openconfig_system_system_aaa_accounting_events_event(self):
         """Test case for delete_list_openconfig_system_system_aaa_accounting_events_event
 
@@ -907,6 +955,54 @@ class TestOpenconfigSystemApi(unittest.TestCase):
 
     def test_get_list_openconfig_system_system_processes_process(self):
         """Test case for get_list_openconfig_system_system_processes_process
+
+        """
+        pass
+
+    def test_get_llist_openconfig_system_system_aaa_accounting_config_accounting_method(self):
+        """Test case for get_llist_openconfig_system_system_aaa_accounting_config_accounting_method
+
+        """
+        pass
+
+    def test_get_llist_openconfig_system_system_aaa_authentication_config_authentication_method(self):
+        """Test case for get_llist_openconfig_system_system_aaa_authentication_config_authentication_method
+
+        """
+        pass
+
+    def test_get_llist_openconfig_system_system_aaa_authorization_config_authorization_method(self):
+        """Test case for get_llist_openconfig_system_system_aaa_authorization_config_authorization_method
+
+        """
+        pass
+
+    def test_get_llist_openconfig_system_system_dns_config_search(self):
+        """Test case for get_llist_openconfig_system_system_dns_config_search
+
+        """
+        pass
+
+    def test_get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(self):
+        """Test case for get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias
+
+        """
+        pass
+
+    def test_get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(self):
+        """Test case for get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address
+
+        """
+        pass
+
+    def test_get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(self):
+        """Test case for get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address
+
+        """
+        pass
+
+    def test_get_llist_openconfig_system_system_grpc_server_config_listen_addresses(self):
+        """Test case for get_llist_openconfig_system_system_grpc_server_config_listen_addresses
 
         """
         pass

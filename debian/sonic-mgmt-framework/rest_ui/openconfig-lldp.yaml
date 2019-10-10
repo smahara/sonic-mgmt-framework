@@ -718,6 +718,81 @@ paths:
           description: "Unsupported Media Type"
         500:
           description: "Internal Server Error"
+  /openconfig-lldp:lldp/config/suppress-tlv-advertisement={suppress-tlv-advertisement}:
+    get:
+      tags:
+      - "openconfig-lldp"
+      description: "OperationId: get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement\n\
+        Indicates whether the local system should suppress the\nadvertisement of particular\
+        \ TLVs with the LLDP PDUs that it\ntransmits. Where a TLV type is specified\
+        \ within this list, it\nshould not be included in any LLDP PDU transmitted\
+        \ by the\nlocal agent."
+      operationId: "get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "suppress-tlv-advertisement"
+        in: "path"
+        description: "Indicates whether the local system should suppress the\nadvertisement\
+          \ of particular TLVs with the LLDP PDUs that it\ntransmits. Where a TLV\
+          \ type is specified within this list, it\nshould not be included in any\
+          \ LLDP PDU transmitted by the\nlocal agent."
+        required: true
+        type: "string"
+        x-exportParamName: "SuppressTlvAdvertisement"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_lldp_lldp_config_suppress_tlv_advertisement"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-lldp"
+      description: "OperationId: del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement\n\
+        Indicates whether the local system should suppress the\nadvertisement of particular\
+        \ TLVs with the LLDP PDUs that it\ntransmits. Where a TLV type is specified\
+        \ within this list, it\nshould not be included in any LLDP PDU transmitted\
+        \ by the\nlocal agent."
+      operationId: "del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "suppress-tlv-advertisement"
+        in: "path"
+        description: "Indicates whether the local system should suppress the\nadvertisement\
+          \ of particular TLVs with the LLDP PDUs that it\ntransmits. Where a TLV\
+          \ type is specified within this list, it\nshould not be included in any\
+          \ LLDP PDU transmitted by the\nlocal agent."
+        required: true
+        type: "string"
+        x-exportParamName: "SuppressTlvAdvertisement"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
   /openconfig-lldp:lldp/config/system-name:
     get:
       tags:

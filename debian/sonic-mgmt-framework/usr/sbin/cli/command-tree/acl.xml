@@ -4,14 +4,15 @@
 <!ENTITY MAX_PORT_ID "32">
 <!ENTITY START_SUB_PORT_ID "1">
 <!ENTITY MAX_SUB_PORT_ID "4">
-<!ENTITY MAX_MTU "9276">
+<!ENTITY MAX_MTU "9216">
 ]>
+<!-- Copyright 2019 Dell, Inc.  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at  http://www.apache.org/licenses/LICENSE-2.0  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License. -->
 <CLISH_MODULE xmlns="http://www.dellemc.com/sonic/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xi="http://www.w3.org/2001/XInclude" xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema http://www.dellemc.com/sonic/XMLSchema/clish.xsd">
   <!--=========================================================================-->
   <VIEW name="enable-view">
     <!--show ip access-lists -->
     <COMMAND name="show ip access-lists" help="Show IPv4 access-lists information">
-      <PARAM name="access-list-name" help="Access list name" ptype="STRING" optional="true"> </PARAM>
+      <PARAM name="access-list-name" help="Access list name" ptype="STRING_63" optional="true"> </PARAM>
       <ACTION> if test "${access-list-name}" = ""; then
  python $SONIC_CLI_ROOT/sonic-cli.py get_openconfig_acl_acl_acl_sets show_access_list.j2
  else
@@ -30,7 +31,7 @@
   <VIEW name="configure-if-view">
     <!-- ip access-group -->
     <COMMAND name="ip access-group" help="Specify access control for packets">
-      <PARAM name="access-list-name" help="Name of access-list (Max size 140)" ptype="STRING"/>
+      <PARAM name="access-list-name" help="Name of access-list (Max size 63)" ptype="STRING_63"/>
       <PARAM name="direction-switch" help="Configure the direction to apply the access list" ptype="SUBCOMMAND" mode="switch">
         <PARAM name="in" help="Apply access-list in incoming direction" ptype="SUBCOMMAND" mode="subcommand"/>
         <PARAM name="out" help="Apply access-list in outgoing direction" ptype="SUBCOMMAND" mode="subcommand"/>
@@ -44,7 +45,7 @@
     </COMMAND>
     <!-- no ip access-group -->
     <COMMAND name="no ip access-group" help="Specify access control for packets">
-      <PARAM name="access-list-name" help="Name of access-list (Max size 140)" ptype="STRING"/>
+      <PARAM name="access-list-name" help="Name of access-list (Max size 63)" ptype="STRING_63"/>
       <PARAM name="direction-switch" help="Configure the direction to apply the access list" ptype="SUBCOMMAND" mode="switch">
         <PARAM name="in" help="Apply access-list in incoming direction" ptype="SUBCOMMAND" mode="subcommand"/>
         <PARAM name="out" help="Apply access-list in outgoing direction" ptype="SUBCOMMAND" mode="subcommand"/>
@@ -60,12 +61,12 @@
   <VIEW name="configure-view">
     <!-- ip access-list -->
     <COMMAND name="ip access-list" help="Configure IPv4 access-list" view="configure-acl-ipv4-view" viewid="name=${access-list-name}">
-      <PARAM name="access-list-name" help="Name of the IPv4 access-list (Max size 140)" ptype="STRING"> </PARAM>
+      <PARAM name="access-list-name" help="Name of the IPv4 access-list (Max size 63)" ptype="STRING_63"> </PARAM>
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli.py patch_openconfig_acl_acl_acl_sets_acl_set ${access-list-name} ACL_IPV4</ACTION>
     </COMMAND>
     <!-- no ip access-list -->
     <COMMAND name="no ip access-list" help="Configure IPv4 access-list">
-      <PARAM name="access-list-name" help="Name of the IPv4 access-list (Max size 140)" ptype="STRING"> </PARAM>
+      <PARAM name="access-list-name" help="Name of the IPv4 access-list (Max size 63)" ptype="STRING_63"> </PARAM>
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli.py delete_openconfig_acl_acl_acl_sets_acl_set ${access-list-name} ACL_IPV4</ACTION>
     </COMMAND>
   </VIEW>
@@ -86,11 +87,11 @@
     </COMMAND>
     <COMMAND name="no" help="Negate a command or set its defaults"> </COMMAND>
     <COMMAND name="no seq" help="Sequence number">
-      <PARAM name="seq-no" help="Sequence number" ptype="RANGE_1_4294967295"/>
+      <PARAM name="seq-no" help="Sequence number" ptype="RANGE_1_65535"/>
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli.py delete_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry ${name} ACL_IPV4 ${seq-no}</ACTION>
     </COMMAND>
     <COMMAND name="seq" help="Sequence number">
-      <PARAM name="seq-no" help="Sequence number" ptype="RANGE_1_4294967295">
+      <PARAM name="seq-no" help="Sequence number" ptype="RANGE_1_65535">
         <PARAM name="seq-options" help="" ptype="SUBCOMMAND" mode="switch">
           <PARAM name="deny" help="Configure deny criteria" ptype="SUBCOMMAND" mode="subcommand">
             <PARAM name="deny-options" help="" ptype="SUBCOMMAND" mode="switch">

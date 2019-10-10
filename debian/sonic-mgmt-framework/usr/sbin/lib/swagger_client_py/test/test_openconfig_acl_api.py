@@ -29,6 +29,12 @@ class TestOpenconfigAclApi(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(self):
+        """Test case for del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags
+
+        """
+        pass
+
     def test_delete_list_openconfig_acl_acl_acl_sets_acl_set(self):
         """Test case for delete_list_openconfig_acl_acl_acl_sets_acl_set
 
@@ -421,6 +427,12 @@ class TestOpenconfigAclApi(unittest.TestCase):
 
     def test_get_list_openconfig_acl_acl_interfaces_interface_ingress_acl_sets_ingress_acl_set_acl_entries_acl_entry(self):
         """Test case for get_list_openconfig_acl_acl_interfaces_interface_ingress_acl_sets_ingress_acl_set_acl_entries_acl_entry
+
+        """
+        pass
+
+    def test_get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(self):
+        """Test case for get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags
 
         """
         pass

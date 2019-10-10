@@ -9410,6 +9410,105 @@ paths:
           description: "Unsupported Media Type"
         500:
           description: "Internal Server Error"
+  /openconfig-acl:acl/acl-sets/acl-set={name},{type}/acl-entries/acl-entry={sequence-id}/transport/config/tcp-flags={tcp-flags}:
+    get:
+      tags:
+      - "openconfig-acl"
+      description: "OperationId: get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags\n\
+        List of TCP flags to match"
+      operationId: "get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "type"
+        in: "path"
+        description: "Reference to the type list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Type_"
+      - name: "sequence-id"
+        in: "path"
+        description: "references the list key"
+        required: true
+        type: "integer"
+        x-exportParamName: "SequenceId"
+      - name: "tcp-flags"
+        in: "path"
+        description: "List of TCP flags to match"
+        required: true
+        type: "string"
+        x-exportParamName: "TcpFlags"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-acl"
+      description: "OperationId: del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags\n\
+        List of TCP flags to match"
+      operationId: "del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "Reference to the name list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "type"
+        in: "path"
+        description: "Reference to the type list key"
+        required: true
+        type: "string"
+        x-exportParamName: "Type_"
+      - name: "sequence-id"
+        in: "path"
+        description: "references the list key"
+        required: true
+        type: "integer"
+        x-exportParamName: "SequenceId"
+      - name: "tcp-flags"
+        in: "path"
+        description: "List of TCP flags to match"
+        required: true
+        type: "string"
+        x-exportParamName: "TcpFlags"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
   /openconfig-acl:acl/acl-sets/acl-set={name},{type}/acl-entries/acl-entry={sequence-id}/transport/state:
     get:
       tags:

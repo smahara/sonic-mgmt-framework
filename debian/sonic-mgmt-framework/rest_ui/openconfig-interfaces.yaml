@@ -9524,6 +9524,119 @@ paths:
           description: "Unsupported Media Type"
         500:
           description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/config/virtual-address={virtual-address}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address\n\
+        Configure one or more virtual addresses for the\nVRRP group"
+      operationId: "get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "index"
+        in: "path"
+        description: "The index number of the subinterface -- used to address\nthe\
+          \ logical interface"
+        required: true
+        type: "integer"
+        x-exportParamName: "Index"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "virtual-address"
+        in: "path"
+        description: "Configure one or more virtual addresses for the\nVRRP group"
+        required: true
+        type: "string"
+        x-exportParamName: "VirtualAddress"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address\n\
+        Configure one or more virtual addresses for the\nVRRP group"
+      operationId: "del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "index"
+        in: "path"
+        description: "The index number of the subinterface -- used to address\nthe\
+          \ logical interface"
+        required: true
+        type: "integer"
+        x-exportParamName: "Index"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "virtual-address"
+        in: "path"
+        description: "Configure one or more virtual addresses for the\nVRRP group"
+        required: true
+        type: "string"
+        x-exportParamName: "VirtualAddress"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
   ? /openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/config/priority
   : get:
       tags:
@@ -11961,6 +12074,139 @@ paths:
           description: "Method Not Allowed"
         409:
           description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/interface-tracking/config/track-interface={track-interface}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface\n\
+        Sets a list of one or more interfaces that should\nbe tracked for up/down\
+        \ events to dynamically change the\npriority state of the VRRP group, and\
+        \ potentially\nchange the mastership if the tracked interface going\ndown\
+        \ lowers the priority sufficiently.  Any of the tracked\ninterfaces going\
+        \ down will cause the priority to be lowered.\nSome implementations may only\
+        \ support a single\ntracked interface."
+      operationId: "get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "index"
+        in: "path"
+        description: "The index number of the subinterface -- used to address\nthe\
+          \ logical interface"
+        required: true
+        type: "integer"
+        x-exportParamName: "Index"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "track-interface"
+        in: "path"
+        description: "Sets a list of one or more interfaces that should\nbe tracked\
+          \ for up/down events to dynamically change the\npriority state of the VRRP\
+          \ group, and potentially\nchange the mastership if the tracked interface\
+          \ going\ndown lowers the priority sufficiently.  Any of the tracked\ninterfaces\
+          \ going down will cause the priority to be lowered.\nSome implementations\
+          \ may only support a single\ntracked interface."
+        required: true
+        type: "string"
+        x-exportParamName: "TrackInterface"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface\n\
+        Sets a list of one or more interfaces that should\nbe tracked for up/down\
+        \ events to dynamically change the\npriority state of the VRRP group, and\
+        \ potentially\nchange the mastership if the tracked interface going\ndown\
+        \ lowers the priority sufficiently.  Any of the tracked\ninterfaces going\
+        \ down will cause the priority to be lowered.\nSome implementations may only\
+        \ support a single\ntracked interface."
+      operationId: "del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "index"
+        in: "path"
+        description: "The index number of the subinterface -- used to address\nthe\
+          \ logical interface"
+        required: true
+        type: "integer"
+        x-exportParamName: "Index"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "track-interface"
+        in: "path"
+        description: "Sets a list of one or more interfaces that should\nbe tracked\
+          \ for up/down events to dynamically change the\npriority state of the VRRP\
+          \ group, and potentially\nchange the mastership if the tracked interface\
+          \ going\ndown lowers the priority sufficiently.  Any of the tracked\ninterfaces\
+          \ going down will cause the priority to be lowered.\nSome implementations\
+          \ may only support a single\ntracked interface."
+        required: true
+        type: "string"
+        x-exportParamName: "TrackInterface"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
         415:
           description: "Unsupported Media Type"
         500:
@@ -20252,6 +20498,119 @@ paths:
           description: "Unsupported Media Type"
         500:
           description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/config/virtual-address={virtual-address}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address\n\
+        Configure one or more virtual addresses for the\nVRRP group"
+      operationId: "get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "index"
+        in: "path"
+        description: "The index number of the subinterface -- used to address\nthe\
+          \ logical interface"
+        required: true
+        type: "integer"
+        x-exportParamName: "Index"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "virtual-address"
+        in: "path"
+        description: "Configure one or more virtual addresses for the\nVRRP group"
+        required: true
+        type: "string"
+        x-exportParamName: "VirtualAddress"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address\n\
+        Configure one or more virtual addresses for the\nVRRP group"
+      operationId: "del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "index"
+        in: "path"
+        description: "The index number of the subinterface -- used to address\nthe\
+          \ logical interface"
+        required: true
+        type: "integer"
+        x-exportParamName: "Index"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "virtual-address"
+        in: "path"
+        description: "Configure one or more virtual addresses for the\nVRRP group"
+        required: true
+        type: "string"
+        x-exportParamName: "VirtualAddress"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
   ? /openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/config/priority
   : get:
       tags:
@@ -22966,6 +23325,139 @@ paths:
           description: "Method Not Allowed"
         409:
           description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/interface-tracking/config/track-interface={track-interface}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface\n\
+        Sets a list of one or more interfaces that should\nbe tracked for up/down\
+        \ events to dynamically change the\npriority state of the VRRP group, and\
+        \ potentially\nchange the mastership if the tracked interface going\ndown\
+        \ lowers the priority sufficiently.  Any of the tracked\ninterfaces going\
+        \ down will cause the priority to be lowered.\nSome implementations may only\
+        \ support a single\ntracked interface."
+      operationId: "get_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "index"
+        in: "path"
+        description: "The index number of the subinterface -- used to address\nthe\
+          \ logical interface"
+        required: true
+        type: "integer"
+        x-exportParamName: "Index"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "track-interface"
+        in: "path"
+        description: "Sets a list of one or more interfaces that should\nbe tracked\
+          \ for up/down events to dynamically change the\npriority state of the VRRP\
+          \ group, and potentially\nchange the mastership if the tracked interface\
+          \ going\ndown lowers the priority sufficiently.  Any of the tracked\ninterfaces\
+          \ going down will cause the priority to be lowered.\nSome implementations\
+          \ may only support a single\ntracked interface."
+        required: true
+        type: "string"
+        x-exportParamName: "TrackInterface"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface\n\
+        Sets a list of one or more interfaces that should\nbe tracked for up/down\
+        \ events to dynamically change the\npriority state of the VRRP group, and\
+        \ potentially\nchange the mastership if the tracked interface going\ndown\
+        \ lowers the priority sufficiently.  Any of the tracked\ninterfaces going\
+        \ down will cause the priority to be lowered.\nSome implementations may only\
+        \ support a single\ntracked interface."
+      operationId: "del_llist_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "index"
+        in: "path"
+        description: "The index number of the subinterface -- used to address\nthe\
+          \ logical interface"
+        required: true
+        type: "integer"
+        x-exportParamName: "Index"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "track-interface"
+        in: "path"
+        description: "Sets a list of one or more interfaces that should\nbe tracked\
+          \ for up/down events to dynamically change the\npriority state of the VRRP\
+          \ group, and potentially\nchange the mastership if the tracked interface\
+          \ going\ndown lowers the priority sufficiently.  Any of the tracked\ninterfaces\
+          \ going down will cause the priority to be lowered.\nSome implementations\
+          \ may only support a single\ntracked interface."
+        required: true
+        type: "string"
+        x-exportParamName: "TrackInterface"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
         415:
           description: "Unsupported Media Type"
         500:
@@ -32374,6 +32866,93 @@ paths:
           description: "Unsupported Media Type"
         500:
           description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/openconfig-if-ethernet:ethernet/openconfig-vlan:switched-vlan/config/trunk-vlans={trunk-vlans}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans\n\
+        Specify VLANs, or ranges thereof, that the interface may\ncarry when in trunk\
+        \ mode.  If not specified, all VLANs are\nallowed on the interface. Ranges\
+        \ are specified in the form\nx..y, where x<y - ranges are assumed to be inclusive\
+        \ (such\nthat the VLAN range is x <= range <= y."
+      operationId: "get_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "trunk-vlans"
+        in: "path"
+        description: "Specify VLANs, or ranges thereof, that the interface may\ncarry\
+          \ when in trunk mode.  If not specified, all VLANs are\nallowed on the interface.\
+          \ Ranges are specified in the form\nx..y, where x<y - ranges are assumed\
+          \ to be inclusive (such\nthat the VLAN range is x <= range <= y."
+        required: true
+        type: "string"
+        x-exportParamName: "TrunkVlans"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans\n\
+        Specify VLANs, or ranges thereof, that the interface may\ncarry when in trunk\
+        \ mode.  If not specified, all VLANs are\nallowed on the interface. Ranges\
+        \ are specified in the form\nx..y, where x<y - ranges are assumed to be inclusive\
+        \ (such\nthat the VLAN range is x <= range <= y."
+      operationId: "del_llist_openconfig_vlan_interfaces_interface_ethernet_switched_vlan_config_trunk_vlans"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "trunk-vlans"
+        in: "path"
+        description: "Specify VLANs, or ranges thereof, that the interface may\ncarry\
+          \ when in trunk mode.  If not specified, all VLANs are\nallowed on the interface.\
+          \ Ranges are specified in the form\nx..y, where x<y - ranges are assumed\
+          \ to be inclusive (such\nthat the VLAN range is x <= range <= y."
+        required: true
+        type: "string"
+        x-exportParamName: "TrunkVlans"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
   /openconfig-interfaces:interfaces/interface={name}/openconfig-if-ethernet:ethernet/openconfig-vlan:switched-vlan/state:
     get:
       tags:
@@ -34399,6 +34978,93 @@ paths:
           description: "Method Not Allowed"
         409:
           description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/openconfig-if-aggregate:aggregation/openconfig-vlan:switched-vlan/config/trunk-vlans={trunk-vlans}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans\n\
+        Specify VLANs, or ranges thereof, that the interface may\ncarry when in trunk\
+        \ mode.  If not specified, all VLANs are\nallowed on the interface. Ranges\
+        \ are specified in the form\nx..y, where x<y - ranges are assumed to be inclusive\
+        \ (such\nthat the VLAN range is x <= range <= y."
+      operationId: "get_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "trunk-vlans"
+        in: "path"
+        description: "Specify VLANs, or ranges thereof, that the interface may\ncarry\
+          \ when in trunk mode.  If not specified, all VLANs are\nallowed on the interface.\
+          \ Ranges are specified in the form\nx..y, where x<y - ranges are assumed\
+          \ to be inclusive (such\nthat the VLAN range is x <= range <= y."
+        required: true
+        type: "string"
+        x-exportParamName: "TrunkVlans"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans\n\
+        Specify VLANs, or ranges thereof, that the interface may\ncarry when in trunk\
+        \ mode.  If not specified, all VLANs are\nallowed on the interface. Ranges\
+        \ are specified in the form\nx..y, where x<y - ranges are assumed to be inclusive\
+        \ (such\nthat the VLAN range is x <= range <= y."
+      operationId: "del_llist_openconfig_vlan_interfaces_interface_aggregation_switched_vlan_config_trunk_vlans"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "trunk-vlans"
+        in: "path"
+        description: "Specify VLANs, or ranges thereof, that the interface may\ncarry\
+          \ when in trunk mode.  If not specified, all VLANs are\nallowed on the interface.\
+          \ Ranges are specified in the form\nx..y, where x<y - ranges are assumed\
+          \ to be inclusive (such\nthat the VLAN range is x <= range <= y."
+        required: true
+        type: "string"
+        x-exportParamName: "TrunkVlans"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
         415:
           description: "Unsupported Media Type"
         500:
@@ -37509,6 +38175,105 @@ paths:
           description: "Unsupported Media Type"
         500:
           description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/config/virtual-address={virtual-address}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address\n\
+        Configure one or more virtual addresses for the\nVRRP group"
+      operationId: "get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "virtual-address"
+        in: "path"
+        description: "Configure one or more virtual addresses for the\nVRRP group"
+        required: true
+        type: "string"
+        x-exportParamName: "VirtualAddress"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address\n\
+        Configure one or more virtual addresses for the\nVRRP group"
+      operationId: "del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_config_virtual_address"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "virtual-address"
+        in: "path"
+        description: "Configure one or more virtual addresses for the\nVRRP group"
+        required: true
+        type: "string"
+        x-exportParamName: "VirtualAddress"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
   ? /openconfig-interfaces:interfaces/interface={name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/config/priority
   : get:
       tags:
@@ -39645,6 +40410,125 @@ paths:
           description: "Method Not Allowed"
         409:
           description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv4/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/interface-tracking/config/track-interface={track-interface}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface\n\
+        Sets a list of one or more interfaces that should\nbe tracked for up/down\
+        \ events to dynamically change the\npriority state of the VRRP group, and\
+        \ potentially\nchange the mastership if the tracked interface going\ndown\
+        \ lowers the priority sufficiently.  Any of the tracked\ninterfaces going\
+        \ down will cause the priority to be lowered.\nSome implementations may only\
+        \ support a single\ntracked interface."
+      operationId: "get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "track-interface"
+        in: "path"
+        description: "Sets a list of one or more interfaces that should\nbe tracked\
+          \ for up/down events to dynamically change the\npriority state of the VRRP\
+          \ group, and potentially\nchange the mastership if the tracked interface\
+          \ going\ndown lowers the priority sufficiently.  Any of the tracked\ninterfaces\
+          \ going down will cause the priority to be lowered.\nSome implementations\
+          \ may only support a single\ntracked interface."
+        required: true
+        type: "string"
+        x-exportParamName: "TrackInterface"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface\n\
+        Sets a list of one or more interfaces that should\nbe tracked for up/down\
+        \ events to dynamically change the\npriority state of the VRRP group, and\
+        \ potentially\nchange the mastership if the tracked interface going\ndown\
+        \ lowers the priority sufficiently.  Any of the tracked\ninterfaces going\
+        \ down will cause the priority to be lowered.\nSome implementations may only\
+        \ support a single\ntracked interface."
+      operationId: "del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv4_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "track-interface"
+        in: "path"
+        description: "Sets a list of one or more interfaces that should\nbe tracked\
+          \ for up/down events to dynamically change the\npriority state of the VRRP\
+          \ group, and potentially\nchange the mastership if the tracked interface\
+          \ going\ndown lowers the priority sufficiently.  Any of the tracked\ninterfaces\
+          \ going down will cause the priority to be lowered.\nSome implementations\
+          \ may only support a single\ntracked interface."
+        required: true
+        type: "string"
+        x-exportParamName: "TrackInterface"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
         415:
           description: "Unsupported Media Type"
         500:
@@ -46718,6 +47602,105 @@ paths:
           description: "Unsupported Media Type"
         500:
           description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv6/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/config/virtual-address={virtual-address}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address\n\
+        Configure one or more virtual addresses for the\nVRRP group"
+      operationId: "get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "virtual-address"
+        in: "path"
+        description: "Configure one or more virtual addresses for the\nVRRP group"
+        required: true
+        type: "string"
+        x-exportParamName: "VirtualAddress"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address\n\
+        Configure one or more virtual addresses for the\nVRRP group"
+      operationId: "del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_config_virtual_address"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "virtual-address"
+        in: "path"
+        description: "Configure one or more virtual addresses for the\nVRRP group"
+        required: true
+        type: "string"
+        x-exportParamName: "VirtualAddress"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
   ? /openconfig-interfaces:interfaces/interface={name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv6/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/config/priority
   : get:
       tags:
@@ -49096,6 +50079,125 @@ paths:
           description: "Method Not Allowed"
         409:
           description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  ? /openconfig-interfaces:interfaces/interface={name}/openconfig-vlan:routed-vlan/openconfig-if-ip:ipv6/addresses/address={ip}/vrrp/vrrp-group={virtual-router-id}/interface-tracking/config/track-interface={track-interface}
+  : get:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface\n\
+        Sets a list of one or more interfaces that should\nbe tracked for up/down\
+        \ events to dynamically change the\npriority state of the VRRP group, and\
+        \ potentially\nchange the mastership if the tracked interface going\ndown\
+        \ lowers the priority sufficiently.  Any of the tracked\ninterfaces going\
+        \ down will cause the priority to be lowered.\nSome implementations may only\
+        \ support a single\ntracked interface."
+      operationId: "get_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "track-interface"
+        in: "path"
+        description: "Sets a list of one or more interfaces that should\nbe tracked\
+          \ for up/down events to dynamically change the\npriority state of the VRRP\
+          \ group, and potentially\nchange the mastership if the tracked interface\
+          \ going\ndown lowers the priority sufficiently.  Any of the tracked\ninterfaces\
+          \ going down will cause the priority to be lowered.\nSome implementations\
+          \ may only support a single\ntracked interface."
+        required: true
+        type: "string"
+        x-exportParamName: "TrackInterface"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-interfaces"
+      description: "OperationId: del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface\n\
+        Sets a list of one or more interfaces that should\nbe tracked for up/down\
+        \ events to dynamically change the\npriority state of the VRRP group, and\
+        \ potentially\nchange the mastership if the tracked interface going\ndown\
+        \ lowers the priority sufficiently.  Any of the tracked\ninterfaces going\
+        \ down will cause the priority to be lowered.\nSome implementations may only\
+        \ support a single\ntracked interface."
+      operationId: "del_llist_openconfig_if_ip_interfaces_interface_routed_vlan_ipv6_addresses_address_vrrp_vrrp_group_interface_tracking_config_track_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "References the configured name of the interface"
+        required: true
+        type: "string"
+        x-exportParamName: "Name"
+      - name: "ip"
+        in: "path"
+        description: "References the configured IP address"
+        required: true
+        type: "string"
+        x-exportParamName: "Ip"
+      - name: "virtual-router-id"
+        in: "path"
+        description: "References the configured virtual router id for this\nVRRP group"
+        required: true
+        type: "integer"
+        x-exportParamName: "VirtualRouterId"
+      - name: "track-interface"
+        in: "path"
+        description: "Sets a list of one or more interfaces that should\nbe tracked\
+          \ for up/down events to dynamically change the\npriority state of the VRRP\
+          \ group, and potentially\nchange the mastership if the tracked interface\
+          \ going\ndown lowers the priority sufficiently.  Any of the tracked\ninterfaces\
+          \ going down will cause the priority to be lowered.\nSome implementations\
+          \ may only support a single\ntracked interface."
+        required: true
+        type: "string"
+        x-exportParamName: "TrackInterface"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
         415:
           description: "Unsupported Media Type"
         500:

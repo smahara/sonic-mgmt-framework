@@ -1,0 +1,10 @@
+# PutSonicPortSonicPortPort
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**sonic_port_port** | [**SonicPortSonicPortSonicportsonicportPORT**](SonicPortSonicPortSonicportsonicportPORT.md) |  | [optional] 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

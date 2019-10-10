@@ -29,56 +29,86 @@ class TestSonicWatermarkTelemetryApi(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_delete_sonic_watermark_telemetry_watermark_table(self):
-        """Test case for delete_sonic_watermark_telemetry_watermark_table
+    def test_delete_sonic_watermark_telemetry_sonic_watermark_telemetry(self):
+        """Test case for delete_sonic_watermark_telemetry_sonic_watermark_telemetry
 
         """
         pass
 
-    def test_delete_sonic_watermark_telemetry_watermark_table_interval(self):
-        """Test case for delete_sonic_watermark_telemetry_watermark_table_interval
+    def test_delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self):
+        """Test case for delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table
 
         """
         pass
 
-    def test_get_sonic_watermark_telemetry_watermark_table(self):
-        """Test case for get_sonic_watermark_telemetry_watermark_table
+    def test_delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self):
+        """Test case for delete_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval
 
         """
         pass
 
-    def test_get_sonic_watermark_telemetry_watermark_table_interval(self):
-        """Test case for get_sonic_watermark_telemetry_watermark_table_interval
+    def test_get_sonic_watermark_telemetry_sonic_watermark_telemetry(self):
+        """Test case for get_sonic_watermark_telemetry_sonic_watermark_telemetry
 
         """
         pass
 
-    def test_patch_sonic_watermark_telemetry_watermark_table(self):
-        """Test case for patch_sonic_watermark_telemetry_watermark_table
+    def test_get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self):
+        """Test case for get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table
 
         """
         pass
 
-    def test_patch_sonic_watermark_telemetry_watermark_table_interval(self):
-        """Test case for patch_sonic_watermark_telemetry_watermark_table_interval
+    def test_get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self):
+        """Test case for get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval
 
         """
         pass
 
-    def test_post_sonic_watermark_telemetry_watermark_table_interval(self):
-        """Test case for post_sonic_watermark_telemetry_watermark_table_interval
+    def test_patch_sonic_watermark_telemetry_sonic_watermark_telemetry(self):
+        """Test case for patch_sonic_watermark_telemetry_sonic_watermark_telemetry
 
         """
         pass
 
-    def test_put_sonic_watermark_telemetry_watermark_table(self):
-        """Test case for put_sonic_watermark_telemetry_watermark_table
+    def test_patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self):
+        """Test case for patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table
 
         """
         pass
 
-    def test_put_sonic_watermark_telemetry_watermark_table_interval(self):
-        """Test case for put_sonic_watermark_telemetry_watermark_table_interval
+    def test_patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self):
+        """Test case for patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval
+
+        """
+        pass
+
+    def test_post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self):
+        """Test case for post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table
+
+        """
+        pass
+
+    def test_post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self):
+        """Test case for post_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval
+
+        """
+        pass
+
+    def test_put_sonic_watermark_telemetry_sonic_watermark_telemetry(self):
+        """Test case for put_sonic_watermark_telemetry_sonic_watermark_telemetry
+
+        """
+        pass
+
+    def test_put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table(self):
+        """Test case for put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table
+
+        """
+        pass
+
+    def test_put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval(self):
+        """Test case for put_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval
 
         """
         pass

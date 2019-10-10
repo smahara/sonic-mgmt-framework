@@ -29,6 +29,12 @@ class TestOpenconfigLldpApi(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement(self):
+        """Test case for del_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement
+
+        """
+        pass
+
     def test_delete_list_openconfig_lldp_lldp_interfaces_interface(self):
         """Test case for delete_list_openconfig_lldp_lldp_interfaces_interface
 
@@ -127,6 +133,12 @@ class TestOpenconfigLldpApi(unittest.TestCase):
 
     def test_get_list_openconfig_lldp_lldp_interfaces_interface_neighbors_neighbor_custom_tlvs_tlv(self):
         """Test case for get_list_openconfig_lldp_lldp_interfaces_interface_neighbors_neighbor_custom_tlvs_tlv
+
+        """
+        pass
+
+    def test_get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement(self):
+        """Test case for get_llist_openconfig_lldp_lldp_config_suppress_tlv_advertisement
 
         """
         pass

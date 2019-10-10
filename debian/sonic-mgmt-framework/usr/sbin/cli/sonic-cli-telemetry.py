@@ -22,9 +22,9 @@ def call_method(name, args):
 def generate_body(func, args):
     body = None
     keypath = []
-    if func.__name__ == 'get_sonic_watermark_telemetry_watermark_table_interval':
+    if func.__name__ == 'get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval':
         keypath = []
-    elif func.__name__ =='patch_sonic_watermark_telemetry_watermark_table_interval':
+    elif func.__name__ =='patch_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval':
         keypath =[]
         body = {"sonic-watermark-telemetry:interval": int(args[0]) }
     else:
@@ -64,7 +64,7 @@ def run(func, args):
         if api_response is None:
             print("Failed")
         else:
-           if func.__name__ == 'get_sonic_watermark_telemetry_watermark_table_interval':
+           if func.__name__ == 'get_sonic_watermark_telemetry_sonic_watermark_telemetry_watermark_table_interval':
                 print (api_response)
                 show_cli_output(args[1], api_response)
            return

@@ -33,6 +33,790 @@ class OpenconfigSystemApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
+    def del_llist_openconfig_system_system_aaa_accounting_config_accounting_method(self, accounting_method, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_aaa_accounting_config_accounting_method  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_aaa_accounting_config_accounting_method An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_aaa_accounting_config_accounting_method(accounting_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str accounting_method: An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system. (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_system_system_aaa_accounting_config_accounting_method_with_http_info(accounting_method, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_system_system_aaa_accounting_config_accounting_method_with_http_info(accounting_method, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_system_system_aaa_accounting_config_accounting_method_with_http_info(self, accounting_method, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_aaa_accounting_config_accounting_method  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_aaa_accounting_config_accounting_method An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_aaa_accounting_config_accounting_method_with_http_info(accounting_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str accounting_method: An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system. (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['accounting_method']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_system_system_aaa_accounting_config_accounting_method" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'accounting_method' is set
+        if ('accounting_method' not in params or
+                params['accounting_method'] is None):
+            raise ValueError("Missing the required parameter `accounting_method` when calling `del_llist_openconfig_system_system_aaa_accounting_config_accounting_method`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'accounting_method' in params:
+            path_params['accounting-method'] = params['accounting_method']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/aaa/accounting/config/accounting-method={accounting-method}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def del_llist_openconfig_system_system_aaa_authentication_config_authentication_method(self, authentication_method, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_aaa_authentication_config_authentication_method  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_aaa_authentication_config_authentication_method Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_aaa_authentication_config_authentication_method(authentication_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str authentication_method: Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access. (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_system_system_aaa_authentication_config_authentication_method_with_http_info(authentication_method, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_system_system_aaa_authentication_config_authentication_method_with_http_info(authentication_method, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_system_system_aaa_authentication_config_authentication_method_with_http_info(self, authentication_method, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_aaa_authentication_config_authentication_method  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_aaa_authentication_config_authentication_method Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_aaa_authentication_config_authentication_method_with_http_info(authentication_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str authentication_method: Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access. (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['authentication_method']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_system_system_aaa_authentication_config_authentication_method" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'authentication_method' is set
+        if ('authentication_method' not in params or
+                params['authentication_method'] is None):
+            raise ValueError("Missing the required parameter `authentication_method` when calling `del_llist_openconfig_system_system_aaa_authentication_config_authentication_method`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'authentication_method' in params:
+            path_params['authentication-method'] = params['authentication_method']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/aaa/authentication/config/authentication-method={authentication-method}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def del_llist_openconfig_system_system_aaa_authorization_config_authorization_method(self, authorization_method, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_aaa_authorization_config_authorization_method  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_aaa_authorization_config_authorization_method Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_aaa_authorization_config_authorization_method(authorization_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str authorization_method: Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists. (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_system_system_aaa_authorization_config_authorization_method_with_http_info(authorization_method, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_system_system_aaa_authorization_config_authorization_method_with_http_info(authorization_method, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_system_system_aaa_authorization_config_authorization_method_with_http_info(self, authorization_method, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_aaa_authorization_config_authorization_method  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_aaa_authorization_config_authorization_method Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_aaa_authorization_config_authorization_method_with_http_info(authorization_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str authorization_method: Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists. (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['authorization_method']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_system_system_aaa_authorization_config_authorization_method" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'authorization_method' is set
+        if ('authorization_method' not in params or
+                params['authorization_method'] is None):
+            raise ValueError("Missing the required parameter `authorization_method` when calling `del_llist_openconfig_system_system_aaa_authorization_config_authorization_method`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'authorization_method' in params:
+            path_params['authorization-method'] = params['authorization_method']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/aaa/authorization/config/authorization-method={authorization-method}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def del_llist_openconfig_system_system_dns_config_search(self, search, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_dns_config_search  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_dns_config_search An ordered list of domains to search when resolving a host name.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_dns_config_search(search, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str search: An ordered list of domains to search when resolving a host name. (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_system_system_dns_config_search_with_http_info(search, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_system_system_dns_config_search_with_http_info(search, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_system_system_dns_config_search_with_http_info(self, search, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_dns_config_search  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_dns_config_search An ordered list of domains to search when resolving a host name.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_dns_config_search_with_http_info(search, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str search: An ordered list of domains to search when resolving a host name. (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['search']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_system_system_dns_config_search" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'search' is set
+        if ('search' not in params or
+                params['search'] is None):
+            raise ValueError("Missing the required parameter `search` when calling `del_llist_openconfig_system_system_dns_config_search`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'search' in params:
+            path_params['search'] = params['search']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/dns/config/search={search}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(self, hostname, alias, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias Additional aliases for the hostname  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(hostname, alias, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str alias: Additional aliases for the hostname (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias_with_http_info(hostname, alias, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias_with_http_info(hostname, alias, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias_with_http_info(self, hostname, alias, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias Additional aliases for the hostname  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias_with_http_info(hostname, alias, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str alias: Additional aliases for the hostname (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['hostname', 'alias']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'hostname' is set
+        if ('hostname' not in params or
+                params['hostname'] is None):
+            raise ValueError("Missing the required parameter `hostname` when calling `del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias`")  # noqa: E501
+        # verify the required parameter 'alias' is set
+        if ('alias' not in params or
+                params['alias'] is None):
+            raise ValueError("Missing the required parameter `alias` when calling `del_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'hostname' in params:
+            path_params['hostname'] = params['hostname']  # noqa: E501
+        if 'alias' in params:
+            path_params['alias'] = params['alias']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/dns/host-entries/host-entry={hostname}/config/alias={alias}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(self, hostname, ipv4_address, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address List of IPv4 addressses for the host entry  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(hostname, ipv4_address, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str ipv4_address: List of IPv4 addressses for the host entry (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address_with_http_info(hostname, ipv4_address, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address_with_http_info(hostname, ipv4_address, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address_with_http_info(self, hostname, ipv4_address, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address List of IPv4 addressses for the host entry  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address_with_http_info(hostname, ipv4_address, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str ipv4_address: List of IPv4 addressses for the host entry (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['hostname', 'ipv4_address']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'hostname' is set
+        if ('hostname' not in params or
+                params['hostname'] is None):
+            raise ValueError("Missing the required parameter `hostname` when calling `del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address`")  # noqa: E501
+        # verify the required parameter 'ipv4_address' is set
+        if ('ipv4_address' not in params or
+                params['ipv4_address'] is None):
+            raise ValueError("Missing the required parameter `ipv4_address` when calling `del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'hostname' in params:
+            path_params['hostname'] = params['hostname']  # noqa: E501
+        if 'ipv4_address' in params:
+            path_params['ipv4-address'] = params['ipv4_address']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/dns/host-entries/host-entry={hostname}/config/ipv4-address={ipv4-address}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(self, hostname, ipv6_address, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address List of IPv6 addresses for the host entry  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(hostname, ipv6_address, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str ipv6_address: List of IPv6 addresses for the host entry (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address_with_http_info(hostname, ipv6_address, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address_with_http_info(hostname, ipv6_address, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address_with_http_info(self, hostname, ipv6_address, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address List of IPv6 addresses for the host entry  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address_with_http_info(hostname, ipv6_address, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str ipv6_address: List of IPv6 addresses for the host entry (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['hostname', 'ipv6_address']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'hostname' is set
+        if ('hostname' not in params or
+                params['hostname'] is None):
+            raise ValueError("Missing the required parameter `hostname` when calling `del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address`")  # noqa: E501
+        # verify the required parameter 'ipv6_address' is set
+        if ('ipv6_address' not in params or
+                params['ipv6_address'] is None):
+            raise ValueError("Missing the required parameter `ipv6_address` when calling `del_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'hostname' in params:
+            path_params['hostname'] = params['hostname']  # noqa: E501
+        if 'ipv6_address' in params:
+            path_params['ipv6-address'] = params['ipv6_address']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/dns/host-entries/host-entry={hostname}/config/ipv6-address={ipv6-address}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def del_llist_openconfig_system_system_grpc_server_config_listen_addresses(self, listen_addresses, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_grpc_server_config_listen_addresses  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_grpc_server_config_listen_addresses The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_grpc_server_config_listen_addresses(listen_addresses, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str listen_addresses: The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_system_system_grpc_server_config_listen_addresses_with_http_info(listen_addresses, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_system_system_grpc_server_config_listen_addresses_with_http_info(listen_addresses, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_system_system_grpc_server_config_listen_addresses_with_http_info(self, listen_addresses, **kwargs):  # noqa: E501
+        """del_llist_openconfig_system_system_grpc_server_config_listen_addresses  # noqa: E501
+
+        OperationId: del_llist_openconfig_system_system_grpc_server_config_listen_addresses The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_system_system_grpc_server_config_listen_addresses_with_http_info(listen_addresses, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str listen_addresses: The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['listen_addresses']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_system_system_grpc_server_config_listen_addresses" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'listen_addresses' is set
+        if ('listen_addresses' not in params or
+                params['listen_addresses'] is None):
+            raise ValueError("Missing the required parameter `listen_addresses` when calling `del_llist_openconfig_system_system_grpc_server_config_listen_addresses`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'listen_addresses' in params:
+            path_params['listen-addresses'] = params['listen_addresses']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/grpc-server/config/listen-addresses={listen-addresses}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def delete_list_openconfig_system_system_aaa_accounting_events_event(self, **kwargs):  # noqa: E501
         """delete_list_openconfig_system_system_aaa_accounting_events_event  # noqa: E501
 
@@ -13383,6 +14167,790 @@ class OpenconfigSystemApi(object):
             post_params=form_params,
             files=local_var_files,
             response_type='GetOpenconfigSystemSystemProcessesProcess',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_system_system_aaa_accounting_config_accounting_method(self, accounting_method, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_aaa_accounting_config_accounting_method  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_aaa_accounting_config_accounting_method An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_aaa_accounting_config_accounting_method(accounting_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str accounting_method: An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system. (required)
+        :return: GetOpenconfigSystemSystemAaaAccountingConfigAccountingMethod
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_system_system_aaa_accounting_config_accounting_method_with_http_info(accounting_method, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_system_system_aaa_accounting_config_accounting_method_with_http_info(accounting_method, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_system_system_aaa_accounting_config_accounting_method_with_http_info(self, accounting_method, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_aaa_accounting_config_accounting_method  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_aaa_accounting_config_accounting_method An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_aaa_accounting_config_accounting_method_with_http_info(accounting_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str accounting_method: An ordered list of methods used for AAA accounting for this event type.  The method is defined by the destination for accounting data, which may be specified as the group of all TACACS+/RADIUS servers, a defined server group, or the local system. (required)
+        :return: GetOpenconfigSystemSystemAaaAccountingConfigAccountingMethod
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['accounting_method']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_system_system_aaa_accounting_config_accounting_method" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'accounting_method' is set
+        if ('accounting_method' not in params or
+                params['accounting_method'] is None):
+            raise ValueError("Missing the required parameter `accounting_method` when calling `get_llist_openconfig_system_system_aaa_accounting_config_accounting_method`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'accounting_method' in params:
+            path_params['accounting-method'] = params['accounting_method']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/aaa/accounting/config/accounting-method={accounting-method}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSystemSystemAaaAccountingConfigAccountingMethod',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_system_system_aaa_authentication_config_authentication_method(self, authentication_method, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_aaa_authentication_config_authentication_method  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_aaa_authentication_config_authentication_method Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_aaa_authentication_config_authentication_method(authentication_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str authentication_method: Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access. (required)
+        :return: GetOpenconfigSystemSystemAaaAuthenticationConfigAuthenticationMethod
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_system_system_aaa_authentication_config_authentication_method_with_http_info(authentication_method, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_system_system_aaa_authentication_config_authentication_method_with_http_info(authentication_method, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_system_system_aaa_authentication_config_authentication_method_with_http_info(self, authentication_method, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_aaa_authentication_config_authentication_method  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_aaa_authentication_config_authentication_method Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_aaa_authentication_config_authentication_method_with_http_info(authentication_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str authentication_method: Ordered list of authentication methods for users.  This can be either a reference to a server group, or a well- defined designation in the AAA_METHOD_TYPE identity.  If authentication fails with one method, the next defined method is tried -- failure of all methods results in the user being denied access. (required)
+        :return: GetOpenconfigSystemSystemAaaAuthenticationConfigAuthenticationMethod
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['authentication_method']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_system_system_aaa_authentication_config_authentication_method" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'authentication_method' is set
+        if ('authentication_method' not in params or
+                params['authentication_method'] is None):
+            raise ValueError("Missing the required parameter `authentication_method` when calling `get_llist_openconfig_system_system_aaa_authentication_config_authentication_method`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'authentication_method' in params:
+            path_params['authentication-method'] = params['authentication_method']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/aaa/authentication/config/authentication-method={authentication-method}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSystemSystemAaaAuthenticationConfigAuthenticationMethod',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_system_system_aaa_authorization_config_authorization_method(self, authorization_method, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_aaa_authorization_config_authorization_method  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_aaa_authorization_config_authorization_method Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_aaa_authorization_config_authorization_method(authorization_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str authorization_method: Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists. (required)
+        :return: GetOpenconfigSystemSystemAaaAuthorizationConfigAuthorizationMethod
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_system_system_aaa_authorization_config_authorization_method_with_http_info(authorization_method, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_system_system_aaa_authorization_config_authorization_method_with_http_info(authorization_method, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_system_system_aaa_authorization_config_authorization_method_with_http_info(self, authorization_method, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_aaa_authorization_config_authorization_method  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_aaa_authorization_config_authorization_method Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_aaa_authorization_config_authorization_method_with_http_info(authorization_method, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str authorization_method: Ordered list of methods for authorizing commands.  The first method that provides a response (positive or negative) should be used.  The list may contain a well-defined method such as the set of all TACACS or RADIUS servers, or the name of a defined AAA server group.  The system must validate that the named server group exists. (required)
+        :return: GetOpenconfigSystemSystemAaaAuthorizationConfigAuthorizationMethod
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['authorization_method']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_system_system_aaa_authorization_config_authorization_method" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'authorization_method' is set
+        if ('authorization_method' not in params or
+                params['authorization_method'] is None):
+            raise ValueError("Missing the required parameter `authorization_method` when calling `get_llist_openconfig_system_system_aaa_authorization_config_authorization_method`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'authorization_method' in params:
+            path_params['authorization-method'] = params['authorization_method']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/aaa/authorization/config/authorization-method={authorization-method}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSystemSystemAaaAuthorizationConfigAuthorizationMethod',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_system_system_dns_config_search(self, search, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_dns_config_search  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_dns_config_search An ordered list of domains to search when resolving a host name.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_dns_config_search(search, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str search: An ordered list of domains to search when resolving a host name. (required)
+        :return: GetOpenconfigSystemSystemDnsConfigSearch
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_system_system_dns_config_search_with_http_info(search, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_system_system_dns_config_search_with_http_info(search, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_system_system_dns_config_search_with_http_info(self, search, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_dns_config_search  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_dns_config_search An ordered list of domains to search when resolving a host name.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_dns_config_search_with_http_info(search, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str search: An ordered list of domains to search when resolving a host name. (required)
+        :return: GetOpenconfigSystemSystemDnsConfigSearch
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['search']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_system_system_dns_config_search" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'search' is set
+        if ('search' not in params or
+                params['search'] is None):
+            raise ValueError("Missing the required parameter `search` when calling `get_llist_openconfig_system_system_dns_config_search`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'search' in params:
+            path_params['search'] = params['search']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/dns/config/search={search}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSystemSystemDnsConfigSearch',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(self, hostname, alias, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias Additional aliases for the hostname  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias(hostname, alias, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str alias: Additional aliases for the hostname (required)
+        :return: GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigAlias
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias_with_http_info(hostname, alias, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias_with_http_info(hostname, alias, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias_with_http_info(self, hostname, alias, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias Additional aliases for the hostname  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias_with_http_info(hostname, alias, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str alias: Additional aliases for the hostname (required)
+        :return: GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigAlias
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['hostname', 'alias']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'hostname' is set
+        if ('hostname' not in params or
+                params['hostname'] is None):
+            raise ValueError("Missing the required parameter `hostname` when calling `get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias`")  # noqa: E501
+        # verify the required parameter 'alias' is set
+        if ('alias' not in params or
+                params['alias'] is None):
+            raise ValueError("Missing the required parameter `alias` when calling `get_llist_openconfig_system_system_dns_host_entries_host_entry_config_alias`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'hostname' in params:
+            path_params['hostname'] = params['hostname']  # noqa: E501
+        if 'alias' in params:
+            path_params['alias'] = params['alias']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/dns/host-entries/host-entry={hostname}/config/alias={alias}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigAlias',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(self, hostname, ipv4_address, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address List of IPv4 addressses for the host entry  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address(hostname, ipv4_address, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str ipv4_address: List of IPv4 addressses for the host entry (required)
+        :return: GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv4Address
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address_with_http_info(hostname, ipv4_address, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address_with_http_info(hostname, ipv4_address, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address_with_http_info(self, hostname, ipv4_address, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address List of IPv4 addressses for the host entry  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address_with_http_info(hostname, ipv4_address, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str ipv4_address: List of IPv4 addressses for the host entry (required)
+        :return: GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv4Address
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['hostname', 'ipv4_address']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'hostname' is set
+        if ('hostname' not in params or
+                params['hostname'] is None):
+            raise ValueError("Missing the required parameter `hostname` when calling `get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address`")  # noqa: E501
+        # verify the required parameter 'ipv4_address' is set
+        if ('ipv4_address' not in params or
+                params['ipv4_address'] is None):
+            raise ValueError("Missing the required parameter `ipv4_address` when calling `get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv4_address`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'hostname' in params:
+            path_params['hostname'] = params['hostname']  # noqa: E501
+        if 'ipv4_address' in params:
+            path_params['ipv4-address'] = params['ipv4_address']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/dns/host-entries/host-entry={hostname}/config/ipv4-address={ipv4-address}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv4Address',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(self, hostname, ipv6_address, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address List of IPv6 addresses for the host entry  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address(hostname, ipv6_address, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str ipv6_address: List of IPv6 addresses for the host entry (required)
+        :return: GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv6Address
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address_with_http_info(hostname, ipv6_address, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address_with_http_info(hostname, ipv6_address, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address_with_http_info(self, hostname, ipv6_address, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address List of IPv6 addresses for the host entry  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address_with_http_info(hostname, ipv6_address, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str hostname: Reference to the hostname list key (required)
+        :param str ipv6_address: List of IPv6 addresses for the host entry (required)
+        :return: GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv6Address
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['hostname', 'ipv6_address']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'hostname' is set
+        if ('hostname' not in params or
+                params['hostname'] is None):
+            raise ValueError("Missing the required parameter `hostname` when calling `get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address`")  # noqa: E501
+        # verify the required parameter 'ipv6_address' is set
+        if ('ipv6_address' not in params or
+                params['ipv6_address'] is None):
+            raise ValueError("Missing the required parameter `ipv6_address` when calling `get_llist_openconfig_system_system_dns_host_entries_host_entry_config_ipv6_address`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'hostname' in params:
+            path_params['hostname'] = params['hostname']  # noqa: E501
+        if 'ipv6_address' in params:
+            path_params['ipv6-address'] = params['ipv6_address']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/dns/host-entries/host-entry={hostname}/config/ipv6-address={ipv6-address}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSystemSystemDnsHostEntriesHostEntryConfigIpv6Address',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_system_system_grpc_server_config_listen_addresses(self, listen_addresses, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_grpc_server_config_listen_addresses  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_grpc_server_config_listen_addresses The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_grpc_server_config_listen_addresses(listen_addresses, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str listen_addresses: The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address (required)
+        :return: GetOpenconfigSystemSystemGrpcServerConfigListenAddresses
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_system_system_grpc_server_config_listen_addresses_with_http_info(listen_addresses, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_system_system_grpc_server_config_listen_addresses_with_http_info(listen_addresses, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_system_system_grpc_server_config_listen_addresses_with_http_info(self, listen_addresses, **kwargs):  # noqa: E501
+        """get_llist_openconfig_system_system_grpc_server_config_listen_addresses  # noqa: E501
+
+        OperationId: get_llist_openconfig_system_system_grpc_server_config_listen_addresses The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_system_system_grpc_server_config_listen_addresses_with_http_info(listen_addresses, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str listen_addresses: The IP addresses that the gRPC server should listen on. This may be an IPv4 or an IPv6 address (required)
+        :return: GetOpenconfigSystemSystemGrpcServerConfigListenAddresses
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['listen_addresses']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_system_system_grpc_server_config_listen_addresses" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'listen_addresses' is set
+        if ('listen_addresses' not in params or
+                params['listen_addresses'] is None):
+            raise ValueError("Missing the required parameter `listen_addresses` when calling `get_llist_openconfig_system_system_grpc_server_config_listen_addresses`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'listen_addresses' in params:
+            path_params['listen-addresses'] = params['listen_addresses']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-system:system/grpc-server/config/listen-addresses={listen-addresses}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigSystemSystemGrpcServerConfigListenAddresses',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),

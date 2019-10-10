@@ -620,6 +620,69 @@ paths:
           description: "Unsupported Media Type"
         500:
           description: "Internal Server Error"
+  /openconfig-spanning-tree:stp/global/config/enabled-protocol={enabled-protocol}:
+    get:
+      tags:
+      - "openconfig-spanning-tree"
+      description: "OperationId: get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol\n\
+        List of the spanning tree protocols enabled on the\ndevice"
+      operationId: "get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "enabled-protocol"
+        in: "path"
+        description: "List of the spanning tree protocols enabled on the\ndevice"
+        required: true
+        type: "string"
+        x-exportParamName: "EnabledProtocol"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_spanning_tree_stp_global_config_enabled_protocol"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-spanning-tree"
+      description: "OperationId: del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol\n\
+        List of the spanning tree protocols enabled on the\ndevice"
+      operationId: "del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "enabled-protocol"
+        in: "path"
+        description: "List of the spanning tree protocols enabled on the\ndevice"
+        required: true
+        type: "string"
+        x-exportParamName: "EnabledProtocol"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
   /openconfig-spanning-tree:stp/global/config/bridge-assurance:
     get:
       tags:
@@ -6715,6 +6778,81 @@ paths:
           description: "Method Not Allowed"
         409:
           description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /openconfig-spanning-tree:stp/mstp/mst-instances/mst-instance={mst-id}/config/vlan={vlan}:
+    get:
+      tags:
+      - "openconfig-spanning-tree"
+      description: "OperationId: get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan\n\
+        list of vlans mapped to the MST instance"
+      operationId: "get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "mst-id"
+        in: "path"
+        description: "Reference to the list key"
+        required: true
+        type: "integer"
+        x-exportParamName: "MstId"
+      - name: "vlan"
+        in: "path"
+        description: "list of vlans mapped to the MST instance"
+        required: true
+        type: "string"
+        x-exportParamName: "Vlan"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "openconfig-spanning-tree"
+      description: "OperationId: del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan\n\
+        list of vlans mapped to the MST instance"
+      operationId: "del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "mst-id"
+        in: "path"
+        description: "Reference to the list key"
+        required: true
+        type: "integer"
+        x-exportParamName: "MstId"
+      - name: "vlan"
+        in: "path"
+        description: "list of vlans mapped to the MST instance"
+        required: true
+        type: "string"
+        x-exportParamName: "Vlan"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
         415:
           description: "Unsupported Media Type"
         500:

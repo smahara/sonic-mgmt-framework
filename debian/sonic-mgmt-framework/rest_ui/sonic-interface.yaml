@@ -1,0 +1,1213 @@
+---
+swagger: "2.0"
+info:
+  description: "Network management Open APIs for Sonic."
+  version: "1.0.0"
+  title: "Sonic Network Management APIs"
+basePath: "/restconf/data"
+tags:
+- name: "sonic-interface"
+  description: "Operations for sonic-interface"
+schemes:
+- "https"
+- "http"
+paths:
+  /sonic-interface:sonic-interface:
+    get:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: get_sonic_interface_sonic_interface\n"
+      operationId: "get_sonic_interface_sonic_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_interface_sonic_interface"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: post_sonic_interface_sonic_interface_interface\n"
+      operationId: "post_sonic_interface_sonic_interface_interface"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_interface_sonic_interface_interface"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: put_sonic_interface_sonic_interface\n"
+      operationId: "put_sonic_interface_sonic_interface"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_interface_sonic_interface"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: delete_sonic_interface_sonic_interface\n"
+      operationId: "delete_sonic_interface_sonic_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: patch_sonic_interface_sonic_interface\n"
+      operationId: "patch_sonic_interface_sonic_interface"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_interface_sonic_interface"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-interface:sonic-interface/INTERFACE:
+    get:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: get_sonic_interface_sonic_interface_interface\n"
+      operationId: "get_sonic_interface_sonic_interface_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_interface_sonic_interface_interface"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: post_list_sonic_interface_sonic_interface_interface_interface_list\n"
+      operationId: "post_list_sonic_interface_sonic_interface_interface_interface_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_list_sonic_interface_sonic_interface_interface_interface_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: put_sonic_interface_sonic_interface_interface\n"
+      operationId: "put_sonic_interface_sonic_interface_interface"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_interface_sonic_interface_interface"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: delete_sonic_interface_sonic_interface_interface\n"
+      operationId: "delete_sonic_interface_sonic_interface_interface"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: patch_sonic_interface_sonic_interface_interface\n"
+      operationId: "patch_sonic_interface_sonic_interface_interface"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_interface_sonic_interface_interface"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-interface:sonic-interface/INTERFACE/INTERFACE_LIST={portname}:
+    get:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: get_sonic_interface_sonic_interface_interface_interface_list\n"
+      operationId: "get_sonic_interface_sonic_interface_interface_interface_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_interface_sonic_interface_interface_interface_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: post_sonic_interface_sonic_interface_interface_interface_list_vrf_name\n"
+      operationId: "post_sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: put_sonic_interface_sonic_interface_interface_interface_list\n"
+      operationId: "put_sonic_interface_sonic_interface_interface_interface_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_interface_sonic_interface_interface_interface_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: delete_sonic_interface_sonic_interface_interface_interface_list\n"
+      operationId: "delete_sonic_interface_sonic_interface_interface_interface_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: patch_sonic_interface_sonic_interface_interface_interface_list\n"
+      operationId: "patch_sonic_interface_sonic_interface_interface_interface_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_interface_sonic_interface_interface_interface_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-interface:sonic-interface/INTERFACE/INTERFACE_LIST:
+    get:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: get_list_sonic_interface_sonic_interface_interface_interface_list\n"
+      operationId: "get_list_sonic_interface_sonic_interface_interface_interface_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_interface_sonic_interface_interface_interface_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: put_list_sonic_interface_sonic_interface_interface_interface_list\n"
+      operationId: "put_list_sonic_interface_sonic_interface_interface_interface_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_list_sonic_interface_sonic_interface_interface_interface_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: delete_list_sonic_interface_sonic_interface_interface_interface_list\n"
+      operationId: "delete_list_sonic_interface_sonic_interface_interface_interface_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: patch_list_sonic_interface_sonic_interface_interface_interface_list\n"
+      operationId: "patch_list_sonic_interface_sonic_interface_interface_interface_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_list_sonic_interface_sonic_interface_interface_interface_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-interface:sonic-interface/INTERFACE/INTERFACE_LIST={portname}/vrf-name:
+    get:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: get_sonic_interface_sonic_interface_interface_interface_list_vrf_name\n"
+      operationId: "get_sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: put_sonic_interface_sonic_interface_interface_interface_list_vrf_name\n"
+      operationId: "put_sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: delete_sonic_interface_sonic_interface_interface_interface_list_vrf_name\n"
+      operationId: "delete_sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: patch_sonic_interface_sonic_interface_interface_interface_list_vrf_name\n"
+      operationId: "patch_sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-interface:sonic-interface/INTERFACE/INTERFACE_IPADDR_LIST={portname},{ip_prefix}:
+    get:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: get_sonic_interface_sonic_interface_interface_interface_ipaddr_list\n"
+      operationId: "get_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      - name: "ip_prefix"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "IpPrefix"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: put_sonic_interface_sonic_interface_interface_interface_ipaddr_list\n"
+      operationId: "put_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      - name: "ip_prefix"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "IpPrefix"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: delete_sonic_interface_sonic_interface_interface_interface_ipaddr_list\n"
+      operationId: "delete_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      - name: "ip_prefix"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "IpPrefix"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: patch_sonic_interface_sonic_interface_interface_interface_ipaddr_list\n"
+      operationId: "patch_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "portname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Portname"
+      - name: "ip_prefix"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "IpPrefix"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-interface:sonic-interface/INTERFACE/INTERFACE_IPADDR_LIST:
+    get:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: get_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list\n"
+      operationId: "get_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: put_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list\n"
+      operationId: "put_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: delete_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list\n"
+      operationId: "delete_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-interface"
+      description: "OperationId: patch_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list\n"
+      operationId: "patch_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+definitions:
+  sonic_interface_sonic_interface:
+    type: "object"
+    properties:
+      sonic-interface:sonic-interface:
+        $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface"
+  post_sonic_interface_sonic_interface:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface"
+  put_sonic_interface_sonic_interface:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface"
+  patch_sonic_interface_sonic_interface:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface"
+  get_sonic_interface_sonic_interface:
+    type: "object"
+    properties:
+      sonic-interface:sonic-interface:
+        $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface"
+  sonic_interface_sonic_interface_interface:
+    type: "object"
+    properties:
+      sonic-interface:INTERFACE:
+        $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE"
+  post_sonic_interface_sonic_interface_interface:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface"
+  put_sonic_interface_sonic_interface_interface:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface"
+  patch_sonic_interface_sonic_interface_interface:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface"
+  get_sonic_interface_sonic_interface_interface:
+    type: "object"
+    properties:
+      sonic-interface:INTERFACE:
+        $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE"
+  sonic_interface_sonic_interface_interface_interface_list:
+    type: "object"
+    properties:
+      sonic-interface:INTERFACE_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE_INTERFACE_LIST"
+  put_sonic_interface_sonic_interface_interface_interface_list:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_list"
+  patch_sonic_interface_sonic_interface_interface_interface_list:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_list"
+  get_sonic_interface_sonic_interface_interface_interface_list:
+    type: "object"
+    properties:
+      sonic-interface:INTERFACE_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE_INTERFACE_LIST"
+  post_list_sonic_interface_sonic_interface_interface_interface_list:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_list"
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+  put_list_sonic_interface_sonic_interface_interface_interface_list:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_list"
+  patch_list_sonic_interface_sonic_interface_interface_interface_list:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_list"
+  sonic_interface_sonic_interface_interface_interface_list_vrf_name:
+    type: "object"
+    properties:
+      sonic-interface:vrf-name:
+        type: "string"
+  post_sonic_interface_sonic_interface_interface_interface_list_vrf_name:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+  put_sonic_interface_sonic_interface_interface_interface_list_vrf_name:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+  patch_sonic_interface_sonic_interface_interface_interface_list_vrf_name:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_list_vrf_name"
+  get_sonic_interface_sonic_interface_interface_interface_list_vrf_name:
+    type: "object"
+    properties:
+      sonic-interface:vrf-name:
+        type: "string"
+  sonic_interface_sonic_interface_interface_interface_ipaddr_list:
+    type: "object"
+    properties:
+      sonic-interface:INTERFACE_IPADDR_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE_INTERFACE_IPADDR_LIST"
+  put_sonic_interface_sonic_interface_interface_interface_ipaddr_list:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+  patch_sonic_interface_sonic_interface_interface_interface_ipaddr_list:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+  get_sonic_interface_sonic_interface_interface_interface_ipaddr_list:
+    type: "object"
+    properties:
+      sonic-interface:INTERFACE_IPADDR_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE_INTERFACE_IPADDR_LIST"
+  put_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+  patch_list_sonic_interface_sonic_interface_interface_interface_ipaddr_list:
+    allOf:
+    - $ref: "#/definitions/sonic_interface_sonic_interface_interface_interface_ipaddr_list"
+  sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE_INTERFACE_LIST:
+    required:
+    - "portname"
+    properties:
+      portname:
+        type: "string"
+      vrf-name:
+        type: "string"
+  sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE_INTERFACE_IPADDR_LIST:
+    required:
+    - "ip_prefix"
+    - "portname"
+    properties:
+      portname:
+        type: "string"
+      ip_prefix:
+        type: "string"
+  sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE:
+    properties:
+      INTERFACE_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE_INTERFACE_LIST"
+      INTERFACE_IPADDR_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE_INTERFACE_IPADDR_LIST"
+  sonic_interface_sonic_interface_sonicinterfacesonicinterface:
+    properties:
+      INTERFACE:
+        $ref: "#/definitions/sonic_interface_sonic_interface_sonicinterfacesonicinterface_INTERFACE"

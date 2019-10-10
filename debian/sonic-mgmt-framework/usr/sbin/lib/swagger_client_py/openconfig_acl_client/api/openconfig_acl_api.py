@@ -33,6 +33,125 @@ class OpenconfigAclApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
+    def del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(self, name, type, sequence_id, tcp_flags, **kwargs):  # noqa: E501
+        """del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags  # noqa: E501
+
+        OperationId: del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags List of TCP flags to match  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(name, type, sequence_id, tcp_flags, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str name: Reference to the name list key (required)
+        :param str type: Reference to the type list key (required)
+        :param int sequence_id: references the list key (required)
+        :param str tcp_flags: List of TCP flags to match (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags_with_http_info(name, type, sequence_id, tcp_flags, **kwargs)  # noqa: E501
+        else:
+            (data) = self.del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags_with_http_info(name, type, sequence_id, tcp_flags, **kwargs)  # noqa: E501
+            return data
+
+    def del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags_with_http_info(self, name, type, sequence_id, tcp_flags, **kwargs):  # noqa: E501
+        """del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags  # noqa: E501
+
+        OperationId: del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags List of TCP flags to match  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags_with_http_info(name, type, sequence_id, tcp_flags, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str name: Reference to the name list key (required)
+        :param str type: Reference to the type list key (required)
+        :param int sequence_id: references the list key (required)
+        :param str tcp_flags: List of TCP flags to match (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['name', 'type', 'sequence_id', 'tcp_flags']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'name' is set
+        if ('name' not in params or
+                params['name'] is None):
+            raise ValueError("Missing the required parameter `name` when calling `del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags`")  # noqa: E501
+        # verify the required parameter 'type' is set
+        if ('type' not in params or
+                params['type'] is None):
+            raise ValueError("Missing the required parameter `type` when calling `del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags`")  # noqa: E501
+        # verify the required parameter 'sequence_id' is set
+        if ('sequence_id' not in params or
+                params['sequence_id'] is None):
+            raise ValueError("Missing the required parameter `sequence_id` when calling `del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags`")  # noqa: E501
+        # verify the required parameter 'tcp_flags' is set
+        if ('tcp_flags' not in params or
+                params['tcp_flags'] is None):
+            raise ValueError("Missing the required parameter `tcp_flags` when calling `del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'name' in params:
+            path_params['name'] = params['name']  # noqa: E501
+        if 'type' in params:
+            path_params['type'] = params['type']  # noqa: E501
+        if 'sequence_id' in params:
+            path_params['sequence-id'] = params['sequence_id']  # noqa: E501
+        if 'tcp_flags' in params:
+            path_params['tcp-flags'] = params['tcp_flags']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-acl:acl/acl-sets/acl-set={name},{type}/acl-entries/acl-entry={sequence-id}/transport/config/tcp-flags={tcp-flags}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def delete_list_openconfig_acl_acl_acl_sets_acl_set(self, **kwargs):  # noqa: E501
         """delete_list_openconfig_acl_acl_acl_sets_acl_set  # noqa: E501
 
@@ -6968,6 +7087,125 @@ class OpenconfigAclApi(object):
             post_params=form_params,
             files=local_var_files,
             response_type='GetOpenconfigAclAclInterfacesInterfaceIngressAclSetsIngressAclSetAclEntriesAclEntry',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(self, name, type, sequence_id, tcp_flags, **kwargs):  # noqa: E501
+        """get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags  # noqa: E501
+
+        OperationId: get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags List of TCP flags to match  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(name, type, sequence_id, tcp_flags, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str name: Reference to the name list key (required)
+        :param str type: Reference to the type list key (required)
+        :param int sequence_id: references the list key (required)
+        :param str tcp_flags: List of TCP flags to match (required)
+        :return: GetOpenconfigAclAclAclSetsAclSetAclEntriesAclEntryTransportConfigTcpFlags
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags_with_http_info(name, type, sequence_id, tcp_flags, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags_with_http_info(name, type, sequence_id, tcp_flags, **kwargs)  # noqa: E501
+            return data
+
+    def get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags_with_http_info(self, name, type, sequence_id, tcp_flags, **kwargs):  # noqa: E501
+        """get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags  # noqa: E501
+
+        OperationId: get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags List of TCP flags to match  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags_with_http_info(name, type, sequence_id, tcp_flags, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str name: Reference to the name list key (required)
+        :param str type: Reference to the type list key (required)
+        :param int sequence_id: references the list key (required)
+        :param str tcp_flags: List of TCP flags to match (required)
+        :return: GetOpenconfigAclAclAclSetsAclSetAclEntriesAclEntryTransportConfigTcpFlags
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['name', 'type', 'sequence_id', 'tcp_flags']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'name' is set
+        if ('name' not in params or
+                params['name'] is None):
+            raise ValueError("Missing the required parameter `name` when calling `get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags`")  # noqa: E501
+        # verify the required parameter 'type' is set
+        if ('type' not in params or
+                params['type'] is None):
+            raise ValueError("Missing the required parameter `type` when calling `get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags`")  # noqa: E501
+        # verify the required parameter 'sequence_id' is set
+        if ('sequence_id' not in params or
+                params['sequence_id'] is None):
+            raise ValueError("Missing the required parameter `sequence_id` when calling `get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags`")  # noqa: E501
+        # verify the required parameter 'tcp_flags' is set
+        if ('tcp_flags' not in params or
+                params['tcp_flags'] is None):
+            raise ValueError("Missing the required parameter `tcp_flags` when calling `get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'name' in params:
+            path_params['name'] = params['name']  # noqa: E501
+        if 'type' in params:
+            path_params['type'] = params['type']  # noqa: E501
+        if 'sequence_id' in params:
+            path_params['sequence-id'] = params['sequence_id']  # noqa: E501
+        if 'tcp_flags' in params:
+            path_params['tcp-flags'] = params['tcp_flags']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/yang-data+json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/openconfig-acl:acl/acl-sets/acl-set={name},{type}/acl-entries/acl-entry={sequence-id}/transport/config/tcp-flags={tcp-flags}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='GetOpenconfigAclAclAclSetsAclSetAclEntriesAclEntryTransportConfigTcpFlags',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),

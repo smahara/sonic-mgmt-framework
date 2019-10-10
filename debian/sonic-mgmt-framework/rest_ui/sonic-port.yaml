@@ -1,0 +1,2049 @@
+---
+swagger: "2.0"
+info:
+  description: "Network management Open APIs for Sonic."
+  version: "1.0.0"
+  title: "Sonic Network Management APIs"
+basePath: "/restconf/data"
+tags:
+- name: "sonic-port"
+  description: "Operations for sonic-port"
+schemes:
+- "https"
+- "http"
+paths:
+  /sonic-port:sonic-port:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port\n"
+      operationId: "get_sonic_port_sonic_port"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-port"
+      description: "OperationId: post_sonic_port_sonic_port_port\n"
+      operationId: "post_sonic_port_sonic_port_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_port_sonic_port_port"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port\n"
+      operationId: "put_sonic_port_sonic_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port\n"
+      operationId: "delete_sonic_port_sonic_port"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port\n"
+      operationId: "patch_sonic_port_sonic_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port\n"
+      operationId: "get_sonic_port_sonic_port_port"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-port"
+      description: "OperationId: post_list_sonic_port_sonic_port_port_port_list\n"
+      operationId: "post_list_sonic_port_sonic_port_port_port_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_list_sonic_port_sonic_port_port_port_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port\n"
+      operationId: "put_sonic_port_sonic_port_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port\n"
+      operationId: "delete_sonic_port_sonic_port_port"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port\n"
+      operationId: "patch_sonic_port_sonic_port_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST={ifname}:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port_port_list\n"
+      operationId: "get_sonic_port_sonic_port_port_port_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-port"
+      description: "OperationId: post_sonic_port_sonic_port_port_port_list_index\n"
+      operationId: "post_sonic_port_sonic_port_port_port_list_index"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_port_sonic_port_port_port_list_index"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port_port_list\n"
+      operationId: "put_sonic_port_sonic_port_port_port_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port_port_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port_port_list\n"
+      operationId: "delete_sonic_port_sonic_port_port_port_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port_port_list\n"
+      operationId: "patch_sonic_port_sonic_port_port_port_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port_port_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_list_sonic_port_sonic_port_port_port_list\n"
+      operationId: "get_list_sonic_port_sonic_port_port_port_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_list_sonic_port_sonic_port_port_port_list\n"
+      operationId: "put_list_sonic_port_sonic_port_port_port_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_list_sonic_port_sonic_port_port_port_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_list_sonic_port_sonic_port_port_port_list\n"
+      operationId: "delete_list_sonic_port_sonic_port_port_port_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_list_sonic_port_sonic_port_port_port_list\n"
+      operationId: "patch_list_sonic_port_sonic_port_port_port_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_list_sonic_port_sonic_port_port_port_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST={ifname}/index:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port_port_list_index\n"
+      operationId: "get_sonic_port_sonic_port_port_port_list_index"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list_index"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port_port_list_index\n"
+      operationId: "put_sonic_port_sonic_port_port_port_list_index"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port_port_list_index"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port_port_list_index\n"
+      operationId: "delete_sonic_port_sonic_port_port_port_list_index"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port_port_list_index\n"
+      operationId: "patch_sonic_port_sonic_port_port_port_list_index"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port_port_list_index"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST={ifname}/speed:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port_port_list_speed\n"
+      operationId: "get_sonic_port_sonic_port_port_port_list_speed"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list_speed"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port_port_list_speed\n"
+      operationId: "put_sonic_port_sonic_port_port_port_list_speed"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port_port_list_speed"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port_port_list_speed\n"
+      operationId: "delete_sonic_port_sonic_port_port_port_list_speed"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port_port_list_speed\n"
+      operationId: "patch_sonic_port_sonic_port_port_port_list_speed"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port_port_list_speed"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST={ifname}/valid_speeds:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port_port_list_valid_speeds\n"
+      operationId: "get_sonic_port_sonic_port_port_port_list_valid_speeds"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list_valid_speeds"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port_port_list_valid_speeds\n"
+      operationId: "put_sonic_port_sonic_port_port_port_list_valid_speeds"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port_port_list_valid_speeds"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port_port_list_valid_speeds\n"
+      operationId: "delete_sonic_port_sonic_port_port_port_list_valid_speeds"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port_port_list_valid_speeds\n"
+      operationId: "patch_sonic_port_sonic_port_port_port_list_valid_speeds"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port_port_list_valid_speeds"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST={ifname}/alias:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port_port_list_alias\n"
+      operationId: "get_sonic_port_sonic_port_port_port_list_alias"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list_alias"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port_port_list_alias\n"
+      operationId: "put_sonic_port_sonic_port_port_port_list_alias"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port_port_list_alias"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port_port_list_alias\n"
+      operationId: "delete_sonic_port_sonic_port_port_port_list_alias"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port_port_list_alias\n"
+      operationId: "patch_sonic_port_sonic_port_port_port_list_alias"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port_port_list_alias"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST={ifname}/description:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port_port_list_description\n"
+      operationId: "get_sonic_port_sonic_port_port_port_list_description"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list_description"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port_port_list_description\n"
+      operationId: "put_sonic_port_sonic_port_port_port_list_description"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port_port_list_description"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port_port_list_description\n"
+      operationId: "delete_sonic_port_sonic_port_port_port_list_description"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port_port_list_description\n"
+      operationId: "patch_sonic_port_sonic_port_port_port_list_description"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port_port_list_description"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST={ifname}/mtu:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port_port_list_mtu\n"
+      operationId: "get_sonic_port_sonic_port_port_port_list_mtu"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list_mtu"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port_port_list_mtu\n"
+      operationId: "put_sonic_port_sonic_port_port_port_list_mtu"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port_port_list_mtu"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port_port_list_mtu\n"
+      operationId: "delete_sonic_port_sonic_port_port_port_list_mtu"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port_port_list_mtu\n"
+      operationId: "patch_sonic_port_sonic_port_port_port_list_mtu"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port_port_list_mtu"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST={ifname}/lanes:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port_port_list_lanes\n"
+      operationId: "get_sonic_port_sonic_port_port_port_list_lanes"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list_lanes"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port_port_list_lanes\n"
+      operationId: "put_sonic_port_sonic_port_port_port_list_lanes"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port_port_list_lanes"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port_port_list_lanes\n"
+      operationId: "delete_sonic_port_sonic_port_port_port_list_lanes"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port_port_list_lanes\n"
+      operationId: "patch_sonic_port_sonic_port_port_port_list_lanes"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port_port_list_lanes"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-port:sonic-port/PORT/PORT_LIST={ifname}/admin_status:
+    get:
+      tags:
+      - "sonic-port"
+      description: "OperationId: get_sonic_port_sonic_port_port_port_list_admin_status\n"
+      operationId: "get_sonic_port_sonic_port_port_port_list_admin_status"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_port_sonic_port_port_port_list_admin_status"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-port"
+      description: "OperationId: put_sonic_port_sonic_port_port_port_list_admin_status\n"
+      operationId: "put_sonic_port_sonic_port_port_port_list_admin_status"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_port_sonic_port_port_port_list_admin_status"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-port"
+      description: "OperationId: delete_sonic_port_sonic_port_port_port_list_admin_status\n"
+      operationId: "delete_sonic_port_sonic_port_port_port_list_admin_status"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-port"
+      description: "OperationId: patch_sonic_port_sonic_port_port_port_list_admin_status\n"
+      operationId: "patch_sonic_port_sonic_port_port_port_list_admin_status"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "ifname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ifname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_port_sonic_port_port_port_list_admin_status"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+definitions:
+  sonic_port_sonic_port:
+    type: "object"
+    properties:
+      sonic-port:sonic-port:
+        $ref: "#/definitions/sonic_port_sonic_port_sonicportsonicport"
+  post_sonic_port_sonic_port:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port"
+  put_sonic_port_sonic_port:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port"
+  patch_sonic_port_sonic_port:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port"
+  get_sonic_port_sonic_port:
+    type: "object"
+    properties:
+      sonic-port:sonic-port:
+        $ref: "#/definitions/sonic_port_sonic_port_sonicportsonicport"
+  sonic_port_sonic_port_port:
+    type: "object"
+    properties:
+      sonic-port:PORT:
+        $ref: "#/definitions/sonic_port_sonic_port_sonicportsonicport_PORT"
+  post_sonic_port_sonic_port_port:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port"
+  put_sonic_port_sonic_port_port:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port"
+  patch_sonic_port_sonic_port_port:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port"
+  get_sonic_port_sonic_port_port:
+    type: "object"
+    properties:
+      sonic-port:PORT:
+        $ref: "#/definitions/sonic_port_sonic_port_sonicportsonicport_PORT"
+  sonic_port_sonic_port_port_port_list:
+    type: "object"
+    properties:
+      sonic-port:PORT_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_port_sonic_port_sonicportsonicport_PORT_PORT_LIST"
+  put_sonic_port_sonic_port_port_port_list:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list"
+  patch_sonic_port_sonic_port_port_port_list:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list"
+  get_sonic_port_sonic_port_port_port_list:
+    type: "object"
+    properties:
+      sonic-port:PORT_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_port_sonic_port_sonicportsonicport_PORT_PORT_LIST"
+  post_list_sonic_port_sonic_port_port_port_list:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list"
+  put_list_sonic_port_sonic_port_port_port_list:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list"
+  patch_list_sonic_port_sonic_port_port_port_list:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list"
+  sonic_port_sonic_port_port_port_list_index:
+    type: "object"
+    properties:
+      sonic-port:index:
+        type: "integer"
+        format: "int32"
+  post_sonic_port_sonic_port_port_port_list_index:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_index"
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_speed"
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_valid_speeds"
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_alias"
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_description"
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_mtu"
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_lanes"
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_admin_status"
+  put_sonic_port_sonic_port_port_port_list_index:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_index"
+  patch_sonic_port_sonic_port_port_port_list_index:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_index"
+  get_sonic_port_sonic_port_port_port_list_index:
+    type: "object"
+    properties:
+      sonic-port:index:
+        type: "integer"
+        format: "int32"
+  sonic_port_sonic_port_port_port_list_speed:
+    type: "object"
+    properties:
+      sonic-port:speed:
+        type: "integer"
+        format: "int64"
+  put_sonic_port_sonic_port_port_port_list_speed:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_speed"
+  patch_sonic_port_sonic_port_port_port_list_speed:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_speed"
+  get_sonic_port_sonic_port_port_port_list_speed:
+    type: "object"
+    properties:
+      sonic-port:speed:
+        type: "integer"
+        format: "int64"
+  sonic_port_sonic_port_port_port_list_valid_speeds:
+    type: "object"
+    properties:
+      sonic-port:valid_speeds:
+        type: "string"
+  put_sonic_port_sonic_port_port_port_list_valid_speeds:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_valid_speeds"
+  patch_sonic_port_sonic_port_port_port_list_valid_speeds:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_valid_speeds"
+  get_sonic_port_sonic_port_port_port_list_valid_speeds:
+    type: "object"
+    properties:
+      sonic-port:valid_speeds:
+        type: "string"
+  sonic_port_sonic_port_port_port_list_alias:
+    type: "object"
+    properties:
+      sonic-port:alias:
+        type: "string"
+  put_sonic_port_sonic_port_port_port_list_alias:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_alias"
+  patch_sonic_port_sonic_port_port_port_list_alias:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_alias"
+  get_sonic_port_sonic_port_port_port_list_alias:
+    type: "object"
+    properties:
+      sonic-port:alias:
+        type: "string"
+  sonic_port_sonic_port_port_port_list_description:
+    type: "object"
+    properties:
+      sonic-port:description:
+        type: "string"
+  put_sonic_port_sonic_port_port_port_list_description:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_description"
+  patch_sonic_port_sonic_port_port_port_list_description:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_description"
+  get_sonic_port_sonic_port_port_port_list_description:
+    type: "object"
+    properties:
+      sonic-port:description:
+        type: "string"
+  sonic_port_sonic_port_port_port_list_mtu:
+    type: "object"
+    properties:
+      sonic-port:mtu:
+        type: "integer"
+        format: "int32"
+  put_sonic_port_sonic_port_port_port_list_mtu:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_mtu"
+  patch_sonic_port_sonic_port_port_port_list_mtu:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_mtu"
+  get_sonic_port_sonic_port_port_port_list_mtu:
+    type: "object"
+    properties:
+      sonic-port:mtu:
+        type: "integer"
+        format: "int32"
+  sonic_port_sonic_port_port_port_list_lanes:
+    type: "object"
+    properties:
+      sonic-port:lanes:
+        type: "string"
+  put_sonic_port_sonic_port_port_port_list_lanes:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_lanes"
+  patch_sonic_port_sonic_port_port_port_list_lanes:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_lanes"
+  get_sonic_port_sonic_port_port_port_list_lanes:
+    type: "object"
+    properties:
+      sonic-port:lanes:
+        type: "string"
+  sonic_port_sonic_port_port_port_list_admin_status:
+    type: "object"
+    properties:
+      sonic-port:admin_status:
+        type: "string"
+        enum:
+        - "up"
+        - "down"
+  put_sonic_port_sonic_port_port_port_list_admin_status:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_admin_status"
+  patch_sonic_port_sonic_port_port_port_list_admin_status:
+    allOf:
+    - $ref: "#/definitions/sonic_port_sonic_port_port_port_list_admin_status"
+  get_sonic_port_sonic_port_port_port_list_admin_status:
+    type: "object"
+    properties:
+      sonic-port:admin_status:
+        type: "string"
+        enum:
+        - "up"
+        - "down"
+  sonic_port_sonic_port_sonicportsonicport_PORT_PORT_LIST:
+    required:
+    - "ifname"
+    properties:
+      ifname:
+        type: "string"
+      index:
+        type: "integer"
+        format: "int32"
+      speed:
+        type: "integer"
+        format: "int64"
+      valid_speeds:
+        type: "string"
+      alias:
+        type: "string"
+      description:
+        type: "string"
+      mtu:
+        type: "integer"
+        format: "int32"
+      lanes:
+        type: "string"
+      admin_status:
+        type: "string"
+        enum:
+        - "up"
+        - "down"
+  sonic_port_sonic_port_sonicportsonicport_PORT:
+    properties:
+      PORT_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_port_sonic_port_sonicportsonicport_PORT_PORT_LIST"
+  sonic_port_sonic_port_sonicportsonicport:
+    properties:
+      PORT:
+        $ref: "#/definitions/sonic_port_sonic_port_sonicportsonicport_PORT"

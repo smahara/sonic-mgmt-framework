@@ -1,0 +1,5283 @@
+---
+swagger: "2.0"
+info:
+  description: "Network management Open APIs for Sonic."
+  version: "1.0.0"
+  title: "Sonic Network Management APIs"
+basePath: "/restconf/data"
+tags:
+- name: "sonic-acl"
+  description: "Operations for sonic-acl"
+schemes:
+- "https"
+- "http"
+paths:
+  /sonic-acl:sonic-acl:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl\n"
+      operationId: "get_sonic_acl_sonic_acl"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: post_sonic_acl_sonic_acl_acl_table\n"
+      operationId: "post_sonic_acl_sonic_acl_acl_table"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_acl_sonic_acl_acl_table"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl\n"
+      operationId: "put_sonic_acl_sonic_acl"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl\n"
+      operationId: "delete_sonic_acl_sonic_acl"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl\n"
+      operationId: "patch_sonic_acl_sonic_acl"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_TABLE:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_table\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_table"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_table"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: post_list_sonic_acl_sonic_acl_acl_table_acl_table_list\n"
+      operationId: "post_list_sonic_acl_sonic_acl_acl_table_acl_table_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_list_sonic_acl_sonic_acl_acl_table_acl_table_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_table\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_table"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_table"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_table\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_table"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_table\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_table"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_table"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_TABLE/ACL_TABLE_LIST={aclname}:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_table_acl_table_list\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_table_acl_table_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_table_acl_table_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: post_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc\n"
+      operationId: "post_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_table_acl_table_list\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_table_acl_table_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_table_acl_table_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_table_acl_table_list\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_table_acl_table_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_table_acl_table_list\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_table_acl_table_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_table_acl_table_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_TABLE/ACL_TABLE_LIST:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_list_sonic_acl_sonic_acl_acl_table_acl_table_list\n"
+      operationId: "get_list_sonic_acl_sonic_acl_acl_table_acl_table_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_table_acl_table_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_list_sonic_acl_sonic_acl_acl_table_acl_table_list\n"
+      operationId: "put_list_sonic_acl_sonic_acl_acl_table_acl_table_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_list_sonic_acl_sonic_acl_acl_table_acl_table_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_list_sonic_acl_sonic_acl_acl_table_acl_table_list\n"
+      operationId: "delete_list_sonic_acl_sonic_acl_acl_table_acl_table_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_list_sonic_acl_sonic_acl_acl_table_acl_table_list\n"
+      operationId: "patch_list_sonic_acl_sonic_acl_acl_table_acl_table_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_list_sonic_acl_sonic_acl_acl_table_acl_table_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_TABLE/ACL_TABLE_LIST={aclname}/policy_desc:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_TABLE/ACL_TABLE_LIST={aclname}/stage:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_table_acl_table_list_stage\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_table_acl_table_list_stage\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_table_acl_table_list_stage\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_table_acl_table_list_stage\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_TABLE/ACL_TABLE_LIST={aclname}/type:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_table_acl_table_list_type\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_table_acl_table_list_type\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_table_acl_table_list_type\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_table_acl_table_list_type\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_TABLE/ACL_TABLE_LIST={aclname}/ports:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_table_acl_table_list_ports\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_table_acl_table_list_ports\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_table_acl_table_list_ports\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_table_acl_table_list_ports\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_TABLE/ACL_TABLE_LIST={aclname}/ports={ports}:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_llist_sonic_acl_sonic_acl_acl_table_acl_table_list_ports\n"
+      operationId: "get_llist_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "ports"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ports"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: del_llist_sonic_acl_sonic_acl_acl_table_acl_table_list_ports\n"
+      operationId: "del_llist_sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "ports"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Ports"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: post_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list\n"
+      operationId: "post_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    post:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: post_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority\n"
+      operationId: "post_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/post_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list\n"
+      operationId: "get_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list\n"
+      operationId: "put_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list\n"
+      operationId: "delete_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+      produces:
+      - "application/yang-data+json"
+      parameters: []
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list\n"
+      operationId: "patch_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/PRIORITY:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/RULE_DESCRIPTION:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/PACKET_ACTION:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/MIRROR_ACTION:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/IP_TYPE:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/IP_PROTOCOL:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/ETHER_TYPE:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/SRC_IP:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/DST_IP:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/SRC_IPV6:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/DST_IPV6:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/L4_SRC_PORT:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/L4_SRC_PORT_RANGE:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/L4_DST_PORT:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/L4_DST_PORT_RANGE:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/TCP_FLAGS:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+  /sonic-acl:sonic-acl/ACL_RULE/ACL_RULE_LIST={aclname},{rulename}/DSCP:
+    get:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp\n"
+      operationId: "get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            $ref: "#/definitions/get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp\n"
+      operationId: "put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+        x-exportParamName: "Body"
+      responses:
+        201:
+          description: "Created"
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    delete:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp\n"
+      operationId: "delete_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+    patch:
+      tags:
+      - "sonic-acl"
+      description: "OperationId: patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp\n"
+      operationId: "patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+      consumes:
+      - "application/yang-data+json"
+      produces:
+      - "application/yang-data+json"
+      parameters:
+      - name: "aclname"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Aclname"
+      - name: "rulename"
+        in: "path"
+        description: ""
+        required: true
+        type: "string"
+        x-exportParamName: "Rulename"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+        x-exportParamName: "Body"
+      responses:
+        204:
+          description: "No Content"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+        405:
+          description: "Method Not Allowed"
+        409:
+          description: "Conflict"
+        415:
+          description: "Unsupported Media Type"
+        500:
+          description: "Internal Server Error"
+definitions:
+  sonic_acl_sonic_acl:
+    type: "object"
+    properties:
+      sonic-acl:sonic-acl:
+        $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl"
+  post_sonic_acl_sonic_acl:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl"
+  put_sonic_acl_sonic_acl:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl"
+  patch_sonic_acl_sonic_acl:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl"
+  get_sonic_acl_sonic_acl:
+    type: "object"
+    properties:
+      sonic-acl:sonic-acl:
+        $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl"
+  sonic_acl_sonic_acl_acl_table:
+    type: "object"
+    properties:
+      sonic-acl:ACL_TABLE:
+        $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_TABLE"
+  post_sonic_acl_sonic_acl_acl_table:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule"
+  put_sonic_acl_sonic_acl_acl_table:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table"
+  patch_sonic_acl_sonic_acl_acl_table:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table"
+  get_sonic_acl_sonic_acl_acl_table:
+    type: "object"
+    properties:
+      sonic-acl:ACL_TABLE:
+        $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_TABLE"
+  sonic_acl_sonic_acl_acl_table_acl_table_list:
+    type: "object"
+    properties:
+      sonic-acl:ACL_TABLE_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_TABLE_ACL_TABLE_LIST"
+  put_sonic_acl_sonic_acl_acl_table_acl_table_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list"
+  patch_sonic_acl_sonic_acl_acl_table_acl_table_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list"
+  get_sonic_acl_sonic_acl_acl_table_acl_table_list:
+    type: "object"
+    properties:
+      sonic-acl:ACL_TABLE_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_TABLE_ACL_TABLE_LIST"
+  post_list_sonic_acl_sonic_acl_acl_table_acl_table_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list"
+  put_list_sonic_acl_sonic_acl_acl_table_acl_table_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list"
+  patch_list_sonic_acl_sonic_acl_acl_table_acl_table_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list"
+  sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc:
+    type: "object"
+    properties:
+      sonic-acl:policy_desc:
+        type: "string"
+  post_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+  put_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+  patch_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc"
+  get_sonic_acl_sonic_acl_acl_table_acl_table_list_policy_desc:
+    type: "object"
+    properties:
+      sonic-acl:policy_desc:
+        type: "string"
+  sonic_acl_sonic_acl_acl_table_acl_table_list_stage:
+    type: "object"
+    properties:
+      sonic-acl:stage:
+        type: "string"
+        enum:
+        - "INGRESS"
+        - "EGRESS"
+  put_sonic_acl_sonic_acl_acl_table_acl_table_list_stage:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+  patch_sonic_acl_sonic_acl_acl_table_acl_table_list_stage:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_stage"
+  get_sonic_acl_sonic_acl_acl_table_acl_table_list_stage:
+    type: "object"
+    properties:
+      sonic-acl:stage:
+        type: "string"
+        enum:
+        - "INGRESS"
+        - "EGRESS"
+  sonic_acl_sonic_acl_acl_table_acl_table_list_type:
+    type: "object"
+    properties:
+      sonic-acl:type:
+        type: "string"
+        enum:
+        - "MIRROR"
+        - "L2"
+        - "L3"
+        - "L3V6"
+  put_sonic_acl_sonic_acl_acl_table_acl_table_list_type:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+  patch_sonic_acl_sonic_acl_acl_table_acl_table_list_type:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_type"
+  get_sonic_acl_sonic_acl_acl_table_acl_table_list_type:
+    type: "object"
+    properties:
+      sonic-acl:type:
+        type: "string"
+        enum:
+        - "MIRROR"
+        - "L2"
+        - "L3"
+        - "L3V6"
+  sonic_acl_sonic_acl_acl_table_acl_table_list_ports:
+    type: "object"
+    properties:
+      sonic-acl:ports:
+        type: "array"
+        items:
+          type: "string"
+  put_sonic_acl_sonic_acl_acl_table_acl_table_list_ports:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+  patch_sonic_acl_sonic_acl_acl_table_acl_table_list_ports:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_table_acl_table_list_ports"
+  get_sonic_acl_sonic_acl_acl_table_acl_table_list_ports:
+    type: "object"
+    properties:
+      sonic-acl:ports:
+        type: "array"
+        items:
+          type: "string"
+  sonic_acl_sonic_acl_acl_rule:
+    type: "object"
+    properties:
+      sonic-acl:ACL_RULE:
+        $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_RULE"
+  put_sonic_acl_sonic_acl_acl_rule:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule"
+  patch_sonic_acl_sonic_acl_acl_rule:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule"
+  get_sonic_acl_sonic_acl_acl_rule:
+    type: "object"
+    properties:
+      sonic-acl:ACL_RULE:
+        $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_RULE"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list:
+    type: "object"
+    properties:
+      sonic-acl:ACL_RULE_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_RULE_ACL_RULE_LIST"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list:
+    type: "object"
+    properties:
+      sonic-acl:ACL_RULE_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_RULE_ACL_RULE_LIST"
+  post_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+  put_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+  patch_list_sonic_acl_sonic_acl_acl_rule_acl_rule_list:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority:
+    type: "object"
+    properties:
+      sonic-acl:PRIORITY:
+        type: "integer"
+        format: "int32"
+  post_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_priority:
+    type: "object"
+    properties:
+      sonic-acl:PRIORITY:
+        type: "integer"
+        format: "int32"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description:
+    type: "object"
+    properties:
+      sonic-acl:RULE_DESCRIPTION:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_rule_description:
+    type: "object"
+    properties:
+      sonic-acl:RULE_DESCRIPTION:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action:
+    type: "object"
+    properties:
+      sonic-acl:PACKET_ACTION:
+        type: "string"
+        enum:
+        - "FORWARD"
+        - "DROP"
+        - "REDIRECT"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_packet_action:
+    type: "object"
+    properties:
+      sonic-acl:PACKET_ACTION:
+        type: "string"
+        enum:
+        - "FORWARD"
+        - "DROP"
+        - "REDIRECT"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action:
+    type: "object"
+    properties:
+      sonic-acl:MIRROR_ACTION:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_mirror_action:
+    type: "object"
+    properties:
+      sonic-acl:MIRROR_ACTION:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type:
+    type: "object"
+    properties:
+      sonic-acl:IP_TYPE:
+        type: "string"
+        enum:
+        - "ANY"
+        - "IP"
+        - "IPV4"
+        - "IPV4ANY"
+        - "NON_IPV4"
+        - "IPV6ANY"
+        - "NON_IPV6"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_type:
+    type: "object"
+    properties:
+      sonic-acl:IP_TYPE:
+        type: "string"
+        enum:
+        - "ANY"
+        - "IP"
+        - "IPV4"
+        - "IPV4ANY"
+        - "NON_IPV4"
+        - "IPV6ANY"
+        - "NON_IPV6"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol:
+    type: "object"
+    properties:
+      sonic-acl:IP_PROTOCOL:
+        type: "integer"
+        format: "int32"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ip_protocol:
+    type: "object"
+    properties:
+      sonic-acl:IP_PROTOCOL:
+        type: "integer"
+        format: "int32"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type:
+    type: "object"
+    properties:
+      sonic-acl:ETHER_TYPE:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_ether_type:
+    type: "object"
+    properties:
+      sonic-acl:ETHER_TYPE:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip:
+    type: "object"
+    properties:
+      sonic-acl:SRC_IP:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ip:
+    type: "object"
+    properties:
+      sonic-acl:SRC_IP:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip:
+    type: "object"
+    properties:
+      sonic-acl:DST_IP:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ip:
+    type: "object"
+    properties:
+      sonic-acl:DST_IP:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6:
+    type: "object"
+    properties:
+      sonic-acl:SRC_IPV6:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_src_ipv6:
+    type: "object"
+    properties:
+      sonic-acl:SRC_IPV6:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6:
+    type: "object"
+    properties:
+      sonic-acl:DST_IPV6:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dst_ipv6:
+    type: "object"
+    properties:
+      sonic-acl:DST_IPV6:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port:
+    type: "object"
+    properties:
+      sonic-acl:L4_SRC_PORT:
+        type: "integer"
+        format: "int32"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port:
+    type: "object"
+    properties:
+      sonic-acl:L4_SRC_PORT:
+        type: "integer"
+        format: "int32"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range:
+    type: "object"
+    properties:
+      sonic-acl:L4_SRC_PORT_RANGE:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_src_port_range:
+    type: "object"
+    properties:
+      sonic-acl:L4_SRC_PORT_RANGE:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port:
+    type: "object"
+    properties:
+      sonic-acl:L4_DST_PORT:
+        type: "integer"
+        format: "int32"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port:
+    type: "object"
+    properties:
+      sonic-acl:L4_DST_PORT:
+        type: "integer"
+        format: "int32"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range:
+    type: "object"
+    properties:
+      sonic-acl:L4_DST_PORT_RANGE:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_l4_dst_port_range:
+    type: "object"
+    properties:
+      sonic-acl:L4_DST_PORT_RANGE:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags:
+    type: "object"
+    properties:
+      sonic-acl:TCP_FLAGS:
+        type: "string"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_tcp_flags:
+    type: "object"
+    properties:
+      sonic-acl:TCP_FLAGS:
+        type: "string"
+  sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp:
+    type: "object"
+    properties:
+      sonic-acl:DSCP:
+        type: "integer"
+        format: "int32"
+  put_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+  patch_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp:
+    allOf:
+    - $ref: "#/definitions/sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp"
+  get_sonic_acl_sonic_acl_acl_rule_acl_rule_list_dscp:
+    type: "object"
+    properties:
+      sonic-acl:DSCP:
+        type: "integer"
+        format: "int32"
+  sonic_acl_sonic_acl_sonicaclsonicacl_ACL_TABLE_ACL_TABLE_LIST:
+    required:
+    - "aclname"
+    properties:
+      aclname:
+        type: "string"
+      policy_desc:
+        type: "string"
+      stage:
+        type: "string"
+        enum:
+        - "INGRESS"
+        - "EGRESS"
+      type:
+        type: "string"
+        enum:
+        - "MIRROR"
+        - "L2"
+        - "L3"
+        - "L3V6"
+      ports:
+        type: "array"
+        items:
+          type: "string"
+  sonic_acl_sonic_acl_sonicaclsonicacl_ACL_TABLE:
+    properties:
+      ACL_TABLE_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_TABLE_ACL_TABLE_LIST"
+  sonic_acl_sonic_acl_sonicaclsonicacl_ACL_RULE_ACL_RULE_LIST:
+    required:
+    - "aclname"
+    - "rulename"
+    properties:
+      aclname:
+        type: "string"
+      rulename:
+        type: "string"
+      PRIORITY:
+        type: "integer"
+        format: "int32"
+      RULE_DESCRIPTION:
+        type: "string"
+      PACKET_ACTION:
+        type: "string"
+        enum:
+        - "FORWARD"
+        - "DROP"
+        - "REDIRECT"
+      MIRROR_ACTION:
+        type: "string"
+      IP_TYPE:
+        type: "string"
+        enum:
+        - "ANY"
+        - "IP"
+        - "IPV4"
+        - "IPV4ANY"
+        - "NON_IPV4"
+        - "IPV6ANY"
+        - "NON_IPV6"
+      IP_PROTOCOL:
+        type: "integer"
+        format: "int32"
+      ETHER_TYPE:
+        type: "string"
+      SRC_IP:
+        type: "string"
+      DST_IP:
+        type: "string"
+      SRC_IPV6:
+        type: "string"
+      DST_IPV6:
+        type: "string"
+      L4_SRC_PORT:
+        type: "integer"
+        format: "int32"
+      L4_SRC_PORT_RANGE:
+        type: "string"
+      L4_DST_PORT:
+        type: "integer"
+        format: "int32"
+      L4_DST_PORT_RANGE:
+        type: "string"
+      TCP_FLAGS:
+        type: "string"
+      DSCP:
+        type: "integer"
+        format: "int32"
+  sonic_acl_sonic_acl_sonicaclsonicacl_ACL_RULE:
+    properties:
+      ACL_RULE_LIST:
+        type: "array"
+        items:
+          $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_RULE_ACL_RULE_LIST"
+  sonic_acl_sonic_acl_sonicaclsonicacl:
+    properties:
+      ACL_TABLE:
+        $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_TABLE"
+      ACL_RULE:
+        $ref: "#/definitions/sonic_acl_sonic_acl_sonicaclsonicacl_ACL_RULE"

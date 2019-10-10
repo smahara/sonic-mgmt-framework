@@ -4,6 +4,7 @@ All URIs are relative to *https://localhost/restconf/data*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags**](OpenconfigAclApi.md#del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags) | **DELETE** /openconfig-acl:acl/acl-sets/acl-set&#x3D;{name},{type}/acl-entries/acl-entry&#x3D;{sequence-id}/transport/config/tcp-flags&#x3D;{tcp-flags} | 
 [**delete_list_openconfig_acl_acl_acl_sets_acl_set**](OpenconfigAclApi.md#delete_list_openconfig_acl_acl_acl_sets_acl_set) | **DELETE** /openconfig-acl:acl/acl-sets/acl-set | 
 [**delete_list_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry**](OpenconfigAclApi.md#delete_list_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry) | **DELETE** /openconfig-acl:acl/acl-sets/acl-set&#x3D;{name},{type}/acl-entries/acl-entry | 
 [**delete_list_openconfig_acl_acl_interfaces_interface**](OpenconfigAclApi.md#delete_list_openconfig_acl_acl_interfaces_interface) | **DELETE** /openconfig-acl:acl/interfaces/interface | 
@@ -70,6 +71,7 @@ Method | HTTP request | Description
 [**get_list_openconfig_acl_acl_interfaces_interface_egress_acl_sets_egress_acl_set_acl_entries_acl_entry**](OpenconfigAclApi.md#get_list_openconfig_acl_acl_interfaces_interface_egress_acl_sets_egress_acl_set_acl_entries_acl_entry) | **GET** /openconfig-acl:acl/interfaces/interface&#x3D;{id}/egress-acl-sets/egress-acl-set&#x3D;{set-name},{type}/acl-entries/acl-entry | 
 [**get_list_openconfig_acl_acl_interfaces_interface_ingress_acl_sets_ingress_acl_set**](OpenconfigAclApi.md#get_list_openconfig_acl_acl_interfaces_interface_ingress_acl_sets_ingress_acl_set) | **GET** /openconfig-acl:acl/interfaces/interface&#x3D;{id}/ingress-acl-sets/ingress-acl-set | 
 [**get_list_openconfig_acl_acl_interfaces_interface_ingress_acl_sets_ingress_acl_set_acl_entries_acl_entry**](OpenconfigAclApi.md#get_list_openconfig_acl_acl_interfaces_interface_ingress_acl_sets_ingress_acl_set_acl_entries_acl_entry) | **GET** /openconfig-acl:acl/interfaces/interface&#x3D;{id}/ingress-acl-sets/ingress-acl-set&#x3D;{set-name},{type}/acl-entries/acl-entry | 
+[**get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags**](OpenconfigAclApi.md#get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags) | **GET** /openconfig-acl:acl/acl-sets/acl-set&#x3D;{name},{type}/acl-entries/acl-entry&#x3D;{sequence-id}/transport/config/tcp-flags&#x3D;{tcp-flags} | 
 [**get_openconfig_acl_acl**](OpenconfigAclApi.md#get_openconfig_acl_acl) | **GET** /openconfig-acl:acl | 
 [**get_openconfig_acl_acl_acl_sets**](OpenconfigAclApi.md#get_openconfig_acl_acl_acl_sets) | **GET** /openconfig-acl:acl/acl-sets | 
 [**get_openconfig_acl_acl_acl_sets_acl_set**](OpenconfigAclApi.md#get_openconfig_acl_acl_acl_sets_acl_set) | **GET** /openconfig-acl:acl/acl-sets/acl-set&#x3D;{name},{type} | 
@@ -348,6 +350,58 @@ Method | HTTP request | Description
 [**put_openconfig_acl_acl_interfaces_interface_interface_ref_config_interface**](OpenconfigAclApi.md#put_openconfig_acl_acl_interfaces_interface_interface_ref_config_interface) | **PUT** /openconfig-acl:acl/interfaces/interface&#x3D;{id}/interface-ref/config/interface | 
 [**put_openconfig_acl_acl_interfaces_interface_interface_ref_config_subinterface**](OpenconfigAclApi.md#put_openconfig_acl_acl_interfaces_interface_interface_ref_config_subinterface) | **PUT** /openconfig-acl:acl/interfaces/interface&#x3D;{id}/interface-ref/config/subinterface | 
 
+
+# **del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags**
+> del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(name, type, sequence_id, tcp_flags)
+
+
+
+OperationId: del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags List of TCP flags to match
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_acl_client
+from openconfig_acl_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_acl_client.OpenconfigAclApi()
+name = 'name_example' # str | Reference to the name list key
+type = 'type_example' # str | Reference to the type list key
+sequence_id = 56 # int | references the list key
+tcp_flags = 'tcp_flags_example' # str | List of TCP flags to match
+
+try:
+    api_instance.del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(name, type, sequence_id, tcp_flags)
+except ApiException as e:
+    print("Exception when calling OpenconfigAclApi->del_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| Reference to the name list key | 
+ **type** | **str**| Reference to the type list key | 
+ **sequence_id** | **int**| references the list key | 
+ **tcp_flags** | **str**| List of TCP flags to match | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_list_openconfig_acl_acl_acl_sets_acl_set**
 > delete_list_openconfig_acl_acl_acl_sets_acl_set()
@@ -3534,6 +3588,59 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**GetOpenconfigAclAclInterfacesInterfaceIngressAclSetsIngressAclSetAclEntriesAclEntry**](GetOpenconfigAclAclInterfacesInterfaceIngressAclSetsIngressAclSetAclEntriesAclEntry.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags**
+> GetOpenconfigAclAclAclSetsAclSetAclEntriesAclEntryTransportConfigTcpFlags get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(name, type, sequence_id, tcp_flags)
+
+
+
+OperationId: get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags List of TCP flags to match
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_acl_client
+from openconfig_acl_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_acl_client.OpenconfigAclApi()
+name = 'name_example' # str | Reference to the name list key
+type = 'type_example' # str | Reference to the type list key
+sequence_id = 56 # int | references the list key
+tcp_flags = 'tcp_flags_example' # str | List of TCP flags to match
+
+try:
+    api_response = api_instance.get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags(name, type, sequence_id, tcp_flags)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigAclApi->get_llist_openconfig_acl_acl_acl_sets_acl_set_acl_entries_acl_entry_transport_config_tcp_flags: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **name** | **str**| Reference to the name list key | 
+ **type** | **str**| Reference to the type list key | 
+ **sequence_id** | **int**| references the list key | 
+ **tcp_flags** | **str**| List of TCP flags to match | 
+
+### Return type
+
+[**GetOpenconfigAclAclAclSetsAclSetAclEntriesAclEntryTransportConfigTcpFlags**](GetOpenconfigAclAclAclSetsAclSetAclEntriesAclEntryTransportConfigTcpFlags.md)
 
 ### Authorization
 

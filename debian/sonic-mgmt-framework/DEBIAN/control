@@ -2,7 +2,7 @@ Package: sonic-mgmt-framework
 Version: 1.0-01
 Architecture: amd64
 Maintainer: Prabhu Sreenivasan <prabhu.sreenivasan@broadcom.com>
-Installed-Size: 97417
+Installed-Size: 103320
 Depends: libc6 (>= 2.15), libxml2 (>= 2.7.4), libyang0.16 (>= 0.16.52)
 Section: net
 Priority: extra

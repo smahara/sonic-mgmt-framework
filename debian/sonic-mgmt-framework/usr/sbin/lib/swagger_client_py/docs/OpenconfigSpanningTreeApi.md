@@ -4,6 +4,8 @@ All URIs are relative to *https://localhost/restconf/data*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol**](OpenconfigSpanningTreeApi.md#del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol) | **DELETE** /openconfig-spanning-tree:stp/global/config/enabled-protocol&#x3D;{enabled-protocol} | 
+[**del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan**](OpenconfigSpanningTreeApi.md#del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan) | **DELETE** /openconfig-spanning-tree:stp/mstp/mst-instances/mst-instance&#x3D;{mst-id}/config/vlan&#x3D;{vlan} | 
 [**delete_list_openconfig_spanning_tree_stp_interfaces_interface**](OpenconfigSpanningTreeApi.md#delete_list_openconfig_spanning_tree_stp_interfaces_interface) | **DELETE** /openconfig-spanning-tree:stp/interfaces/interface | 
 [**delete_list_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance**](OpenconfigSpanningTreeApi.md#delete_list_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance) | **DELETE** /openconfig-spanning-tree:stp/mstp/mst-instances/mst-instance | 
 [**delete_list_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_interfaces_interface**](OpenconfigSpanningTreeApi.md#delete_list_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_interfaces_interface) | **DELETE** /openconfig-spanning-tree:stp/mstp/mst-instances/mst-instance&#x3D;{mst-id}/interfaces/interface | 
@@ -72,6 +74,8 @@ Method | HTTP request | Description
 [**get_list_openconfig_spanning_tree_stp_rapid_pvst_vlan**](OpenconfigSpanningTreeApi.md#get_list_openconfig_spanning_tree_stp_rapid_pvst_vlan) | **GET** /openconfig-spanning-tree:stp/rapid-pvst/vlan | 
 [**get_list_openconfig_spanning_tree_stp_rapid_pvst_vlan_interfaces_interface**](OpenconfigSpanningTreeApi.md#get_list_openconfig_spanning_tree_stp_rapid_pvst_vlan_interfaces_interface) | **GET** /openconfig-spanning-tree:stp/rapid-pvst/vlan&#x3D;{vlan-id}/interfaces/interface | 
 [**get_list_openconfig_spanning_tree_stp_rstp_interfaces_interface**](OpenconfigSpanningTreeApi.md#get_list_openconfig_spanning_tree_stp_rstp_interfaces_interface) | **GET** /openconfig-spanning-tree:stp/rstp/interfaces/interface | 
+[**get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol**](OpenconfigSpanningTreeApi.md#get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol) | **GET** /openconfig-spanning-tree:stp/global/config/enabled-protocol&#x3D;{enabled-protocol} | 
+[**get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan**](OpenconfigSpanningTreeApi.md#get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan) | **GET** /openconfig-spanning-tree:stp/mstp/mst-instances/mst-instance&#x3D;{mst-id}/config/vlan&#x3D;{vlan} | 
 [**get_openconfig_spanning_tree_stp**](OpenconfigSpanningTreeApi.md#get_openconfig_spanning_tree_stp) | **GET** /openconfig-spanning-tree:stp | 
 [**get_openconfig_spanning_tree_stp_global**](OpenconfigSpanningTreeApi.md#get_openconfig_spanning_tree_stp_global) | **GET** /openconfig-spanning-tree:stp/global | 
 [**get_openconfig_spanning_tree_stp_global_config**](OpenconfigSpanningTreeApi.md#get_openconfig_spanning_tree_stp_global_config) | **GET** /openconfig-spanning-tree:stp/global/config | 
@@ -414,6 +418,100 @@ Method | HTTP request | Description
 [**put_openconfig_spanning_tree_stp_rstp_interfaces_interface_config_cost**](OpenconfigSpanningTreeApi.md#put_openconfig_spanning_tree_stp_rstp_interfaces_interface_config_cost) | **PUT** /openconfig-spanning-tree:stp/rstp/interfaces/interface&#x3D;{name}/config/cost | 
 [**put_openconfig_spanning_tree_stp_rstp_interfaces_interface_config_port_priority**](OpenconfigSpanningTreeApi.md#put_openconfig_spanning_tree_stp_rstp_interfaces_interface_config_port_priority) | **PUT** /openconfig-spanning-tree:stp/rstp/interfaces/interface&#x3D;{name}/config/port-priority | 
 
+
+# **del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol**
+> del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(enabled_protocol)
+
+
+
+OperationId: del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol List of the spanning tree protocols enabled on the device
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_spanning_tree_client
+from openconfig_spanning_tree_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_spanning_tree_client.OpenconfigSpanningTreeApi()
+enabled_protocol = 'enabled_protocol_example' # str | List of the spanning tree protocols enabled on the device
+
+try:
+    api_instance.del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(enabled_protocol)
+except ApiException as e:
+    print("Exception when calling OpenconfigSpanningTreeApi->del_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **enabled_protocol** | **str**| List of the spanning tree protocols enabled on the device | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan**
+> del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(mst_id, vlan)
+
+
+
+OperationId: del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan list of vlans mapped to the MST instance
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_spanning_tree_client
+from openconfig_spanning_tree_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_spanning_tree_client.OpenconfigSpanningTreeApi()
+mst_id = 56 # int | Reference to the list key
+vlan = 'vlan_example' # str | list of vlans mapped to the MST instance
+
+try:
+    api_instance.del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(mst_id, vlan)
+except ApiException as e:
+    print("Exception when calling OpenconfigSpanningTreeApi->del_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **mst_id** | **int**| Reference to the list key | 
+ **vlan** | **str**| list of vlans mapped to the MST instance | 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_list_openconfig_spanning_tree_stp_interfaces_interface**
 > delete_list_openconfig_spanning_tree_stp_interfaces_interface()
@@ -3397,6 +3495,102 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**GetOpenconfigSpanningTreeStpRstpInterfacesInterface**](GetOpenconfigSpanningTreeStpRstpInterfacesInterface.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol**
+> GetOpenconfigSpanningTreeStpGlobalConfigEnabledProtocol get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(enabled_protocol)
+
+
+
+OperationId: get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol List of the spanning tree protocols enabled on the device
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_spanning_tree_client
+from openconfig_spanning_tree_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_spanning_tree_client.OpenconfigSpanningTreeApi()
+enabled_protocol = 'enabled_protocol_example' # str | List of the spanning tree protocols enabled on the device
+
+try:
+    api_response = api_instance.get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol(enabled_protocol)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSpanningTreeApi->get_llist_openconfig_spanning_tree_stp_global_config_enabled_protocol: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **enabled_protocol** | **str**| List of the spanning tree protocols enabled on the device | 
+
+### Return type
+
+[**GetOpenconfigSpanningTreeStpGlobalConfigEnabledProtocol**](GetOpenconfigSpanningTreeStpGlobalConfigEnabledProtocol.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/yang-data+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan**
+> GetOpenconfigSpanningTreeStpMstpMstInstancesMstInstanceConfigVlan get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(mst_id, vlan)
+
+
+
+OperationId: get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan list of vlans mapped to the MST instance
+
+### Example
+```python
+from __future__ import print_function
+import time
+import openconfig_spanning_tree_client
+from openconfig_spanning_tree_client.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = openconfig_spanning_tree_client.OpenconfigSpanningTreeApi()
+mst_id = 56 # int | Reference to the list key
+vlan = 'vlan_example' # str | list of vlans mapped to the MST instance
+
+try:
+    api_response = api_instance.get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan(mst_id, vlan)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling OpenconfigSpanningTreeApi->get_llist_openconfig_spanning_tree_stp_mstp_mst_instances_mst_instance_config_vlan: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **mst_id** | **int**| Reference to the list key | 
+ **vlan** | **str**| list of vlans mapped to the MST instance | 
+
+### Return type
+
+[**GetOpenconfigSpanningTreeStpMstpMstInstancesMstInstanceConfigVlan**](GetOpenconfigSpanningTreeStpMstpMstInstancesMstInstanceConfigVlan.md)
 
 ### Authorization
 
