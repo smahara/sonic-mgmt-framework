@@ -31,72 +31,42 @@ def generate_body(func, args):
         keypath = [args[0]]
     elif func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile':
         keypath = []
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:name": args[0] }
     elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile':
        keypath = [args[0]]
        body = { "sonic-wred-profile:name": args[0] }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_min_threshold':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_min_threshold':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:yellow_min_threshold":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_min_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:yellow_min_threshold": 0 }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_max_threshold':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_max_threshold':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:yellow_max_threshold":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_max_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:yellow_max_threshold": 0 }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_drop_rate':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_drop_rate':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:yellow_drop_rate":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_yellow_drop_rate':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:yellow_drop_rate": 0 }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_green_min_threshold':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_min_threshold':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:green_min_threshold":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_green_min_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:green_min_threshold": 0 }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_green_max_threshold':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_max_threshold':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:green_max_threshold":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_green_max_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:green_max_threshold": 0 }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_green_drop_rate':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_drop_rate':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:green_drop_rate":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_green_drop_rate':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:green_drop_rate": 0 }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_red_min_threshold':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_min_threshold':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:red_min_threshold":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_red_min_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:red_min_threshold": 0 }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_red_max_threshold':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_max_threshold':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:red_max_threshold":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_red_max_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:red_max_threshold": 0 }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_red_drop_rate':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_drop_rate':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:red_drop_rate":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_red_drop_rate':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:red_drop_rate": 0 }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_ecn':
+    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_ecn':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:ecn":  (args[1]) }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_ecn':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:ecn": "ecn_none" }
     else:
        body = {}
 
@@ -130,7 +100,7 @@ def run(func, args):
             if api_response is None:
                 print("Failed")
             else:
-                if func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile_wred_profile':
+                if func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list':
                      show_cli_output(args[1], api_response)
                 elif func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile':
                      show_cli_output(args[0], api_response)
