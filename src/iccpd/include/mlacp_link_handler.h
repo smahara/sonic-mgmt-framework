@@ -52,6 +52,8 @@ int mlacp_fsm_arp_set(char *ifname, uint32_t ip, char *mac);
 int mlacp_fsm_arp_del(char *ifname, uint32_t ip);
 void del_mac_from_chip(struct MACMsg* mac_msg);
 void add_mac_to_chip(struct MACMsg* mac_msg, uint8_t mac_type);
+void del_l2mc_from_chip(struct L2MCMsg* l2mc_msg);
+void add_l2mc_to_chip(struct L2MCMsg* l2mc_msg, uint8_t l2mc_type);
 uint8_t set_mac_local_age_flag(struct CSM *csm, struct MACMsg* mac_msg, uint8_t set, uint8_t update_peer);
 
 extern int mclagd_ctl_sock_create();
