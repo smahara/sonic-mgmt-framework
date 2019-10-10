@@ -55,6 +55,22 @@ limitations under the License.
                     >
                  </PARAM>
              </PARAM>
+
+             <PARAM
+                 name="PortChannel"
+                 help="PortChannel Interface"
+                 ptype="SUBCOMMAND"
+                 mode="subcommand"
+                 >
+                 <PARAM
+                    name="po-id"
+                    help="Port Channel ID"
+                    ptype="UINT"
+                    optional="true"
+                    >
+                 </PARAM>
+             </PARAM>
+
              <PARAM
                  name="status"
                  help="Physical interfaces status"
@@ -68,6 +84,12 @@ limitations under the License.
             python $SONIC_CLI_ROOT/sonic-cli-if.py get_openconfig_interfaces_interfaces show_interface_status.j2 ${__full_line}&#xA;
         elif test "${if-subcommands}" = "counters"; then&#xA;
             python $SONIC_CLI_ROOT/sonic-cli-if.py get_openconfig_interfaces_interfaces show_interface_counters.j2 ${__full_line}&#xA;
+        elif test "${if-subcommands}" = "PortChannel"; then&#xA;
+            if test "${po-id}" = ""; then&#xA;
+                python $SONIC_CLI_ROOT/sonic-cli-port-channel.py get_all_portchannels show_portchannel.j2 ${__full_line}&#xA;
+            else&#xA;
+                python $SONIC_CLI_ROOT/sonic-cli-port-channel.py get_specific_portchannel PortChannel${po-id} show_portchannel.j2 ${__full_line}&#xA;
+            fi&#xA;
         else&#xA;
             if test "${phy-if-id}" = ""; then&#xA;
                 python $SONIC_CLI_ROOT/sonic-cli-if.py get_openconfig_interfaces_interfaces show_interface.j2 ${__full_line}&#xA;

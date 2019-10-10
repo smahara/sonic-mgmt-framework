@@ -1,0 +1,20 @@
+module openconfig-lacp-annot {
+
+    yang-version "1";
+
+    namespace "http://openconfig.net/yang/annotation";
+    prefix "oc-lacp-annot";
+
+    import openconfig-interfaces { prefix oc-if; }
+    import openconfig-yang-types { prefix oc-yang; }
+    import openconfig-extensions { prefix oc-ext; }
+
+
+    deviation oc-lacp:openconfig-lacp/oc-lacp:lacp/oc-lacp:interfaces/oc-lacp:interface/oc-lacp:state {
+      deviate add {
+          sonic-ext:subtree-transformer "lacp_get_specific_xfmr";
+      }
+    }
+
+}
+
