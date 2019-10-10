@@ -27,6 +27,5 @@
       </PARAM>
       <ACTION>builtin="clish_nop" </ACTION>
     </COMMAND>
-    
   </VIEW>
 </CLISH_MODULE>
