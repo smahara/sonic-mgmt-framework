@@ -34,6 +34,7 @@ supervisorctl start bgpcfgd
 supervisorctl start zebra
 supervisorctl start staticd
 supervisorctl start bgpd
+supervisorctl start ospfd
 supervisorctl start pimd
 supervisorctl start bfdd
 
