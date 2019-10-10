@@ -122,3 +122,7 @@
 	path = src/sonic-l2mcd
 	url = ../sonic-l2mcd.git
 	branch = broadcom_sonic
+[submodule "src/sonic-udld"]
+	path = src/sonic-udld
+	url = ../sonic-udld.git
+	branch = broadcom_sonic
