@@ -185,8 +185,13 @@ def get_path_to_pddf_plugin():
 
 def config_pddf_utils():
     device_path = get_path_to_device()
-    device_plugin_path = "/".join([device_path, "plugins"])
     pddf_path = get_path_to_pddf_plugin()
+    #  Check if the new 2.0 platform APIs exists and pddf 2.0 implementation also exist
+    if os.path.exists(device_path+'/sonic_platform') and os.path.exists(pddf_path+'/sonic_platform'):
+        device_plugin_path = "/".join([device_path,"sonic_platform"])
+    else:
+        device_plugin_path = "/".join([device_path, "plugins"])
+    
     backup_path = "/".join([device_plugin_path, "orig"])
 
     if os.path.exists(backup_path) is False:
@@ -211,7 +216,12 @@ def config_pddf_utils():
 
 def cleanup_pddf_utils():
     device_path = get_path_to_device()
-    device_plugin_path = "/".join([device_path, "plugins"])
+
+    #  Check if the new 2.0 platform APIs exists and pddf 2.0 implementation also exist
+    if os.path.exists(device_path+'/sonic_platform') and os.path.exists(pddf_path+'/sonic_platform'):
+        device_plugin_path = "/".join([device_path,"sonic_platform"])
+    else:
+        device_plugin_path = "/".join([device_path, "plugins"])
 
     backup_path = "/".join([device_plugin_path, "orig"])
     if os.path.exists(backup_path) is True:

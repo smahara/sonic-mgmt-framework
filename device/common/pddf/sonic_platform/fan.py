@@ -29,7 +29,7 @@ class Fan(FanBase):
     """PDDF generic Fan class"""
 
     def __init__(self, idx, is_psu_fan=False, psu_index=0):
-        # index is 1-based
+        # idx is 0-based and psu_index is 1-based
         global pddf_obj
         global plugin_data
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../pddf/pd-plugin.json')) as pd:
@@ -37,17 +37,17 @@ class Fan(FanBase):
 
         pddf_obj = pddfparse.PddfParse()
         self.platform = pddf_obj.get_platform()
-        if idx<1 or idx>self.platform['num_fans']:
+        if idx<0 or idx>=self.platform['num_fans']:
             print "Invalid fan index %d\n"%idx
-            return False
+            return
         
-        self.fan_index = idx
+        self.fan_index = idx+1
         self.is_psu_fan = is_psu_fan
         if self.is_psu_fan:
             self.fans_psu_index = psu_index
 
         self.is_rear = False #TODO: Should this be included in __init__ arguments
-        self.fantray_index = idx #TODO: Should this be included in __init__ arguments
+        self.fantray_index = idx+1 #TODO: Should this be included in __init__ arguments
 
     def get_name(self):
         """
@@ -125,23 +125,37 @@ class Fan(FanBase):
             attr = "psu_fan_dir"
             device = "PSU{}".format(self.fans_psu_index)
             path = pddf_obj.get_path(device, "psu_fan_dir")
+            if path is None:
+                return None
+            try:
+                with open(path, 'r') as f:
+                    val = f.read()
+            except IOError:
+                return None
+
+            vmap = plugin_data['PSU']['direction']['valmap']
+            if val.rstrip('\n') in vmap:
+                direction = vmap[val.rstrip('\n')]
+            else:
+                direction = val
+
         else:
             attr = "fan" + str(self.fan_index) + "_direction"
             path = pddf_obj.get_path("FAN-CTRL", attr)
         
-        if path is None:
-            return None
-        try:
-            with open(path, 'r') as f:
-                val = f.read()
-        except IOError:
-            return None
+            if path is None:
+                return None
+            try:
+                with open(path, 'r') as f:
+                    val = f.read()
+            except IOError:
+                return None
 
-        vmap = plugin_data['FAN']['direction']['valmap']
-        if val.rstrip('\n') in vmap:
-            direction = vmap[val.rstrip('\n')]
-        else:
-            direction = val
+            vmap = plugin_data['FAN']['direction']['valmap']
+            if val.rstrip('\n') in vmap:
+                direction = vmap[val.rstrip('\n')]
+            else:
+                direction = val
 
         return direction
 
