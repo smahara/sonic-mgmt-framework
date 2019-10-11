@@ -293,6 +293,21 @@ j2 files/build_templates/config-setup.service.j2 | sudo tee $FILESYSTEM_ROOT/etc
 sudo cp $IMAGE_CONFIGS/config-setup/config-setup $FILESYSTEM_ROOT/usr/bin/config-setup
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable config-setup.service
 
+# Copy config migration hooks
+sudo mkdir -p $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d
+sudo cp $IMAGE_CONFIGS/config-setup/migration-hooks-pre/*  $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d/
+sudo mkdir -p $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d
+sudo cp $IMAGE_CONFIGS/config-setup/migration-hooks-post/*  $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d/
+for hook_dir in $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d \
+                $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d ; do
+    for hook in $(ls -1 $hook_dir/*.j2); do
+        hook_full_filename=$(basename $hook)
+        hook_file="${hook_full_filename%.*}"
+        j2 $hook | sudo tee $hook_dir/$hook_file
+        sudo rm -f $hook
+    done
+done
+
 # Copy SNMP configuration files
 sudo cp $IMAGE_CONFIGS/snmp/snmp.yml $FILESYSTEM_ROOT/etc/sonic/
 sudo cp $IMAGE_CONFIGS/snmp/snmp_wait.sh $FILESYSTEM_ROOT/usr/bin
