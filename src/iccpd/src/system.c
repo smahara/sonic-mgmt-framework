@@ -76,6 +76,7 @@ void system_init(struct System* sys)
     sys->telnet_port = 2015;
     FD_ZERO(&(sys->readfd));
     sys->readfd_count = 0;
+    sys->csm_trans_time = 0;
     sys->need_sync_team_again = 0;
     sys->need_sync_netlink_again = 0;
     scheduler_server_sock_init();

@@ -131,6 +131,9 @@ static int MACMsg_compare(const struct MACMsg *mac1, const struct MACMsg *mac2)
 
 RB_GENERATE(mac_rb_tree, MACMsg, mac_entry_rb, MACMsg_compare);
 
+
+#define WARM_REBOOT_TIMEOUT 90
+
 /*****************************************
 * Static Function
 *
@@ -739,6 +742,18 @@ void mlacp_fsm_transit(struct CSM* csm)
         return;
     }
 
+    if (csm->warm_reboot_disconn_time != 0)
+    {
+        /*After peer warm reboot and disconnect, if peer connection is not establised more than 90s, 
+           recover peer disconnection to normal process, such as add peer age flag for MACs etc*/
+        if ((time(NULL) - csm->warm_reboot_disconn_time) >= WARM_REBOOT_TIMEOUT)
+        {
+            csm->warm_reboot_disconn_time = 0;
+            ICCPD_LOG_DEBUG(__FUNCTION__, "Peer warm reboot, reconnection timeout, recover to normal reboot!");
+            mlacp_peer_disconn_handler(csm);
+        }
+    }
+
     mlacp_sync_send_heartbeat(csm);
 
     /* Dequeue msg if any*/
@@ -781,7 +796,6 @@ void mlacp_fsm_transit(struct CSM* csm)
         {
             MLACP(csm).wait_for_sync_data = 0;
             MLACP(csm).current_state = MLACP_STATE_STAGE1;
-            mlacp_resync_mac(csm);
             mlacp_resync_arp(csm);
         }
 
@@ -881,20 +895,40 @@ void mlacp_sync_mac(struct CSM* csm)
     struct MACMsg* mac_msg = NULL;
     RB_FOREACH (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb)
     {
-       mac_msg->op_type = MAC_SYNC_ADD;
-       mac_msg->age_flag &= ~MAC_AGE_PEER;
+        /*If MAC with local age flag, dont sync to peer. Such MAC only exist when peer is warm-reboot.
+          If peer is warm-reboot, peer age flag is not set when connection is lost. 
+          When MAC is aged in local switch, this MAC is not deleted for no peer age flag.
+          After warm-reboot, this MAC must be learnt by peer and sync to local switch*/
+        if (!(mac_msg->age_flag & MAC_AGE_LOCAL))
+        {
+            mac_msg->op_type = MAC_SYNC_ADD;
+            //As part of local sync do not delete peer age
+            //mac_msg->age_flag &= ~MAC_AGE_PEER;
 
-       if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
-       {
-           TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
-       }
+            if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
+            {
+                TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
+            }
 
-       ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface %s, "
-           "MAC %s vlan %d, age_flag %d", mac_msg->ifname,
-           mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+            ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface %s, "
+                    "MAC %s vlan %d, age_flag %d", mac_msg->ifname,
+                    mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+        }
+        else
+        {
+            /*If MAC with local age flag and is point to MCLAG enabled port, reomove local age flag*/
+            if (strcmp(mac_msg->ifname, csm->peer_itf_name) != 0)
+            {
+                ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list not enqueue for local age flag: %s, mac %s vlan-id %d, age_flag %d, remove local age flag",
+                        mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+                mac_msg->age_flag &= ~MAC_AGE_LOCAL;
+            }
+        }
     }
     return;
 }
+
+
 /******************************************
 * When peerlink ready, prepare the MACMsg
 *
@@ -1353,9 +1387,12 @@ static void mlacp_exchange_handler(struct CSM* csm, struct Msg* msg)
     /*If peer is warm reboot*/
     if (csm->peer_warm_reboot_time != 0)
     {
-        /*Peer warm reboot timeout, recover to normal reboot*/
-        if ((time(NULL) - csm->peer_warm_reboot_time) >= 90)
+        /*Peer warm reboot timeout(connection is not broken more than 90s), recover to normal reboot*/
+        if ((time(NULL) - csm->peer_warm_reboot_time) >= WARM_REBOOT_TIMEOUT)
+        {
             csm->peer_warm_reboot_time = 0;
+            ICCPD_LOG_DEBUG(__FUNCTION__, "Peer warm reboot timeout, recover to normal reboot!");
+        }
     }
 
     return;

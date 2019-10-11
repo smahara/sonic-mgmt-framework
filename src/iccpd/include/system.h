@@ -191,6 +191,7 @@ struct System
     int telnet_port;
     fd_set readfd; /*record socket need to listen*/
     int readfd_count;
+    time_t csm_trans_time;
     int need_sync_team_again;
     int need_sync_netlink_again;
 
