@@ -3,6 +3,7 @@ import time
 import json
 import ast
 import sonic_wred_profile_client
+from rpipe_utils import pipestr
 from sonic_wred_profile_client.rest import ApiException
 from scripts.render_cli import show_cli_output
 
@@ -131,6 +132,7 @@ def run(func, args):
 
 if __name__ == '__main__':
 
+    pipestr().write(sys.argv)
     func = eval(sys.argv[1], globals(), sonic_wred_profile_client.SonicWredProfileApi.__dict__)
 
     run(func, sys.argv[2:])
