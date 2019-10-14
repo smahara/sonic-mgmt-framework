@@ -112,7 +112,7 @@ int mlacp_fsm_arp_set(char *ifname, uint32_t ip, char *mac)
     int rc;
     int sock_fd = 0;
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Set arp entry for IP:%s  MAC:%s  ifname:%s\n", show_ip_str(htonl(ip)), mac, ifname);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Set arp entry for IP:%s  MAC:%s  ifname:%s", show_ip_str(htonl(ip)), mac, ifname);
 
     if (ifname == NULL || ip == 0 || mac == NULL)
     {
@@ -166,7 +166,7 @@ int mlacp_fsm_arp_del(char *ifname, uint32_t ip)
     int rc;
     int sock_fd = 0;
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "%s: Del arp entry for IP : %s\n", __FUNCTION__, show_ip_str(htonl(ip)));
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Del arp entry for IP : %s ifname:%s", show_ip_str(htonl(ip)), ifname);
 
     if (ifname == NULL || ip == 0)
     {
@@ -1511,9 +1511,8 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type)
     mac_info->op_type = mac_msg->op_type;
     msg_hdr->len = sizeof(struct IccpSyncdHDr) + sizeof(struct mclag_fdb_info);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "fd %d write mac msg vid : %d ; ifname %s ; "
-        "mac %s fdb type %d ; op type %d  ", sys->sync_fd, mac_info->vid,
-        mac_info->port_name, mac_addr_to_str(mac_info->mac), mac_info->type, mac_info->op_type);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "write mac msg vid : %d ; ifname %s ; mac %s fdb type %s ; op type %s",
+                    mac_info->vid, mac_info->port_name, mac_info->mac, mac_info->type == MAC_TYPE_STATIC ? "static" : "dynamic", mac_info->op_type == MAC_SYNC_ADD ? "add" : "del");
 
     /*send msg*/
     if (sys->sync_fd > 0 )
@@ -1594,8 +1593,8 @@ uint8_t set_mac_local_age_flag(struct CSM *csm, struct MACMsg* mac_msg, uint8_t 
             new_age_flag |= MAC_AGE_LOCAL;
 
             ICCPD_LOG_DEBUG(__FUNCTION__, "After local age set, flag: %d interface %s, "
-                "MAC %s vlan-id %d, old age_flag %d", new_age_flag, mac_msg->ifname,
-                mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+                    "MAC %s vlan-id %d, old age_flag %d", new_age_flag, mac_msg->ifname,
+                    mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
 
             /*send mac MAC_SYNC_DEL message to peer*/
             if ((MLACP(csm).current_state == MLACP_STATE_EXCHANGE) && update_peer)
@@ -1607,12 +1606,11 @@ uint8_t set_mac_local_age_flag(struct CSM *csm, struct MACMsg* mac_msg, uint8_t 
                 }
 
                 ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface: %s, oper: %d "
-                "MAC %s vlan-id %d, age_flag %d", mac_msg->ifname, mac_msg->op_type,
-                mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+                        "MAC %s vlan-id %d, age_flag %d", mac_msg->ifname, mac_msg->op_type,
+                        mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
             }
         }
     }
-
     return new_age_flag;
 }
 
@@ -1780,6 +1778,29 @@ static void mlacp_conn_handler_fdb(struct CSM* csm)
         return;
     ICCPD_LOG_DEBUG(__FUNCTION__, " Sync MAC addresses to peer ");
     mlacp_sync_mac(csm);
+    return;
+}
+
+static void mlacp_fix_bridge_mac(struct CSM* csm)
+{
+    char syscmd[128];
+    int ret = 0;
+    char macaddr[64];
+    uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+    if (memcmp(MLACP(csm).system_id, null_mac, ETHER_ADDR_LEN) != 0)
+    {
+        memset(macaddr, 0, 64);
+        snprintf(macaddr, 64, "%02x:%02x:%02x:%02x:%02x:%02x",
+             MLACP(csm).system_id[0], MLACP(csm).system_id[1], MLACP(csm).system_id[2],
+             MLACP(csm).system_id[3], MLACP(csm).system_id[4], MLACP(csm).system_id[5]);
+
+        /*When changing the mac of a vlan member port, the mac of Bridge will be changed.*/
+        /*The Bridge mac can not be the same as peer system id, so fix the Bridge MAC address here.*/
+        sprintf(syscmd, "ip link set dev Bridge address %s > /dev/null 2>&1", macaddr);
+        ret = system(syscmd);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "  %s  ret = %d", syscmd, ret);
+    }
 
     return;
 }
@@ -1792,7 +1813,7 @@ void mlacp_peer_conn_handler(struct CSM* csm)
 {
     struct LocalInterface *lif = NULL;
     struct PeerInterface* peer_if;
-    static int first_time = 0;
+    static int once_connected = 0;
     struct System* sys = NULL;
 
     if (!csm)
@@ -1803,6 +1824,13 @@ void mlacp_peer_conn_handler(struct CSM* csm)
         ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
     }
+    if (csm->warm_reboot_disconn_time != 0)
+    {
+        /*If peer reconnected, reset peer disconnect time*/
+        csm->warm_reboot_disconn_time = 0;
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer warm reboot and reconnect, reset peer disconnect time!");
+    }
+
 
     if (csm->peer_link_if)
     {
@@ -1814,14 +1842,16 @@ void mlacp_peer_conn_handler(struct CSM* csm)
         (csm->role_type == STP_ROLE_STANDBY) ? "standby" : "active");
 
     /*If peer connect again, don't flush FDB*/
-    if (first_time == 0)
+    if (once_connected == 0)
     {
-        first_time = 1;
+        once_connected = 1;
+        mlacp_fix_bridge_mac(csm);
         /*If warm reboot, don't flush FDB*/
         if (sys->warmboot_start != WARM_REBOOT)
             mlacp_clean_fdb();
     }
 
+    sys->csm_trans_time = time(NULL);
     mlacp_conn_handler_fdb(csm);
 
 #if 0
@@ -1901,11 +1931,14 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
     if (sys->warmboot_exit == WARM_REBOOT)
         return;
 
-    /*If peer is warm reboot, don't change FDB and MAC address*/
     if (csm->peer_warm_reboot_time != 0)
     {
         /*If peer disconnected, recover peer to normal reboot for next time*/
         csm->peer_warm_reboot_time = 0;
+        /*peer connection must be establised again within 90s
+          from last disconnection for peer warm reboot*/
+        time(&csm->warm_reboot_disconn_time);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer warm reboot and disconnect, recover to normal reboot for next time!");
         return;
     }
 
@@ -2200,9 +2233,10 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
     mac_msg->vid = vid;
 
     mac_msg->age_flag = 0;
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Recv MAC msg vid %d mac %s port %s optype %s ", vid, mac_addr_to_str(mac_addr), ifname, op_type == MAC_SYNC_ADD ? "add" : "del");
 
     /*Debug*/
-    #if 1
+    #if 0
     /* dump receive MAC info*/
     fprintf(stderr, "\n======== MAC Update==========\n");
     fprintf(stderr, "  MAC    =  %s \n", mac_addr_to_str(mac_addr));

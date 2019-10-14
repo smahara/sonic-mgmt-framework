@@ -484,6 +484,13 @@ void session_client_conn_handler(struct CSM *csm)
     int connFd = -1, connStat = -1;
     struct timeval con_tv;
     socklen_t len = sizeof(con_tv);
+    int err = 0;
+
+    struct sockaddr_in src_addr;
+    bzero(&(src_addr), sizeof(src_addr));
+    src_addr.sin_family = PF_INET;
+    src_addr.sin_port = 0;
+    src_addr.sin_addr.s_addr = inet_addr(csm->sender_ip);
 
     /* Lock the thread*/
     session_conn_thread_lock(&csm->conn_mutex);
@@ -511,6 +518,13 @@ void session_client_conn_handler(struct CSM *csm)
     if (setsockopt(connFd, SOL_SOCKET, SO_SNDTIMEO, &con_tv, len) == -1)
     {
         ICCPD_LOG_INFO(__FUNCTION__, "Set socket timeout fail");
+    }
+
+    err = bind(connFd, (struct sockaddr*)&(src_addr), sizeof(src_addr));
+    if (err < 0)
+    {
+        ICCPD_LOG_INFO(__FUNCTION__, "Bind socket failed. Error = %d errno = %d ",err,errno);
+        goto conn_fail;
     }
 
     /* Try conn*/
@@ -615,16 +629,16 @@ void scheduler_server_sock_init()
 {
     int optval = 1;
     struct System* sys = NULL;
-    struct sockaddr_in svr_addr;
+    struct sockaddr_in src_addr;
 
     if ((sys = system_get_instance()) == NULL)
         return;
 
     sys->server_fd = socket(PF_INET, SOCK_STREAM, 0);
-    bzero(&(svr_addr), sizeof(svr_addr));
-    svr_addr.sin_family = PF_INET;
-    svr_addr.sin_port = htons(ICCP_TCP_PORT);
-    svr_addr.sin_addr.s_addr = INADDR_ANY;
+    bzero(&(src_addr), sizeof(src_addr));
+    src_addr.sin_family = PF_INET;
+    src_addr.sin_port = htons(ICCP_TCP_PORT);
+    src_addr.sin_addr.s_addr = INADDR_ANY;
 
     if (sys->server_fd == -1)
     {
@@ -638,7 +652,7 @@ void scheduler_server_sock_init()
         /*return;*/
     }
 
-    if (bind(sys->server_fd, (struct sockaddr*)&(svr_addr), sizeof(svr_addr)) < 0)
+    if (bind(sys->server_fd, (struct sockaddr*)&(src_addr), sizeof(src_addr)) < 0)
     {
         ICCPD_LOG_INFO(__FUNCTION__, "Bind socket failed. Error");
         return;

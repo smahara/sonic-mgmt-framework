@@ -395,9 +395,8 @@ int mlacp_prepare_for_arp_info(struct CSM* csm, char* buf, size_t max_buf_size, 
     ArpData->ipv4_addr = htonl(arp_msg->ipv4_addr);
     memcpy(ArpData->mac_addr, arp_msg->mac_addr, ETHER_ADDR_LEN);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg if name %s  mac  =%02x:%02x:%02x:%02x:%02x:%02x ", ArpData->ifname, ArpData->mac_addr[0], ArpData->mac_addr[1], ArpData->mac_addr[2],
-                    ArpData->mac_addr[3], ArpData->mac_addr[4], ArpData->mac_addr[5]);
-    ICCPD_LOG_DEBUG(__FUNCTION__, "    IP Addr = %s ", show_ip_str( ArpData->ipv4_addr));
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Send ARP messge to peer, if name %s mac %02x:%02x:%02x:%02x:%02x:%02x IP %s", ArpData->ifname, ArpData->mac_addr[0], ArpData->mac_addr[1], ArpData->mac_addr[2],
+                    ArpData->mac_addr[3], ArpData->mac_addr[4], ArpData->mac_addr[5], show_ip_str( ArpData->ipv4_addr));
 
     return msg_len;
 }

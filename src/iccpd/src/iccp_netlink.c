@@ -562,7 +562,13 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
     memset(macaddr, 0, 64);
     SET_MAC_STR(macaddr, MLACP(csm).remote_system.system_id);
     if (local_if_is_l3_mode(lif_po))
-        iccp_set_interface_ipadd_mac(lif_po, macaddr );
+    {
+        if (memcmp(lif_po->l3_mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN) != 0)
+        {
+            iccp_set_interface_ipadd_mac(lif_po, macaddr );
+            memcpy(lif_po->l3_mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
+        }
+    }
     else
     {
         LIST_FOREACH(vlan, &(lif_po->vlan_list), port_next)
@@ -573,6 +579,8 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
             /*If the po is under a vlan, update vlan mac*/
             if (local_if_is_l3_mode(vlan->vlan_itf))
             {
+                if (memcmp(vlan->vlan_itf->l3_mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN) != 0)
+                {
                 ret =  iccp_netlink_if_hwaddr_set(vlan->vlan_itf->ifindex,  MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
                 if (ret != 0)
                 {
@@ -580,6 +588,8 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
                 }
 
                 iccp_set_interface_ipadd_mac(vlan->vlan_itf, macaddr );
+                    memcpy(vlan->vlan_itf->l3_mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
+                }
             }
         }
     }
@@ -628,7 +638,10 @@ void recover_if_ipmac_on_standby(struct LocalInterface* lif_po)
     memset(macaddr, 0, 64);
     SET_MAC_STR(macaddr, MLACP(csm).system_id);
     if (local_if_is_l3_mode(lif_po))
+    {
         iccp_set_interface_ipadd_mac(lif_po, macaddr );
+        memcpy(lif_po->l3_mac_addr, MLACP(csm).system_id, ETHER_ADDR_LEN);
+    }
     else
     {
         LIST_FOREACH(vlan, &(lif_po->vlan_list), port_next)
@@ -646,6 +659,7 @@ void recover_if_ipmac_on_standby(struct LocalInterface* lif_po)
                 }
 
                 iccp_set_interface_ipadd_mac(vlan->vlan_itf, macaddr);
+                memcpy(vlan->vlan_itf->l3_mac_addr, MLACP(csm).system_id, ETHER_ADDR_LEN);
             }
         }
     }
@@ -846,6 +860,7 @@ int iccp_local_if_addr_update(struct nl_msg *msg, void *arg)
         lif->ipv4_addr = 0;
         lif->prefixlen = 0;
         lif->l3_mode = 0;
+        memset(lif->l3_mac_addr, 0, ETHER_ADDR_LEN);
     }
 
     len = n->nlmsg_len - NLMSG_LENGTH(sizeof(struct ifaddrmsg));
@@ -1253,7 +1268,7 @@ static int iccp_receive_arp_packet_handler(struct System *sys)
     memcpy(mac_addr,  (char*)(a + 1), ETHER_ADDR_LEN);
     memcpy(&addr, (char*)(a + 1) + a->ar_hln, 4);
 
-    do_arp_update(ifindex, ntohl(addr), mac_addr);
+    do_arp_update_from_reply_packet(ifindex, ntohl(addr), mac_addr);
 
     return 0;
 }

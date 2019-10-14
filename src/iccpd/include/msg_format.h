@@ -506,7 +506,7 @@ struct mclag_fdb_info
 {
     uint8_t     mac[ETHER_ADDR_LEN];
     unsigned int vid;
-    char port_name[32];
+    char port_name[MAX_L_PORT_NAME];
     short type;    /*dynamic or static*/
     short op_type; /*add or del*/
 };
