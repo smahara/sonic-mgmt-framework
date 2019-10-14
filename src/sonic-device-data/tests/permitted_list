@@ -181,3 +181,6 @@ flow_init_mode
 ifa_enable
 sai_ifa_config
 sai_eapp_config_file
+use_all_splithorizon_groups
+sai_tunnel_support
+
