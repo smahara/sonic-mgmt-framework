@@ -40,12 +40,12 @@ class Psu(PsuBase):
 
         pddf_obj = pddfparse.PddfParse()
         self.platform = pddf_obj.get_platform()
-        self.psu_index = index
+        self.psu_index = index + 1
         
         self._fan_list = []     # _fan_list under PsuBase class is a global variable, hence we need to use _fan_list per class instatiation
-        self.num_psu_fans = int(pddf_obj.get_num_psu_fans('PSU{}'.format(index)))
+        self.num_psu_fans = int(pddf_obj.get_num_psu_fans('PSU{}'.format(index+1)))
         for psu_fan_idx in range(self.num_psu_fans):
-            psu_fan = Fan(psu_fan_idx+1, True, self.psu_index)
+            psu_fan = Fan(psu_fan_idx, True, self.psu_index)
             self._fan_list.append(psu_fan)
 
 

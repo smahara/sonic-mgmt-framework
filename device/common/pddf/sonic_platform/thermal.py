@@ -24,7 +24,7 @@ class Thermal(ThermalBase):
         pddf_obj = pddfparse.PddfParse()
         self.platform = pddf_obj.get_platform()
 
-        self.thermal_index = self.platform['num_temps'] 
+        self.thermal_index = index + 1
         self.info=[]
 
     #def get_name(self):
