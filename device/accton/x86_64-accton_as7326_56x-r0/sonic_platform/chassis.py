@@ -30,6 +30,7 @@ class Chassis(ChassisBase):
     """Platform-specific Chassis class"""
 
     def __init__(self):
+        ChassisBase.__init__(self)
         for index in range(0, NUM_THERMAL):
             thermal = Thermal(index)
             self._thermal_list.append(thermal)
@@ -39,7 +40,6 @@ class Chassis(ChassisBase):
         for index in range(0, NUM_PSU):
             psu = Psu(index)
             self._psu_list.append(psu)
-        ChassisBase.__init__(self)
 
     def __read_config_db(self):
         try:

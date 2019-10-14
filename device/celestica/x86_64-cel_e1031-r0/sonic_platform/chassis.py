@@ -32,11 +32,11 @@ class Chassis(ChassisBase):
     """Platform-specific Chassis class"""
 
     def __init__(self):
+        ChassisBase.__init__(self)
         self.config_data = {}
         for index in range(0, NUM_FAN):
             fan = Fan(index)
             self._fan_list.append(fan)
-        ChassisBase.__init__(self)
 
     def __get_register_value(self, path, register):
         cmd = "echo {1} > {0}; cat {0}".format(path, register)
