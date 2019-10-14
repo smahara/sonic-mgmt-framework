@@ -255,6 +255,10 @@ sudo sed -i '/After=/s/$/ containerd.service/' $FILESYSTEM_ROOT/lib/systemd/syst
 sudo LANG=C chroot $FILESYSTEM_ROOT useradd -G sudo,docker $USERNAME -c "$DEFAULT_USERINFO" -m -s /bin/bash
 ## Create password for the default user
 echo "$USERNAME:$PASSWORD" | sudo LANG=C chroot $FILESYSTEM_ROOT chpasswd
+if [ "$sonic_asic_platform" != "vs" ]; then
+## Force password change upon first time login
+sudo LANG=C chroot $FILESYSTEM_ROOT chage -d 0 $USERNAME
+fi
 
 ## Pre-install hardware drivers
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y install      \
