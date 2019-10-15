@@ -1,9 +1,0 @@
-# Initial /etc/network/interface file for PDE
-
-# The loopback network interface
-auto lo
-iface lo inet loopback
-#
-# Enable the management network interface during boot up
-auto eth0 
-iface eth0 inet dhcp
