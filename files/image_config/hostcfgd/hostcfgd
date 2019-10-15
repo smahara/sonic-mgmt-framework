@@ -274,12 +274,11 @@ class MgmtIntfCfg:
                 if 'autoneg' in data:
                     if data['autoneg'] == "false":
                         autoneg = "off"
-                self.mgmt_intf_speed_set(key, data['speed'], mgmt_intf)
+                self.mgmt_intf_speed_set(key, data['speed'], autoneg, mgmt_intf)
 
         except:
             syslog.syslog(syslog.LOG_ERR, "{} MGMT Port Config set failed.".format(key))
 
-        syslog.syslog(syslog.LOG_ERR, "mgmt_intf after set before update app : {}\n".format(mgmt_intf))
         self.app_db.set_entry(APP_MGMT_PORT_TABLE, key, mgmt_intf)
 
     def handle_mgmt_intf_cfg(self, key, data, op):
@@ -303,7 +302,6 @@ class MgmtIntfCfg:
         if op == "ADD":
             if mgmt_intf == {}:
                 mgmt_intf["NULL"] = "NULL"
-            syslog.syslog(syslog.LOG_ERR, "mgmt_intf after set before update app :key {} : {}\n".format(cur_appdb_key, mgmt_intf))
             self.app_db.set_entry(APP_MGMT_INTF_TABLE, cur_appdb_key, mgmt_intf)
 
 
