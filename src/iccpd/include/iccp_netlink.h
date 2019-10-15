@@ -42,5 +42,7 @@ int iccp_handle_events(struct System * sys);
 void update_if_ipmac_on_standby(struct LocalInterface* lif_po);
 int iccp_sys_local_if_list_get_addr();
 
+void recover_if_ipmac_on_standby(struct LocalInterface* lif_po);
+
 #endif
 
