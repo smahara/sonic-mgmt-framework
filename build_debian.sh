@@ -506,6 +506,11 @@ build_number: ${BUILD_NUMBER:-0}
 built_by: $USER@$BUILD_HOSTNAME
 EOF
 
+## Branding file
+sudo tee $FILESYSTEM_ROOT/etc/sonic/sonic_branding.yml > /dev/null <<EOF
+product_name: '$product_name'
+EOF
+
 if [ -f sonic_debian_extension.sh ]; then
     ./sonic_debian_extension.sh $FILESYSTEM_ROOT $PLATFORM_DIR
 fi
