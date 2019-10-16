@@ -61,6 +61,7 @@ typedef enum route_manipulate_type
 *
 * ***************************************/
 char g_ipv4_str[INET_ADDRSTRLEN];
+char g_ipv6_str[INET6_ADDRSTRLEN];
 char g_iccp_mlagsyncd_recv_buf[ICCP_MLAGSYNCD_RECV_MSG_BUFFER_SIZE] = { 0 };
 
 
@@ -78,6 +79,14 @@ char *show_ip_str(uint32_t ipv4_addr)
     inet_ntop(AF_INET, &in_addr, g_ipv4_str, INET_ADDRSTRLEN);
 
     return g_ipv4_str;
+}
+
+char *show_ipv6_str(char *ipv6_addr)
+{
+    memset(g_ipv6_str, 0, sizeof(g_ipv6_str));
+    inet_ntop(AF_INET6, ipv6_addr, g_ipv6_str, INET6_ADDRSTRLEN);
+
+    return g_ipv6_str;
 }
 
 static int getHwAddr(char *buff, char *mac)
@@ -103,6 +112,7 @@ static int getHwAddr(char *buff, char *mac)
     return 0;
 }
 
+#if 0
 /* Set an entry in the ARP cache. */
 int mlacp_fsm_arp_set(char *ifname, uint32_t ip, char *mac)
 {
@@ -203,6 +213,7 @@ int mlacp_fsm_arp_del(char *ifname, uint32_t ip)
 
     return 0;
 }
+#endif
 
 static int arp_set_handler(struct CSM* csm,
                            struct LocalInterface* lif,
@@ -221,7 +232,7 @@ static int arp_set_handler(struct CSM* csm,
         goto del_arp;
 
     /* Process Add */
- add_arp:
+add_arp:
     if (MLACP(csm).current_state != MLACP_STATE_EXCHANGE)
         return 0;
 
@@ -231,7 +242,7 @@ static int arp_set_handler(struct CSM* csm,
         arp_msg = (struct ARPMsg*)msg->buf;
 
         /* only process add*/
-        if (arp_msg->op_type == ARP_SYNC_DEL)
+        if (arp_msg->op_type == NEIGH_SYNC_DEL)
             continue;
 
         /* find the ARP for lif_list*/
@@ -241,13 +252,12 @@ static int arp_set_handler(struct CSM* csm,
         sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x", arp_msg->mac_addr[0], arp_msg->mac_addr[1], arp_msg->mac_addr[2],
                 arp_msg->mac_addr[3], arp_msg->mac_addr[4], arp_msg->mac_addr[5]);
 
-        mlacp_fsm_arp_set(arp_msg->ifname, arp_msg->ipv4_addr, mac_str);
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Add dynamic ARP to kernel [%s]",
-                        show_ip_str(htonl(arp_msg->ipv4_addr)));
+        iccp_netlink_neighbor_request(AF_INET, (uint8_t *)&arp_msg->ipv4_addr, 1, arp_msg->mac_addr, arp_msg->ifname);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Add dynamic ARP to kernel [%s]", show_ip_str(arp_msg->ipv4_addr));
     }
     goto done;
 
- del_arp:
+del_arp:
     /* Process Del */
     TAILQ_FOREACH(msg, &MLACP(csm).arp_list, tail)
     {
@@ -258,16 +268,79 @@ static int arp_set_handler(struct CSM* csm,
             continue;
 
         /* don't process del*/
-        if (arp_msg->op_type == ARP_SYNC_DEL)
+        if (arp_msg->op_type == NEIGH_SYNC_DEL)
             continue;
 
-        mlacp_fsm_arp_del(arp_msg->ifname, arp_msg->ipv4_addr);
-        /* link broken, del all static arp on the lif*/
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Del dynamic ARP [%s]",
-                        show_ip_str(htonl(arp_msg->ipv4_addr)));
+        iccp_netlink_neighbor_request(AF_INET, (uint8_t *)&arp_msg->ipv4_addr, 0, arp_msg->mac_addr, arp_msg->ifname);
+        /* link broken, del all dynamic arp on the lif */
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Del dynamic ARP [%s]", show_ip_str(arp_msg->ipv4_addr));
     }
 
- done:
+done:
+    return 0;
+}
+
+static int ndisc_set_handler(struct CSM *csm, struct LocalInterface *lif, int add)
+{
+    struct Msg *msg = NULL;
+    struct NDISCMsg *ndisc_msg = NULL;
+    char mac_str[18] = "";
+
+    if (!csm || !lif)
+        return 0;
+
+    if (add)
+        goto add_ndisc;
+    else
+        goto del_ndisc;
+
+    /* Process Add */
+add_ndisc:
+    if (MLACP(csm).current_state != MLACP_STATE_EXCHANGE)
+        return 0;
+
+    TAILQ_FOREACH(msg, &MLACP(csm).ndisc_list, tail)
+    {
+        mac_str[0] = '\0';
+        ndisc_msg = (struct NDISCMsg *)msg->buf;
+
+        /* only process add */
+        if (ndisc_msg->op_type == NEIGH_SYNC_DEL)
+            continue;
+
+        /* find the ND for lif_list */
+        if (strcmp(lif->name, ndisc_msg->ifname) != 0)
+            continue;
+
+        sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x", ndisc_msg->mac_addr[0], ndisc_msg->mac_addr[1], ndisc_msg->mac_addr[2],
+                ndisc_msg->mac_addr[3], ndisc_msg->mac_addr[4], ndisc_msg->mac_addr[5]);
+
+        iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_msg->ipv6_addr, 1, ndisc_msg->mac_addr, ndisc_msg->ifname);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Add dynamic ND to kernel [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
+    }
+    goto done;
+
+del_ndisc:
+    /* Process Del */
+    TAILQ_FOREACH(msg, &MLACP(csm).ndisc_list, tail)
+    {
+        ndisc_msg = (struct NDISCMsg *)msg->buf;
+
+        /* find the ND for lif_list */
+        if (strcmp(lif->name, ndisc_msg->ifname) != 0)
+            continue;
+
+        /* don't process del */
+        if (ndisc_msg->op_type == NEIGH_SYNC_DEL)
+            continue;
+
+        iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_msg->ipv6_addr, 1, ndisc_msg->mac_addr, ndisc_msg->ifname);
+
+        /* link broken, del all dynamic ndisc on the lif */
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Del dynamic ND [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
+    }
+
+done:
     return 0;
 }
 
@@ -294,20 +367,13 @@ static void set_route_by_linux_route(struct CSM* csm,
         return;
 
     sprintf(ipv4_dest_str, "%s", show_ip_str(htonl(local_if->ipv4_addr)));
-    ptr = strrchr(ipv4_dest_str, '.'); strcpy(ptr, ".0\0");
+    ptr = strrchr(ipv4_dest_str, '.');
+    strcpy(ptr, ".0\0");
 
-#if 1
-    /* set gw route*/
-    /*sprintf(syscmd, "ip route %s %s/%d proto static metric 200 nexthop via %s > /dev/null 2>&1",*/
+    /* set gw route */
+    /* sprintf(syscmd, "ip route %s %s/%d proto static metric 200 nexthop via %s > /dev/null 2>&1", */
     sprintf(syscmd, "ip route %s %s/%d metric 200 nexthop via %s > /dev/null 2>&1",
-            (is_add) ? "add" : "del", ipv4_dest_str, local_if->prefixlen,
-            csm->peer_ip);
-#else
-    // set interface route
-    sprintf(syscmd, "route %s -net %s/%d %s > /dev/null 2>&1",
-            (is_add) ? "add" : "del", ipv4_dest_str, local_if->prefixlen,
-            local_if->name);
-#endif
+            (is_add) ? "add" : "del", ipv4_dest_str, local_if->prefixlen, csm->peer_ip);
 
     ret = system(syscmd);
     ICCPD_LOG_DEBUG(__FUNCTION__, "  %s  ret = %d", syscmd, ret);
@@ -382,12 +448,14 @@ static void set_l3_itf_state(struct CSM *csm,
             if (strncmp(set_l3_local_if->name, VLAN_PREFIX, 4) != 0)
             {
                 arp_set_handler(csm, set_l3_local_if, 0);     /* del arp*/
+                ndisc_set_handler(csm, set_l3_local_if, 0);     /* del nd */
             }
         }
         else if (route_type == ROUTE_DEL)
         {
             /*set_route_by_linux_route(csm, set_l3_local_if, 0);*/    /*del static route by linux route tool*/
             arp_set_handler(csm, set_l3_local_if, 1);     /* add arp*/
+            ndisc_set_handler(csm, set_l3_local_if, 1); /* add nd */
         }
     }
 
@@ -1398,17 +1466,51 @@ void syn_arp_info_to_peer(struct CSM *csm, struct LocalInterface *local_if)
                 continue;
 
             arp_msg = (struct ARPMsg*)msg->buf;
-            arp_msg->op_type = ARP_SYNC_ADD;
+            arp_msg->op_type = NEIGH_SYNC_ADD;
 
             if (iccp_csm_init_msg(&msg_send, (char*)arp_msg, sizeof(struct ARPMsg)) == 0)
             {
                 TAILQ_INSERT_TAIL(&(MLACP(csm).arp_msg_list), msg_send, tail);
                 ICCPD_LOG_DEBUG( __FUNCTION__, "Enqueue ARP[ADD] for %s",
-                                 show_ip_str(htonl(arp_msg->ipv4_addr)));
+                                 show_ip_str(arp_msg->ipv4_addr));
             }
             else
                 ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to enqueue ARP[ADD] for %s",
-                                show_ip_str(htonl(arp_msg->ipv4_addr)));
+                                show_ip_str(arp_msg->ipv4_addr));
+        }
+    }
+
+    return;
+}
+
+void syn_ndisc_info_to_peer(struct CSM *csm, struct LocalInterface *local_if)
+{
+    struct Msg *msg = NULL;
+    struct NDISCMsg *ndisc_msg = NULL, *ndisc_info = NULL;
+    struct Msg *msg_send = NULL;
+
+    if (!csm || !local_if)
+        return;
+
+    if (!TAILQ_EMPTY(&(MLACP(csm).ndisc_list)))
+    {
+        TAILQ_FOREACH(msg, &MLACP(csm).ndisc_list, tail)
+        {
+            ndisc_info = (struct NDISCMsg *)msg->buf;
+
+            if (strcmp(ndisc_info->ifname, local_if->name) != 0)
+                continue;
+
+            ndisc_msg = (struct NDISCMsg *)msg->buf;
+            ndisc_msg->op_type = NEIGH_SYNC_ADD;
+
+            if (iccp_csm_init_msg(&msg_send, (char *)ndisc_msg, sizeof(struct NDISCMsg)) == 0)
+            {
+                TAILQ_INSERT_TAIL(&(MLACP(csm).ndisc_msg_list), msg_send, tail);
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Enqueue ND[ADD] for %s", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
+            }
+            else
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to enqueue ND[ADD] for %s", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
         }
     }
 
@@ -1450,6 +1552,7 @@ void update_stp_peer_link(struct CSM *csm,
             if (po_state == 1 && lif->po_active == 1)
             {
                 syn_arp_info_to_peer(csm, lif);
+                syn_ndisc_info_to_peer(csm, lif);
             }
         }
         else
@@ -1474,6 +1577,7 @@ void update_stp_peer_link(struct CSM *csm,
                 if (po_state == 1 && lif->po_active == 1)
                 {
                     syn_arp_info_to_peer(csm, vlan->vlan_itf);
+                    syn_ndisc_info_to_peer(csm, vlan->vlan_itf);
                 }
             }
         }
@@ -2282,7 +2386,7 @@ int iccp_connect_syncd()
     count = 0;
     return 0;
 
- conn_fail:
+conn_fail:
     if (count == 0)
         ICCPD_LOG_DEBUG(__FUNCTION__, "%s:%d, mclag syncd socket connect fail",
                         __FUNCTION__, __LINE__);
@@ -2838,6 +2942,9 @@ char * mclagd_ctl_cmd_str(int req_type)
         case INFO_TYPE_DUMP_ARP:
             return "dump arp";
 
+        case INFO_TYPE_DUMP_NDISC:
+            return "dump nd";
+
         case INFO_TYPE_DUMP_MAC:
             return "dump mac";
 
@@ -3064,6 +3171,46 @@ void mclagd_ctl_handle_dump_arp(int client_fd, int mclag_id)
     return;
 }
 
+void mclagd_ctl_handle_dump_ndisc(int client_fd, int mclag_id)
+{
+    char *Pbuf = NULL;
+    char buf[512] = { 0 };
+    int ndisc_num = 0;
+    int ret = 0;
+    struct mclagd_reply_hdr *hd = NULL;
+    int len_tmp = 0;
+
+    ret = iccp_ndisc_dump(&Pbuf, &ndisc_num, mclag_id);
+    if (ret != EXEC_TYPE_SUCCESS)
+    {
+        len_tmp = sizeof(struct mclagd_reply_hdr);
+        memcpy(buf, &len_tmp, sizeof(int));
+        hd = (struct mclagd_reply_hdr *)(buf + sizeof(int));
+        hd->exec_result = ret;
+        hd->info_type = INFO_TYPE_DUMP_NDISC;
+        hd->data_len = 0;
+        mclagd_ctl_sock_write(client_fd, buf, MCLAGD_REPLY_INFO_HDR);
+
+        if (Pbuf)
+            free(Pbuf);
+
+        return;
+    }
+
+    hd = (struct mclagd_reply_hdr *)(Pbuf + sizeof(int));
+    hd->exec_result = EXEC_TYPE_SUCCESS;
+    hd->info_type = INFO_TYPE_DUMP_NDISC;
+    hd->data_len = ndisc_num * sizeof(struct mclagd_ndisc_msg);
+    len_tmp = (hd->data_len + sizeof(struct mclagd_reply_hdr));
+    memcpy(Pbuf, &len_tmp, sizeof(int));
+    mclagd_ctl_sock_write(client_fd, Pbuf, MCLAGD_REPLY_INFO_HDR + hd->data_len);
+
+    if (Pbuf)
+        free(Pbuf);
+
+    return;
+}
+
 void mclagd_ctl_handle_dump_mac(int client_fd, int mclag_id)
 {
     char * Pbuf = NULL;
@@ -3250,6 +3397,10 @@ int mclagd_ctl_interactive_process(int client_fd)
 
         case INFO_TYPE_DUMP_ARP:
             mclagd_ctl_handle_dump_arp(client_fd, req->mclag_id);
+            break;
+
+        case INFO_TYPE_DUMP_NDISC:
+            mclagd_ctl_handle_dump_ndisc(client_fd, req->mclag_id);
             break;
 
         case INFO_TYPE_DUMP_MAC:
