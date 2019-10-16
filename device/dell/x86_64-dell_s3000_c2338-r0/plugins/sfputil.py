@@ -71,19 +71,9 @@ class SfpUtil(SfpUtilBase):
     def __init__(self):
 
         sfpplus_eeprom_path = "/sys/class/i2c-adapter/i2c-{0}/{0}-0050/eeprom"
-        cache_path = "/var/cache/sonic/"
-        sfpeeprom_path = "/usr/share/sonic/device/x86_64-dell_s3000_c2338-r0/plugins/sfp_eeprom" #/var/cache/sonic/sfp_eeprom
-        #if not os.path.exists(sfpeeprom_path) :
-        #    if not os.path.exists(cache_path):
-        #        os.makedirs(cache_path, 0777)
-        #    os.mknod(sfpeeprom_path)
-        for x in range(self.PORT_START, self.SFP_PORT_START):
-            self.port_to_eeprom_mapping[x] = sfpeeprom_path
 
         for x in range(self.SFP_PORT_START, self.SFP_PORT_END + 1):
             self.port_to_eeprom_mapping[x] = sfpplus_eeprom_path.format(self._sfpp_port_i2c_mapping[x])
-        for port in range(self.PORT_START, self.SFP_PORT_START) :
-            self.port_dict[port] = '1'
         # Get Transceiver status
         self.modprs_register = self.get_transceiver_status
 
@@ -95,7 +85,7 @@ class SfpUtil(SfpUtilBase):
             return False
 
         if port_num < self.SFP_PORT_START :
-            return True
+            return False
         port_num -= self.SFP_PORT_START
         try:
             reg_file = open("/sys/devices/platform/LPC/hwmon/hwmon0/sfp_modprs")
@@ -137,7 +127,7 @@ class SfpUtil(SfpUtilBase):
         elif timeout > 0:
             timeout = timeout / float(1000) # Convert to secs
         else:
-            print "get_transceiver_change_event:Invalid timeout value", timeout
+            print 'get_transceiver_change_event:Invalid timeout value', timeout
             return False, {}
 
         end_time = start_time + timeout
@@ -155,7 +145,7 @@ class SfpUtil(SfpUtilBase):
                 while port >= self.SFP_PORT_START and port <= self.SFP_PORT_END:
 
                     # Mask off the bit corresponding to our port
-                    mask = (1 << port)
+                    mask = (1 << (port - self.SFP_PORT_START))
 
                     if changed_ports & mask:
                         # ModPrsL is active low
@@ -182,4 +172,3 @@ class SfpUtil(SfpUtilBase):
                     return True, {}
         print "get_transceiver_change_event: Should not reach here."
         return False, {}
-

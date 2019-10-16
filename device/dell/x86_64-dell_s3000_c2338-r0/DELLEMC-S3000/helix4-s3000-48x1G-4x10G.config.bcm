@@ -137,6 +137,6 @@ l3_mem_entries=4096
 stat_if_parity_enable=1
 tslam_dma_enable=0
 dport_map_direct=1
-bcm56340_4x10=1
 bcm_num_cos=8
+bcm56340_4x10=1
 sai_postinit_cmd_file=/usr/share/sonic/hwsku/sai_postinit_cmd.soc
