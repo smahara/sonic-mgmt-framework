@@ -10,8 +10,8 @@ except ImportError, e:
 class SfpUtil(SfpUtilBase):
     """Platform specific SfpUtill class"""
 
-    _port_start = 0
-    _port_end = 31
+    _port_start = 1
+    _port_end = 32
     ports_in_block = 32
 
     _port_to_eeprom_mapping = {}
@@ -50,12 +50,12 @@ class SfpUtil(SfpUtilBase):
         32 : 63,
     }
 
-    _qsfp_ports = range(0, ports_in_block + 1)
+    _qsfp_ports = range(1, ports_in_block + 1)
 
     def __init__(self):
         eeprom_path = '/sys/bus/i2c/devices/{0}-0050/eeprom'
-        for x in range(0, self._port_end + 1):
-            port_eeprom_path = eeprom_path.format(self.port_to_i2c_mapping[x+1])
+        for x in range(self.port_start, self.port_end + 1):
+            port_eeprom_path = eeprom_path.format(self.port_to_i2c_mapping[x])
             self._port_to_eeprom_mapping[x] = port_eeprom_path
         SfpUtilBase.__init__(self)
 
@@ -65,7 +65,7 @@ class SfpUtil(SfpUtilBase):
             return False
 
         try:
-            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num+1)+"/reset", "r+")
+            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num)+"/reset", "r+")
         except IOError as e:
             print "Error: unable to open file: %s" % str(e)
             return False
@@ -79,7 +79,7 @@ class SfpUtil(SfpUtilBase):
 
         # Flip the value back write back to the register to take port out of reset
         try:
-            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num+1)+"/reset", "r+")
+            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num)+"/reset", "r+")
         except IOError as e:
             print "Error: unable to open file: %s" % str(e)
             return False
@@ -96,7 +96,7 @@ class SfpUtil(SfpUtilBase):
             return False
 
         try:
-            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num+1)+"/lpmode", "r+")
+            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num)+"/lpmode", "r+")
         except IOError as e:
             print "Error: unable to open file: %s" % str(e)
             return False
@@ -120,7 +120,7 @@ class SfpUtil(SfpUtilBase):
             return False
 
         try:
-            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num+1)+"/lpmode")
+            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num)+"/lpmode")
         except IOError as e:
             print "Error: unable to open file: %s" % str(e)
             return False
@@ -138,7 +138,7 @@ class SfpUtil(SfpUtilBase):
             return False
           
         try:
-            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num+1)+"/module_present")
+            reg_file = open("/sys/class/cpld-qsfpdd/port-"+str(port_num)+"/module_present")
         except IOError as e:
             print "Error: unable to open file: %s" % str(e)
             return False
@@ -159,7 +159,7 @@ class SfpUtil(SfpUtilBase):
 
     @property
     def osfp_ports(self):
-        return range(0, self.ports_in_block + 1)
+        return range(self.port_start, self.ports_in_block + 1)
 
     @property
     def qsfp_ports(self):
