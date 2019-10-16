@@ -27,6 +27,12 @@ except ImportError as e:
 
 class Fan(FanBase):
     """PDDF generic Fan class"""
+    color_map = {
+         "STATUS_LED_COLOR_GREEN" : "on",
+         "STATUS_LED_COLOR_RED" : "faulty",
+         "STATUS_LED_COLOR_OFF" : "off"
+    }
+
 
     def __init__(self, idx, is_psu_fan=False, psu_index=0):
         # idx is 0-based and psu_index is 1-based
@@ -48,6 +54,7 @@ class Fan(FanBase):
 
         self.is_rear = False #TODO: Should this be included in __init__ arguments
         self.fantray_index = idx+1 #TODO: Should this be included in __init__ arguments
+
 
     def get_name(self):
         """
@@ -254,25 +261,34 @@ class Fan(FanBase):
             #print "Done changing the speed of all the fans ... Reading the speed to crossscheck\n"
             return True
 
-    #def set_status_led(self, color):
-        #"""
-        #Sets the state of the fan module status LED
+    def set_status_led(self, color):
+        index = str(self.fan_index-1)
+        color_state="SOLID"
+        led_device_name = "FANTRAY{}".format(self.fan_index) + "_LED"
+        if(not pddf_obj.is_led_device_configured(led_device_name, index)):
+                print "Set " + led_device_name + " : is not supported in the platform"
+                return (False)
 
-        #Args:
-            #color: A string representing the color with which to set the
-                   #fan module status LED
+        pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
+        pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
+        pddf_obj.create_attr('color', self.color_map[color], pddf_obj.get_led_cur_state_path())
+        pddf_obj.create_attr('color_state', color_state, pddf_obj.get_led_cur_state_path())
+        pddf_obj.create_attr('dev_ops', 'set_status',  pddf_obj.get_led_path())
+        return (True)
 
-        #Returns:
-            #bool: True if status LED state is set successfully, False if not
-        #"""
-        #raise NotImplementedError
 
-    #def get_status_led(self):
-        #"""
-        #Gets the state of the fan status LED
+    def get_status_led(self, color):
+        index = str(self.fan_index-1)
+        led_device_name = "FANTRAY{}".format(self.fan_index) + "_LED"
+        if(not pddf_obj.is_led_device_configured(led_device_name, index)):
+                print "Read " + led_device_name  + " : is not supported in the platform"
+                return (False)
 
-        #Returns:
-            #A string, one of the predefined STATUS_LED_COLOR_* strings above
-        #"""
-        #raise NotImplementedError
+        pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
+        pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
+        pddf_obj.create_attr('dev_ops', 'get_status',  pddf_obj.get_led_path())
+        color=pddf_obj.get_led_color()
+        return (True)
+
+
 

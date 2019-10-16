@@ -27,80 +27,77 @@ class Thermal(ThermalBase):
         self.thermal_index = index + 1
         self.info=[]
 
-    #def get_name(self):
-        #"""
-        #Retrieves the name of the device
-
-        #Returns:
-            #string: The name of the device
-        #"""
-
-    #def get_temperature(self):
-        #"""
-        #Retrieves current temperature reading from thermal
-
-        #Returns:
-            #A float number of current temperature in Celsius up to nearest thousandth
-            #of one degree Celsius, e.g. 30.125
-        #"""
-        #raise NotImplementedError
+    def get_name(self):
+	device_name="TEMP{}".format(self.thermal_index)
+	return (device_name)
 
 
-    #def get_high_threshold(self):
-        #"""
-        #Retrieves the high threshold temperature of thermal
+    def get_temperature(self):
+        node = pddf_obj.get_path(self.get_name(), "temp1_input")
+        if node is None:
+	    print "ERROR %s does not exist"%node
+            return (0.0) 
+        try:
+            with open(node, 'r') as f:
+            	attr_value = int(f.read())
+        except IOError:
+	     print "ERROR cannot read " + node
+             return (0.0) 
 
-        #Returns:
-            #A float number, the high threshold temperature of thermal in Celsius
-            #up to nearest thousandth of one degree Celsius, e.g. 30.125
-        #"""
-        #raise NotImplementedError
+        return (attr_value/float(1000))
 
-    #def get_high_threshold(self):
-        #"""
-        #Retrieves the high threshold temperature of thermal
 
-        #Returns:
-            #A float number, the high threshold temperature of thermal in Celsius
-            #up to nearest thousandth of one degree Celsius, e.g. 30.125
-        #"""
-        #raise NotImplementedError
+    def get_high_threshold(self):
+        node = pddf_obj.get_path(self.get_name(), "temp1_max")
+        if node is None:
+            print "ERROR %s does not exist"%node
+            return (0.0)
+        try:
+            with open(node, 'r') as f:
+                attr_value = int(f.read())
+        except IOError:
+             print "ERROR cannot read " + node
+             return (0.0)
 
-    #def get_low_threshold(self):
-        #"""
-        #Retrieves the low threshold temperature of thermal
+        return (attr_value/float(1000))
 
-        #Returns:
-            #A float number, the low threshold temperature of thermal in Celsius
-            #up to nearest thousandth of one degree Celsius, e.g. 30.125
-        #"""
-        #raise NotImplementedError
 
-    #def set_high_threshold(self, temperature):
-        #"""
-        #Sets the high threshold temperature of thermal
+    def get_low_threshold(self):
+        node = pddf_obj.get_path(self.get_name(), "temp1_max_hyst")
+        if node is None:
+            print "ERROR %s does not exist"%node
+            return (0.0)
+        try:
+            with open(node, 'r') as f:
+                attr_value = int(f.read())
+        except IOError:
+             print "ERROR cannot read " + node
+             return (0.0)
 
-        #Args :
-            #temperature: A float number up to nearest thousandth of one degree Celsius,
-            #e.g. 30.125
+        return (attr_value/float(1000))
 
-        #Returns:
-            #A boolean, True if threshold is set successfully, False if not
-        #"""
-        #raise NotImplementedError
 
-    #def set_low_threshold(self, temperature):
-        #"""
-        #Sets the low threshold temperature of thermal
+    def set_high_threshold(self, temperature):
+        node = pddf_obj.get_path(self.get_name(), "temp1_max")
+        if node is None:
+            print "ERROR %s does not exist"%node
+            return (0.0)
+	
+	cmd = "echo '%d' > %s"%(temperature * 1000, node)
+	os.system(cmd) 
 
-        #Args :
-            #temperature: A float number up to nearest thousandth of one degree Celsius,
-            #e.g. 30.125
+        return (True)
 
-        #Returns:
-            #A boolean, True if threshold is set successfully, False if not
-        #"""
-        #raise NotImplementedError
+
+    def set_low_threshold(self, temperature):
+        node = pddf_obj.get_path(self.get_name(), "temp1_max_hyst")
+        if node is None:
+            print "ERROR %s does not exist"%node
+            return (0.0)
+	cmd = "echo '%d' > %s"%(temperature * 1000, node)
+        os.system(cmd)
+
+        return (True)
 
     def dump_sysfs(self):
         return pddf_obj.cli_dump_dsysfs('temp-sensors')

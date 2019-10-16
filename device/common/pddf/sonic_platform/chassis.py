@@ -49,20 +49,71 @@ class Chassis(ChassisBase):
         for i in range(self.platform['num_fans']):
             fan = Fan(i)
             self._fan_list.append(fan)
+            #color=""
+            #fan.get_status_led(color)
+            #print "%s"%color
+            #fan.set_status_led("STATUS_LED_COLOR_GREEN")
+            #fan.get_status_led(color)
+            #print "%s"%color
+
 
         for i in range(self.platform['num_psus']):
             psu = Psu(i)
+            self._psu_list.append(psu)
             # for testing, remove the below lines later on 
             #print "%s"%psu.get_name()
             #print "Status: %d"%psu.get_status()
             #print "Model: %s"%psu.get_model()
             #print "FanName: %s"%psu._fan_list[0].get_name()
             #print "FanSpeed: %d%%"%psu._fan_list[0].get_speed()
-            self._psu_list.append(psu)
+            #color=""
+            #psu.get_status_led(color)
+            #print "%s"%color
+            #psu.set_status_led("STATUS_LED_COLOR_GREEN")
+            #psu.get_status_led(color)
+            #print "%s"%color
 
         for i in range(self.platform['num_temps']):
             thermal = Thermal(i)
             self._thermal_list.append(thermal)
+	    # Thermal Test Cases
+            #temp=thermal.get_temperature()
+            #high=thermal.get_high_threshold()
+            #hyst=thermal.get_low_threshold()
+            #value="TEMP%d\t %+.1f C (high = %+.1f C, hyst = %+.1f C)" % (i, temp, high, hyst)
+            #print value
+            #thermal.set_high_threshold(80.0)
+            #thermal.set_low_threshold(75.0)
+            #value="TEMP%d\t %+.1f C (high = %+.1f C, hyst = %+.1f C)" % (i, thermal.get_temperature(), thermal.get_high_threshold(), thermal.get_low_threshold())
+            #print value
+            #thermal.set_high_threshold(high)
+            #thermal.set_low_threshold(hyst)
+            #value="TEMP%d\t %+.1f C (high = %+.1f C, hyst = %+.1f C)" % (i, thermal.get_temperature(), thermal.get_high_threshold(), thermal.get_low_threshold())
+            #print value
+
+
+	# SYSTEM LED Test Cases 
+	"""
+	#comment out test cases
+	sys_led_list= { "LOC":0,
+			"DIAG":0, 
+			"FAN":0,
+			"SYS":0, 
+			"PSU1":0,
+			"PSU2":1
+		      }  
+
+	for led in sys_led_list:
+		color=self.get_system_led(led, sys_led_list[led])
+		print color
+
+	self.set_system_led("LOC", 0, "STATUS_LED_COLOR_GREEN")
+	color=self.get_system_led("LOC", 0)
+	print "Set Green: " + color
+	self.set_system_led("LOC", 0, "STATUS_LED_COLOR_OFF")
+	color=self.get_system_led("LOC", 0)
+	print "Set off: " + color
+	"""
 
     def get_name(self):
         """
@@ -405,6 +456,41 @@ class Chassis(ChassisBase):
                              index, len(self._sfp_list)-1))
 
         return sfp
+
+    ##############################################
+    # System LED  methods
+    ##############################################
+    color_map = {
+         "STATUS_LED_COLOR_GREEN" : "on",
+         "STATUS_LED_COLOR_RED" : "faulty",
+         "STATUS_LED_COLOR_OFF" : "off"
+    }
+
+    def set_system_led(self, device_name, index, color):
+        color_state="SOLID"
+	led_device_name=device_name + "_LED"
+        if(not pddf_obj.is_led_device_configured(led_device_name, str(index))):
+                return (False)
+
+        pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
+        pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
+        pddf_obj.create_attr('color', self.color_map[color], pddf_obj.get_led_cur_state_path())
+        pddf_obj.create_attr('color_state', color_state, pddf_obj.get_led_cur_state_path())
+        pddf_obj.create_attr('dev_ops', 'set_status',  pddf_obj.get_led_path())
+        return (True)
+
+
+    def get_system_led(self, device_name, index):
+	led_device_name=device_name + "_LED"
+        if(not pddf_obj.is_led_device_configured(led_device_name, str(index))):
+                return ("Not Supported")
+
+        pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
+        pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
+        pddf_obj.create_attr('dev_ops', 'get_status',  pddf_obj.get_led_path())
+        color=pddf_obj.get_led_color()
+        return (color)
+
 
     ##############################################
     # Other methods

@@ -31,6 +31,13 @@ except ImportError as e:
 class Psu(PsuBase):
     """PDDF generic PSU util class"""
 
+    color_map = {
+         "STATUS_LED_COLOR_GREEN" : "on",
+         "STATUS_LED_COLOR_RED" : "faulty",
+         "STATUS_LED_COLOR_OFF" : "off"
+    }
+
+
     def __init__(self, index):
         PsuBase.__init__(self)
         global pddf_obj
@@ -47,7 +54,6 @@ class Psu(PsuBase):
         for psu_fan_idx in range(self.num_psu_fans):
             psu_fan = Fan(psu_fan_idx, True, self.psu_index)
             self._fan_list.append(psu_fan)
-
 
     def get_num_fans(self):
         """
@@ -246,27 +252,34 @@ class Psu(PsuBase):
         """
         return self.get_status()
 
-    #def set_status_led(self, color):
-        #"""
-        #Sets the state of the PSU status LED
+    def set_status_led(self, color):
+        index = str(self.psu_index-1)
+        color_state="SOLID"
+        led_device_name = "PSU{}".format(self.psu_index) + "_LED"
+        if(not pddf_obj.is_led_device_configured(led_device_name, index)):
+		print "Set " + led_device_name + " : is not supported in the platform"
+                return (False)
 
-        #Args:
-            #color: A string representing the color with which to set the
-                   #PSU status LED
+        pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
+        pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
+        pddf_obj.create_attr('color', self.color_map[color], pddf_obj.get_led_cur_state_path())
+        pddf_obj.create_attr('color_state', color_state, pddf_obj.get_led_cur_state_path())
+        pddf_obj.create_attr('dev_ops', 'set_status',  pddf_obj.get_led_path())
+        return (True)
 
-        #Returns:
-            #bool: True if status LED state is set successfully, False if not
-        #"""
-        #raise NotImplementedError
 
-    #def get_status_led(self):
-        #"""
-        #Gets the state of the PSU status LED
+    def get_status_led(self, color):
+        index = str(self.psu_index-1)
+        led_device_name = "PSU{}".format(self.psu_index) + "_LED"
+        if(not pddf_obj.is_led_device_configured(led_device_name, index)):
+		print "Set " + led_device_name + " : is not supported in the platform"
+                return (False)
 
-        #Returns:
-            #A string, one of the predefined STATUS_LED_COLOR_* strings above
-        #"""
-        #raise NotImplementedError
+        pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
+        pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
+        pddf_obj.create_attr('dev_ops', 'get_status',  pddf_obj.get_led_path())
+        color=pddf_obj.get_led_color()
+        return (True)
 
     def dump_sysfs(self):
         return pddf_obj.cli_dump_dsysfs('psu')
