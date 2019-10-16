@@ -76,7 +76,7 @@ def run(func, args):
         if api_response is None:
             print ("Success")
         else:
-            api_response = aa.api_client.sanitize_for_serialization(api_response)
+            #api_response = aa.api_client.sanitize_for_serialization(api_response)
 	    if 'ztp-status' in sys.argv:
 	        show_cli_output(sys.argv[2],temp_resp)
    	    else:
