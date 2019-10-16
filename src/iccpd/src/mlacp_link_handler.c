@@ -1071,7 +1071,8 @@ void update_peerlink_isolate_from_all_csm_lif(
             if (strlen(mlag_po_buf) != 0)
                 dst_len += snprintf(mlag_po_buf + dst_len, sizeof(mlag_po_buf) - dst_len, "%s", ",");
 
-            dst_len += snprintf(mlag_po_buf + dst_len, sizeof(mlag_po_buf) - dst_len, "%s", lif->portchannel_member_buf);
+            dst_len += snprintf(mlag_po_buf + dst_len, sizeof(mlag_po_buf) - dst_len, "%s,%s",
+                                lif->name, lif->portchannel_member_buf);
         }
     }
 
