@@ -4,7 +4,7 @@
 #
 
 
-import os.path
+import os
 
 try:
     from sonic_psu.psu_base import PsuBase
@@ -23,7 +23,7 @@ class PsuUtil(PsuBase):
         PsuBase.__init__(self)
 
     def get_cpld_register(self, reg_name):
-        cpld_dir = "/sys/devices/platform/LPC/hwmon/hwmon0"
+        cpld_dir = "/sys/devices/platform/LPC/hwmon/" + os.listdir('/sys/devices/platform/LPC/hwmon')[0]
         retval = 'ERR'
         reg_file = cpld_dir +'/' + reg_name
         if (not os.path.isfile(reg_file)):
