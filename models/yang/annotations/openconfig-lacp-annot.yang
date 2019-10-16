@@ -10,6 +10,12 @@ module openconfig-lacp-annot {
     import openconfig-extensions { prefix oc-ext; }
     import openconfig-lacp { prefix oc-lacp; }
 
+    deviation /oc-lacp:lacp/oc-lacp:interfaces {
+      deviate add {
+          sonic-ext:subtree-transformer "lacp_get_xfmr";
+      }
+    }
+
     deviation /oc-lacp:lacp/oc-lacp:interfaces/oc-lacp:interface/oc-lacp:state {
       deviate add {
           sonic-ext:subtree-transformer "lacp_get_specific_xfmr";

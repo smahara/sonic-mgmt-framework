@@ -11,6 +11,7 @@ import (
 
 func init () {
     XlateFuncBind("DbToYang_lacp_get_specific_xfmr", DbToYang_lacp_get_specific_xfmr)
+    XlateFuncBind("DbToYang_lacp_get_xfmr", DbToYang_lacp_get_xfmr)
 }
 
 func getLacpRoot (s *ygot.GoStruct) *ocbinds.OpenconfigLacp_Lacp {
@@ -143,3 +144,27 @@ var DbToYang_lacp_get_specific_xfmr  SubTreeXfmrDbToYang = func(inParams XfmrPar
     return err
 
 }
+
+var DbToYang_lacp_get_xfmr  SubTreeXfmrDbToYang = func(inParams XfmrParams) error {
+    lacpIntfsObj := getLacpRoot(inParams.ygRoot)
+    pathInfo := NewPathInfo(inParams.uri)
+    targetUriPath, err := getYangPathFromUri(pathInfo.Path)
+
+    log.Infof("Received GET for path: %s; template: %s vars: %v targetUriPath: %s", pathInfo.Path, pathInfo.Template, pathInfo.Vars, targetUriPath)
+
+    var lagTblTs = &db.TableSpec{Name: "LAG_TABLE"}
+    tbl, err := app.appDB.GetTable(lagTblTs)
+
+    if err != nil {
+        log.Error("App-DB get for list of portchannels failed!")
+        return err
+    }
+    keys, _ := tbl.GetKeys()
+    for _, key := range keys {
+        portChannelName := key.Get(0)
+        log.Infof("PortChannel: %s\n", portChannelName)
+    }
+
+    return err
+}
+

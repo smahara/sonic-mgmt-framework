@@ -32,6 +32,13 @@ module sonic-common {
 		}
 	}
 
+        typedef oper-status {
+                type enumeration {
+                        enum up;
+                        enum down;
+                }
+        }
+
 
 	container operation {
 		leaf operation {
