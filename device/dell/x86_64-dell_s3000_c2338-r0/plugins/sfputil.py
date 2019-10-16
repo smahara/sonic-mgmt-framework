@@ -55,7 +55,8 @@ class SfpUtil(SfpUtilBase):
     def get_transceiver_status(self):
 
         try:
-            reg_file = open("/sys/devices/platform/LPC/hwmon/hwmon1/sfp_modprs")
+            sfp_modprs_path = "/sys/devices/platform/LPC/hwmon/" + os.listdir('/sys/devices/platform/LPC/hwmon')[0] + "/sfp_modprs"
+            reg_file = open(sfp_modprs_path)
 
         except IOError as e:
             print "Error: unable to open file: %s" % str(e)
@@ -88,7 +89,8 @@ class SfpUtil(SfpUtilBase):
             return False
         port_num -= self.SFP_PORT_START
         try:
-            reg_file = open("/sys/devices/platform/LPC/hwmon/hwmon1/sfp_modprs")
+            sfp_modprs_path = "/sys/devices/platform/LPC/hwmon/" + os.listdir('/sys/devices/platform/LPC/hwmon')[0] + "/sfp_modprs"
+            reg_file = open(sfp_modprs_path)
         except IOError as e:
             print "Error: unable to open file: %s" % str(e)
             return False
