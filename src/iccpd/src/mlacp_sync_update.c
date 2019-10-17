@@ -484,9 +484,35 @@ void mlacp_enqueue_arp(struct CSM* csm, struct Msg* msg)
         return;
 
     arp_msg = (struct ARPMsg*)msg->buf;
-    if (arp_msg->op_type != ARP_SYNC_DEL)
+    if (arp_msg->op_type != NEIGH_SYNC_DEL)
     {
         TAILQ_INSERT_TAIL(&(MLACP(csm).arp_list), msg, tail);
+    }
+
+    return;
+}
+
+/*****************************************
+ * Tool : Add Ndisc Info into ndisc list
+ *
+ ****************************************/
+void mlacp_enqueue_ndisc(struct CSM *csm, struct Msg *msg)
+{
+    struct NDISCMsg *ndisc_msg = NULL;
+
+    if (!csm)
+    {
+        if (msg)
+            free(msg);
+        return;
+    }
+    if (!msg)
+        return;
+
+    ndisc_msg = (struct NDISCMsg *)msg->buf;
+    if (ndisc_msg->op_type != NEIGH_SYNC_DEL)
+    {
+        TAILQ_INSERT_TAIL(&(MLACP(csm).ndisc_list), msg, tail);
     }
 
     return;
@@ -518,6 +544,8 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
 
     sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x", arp_entry->mac_addr[0], arp_entry->mac_addr[1], arp_entry->mac_addr[2],
             arp_entry->mac_addr[3], arp_entry->mac_addr[4], arp_entry->mac_addr[5]);
+
+    ICCPD_LOG_INFO(__FUNCTION__, "Received ARP Info, intf[%s] IP[%s], MAC[%s]", arp_entry->ifname, show_ip_str(arp_entry->ipv4_addr), mac_str);
 
     if (strncmp(arp_entry->ifname, "Vlan", 4) == 0)
     {
@@ -605,9 +633,9 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
     /* set dynamic ARP*/
     if (set_arp_flag == 1)
     {
-        if (arp_entry->op_type == ARP_SYNC_ADD)
+        if (arp_entry->op_type == NEIGH_SYNC_ADD)
         {
-            if (mlacp_fsm_arp_set(arp_entry->ifname, ntohl(arp_entry->ipv4_addr), mac_str) < 0)
+            if (iccp_netlink_neighbor_request(AF_INET, (uint8_t *)&arp_entry->ipv4_addr, 1, arp_entry->mac_addr, arp_entry->ifname) < 0)
             {
                 ICCPD_LOG_DEBUG(__FUNCTION__, "ARP add failure for %s %s %s",
                                 arp_entry->ifname, show_ip_str(arp_entry->ipv4_addr), mac_str);
@@ -616,7 +644,7 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
         }
         else
         {
-            if (mlacp_fsm_arp_del(arp_entry->ifname, ntohl(arp_entry->ipv4_addr)) < 0)
+            if (iccp_netlink_neighbor_request(AF_INET, (uint8_t *)&arp_entry->ipv4_addr, 0, arp_entry->mac_addr, arp_entry->ifname) < 0)
             {
                 ICCPD_LOG_DEBUG(__FUNCTION__, "ARP delete failure for %s %s %s",
                                 arp_entry->ifname, show_ip_str(arp_entry->ipv4_addr), mac_str);
@@ -637,7 +665,7 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
     TAILQ_FOREACH(msg, &(MLACP(csm).arp_list), tail)
     {
         arp_msg = (struct ARPMsg*)msg->buf;
-        if (arp_msg->ipv4_addr == ntohl(arp_entry->ipv4_addr))
+        if (arp_msg->ipv4_addr == arp_entry->ipv4_addr)
         {
             /*arp_msg->op_type = tlv->type;*/
             sprintf(arp_msg->ifname, "%s", arp_entry->ifname);
@@ -647,18 +675,19 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
     }
 
     /* delete/add ARP list*/
-    if (msg && arp_entry->op_type == ARP_SYNC_DEL)
+    if (msg && arp_entry->op_type == NEIGH_SYNC_DEL)
     {
         TAILQ_REMOVE(&(MLACP(csm).arp_list), msg, tail);
         free(msg->buf);
         free(msg);
         /*ICCPD_LOG_INFO(__FUNCTION__, "Del arp queue successfully");*/
     }
-    else if (!msg && arp_entry->op_type == ARP_SYNC_ADD)
+    else if (!msg && arp_entry->op_type == NEIGH_SYNC_ADD)
     {
         arp_msg = (struct ARPMsg*)&arp_data;
         sprintf(arp_msg->ifname, "%s", arp_entry->ifname);
-        arp_msg->ipv4_addr = ntohl(arp_entry->ipv4_addr);
+        arp_msg->ipv4_addr = arp_entry->ipv4_addr;
+        //arp_msg->ipv4_addr = ntohl(arp_entry->ipv4_addr);
         arp_msg->op_type = arp_entry->op_type;
         memcpy(arp_msg->mac_addr, arp_entry->mac_addr, ETHER_ADDR_LEN);
         if (iccp_csm_init_msg(&msg, (char*)arp_msg, sizeof(struct ARPMsg)) == 0)
@@ -672,7 +701,7 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
     TAILQ_FOREACH(msg, &(MLACP(csm).arp_msg_list), tail)
     {
         arp_msg = (struct ARPMsg*)msg->buf;
-        if (arp_msg->ipv4_addr == ntohl(arp_entry->ipv4_addr))
+        if (arp_msg->ipv4_addr == arp_entry->ipv4_addr)
             break;
     }
 
@@ -685,7 +714,7 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
         TAILQ_FOREACH(msg, &(MLACP(csm).arp_msg_list), tail)
         {
             arp_msg = (struct ARPMsg*)msg->buf;
-            if (arp_msg->ipv4_addr == ntohl(arp_entry->ipv4_addr))
+            if (arp_msg->ipv4_addr == arp_entry->ipv4_addr)
                 break;
         }
     }
@@ -706,6 +735,216 @@ int mlacp_fsm_update_arp_info(struct CSM* csm, struct mLACPARPInfoTLV* tlv)
     for (i = 0; i < count; i++)
     {
         mlacp_fsm_update_arp_entry(csm, &(tlv->ArpEntry[i]));
+    }
+}
+
+/*****************************************
+* NDISC-Info Update
+* ***************************************/
+int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
+{
+    struct Msg *msg = NULL;
+    struct NDISCMsg *ndisc_msg = NULL, ndisc_data;
+    struct LocalInterface *local_if;
+    struct LocalInterface *peer_link_if = NULL;
+    struct VLAN_ID *vlan_id_list = NULL;
+    int set_ndisc_flag = 0;
+    char mac_str[18] = "";
+
+    if (!csm || !ndisc_entry)
+        return MCLAG_ERROR;
+
+    sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x", ndisc_entry->mac_addr[0], ndisc_entry->mac_addr[1], ndisc_entry->mac_addr[2],
+            ndisc_entry->mac_addr[3], ndisc_entry->mac_addr[4], ndisc_entry->mac_addr[5]);
+
+    ICCPD_LOG_INFO(__FUNCTION__,
+                   "Received ND Info, intf[%s] IP[%s], MAC[%s]", ndisc_entry->ifname, show_ipv6_str((char *)ndisc_entry->ipv6_addr), mac_str);
+
+    if (strncmp(ndisc_entry->ifname, "Vlan", 4) == 0)
+    {
+        peer_link_if = local_if_find_by_name(csm->peer_itf_name);
+
+        if (peer_link_if && !local_if_is_l3_mode(peer_link_if))
+        {
+            /* Is peer-linlk itf belong to a vlan the same as peer? */
+            LIST_FOREACH(vlan_id_list, &(peer_link_if->vlan_list), port_next)
+            {
+                if (!vlan_id_list->vlan_itf)
+                    continue;
+                if (strcmp(vlan_id_list->vlan_itf->name, ndisc_entry->ifname) != 0)
+                    continue;
+                if (!local_if_is_l3_mode(vlan_id_list->vlan_itf))
+                    continue;
+
+                ICCPD_LOG_DEBUG(__FUNCTION__,
+                                "ND is learnt from intf %s, peer-link %s is the member of this vlan",
+                                vlan_id_list->vlan_itf->name, peer_link_if->name);
+
+                /* Peer-link belong to L3 vlan is alive, set the NDISC info */
+                set_ndisc_flag = 1;
+
+                break;
+            }
+        }
+    }
+
+    if (set_ndisc_flag == 0)
+    {
+        LIST_FOREACH(local_if, &(MLACP(csm).lif_list), mlacp_next)
+        {
+            if (local_if->type == IF_T_PORT_CHANNEL)
+            {
+                if (!local_if_is_l3_mode(local_if))
+                {
+                    /* Is the L2 MLAG itf belong to a vlan the same as peer? */
+                    LIST_FOREACH(vlan_id_list, &(local_if->vlan_list), port_next)
+                    {
+                        if (!vlan_id_list->vlan_itf)
+                            continue;
+                        if (strcmp(vlan_id_list->vlan_itf->name, ndisc_entry->ifname) != 0)
+                            continue;
+                        if (!local_if_is_l3_mode(vlan_id_list->vlan_itf))
+                            continue;
+
+                        ICCPD_LOG_DEBUG(__FUNCTION__,
+                                        "ND is learnt from intf %s, %s is the member of this vlan", vlan_id_list->vlan_itf->name, local_if->name);
+                        break;
+                    }
+
+                    if (vlan_id_list && local_if->po_active == 1)
+                    {
+                        /* Any po of L3 vlan is alive, set the NDISC info */
+                        set_ndisc_flag = 1;
+                        break;
+                    }
+                }
+                else
+                {
+                    /* Is the ARP belong to a L3 mode MLAG itf? */
+                    if (strcmp(local_if->name, ndisc_entry->ifname) == 0)
+                    {
+                        ICCPD_LOG_DEBUG(__FUNCTION__, "ND is learnt from mclag L3 intf %s", local_if->name);
+                        if (local_if->po_active == 1)
+                        {
+                            /* po is alive, set the NDISC info */
+                            set_ndisc_flag = 1;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    /* set dynamic Ndisc */
+    if (set_ndisc_flag == 1)
+    {
+        if (ndisc_entry->op_type == NEIGH_SYNC_ADD)
+        {
+            if (iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_entry->ipv6_addr, 1, ndisc_entry->mac_addr, ndisc_entry->ifname) < 0)
+            {
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to add nd entry(%s %s %s) to kernel",
+                                ndisc_entry->ifname, show_ipv6_str((char *)ndisc_entry->ipv6_addr), mac_str);
+                return MCLAG_ERROR;
+            }
+
+        }
+        else
+        {
+            if (iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_entry->ipv6_addr, 0, ndisc_entry->mac_addr, ndisc_entry->ifname) < 0)
+            {
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to delete nd entry(%s %s %s) from kernel",
+                                ndisc_entry->ifname, show_ipv6_str((char *)ndisc_entry->ipv6_addr), mac_str);
+                return MCLAG_ERROR;
+            }
+
+        }
+
+        /* ICCPD_LOG_DEBUG(__FUNCTION__, "NDISC update for %s %s %s", ndisc_entry->ifname, show_ipv6_str((char *)ndisc_entry->ipv6_addr), mac_str); */
+    }
+    else
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Failure: port-channel is not alive");
+        /* TODO Set static route through peer-link or just skip it? */
+    }
+
+    /* update NDISC list */
+    TAILQ_FOREACH(msg, &(MLACP(csm).ndisc_list), tail)
+    {
+        ndisc_msg = (struct NDISCMsg *)msg->buf;
+        if (memcmp((char *)ndisc_msg->ipv6_addr, (char *)ndisc_entry->ipv6_addr, 16) == 0)
+        {
+            /* ndisc_msg->op_type = tlv->type; */
+            sprintf(ndisc_msg->ifname, "%s", ndisc_entry->ifname);
+            memcpy(ndisc_msg->mac_addr, ndisc_entry->mac_addr, ETHER_ADDR_LEN);
+            break;
+        }
+    }
+
+    /* delete/add NDISC list */
+    if (msg && ndisc_entry->op_type == NEIGH_SYNC_DEL)
+    {
+        TAILQ_REMOVE(&(MLACP(csm).ndisc_list), msg, tail);
+        free(msg->buf);
+        free(msg);
+        /* ICCPD_LOG_INFO(__FUNCTION__, "Del ndisc queue successfully"); */
+    }
+    else if (!msg && ndisc_entry->op_type == NEIGH_SYNC_ADD)
+    {
+        ndisc_msg = (struct NDISCMsg *)&ndisc_data;
+        sprintf(ndisc_msg->ifname, "%s", ndisc_entry->ifname);
+        memcpy((char *)ndisc_msg->ipv6_addr, (char *)ndisc_entry->ipv6_addr, 16);
+        ndisc_msg->op_type = ndisc_entry->op_type;
+        memcpy(ndisc_msg->mac_addr, ndisc_entry->mac_addr, ETHER_ADDR_LEN);
+        if (iccp_csm_init_msg(&msg, (char *)ndisc_msg, sizeof(struct NDISCMsg)) == 0)
+        {
+            mlacp_enqueue_ndisc(csm, msg);
+            /* ICCPD_LOG_INFO(__FUNCTION__, "Add ndisc queue successfully"); */
+        }
+    }
+
+    /* remove all NDISC msg queue, when receive peer's NDISC list at the same time */
+    TAILQ_FOREACH(msg, &(MLACP(csm).ndisc_msg_list), tail)
+    {
+        ndisc_msg = (struct NDISCMsg *)msg->buf;
+        if (memcmp((char *)ndisc_msg->ipv6_addr, (char *)ndisc_entry->ipv6_addr, 16) == 0)
+            break;
+    }
+
+    while (msg)
+    {
+        ndisc_msg = (struct NDISCMsg *)msg->buf;
+        TAILQ_REMOVE(&(MLACP(csm).ndisc_msg_list), msg, tail);
+        free(msg->buf);
+        free(msg);
+        TAILQ_FOREACH(msg, &(MLACP(csm).ndisc_msg_list), tail)
+        {
+            ndisc_msg = (struct NDISCMsg *)msg->buf;
+            if (memcmp((char *)ndisc_msg->ipv6_addr, (char *)ndisc_entry->ipv6_addr, 16) == 0)
+                break;
+        }
+    }
+
+    return 0;
+}
+
+int mlacp_fsm_update_ndisc_info(struct CSM *csm, struct mLACPNDISCInfoTLV *tlv)
+{
+    int count = 0;
+    int i;
+
+    if (!csm || !tlv)
+        return MCLAG_ERROR;
+    count = ntohs(tlv->num_of_entry);
+    ICCPD_LOG_INFO(__FUNCTION__, "Received NDISC Info count  %d ", count);
+
+    for (i = 0; i < count; i++)
+    {
+        mlacp_fsm_update_ndisc_entry(csm, &(tlv->NdiscEntry[i]));
     }
 }
 
