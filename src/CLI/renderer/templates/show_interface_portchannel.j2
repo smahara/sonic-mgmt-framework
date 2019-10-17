@@ -1,4 +1,10 @@
-{% for intf in json_output['openconfig-lacp:interfaces']['interface'] %}
+{% for intf in json_output['lacp']['openconfig-lacp:interfaces']['interface'] %}
+{% for po_intf in json_output['portchannel']['sonic-portchannel:LAG_TABLE']['LAG_TABLE_LIST'] %}
+{% if intf['name'] == po_intf['lagname'] %}
+{{po_intf['lagname']}} is {{po_intf['admin_status']}}, line protocol is {{po_intf['oper_status']}}, mode {{po_intf['name']}}
+MTU {{po_intf['mtu']}}
+{% endif %}
+{% endfor %}
 LACP mode {{intf['state']['lacp-mode']}} interval {{intf['state']['interval']}} priority {{intf['state']['system-priority']}} address {{intf['state']['system-id-mac']}}
 {% for mem in intf['members']['member'] %}
 Members in this channel: {{mem['interface'] }}
@@ -6,4 +12,3 @@ LACP Actor port {{mem['state']['port-num']}}  address {{mem['state']['system-id'
 LACP Partner port {{mem['state']['partner-port-num']}}  address {{mem['state']['partner-id']}} key {{mem['state']['partner-key']}}
 {% endfor %}
 {% endfor %}
-

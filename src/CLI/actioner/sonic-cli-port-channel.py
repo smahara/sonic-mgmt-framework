@@ -117,19 +117,21 @@ def run():
            #api_response1 = getattr(aa1,func1.__name__)(*keypath1)
             api_response1 = getattr(aa1,func1.__name__)()
 
-        #print "------------------------------------------------", api_response1
-
         if api_response1 is None:
             print ("Failure in getting LACP data")
         else:
             # Get Command Output
             api_response1 = aa1.api_client.sanitize_for_serialization(api_response1)
+            #print "------------------------------------------------", api_response1
 
         # Combine Outputs
+        response = {"portchannel": api_response, "lacp": api_response1}
+        #print response
+
         if sys.argv[1] == "get_all_portchannels":
-            show_cli_output(sys.argv[2], api_response1)
+            show_cli_output(sys.argv[2], response)
         else:
-            show_cli_output(sys.argv[3], api_response1)
+            show_cli_output(sys.argv[3], response)
 
 
     except ApiException as e:
