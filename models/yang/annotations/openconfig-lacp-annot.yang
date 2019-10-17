@@ -16,11 +16,5 @@ module openconfig-lacp-annot {
       }
     }
 
-    deviation /oc-lacp:lacp/oc-lacp:interfaces/oc-lacp:interface/oc-lacp:state {
-      deviate add {
-          sonic-ext:subtree-transformer "lacp_get_specific_xfmr";
-      }
-    }
-
 }
 

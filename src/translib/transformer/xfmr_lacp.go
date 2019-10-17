@@ -3,6 +3,7 @@ package transformer
 import (
         "encoding/json"
 	"translib/ocbinds"
+        "translib/db"
         "os/exec"
 
 	log "github.com/golang/glog"
@@ -10,7 +11,6 @@ import (
 )
 
 func init () {
-    XlateFuncBind("DbToYang_lacp_get_specific_xfmr", DbToYang_lacp_get_specific_xfmr)
     XlateFuncBind("DbToYang_lacp_get_xfmr", DbToYang_lacp_get_xfmr)
 }
 
@@ -110,10 +110,12 @@ func populateLacpData(ifKey string, state *ocbinds.OpenconfigLacp_Lacp_Interface
 
     }
 
+    log.Infof("----------------------------Successfully populated portchannel data for %s\n", ifKey)
+
     return true
 }
 
-var DbToYang_lacp_get_specific_xfmr  SubTreeXfmrDbToYang = func(inParams XfmrParams) error {
+var DbToYang_lacp_get_xfmr  SubTreeXfmrDbToYang = func(inParams XfmrParams) error {
 
     lacpIntfsObj := getLacpRoot(inParams.ygRoot)
     pathInfo := NewPathInfo(inParams.uri)
@@ -121,39 +123,69 @@ var DbToYang_lacp_get_specific_xfmr  SubTreeXfmrDbToYang = func(inParams XfmrPar
 
     targetUriPath, err := getYangPathFromUri(pathInfo.Path)
 
-    log.Infof("Received GET for path: %s; template: %s vars: %v targetUriPath: %s ifKey: %s", pathInfo.Path, pathInfo.Template, pathInfo.Vars, targetUriPath, ifKey)
+    log.Infof("------------Received GET for path: %s; template: %s vars: %v targetUriPath: %s ifKey: %s", pathInfo.Path, pathInfo.Template, pathInfo.Vars, targetUriPath, ifKey)
 
     var ok bool
     var lacpintfObj *ocbinds.OpenconfigLacp_Lacp_Interfaces_Interface
 
-    /* Request for a specific portchannel */
-    if lacpIntfsObj.Interfaces.Interface != nil && len(lacpIntfsObj.Interfaces.Interface) > 0 {
-        lacpintfObj, ok = lacpIntfsObj.Interfaces.Interface[ifKey]
-        if !ok {
-            lacpintfObj, _ = lacpIntfsObj.Interfaces.NewInterface(ifKey)
+    if isSubtreeRequest(targetUriPath, "/openconfig-lacp:lacp/interfaces/interface") {
+        log.Infof("----------------------Inside specific portchannel request")
+
+        /* Request for a specific portchannel */
+        if lacpIntfsObj.Interfaces.Interface != nil && len(lacpIntfsObj.Interfaces.Interface) > 0 && ifKey != "" {
+            lacpintfObj, ok = lacpIntfsObj.Interfaces.Interface[ifKey]
+            if !ok {
+                lacpintfObj, _ = lacpIntfsObj.Interfaces.NewInterface(ifKey)
+            }
+             ygot.BuildEmptyTree(lacpintfObj)
+
+             log.Infof("---------------------------About to populate LACP data for %s\n", ifKey)
+             populateLacpData(ifKey, lacpintfObj.State, lacpintfObj.Members)
         }
+     } else if isSubtreeRequest(targetUriPath, "/openconfig-lacp:lacp/interfaces") {
+        log.Infof("-------------------------------Inside all portchannel request")
 
-    } else {
         ygot.BuildEmptyTree(lacpIntfsObj)
-        lacpintfObj, _ = lacpIntfsObj.Interfaces.NewInterface(ifKey)
-    }
-    ygot.BuildEmptyTree(lacpintfObj)
 
-    populateLacpData(ifKey, lacpintfObj.State, lacpintfObj.Members)
+        var lagTblTs = &db.TableSpec{Name: "LAG_TABLE"}
+        var appDb = inParams.dbs[db.ApplDB]
+        tbl, err := appDb.GetTable(lagTblTs)
+
+        if err != nil {
+            log.Error("App-DB get for list of portchannels failed!")
+            return err
+        }
+        keys, _ := tbl.GetKeys()
+        for _, key := range keys {
+           ifKey := key.Get(0)
+           log.Infof("PortChannel: %s\n", ifKey)
+
+           lacpintfObj, ok = lacpIntfsObj.Interfaces.Interface[ifKey]
+           if !ok {
+              lacpintfObj, _ = lacpIntfsObj.Interfaces.NewInterface(ifKey)
+           }
+           ygot.BuildEmptyTree(lacpintfObj)
+
+           log.Infof("---------------------------About to populate LACP data for %s\n", ifKey)
+           populateLacpData(ifKey, lacpintfObj.State, lacpintfObj.Members)
+        }
+     }
 
     return err
 
 }
 
+/*
 var DbToYang_lacp_get_xfmr  SubTreeXfmrDbToYang = func(inParams XfmrParams) error {
-    lacpIntfsObj := getLacpRoot(inParams.ygRoot)
+    //lacpIntfsObj := getLacpRoot(inParams.ygRoot)
     pathInfo := NewPathInfo(inParams.uri)
     targetUriPath, err := getYangPathFromUri(pathInfo.Path)
 
     log.Infof("Received GET for path: %s; template: %s vars: %v targetUriPath: %s", pathInfo.Path, pathInfo.Template, pathInfo.Vars, targetUriPath)
 
     var lagTblTs = &db.TableSpec{Name: "LAG_TABLE"}
-    tbl, err := app.appDB.GetTable(lagTblTs)
+    var appDb = inParams.dbs[db.ApplDB]
+    tbl, err := appDb.GetTable(lagTblTs)
 
     if err != nil {
         log.Error("App-DB get for list of portchannels failed!")
@@ -167,4 +199,6 @@ var DbToYang_lacp_get_xfmr  SubTreeXfmrDbToYang = func(inParams XfmrParams) erro
 
     return err
 }
+*/
+
 
