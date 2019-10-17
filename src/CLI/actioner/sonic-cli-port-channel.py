@@ -86,7 +86,14 @@ def run():
     keypath, body = generate_body(func, args)
     """
 
-    func1 = eval(sys.argv[1], globals(), openconfig_lacp_client.OpenconfigLacpApi.__dict__)
+
+    if sys.argv[1] == "get_all_portchannels":
+        lacp_func = 'get_openconfig_lacp_lacp_interfaces'
+    else :
+        lacp_func = 'get_openconfig_lacp_lacp_interfaces_interface'
+
+    func1 = eval(lacp_func, globals(), openconfig_lacp_client.OpenconfigLacpApi.__dict__)
+
     args = sys.argv[2:]
     keypath1, body1 = generate_body(func1, args)
 
@@ -114,7 +121,13 @@ def run():
         if body1 is not None:
            api_response1 = getattr(aa1,func1.__name__)(*keypath1, body=body1)
         else :
-           api_response1 = getattr(aa1,func1.__name__)(*keypath1)
+           api_response1 = getattr(aa1,func1.__name__)()
+
+        #print "------------------------------------------------", api_response1
+        if sys.argv[1] == "get_all_portchannels":
+            show_cli_output(sys.argv[2], api_response1)
+        else:
+            show_cli_output(sys.argv[3], api_response1)
 
 
         """

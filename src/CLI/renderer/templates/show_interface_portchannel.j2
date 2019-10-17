@@ -1,0 +1,9 @@
+{% for intf in json_output['openconfig_lacpinterfaces']['interface'] %}
+LACP mode {{intf['state']['lacp_mode']}} interval {{intf['state']['interval']}} priority {{intf['state']['system_priority']}} address {{intf['state']['system_id_mac']}}
+{% for mem in intf['members']['member'] %}
+Members in this channel: {{mem['interface'] }}
+LACP Actor port {{mem['state']['port_num']}}  address {{mem['state']['system_id']}} key {{mem['state']['oper_key']}}
+LACP Partner port {{mem['state']['partner_port_num']}}  address {{mem['state']['partner_id']}} key {{mem['state']['partner_key']}}
+{% endfor %}
+{% endfor %}
+

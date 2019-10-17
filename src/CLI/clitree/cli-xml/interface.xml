@@ -103,9 +103,10 @@ limitations under the License.
             python $SONIC_CLI_ROOT/sonic-cli-if.py get_openconfig_interfaces_interfaces show_interface_counters.j2 ${__full_line}&#xA;
         elif test "${if-subcommands}" = "PortChannel"; then&#xA;
             if test "${po-id}" = ""; then&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-port-channel.py get_all_portchannels show_portchannel.j2 ${__full_line}&#xA;
+                python $SONIC_CLI_ROOT/sonic-cli-port-channel.py get_all_portchannels show_interface_portchannel.j2 ${__full_line}&#xA;
             else&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-port-channel.py get_specific_portchannel PortChannel${po-id} show_portchannel.j2 ${__full_line}&#xA;
+                python $SONIC_CLI_ROOT/sonic-cli-port-channel.py get_specific_portchannel PortChannel${po-id} show_interface_portchannel.j2 ${__full_line}&#xA;
+            fi&#xA;
         elif test "${if-subcommands}" = "Management"; then&#xA;
             if test "${mgmt-if-id}" = ""; then&#xA;
                 python $SONIC_CLI_ROOT/sonic-cli-if.py get_openconfig_interfaces_interfaces show_interface.j2 ${__full_line}&#xA;
