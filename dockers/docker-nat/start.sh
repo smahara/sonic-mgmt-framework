@@ -9,7 +9,7 @@ supervisorctl start rsyslogd
 
 supervisorctl start natmgrd
 
-sleep 2
+sleep 5
 
 supervisorctl start natsyncd
 
