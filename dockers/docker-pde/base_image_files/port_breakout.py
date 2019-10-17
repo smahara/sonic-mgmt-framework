@@ -713,19 +713,25 @@ def check_vaildation(platform, hwsku, port, opt):
 
 def process_args(argv):
     verbose = 0
+    cust = "./cust_platform.json"
+    list = False
     port = None
     opt = None
 
     try:
-        opts, args = getopt.getopt(argv, "hvp:o:", \
-        ["help", "verbose", "port=", "opt="])
+        opts, args = getopt.getopt(argv, "hlvc:p:o:", \
+        ["help", "list", "verbose", "cust=", "port=", "opt="])
 
         for opt,arg in opts:
             if opt in ('-h','--help'):
                 usage()
                 return
+            if opt in ('-l', '--list'):
+                list = True
             if opt in ('-v', '--verbose'):
                 verbose = 1
+            if opt in ('-c', '--cust'):
+                cust = arg
             if opt in ('-p', '--port'):
                 port = arg
             if opt in ('-o', '--option'):
@@ -733,6 +739,23 @@ def process_args(argv):
     except getopt.GetoptError:
         print("Error: Invalid option")
         sys.exit(1)
+
+    #print("# Custom Platform JSON: {}".format(cust))
+    if os.path.isfile(cust):
+        print("# Custom Platform JSON detected, merging the platform info...")
+        try:
+            with open(cust) as fp:
+                sonic_platforms.update(json.load(fp))
+        except:
+            pass
+    else:
+        print("# Custom Platform JSON not found")
+
+    if list == True:
+        print("Supported platform list:")
+        for plat in sonic_platforms:
+            print("* {}".format(plat))
+        sys.exit(0)
 
     if port == None or opt == None:
         print "Error: must give -p [port] and -o [option]"
