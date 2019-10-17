@@ -27,6 +27,8 @@ from openconfig_interfaces_client.rest import ApiException
 from scripts.render_cli import show_cli_output
 
 import urllib3
+from utils import UnixHTTPConnectionPool
+
 urllib3.disable_warnings()
 
 
@@ -109,7 +111,9 @@ def run(func, args):
 
     c = openconfig_interfaces_client.Configuration()
     c.verify_ssl = False
+    new_pool = UnixHTTPConnectionPool("/var/run/rest.sock", 5)
     aa = openconfig_interfaces_client.OpenconfigInterfacesApi(api_client=openconfig_interfaces_client.ApiClient(configuration=c))
+    aa.api_client.rest_client.pool_manager = new_pool
 
 # Code for PortChannel cli skeleton
 

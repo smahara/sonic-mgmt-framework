@@ -80,7 +80,45 @@ func NewRouter() *mux.Router {
 
 	// Collect swagger generated route information
 	for _, route := range allRoutes {
-		handler := withMiddleware(route.Handler, route.Name)
+		handler := withMiddleware(route.Handler, route.Name, false)
+
+		glog.V(2).Infof(
+			"Adding %s, %s %s",
+			route.Name, route.Method, route.Pattern)
+
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(handler)
+	}
+
+	// Documentation and test UI
+	uiHandler := http.StripPrefix("/ui/", http.FileServer(http.Dir(swaggerUIDir)))
+	router.Methods("GET").PathPrefix("/ui/").Handler(uiHandler)
+
+	// Redirect "/ui" to "/ui/index.html"
+	router.Methods("GET").Path("/ui").
+		Handler(http.RedirectHandler("/ui/index.html", 301))
+
+	//router.Methods("GET").Path("/model").
+	//	Handler(http.RedirectHandler("/ui/model.html", 301))
+
+	// Metadata discovery handler
+	metadataHandler := http.HandlerFunc(hostMetadataHandler)
+	router.Methods("GET").Path("/.well-known/host-meta").
+		Handler(loggingMiddleware(metadataHandler, "hostMetadataHandler"))
+
+	return router
+}
+func NewRouterNoAuth() *mux.Router {
+	router := mux.NewRouter().StrictSlash(true)
+
+	glog.Infof("Server has %d paths", len(allRoutes))
+
+	// Collect swagger generated route information
+	for _, route := range allRoutes {
+		handler := withMiddleware(route.Handler, route.Name, true)
 
 		glog.V(2).Infof(
 			"Adding %s, %s %s",
@@ -131,8 +169,8 @@ func loggingMiddleware(inner http.Handler, name string) http.Handler {
 
 // withMiddleware function prepares the default middleware chain for
 // REST APIs.
-func withMiddleware(h http.Handler, name string) http.Handler {
-	if isUserAuthEnabled {
+func withMiddleware(h http.Handler, name string, auth_disable bool) http.Handler {
+	if isUserAuthEnabled && !auth_disable {
 		h = authMiddleware(h)
 	}
 

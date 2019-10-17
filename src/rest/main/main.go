@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net"
 	"os"
 	"os/signal"
 	"rest/server"
@@ -111,6 +112,18 @@ func main() {
 
 	glog.Infof("Server started on %v", address)
 	glog.Infof("UI directory is %v", uiDir)
+
+	//Unix domain server for CLI use only
+	unixDomainRestServer := &http.Server{
+		Handler:   server.NewRouterNoAuth(),
+	}
+	
+    unixListener, err := net.Listen("unix", "/var/run/rest.sock")
+    if err != nil {
+            panic(err)
+    }
+	go unixDomainRestServer.Serve(unixListener)
+	//
 
 	// Start HTTPS server
 	glog.Fatal(restServer.ListenAndServeTLS("", ""))
