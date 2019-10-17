@@ -21,10 +21,12 @@ import sys
 import time
 import json
 import ast
-import openconfig_interfaces_client
 import openconfig_lacp_client
+import sonic_portchannel_client
+from sonic_portchannel_client.api.sonic_portchannel_api import SonicPortchannelApi  
+from sonic_portchannel_client.rest import ApiException
+import sonic_port_client
 from rpipe_utils import pipestr
-from openconfig_interfaces_client.rest import ApiException
 from openconfig_lacp_client.rest import ApiException
 from scripts.render_cli import show_cli_output
 
@@ -47,9 +49,9 @@ def call_method(name, args):
 def generate_body(func, args):
     body = None
     keypath = []
-    if func.__name__ == 'get_openconfig_interfaces_interfaces_interface' or 'get_openconfig_lacp_lacp_interfaces_interface':
+    if func.__name__ == 'get_sonic_portchannel_sonic_portchannel_lag_table_lag_table_list' or 'get_openconfig_lacp_lacp_interfaces_interface':
 	keypath = [args[0]]
-    elif func.__name__ == 'get_openconfig_interfaces_interfaces' or 'get_openconfig_lacp_lacp_interfaces':
+    elif func.__name__ == 'get_sonic_portchannel_sonic_portchannel_lag_table' or 'get_openconfig_lacp_lacp_interfaces':
         keypath = []
     else:
        body = {}
@@ -68,76 +70,67 @@ def getId(item):
 
 def run():
 
-    """
-    c = openconfig_interfaces_client.Configuration()
+    c = sonic_portchannel_client.Configuration()
+    c2 = sonic_port_client.Configuration()
     c.verify_ssl = False
-    aa = openconfig_interfaces_client.OpenconfigInterfacesApi(api_client=openconfig_interfaces_client.ApiClient(configuration=c))
-    """
+    c2.verify_ssl = False
+    aa = sonic_portchannel_client.SonicPortchannelApi(api_client=sonic_portchannel_client.ApiClient(configuration=c))
+    aa2 = sonic_port_client.SonicPortApi(api_client=sonic_port_client.ApiClient(configuration=c2))
 
     c1 = openconfig_lacp_client.Configuration()
     c1.verify_ssl = False
     aa1 = openconfig_lacp_client.OpenconfigLacpApi(api_client=openconfig_lacp_client.ApiClient(configuration=c1))
 
     # create a body block
-
-    """
-    func = eval(sys.argv[1], globals(), openconfig_interfaces_client.OpenconfigInterfacesApi.__dict__)
-    args = sys.argv[2:]
-    keypath, body = generate_body(func, args)
-    """
-
-
     if sys.argv[1] == "get_all_portchannels":
         lacp_func = 'get_openconfig_lacp_lacp_interfaces'
+        portchannel_func = 'get_sonic_portchannel_sonic_portchannel_lag_table' 
     else :
         lacp_func = 'get_openconfig_lacp_lacp_interfaces_interface'
+        portchannel_func = 'get_sonic_portchannel_sonic_portchannel_lag_table_lag_table_list'
 
+    func = eval(portchannel_func, globals(), sonic_portchannel_client.SonicPortchannelApi.__dict__)
     func1 = eval(lacp_func, globals(), openconfig_lacp_client.OpenconfigLacpApi.__dict__)
-
     args = sys.argv[2:]
+
+    keypath, body = generate_body(func, args)
     keypath1, body1 = generate_body(func1, args)
 
 
     try:
-        """
         if body is not None:
            api_response = getattr(aa,func.__name__)(*keypath, body=body)
         else :
-           api_response = getattr(aa,func.__name__)(*keypath)
+           api_response = getattr(aa,func.__name__)()
 
 
         if api_response is None:
-            print ("Success")
+            print ("Failure in getting portchannel data")
         else:
             # Get Command Output
             api_response = aa.api_client.sanitize_for_serialization(api_response)
-            if 'openconfig-interfaces:interfaces' in api_response:
-                value = api_response['openconfig-interfaces:interfaces']
-                if 'interface' in value:
-                    tup = value['interface']
-                    value['interface'] = sorted(tup, key=getId)
-        """
+            print "-----------------------", api_response
 
         if body1 is not None:
            api_response1 = getattr(aa1,func1.__name__)(*keypath1, body=body1)
         else :
-           api_response1 = getattr(aa1,func1.__name__)()
+           #api_response1 = getattr(aa1,func1.__name__)(*keypath1)
+            api_response1 = getattr(aa1,func1.__name__)()
 
         #print "------------------------------------------------", api_response1
+
+        if api_response1 is None:
+            print ("Failure in getting LACP data")
+        else:
+            # Get Command Output
+            api_response1 = aa1.api_client.sanitize_for_serialization(api_response1)
+
+        # Combine Outputs
         if sys.argv[1] == "get_all_portchannels":
             show_cli_output(sys.argv[2], api_response1)
         else:
             show_cli_output(sys.argv[3], api_response1)
 
-
-        """
-        if api_response1 is None:
-            print ("Success")
-        else:
-            # Get Command Output
-            # Combine responses
-            print api_response, api_response1
-        """ 
 
     except ApiException as e:
         #print("Exception when calling OpenconfigInterfacesApi->%s : %s\n" %(func.__name__, e))
