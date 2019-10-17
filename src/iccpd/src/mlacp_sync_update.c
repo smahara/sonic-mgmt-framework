@@ -101,6 +101,11 @@ int mlacp_fsm_update_Agg_conf(struct CSM* csm, mLACPAggConfigTLV* portconf)
         /*Purge*/
         if (pif != NULL )
         {
+            //This handler would take of handling mlacp changes based on peer
+            //mclag interface delete; recover back mac of po to original
+            //on standby etc
+            mlacp_peer_mlag_intf_delete_handler(csm, pif->name);
+
             /* Delete remote interface info from STATE_DB */
             if (csm)
                 mlacp_link_del_remote_if_info(csm->mlag_id, pif->name);

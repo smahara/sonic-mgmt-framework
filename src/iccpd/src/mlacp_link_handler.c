@@ -43,6 +43,7 @@
 #include "../include/iccp_cli.h"
 #include "../include/iccp_cmd.h"
 #include "../include/mlacp_link_handler.h"
+#include "../include/iccp_netlink.h"
 
 /*****************************************
 * Enum
@@ -1737,6 +1738,55 @@ static void update_l2_mac_state(struct CSM *csm,
     return;
 }
 
+//update remote macs to point to peerlink, if peer link is configured
+static void update_remote_macs_to_peerlink(struct CSM *csm, struct LocalInterface *lif)
+{
+    struct MACMsg* mac_entry = NULL;
+
+    if (!csm || !lif)
+        return;
+
+    RB_FOREACH (mac_entry, mac_rb_tree, &MLACP(csm).mac_rb)
+    {
+        /* find the MAC for this interface*/
+        if (strcmp(lif->name, mac_entry->origin_ifname) != 0)
+            continue;
+
+        //consider only remote mac; rest of MACs no need to handle
+        if(!mac_entry->age_flag & MAC_AGE_LOCAL)
+        {
+            continue;
+        }
+
+        ICCPD_LOG_DEBUG(__FUNCTION__, "age flag %d, MAC %s, "
+                "vlan-id %d, Interface: %s", mac_entry->age_flag ,
+                mac_addr_to_str(mac_entry->mac_addr), mac_entry->vid, mac_entry->ifname);
+
+        //If local interface unbinded, redirect the mac to peer-link if peer
+        //link is configured
+        if (strlen(csm->peer_itf_name) != 0)
+        {
+            /*Send mac add message to mclagsyncd. fdb_type is not changed*/
+            if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
+            {
+                //if the mac is already pointing to peer interface, no need to
+                //change it
+                if (strcmp(mac_entry->ifname, csm->peer_itf_name) != 0)
+                {
+                    memcpy(mac_entry->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
+                    add_mac_to_chip(mac_entry, mac_entry->fdb_type);
+                    ICCPD_LOG_DEBUG(__FUNCTION__, "age flag %d, "
+                            "redirect MAC to peer-link: %s, MAC %s vlan-id %d",
+                            mac_entry->age_flag, mac_entry->ifname,
+                            mac_addr_to_str(mac_entry->mac_addr), mac_entry->vid);
+                }
+            }
+        }
+    }
+    return;
+}
+
+
 void mlacp_portchannel_state_handler(struct CSM* csm,
                                      struct LocalInterface* local_if,
                                      int po_state)
@@ -1772,6 +1822,71 @@ void mlacp_portchannel_state_handler(struct CSM* csm,
 
     return;
 }
+
+void mlacp_mlag_intf_detach_handler(struct CSM* csm, struct LocalInterface* local_if)
+{
+    if (!csm || !local_if)
+        return;
+
+    ICCPD_LOG_DEBUG("ICCP_FSM",
+        "MLAG_IF(%s) %s Detach: state %s, po_active %d, traffic_dis %d, sync_state %s",
+        local_if_is_l3_mode(local_if) ? "L3" : "L2",
+        local_if->name, 
+        (local_if->state == PORT_STATE_UP) ? "up" : "down",
+        local_if->po_active, local_if->is_traffic_disable,
+        mlacp_state(csm));
+
+    //set port isolate for lifpo
+    mlacp_mlag_link_del_handler(csm, local_if);
+
+    //point remotely learnt macs to peer-link
+    update_remote_macs_to_peerlink(csm, local_if);
+
+    //Handle Route/ARP changes as if portchannel is down
+    if (!local_if_is_l3_mode(local_if))
+        update_l2_po_state(csm, local_if, 0);
+    else
+        update_l3_po_state(csm, local_if, 0);
+
+  
+    //If the traffic is disabled due to interface flap; while coming up, if
+    //mclag interface is removed before receiving ack, it will be in
+    //blocked state; to address timing scenario unblock Tx/Rx of
+    //traffic on this portchannel if the traffic is blocked on this port
+    if(local_if->is_traffic_disable)
+    {
+        mlacp_link_enable_traffic_distribution(local_if);
+    }
+
+    return;
+}
+
+//Handler to handle when mclag interface is deleted on peer end
+void mlacp_peer_mlag_intf_delete_handler(struct CSM* csm, char *mlag_if_name)
+{
+    struct LocalInterface *local_if = NULL;
+    if (!csm)
+        return;
+
+    local_if = local_if_find_by_name(mlag_if_name);
+
+    if (!local_if)
+        return;
+
+    ICCPD_LOG_DEBUG("ICCP_FSM",
+        "MLAG_IF(%s) %s Peer IF Delete Event: state %s, po_active %d, traffic_dis %d, sync_state %s",
+        local_if_is_l3_mode(local_if) ? "L3" : "L2",
+        local_if->name, 
+        (local_if->state == PORT_STATE_UP) ? "up" : "down",
+        local_if->po_active, local_if->is_traffic_disable,
+        mlacp_state(csm));
+
+    //if it is standby node change back the mac to its original system mac
+    recover_if_ipmac_on_standby(local_if);
+
+    return;
+}
+
 
 static void mlacp_conn_handler_fdb(struct CSM* csm)
 {
@@ -1902,7 +2017,6 @@ void mlacp_peer_conn_handler(struct CSM* csm)
     return;
 }
 
-extern void recover_if_ipmac_on_standby(struct LocalInterface* lif_po);
 void mlacp_peer_disconn_handler(struct CSM* csm)
 {
     uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };

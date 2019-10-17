@@ -405,11 +405,11 @@ int iccp_cli_detach_mclag_domain_to_port_channel( const char* ifname)
     ICCPD_LOG_DEBUG(__FUNCTION__, "detach mclag id = %d from ifname = %s",
                     csm->mlag_id, lif_po->name);
 
-    /* process link state handler before detaching it.
-     * update peer link state, po state, update l2 mac state to peer
-     */
-    mlacp_portchannel_state_handler(csm, lif_po, 0);
+    //if it is standby node change back the mac to its original system mac
+    recover_if_ipmac_on_standby(lif_po);
 
+    /* process link state handler before detaching it.*/
+    mlacp_mlag_intf_detach_handler(csm, lif_po);
 
     unbind_poid = lif_po->po_id;
     mlacp_unbind_local_if(lif_po);
