@@ -118,6 +118,22 @@ class PddfParse():
         
         return self.data[dev]['dev_attr']['num_psu_fans']
 
+    def get_led_path(self): 
+	return ("pddf/devices/led")
+
+    def get_led_cur_state_path(self): 
+	return ("pddf/devices/led/cur_state")
+
+    def get_led_color(self): 
+	color_f="/sys/kernel/pddf/devices/led/cur_state/color"
+        try:
+               with open(color_f, 'r') as f:
+                    color = f.read().strip("\r\n")
+        except IOError:
+                    return ("Error")
+
+	return (color)
+
     #################################################################################################################################
     #   CREATE DEFS
     #################################################################################################################################
