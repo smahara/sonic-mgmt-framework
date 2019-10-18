@@ -306,6 +306,7 @@ PDESUBMODULES = src/sonic-linux-kernel \
                 src/sonic-py-swsssdk \
                 src/redis-dump-load \
                 src/sonic-sairedis \
+                src/sonic-ztp \
                 src/sonic-platform-pde
 
 .PHONY: sonic-slave-build sonic-slave-bash init initpde reset developer
