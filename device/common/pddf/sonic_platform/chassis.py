@@ -10,7 +10,6 @@
 try:
     import os
     import sys
-    import click
     import subprocess
     import glob
     import sonic_device_util
@@ -72,6 +71,10 @@ class Chassis(ChassisBase):
             #psu.set_status_led("STATUS_LED_COLOR_GREEN")
             #psu.get_status_led(color)
             #print "%s"%color
+
+        for index in range(self.platform['num_ports']):
+            sfp = Sfp(index)
+            self._sfp_list.append(sfp)
 
         for i in range(self.platform['num_temps']):
             thermal = Thermal(i)

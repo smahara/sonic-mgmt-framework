@@ -91,13 +91,16 @@ class PddfParse():
                 if path != "":
                     string = path
                 #print "[%s]: %s"%(bb,string)
-                if string is not None:
-                    string = string.rstrip()
         else:
             if target in self.data.keys():
-                string = self.dev_parse(self.data[target], { "cmd": "show_attr", "target":target, "attr":attr })
+                path = self.dev_parse(self.data[target], { "cmd": "show_attr", "target":target, "attr":attr })
                 #print "[test] str is %s" %str
-                string = string.rstrip('\n')
+                if path != "":
+                    string = path
+
+
+        if string is not None:
+            string = string.rstrip()
 
         cache[aa]=string
         return string

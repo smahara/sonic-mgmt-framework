@@ -187,8 +187,9 @@ def config_pddf_utils():
     device_path = get_path_to_device()
     pddf_path = get_path_to_pddf_plugin()
     #  Check if the new 2.0 platform APIs exists and pddf 2.0 implementation also exist
-    if os.path.exists(device_path+'/sonic_platform') and os.path.exists(pddf_path+'/sonic_platform'):
+    if os.path.isdir(device_path+'/sonic_platform') and os.path.isdir(PLATFORM_ROOT_PATH+'/pddf/sonic_platform'):
         device_plugin_path = "/".join([device_path,"sonic_platform"])
+        pddf_path = "/".join([PLATFORM_ROOT_PATH, "pddf/sonic_platform"])
     else:
         device_plugin_path = "/".join([device_path, "plugins"])
     
@@ -218,7 +219,7 @@ def cleanup_pddf_utils():
     device_path = get_path_to_device()
 
     #  Check if the new 2.0 platform APIs exists and pddf 2.0 implementation also exist
-    if os.path.exists(device_path+'/sonic_platform') and os.path.exists(pddf_path+'/sonic_platform'):
+    if os.path.isdir(device_path+'/sonic_platform') and os.path.isdir(PLATFORM_ROOT_PATH+'/pddf/sonic_platform'):
         device_plugin_path = "/".join([device_path,"sonic_platform"])
     else:
         device_plugin_path = "/".join([device_path, "plugins"])
@@ -389,16 +390,16 @@ def do_switch_pddf():
             if FORCE==0:
                 return status
 
-        print "Disabling the 'skip_fand' from pmon daemon control script..."
-        if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
-            with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
-                data = json.load(fr)
-            if 'skip_fand' in data.keys():
-                old_val = data['skip_fand']
-                if old_val:
-                    data['skip_fand'] = False
-                    with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
-                        json.dump(data,fw)
+        #print "Disabling the 'skip_fand' from pmon daemon control script..."
+        #if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
+            #with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
+                #data = json.load(fr)
+            #if 'skip_fand' in data.keys():
+                #old_val = data['skip_fand']
+                #if old_val:
+                    #data['skip_fand'] = False
+                    #with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
+                        #json.dump(data,fw)
 
         print "Restart the pmon service ..."
         status, output = log_os_system("systemctl start pmon.service", 1)
@@ -438,16 +439,16 @@ def do_switch_nonpddf():
             if FORCE==0:
                 return status
 
-        print "Enabeling the 'skip_fand' from pmon startup script..."
-        if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
-            with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
-                data = json.load(fr)
-            if 'skip_fand' in data.keys():
-                old_val = data['skip_fand']
-                if not old_val:
-                    data['skip_fand'] = True
-                    with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
-                        json.dump(data,fw)
+        #print "Enabeling the 'skip_fand' from pmon startup script..."
+        #if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
+            #with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
+                #data = json.load(fr)
+            #if 'skip_fand' in data.keys():
+                #old_val = data['skip_fand']
+                #if not old_val:
+                    #data['skip_fand'] = True
+                    #with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
+                        #json.dump(data,fw)
 
         print "Restart the pmon service ..."
         status, output = log_os_system("systemctl start pmon.service", 1)

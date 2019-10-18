@@ -72,8 +72,7 @@ class Psu(PsuBase):
             string: The name of the device
         """
         if 'name' in plugin_data['PSU']:
-            for fname in plugin_data['PSU']['name']:
-                return fname[str(self.psu_index)]
+            return plugin_data['PSU']['name'][str(self.psu_index)]
         else:
             return "PSU{}".format(self.psu_index)
 
@@ -195,11 +194,12 @@ class Psu(PsuBase):
             return 0.0
         try:
             with open(node, 'r') as f:
-                v_out = int(f.read())
+                v_out = f.read()
         except IOError:
             return 0.0
 
-        return float(v_out)/1000
+        # voltage in mV
+        return float(v_out)
 
     def get_current(self):
         """
@@ -215,11 +215,12 @@ class Psu(PsuBase):
             return 0.0
         try:
             with open(node, 'r') as f:
-                i_out = int(f.read())
+                i_out = f.read()
         except IOError:
             return 0.0
 
-        return float(i_out)/1000
+        # current in mA
+        return float(i_out)
 
     def get_power(self):
         """
@@ -235,12 +236,12 @@ class Psu(PsuBase):
             return 0.0
         try:
             with open(node, 'r') as f:
-                p_out = int(f.read())
+                p_out = f.read()
         except IOError:
             return 0.0
 
         # power is returned in micro watts
-        return float(p_out)/1000000
+        return float(p_out)
 
     def get_powergood_status(self):
         """
