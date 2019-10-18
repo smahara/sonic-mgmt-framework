@@ -1,3 +1,5 @@
+linkscan off
+
 led 0 stop
 led 1 stop
 led 2 stop
@@ -53,3 +55,7 @@ led 1 start
 led 2 start
 led 3 start
 
+# Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI
+rcload /usr/share/sonic/platform/preemphasis-64x100.soc
+
+linkscan on
