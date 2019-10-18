@@ -177,7 +177,7 @@ static void do_arp_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], int
             if (!local_if_is_l3_mode(lif_po))
             {
                 /* Is the L2 MLAG itf belong to a vlan?*/
-                LIST_FOREACH(vlan_id_list, &(lif_po->vlan_list), port_next)
+                RB_FOREACH (vlan_id_list, vlan_rb_tree, &(lif_po->vlan_tree))
                 {
                     if ( !(vlan_id_list->vlan_itf
                            && vlan_id_list->vlan_itf->ifindex == ndm->ndm_ifindex))
@@ -396,7 +396,7 @@ static void do_ndisc_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], i
             if (!local_if_is_l3_mode(lif_po))
             {
                 /* Is the L2 MLAG itf belong to a vlan? */
-                LIST_FOREACH(vlan_id_list, &(lif_po->vlan_list), port_next)
+                RB_FOREACH (vlan_id_list, vlan_rb_tree, &(lif_po->vlan_tree))
                 {
                     if (!(vlan_id_list->vlan_itf && vlan_id_list->vlan_itf->ifindex == ndm->ndm_ifindex))
                         continue;
@@ -720,7 +720,7 @@ void do_arp_update_from_reply_packet(unsigned int ifindex, unsigned int addr, ui
             if (!local_if_is_l3_mode(lif_po))
             {
                 /* Is the L2 MLAG itf belong to a vlan?*/
-                LIST_FOREACH(vlan_id_list, &(lif_po->vlan_list), port_next)
+                RB_FOREACH (vlan_id_list, vlan_rb_tree, &(lif_po->vlan_tree))
                 {
                     if ( !(vlan_id_list->vlan_itf
                            && vlan_id_list->vlan_itf->ifindex == ifindex))
@@ -859,7 +859,7 @@ void do_ndisc_update_from_reply_packet(unsigned int ifindex, char *ipv6_addr, ui
             if (!local_if_is_l3_mode(lif_po))
             {
                 /* Is the L2 MLAG itf belong to a vlan? */
-                LIST_FOREACH(vlan_id_list, &(lif_po->vlan_list), port_next)
+                RB_FOREACH (vlan_id_list, vlan_rb_tree, &(lif_po->vlan_tree))
                 {
                     if (!(vlan_id_list->vlan_itf && vlan_id_list->vlan_itf->ifindex == ifindex))
                         continue;
@@ -1051,7 +1051,7 @@ void iccp_parse_if_vlan_info_from_netlink(struct nlmsghdr *n)
                 struct VLAN_ID *vlan = NULL;
 
                 /*set vlan flag is removed*/
-                LIST_FOREACH(vlan, &(lif->vlan_list), port_next)
+                RB_FOREACH (vlan, vlan_rb_tree, &(lif->vlan_tree))
                 {
                     vlan->vlan_removed = 1;
                 }
@@ -1069,13 +1069,13 @@ void iccp_parse_if_vlan_info_from_netlink(struct nlmsghdr *n)
                 }
 
                 /*After update vlan list, remove unused item*/
-                LIST_FOREACH(vlan, &(lif->vlan_list), port_next)
+                RB_FOREACH (vlan, vlan_rb_tree, &(lif->vlan_tree))
                 {
                     if (vlan->vlan_removed == 1)
                     {
                         ICCPD_LOG_DEBUG(__FUNCTION__, "Delete VLAN ID = %d from %s", vlan->vid, lif->name);
 
-                        LIST_REMOVE(vlan, port_next);
+                        VLAN_RB_REMOVE(vlan_rb_tree, &(lif->vlan_tree), vlan);
                         free(vlan);
                     }
                 }

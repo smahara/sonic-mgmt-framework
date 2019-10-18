@@ -131,7 +131,6 @@ static int MACMsg_compare(const struct MACMsg *mac1, const struct MACMsg *mac2)
 
 RB_GENERATE(mac_rb_tree, MACMsg, mac_entry_rb, MACMsg_compare);
 
-
 #define WARM_REBOOT_TIMEOUT 90
 
 /*****************************************

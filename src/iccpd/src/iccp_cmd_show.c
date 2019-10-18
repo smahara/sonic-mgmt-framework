@@ -433,7 +433,7 @@ int iccp_local_if_dump(char * *buf,  int *num, int mclag_id)
             str_buf = mclagd_lif.vlanlist;
 
             len = 0;
-            LIST_FOREACH(vlan_id, &(lif_po->vlan_list), port_next)
+            RB_FOREACH (vlan_id, vlan_rb_tree, &(lif_po->vlan_tree))
             {
                 if (vlan_id != NULL )
                 {

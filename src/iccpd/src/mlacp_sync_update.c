@@ -554,7 +554,7 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
         if (peer_link_if && !local_if_is_l3_mode(peer_link_if))
         {
             /* Is peer-linlk itf belong to a vlan the same as peer?*/
-            LIST_FOREACH(vlan_id_list, &(peer_link_if->vlan_list), port_next)
+            RB_FOREACH(vlan_id_list, vlan_rb_tree, &(peer_link_if->vlan_tree))
             {
                 if (!vlan_id_list->vlan_itf)
                     continue;
@@ -584,7 +584,7 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
                 if (!local_if_is_l3_mode(local_if))
                 {
                     /* Is the L2 MLAG itf belong to a vlan the same as peer?*/
-                    LIST_FOREACH(vlan_id_list, &(local_if->vlan_list), port_next)
+                    RB_FOREACH(vlan_id_list, vlan_rb_tree, &(local_if->vlan_tree))
                     {
                         if (!vlan_id_list->vlan_itf)
                             continue;
@@ -767,7 +767,7 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
         if (peer_link_if && !local_if_is_l3_mode(peer_link_if))
         {
             /* Is peer-linlk itf belong to a vlan the same as peer? */
-            LIST_FOREACH(vlan_id_list, &(peer_link_if->vlan_list), port_next)
+            RB_FOREACH(vlan_id_list, vlan_rb_tree, &(peer_link_if->vlan_tree))
             {
                 if (!vlan_id_list->vlan_itf)
                     continue;
@@ -797,7 +797,7 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
                 if (!local_if_is_l3_mode(local_if))
                 {
                     /* Is the L2 MLAG itf belong to a vlan the same as peer? */
-                    LIST_FOREACH(vlan_id_list, &(local_if->vlan_list), port_next)
+                    RB_FOREACH(vlan_id_list, vlan_rb_tree, &(local_if->vlan_tree))
                     {
                         if (!vlan_id_list->vlan_itf)
                             continue;
@@ -969,7 +969,7 @@ int mlacp_fsm_update_port_channel_info(struct CSM* csm,
         if (peer_if->po_id != ntohs(tlv->agg_id))
             continue;
 
-        LIST_FOREACH(peer_vlan_id, &(peer_if->vlan_list), port_next)
+        RB_FOREACH(peer_vlan_id, vlan_rb_tree, &(peer_if->vlan_tree))
         {
             peer_vlan_id->vlan_removed = 1;
         }
