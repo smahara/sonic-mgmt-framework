@@ -152,13 +152,6 @@ def get_cfg_file(platform, hwsku):
         cfg_file = "config_db.json"
     return cfg_file
 
-def get_led_file(platform, hwsku):
-    if not SIM_HOST:
-        led_file = get_platform_path() + "/led_proc_init.soc"
-    else:
-        led_file = "led_proc_init.soc"
-    return led_file
-
 def display_files(platform, hwsku):
     print("BCM File:[%s]" % (get_bcm_file(platform, hwsku)))
     print("INI File:[%s]" % (get_ini_file(platform, hwsku)))
@@ -810,11 +803,6 @@ def main(argv):
         return
 
     break_a_port(port, opt, platform, hwsku)
-
-    ### disable pre-emphasis workaround in 'led_proc_init.soc'
-    file = get_led_file(platform, hwsku)
-    if os.path.exists(file):
-        run_command("sed -i 's/^rcload/#rcload/g' " + file)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
