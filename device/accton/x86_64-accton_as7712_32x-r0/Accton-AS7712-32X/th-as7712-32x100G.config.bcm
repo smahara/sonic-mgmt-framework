@@ -33,6 +33,7 @@ num_ipv6_lpm_128b_entries=3072
 max_vp_lags=0
 miim_intr_enable=0
 oversubscribe_mode=1
+bcm_sdk_diag_run=1
 
 # portmap
 portmap_50=49:100

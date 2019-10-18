@@ -32,6 +32,7 @@ max_vp_lags=0
 miim_intr_enable=0
 module_64ports=1
 oversubscribe_mode=1
+bcm_sdk_diag_run=1
 
 #add loopback port
 # port 33 is the first loopback port

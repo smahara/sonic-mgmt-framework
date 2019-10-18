@@ -83,6 +83,7 @@ pbmp_xport
 pci2eb_overrid
 pci_cmcs_num
 pfc_deadlock_seq_control
+bcm_sdk_diag_run
 phy_84328
 phy_84752
 phy_an_allow_pll_change

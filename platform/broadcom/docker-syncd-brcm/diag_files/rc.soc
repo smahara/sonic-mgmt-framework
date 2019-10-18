@@ -1,0 +1,90 @@
+# Initialization RC (run commands) 
+#
+if $?1 "echo rc: arguments not supported; exit"
+if !$?unit "echo rc: no current unit; exit"
+
+echo "rc: unit $unit device $devname"
+local quiet no
+local echo echo
+local rcdone \$rc$unit
+if !"expr $rcdone + 0" "local echo noecho; local quiet yes"
+
+# Shutdown threads if system is already running
+counter off
+linkscan off
+l2mode off
+
+# Chip init
+init soc
+
+# Cancun package files are located in $SDK/rc/flex
+if $?feature_cancun \
+    "cancun load cmh;" \
+    "cancun load cch;" \
+    "cancun load ceh;" \
+
+# Initialize miscellaneous chip registers
+init misc
+
+# Cancun package files are located in $SDK/rc/flex
+if $?feature_cancun \
+   "cancun load cih;"\
+   "cancun load cfh;"\
+   "cancun stat;"
+
+# Initialize the StrataSwitch MMU registers
+init mmu
+
+$echo rc: MMU initialized
+
+# Init CLI and BCM API
+# NOTE: Tables are cleared by "init bcm" below.
+if !$?no_bcm \
+	"init bcm; \
+	 $echo rc: BCM driver initialized"
+
+if $?no_bcm \
+	"$echo rc: *** NOT initializing BCM driver ***"
+
+l2mode interval=3000000
+$echo rc: L2 Table shadowing enabled
+
+# If running BCM library, start linkscan task and set port modes
+if !$?no_bcm && !$?rcpu_only \
+	"linkscan 250000; \
+	 port fe,ge linkscan=on autoneg=on \
+		speed=0 fullduplex=true txpause=true rxpause=true; \
+	 port st linkscan=on txpause=false rxpause=false; \
+         port xe,ce,cd linkscan=on autoneg=off \
+                speed=0 fullduplex=true txpause=true rxpause=true; \
+         port hg linkscan=on fullduplex=true txpause=false rxpause=false; \
+	 $echo rc: Port modes initialized"
+
+if !$?no_bcm && $?rcpu_only \
+	"linkscan 250000; \
+	 port e linkscan=on; \
+	 port st linkscan=on; \
+     port xe linkscan=on; \
+	 $echo rc: Port modes initialized"
+
+if !$?no_bcm && $?shadow \
+     "port il linkscan=on; \
+	  $echo rc: Interlaken Port mode initialized"
+
+# Start counter task unless already started by "init bcm" above.
+local dma true
+if $?no_bcm && !$?rcpu_only\
+	"counter Interval=1000 Pbm=all Dma=$dma; \
+	 $echo rc: Counter collection enabled"
+if $?rcpu_only \
+	"counter Interval=2000000 Pbm=all Dma=false; \
+	 $echo rc: Counter collection enabled"
+
+# Resynchronize the saved values kept by the 'show counter' command.
+counter sync
+
+# mark this unit so that subsequent rc runs are quiet
+setenv rc$unit 1
+
+# cache a copy of rc.soc in memory
+rccache addq rc.soc

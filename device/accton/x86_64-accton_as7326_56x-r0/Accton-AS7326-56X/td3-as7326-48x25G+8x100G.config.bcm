@@ -39,6 +39,7 @@ skip_L2_USER_ENTRY=0
 schan_intr_enable=0
 tdma_timeout_usec=3000000
 parity_enable=1
+bcm_sdk_diag_run=0
 
 # IFA Settings
 num_queues_pci=46
