@@ -13,6 +13,11 @@ urllib3.disable_warnings()
 
 plugins = dict()
 
+PARAM_PATCH_PREFIX='patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_'
+PARAM_PATCH_PREFIX_LEN=len(PARAM_PATCH_PREFIX)
+PARAM_DELETE_PREFIX='delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_'
+PARAM_DELETE_PREFIX_LEN=len(PARAM_DELETE_PREFIX)
+
 def register(func):
     """Register sdk client method as a plug-in"""
     plugins[func.__name__] = func
@@ -26,6 +31,7 @@ def call_method(name, args):
 def generate_body(func, args):
     body = None
     keypath = []
+    showSuccess = True
 
     # Get the rules of all ECN table entries.
     if func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile_wred_profile':
@@ -35,43 +41,22 @@ def generate_body(func, args):
     elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:name": args[0] }
-    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile':
+       showSuccess = False
+    elif func.__name__ == 'delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list':
        keypath = [args[0]]
-       body = { "sonic-wred-profile:name": args[0] }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_min_threshold':
+    elif func.__name__[0:PARAM_PATCH_PREFIX_LEN] == PARAM_PATCH_PREFIX:
        keypath = [ args[0] ]
-       body = { "sonic-wred-profile:yellow_min_threshold":  (args[1]) }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_max_threshold':
+       body = { "sonic-wred-profile:" + func.__name__[PARAM_PATCH_PREFIX_LEN:] :  (args[1]) }
+       if len(args) == 2:
+           showSuccess = False
+    elif func.__name__[0:PARAM_DELETE_PREFIX_LEN] == PARAM_DELETE_PREFIX:
        keypath = [ args[0] ]
-       body = { "sonic-wred-profile:yellow_max_threshold":  (args[1]) }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_drop_rate':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:yellow_drop_rate":  (args[1]) }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_min_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:green_min_threshold":  (args[1]) }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_max_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:green_max_threshold":  (args[1]) }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_drop_rate':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:green_drop_rate":  (args[1]) }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_min_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:red_min_threshold":  (args[1]) }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_max_threshold':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:red_max_threshold":  (args[1]) }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_drop_rate':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:red_drop_rate":  (args[1]) }
-    elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_ecn':
-       keypath = [ args[0] ]
-       body = { "sonic-wred-profile:ecn":  (args[1]) }
+       if len(args) == 1:
+           showSuccess = False
     else:
        body = {}
 
-    return keypath,body
+    return keypath,body,showSuccess
 
 def run(func, args):
 
@@ -80,7 +65,7 @@ def run(func, args):
     aa = sonic_wred_profile_client.SonicWredProfileApi(api_client=sonic_wred_profile_client.ApiClient(configuration=c))
 
     # create a body block
-    keypath, body = generate_body(func, args)
+    keypath, body, showSuccess = generate_body(func, args)
 
     try:
         if body is not None:
@@ -89,7 +74,8 @@ def run(func, args):
            api_response = getattr(aa,func.__name__)(*keypath)
 
         if api_response is None:
-            print ("Success")
+            if showSuccess:
+                print ("Success")
         else:
             # Get Command Output
             api_response = aa.api_client.sanitize_for_serialization(api_response)

@@ -50,21 +50,15 @@ module sonic-wred-profile {
                 }
 
                 leaf yellow_drop_rate {
-                    type uint8 {
-                        range "1..100";
-                    }
+                    type uint64;
                 }
 
                 leaf green_drop_rate {
-                    type uint8 {
-                        range "1..100";
-                    }
+                    type uint64;
                 }
 
                 leaf red_drop_rate {
-                    type uint8 {
-                        range "1..100";
-                    }
+                    type uint64;
                 }
 
                 leaf ecn {

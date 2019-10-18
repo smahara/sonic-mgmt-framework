@@ -490,4 +490,11 @@ limitations under the License.
         help="ECN Options"
         />
     <!--=======================================================-->
+    <PTYPE
+        name="QoS_THRESHOLD"
+        method="integer"
+        pattern="1..12480"
+        help=""
+        />
+    <!--=======================================================-->
 </CLISH_MODULE>
