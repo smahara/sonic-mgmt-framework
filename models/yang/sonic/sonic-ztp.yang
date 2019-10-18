@@ -1,0 +1,89 @@
+module sonic-ztp {
+    namespace "http://github.com/Azure/sonic-ztp";
+    prefix sztp;
+    yang-version 1.1;
+    import ietf-yang-types {
+        prefix yang;
+    }
+
+    organization "Dell EMC";
+    contact
+        "DELL EMC";
+    description
+        "This module contains a collection of YANG definitions for
+           Zero Touch Provisioning";
+
+    revision 2019-10-11 {
+        description
+            "Initial revision.";
+    }
+  container sonic-ztp {
+      container  ztp-status {
+	    config false;
+    	    leaf admin_mode {
+		type boolean;
+	     }
+
+	    leaf service {
+		type string;
+	     }
+	    leaf status {
+		type string;
+	     }
+	    leaf source {
+		type string;
+	     }
+	    leaf runtime {
+		type string;
+	     }
+	    leaf timestamp {
+		type yang:date-and-time;
+	     }
+	    leaf jsonversion {
+		type string;
+	    }
+	    leaf activity_string {
+		type string;
+	     }
+	    list CONFIG_SECTION_LIST {
+		key "sectionname";
+		leaf sectionname {
+		    type string; 
+		}
+		leaf status {
+            	    type string; 
+		}
+		leaf runtime {
+		    type string; 
+		}
+		leaf timestamp {
+		    type yang:date-and-time; 
+		}
+		leaf exitcode {
+		    type uint32; 
+		}
+		leaf ignoreresult {
+		    type boolean; 
+		}
+	    }
+	}
+    
+  container ztp-enable {
+     leaf  admin_mode{
+        type boolean;
+      }
+   }
+  
+
+  container ztp-disable {
+     leaf admin_mode {
+        type boolean;
+     }
+  }
+ 
+	
+ }
+
+}
+
+
