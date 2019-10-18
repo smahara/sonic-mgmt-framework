@@ -77,6 +77,8 @@ supervisorctl start vxlanmgrd
 
 supervisorctl start aclsvcd
 
+supervisorctl start sflowmgrd
+
 # Start arp_update when VLAN exists
 VLAN=`sonic-cfggen -d -v 'VLAN.keys() | join(" ") if VLAN'`
 if [ "$VLAN" != "" ]; then
