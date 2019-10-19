@@ -343,8 +343,9 @@ int mlacp_prepare_for_mac_info_to_peer(struct CSM* csm, char* buf, size_t max_bu
     #if 1
     ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg type = TLV_T_MLACP_MAC_INFO");
     ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg if name %s  mac  = %s, "
-            "vid = %d, type = %d count %d msg len %d", mac_msg->origin_ifname,
-            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->op_type, count, msg_len);
+            "vid = %d, type = %s count %d msg len %d", mac_msg->origin_ifname,
+            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
+            (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del", count, msg_len);
     #endif
 
     return msg_len;

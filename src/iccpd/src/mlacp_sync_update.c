@@ -229,8 +229,9 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
         {
             mac_msg->age_flag &= ~MAC_AGE_PEER;
             ICCPD_LOG_DEBUG(__FUNCTION__, "Recv ADD, Remove peer age flag:%d interface %s, "
-                "MAC %s vlan-id %d, op_type %d", mac_msg->age_flag, mac_msg->ifname,
-                mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->op_type);
+                "MAC %s vlan-id %d, op_type %s", mac_msg->age_flag, mac_msg->ifname,
+                mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
+                (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del");
 
             /*mac_msg->fdb_type = tlv->fdb_type;*/
             /*The port ifname is different to the local item*/
@@ -352,8 +353,9 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
     {
         mac_msg->age_flag |= MAC_AGE_PEER;
         ICCPD_LOG_DEBUG(__FUNCTION__, "Add peer age flag: %d interface %s, "
-            "MAC %s vlan %d, op_type %d", mac_msg->age_flag, mac_msg->ifname,
-            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->op_type);
+            "MAC %s vlan %d, op_type %s", mac_msg->age_flag, mac_msg->ifname,
+            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
+            (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del");
 
         if (mac_msg->age_flag == (MAC_AGE_LOCAL | MAC_AGE_PEER))
         {
@@ -394,15 +396,17 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
 
             if (strlen(csm->peer_itf_name) == 0)
             {
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Ignore MAC, is mclag intf %d orphan or "
-                    "portchannel is down, but peer-link is not configured "
-                    "interface %s, MAC %s vlan-id %d, op_type %d", from_mclag_intf,
-                    mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr),
-                    mac_msg->vid, mac_msg->op_type);
-
                 /*if orphan port mac but no peerlink, don't keep this mac*/
+                //MAC to be saved and program when peer_link is configured..? TBD
                 if (from_mclag_intf == 0)
+                {
+                    ICCPD_LOG_DEBUG(__FUNCTION__, "Ignore MAC learn on orphan port "
+                        "peer-link is not configured interface %s, MAC %s vlan-id %d, "
+                        " op_type %d", from_mclag_intf, mac_msg->ifname,
+                        mac_addr_to_str(mac_msg->mac_addr),
+                        mac_msg->vid, mac_msg->op_type);
                     return 0;
+                }
             }
             else
             {
@@ -428,7 +432,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
                 if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
                     add_mac_to_chip(mac_msg, mac_msg->fdb_type);
             }
-            else
+            else if(local_if->state != PORT_STATE_DOWN)
             {
                 /*from MCLAG port and the local port is up*/
                 add_mac_to_chip(mac_msg, mac_msg->fdb_type);

@@ -1711,8 +1711,9 @@ uint8_t set_mac_local_age_flag(struct CSM *csm, struct MACMsg* mac_msg, uint8_t 
                     TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
                 }
 
-                ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface: %s, oper: %d "
-                        "MAC %s vlan-id %d, age_flag %d", mac_msg->ifname, mac_msg->op_type,
+                ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface: %s, oper: %s "
+                        "MAC %s vlan-id %d, age_flag %d", mac_msg->ifname,
+                        (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del",
                         mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
             }
         }
@@ -1814,7 +1815,9 @@ static void update_l2_mac_state(struct CSM *csm,
                 mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
                 /*Remove MAC_AGE_LOCAL flag*/
-                mac_msg->age_flag = set_mac_local_age_flag(csm, mac_msg, 0, 1);
+                // commenting this code to fix an issue, when interface comes back up dont delete age flag
+                // as the MAC is remote now, delete only if MAC learns again.
+                //mac_msg->age_flag = set_mac_local_age_flag(csm, mac_msg, 0, 1);
 
                 /*Reverse interface from peer-link to the original portchannel*/
                 memcpy(mac_msg->ifname, mac_msg->origin_ifname, MAX_L_PORT_NAME);
@@ -2165,14 +2168,16 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
     {
         mac_msg->age_flag |= MAC_AGE_PEER;
         ICCPD_LOG_DEBUG(__FUNCTION__, "Add peer age flag %d interface %s, MAC %s vlan-id %d,"
-                " op_type %d", mac_msg->age_flag, mac_msg->ifname,
-                mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->op_type);
+                " op_type %s", mac_msg->age_flag, mac_msg->ifname,
+                mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
+                (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del");
 
-        /* find the MAC that the port is peer-link or local and peer both aged, to be deleted*/
-        if (strcmp(mac_msg->ifname, csm->peer_itf_name) != 0 && mac_msg->age_flag != (MAC_AGE_LOCAL | MAC_AGE_PEER))
+        /* local and peer both aged, to be deleted*/
+        // delete peer-link check, delete all remote macs which are aged local and remote.
+        if (mac_msg->age_flag != (MAC_AGE_LOCAL | MAC_AGE_PEER))
             continue;
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer disconnect, del MAC for peer-link: %s, "
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer disconnect, del MAC for %s, "
             "MAC %s vlan-id %d", mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
         /*Send mac del message to mclagsyncd, may be already deleted*/
