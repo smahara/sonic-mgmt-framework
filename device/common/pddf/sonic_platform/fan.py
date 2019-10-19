@@ -65,8 +65,7 @@ class Fan(FanBase):
             return "PSU_FAN{}".format(self.fan_index)
         else:
             if 'name' in plugin_data['FAN']:
-                for fname in plugin_data['FAN']['name']:
-                    return fname[str(self.fan_index)]
+                return plugin_data['FAN']['name'][str(self.fan_index)]
             else:
                 return "FAN{}".format(self.fan_index)
 
@@ -115,8 +114,8 @@ class Fan(FanBase):
         #raise NotImplementedError
 
     def get_status(self):
-        speed = self.get_speed(self.fan_index)
-        #rear_speed = self.get_speed_rear(idx)
+        speed = self.get_speed()
+        #rear_speed = self.get_speed_rear()
         status = True if (speed != 0) else False
         return status
 
@@ -140,7 +139,7 @@ class Fan(FanBase):
             except IOError:
                 return None
 
-            vmap = plugin_data['PSU']['direction']['valmap']
+            vmap = plugin_data['PSU']['psu_fan_dir']['valmap']
             if val.rstrip('\n') in vmap:
                 direction = vmap[val.rstrip('\n')]
             else:
@@ -203,10 +202,47 @@ class Fan(FanBase):
                 return 0
 
             pwm_to_dc = eval(plugin_data['FAN']['pwm_to_duty_cycle'])
-            speed_percetage = pwm_to_dc(fpwm)
-            #print "Speed: %d%%\n"%(speed_percetage)
+            speed_percentage = pwm_to_dc(fpwm)
+            #print "Speed: %d%%\n"%(speed_percentage)
 
             return speed_percentage
+
+    def get_speed_rpm(self):
+        """
+        Retrieves the speed of fan in RPM
+
+        Returns:
+            An integer, Speed of fan in RPM
+        """
+        if self.is_psu_fan:
+            attr = "psu_fan{}_speed_rpm".format(self.fan_index)
+            device = "PSU{}".format(self.fans_psu_index)
+            path = pddf_obj.get_path(device, attr)
+            if path is None:
+                return 0
+            try:
+                with open(path, 'r') as f:
+                    speed = int(f.read())
+            except IOError:
+                return 0
+            
+            rpm_speed = speed
+            return rpm_speed
+        else:
+            attr = "fan" + str(self.fan_index) + "_front_rpm"
+            #attr = "fan" + str(self.fan_index) + "_input"
+            path = pddf_obj.get_path("FAN-CTRL", attr)
+
+            if path is None:
+                return 0
+            try:
+                with open(path, 'r') as f:
+                    rpm_speed = int(f.read())
+            except IOError:
+                return 0
+
+
+            return rpm_speed
 
     #def get_target_speed(self):
         #"""
@@ -243,12 +279,16 @@ class Fan(FanBase):
             print "Setting PSU fan speed is not allowed"
             return False
         else:
+            if speed<0 or speed>100:
+                print "Error: Invalid speed %d. Please provide a valid speed percentage"%speed
+                return False
+
             duty_cycle_to_pwm = eval(plugin_data['FAN']['duty_cycle_to_pwm'])
             pwm = duty_cycle_to_pwm(speed)
             #print "New Speed: %d%% - PWM value to be set is %d\n"%(speed,pwm)
 
             status = 0
-            attr = "fan" + str(i) + "_pwm"
+            attr = "fan" + str(self.fan_index) + "_pwm"
             node = pddf_obj.get_path("FAN-CTRL", attr)
             if node is None:
                 return False
@@ -291,4 +331,6 @@ class Fan(FanBase):
         return (True)
 
 
+    def dump_sysfs(self):
+        return pddf_obj.cli_dump_dsysfs('fan')
 
