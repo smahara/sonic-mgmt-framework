@@ -625,7 +625,7 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
     }
     else
     {
-        LIST_FOREACH(vlan, &(lif_po->vlan_list), port_next)
+        RB_FOREACH(vlan, vlan_rb_tree, &(lif_po->vlan_tree))
         {
             if (!vlan->vlan_itf)
                 continue;
@@ -706,7 +706,7 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
     }
     else
     {
-        LIST_FOREACH(vlan, &(lif_po->vlan_list), port_next)
+        RB_FOREACH(vlan, vlan_rb_tree, &(lif_po->vlan_tree))
         {
             if (!vlan->vlan_itf)
                 continue;

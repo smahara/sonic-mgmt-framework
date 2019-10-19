@@ -1355,7 +1355,7 @@ static void update_l2_po_state(struct CSM *csm,
        }*/
 
     /*Is there any L3 vlan over L2 po?*/
-    LIST_FOREACH(vlan, &(lif->vlan_list), port_next)
+    RB_FOREACH (vlan, vlan_rb_tree, &(lif->vlan_tree))
     {
         route_type = ROUTE_NONE;
 
@@ -1557,7 +1557,7 @@ void update_stp_peer_link(struct CSM *csm,
         }
         else
         {
-            LIST_FOREACH(vlan, &(lif->vlan_list), port_next)
+            RB_FOREACH(vlan, vlan_rb_tree, &(lif->vlan_tree))
             {
                 if (!is_local_vlan_on(vlan))
                     continue;
@@ -1921,7 +1921,11 @@ void mlacp_portchannel_state_handler(struct CSM* csm,
      * Traffic is re-enabled back after the interface is up and ack is
      * received from peer
      */
-    if (po_state == 0)
+    if ( po_state == 0 && 
+         ( !csm->peer_link_if ||
+           !(strcmp(csm->peer_link_if->name, local_if->name)) 
+         ) 
+       )
         mlacp_link_disable_traffic_distribution(local_if);
 
     return;
@@ -1959,7 +1963,10 @@ void mlacp_mlag_intf_detach_handler(struct CSM* csm, struct LocalInterface* loca
     //traffic on this portchannel if the traffic is blocked on this port
     if(local_if->is_traffic_disable)
     {
-        mlacp_link_enable_traffic_distribution(local_if);
+        if ( !csm->peer_link_if || !(strcmp(csm->peer_link_if->name, local_if->name)) ) 
+        {
+            mlacp_link_enable_traffic_distribution(local_if);
+        }
     }
 
     return;

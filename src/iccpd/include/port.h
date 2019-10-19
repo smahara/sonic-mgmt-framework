@@ -29,6 +29,8 @@
 #include <time.h>
 #include <sys/queue.h>
 
+#include "../include/openbsd_tree.h"
+
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN 16
 #endif /* INET_ADDRSTRLEN */
@@ -56,6 +58,7 @@
 #define IF_T_VLAN         2
 #define IF_T_VXLAN       3
 #define IF_T_BRIDGE      4
+
 typedef struct
 {
     char *ifname;
@@ -73,8 +76,19 @@ struct VLAN_ID
     uint16_t vid;
     uint16_t vlan_removed;
     struct LocalInterface* vlan_itf; /* loacl vlan interface */
-    LIST_ENTRY(VLAN_ID) port_next;
+    RB_ENTRY(VLAN_ID) vlan_entry;
 };
+
+RB_HEAD(vlan_rb_tree, VLAN_ID);
+RB_PROTOTYPE(vlan_rb_tree, VLAN_ID, vlan_rb_tree, vlan_node_compare);
+
+#define VLAN_RB_REMOVE(name, head, elm) do {  \
+    RB_REMOVE(name, head, elm);              \
+    (elm)->vlan_entry.rbt_parent = NULL;   \
+    (elm)->vlan_entry.rbt_left = NULL;     \
+    (elm)->vlan_entry.rbt_right = NULL;    \
+} while (0)
+
 
 struct PeerInterface
 {
@@ -94,7 +108,7 @@ struct PeerInterface
     struct CSM* csm;
 
     LIST_ENTRY(PeerInterface) mlacp_next;
-    LIST_HEAD(peer_vlan_list, VLAN_ID) vlan_list;
+    struct vlan_rb_tree vlan_tree;
 };
 
 struct LocalInterface
@@ -127,7 +141,7 @@ struct LocalInterface
     uint8_t port_config_sync;
     bool is_traffic_disable;   /* Disable traffic tx/rx  */ 
 
-    LIST_HEAD(local_vlan_list, VLAN_ID) vlan_list;
+    struct vlan_rb_tree vlan_tree;
 
     LIST_ENTRY(LocalInterface) system_next;
     LIST_ENTRY(LocalInterface) system_purge_next;
