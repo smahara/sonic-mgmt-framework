@@ -486,7 +486,7 @@ limitations under the License.
      <PTYPE
         name="ECN_OPTION"
         method="select"
-        pattern="ecn_none(ecn_none) ecn_green(ecn_green) ecn_yellow(ecn_yellow) ecn_red(ecn_red) ecn_green_yello(ecn_green_yellow) ecn_green_red(ecn_green_red) ecn_yellow_red(ecn_yellow_red) ecn_all(ecn_all)"
+        pattern="none(ecn_none) green(ecn_green) yellow(ecn_yellow) red(ecn_red) green_yellow(ecn_green_yellow) green_red(ecn_green_red) yellow_red(ecn_yellow_red) all(ecn_all)"
         help="ECN Options"
         />
     <!--=======================================================-->

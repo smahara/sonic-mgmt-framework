@@ -47,11 +47,11 @@ def generate_body(func, args):
     elif func.__name__[0:PARAM_PATCH_PREFIX_LEN] == PARAM_PATCH_PREFIX:
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:" + func.__name__[PARAM_PATCH_PREFIX_LEN:] :  (args[1]) }
-       if len(args) == 2:
+       if len(args) > 2:
            showSuccess = False
     elif func.__name__[0:PARAM_DELETE_PREFIX_LEN] == PARAM_DELETE_PREFIX:
        keypath = [ args[0] ]
-       if len(args) == 1:
+       if len(args) > 1:
            showSuccess = False
     else:
        body = {}

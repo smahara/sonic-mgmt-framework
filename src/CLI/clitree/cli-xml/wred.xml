@@ -91,50 +91,20 @@
             </PARAM>
             <ACTION>
                 if test "${color_select}" = "red" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_min_threshold ${prof_id} ${min-threshold}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_max_threshold ${prof_id} ${max-threshold}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_drop_rate ${prof_id} ${max-drop-rate} OK&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_min_threshold ${prof_id} ${min-threshold} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_max_threshold ${prof_id} ${max-threshold} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_drop_rate ${prof_id} ${max-drop-rate}&#xA;
                 elif test "${color_select}" = "green" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_min_threshold ${prof_id} ${min-threshold}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_max_threshold ${prof_id} ${max-threshold}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_drop_rate ${prof_id} ${max-drop-rate} OK&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_min_threshold ${prof_id} ${min-threshold} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_max_threshold ${prof_id} ${max-threshold} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_drop_rate ${prof_id} ${max-drop-rate}&#xA;
                 else&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_min_threshold ${prof_id} ${min-threshold}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_max_threshold ${prof_id} ${max-threshold}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_drop_rate ${prof_id} ${max-drop-rate} OK&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_min_threshold ${prof_id} ${min-threshold} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_max_threshold ${prof_id} ${max-threshold} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_drop_rate ${prof_id} ${max-drop-rate}&#xA;
                 fi&#xA;
             </ACTION>
         </COMMAND>
-<!-- FIXME
-        <COMMAND
-            name="random-detect ecn"
-            help="Enable ECN"
-            <PARAM
-                name="ecn_thr_select"
-                help="Choose ecn cb threshold"
-                mode="switch"
-                ptype="SUBCOMMAND"
-                >
-                <PARAM
-                    name="green"
-                    help="Green"
-                    >
-                </PARAM>
-                <PARAM
-                    name="yellow"
-                    help="Yellow precedence"
-                    >
-                </PARAM>
-                <PARAM
-                    name="red"
-                    help="Red"
-                    >
-                    <MACRO name="WRED_THD_CONFIG" arg=""/>
-                </PARAM>
-            </PARAM>
-            <ACTION> python $SONIC_CLI_ROOT/sonic-cli-wred.py get_sonic_wred_profile_sonic_wred_profile show_wred.j2 </ACTION>
-        </COMMAND>
-FIXME -->
         <COMMAND
             name="no"
             help="Delete WRED profile">
@@ -177,36 +147,34 @@ FIXME -->
             </PARAM>
             <ACTION>
                 if test "${color_select}" = "red" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_min_threshold ${prof_id}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_max_threshold ${prof_id}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_drop_rate ${prof_id} OK&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_min_threshold ${prof_id} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_max_threshold ${prof_id} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_red_drop_rate ${prof_id}&#xA;
                 elif test "${color_select}" = "green" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_min_threshold ${prof_id}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_max_threshold ${prof_id}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_drop_rate ${prof_id} OK&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_min_threshold ${prof_id} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_max_threshold ${prof_id} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_green_drop_rate ${prof_id}&#xA;
                 else&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_min_threshold ${prof_id}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_max_threshold ${prof_id}&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_drop_rate ${prof_id} OK&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_min_threshold ${prof_id} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_max_threshold ${prof_id} WaitShow &#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_yellow_drop_rate ${prof_id}&#xA;
                 fi&#xA;
             </ACTION>
         </COMMAND>
-<!-- FIXME
+        <COMMAND
+            name="random-detect ecn"
+            help="Configure ecn for the profile">
+            <PARAM
+                name="ecn"
+                help="Configure ecn mode"
+                ptype="ECN_OPTION" />
+            <ACTION>python $SONIC_CLI_ROOT/sonic-cli-wred.py patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_ecn ${prof_id} ${ecn}</ACTION>
+        </COMMAND>
         <COMMAND
             name="no random-detect ecn"
-            help="Enable ECN"
-            mode="subcommand"
-            ptype="SUBCOMMAND">
-            <PARAM
-                name="ecn_thr_select"
-                help="Choose ecn cb threshold"
-                mode="switch"
-                ptype="SUBCOMMAND"
-                >
-            </PARAM>
-            <ACTION> python $SONIC_CLI_ROOT/sonic-cli-wred.py get_sonic_wred_profile_sonic_wred_profile show_wred.j2 </ACTION>
+            help="Unconfigure ecn for the profile" >
+            <ACTION>python $SONIC_CLI_ROOT/sonic-cli-wred.py delete_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list_ecn ${prof_id}</ACTION>
         </COMMAND>
-FIXME -->
     </VIEW>
 </CLISH_MODULE>
 
