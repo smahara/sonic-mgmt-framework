@@ -95,14 +95,15 @@ enum ICCP_DBG_CNTR_MSG
     ICCP_DBG_CNTR_MSG_AGGR_STATE       = 2,
     ICCP_DBG_CNTR_MSG_MAC_INFO         = 3,
     ICCP_DBG_CNTR_MSG_ARP_INFO         = 4,
-    ICCP_DBG_CNTR_MSG_PORTCHANNEL_INFO = 5,
-    ICCP_DBG_CNTR_MSG_PEER_LINK_INFO   = 6,
-    ICCP_DBG_CNTR_MSG_HEART_BEAT       = 7,
-    ICCP_DBG_CNTR_MSG_NAK              = 8,
-    ICCP_DBG_CNTR_MSG_SYNC_DATA        = 9,
-    ICCP_DBG_CNTR_MSG_SYNC_REQ         = 10,
-    ICCP_DBG_CNTR_MSG_WARM_BOOT        = 11,
-    ICCP_DBG_CNTR_MSG_IF_UP_ACK        = 12,
+    ICCP_DBG_CNTR_MSG_L2MC_INFO        = 5,
+    ICCP_DBG_CNTR_MSG_PORTCHANNEL_INFO = 6,
+    ICCP_DBG_CNTR_MSG_PEER_LINK_INFO   = 7,
+    ICCP_DBG_CNTR_MSG_HEART_BEAT       = 8,
+    ICCP_DBG_CNTR_MSG_NAK              = 9,
+    ICCP_DBG_CNTR_MSG_SYNC_DATA        = 10,
+    ICCP_DBG_CNTR_MSG_SYNC_REQ         = 11,
+    ICCP_DBG_CNTR_MSG_WARM_BOOT        = 12,
+    ICCP_DBG_CNTR_MSG_IF_UP_ACK        = 13,
     ICCP_DBG_CNTR_MSG_MAX
 };
 typedef enum ICCP_DBG_CNTR_MSG ICCP_DBG_CNTR_MSG_e;
@@ -153,8 +154,10 @@ struct mLACP
     TAILQ_HEAD(ndisc_msg_list, Msg) ndisc_msg_list;
     TAILQ_HEAD(ndisc_info_list, Msg) ndisc_list;
     TAILQ_HEAD(mac_msg_list, MACMsg) mac_msg_list;
+    TAILQ_HEAD(l2mc_msg_list, L2MCMsg) l2mc_msg_list;
 
     struct mac_rb_tree mac_rb;
+    struct l2mc_rb_tree l2mc_rb;
 
     LIST_HEAD(lif_list, LocalInterface) lif_list;
     LIST_HEAD(lif_purge_list, LocalInterface) lif_purge_list;

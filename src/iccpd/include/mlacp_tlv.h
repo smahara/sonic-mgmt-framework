@@ -418,6 +418,28 @@ struct mLACPSTPInfoTLV
     uint8_t         stp_msg[0];
 } __attribute__ ((packed));
 
+/* L2MC entry Information TLV*/
+struct mLACPL2MCData
+{
+    uint8_t     type;/*add or del*/
+    uint8_t     l2mc_type;
+    uint8_t     saddr[16];
+    uint8_t     gaddr[16];
+    uint16_t vid;
+    /*Current if name that set in chip*/
+    char     ifname[MAX_L_PORT_NAME];
+} __attribute__ ((packed));
+
+/*
+ * L2MC Information TLV
+ */
+struct mLACPL2MCInfoTLV
+{
+    ICCParameter    icc_parameter;
+    uint16_t num_of_entry;
+    struct mLACPL2MCData L2mcEntry[0];
+} __attribute__ ((packed));
+
 /*
  * NOS: Heartbeat
  */
@@ -508,5 +530,46 @@ struct MACMsg
 
 RB_HEAD(mac_rb_tree, MACMsg);
 RB_PROTOTYPE(mac_rb_tree, MACMsg, mac_entry_rb, MACMsg_compare);
+
+enum L2MC_DEL_TYPE
+{
+    L2MC_DEL_LOCAL   = 1,    /*L2MC in local switch is deleted due to link down*/
+    L2MC_DEL_PEER    = 2,    /*L2MC in peer switch is deleted due to link down*/
+};
+
+enum L2MC_OP_TYPE
+{
+    L2MC_SYNC_ADD    = 1,
+    L2MC_SYNC_DEL    = 2,
+    L2MC_SYNC_LEAVE  = 3,
+    L2MC_SYNC_ACK    = 4,
+};
+
+enum L2MC_TYPE
+{
+    L2MC_TYPE_STATIC     = 1,
+    L2MC_TYPE_DYNAMIC    = 2,
+};
+
+struct L2MCMsg
+{
+    RB_ENTRY(L2MCMsg) l2mc_entry_rb;
+    uint16_t    vid;
+    uint8_t     saddr[16];
+    uint8_t     gaddr[16];
+    uint8_t     op_type;    /*add or del*/
+    uint8_t     l2mc_type;   /*static or dynamic*/
+
+    /*Current if name that set in chip*/
+    char     ifname[MAX_L_PORT_NAME];
+    /*if we set the entry to peer-link, origin_ifname store the
+       original if name that learned from chip*/
+    char     origin_ifname[MAX_L_PORT_NAME];
+    uint8_t del_flag;/*local or peer is deleted?*/
+    TAILQ_ENTRY(L2MCMsg) tail;     // entry into mac_msg_list
+};
+
+RB_HEAD(l2mc_rb_tree, L2MCMsg);
+RB_PROTOTYPE(l2mc_rb_tree, L2MCMsg, l2mc_entry_rb, L2MCMsg_compare);
 
 #endif /* MLACP_TLV_H_ */

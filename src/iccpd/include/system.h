@@ -71,6 +71,22 @@ extern char mac_print_str[ETHER_ADDR_STR_LEN];
     (elm)->mac_entry_rb.rbt_right = NULL;    \
 } while (/*CONSTCOND*/0)
 
+#define L2MC_IN_MSG_LIST(head, elm, field)   \
+    (((elm)->field.tqe_next != NULL) ||     \
+    ((elm)->field.tqe_prev != NULL))
+
+#define L2MC_TAILQ_REMOVE(head, elm, field) do {  \
+    TAILQ_REMOVE(head, elm, field);              \
+    (elm)->field.tqe_next = NULL;                \
+    (elm)->field.tqe_prev = NULL;                \
+} while (/*CONSTCOND*/0)
+
+#define L2MC_RB_REMOVE(name, head, elm) do {  \
+    RB_REMOVE(name, head, elm);              \
+    (elm)->l2mc_entry_rb.rbt_parent = NULL;   \
+    (elm)->l2mc_entry_rb.rbt_left = NULL;     \
+    (elm)->l2mc_entry_rb.rbt_right = NULL;    \
+} while (/*CONSTCOND*/0)
 
 /* Debug counters */
 /* Debug counters to track messages ICCPd sent to MclagSyncd */
@@ -90,14 +106,15 @@ enum SYNCD_TX_DBG_CNTR_MSG_e
     SYNCD_TX_DBG_CNTR_MSG_FLUSH_FDB                  = 2,
     SYNCD_TX_DBG_CNTR_MSG_SET_IF_MAC                 = 3,
     SYNCD_TX_DBG_CNTR_MSG_SET_FDB                    = 4,
-    SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_ENABLE    = 5,
-    SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE   = 6,
-    SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_STATE             = 7,
-    SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_ROLE              = 8,
-    SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_SYSTEM_ID         = 9,
-    SYNCD_TX_DBG_CNTR_MSG_DEL_ICCP_INFO              = 10,
-    SYNCD_TX_DBG_CNTR_MSG_SET_REMOTE_IF_STATE        = 11,
-    SYNCD_TX_DBG_CNTR_MSG_DEL_REMOTE_IF_INFO         = 12,
+    SYNCD_TX_DBG_CNTR_MSG_SET_L2MC                   = 5,
+    SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_ENABLE    = 6,
+    SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE   = 7,
+    SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_STATE             = 8,
+    SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_ROLE              = 9,
+    SYNCD_TX_DBG_CNTR_MSG_SET_ICCP_SYSTEM_ID         = 10,
+    SYNCD_TX_DBG_CNTR_MSG_DEL_ICCP_INFO              = 11,
+    SYNCD_TX_DBG_CNTR_MSG_SET_REMOTE_IF_STATE        = 12,
+    SYNCD_TX_DBG_CNTR_MSG_DEL_REMOTE_IF_INFO         = 13,
     SYNCD_TX_DBG_CNTR_MSG_MAX
 };
 

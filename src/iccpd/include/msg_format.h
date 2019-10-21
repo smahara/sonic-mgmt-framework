@@ -102,9 +102,10 @@
 #define TLV_T_MLACP_ARP_INFO            0x1036
 #define TLV_T_MLACP_STP_INFO            0x1037//no support
 #define TLV_T_MLACP_MAC_INFO            0x1038
-#define TLV_T_MLACP_WARMBOOT_FLAG       0x1039
-#define TLV_T_MLACP_NDISC_INFO          0x103A
-#define TLV_T_MLACP_IF_UP_ACK           0x103B
+#define TLV_T_MLACP_L2MC_INFO           0x1039
+#define TLV_T_MLACP_WARMBOOT_FLAG       0x103A
+#define TLV_T_MLACP_NDISC_INFO          0x103B
+#define TLV_T_MLACP_IF_UP_ACK           0x103C
 #define TLV_T_MLACP_LIST_END            0x104a //list end
 
 /* Debug */
@@ -181,6 +182,9 @@ static char* get_tlv_type_string(int type)
 
         case TLV_T_MLACP_MAC_INFO:
             return "TLV_T_MLACP_MAC_INFO";
+
+        case TLV_T_MLACP_L2MC_INFO:
+            return "TLV_T_MLACP_L2MC_INFO";
 
         case TLV_T_MLACP_STP_INFO:
             return "TLV_T_MLACP_STP_INFO";
@@ -437,8 +441,9 @@ typedef enum mclag_syncd_msg_type_e_
 {
     MCLAG_SYNCD_MSG_TYPE_NONE             = 0,
     MCLAG_SYNCD_MSG_TYPE_FDB_OPERATION    = 1,
-    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_DOMAIN = 2,
-    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_IFACE  = 3
+    MCLAG_SYNCD_MSG_TYPE_L2MC_OPERATION   = 2,
+    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_DOMAIN = 3,
+    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_IFACE  = 4
 }mclag_syncd_msg_type_e;
 
 typedef enum mclag_msg_type_e_
@@ -456,7 +461,8 @@ typedef enum mclag_msg_type_e_
     MCLAG_MSG_TYPE_SET_ICCP_SYSTEM_ID       = 11,
     MCLAG_MSG_TYPE_DEL_ICCP_INFO            = 12,
     MCLAG_MSG_TYPE_SET_REMOTE_IF_STATE      = 13,
-    MCLAG_MSG_TYPE_DEL_REMOTE_IF_INFO       = 14
+    MCLAG_MSG_TYPE_DEL_REMOTE_IF_INFO       = 14,
+    MCLAG_MSG_TYPE_SET_L2MC                 = 15
 }mclag_msg_type_e;
 
 
@@ -510,6 +516,17 @@ struct mclag_fdb_info
     char port_name[MAX_L_PORT_NAME];
     short type;    /*dynamic or static*/
     short op_type; /*add or del*/
+};
+
+struct mclag_l2mc_info
+{
+    uint8_t     saddr[16];
+    uint8_t     gaddr[16];
+    unsigned int vid;
+    char port_name[20];
+    short type;    /*dynamic or static*/
+    short op_type; /*add or del*/
+    bool leave;
 };
 
 struct mclag_domain_cfg_info
