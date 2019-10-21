@@ -261,6 +261,10 @@ class Psu(PsuBase):
 		print "Set " + led_device_name + " : is not supported in the platform"
                 return (False)
 
+        if (not color in color_map.keys()):
+                print "Invalid " + color
+                return (False)
+
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
         pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
         pddf_obj.create_attr('color', self.color_map[color], pddf_obj.get_led_cur_state_path())

@@ -99,6 +99,12 @@ class Thermal(ThermalBase):
 
         return (True)
 
+    def get_temp_label(self):
+        dev= pddf_obj.data[self.get_name()]
+        topo_info = dev['i2c']['topo_info']
+        label="%s-i2c-%d-%x" % (topo_info['dev_type'], int(topo_info['parent_bus'], 0), int(topo_info['dev_addr'], 0))
+
+
     def dump_sysfs(self):
         return pddf_obj.cli_dump_dsysfs('temp-sensors')
 
