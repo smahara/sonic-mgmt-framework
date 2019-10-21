@@ -9,11 +9,11 @@ import argparse
 
 class LedUtil:
     color_map = {
-                 "GREEN" : "on",
-                 "RED" : "faulty",
-                 "OFF" : "off",
-		 "ON"  : "on"
-                }
+         "STATUS_LED_COLOR_GREEN" : "on",
+         "STATUS_LED_COLOR_RED" : "faulty",
+         "STATUS_LED_COLOR_OFF" : "off"
+    }
+
     def __init__(self):
         global pddf_obj
         pddf_obj = pddfparse.PddfParse()

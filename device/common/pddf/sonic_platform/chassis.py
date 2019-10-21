@@ -473,14 +473,18 @@ class Chassis(ChassisBase):
         color_state="SOLID"
 	led_device_name=device_name + "_LED"
         if(not pddf_obj.is_led_device_configured(led_device_name, str(index))):
-                return (False)
+                return ("Not Supported")
+
+
+        if (not color in self.color_map.keys()):
+                return ("Invalid color")
 
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
         pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
         pddf_obj.create_attr('color', self.color_map[color], pddf_obj.get_led_cur_state_path())
         pddf_obj.create_attr('color_state', color_state, pddf_obj.get_led_cur_state_path())
         pddf_obj.create_attr('dev_ops', 'set_status',  pddf_obj.get_led_path())
-        return (True)
+        return ("Executed")
 
 
     def get_system_led(self, device_name, index):
