@@ -1,0 +1,5 @@
+s3000/scripts/s3000_platform.sh usr/local/bin
+s3000/scripts//portiocfg.py usr/local/bin
+#s3000/scripts/set-fan-speed usr/local/bin
+s3000/systemd/platform-modules-s3000.service etc/systemd/system
+common/dell_i2c_utils.sh usr/local/bin

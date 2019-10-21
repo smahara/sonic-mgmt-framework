@@ -1,0 +1,13 @@
+[Unit]
+Description=Dell S3000 Platform modules
+Before=pmon.service
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/s3000_platform.sh init
+ExecStop=/usr/local/bin/s3000_platform.sh deinit
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
