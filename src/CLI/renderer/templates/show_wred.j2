@@ -11,7 +11,11 @@
 {% set vars = {'red_drop_rate': ""} %}
 {% if json_output -%}
 {% for key_json in json_output %}
-{% set ecn_list = json_output[key_json]["WRED_PROFILE"]["WRED_PROFILE_LIST"] %}
+    {% if key_json == "sonic-wred-profile:sonic-wred-profile" %}
+        {% set ecn_list = json_output[key_json]["WRED_PROFILE"]["WRED_PROFILE_LIST"] %}
+    {% else %}
+        {% set ecn_list = json_output[key_json] %}
+    {% endif %}
 {% for ecn in ecn_list %}
     {% if vars.update({'name':ecn["name"]}) %}{% endif %}
     {% if vars.update({'ecn':ecn["ecn"]}) %}{% endif %}

@@ -34,10 +34,10 @@ def generate_body(func, args):
     showSuccess = True
 
     # Get the rules of all ECN table entries.
-    if func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile_wred_profile':
-        keypath = [args[0]]
-    elif func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile':
+    if func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile':
         keypath = []
+    elif func.__name__ == 'get_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list':
+       keypath = [ args[0] ]
     elif func.__name__ == 'patch_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list':
        keypath = [ args[0] ]
        body = { "sonic-wred-profile:name": args[0] }

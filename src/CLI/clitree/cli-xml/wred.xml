@@ -6,8 +6,17 @@
   <VIEW name="enable-view">
 
     <!--show ecn -->
-    <COMMAND name="show wred" help="Show configured WRED profiles">
-      <ACTION> python $SONIC_CLI_ROOT/sonic-cli-wred.py get_sonic_wred_profile_sonic_wred_profile show_wred.j2 </ACTION>
+    <COMMAND
+        name="show wred" help="Show configured WRED profiles"
+        mode="subcommand" ptype="SUBCOMMAND">
+      <PARAM name="name" help="Name of the WRED profile" optional='true' ptype="STRING_32"> </PARAM>
+      <ACTION>
+          if test "${name}" = "" ; then&#xA;
+               python $SONIC_CLI_ROOT/sonic-cli-wred.py get_sonic_wred_profile_sonic_wred_profile show_wred.j2&#xA;
+          else&#xA;
+               python $SONIC_CLI_ROOT/sonic-cli-wred.py get_sonic_wred_profile_sonic_wred_profile_wred_profile_wred_profile_list ${name} show_wred.j2&#xA;
+          fi&#xA;
+      </ACTION>
       <xi:include href="include/pipe.xml"/>
     </COMMAND>
 
