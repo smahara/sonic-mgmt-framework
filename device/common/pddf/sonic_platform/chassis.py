@@ -110,11 +110,11 @@ class Chassis(ChassisBase):
 		color=self.get_system_led(led, sys_led_list[led])
 		print color
 
-	self.set_system_led("LOC", 0, "STATUS_LED_COLOR_GREEN")
-	color=self.get_system_led("LOC", 0)
+	self.set_system_led("LOC_LED","STATUS_LED_COLOR_GREEN")
+	color=self.get_system_led("LOC_LED")
 	print "Set Green: " + color
-	self.set_system_led("LOC", 0, "STATUS_LED_COLOR_OFF")
-	color=self.get_system_led("LOC", 0)
+	self.set_system_led("LOC_LED", "STATUS_LED_COLOR_OFF")
+	color=self.get_system_led("LOC_LED")
 	print "Set off: " + color
 	"""
 
@@ -469,26 +469,38 @@ class Chassis(ChassisBase):
          "STATUS_LED_COLOR_OFF" : "off"
     }
 
-    def set_system_led(self, device_name, index, color):
+    def set_system_led(self, led_device_name, color):
         color_state="SOLID"
-	led_device_name=device_name + "_LED"
-        if(not pddf_obj.is_led_device_configured(led_device_name, str(index))):
-                return ("Not Supported")
+        if (not led_device_name in pddf_obj.data.keys()):
+                print led_device_name + ": not configured"
+                return (False)
+
+        index=pddf_obj.data[led_device_name]['dev_attr']['index']
+
+        if(not pddf_obj.is_led_device_configured(led_device_name, index)):
+                print "Not Supported"
+		return (False)
 
 
         if (not color in self.color_map.keys()):
-                return ("Invalid color")
+                print "Invalid color"
+		return (False)
 
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
         pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
         pddf_obj.create_attr('color', self.color_map[color], pddf_obj.get_led_cur_state_path())
         pddf_obj.create_attr('color_state', color_state, pddf_obj.get_led_cur_state_path())
         pddf_obj.create_attr('dev_ops', 'set_status',  pddf_obj.get_led_path())
-        return ("Executed")
+        return (True)
 
 
-    def get_system_led(self, device_name, index):
-	led_device_name=device_name + "_LED"
+    def get_system_led(self, led_device_name):
+        if (not led_device_name in pddf_obj.data.keys()):
+                status = led_device_name + ": not configured"
+		return (status)
+
+        index=pddf_obj.data[led_device_name]['dev_attr']['index']
+
         if(not pddf_obj.is_led_device_configured(led_device_name, str(index))):
                 return ("Not Supported")
 
