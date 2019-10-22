@@ -253,14 +253,12 @@ drivers =[
 'at24',
 'qci_cpld_sfp28',
 'qci_cpld_led',
-'qci_platform_ix8'
+'qci_platform_ix8',
+'quanta_hwmon_ipmi'
 ]
- 
 
-                    
 def system_install():
     global FORCE
-	
     #setup driver dependency
     status, output = exec_cmd("depmod -a ", 1)
     #install drivers
@@ -268,25 +266,22 @@ def system_install():
        status, output = exec_cmd("modprobe "+drivers[i], 1)
     if status:
 	   print output
-	   if FORCE == 0:                
-	      return status             
-    				 
+	   if FORCE == 0:
+	      return status
     #instantiate devices
     for i in range(0,len(instantiate)):
        #time.sleep(1)
        status, output = exec_cmd(instantiate[i], 1)
     if status:
 	   print output
-	   if FORCE == 0:                
-	      return status   
-    
+	   if FORCE == 0:
+	      return status
     #for i in range(22,30):
     #    status, output =exec_cmd("echo sff8436 0x50 > /sys/bus/i2c/devices/i2c-0/i2c-4/i2c-"+str(i)+"/new_device", 1)
     #    if status:
     #        print output
-    #        if FORCE == 0:            
-    #            return status   
-    
+    #        if FORCE == 0:
+    #            return status
     return 
      
         
@@ -294,14 +289,14 @@ def system_ready():
     if not device_found(): 
         return False
     return True
-               
-def install():                      
+    
+def install():
     if not device_found():
-        print "No device, installing...."     
-        status = system_install() 
+        print "No device, installing...."
+        status = system_install()
         if status:
-            if FORCE == 0:        
-                return  status        
+            if FORCE == 0:
+                return  status
     else:
         print " ix8 driver already installed...."
     return
@@ -313,13 +308,13 @@ def uninstall():
        status, output = exec_cmd("rmmod "+drivers[i], 1)
     if status:
 	   print output
-	   if FORCE == 0:                
+	   if FORCE == 0:
 	      return status
     return
 
 def device_found():
     ret1, log = exec_cmd("ls "+i2c_prefix+"i2c-0", 0)
-    return ret1				
+    return ret1
 
 if __name__ == "__main__":
     main()
