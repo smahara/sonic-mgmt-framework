@@ -490,7 +490,7 @@ int mlacp_fsm_update_l2mc_entry_from_peer( struct CSM* csm, struct mLACPL2MCData
 
     if (l2mc_msg)
     {
-        if (L2mcData->type == MAC_SYNC_ADD)
+        if (L2mcData->type == L2MC_SYNC_ADD)
         {
             l2mc_msg->del_flag &= ~L2MC_DEL_PEER;
             ICCPD_LOG_DEBUG(__FUNCTION__, "Recv ADD, Remove peer del flag:%d interface %s, "

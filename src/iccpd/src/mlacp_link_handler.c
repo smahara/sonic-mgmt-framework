@@ -2202,6 +2202,7 @@ void mlacp_peer_conn_handler(struct CSM* csm)
 
     sys->csm_trans_time = time(NULL);
     mlacp_conn_handler_fdb(csm);
+    mlacp_sync_l2mc(csm);
 
 #if 0
     // When peer-link ready, suppose all MLAG link are alive
@@ -2256,7 +2257,8 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
     struct LocalInterface* lif = NULL;
     struct PeerInterface* peer_if;
     struct Msg* msg = NULL;
-    struct MACMsg* mac_msg = NULL;
+    struct MACMsg* mac_msg = NULL, *mac_temp = NULL;
+    struct L2MCMsg* l2mc_msg = NULL, *l2mc_temp = NULL;
     struct System* sys = NULL;
 
     if (!csm)
@@ -2290,7 +2292,7 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
         return;
     }
 
-    RB_FOREACH (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb)
+    RB_FOREACH_SAFE (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb, mac_temp)
     {
         mac_msg->age_flag |= MAC_AGE_PEER;
         ICCPD_LOG_DEBUG(__FUNCTION__, "Add peer age flag %d interface %s, MAC %s vlan-id %d,"
@@ -2315,6 +2317,32 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
         if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
         {
             free(mac_msg);
+        }
+    }
+
+    RB_FOREACH_SAFE (l2mc_msg, l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_temp)
+    {
+        l2mc_msg->del_flag |= L2MC_DEL_PEER;
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Add peer del flag %d interface %s, saddr  %s gaddr %s vlan-id %d,"
+                " op_type %d", l2mc_msg->del_flag, l2mc_msg->ifname,
+                l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid, l2mc_msg->op_type);
+
+        /* find the entry that the port is peer-link or local and peer both deleted, to be deleted*/
+        if (strcmp(l2mc_msg->ifname, csm->peer_itf_name) != 0 && l2mc_msg->del_flag != (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
+            continue;
+
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer disconnect, del L2MC entry for peer-link: %s, "
+            "saddr %s gaddr %s vlan-id %d", l2mc_msg->ifname, l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
+
+        /*Send del message to mclagsyncd, may be already deleted*/
+        del_l2mc_from_chip(l2mc_msg);
+
+        L2MC_RB_REMOVE(l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_msg);
+        // free only if not in change list to be send to peer node,
+        // else free is taken care after sending the update to peer
+        if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail))
+        {
+            free(l2mc_msg);
         }
     }
 
@@ -2361,6 +2389,7 @@ void mlacp_peerlink_up_handler(struct CSM* csm)
 {
     struct Msg* msg = NULL;
     struct MACMsg* mac_msg = NULL;
+    struct L2MCMsg* l2mc_msg = NULL;
 
     if (!csm)
         return;
@@ -2380,6 +2409,17 @@ void mlacp_peerlink_up_handler(struct CSM* csm)
 
         /*Send mac add message to mclagsyncd, local age flag is already set*/
         add_mac_to_chip(mac_msg, mac_msg->fdb_type);
+    }
+    RB_FOREACH (l2mc_msg, l2mc_rb_tree, &MLACP(csm).l2mc_rb)
+    {
+        if ((strcmp(l2mc_msg->ifname, csm->peer_itf_name) != 0) ||
+            (!(l2mc_msg->del_flag & L2MC_DEL_LOCAL)))
+              continue;
+
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer link up, add L2MC to STATE_DB for peer-link: %s, "
+                "saddr %s gaddr %s vlan-id %d", l2mc_msg->ifname, l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
+
+        add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type);
     }
 
     return;
@@ -3019,14 +3059,17 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
                /*send L2MC_SYNC_LEAVE message to peer*/
                 if (MLACP(csm).current_state == MLACP_STATE_EXCHANGE)
                 {
-                    l2mc_msg->op_type = L2MC_SYNC_LEAVE;
-                    if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail))
+                    l2mc_info->op_type = L2MC_SYNC_LEAVE;
+                    if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_info, tail))
                     {
-                        TAILQ_INSERT_TAIL(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail);
+                        TAILQ_INSERT_TAIL(&(MLACP(csm).l2mc_msg_list), l2mc_info, tail);
                     }
                 }
                 RB_REMOVE(l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_info);
-                free(l2mc_info);
+                if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_info, tail))
+                {
+                    free(l2mc_info);
+                }
             }
             else
             {
@@ -3037,7 +3080,8 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
                 if (strcmp(l2mc_info->ifname, csm->peer_itf_name) == 0)
                 {
                     /*Set L2MC_DEL_LOCAL flag*/
-                    l2mc_info->del_flag = set_l2mc_local_del_flag(csm, l2mc_info, 1, 1);
+                    //l2mc_info->del_flag = set_l2mc_local_del_flag(csm, l2mc_info, 1, 1);
+                    l2mc_info->del_flag |= L2MC_DEL_LOCAL;
 
                     if (l2mc_info->del_flag == (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
                     {

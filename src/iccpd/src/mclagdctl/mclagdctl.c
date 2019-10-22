@@ -497,7 +497,7 @@ int mclagdctl_parse_dump_l2mc(char *msg, int data_len)
     int len = 0;
     int count = 0;
 
-    fprintf(stdout, "%-60s\n", "TYPE: S-STATIC, D-DYNAMIC; AGE: L-Local del, P-Peer del");
+    fprintf(stdout, "%-60s\n", "TYPE: S-STATIC, D-DYNAMIC; DEL: L-Local del, P-Peer del");
 
     fprintf(stdout, "%-6s", "No.");
     fprintf(stdout, "%-5s", "TYPE");
@@ -1147,4 +1147,3 @@ mclagdctl_disconnect:
 
     return ret;
 }
-
