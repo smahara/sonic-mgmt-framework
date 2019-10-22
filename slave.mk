@@ -880,6 +880,8 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
                 $(IFUPDOWN2) \
                 $(HWDIAG) \
                 $(NTP) \
+                $(LIBPAM_RADIUS) \
+                $(LIBNSS_RADIUS) \
                 $(LIBPAM_TACPLUS) \
                 $(LIBNSS_TACPLUS)) \
         $$(addprefix $(TARGET_PATH)/,$$($$*_DOCKERS)) \
