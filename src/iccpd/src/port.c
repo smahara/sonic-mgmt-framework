@@ -29,6 +29,7 @@
 #include "../include/system.h"
 #include "../include/iccp_csm.h"
 
+#if 0
 /* Ethernet MAC Address setter - set by string. */
 static void ether_mac_set_addr_with_string(uint8_t* macdst, const char* macstr)
 {
@@ -97,6 +98,7 @@ void ether_mac_set_addr_with_if_name(char* name, uint8_t* mac)
 
     return;
 }
+#endif
 
 static int vlan_node_compare(const struct VLAN_ID *p_vlan_node1, const struct VLAN_ID *p_vlan_node2)
 {

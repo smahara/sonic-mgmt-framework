@@ -733,6 +733,7 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
     return;
 }
 
+#if 0
 void update_local_system_id(struct LocalInterface* local_if)
 {
     struct System* sys = NULL;
@@ -765,6 +766,7 @@ void update_local_system_id(struct LocalInterface* local_if)
 
     return;
 }
+#endif
 
 int iccp_netlink_neighbor_request(int family, uint8_t *addr, int add, uint8_t *mac, char *portname)
 {
@@ -969,6 +971,110 @@ void iccp_event_handler_obj_input_dellink(struct nl_object *obj, void *arg)
         local_if_destroy(lif->name);
 
     return;
+}
+
+int iccp_check_if_addr_from_netlink(int family, uint8_t *addr, struct LocalInterface *lif)
+{
+    struct
+    {
+        struct nlmsghdr nlh;
+        struct ifaddrmsg ifa;
+    } req;
+
+    struct sockaddr_nl nladdr;
+    struct iovec iov;
+    struct msghdr msg = {
+        .msg_name       = &nladdr,
+        .msg_namelen    = sizeof(nladdr),
+        .msg_iov        = &iov,
+        .msg_iovlen     = 1,
+    };
+
+    int fd;
+    struct System *sys;
+    if ((sys = system_get_instance()) == NULL)
+    {
+        return 0;
+    }
+
+    memset(&req, 0, sizeof(req));
+    req.nlh.nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
+    req.nlh.nlmsg_type = RTM_GETADDR;
+    req.nlh.nlmsg_flags =  NLM_F_ROOT | NLM_F_MATCH | NLM_F_REQUEST;
+    req.nlh.nlmsg_pid = 0;
+    req.nlh.nlmsg_seq = 0;
+    req.ifa.ifa_family = family;
+
+    fd = nl_socket_get_fd(sys->route_sock);
+    send(fd, (void*)&req, sizeof(req), 0);
+
+    char * buf = malloc(10000);
+    iov.iov_base = buf;
+
+    while (1)
+    {
+        int status;
+        int msglen = 0;
+        iov.iov_len = 10000;
+        status = recvmsg(fd, &msg, 0);
+
+        if (status < 0 || status == 0)
+        {
+            ICCPD_LOG_WARN(__FUNCTION__, "netlink receive error  (%d) status %d %d ", fd, status, errno);
+            free(buf);
+            return 0;
+        }
+        struct nlmsghdr *n = (struct nlmsghdr*)buf;
+        msglen = status;
+
+        while (NLMSG_OK(n, msglen))
+        {
+            if (n->nlmsg_type != RTM_NEWADDR)
+            {
+                free(buf);
+                return 0;
+            }
+            struct ifaddrmsg *ifa;
+            ifa = NLMSG_DATA(n);
+            if (lif && lif->ifindex == ifa->ifa_index)
+            {
+                struct rtattr *rth = IFA_RTA(ifa);
+                int rtl = IFA_PAYLOAD(n);
+
+                while (rtl && RTA_OK(rth, rtl))
+                {
+                    if (rth->rta_type == IFA_ADDRESS || rth->rta_type == IFA_LOCAL)
+                    {
+                        if (family == AF_INET && ifa->ifa_family == AF_INET)
+                        {
+                            if (*(uint32_t *)addr == ntohl(*((uint32_t *)RTA_DATA(rth))))
+                            {
+                                free(buf);
+                                return 1;
+                            }
+                        }
+
+                        if (family == AF_INET6 && ifa->ifa_family == AF_INET6)
+                        {
+                            void *addr_netlink;
+                            addr_netlink = RTA_DATA(rth);
+                            if (!memcmp((uint8_t *)addr_netlink, addr, 16))
+                            {
+                                free(buf);
+                                return 1;
+                            }
+                        }
+                    }
+                    rth = RTA_NEXT(rth, rtl);
+                }
+            }
+            n = NLMSG_NEXT(n, msglen);
+        }
+    }
+
+    free(buf);
+
+    return 0;
 }
 
 #if 0
