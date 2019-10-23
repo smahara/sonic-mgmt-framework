@@ -2,5 +2,5 @@
 
 openconfig-acl.yang
 openconfig-acl-annot.yang
-sonic-ztp.yang
-sonic-ztp-annot.yang
+openconfig-ztp.yang
+openconfig-ztp-annot.yang
