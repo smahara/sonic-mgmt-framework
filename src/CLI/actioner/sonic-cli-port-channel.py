@@ -51,8 +51,8 @@ def call_method(name, args):
 def generate_body(func, args):
     body = None
     keypath = []
-    if func.__name__ == 'get_sonic_portchannel_sonic_portchannel_lag_table_lag_table_list' or 'get_openconfig_lacp_lacp_interfaces_interface' or 'get_openconfig_interfaces_interfaces_interface':
-	keypath = [args[0]]
+    if func.__name__ == 'get_sonic_portchannel_sonic_portchannel_lag_table_lag_table_list' or 'get_openconfig_lacp_lacp_interfaces_interface' or 'get_openconfig_interfaces_interfaces_interface_state_counters':
+        keypath = [args[0]]
     elif func.__name__ == 'get_sonic_portchannel_sonic_portchannel_lag_table' or 'get_openconfig_lacp_lacp_interfaces' or 'get_openconfig_interfaces_interfaces':
         keypath = []
     else:
@@ -86,7 +86,7 @@ def run():
     else :
         lacp_func = 'get_openconfig_lacp_lacp_interfaces_interface'
         portchannel_func = 'get_sonic_portchannel_sonic_portchannel_lag_table_lag_table_list'
-        counters_func = 'get_openconfig_interfaces_interfaces_interface'
+        counters_func = 'get_openconfig_interfaces_interfaces_interface_state_counters'
 
     func = eval(portchannel_func, globals(), sonic_portchannel_client.SonicPortchannelApi.__dict__)
     func1 = eval(lacp_func, globals(), openconfig_lacp_client.OpenconfigLacpApi.__dict__)
@@ -102,7 +102,7 @@ def run():
         if body is not None:
            api_response = getattr(aa,func.__name__)(*keypath, body=body)
         else :
-           api_response = getattr(aa,func.__name__)()
+           api_response = getattr(aa,func.__name__)(*keypath)
 
 
         if api_response is None:
@@ -115,15 +115,13 @@ def run():
         if body1 is not None:
            api_response1 = getattr(aa1,func1.__name__)(*keypath1, body=body1)
         else :
-           #api_response1 = getattr(aa1,func1.__name__)(*keypath1)
-            api_response1 = getattr(aa1,func1.__name__)()
+           api_response1 = getattr(aa1,func1.__name__)(*keypath1)
 
         if api_response1 is None:
             print ("Failure in getting LACP data")
         else:
             # Get Command Output
             api_response1 = aa1.api_client.sanitize_for_serialization(api_response1)
-            #print "------------------------------------------------", api_response1
 
         if body3 is not None:
            api_response3 = getattr(aa3,func3.__name__)(*keypath3, body=body3)
@@ -135,12 +133,10 @@ def run():
         else:
             # Get Command Output
             api_response3 = aa3.api_client.sanitize_for_serialization(api_response3)
-            #print "------------------------------------------------", api_response3
 
 
         # Combine Outputs
-        response = {"portchannel": api_response, "lacp": api_response1}
-        #print response
+        response = {"portchannel": api_response, "lacp": api_response1, "counters": api_response3}
 
         if sys.argv[1] == "get_all_portchannels":
             show_cli_output(sys.argv[2], response)
