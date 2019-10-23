@@ -21,10 +21,12 @@ import sys
 import time
 import json
 import ast
+import openconfig_interfaces_client
 import openconfig_lacp_client
 import sonic_portchannel_client
 from sonic_portchannel_client.api.sonic_portchannel_api import SonicPortchannelApi  
 from sonic_portchannel_client.rest import ApiException
+from openconfig_interfaces_client.rest import ApiException
 import sonic_port_client
 from rpipe_utils import pipestr
 from openconfig_lacp_client.rest import ApiException
@@ -49,24 +51,15 @@ def call_method(name, args):
 def generate_body(func, args):
     body = None
     keypath = []
-    if func.__name__ == 'get_sonic_portchannel_sonic_portchannel_lag_table_lag_table_list' or 'get_openconfig_lacp_lacp_interfaces_interface':
+    if func.__name__ == 'get_sonic_portchannel_sonic_portchannel_lag_table_lag_table_list' or 'get_openconfig_lacp_lacp_interfaces_interface' or 'get_openconfig_interfaces_interfaces_interface':
 	keypath = [args[0]]
-    elif func.__name__ == 'get_sonic_portchannel_sonic_portchannel_lag_table' or 'get_openconfig_lacp_lacp_interfaces':
+    elif func.__name__ == 'get_sonic_portchannel_sonic_portchannel_lag_table' or 'get_openconfig_lacp_lacp_interfaces' or 'get_openconfig_interfaces_interfaces':
         keypath = []
     else:
        body = {}
 
     return keypath,body
 
-def getId(item):
-    prfx = "Ethernet"
-    state_dict = item['state']
-    ifName = state_dict['name']
-
-    if ifName.startswith(prfx):
-        ifId = int(ifName[len(prfx):])
-        return ifId
-    return ifName
 
 def run():
 
@@ -81,20 +74,28 @@ def run():
     c1.verify_ssl = False
     aa1 = openconfig_lacp_client.OpenconfigLacpApi(api_client=openconfig_lacp_client.ApiClient(configuration=c1))
 
+    c3 = openconfig_interfaces_client.Configuration()
+    c3.verify_ssl = False
+    aa3 = openconfig_interfaces_client.OpenconfigInterfacesApi(api_client=openconfig_interfaces_client.ApiClient(configuration=c3))
+
     # create a body block
     if sys.argv[1] == "get_all_portchannels":
         lacp_func = 'get_openconfig_lacp_lacp_interfaces'
         portchannel_func = 'get_sonic_portchannel_sonic_portchannel_lag_table' 
+        counters_func = 'get_openconfig_interfaces_interfaces'
     else :
         lacp_func = 'get_openconfig_lacp_lacp_interfaces_interface'
         portchannel_func = 'get_sonic_portchannel_sonic_portchannel_lag_table_lag_table_list'
+        counters_func = 'get_openconfig_interfaces_interfaces_interface'
 
     func = eval(portchannel_func, globals(), sonic_portchannel_client.SonicPortchannelApi.__dict__)
     func1 = eval(lacp_func, globals(), openconfig_lacp_client.OpenconfigLacpApi.__dict__)
+    func3 = eval(counters_func, globals(), openconfig_interfaces_client.OpenconfigInterfacesApi.__dict_)_
     args = sys.argv[2:]
 
     keypath, body = generate_body(func, args)
     keypath1, body1 = generate_body(func1, args)
+    keypath3, body3 = generate_body(func3, args)
 
 
     try:
@@ -109,7 +110,7 @@ def run():
         else:
             # Get Command Output
             api_response = aa.api_client.sanitize_for_serialization(api_response)
-            print "-----------------------", api_response
+            #print "-----------------------", api_response
 
         if body1 is not None:
            api_response1 = getattr(aa1,func1.__name__)(*keypath1, body=body1)
@@ -123,6 +124,19 @@ def run():
             # Get Command Output
             api_response1 = aa1.api_client.sanitize_for_serialization(api_response1)
             #print "------------------------------------------------", api_response1
+
+        if body3 is not None:
+           api_response3 = getattr(aa3,func3.__name__)(*keypath3, body=body3)
+        else :
+           api_response3 = getattr(aa3,func3.__name__)(*keypath3)
+
+        if api_response3 is None:
+            print ("Failure in getting interfaces data")
+        else:
+            # Get Command Output
+            api_response3 = aa3.api_client.sanitize_for_serialization(api_response3)
+            #print "------------------------------------------------", api_response3
+
 
         # Combine Outputs
         response = {"portchannel": api_response, "lacp": api_response1}
