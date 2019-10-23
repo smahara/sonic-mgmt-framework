@@ -103,69 +103,8 @@ def exec_cmd(cmd, show):
         if show:
             print('Failed :'+cmd)
     return  status, output
-        
-instantiate =[
-# turn on module power
-'echo 21 > /sys/class/gpio/export',
-'echo out > /sys/class/gpio/gpio21/direction',
-'echo 1 >/sys/class/gpio/gpio21/value',
-# turn on 100G led by default
-'i2cset -y 0x10 0x3a 0x04 0x00',
-'i2cset -y 0x11 0x3a 0x04 0x00',
-'i2cset -y 0x12 0x3a 0x04 0x00',
-'i2cset -y 0x13 0x3a 0x04 0x00',
-# Update System LED
-'echo 87 > /sys/class/gpio/export',
-'echo out > /sys/class/gpio/gpio87/direction',
-'echo 0 >/sys/class/gpio/gpio87/value',
-'echo 88 > /sys/class/gpio/export',
-'echo out > /sys/class/gpio/gpio88/direction',
-'echo 1 >/sys/class/gpio/gpio88/value',
-]
 
-drivers =[
-'lpc_ich',
-'i2c-i801',
-'i2c-dev',
-'i2c-mux-pca954x',
-'gpio-pca953x',
-'leds-gpio',
-'optoe',
-'qci_bwde_cpld',
-'qci_platform_ix4',
-'ipmi_devintf'
-]
- 
-
-                    
 def system_install():
-    global FORCE
-	
-    #remove default drivers to avoid modprobe order conflicts
-    status, output = exec_cmd("rmmod i2c-i801 ", 1)
-    #setup driver dependency
-    status, output = exec_cmd("depmod -a ", 1)
-    #install drivers
-    for i in range(0,len(drivers)):
-       status, output = exec_cmd("modprobe "+drivers[i], 1)
-    if status:
-       print output
-       if FORCE == 0:                
-          return status             
-
-    #instantiate devices
-    for i in range(0,len(instantiate)):
-       status, output = exec_cmd(instantiate[i], 1)
-    if status:
-       print output
-       if FORCE == 0:
-          return status
-
-    #QSFP for 1~64 port
-    for port_number in range(1,65):
-        bus_number = port_number + 31
-        os.system("echo %d >/sys/bus/i2c/devices/%d-0050/port_name" % (port_number, bus_number))
-
     return
      
         
@@ -186,14 +125,6 @@ def install():
     return
 
 def uninstall():
-    global FORCE
-    #uninstall drivers
-    for i in range(len(drivers)-1,-1,-1):
-       status, output = exec_cmd("rmmod "+drivers[i], 1)
-    if status:
-	   print output
-	   if FORCE == 0:                
-	      return status
     return
 
 def device_found():
@@ -202,4 +133,3 @@ def device_found():
 
 if __name__ == "__main__":
     main()
-
