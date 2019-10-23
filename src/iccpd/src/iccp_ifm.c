@@ -568,11 +568,12 @@ int do_one_neigh_request(struct nlmsghdr *n)
 
     ifm_parse_rtattr(tb, NDA_MAX, NDA_RTA(ndm), len);
 
-    if (ndm->ndm_state == NUD_INCOMPLETE
+    if (n->nlmsg_type == RTM_NEWNEIGH
+		&& (ndm->ndm_state == NUD_INCOMPLETE
         || ndm->ndm_state == NUD_FAILED
         || ndm->ndm_state == NUD_NOARP
         || ndm->ndm_state == NUD_PERMANENT
-        || ndm->ndm_state == NUD_NONE)
+        || ndm->ndm_state == NUD_NONE))
     {
         return(0);
     }
@@ -755,6 +756,13 @@ void do_arp_update_from_reply_packet(unsigned int ifindex, unsigned int addr, ui
         return;
     if (!verify_arp)
         return;
+
+    if (iccp_check_if_addr_from_netlink(AF_INET, &addr, arp_lif))
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__, "ARP %s is identical with the ip address of interface %s",
+                                      show_ip_str(arp_msg->ipv4_addr), arp_lif->name);
+        return;
+    }
 
     /* update lif ARP*/
     TAILQ_FOREACH(msg, &MLACP(csm).arp_list, tail)
