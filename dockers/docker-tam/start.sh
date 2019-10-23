@@ -8,3 +8,5 @@ supervisorctl start thresholdmgr
 
 supervisorctl start tsmgrd
 
+supervisorctl start dropmgrd
+
