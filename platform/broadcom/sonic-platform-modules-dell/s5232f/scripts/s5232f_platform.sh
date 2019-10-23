@@ -16,10 +16,22 @@ init_devnum() {
 
 # Attach/Detach syseeprom on CPU board
 sys_eeprom() {
+    b=''
+    for bb in 0 1; do
+	if [ "$(cat /sys/bus/i2c/devices/i2c-${bb}/name)" = 'SMBus iSMT adapter at dff9f000' ]; then
+	    b=$bb
+	    break
+	fi
+    done
+    if [ "$b" = '' ]; then
+	echo "s5232f_platform: sys_eeprom : cannot find I2C bus!"
+	return
+    fi
+    
     case $1 in
-        "new_device")    echo 24c16 0x50 > /sys/bus/i2c/devices/i2c-0/$1
+        "new_device")    echo 24c16 0x50 > /sys/bus/i2c/devices/i2c-${b}/$1
                          ;;
-        "delete_device") echo 0x50 > /sys/bus/i2c/devices/i2c-0/$1
+        "delete_device") echo 0x50 > /sys/bus/i2c/devices/i2c-${b}/$1
                          ;;
         *)               echo "s5232f_platform: sys_eeprom : invalid command !"
                          ;;
