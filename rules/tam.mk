@@ -14,3 +14,7 @@ $(TAM_DBG)_DEPENDS += $(TAM)
 $(TAM_DBG)_RDEPENDS += $(TAM)
 $(eval $(call add_derived_package,$(TAM),$(TAM_DBG)))
 
+# SONiC Timestamping Manager
+SONIC_TS_MGR = tsmgrd
+$(SONIC_TS_MGR)_PATH = $(SRC_PATH)/sonic-tam/tsmgrd
+SONIC_COPY_FILES += $(SONIC_TS_MGR)
