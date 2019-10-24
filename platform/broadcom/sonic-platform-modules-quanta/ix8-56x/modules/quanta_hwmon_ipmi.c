@@ -929,64 +929,6 @@ void ipmi_sdr_set_sensor_threshold(uint8_t idx,
                                    struct sdr_record_full_sensor *sensor)
 {
 
-  /*refer to Table 35-, Get Sensor Event Enable*/
-  /*
-  /* change detect threshold method, keep it for record detail format */
-  /* in this version function input is */
-  "void ipmi_sdr_set_sensor_threshold(uint8_t idx, uint8_t *rec)"
-#define offset_threshold_enable 9
-#define offset_threshold_data 31
-  if (rec[offset_threshold_enable + 1] & 0x08)
-  {
-    g_sensor_data[idx].upperinfo.unr_high = 1;
-  }
-  if (rec[offset_threshold_enable + 1] & 0x04)
-  {
-    g_sensor_data[idx].upperinfo.unr_low = 1;
-  }
-  if (rec[offset_threshold_enable + 1] & 0x02)
-  {
-    g_sensor_data[idx].upperinfo.ucr_high = 1;
-  }
-  if (rec[offset_threshold_enable + 1] & 0x01)
-  {
-    g_sensor_data[idx].upperinfo.ucr_low = 1;
-  }
-  if (rec[offset_threshold_enable] & 0x80)
-  {
-    g_sensor_data[idx].upperinfo.unc_high = 1;
-  }
-  if (rec[offset_threshold_enable] & 0x40)
-  {
-    g_sensor_data[idx].upperinfo.unc_low = 1;
-  }
-
-  if (rec[offset_threshold_enable] & 0x20)
-  {
-    g_sensor_data[idx].lowerinfo.lnr_high = 1;
-  }
-  if (rec[offset_threshold_enable] & 0x10)
-  {
-    g_sensor_data[idx].lowerinfo.lnr_low = 1;
-  }
-  if (rec[offset_threshold_enable] & 0x08)
-  {
-    g_sensor_data[idx].lowerinfo.lcr_high = 1;
-  }
-  if (rec[offset_threshold_enable] & 0x04)
-  {
-    g_sensor_data[idx].lowerinfo.lcr_low = 1;
-  }
-  if (rec[offset_threshold_enable] & 0x02)
-  {
-    g_sensor_data[idx].lowerinfo.lnc_high = 1;
-  }
-  if (rec[offset_threshold_enable] & 0x01)
-  {
-    g_sensor_data[idx].lowerinfo.lnc_low = 1;
-  }
-  /**/ * /
-
   /* lower threshold info */
   if (sensor->mask.type.threshold.read.lnc)
   {
