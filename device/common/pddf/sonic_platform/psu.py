@@ -52,7 +52,7 @@ class Psu(PsuBase):
         self._fan_list = []     # _fan_list under PsuBase class is a global variable, hence we need to use _fan_list per class instatiation
         self.num_psu_fans = int(pddf_obj.get_num_psu_fans('PSU{}'.format(index+1)))
         for psu_fan_idx in range(self.num_psu_fans):
-            psu_fan = Fan(psu_fan_idx, True, self.psu_index)
+            psu_fan = Fan(0, psu_fan_idx, True, self.psu_index)
             self._fan_list.append(psu_fan)
 
     def get_num_fans(self):

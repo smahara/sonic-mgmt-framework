@@ -33,7 +33,7 @@ FAN_DATA fan_data = {0};
 
 
 /* FAN CLIENT DATA */
-PDDF_DATA_ATTR(num_fan, S_IWUSR|S_IRUGO, show_pddf_data, store_pddf_data, PDDF_INT_DEC, sizeof(int), (void*)&fan_data.num_fan, NULL);
+PDDF_DATA_ATTR(num_fantrays, S_IWUSR|S_IRUGO, show_pddf_data, store_pddf_data, PDDF_INT_DEC, sizeof(int), (void*)&fan_data.num_fantrays, NULL);
 
 PDDF_DATA_ATTR(attr_name, S_IWUSR|S_IRUGO, show_pddf_data, store_pddf_data, PDDF_CHAR, 32, (void*)&fan_data.fan_attr.aname, NULL);
 PDDF_DATA_ATTR(attr_devtype, S_IWUSR|S_IRUGO, show_pddf_data, store_pddf_data, PDDF_CHAR, 8, (void*)&fan_data.fan_attr.devtype, NULL);
@@ -50,7 +50,7 @@ PDDF_DATA_ATTR(dev_ops, S_IWUSR, NULL, do_device_operation, PDDF_CHAR, 8, (void*
 
 
 static struct attribute *fan_attributes[] = {
-    &attr_num_fan.dev_attr.attr,
+    &attr_num_fantrays.dev_attr.attr,
     &attr_attr_name.dev_attr.attr,
     &attr_attr_devtype.dev_attr.attr,
     &attr_attr_devname.dev_attr.attr,
@@ -108,7 +108,7 @@ struct i2c_board_info *i2c_get_fan_board_info(FAN_DATA *fdata, NEW_DEV_ATTR *cda
         fan_platform_data->fan_attrs = (FAN_DATA_ATTR *)kzalloc(num*sizeof(FAN_DATA_ATTR), GFP_KERNEL);
 
 
-        fan_platform_data->num_fan = fdata->num_fan;
+        fan_platform_data->num_fantrays = fdata->num_fantrays;
         fan_platform_data->len = fdata->len;
 
         for (i=0;i<num;i++)
@@ -119,7 +119,7 @@ struct i2c_board_info *i2c_get_fan_board_info(FAN_DATA *fdata, NEW_DEV_ATTR *cda
         /* Verify that the data is written properly */
 #if 0
         pddf_dbg(FAN, KERN_ERR "\n\n########### fan_platform_data - start ##########\n");
-        pddf_dbg(FAN, KERN_ERR "num_of_fans: %d\n", fan_platform_data->num_fan);
+        pddf_dbg(FAN, KERN_ERR "num_of_fans: %d\n", fan_platform_data->num_fantrays);
         pddf_dbg(FAN, KERN_ERR "no_of_usr_attr: %d\n", fan_platform_data->len);
 
         for (i=0; i<num; i++)

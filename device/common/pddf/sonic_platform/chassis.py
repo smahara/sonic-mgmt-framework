@@ -44,18 +44,19 @@ class Chassis(ChassisBase):
         # Initialize EEPROM
         self.sys_eeprom = Eeprom()
 
-        # Initializing the objects with 1-based indexes
-        for i in range(self.platform['num_fans']):
-            fan = Fan(i)
-            self._fan_list.append(fan)
-            #color=""
-            #fan.get_status_led(color)
-            #print "%s"%color
-            #fan.set_status_led("STATUS_LED_COLOR_GREEN")
-            #fan.get_status_led(color)
-            #print "%s"%color
+        # FANs
+        for i in range(self.platform['num_fantrays']):
+            for j in range(self.platform['num_fans_pertray']):
+                fan = Fan(i, j)
+                self._fan_list.append(fan)
+                #color=""
+                #fan.get_status_led(color)
+                #print "%s"%color
+                #fan.set_status_led("STATUS_LED_COLOR_GREEN")
+                #fan.get_status_led(color)
+                #print "%s"%color
 
-
+        # PSUs
         for i in range(self.platform['num_psus']):
             psu = Psu(i)
             self._psu_list.append(psu)
@@ -72,10 +73,12 @@ class Chassis(ChassisBase):
             #psu.get_status_led(color)
             #print "%s"%color
 
+        # OPTICs
         for index in range(self.platform['num_ports']):
             sfp = Sfp(index)
             self._sfp_list.append(sfp)
 
+        # THERMALs
         for i in range(self.platform['num_temps']):
             thermal = Thermal(i)
             self._thermal_list.append(thermal)

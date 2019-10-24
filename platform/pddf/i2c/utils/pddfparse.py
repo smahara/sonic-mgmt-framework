@@ -866,7 +866,7 @@ class PddfParse():
                             self.sysfs_obj[KEY] = []
                             path='pddf/devices/platform'
                             self.sysfs_attr('num_psus', self.data['PLATFORM']['num_psus'], path, self.sysfs_obj, KEY)
-                            self.sysfs_attr('num_fans', self.data['PLATFORM']['num_fans'], path, self.sysfs_obj, KEY)
+                            self.sysfs_attr('num_fantrays', self.data['PLATFORM']['num_fantrays'], path, self.sysfs_obj, KEY)
 
     def show_led_device(self, key, ops):
             if self.check_led_cmds(key, ops):
@@ -1244,7 +1244,7 @@ class PddfParse():
             if ops['attr']=='all' or ops['attr']=='PLATFORM':
                     path='pddf/devices/platform'
                     self.create_attr('num_psus', self.data['PLATFORM']['num_psus'], path)
-                    self.create_attr('num_fans', self.data['PLATFORM']['num_fans'], path)
+                    self.create_attr('num_fantrays', self.data['PLATFORM']['num_fantrays'], path)
 
     def create_led_device(self, key, ops):
             if ops['attr']=='all' or ops['attr']==self.data[key]['dev_info']['device_name']:
