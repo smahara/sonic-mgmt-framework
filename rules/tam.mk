@@ -18,3 +18,8 @@ $(eval $(call add_derived_package,$(TAM),$(TAM_DBG)))
 SONIC_TS_MGR = tsmgrd
 $(SONIC_TS_MGR)_PATH = $(SRC_PATH)/sonic-tam/tsmgrd
 SONIC_COPY_FILES += $(SONIC_TS_MGR)
+
+# SONiC Drop monitor Manager
+SONIC_DROP_MGR = dropmgrd
+$(SONIC_DROP_MGR)_PATH = $(SRC_PATH)/sonic-tam/dropmgr
+SONIC_COPY_FILES += $(SONIC_DROP_MGR)
