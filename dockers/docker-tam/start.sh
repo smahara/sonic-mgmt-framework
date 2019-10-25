@@ -6,3 +6,5 @@ supervisorctl start rsyslogd
 
 supervisorctl start thresholdmgr
 
+supervisorctl start tsmgrd
+
