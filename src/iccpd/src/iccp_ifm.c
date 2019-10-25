@@ -568,12 +568,11 @@ int do_one_neigh_request(struct nlmsghdr *n)
 
     ifm_parse_rtattr(tb, NDA_MAX, NDA_RTA(ndm), len);
 
-    if (n->nlmsg_type == RTM_NEWNEIGH
-		&& (ndm->ndm_state == NUD_INCOMPLETE
+    if (ndm->ndm_state == NUD_INCOMPLETE
         || ndm->ndm_state == NUD_FAILED
         || ndm->ndm_state == NUD_NOARP
         || ndm->ndm_state == NUD_PERMANENT
-        || ndm->ndm_state == NUD_NONE))
+        || ndm->ndm_state == NUD_NONE)
     {
         return(0);
     }
