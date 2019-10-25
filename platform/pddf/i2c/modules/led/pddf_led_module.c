@@ -35,7 +35,7 @@ LED_OPS_DATA* dev_list[LED_TYPE_MAX] = {
 	NULL
 };
 int num_psus = 0;
-int num_fans = 0;
+int num_fantrays = 0;
 
 extern int board_i2c_cpld_read(unsigned short cpld_addr, u8 reg);
 extern int board_i2c_cpld_write(unsigned short cpld_addr, u8 reg, u8 value);
@@ -66,8 +66,8 @@ static LED_TYPE get_dev_type(char* name)
 static int dev_index_check(LED_TYPE type, int index)
 {
 #if DEBUG
-	pddf_dbg(LED, "dev_index_check: type:%s index:%d num_psus:%d num_fans:%d\n", 
-		LED_TYPE_STR[type], index, num_psus, num_fans);
+	pddf_dbg(LED, "dev_index_check: type:%s index:%d num_psus:%d num_fantrays:%d\n", 
+		LED_TYPE_STR[type], index, num_psus, num_fantrays);
 #endif
         switch(type)
         {
@@ -75,7 +75,7 @@ static int dev_index_check(LED_TYPE type, int index)
                         if(index >= num_psus) return (-1);
                 break;
                 case LED_FANTRAY:
-                        if(index >= num_fans) return (-1);
+                        if(index >= num_fantrays) return (-1);
                 break;
                 default:
                         if(index >= 1) return (-1);
@@ -110,8 +110,8 @@ static LED_OPS_DATA* find_led_ops_data(struct device_attribute *da)
 static void print_led_data(LED_OPS_DATA *ptr)
 {
 	if(!ptr) return ;
-	pddf_dbg(LED, KERN_INFO "Print %s index:%d num_psus:%d num_fans:%d ADDR=%p\n", 
-					ptr->device_name, ptr->index, num_psus, num_fans, ptr);
+	pddf_dbg(LED, KERN_INFO "Print %s index:%d num_psus:%d num_fantrays:%d ADDR=%p\n", 
+					ptr->device_name, ptr->index, num_psus, num_fantrays, ptr);
 	pddf_dbg(LED, KERN_INFO "\tindex: %d\n", ptr->index); 
 	pddf_dbg(LED, KERN_INFO  "\tcur_state: %d; %s; %s\n", ptr->cur_state.state, ptr->cur_state.color, ptr->cur_state.color_state); 
 	if(ptr->data[ON].swpld_addr) {
@@ -462,7 +462,7 @@ ssize_t store_config_data(struct device *dev, struct device_attribute *da, const
 #endif
 		return(count);
 	}
-        if(strncmp(ptr->dev_attr.attr.name, "num_fans", strlen("num_fans"))==0 ) {
+        if(strncmp(ptr->dev_attr.attr.name, "num_fantrays", strlen("num_fantrays"))==0 ) {
                ret = kstrtoint(buf,10,&num);
                if (ret==0)
                       *(int *)(ptr->addr) = num;
@@ -476,7 +476,7 @@ ssize_t store_config_data(struct device *dev, struct device_attribute *da, const
                }
 #if DEBUG
         pddf_dbg(LED, "[ WRITE ] ATTR CONFIG [%s] VALUE:%d; %d\n",
-                        ptr->dev_attr.attr.name, num, num_fans);
+                        ptr->dev_attr.attr.name, num, num_fantrays);
 #endif
                 return(count);
         }
@@ -520,12 +520,12 @@ ssize_t store_bits_data(struct device *dev, struct device_attribute *da, const c
  **************************************************************************/
 PDDF_LED_DATA_ATTR(platform, num_psus, S_IWUSR|S_IRUGO, show_pddf_data, 
                 store_config_data, PDDF_INT_DEC, sizeof(int), (void*)&num_psus); 
-PDDF_LED_DATA_ATTR(platform, num_fans, S_IWUSR|S_IRUGO, show_pddf_data, 
-                store_config_data, PDDF_INT_DEC, sizeof(int), (void*)&num_fans); 
+PDDF_LED_DATA_ATTR(platform, num_fantrays, S_IWUSR|S_IRUGO, show_pddf_data, 
+                store_config_data, PDDF_INT_DEC, sizeof(int), (void*)&num_fantrays); 
 
 struct attribute* attrs_platform[]={
                 &pddf_dev_platform_attr_num_psus.dev_attr.attr,
-                &pddf_dev_platform_attr_num_fans.dev_attr.attr,
+                &pddf_dev_platform_attr_num_fantrays.dev_attr.attr,
                 NULL,
 };
 struct attribute_group attr_group_platform={

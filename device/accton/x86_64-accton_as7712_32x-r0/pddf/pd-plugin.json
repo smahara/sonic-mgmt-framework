@@ -21,16 +21,6 @@
 
     "FAN":
     {
-        "name":
-        {
-            "1":"FAN1",
-            "2":"FAN2",
-            "3":"FAN3",
-            "4":"FAN4",
-            "5":"FAN5",
-            "6":"FAN6"
-        },
-
         "direction":
         {
             "valmap": {"1":"INTAKE", "0":"EXHAUST"}
