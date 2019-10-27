@@ -14,6 +14,7 @@ l2_mem_entries=40960
 l2xmsg_mode=1 
 mmu_lossless=0
 bcm_num_cos=10
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
 
 #Parity
 parity_correction=1

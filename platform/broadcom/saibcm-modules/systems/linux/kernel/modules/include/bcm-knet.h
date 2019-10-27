@@ -71,7 +71,7 @@ typedef int
 (*knet_hw_tstamp_ptp_clock_index_cb_f)(int dev_no);
 
 typedef int
-(*knet_hw_tstamp_rx_time_upscale_cb_f)(int dev_no, uint64_t *ts);
+(*knet_hw_tstamp_rx_time_upscale_cb_f)(int dev_no, int phys_port, struct sk_buff *skb, uint64_t *ts);
 
 extern int
 bkn_rx_skb_cb_register(knet_skb_cb_f rx_cb);

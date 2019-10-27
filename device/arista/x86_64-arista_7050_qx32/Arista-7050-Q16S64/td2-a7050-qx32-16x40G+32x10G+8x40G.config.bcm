@@ -33,6 +33,8 @@ parity_correction=1
 parity_enable=1
 stat_if_parity_enable=0
 
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
+
 # l2 thread related config vars
 l2xmsg_hostbuf_size=8192
 l2xmsg_mode=1

@@ -143,6 +143,7 @@ typedef struct kcom_netif_s {
     uint8 system_headers[KCOM_NETIF_SYSTEM_HEADERS_SIZE_MAX];
     uint8 system_headers_size;
     char name[KCOM_NETIF_NAME_MAX];
+    uint8 phys_port;
 } kcom_netif_t;
 
 /*
