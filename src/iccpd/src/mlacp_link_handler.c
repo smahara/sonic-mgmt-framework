@@ -3209,6 +3209,35 @@ int iccp_mclagsyncd_mclag_iface_cfg_handler(struct System *sys, char *msg_buf)
     return 0;
 }
 
+int iccp_mclagsyncd_mclag_unique_ip_cfg_handler(struct System *sys, char *msg_buf)
+{
+    struct IccpSyncdHDr * msg_hdr;
+    struct mclag_unique_ip_cfg_info* cfg_info;
+    int count, i = 0;
+
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+
+    count = (msg_hdr->len- sizeof(struct IccpSyncdHDr))/sizeof(struct mclag_unique_ip_cfg_info);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "recv domain cfg msg, count %d ",count);
+
+    for (i =0; i<count; i++)
+    {
+        cfg_info = (struct mclag_unique_ip_cfg_info*)((char *)(msg_buf) + sizeof(struct IccpSyncdHDr) + i * sizeof(struct mclag_unique_ip_cfg_info));
+        ICCPD_LOG_NOTICE(__FUNCTION__, "recv mclag unique ip cfg msg, op_type:%d ifname:%s ",
+                cfg_info->op_type, cfg_info->mclag_unique_ip_ifname);
+
+        if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
+        {
+            //TBD
+        }
+        else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL)
+        {
+            //TBD
+        }
+    }
+    return 0;
+}
+
 int iccp_receive_fdb_handler_from_syncd(struct System *sys, char *msg_buf)
 {
     int count = 0;
@@ -3275,7 +3304,8 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
     while (pos < num_bytes_rxed) //iterate through all msgs
     {
         msg_hdr = (struct IccpSyncdHDr *)(&msg_buf[pos]);
-        ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg version %d type %d len %d pos:%d num_bytes_rxed:%d ",msg_hdr->ver , msg_hdr->type, msg_hdr->len, pos, num_bytes_rxed);  
+        ICCPD_LOG_NOTICE(__FUNCTION__, "recv msg version %d type %d len %d pos:%d num_bytes_rxed:%d ",
+                msg_hdr->ver , msg_hdr->type, msg_hdr->len, pos, num_bytes_rxed);
         if (!msg_hdr->len)
         {
             ICCPD_LOG_ERR(__FUNCTION__, "msg length zero!!!!! ");  
@@ -3303,6 +3333,10 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
         else if (msg_hdr->type == MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_IFACE)
         {
             iccp_mclagsyncd_mclag_iface_cfg_handler(sys, &msg_buf[pos]);
+        }
+        else if (msg_hdr->type == MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_UNIQUE_IP)
+        {
+            iccp_mclagsyncd_mclag_unique_ip_cfg_handler(sys, &msg_buf[pos]);
         }
         else 
         {
