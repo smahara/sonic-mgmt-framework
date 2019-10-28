@@ -4,7 +4,7 @@ import sys
 import glob
 import json
 
-level1_keys = ["GLOBAL_MEDIA_SETTINGS","PORT_MEDIA_SETTINGS"]
+level1_keys = ["GLOBAL_MEDIA_SETTINGS","PORT_MEDIA_SETTINGS", "SPEED_MEDIA_SETTINGS"]
 setting_keys = ["preemphasis","idriver","ipredriver"]
 lane_prefix = "lane"
 comma_separator = ","
