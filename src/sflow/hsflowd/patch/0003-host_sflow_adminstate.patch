@@ -1,0 +1,12 @@
+diff -ruN a/src/Linux/mod_sonic.c b/src/Linux/mod_sonic.c
+--- a/src/Linux/mod_sonic.c	2019-10-29 03:56:42.022585000 -0700
++++ b/src/Linux/mod_sonic.c	2019-10-29 03:44:17.109447000 -0700
+@@ -901,7 +901,7 @@
+ 	  myDebug(1, "sonic sflow: %s=%s", f_name->str, db_replyStr(f_val, db->replyBuf, YES));
+ 	  
+ 	  if(my_strequal(f_name->str, HSP_SONIC_FIELD_SFLOW_ADMIN_STATE))
+-	    sflow_enable = my_strequal(f_val->str, "enable");
++	    sflow_enable = my_strequal(f_val->str, "up");
+ 	  
+ 	  if(my_strequal(f_name->str, HSP_SONIC_FIELD_SFLOW_AGENT))
+ 	    sflow_agent = f_val->str;
