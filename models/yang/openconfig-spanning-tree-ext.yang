@@ -85,6 +85,12 @@ module openconfig-spanning-tree-ext {
             description
                 "Instance identifier of STP";
         }
+
+        leaf root-port-name {
+            type string;
+            description
+                "Name of root port";
+        }
     }
 
     grouping vlan-interface-extra-state-field {
@@ -241,12 +247,6 @@ module openconfig-spanning-tree-ext {
         deviate not-supported;
     }
     deviation /oc-stp:stp/oc-stp:global/oc-stp:state/oc-stp:bpdu-guard {
-        deviate not-supported;
-    }
-    deviation /oc-stp:stp/oc-stp:global/oc-stp:config/oc-stp:bpdu-filter {
-        deviate not-supported;
-    }
-    deviation /oc-stp:stp/oc-stp:global/oc-stp:state/oc-stp:bpdu-filter {
         deviate not-supported;
     }
 

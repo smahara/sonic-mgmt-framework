@@ -5,22 +5,20 @@ module sonic-portchannel-annot {
     namespace "http://openconfig.net/yang/annotation/spc-annot";
     prefix "spc-annot";
 
-    import sonic-common { prefix scommon; }
-    import sonic-port { prefix prt; }
     import sonic-portchannel { prefix spc; }
     import sonic-extensions { prefix sonic-ext; }
 
 
     deviation /spc:sonic-portchannel/spc:LAG_TABLE {
-      deviate add {
+        deviate add {
             sonic-ext:db-name "APPL_DB";          
-      }
+        }
     }
-
 
     deviation /spc:sonic-portchannel/spc:LAG_MEMBER_TABLE {
-      deviate add {
+        deviate add {
             sonic-ext:db-name "APPL_DB";
-      }
+        }
     }
 }
+

@@ -9,9 +9,10 @@ module sonic-port-annot {
     import sonic-port { prefix prt; }
 
     deviation /prt:sonic-port/prt:PORT_TABLE {
-      deviate add {
+        deviate add {
             sonic-ext:db-name "APPL_DB";
-      }
+        }
     }
 
 }
+
