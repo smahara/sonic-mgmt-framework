@@ -68,6 +68,7 @@ extern int debug;
 #define SOC_HIGIG2_SRCPORT(x) ((x[1] >> 16) & 0x7f)
 #define SOC_DCB32_HG_OFFSET   (6)
 
+#define PSAMPLE_RATE_DFLT 1
 #define PSAMPLE_SIZE_DFLT 128
 static int psample_size = PSAMPLE_SIZE_DFLT;
 LKM_MOD_PARAM(psample_size, "i", int, 0);
@@ -93,7 +94,7 @@ typedef struct psample_stats_s {
     unsigned long pkts_f_handled;
     unsigned long pkts_f_pass_through;
     unsigned long pkts_d_no_group;
-    unsigned long pkts_d_not_sample;
+    unsigned long pkts_d_sampling_disabled;
     unsigned long pkts_d_no_skb;
     unsigned long pkts_d_not_ready;
     unsigned long pkts_d_metadata;
@@ -157,10 +158,13 @@ psample_meta_srcport_get(uint8_t *pkt, void *pkt_meta)
     uint32_t *metadata = (uint32_t*)pkt_meta;
 
     switch(g_psample_info.hw.dcb_type) {
-        case 32: /* TH1/TH2 */
-            metadata += SOC_DCB32_HG_OFFSET;
-            break;
         case 36: /* TD3 */
+        case 38: /* TH3 */
+            break;
+        case 32: /* TH1/TH2 */
+        case 26: /* TD2 */
+        case 23: /* HX4 */
+            metadata += SOC_DCB32_HG_OFFSET;
         default:
             break;
     }
@@ -189,11 +193,14 @@ psample_meta_dstport_get(uint8_t *pkt, void *pkt_meta)
     uint32_t *metadata = (uint32_t*)pkt_meta;
 
     switch(g_psample_info.hw.dcb_type) {
-        case 32: /* TH1/TH2 */
-            metadata += SOC_DCB32_HG_OFFSET;
-            break;
         case 36: /* TD3 */
+        case 38: /* TH3 */
+            break;
+        case 32: /* TH1/TH2 */
+        case 26: /* TD2 */
+        case 23: /* HX4 */
         default:
+            metadata += SOC_DCB32_HG_OFFSET;
             break;
     }
     
@@ -225,11 +232,14 @@ psample_meta_sample_reason(uint8_t *pkt, void *pkt_meta)
     /* Sample Pkt reason code (bcmRxReasonSampleSource) */
     switch(g_psample_info.hw.dcb_type) {
         case 36: /* TD3 */
+        case 38: /* TH3 */
             reason_hi = *(metadata + 4);
             reason    = *(metadata + 5);
             sample_rx_reason_mask = (1 << 3);
             break;
         case 32: /* TH1/TH2 */
+        case 26: /* TD2 */
+        case 23: /* HX4 */
         default:
             reason_hi = *(metadata + 2);
             reason    = *(metadata + 3);
@@ -239,7 +249,7 @@ psample_meta_sample_reason(uint8_t *pkt, void *pkt_meta)
         
     PSAMPLE_CB_DBG_PRINT("%s: DCB%d sample_rx_reason_mask: 0x%08x, reason: 0x%08x, reason_hi: 0x%08x\n", 
             __func__, g_psample_info.hw.dcb_type, sample_rx_reason_mask, reason, reason_hi);
-
+            
     /* Check if only sample reason code is set.
      * If only sample reason code, then consume pkt.
      * If other reason codes exist, then pkt should be 
@@ -259,8 +269,8 @@ psample_meta_get(int unit, uint8_t *pkt, void *pkt_meta, psample_meta_t *sflow_m
     int srcport, dstport;
     int src_ifindex = 0;
     int dst_ifindex = 0;
-    int sample_rate = 0;
-    int sample_size = 0;
+    int sample_rate = 1;
+    int sample_size = PSAMPLE_SIZE_DFLT;
     psample_netif_t *psample_netif = NULL;
 
 #ifdef PSAMPLE_CB_DBG
@@ -360,21 +370,26 @@ psample_filter_cb(uint8_t * pkt, int size, int dev_no, void *pkt_meta,
         meta.trunc_size = size;
     }
 
-    /* setup skb to point to pkt */
-    memset(&skb, 0, sizeof(struct sk_buff));
-    skb.len = size;
-    skb.data = pkt; 
+    /* drop if configured sample rate is 0 */
+    if (meta.sample_rate > 0) {
+        /* setup skb to point to pkt */
+        memset(&skb, 0, sizeof(struct sk_buff));
+        skb.len = size;
+        skb.data = pkt; 
 
-    PSAMPLE_CB_DBG_PRINT("%s: psample_sample_packet - group 0x%x, trunc_size %d, src_ifdx %d, dst_ifdx %d, sample_rate %d\n",
-            __func__, group->group_num, meta.trunc_size, meta.src_ifindex, meta.dst_ifindex, meta.sample_rate);
-    psample_sample_packet(group, 
-                          &skb, 
-                          meta.trunc_size,
-                          meta.src_ifindex,
-                          meta.dst_ifindex,
-                          meta.sample_rate);
+        PSAMPLE_CB_DBG_PRINT("%s: psample_sample_packet - group 0x%x, trunc_size %d, src_ifdx %d, dst_ifdx %d, sample_rate %d\n",
+                __func__, group->group_num, meta.trunc_size, meta.src_ifindex, meta.dst_ifindex, meta.sample_rate);
+        psample_sample_packet(group, 
+                              &skb, 
+                              meta.trunc_size,
+                              meta.src_ifindex,
+                              meta.dst_ifindex,
+                              meta.sample_rate);
 
-    g_psample_stats.pkts_f_psample_mod++;
+        g_psample_stats.pkts_f_psample_mod++;
+    } else {
+        g_psample_stats.pkts_d_sampling_disabled++;
+    }
 
     /* if sample reason only, consume pkt. else pass through */
     rv = psample_meta_sample_reason(pkt, pkt_meta);
@@ -407,7 +422,7 @@ psample_netif_create_cb(int unit, kcom_netif_t *netif, struct net_device *dev)
     psample_netif->port = netif->port;
     psample_netif->vlan = netif->vlan;
     psample_netif->qnum = netif->qnum;
-    psample_netif->sample_rate = 0;
+    psample_netif->sample_rate = PSAMPLE_RATE_DFLT;
     psample_netif->sample_size = PSAMPLE_SIZE_DFLT;
 
     /* insert netif sorted by ID similar to bkn_knet_netif_create() */
@@ -679,7 +694,7 @@ psample_proc_stats_show(struct seq_file *m, void *v)
     seq_printf(m, "  pkts handled by psample        %10lu\n", g_psample_stats.pkts_f_handled);
     seq_printf(m, "  pkts pass through              %10lu\n", g_psample_stats.pkts_f_pass_through);
     seq_printf(m, "  pkts drop no psample group     %10lu\n", g_psample_stats.pkts_d_no_group);
-    seq_printf(m, "  pkts drop not sample           %10lu\n", g_psample_stats.pkts_d_not_sample);
+    seq_printf(m, "  pkts drop sampling disabled    %10lu\n", g_psample_stats.pkts_d_sampling_disabled);
     seq_printf(m, "  pkts drop no skb               %10lu\n", g_psample_stats.pkts_d_no_skb);
     seq_printf(m, "  pkts drop psample not ready    %10lu\n", g_psample_stats.pkts_d_not_ready);
     seq_printf(m, "  pkts drop metadata parse error %10lu\n", g_psample_stats.pkts_d_metadata);
@@ -729,14 +744,14 @@ int psample_init(void)
         gprintk("%s: Unable to create procfs entry '/procfs/%s/stats'\n", __func__, psample_procfs_path);
         return -1;
     }
-    
+
     /* create procfs for setting sample rates */
     PROC_CREATE(entry, "rate", 0666, psample_proc_root, &psample_proc_rate_file_ops);
     if (entry == NULL) {
         gprintk("%s: Unable to create procfs entry '/procfs/%s/rate'\n", __func__, psample_procfs_path);
         return -1;
     }
-    
+
     /* create procfs for setting sample size */
     PROC_CREATE(entry, "size", 0666, psample_proc_root, &psample_proc_size_file_ops);
     if (entry == NULL) {
