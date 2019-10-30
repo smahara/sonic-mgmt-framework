@@ -31,3 +31,9 @@ wait_until_iface_ready PortChannel02 10.0.0.58/31
 wait_until_iface_ready PortChannel03 10.0.0.60/31
 wait_until_iface_ready PortChannel04 10.0.0.62/31
 
+# Wait for all interfaces with IPv6 addresses to be up and ready
+wait_until_iface_ready PortChannel01 FC00::71/126
+wait_until_iface_ready PortChannel02 FC00::75/126
+wait_until_iface_ready PortChannel03 FC00::79/126
+wait_until_iface_ready PortChannel04 FC00::7D/126
+
