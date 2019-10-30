@@ -114,7 +114,3 @@
 	path = src/sonic-mgmt-framework
 	url = https://github.com/project-arlo/sonic-mgmt-framework.git
 	branch = master
-[submodule "src/broadcom-exclusive"]
-	path = src/broadcom-exclusive
-	url = ../broadcom-exclusive
-	branch = broadcom_sonic
