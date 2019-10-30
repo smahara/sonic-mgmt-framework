@@ -1092,6 +1092,38 @@ static void mlacp_resync_mac(struct CSM* csm)
     return;
 }
 
+
+void mlacp_sync_l2mc(struct CSM* csm)
+{
+    struct L2MCMsg* l2mc_msg = NULL;
+    RB_FOREACH (l2mc_msg, l2mc_rb_tree, &MLACP(csm).l2mc_rb)
+    {
+        if (!(l2mc_msg->del_flag & L2MC_DEL_LOCAL))
+        {
+            l2mc_msg->op_type = L2MC_SYNC_ADD;
+
+            if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail))
+            {
+                TAILQ_INSERT_TAIL(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail);
+            }
+
+            ICCPD_LOG_DEBUG(__FUNCTION__, "L2MC-msg-list enqueue interface %s, "
+                    "saddr %s gaddr %s vlan %d, del_flag %d", l2mc_msg->ifname,
+                    l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid, l2mc_msg->del_flag);
+        }
+        else
+        {
+            if (strcmp(l2mc_msg->ifname, csm->peer_itf_name) != 0)
+            {
+                ICCPD_LOG_DEBUG(__FUNCTION__, "L2MC-msg-list not enqueue for local del flag: %s, saddr %s gaddr %s vlan-id %d,del_flag %d, remove local del flag",
+                        l2mc_msg->ifname, l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid, l2mc_msg->del_flag);
+                l2mc_msg->del_flag &= ~L2MC_DEL_LOCAL;
+            }
+        }
+    }
+    return;
+}
+
 /******************************************
 * When peerlink ready, prepare the ARPMsg
 *
