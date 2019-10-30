@@ -22,6 +22,8 @@ SONIC_INSTALL_DOCKER_DBG_IMAGES += $(DOCKER_MGMT_FRAMEWORK_DBG)
 SONIC_STRETCH_DBG_DOCKERS += $(DOCKER_MGMT_FRAMEWORK_DBG)
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += --net=host --privileged -t
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /etc/sonic:/etc/sonic:ro
+$(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /var/run/docker.sock:/var/run/docker.sock \
+$(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /usr/bin/docker:/usr/bin/docker:ro \
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /etc:/host_etc:ro
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += --mount type=bind,source="/var/platform/",target="/mnt/platform/"
 
