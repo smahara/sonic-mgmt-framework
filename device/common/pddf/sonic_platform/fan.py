@@ -306,11 +306,11 @@ class Fan(FanBase):
         color_state="SOLID"
         led_device_name = "FANTRAY{}".format(self.fantray_index) + "_LED"
         if(not pddf_obj.is_led_device_configured(led_device_name, index)):
-                print "Set " + led_device_name + " : is not supported in the platform"
+                print "ERROR: Set " + led_device_name + " : is not supported in the platform"
                 return (False)
 
         if (not color in self.color_map.keys()):
-                return ("Invalid color")
+                return ("ERROR: Invalid color")
 
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
         pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
@@ -324,7 +324,7 @@ class Fan(FanBase):
         index = str(self.fantray_index-1)
         led_device_name = "FANTRAY{}".format(self.fantray_index) + "_LED"
         if(not pddf_obj.is_led_device_configured(led_device_name, index)):
-                print "Read " + led_device_name  + " : is not supported in the platform"
+                print "ERROR: Read " + led_device_name  + " : is not supported in the platform"
                 return (False)
 
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
