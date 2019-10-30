@@ -1,0 +1,7 @@
+
+obj-m := pddf_gpio_module.o
+
+#GCOV_PROFILE := y
+#$(info  ===========$(M)=========)
+CFLAGS_$(obj-m):= -I$(M)/modules/include
+

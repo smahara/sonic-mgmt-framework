@@ -7,6 +7,7 @@ l3_mem_entries=40960
 parity_correction=0
 parity_enable=0
 mmu_lossless=1
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
 
 pbmp_oversubscribe=0x444444441111111104444444422222222
 pbmp_xport_xe=0x444444451111111144444444422222222

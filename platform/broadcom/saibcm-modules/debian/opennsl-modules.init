@@ -35,12 +35,14 @@ function load_kernel_modules()
     modprobe linux-kernel-bde dmasize=32M maxpayload=128 debug=4 dma_debug=1
     modprobe linux-user-bde
     modprobe linux-bcm-knet use_rx_skb=1 rx_buffer_size=9238 debug=0x5020 rx_rate=30000,30000,30000,30000,30000,30000,30000
+    modprobe psample
     modprobe linux-knet-cb
 }
 
 function remove_kernel_modules()
 {
     rmmod linux-knet-cb
+    rmmod psample
     rmmod linux-bcm-knet
     rmmod linux-user-bde
     rmmod linux-kernel-bde

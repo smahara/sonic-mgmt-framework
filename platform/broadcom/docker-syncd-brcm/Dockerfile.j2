@@ -27,6 +27,8 @@ RUN chmod +x /usr/bin/dsserve /usr/bin/bcmcmd
 
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 COPY ["critical_processes", "/etc/supervisor/"]
+COPY ["diag_files/bcmdiag.soc", "/etc/sai.d/"]
+COPY ["diag_files/rc.soc", "/"]
 
 ## Clean up
 RUN apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y

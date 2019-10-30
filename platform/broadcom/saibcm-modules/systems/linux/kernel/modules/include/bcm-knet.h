@@ -39,6 +39,8 @@ typedef struct  {
  * Call-back interfaces for other Linux kernel drivers.
  */
 #include <linux/skbuff.h>
+#include <linux/netdevice.h>
+#include <kcom.h>
 
 typedef struct {
     uint32 netif_user_data;
@@ -69,7 +71,7 @@ typedef int
 (*knet_hw_tstamp_ptp_clock_index_cb_f)(int dev_no);
 
 typedef int
-(*knet_hw_tstamp_rx_time_upscale_cb_f)(int dev_no, uint64_t *ts);
+(*knet_hw_tstamp_rx_time_upscale_cb_f)(int dev_no, int phys_port, struct sk_buff *skb, uint64_t *ts);
 
 extern int
 bkn_rx_skb_cb_register(knet_skb_cb_f rx_cb);
@@ -125,6 +127,36 @@ bkn_hw_tstamp_rx_time_upscale_cb_register(knet_hw_tstamp_rx_time_upscale_cb_f hw
 extern int
 bkn_hw_tstamp_rx_time_upscale_cb_unregister(knet_hw_tstamp_rx_time_upscale_cb_f hw_tstamp_rx_time_upscale_cb);
 
-#endif
+
+#ifdef PSAMPLE_SUPPORT
+typedef struct {
+    uint8 cmic_type;
+    uint8 dcb_type;
+    uint8 dcb_size;
+    uint8 pkt_hdr_size;
+    uint32 cdma_channels;
+} knet_hw_info_t;
+
+extern int
+bkn_hw_info_get(int unit, knet_hw_info_t *hw_info);
+
+typedef int
+(*knet_netif_cb_f)(int unit, kcom_netif_t *netif, struct net_device *dev);
+
+extern int
+bkn_netif_create_cb_register(knet_netif_cb_f netif_cb);
+
+extern int
+bkn_netif_create_cb_unregister(knet_netif_cb_f netif_cb);
+
+extern int
+bkn_netif_destroy_cb_register(knet_netif_cb_f netif_cb);
+
+extern int
+bkn_netif_destroy_cb_unregister(knet_netif_cb_f netif_cb);
+
+#endif /* PSAMPLE_SUPPORT */
+
+#endif /* __KERNEL__ */
 
 #endif /* __LINUX_BCM_KNET_H__ */

@@ -111,6 +111,11 @@ ifneq ($(SONIC_COVERAGE_ON_PARAM),)
 SONIC_COVERAGE_ON = $(SONIC_COVERAGE_ON_PARAM)
 endif
 
+ifeq ($(SONIC_ENABLE_SFLOW),y)
+ENABLE_SFLOW = y
+endif
+
+include $(RULES_PATH)/config
 include $(RULES_PATH)/functions
 include $(RULES_PATH)/*.mk
 ifneq ($(CONFIGURED_PLATFORM), undefined)
@@ -207,10 +212,6 @@ DEB_BUILD_OPTIONS_GENERIC += "parallel=$(SONIC_CONFIG_MAKE_JOBS)"
 export DEB_BUILD_OPTIONS := "$(DEB_BUILD_OPTIONS_GENERIC)"
 export SONIC_CONFIG_MAKE_JOBS
 
-ifeq ($(ENABLE_PDE),y)
-override ENABLE_ZTP :=
-endif
-
 ###############################################################################
 ## Routing stack related exports
 ###############################################################################
@@ -268,6 +269,7 @@ $(info "BLDENV"                          : "$(BLDENV)")
 $(info "VS_PREPARE_MEM"                  : "$(VS_PREPARE_MEM)")
 $(info "VERSION"                         : "$(SONIC_GET_VERSION)")
 $(info "PDDF_SUPPORT"                    : "$(PDDF_SUPPORT)")
+$(info "ENABLE_SFLOW"                    : "$(ENABLE_SFLOW)")
 $(info )
 
 ###############################################################################
@@ -283,27 +285,44 @@ export vs_build_prepare_mem=$(VS_PREPARE_MEM)
 ## Canned sequences
 ###############################################################################
 
-MOD_CACHE_LOCK_TIMEOUT = 3600
-SONIC_DPKG_CACHE_DIR=/dpkg_cache
+SONIC_DPKG_CACHE_DIR    := /dpkg_cache
+MOD_CACHE_LOCK_SUFFIX   := cache_accss
+MOD_CACHE_LOCK_TIMEOUT  := 3600
 
-# Lock macro for debian package level cache
-# Lock is implemented through flock command with the timeout value of 1 hour
-# Lock file is created in the cache directory and corresponding lock fd is stored as part of DPKG recipe.
+DOCKER_LOCKFILE_SUFFIX  := access
+DOCKER_LOCKFILE_TIMEOUT := 1200
+
+# Lock macro for shared file access
+# Lock is implemented through flock command with a specified timeout value
+# Lock file is created in the specified directory, a separate one for each target file name
+# A designated suffix is appended to each target file name, followed by .lock
+#
+# Parameters:
+#  $(1) - target file name (without path)
+#  $(2) - lock file path (only)
+#  $(3) - designated lock file suffix
+#  $(4) - flock timeout (in seconds)
+#
+# $(call MOD_LOCK,file,path,suffix,timeout)
 define MOD_LOCK
-	if [[ ! -f $(SONIC_DPKG_CACHE_DIR)/$(1)_cache_accss.lock ]]; then
-		touch $(SONIC_DPKG_CACHE_DIR)/$(1)_cache_accss.lock
-		chmod 777 $(SONIC_DPKG_CACHE_DIR)/$(1)_cache_accss.lock;
+	if [[ ! -f $(2)/$(1)_$(3).lock ]]; then
+		touch $(2)/$(1)_$(3).lock
+		chmod 777 $(2)/$(1)_$(3).lock;
 	fi
 	$(eval $(1)_lock_fd=$(subst -,_,$(subst +,_,$(subst .,_,$(1)))))
-	exec {$($(1)_lock_fd)}<"$(SONIC_DPKG_CACHE_DIR)/$(1)_cache_accss.lock";
-	if ! flock -x -w $(MOD_CACHE_LOCK_TIMEOUT) "$${$($(1)_lock_fd)}" ; then
-		echo "ERROR: Lock timeout trying to read $(1) from cache.";
+	exec {$($(1)_lock_fd)}<"$(2)/$(1)_$(3).lock";
+	if ! flock -x -w $(4) "$${$($(1)_lock_fd)}" ; then
+		echo "ERROR: Lock timeout trying to access $(2)/$(1)_$(3).lock";
 		exit 1;
 	fi
 endef
 
-
-# UnLock macro for debian package level cache
+# UnLock macro for shared file access
+#
+# Parameters:
+#  $(1) - target file name (without path)
+#
+# $(call MOD_UNLOCK,file)
 define MOD_UNLOCK
 	eval exec "$${$($(1)_lock_fd)}<&-";
 endef
@@ -354,7 +373,7 @@ endef
 define SAVE_CACHE
 	$(eval MOD_SRC_PATH=$($(1)_SRC_PATH))
 	$(eval MOD_CACHE_FILE=$($(1)_MOD_CACHE_FILE))
-	$(call MOD_LOCK,$(1))
+	$(call MOD_LOCK,$(1),$(SONIC_DPKG_CACHE_DIR),$(MOD_CACHE_LOCK_SUFFIX),$(MOD_CACHE_LOCK_TIMEOUT))
 	$(if $($(1)_FILES_MODIFIED),
 		echo "Target $(1) dependencies are modifed - save cache skipped";
 	    ,
@@ -366,46 +385,36 @@ define SAVE_CACHE
 endef
 
 
-DOCKER_LOCKFILE_TIMEOUT = 1200
-
 ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
 # $(call docker-image-save,from,to)
 define docker-image-save
-    exec 201>"$(DOCKER_LOCKFILE_SAVE)"
-    if ! flock -x -w $(DOCKER_LOCKFILE_TIMEOUT) 201; then
-        @echo "ERROR: Cannot obtain docker image lock for $(1) save" $(LOG)
-        exit 1
-    else
-        @echo "Obtained docker image lock for $(1) save" $(LOG)
-        @echo "Tagging docker image $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) as $(1):latest" $(LOG)
-        docker tag $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(1):latest $(LOG)
-        @echo "Saving docker image $(1):latest" $(LOG)
-        docker save $(1):latest | gzip -c > $(2)
-        @echo "Removing docker image $(1):latest" $(LOG)
-        docker rmi -f $(1):latest $(LOG)
-        eval exec "201<&-"
-        @echo "Released docker image lock for $(1) save" $(LOG)
-    fi
+    @echo "Attempting docker image lock for $(1) save" $(LOG)
+    $(call MOD_LOCK,$(1),$(DOCKER_LOCKDIR),$(DOCKER_LOCKFILE_SUFFIX),$(DOCKER_LOCKFILE_TIMEOUT))
+    @echo "Obtained docker image lock for $(1) save" $(LOG)
+    @echo "Tagging docker image $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) as $(1):latest" $(LOG)
+    docker tag $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(1):latest $(LOG)
+    @echo "Saving docker image $(1):latest" $(LOG)
+    docker save $(1):latest | gzip -c > $(2)
+    @echo "Removing docker image $(1):latest" $(LOG)
+    docker rmi -f $(1):latest $(LOG)
+    $(call MOD_UNLOCK,$(1))
+    @echo "Released docker image lock for $(1) save" $(LOG)
     @echo "Removing docker image $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG)" $(LOG)
     docker rmi -f $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
 endef
 # $(call docker-image-load,from)
 define docker-image-load
-    exec 201>"$(DOCKER_LOCKFILE_SAVE)"
-    if ! flock -x -w $(DOCKER_LOCKFILE_TIMEOUT) 201; then
-        @echo "ERROR: Cannot obtain docker image lock for $(1) load" $(LOG)
-        exit 1
-    else
-        @echo "Obtained docker image lock for $(1) load" $(LOG)
-        @echo "Loading docker image $(TARGET_PATH)/$(1).gz" $(LOG)
-        docker load -i $(TARGET_PATH)/$(1).gz $(LOG)
-        @echo "Tagging docker image $(1):latest as $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG)" $(LOG)
-        docker tag $(1):latest $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
-        @echo "Removing docker image $(1):latest" $(LOG)
-        docker rmi -f $(1):latest $(LOG)
-        eval exec "201<&-"
-        @echo "Released docker image lock for $(1) load" $(LOG)
-    fi
+    @echo "Attempting docker image lock for $(1) load" $(LOG)
+    $(call MOD_LOCK,$(1),$(DOCKER_LOCKDIR),$(DOCKER_LOCKFILE_SUFFIX),$(DOCKER_LOCKFILE_TIMEOUT))
+    @echo "Obtained docker image lock for $(1) load" $(LOG)
+    @echo "Loading docker image $(TARGET_PATH)/$(1).gz" $(LOG)
+    docker load -i $(TARGET_PATH)/$(1).gz $(LOG)
+    @echo "Tagging docker image $(1):latest as $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG)" $(LOG)
+    docker tag $(1):latest $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
+    @echo "Removing docker image $(1):latest" $(LOG)
+    docker rmi -f $(1):latest $(LOG)
+    $(call MOD_UNLOCK,$(1))
+    @echo "Released docker image lock for $(1) load" $(LOG)
 endef
 else
 define docker-image-save
@@ -871,6 +880,8 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
                 $(IFUPDOWN2) \
                 $(HWDIAG) \
                 $(NTP) \
+                $(LIBPAM_RADIUS) \
+                $(LIBNSS_RADIUS) \
                 $(LIBPAM_TACPLUS) \
                 $(LIBNSS_TACPLUS)) \
         $$(addprefix $(TARGET_PATH)/,$$($$*_DOCKERS)) \

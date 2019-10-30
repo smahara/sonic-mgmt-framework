@@ -19,6 +19,7 @@ ipv6_lpm_128b_enable=1
 #Use MMU lossy configuration
 mmu_lossless=0
 bcm_num_cos=10
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
 
 ###################################################################################
 # SeaStone customized configuration

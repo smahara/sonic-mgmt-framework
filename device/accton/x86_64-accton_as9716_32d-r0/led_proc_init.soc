@@ -1,0 +1,14 @@
+# Copyright 2019 Broadcom. All rights reserved.
+# The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+
+linkscan off
+
+m0 load 0 0x3800 /usr/share/sonic/platform/custom_led.bin
+led auto on
+led start
+
+# Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI
+# ** Please comment out the following command when activating breakout ports **
+rcload /usr/share/sonic/platform/preemphasis-32x400G.soc
+
+linkscan on
