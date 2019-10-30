@@ -14,6 +14,8 @@ parity_correction=1
 parity_enable=1
 mmu_lossless=1
 
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
+
 pbmp_oversubscribe=0x3ffffffffffffffffffffffffffffffffe
 pbmp_xport_xe=0x3ffffffffffffffffffffffffffffffffe
 

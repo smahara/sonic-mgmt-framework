@@ -18,6 +18,8 @@ bcm_num_cos=10
 parity_correction=1
 parity_enable=1
 
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
+
 #PIPE0
 portmap_1=17:25
 portmap_2=18:25

@@ -579,8 +579,6 @@ typedef struct bkn_switch_info_s {
     uint32_t inst_id;           /* Instance id of this device */
     int evt_idx;                /* Event queue index for this device*/
     int basedev_suspended;      /* Base device suspended */
-    int tx_hwts;                /* HW timestamp for Tx */
-    int rx_hwts;                /* HW timestamp for Rx */
     struct sk_buff_head tx_ptp_queue;   /* Tx PTP skb queue */
     struct work_struct tx_ptp_work;     /* Tx PTP work */
     struct {
@@ -881,6 +879,9 @@ typedef struct bkn_priv_s {
     uint32_t cb_user_data;
     uint8_t system_headers[27];
     uint32_t system_headers_size;
+    int tx_hwts;                /* HW timestamp for Tx */
+    int rx_hwts;                /* HW timestamp for Rx */
+    int phys_port;
 } bkn_priv_t;
 
 typedef struct bkn_filter_s {
@@ -2673,32 +2674,14 @@ bkn_netif_lookup(bkn_switch_info_t *sinfo, int id)
 }
 
 static int
-bkn_hw_tstamp_rx_set(bkn_switch_info_t *sinfo, struct sk_buff *skb, uint32 *meta)
+bkn_hw_tstamp_rx_set(bkn_switch_info_t *sinfo, int phys_port, struct sk_buff *skb, uint32 *meta)
 {
     struct skb_shared_hwtstamps *shhwtstamps = skb_hwtstamps(skb);
-    uint32_t *md = meta;
     uint64_t ts = 0;
 
-    switch (sinfo->dcb_type) {
-    case 26:
-    case 32:
-    case 33:
-        ts = md[14];
-        ts = ts << 32 | md[12];
-        break;
-    case 36:
-        ts = md[10];
-        break;
-    case 38:
-        ts = md[4] & 0xffff;
-        ts = ts << 32 | md[5];
-        break;
-    default:
-        return -1;
-    }
 
     if (knet_hw_tstamp_rx_time_upscale_cb) {
-        if (knet_hw_tstamp_rx_time_upscale_cb(sinfo->dev_no, &ts) < 0) {
+        if (knet_hw_tstamp_rx_time_upscale_cb(sinfo->dev_no, phys_port, skb, &ts) < 0) {
           return -1;
         }
     }
@@ -3717,8 +3700,8 @@ bkn_do_api_rx(bkn_switch_info_t *sinfo, int chan, int budget)
                     }
 
                     /* Do Rx timestamping */
-                    if (sinfo->rx_hwts) {
-                        bkn_hw_tstamp_rx_set(sinfo, skb, meta);
+                    if (priv->rx_hwts) {
+                        bkn_hw_tstamp_rx_set(sinfo, priv->phys_port, skb, meta);
                     }
 
                     if (priv->flags & KCOM_NETIF_F_RCPU_ENCAP) {
@@ -4029,8 +4012,8 @@ bkn_do_skb_rx(bkn_switch_info_t *sinfo, int chan, int budget)
                     }
 
                     /* Do Rx timestamping */
-                    if (sinfo->rx_hwts) {
-                        bkn_hw_tstamp_rx_set(sinfo, skb, meta);
+                    if (priv->rx_hwts) {
+                        bkn_hw_tstamp_rx_set(sinfo, priv->phys_port, skb, meta);
                     }
 
                     if (priv->flags & KCOM_NETIF_F_RCPU_ENCAP) {
@@ -5040,12 +5023,12 @@ bkn_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 
         switch (config.tx_type) {
         case HWTSTAMP_TX_OFF:
-            knet_hw_tstamp_disable_cb(sinfo->dev_no, priv->port);
-            sinfo->tx_hwts = 0;
+            knet_hw_tstamp_disable_cb(sinfo->dev_no, priv->phys_port);
+            priv->tx_hwts = 0;
             break;
         case HWTSTAMP_TX_ON:
-            knet_hw_tstamp_enable_cb(sinfo->dev_no, priv->port);
-            sinfo->tx_hwts = 1;
+            knet_hw_tstamp_enable_cb(sinfo->dev_no, priv->phys_port);
+            priv->tx_hwts = 1;
             break;
         default:
             return -ERANGE;
@@ -5053,15 +5036,15 @@ bkn_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 
         switch (config.rx_filter) {
         case HWTSTAMP_FILTER_NONE:
-            if (sinfo->rx_hwts) {
-                knet_hw_tstamp_disable_cb(sinfo->dev_no, priv->port);
-                sinfo->rx_hwts = 0;
+            if (priv->rx_hwts) {
+                knet_hw_tstamp_disable_cb(sinfo->dev_no, priv->phys_port);
+                priv->rx_hwts = 0;
             }
             break;
         default:
-            if (!sinfo->rx_hwts) {
-                knet_hw_tstamp_enable_cb(sinfo->dev_no, priv->port);
-                sinfo->rx_hwts = 1;
+            if (!priv->rx_hwts) {
+                knet_hw_tstamp_enable_cb(sinfo->dev_no, priv->phys_port);
+                priv->rx_hwts = 1;
             }
             config.rx_filter = HWTSTAMP_FILTER_ALL;
             break;
@@ -5073,8 +5056,8 @@ bkn_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,14,0))
     if (cmd == SIOCGHWTSTAMP) {
         config.flags = 0;
-        config.tx_type = sinfo->tx_hwts ? HWTSTAMP_TX_ON : HWTSTAMP_TX_OFF;
-        config.rx_filter = sinfo->rx_hwts ? HWTSTAMP_FILTER_ALL : HWTSTAMP_FILTER_NONE;
+        config.tx_type = priv->tx_hwts ? HWTSTAMP_TX_ON : HWTSTAMP_TX_OFF;
+        config.rx_filter = priv->rx_hwts ? HWTSTAMP_FILTER_ALL : HWTSTAMP_FILTER_NONE;
 
         return copy_to_user(ifr->ifr_data, &config, sizeof(config)) ? -EFAULT : 0;
     }
@@ -5352,6 +5335,7 @@ bkn_tx(struct sk_buff *skb, struct net_device *dev)
                         memcpy(new_skb->data, pktdata, 12);
                         memcpy(&new_skb->data[16], &pktdata[12], pktlen - 12);
                         skb_put(new_skb, pktlen + TAG_SZ);
+                        bkn_skb_tx_flags(new_skb) = bkn_skb_tx_flags(skb);
                         dev_kfree_skb_any(skb);
                         skb = new_skb;
                         pktdata = skb->data;
@@ -5392,6 +5376,7 @@ bkn_tx(struct sk_buff *skb, struct net_device *dev)
                     }
                     memcpy(new_skb->data + hdrlen, skb->data, pktlen);
                     skb_put(new_skb, pktlen + hdrlen);
+                    bkn_skb_tx_flags(new_skb) = bkn_skb_tx_flags(skb);
                     dev_kfree_skb_any(skb);
                     skb = new_skb;
                 } else {
@@ -5426,6 +5411,7 @@ bkn_tx(struct sk_buff *skb, struct net_device *dev)
                         memcpy(&new_skb->data[hdrlen + 16], &skb->data[hdrlen + 12],
                                pktlen - hdrlen - 12);
                         skb_put(new_skb, pktlen + TAG_SZ);
+                        bkn_skb_tx_flags(new_skb) = bkn_skb_tx_flags(skb);
                         dev_kfree_skb_any(skb);
                         skb = new_skb;
                     } else {
@@ -5540,6 +5526,7 @@ bkn_tx(struct sk_buff *skb, struct net_device *dev)
                            }
                            memcpy(&new_skb->data[6], skb->data, pktlen);
                            skb_put(new_skb, pktlen + 6);
+                           bkn_skb_tx_flags(new_skb) = bkn_skb_tx_flags(skb);
                            dev_kfree_skb_any(skb);
                            skb = new_skb;
                         } else {
@@ -5569,6 +5556,7 @@ bkn_tx(struct sk_buff *skb, struct net_device *dev)
                             }
                             memcpy(&new_skb->data[2], skb->data, pktlen);
                             skb_put(new_skb, pktlen + 2);
+                            bkn_skb_tx_flags(new_skb) = bkn_skb_tx_flags(skb);
                             dev_kfree_skb_any(skb);
                             skb = new_skb;
                         } else {
@@ -5698,8 +5686,8 @@ bkn_tx(struct sk_buff *skb, struct net_device *dev)
 
         /* Do Tx timestamping */
         if (priv->port >= 0) {
-            if (bkn_skb_tx_flags(skb) & SKBTX_HW_TSTAMP && sinfo->tx_hwts) {
-                KNET_SKB_CB(skb)->port = priv->port;
+            if (bkn_skb_tx_flags(skb) & SKBTX_HW_TSTAMP && priv->tx_hwts) {
+                KNET_SKB_CB(skb)->port = priv->phys_port;
                 bkn_hw_tstamp_tx_config(sinfo, skb, meta);
                 bkn_skb_tx_flags(skb) |= SKBTX_IN_PROGRESS;
             }
@@ -7619,6 +7607,7 @@ bkn_knet_netif_create(kcom_msg_netif_create_t *kmsg, int len)
     priv->vlan = kmsg->netif.vlan;
     if (priv->type == KCOM_NETIF_T_PORT) {
         priv->port = kmsg->netif.port;
+        priv->phys_port = kmsg->netif.phys_port;
         if (device_is_dpp(sinfo)) {
             memcpy(priv->itmh, kmsg->netif.itmh, 4);
         } else if (device_is_dnx(sinfo)) {

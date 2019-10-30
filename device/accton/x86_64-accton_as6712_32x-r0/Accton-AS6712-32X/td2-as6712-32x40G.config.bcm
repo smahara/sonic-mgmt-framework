@@ -20,6 +20,8 @@ phy_an_c73=5 # TSCMOD_CL73_CL37
 tslam_dma_enable=1
 table_dma_enable=1
 
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
+
 #for 32x40G ports for breakout mode
 pbmp_oversubscribe=0x1fffffffe
 pbmp_xport_xe=0x1fffffffe

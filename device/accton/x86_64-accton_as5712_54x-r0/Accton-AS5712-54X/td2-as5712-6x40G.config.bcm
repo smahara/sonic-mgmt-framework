@@ -18,6 +18,8 @@ mmu_lossless=0
 lls_num_l2uc=12
 module_64ports=0
 
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
+
 #SFI
 serdes_if_type=9
 

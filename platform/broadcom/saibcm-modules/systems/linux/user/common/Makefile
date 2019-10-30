@@ -116,6 +116,7 @@ endif
 # Remove this when LinuxPTP support becomes optional.
 ifndef BUILD_LPTP
 BUILD_LPTP = 1
+BUILD_KNETSYNC = 1
 endif
 
 ifeq ($(BUILD_KNET),1)
@@ -139,6 +140,15 @@ endif
 ifdef BUILD_PSAMPLE
 all_targets += $(PSAMPLE)
 ADD_TO_CFLAGS += -DPSAMPLE_SUPPORT
+
+
+# KnetSync support
+ifdef BUILD_KNETSYNC
+
+KERNEL_TARGETS += $(BCM_PTP_CLOCK)
+LOCAL_KERNEL_TARGETS += $(patsubst %,$(realpath ..)/$(platform)/%,$(BCM_PTP_CLOCK_LOCAL))
+
+endif # BUILD_KNETSYNC
 
 ifeq ($(NO_LOCAL_TARGETS),)
 LOCAL_TARGETS +=$(patsubst %,../$(platform)/%,$(PSAMPLE_LOCAL))
@@ -181,6 +191,11 @@ CFLAGS += $(ADD_TO_CFLAGS)
 
 #SAI_FIXUP
 CFLAGS:=$(filter-out -fPIC, $(CFLAGS))
+
+# KnetSync Support
+ifdef BUILD_KNETSYNC
+knetsync_subdirs = bcm-ptp-clock
+endif # BUILD_KNETSYNC
 
 kernel_modules:
 	$(MAKE) -C $(SDK)/systems/bde/linux/kernel kernel_version=$(kernel_version)

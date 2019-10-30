@@ -21,7 +21,7 @@ bcm_linkscan_interval.0=450000
 
 os=unix
 bcm_num_cos=10
-
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
 
 # EagleCore ports
 #portmap_66=129:10
