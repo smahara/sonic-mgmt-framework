@@ -1,115 +1,633 @@
 #!/usr/bin/env python
 
 import sys
+import copy
+import Queue
 import redis
 import subprocess
 import syslog
-from swsssdk import ConfigDBConnector
+import os
+from swsscommon import swsscommon
+import socket
 
-class BGPConfigDaemon:
+def print_log(level, msg):
+    lvl_str = ''
+    if level == syslog.LOG_DEBUG:
+        lvl_str = 'DEBUG'
+    elif level == syslog.LOG_INFO:
+        lvl_str = 'INFO'
+    elif level == syslog.LOG_ERR:
+        lvl_str = '*** ERROR ***'
+    print('[{}]: {}'.format(lvl_str, msg))
+
+syslog.syslog = print_log
+
+class CachedDataWithOp:
+    OP_NONE = 0
+    OP_ADD = 1
+    OP_DELETE = 2
+    OP_UPDATE = 3
+
+    STAT_SUCC = 0
+    STAT_FAIL = 1
+
+    def __init__(self, data = None, op = OP_NONE):
+        self.data = data
+        self.op = op
+        self.status = self.STAT_FAIL
+
+    def __repr__(self):
+        op_str = ''
+        if self.op == self.OP_NONE:
+            op_str = 'NONE'
+        elif self.op == self.OP_ADD:
+            op_str = 'ADD'
+        elif self.op == self.OP_DELETE:
+            op_str = 'DELETE'
+        elif self.op == self.OP_UPDATE:
+            op_str = 'UPDATE'
+        return '(%s, %s)' % (self.data, op_str)
+
+def run_command(command):
+    syslog.syslog(syslog.LOG_DEBUG, "execute command {}.".format(command))
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    stdout = p.communicate()[0]
+    p.wait()
+    if p.returncode != 0:
+        syslog.syslog(syslog.LOG_ERR, 'command execution returned {}. Command: "{}", stdout: "{}"'.format(p.returncode, command, stdout))
+        return False
+    return True
+
+class BGPPeerGroup:
+    def __init__(self, vrf):
+        self.vrf = vrf
+        self.ref_nbrs = set()
+
+class SubscriberActionList(list):
+    def __init__(self):
+        super(SubscriberActionList, self).__init__()
+    def append(self, db_id, op, table, key, data):
+        super(SubscriberActionList, self).append((db_id, op, table, key, data))
+    def cmp_obj(self, o1, o2):
+        if o1[0] != o2[0]:
+            return cmp(o1[0], o2[0])
+        if o1[1] != o2[1]:
+            if o1[1] == swsscommon.SET_COMMAND:
+                # set is ahead of delete
+                return -1
+            else:
+                return 1
+        op = o1[1]
+        table1 = o1[2]
+        table2 = o2[2]
+        is_table_front = lambda t1, t2: ((t2 != 'BGP_NEIGHBOR' and t2 != 'BGP_PEER_GROUP') or
+                                         (op == swsscommon.DEL_COMMAND and t1 == 'BGP_NEIGHBOR') or
+                                         (op == swsscommon.SET_COMMAND and t1 == 'BGP_PEER_GROUP'))
+        if table1 != table2:
+            if table1 == 'DEVICE_METADATA' or table2 == 'DEVICE_METADATA':
+                return (-1 if table1 == 'DEVICE_METADATA' else 1)
+            elif table1 == 'BGP_GLOBALS' or table2 == 'BGP_GLOBALS':
+                return (-1 if table1 == 'BGP_GLOBALS' else 1)
+            elif table1 == 'ROUTE_MAP' or table2 == 'ROUTE_MAP':
+                return (-1 if table1 == 'ROUTE_MAP' else 1)
+            elif table1 == 'BGP_NEIGHBOR' or table1 == 'BGP_PEER_GROUP':
+                return (-1 if is_table_front(table1, table2) else 1)
+            elif table2 == 'BGP_NEIGHBOR' or table2 == 'BGP_PEER_GROUP':
+                return (1 if is_table_front(table2, table1) else -1)
+            else:
+                return cmp(table1, table2)
+        else:
+            return cmp(o1[3].split('|'), o2[3].split('|'))
+        return ret_val
+    def sort(self):
+        super(SubscriberActionList, self).sort(cmp = self.cmp_obj)
+
+class BGPKeyMapInfo:
+    def __init__(self, cmd_str, bool_vals = None):
+        self.run_cmd = cmd_str
+        self.bool_values = bool_vals
+    def get_command(self, op, *vals):
+        if op == CachedDataWithOp.OP_DELETE:
+            if self.bool_values is not None and len(self.bool_values) >= 3:
+                # set to default if given
+                cmd_enable = self.bool_values[2]
+            else:
+                cmd_enable = False
+        else:
+            cmd_enable = True
+            if self.bool_values is not None:
+                if len(vals) == 0:
+                    syslog.syslog(syslog.LOG_ERR, 'No input token for running cmd: %s' % self.run_cmd)
+                    return None
+                chk_val = vals[-1]
+                if chk_val == self.bool_values[0]:
+                    cmd_enable = True
+                elif chk_val == self.bool_values[1]:
+                    cmd_enable = False
+                else:
+                    syslog.syslog(syslog.LOG_ERR, 'Input token %s is neither %s or %s for cmd: %s' %
+                                                  (chk_val, self.bool_values[0], self.bool_values[1], self.run_cmd))
+                    return None
+        cmd_args = [CommandArgument(cmd_enable, v) for v in vals]
+        return self.run_cmd.format(*cmd_args, no = CommandArgument(cmd_enable))
+    def __str__(self):
+        ret_str = '[CMD: %s' % self.run_cmd
+        if self.bool_values is not None:
+            ret_str += ' BOOL: %s/%s' % (self.bool_values[0], self.bool_values[1])
+            if len(self.bool_values) >= 3:
+                ret_str += ' DFT: %s' % self.bool_values[2]
+        ret_str += ']'
+        return ret_str
+        
+class BGPKeyMapList(list):
+    def __init__(self, key_map_list, table_name, table_key = None):
+        super(BGPKeyMapList, self).__init__()
+        self.table_name = table_name
+        self.table_key = table_key
+        for key_map in key_map_list:
+            if len(key_map) < 2:
+                continue
+            db_field = key_map[0]
+            cmd_str = key_map[1]
+            bool_vals = None
+            if len(key_map) >= 3:
+                if len(key_map[2]) < 2:
+                    continue
+                bool_vals = key_map[2]
+            fld_key = None
+            if type(db_field) is str:
+                fld_tokens = db_field.split('|', 1)
+                if len(fld_tokens) == 2:
+                    db_field, fld_key = fld_tokens
+            if table_key is not None and fld_key is not None and table_key != fld_key:
+                continue
+            super(BGPKeyMapList, self).append((db_field, BGPKeyMapInfo(cmd_str, bool_vals)))
+    def run_command(self, data, prefix_list, *upper_vals):
+        for db_field, key_map in self:
+            if type(db_field) is not list:
+                db_field = [db_field]
+            run_cmd = False
+            op = None
+            for dkey in db_field:
+                if dkey not in data:
+                    syslog.syslog(syslog.LOG_DEBUG, 'key %s is not in data, bypass command' % dkey)
+                    run_cmd = False
+                    break
+                dval = data[dkey]
+                if not isinstance(dval, CachedDataWithOp):
+                    syslog.syslog(syslog.LOG_ERR, 'invalid vaule type of key %s' % dkey)
+                    run_cmd = False
+                    break
+                if dval.op != CachedDataWithOp.OP_NONE:
+                    run_cmd = True
+                    if op is None or dval.op == CachedDataWithOp.OP_DELETE:
+                        op = dval.op
+            if not run_cmd:
+                syslog.syslog(syslog.LOG_DEBUG, 'ignore command running for db_field %s' % db_field)
+                continue
+            cmd_prefix = 'vtysh '
+            for pfx in prefix_list:
+                cmd_prefix += "-c '%s' " % pfx
+            cmd = key_map.get_command(op, *(upper_vals + tuple([data[dkey].data for dkey in db_field])))
+            if cmd is None:
+                return False
+            if not run_command(cmd_prefix + "-c '%s'" % cmd):
+                syslog.syslog(syslog.LOG_ERR, 'failed running FRR command: %s' % cmd)
+                return False
+            for dkey in db_field:
+                data[dkey].status = CachedDataWithOp.STAT_SUCC
+        return True
+
+class CommandArgument(object):
+    def __init__(self, enabled, val = None):
+        self.enabled = enabled
+        self.value = val
+    def __format__(self, format):
+        if format == 'no-prefix':
+            return 'no ' if not self.enabled else ''
+        elif format == 'enable-only' and not enabled:
+            return ''
+        return str(self.value)
+
+class BGPConfigManager(object):
+    DEFAULT_VRF = 'default'
+    LOCAL_ROUTE_DISTANCE = 20
+
+    global_key_map = [('router_id',                                     '{no:no-prefix}bgp router-id {}'),
+                      ('load_balance_mp_relax',                         '{no:no-prefix}bgp bestpath as-path multipath-relax', ['true', 'false']),
+                      ('always_compare_med',                            '{no:no-prefix}bgp always-compare-med', ['true', 'false']),
+                      ('external_compare_router_id',                    '{no:no-prefix}bgp bestpath compare-routerid', ['true', 'false']),
+                      ('ignore_as_path_length',                         '{no:no-prefix}bgp bestpath as-path ignore', ['true', 'false']),
+                      ('graceful_restart_enable',                       '{no:no-prefix}bgp graceful-restart', ['true', 'false']),
+                      ('gr_restart_time',                               '{no:no-prefix}bgp graceful-restart restart-time {}'),
+                      ('gr_stale_routes_time',                          '{no:no-prefix}bgp graceful-restart stalepath-time {}'),
+                      (['ebgp_route_distance', 'ibgp_route_distance'],  '{{no:no-prefix}}distance bgp {{}} {{}} {}'.format(LOCAL_ROUTE_DISTANCE))
+    ]
+
+    nbr_key_map = [('peer_asn',                             '{no:no-prefix}neighbor {} remote-as {}'),
+                   ('peer_type',                            '{no:no-prefix}neighbor {} remote-as {}'),
+                   ('peer_group_name',                      '{no:no-prefix}neighbor {} peer-group {}'),
+                   ('local_asn',                            '{no:no-prefix}neighbor {} local-as {}'),
+                   ('local_address',                        '{no:no-prefix}neighbor {} update-source {}'),
+                   ('enabled',                              '{no:no-prefix}neighbor {} shutdown', ['false', 'true']),
+                   ('description',                          '{no:no-prefix}neighbor {} description {}'),
+                   ('ebgp_multihop',                        '{no:no-prefix}neighbor {} ebgp-multihop', ['true', 'false']),
+                   ('ebgp_multihop_ttl',                    '{no:no-prefix}neighbor {} ebgp-multihop {}'),
+                   ('auth_password',                        '{no:no-prefix}neighbor {} password {}'),
+                   (['keepalive_interval', 'hold_time'],    '{no:no-prefix}neighbor {} timers {} {}'),
+                   ('conn_retry',                           '{no:no-prefix}neighbor {} timers connect {}'),
+                   ('min_adv_intfvl',                       '{no:no-prefix}neighbor {} advertisement-interval {}'),
+                   ('passive_mode',                         '{no:no-prefix}neighbor {} passive', ['true', 'false']),
+    ]
+
+    nbr_af_key_map = [('allow_asin',                                '{no:no-prefix}neighbor {} allowas-in {}'),
+                      ('enabled|ipv4',                              '{no:no-prefix}neighbor {} activate', ['true', 'false', True]),
+                      ('enabled|ipv6',                              '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
+                      ('send_dflt_route',                           '{no:no-prefix}neighbor {} default-originate', ['true', 'false']),
+                      ('max_pfx_limit',                             '{no:no-prefix}neighbor {} maximum-prefix {}'),
+                      (['max_pfx_limit', 'max_pfx_warn_only'],      '{no:no-prefix}neighbor {} maximum-prefix {} warning-only', ['true', 'false']),
+                      (['max_pfx_limit', 'max_pfx_warn_thrshld'],   '{no:no-prefix}neighbor {} maximum-prefix {} {}'),
+                      (['max_pfx_limit', 'max_pfx_restart_timer'],  '{no:no-prefix}neighbor {} maximum-prefix {} restart {}'),
+                      (['route_name', 'direction'],                 '{no:no-prefix}neighbor {} route-map {} {}'),
+                      ('route_map_in',                              '{no:no-prefix}neighbor {} route-map {} in'),
+                      ('route_map_out',                             '{no:no-prefix}neighbor {} route-map {} out'),
+    ]
+
+    route_map_key_map = [('match_interface',            '{no:no-prefix}match interface {}'),
+                         ('match_prefix_set',           '{no:no-prefix}match '),
+                         ('match_address_family',       '{no:no-prefix}match '),
+                         ('match_med',                  '{no:no-prefix}match metric {}'),
+                         ('match_origin',               '{no:no-prefix}match origin {}'),
+                         ('match_local_pref',           '{no:no-prefix}match '),
+                         ('match_route_type',           '{no:no-prefix}match '),
+                         ('match_community',            '{no:no-prefix}match community {}'),
+                         ('match_ext_community',        '{no:no-prefix}match extcommunity {}'),
+                         ('match_as_path',              '{no:no-prefix}match as-path'),
+                         ('call_route_map',             '{no:no-prefix}call {:enable-only}'),
+                         ('set_origin',                 '{no:no-prefix}set origin {}'),
+                         ('set_local_pref',             '{no:no-prefix}set '),
+                         ('set_next_hop',               '{no:no-prefix}set '),
+                         ('set_med',                    '{no:no-prefix}set metric {}'),
+                         ('set_repeat_asn',             '{no:no-prefix}set '),
+                         ('set_asn',                    '{no:no-prefix}set '),
+                         ('set_community_inline',       '{no:no-prefix}set '),
+                         ('set_community_ref',          '{no:no-prefix}set '),
+                         ('set_ext_community_inline',   '{no:no-prefix}set '),
+                         ('set_ext_community_ref',      '{no:no-prefix}set ')
+    ]
+
+    tbl_to_key_map = {'BGP_GLOBALS':        global_key_map,
+                      'BGP_NEIGHBOR':       nbr_key_map,
+                      'BGP_PEER_GROUP':     nbr_key_map[0:1] + nbr_key_map[2:],
+                      'BGP_NEIGHBOR_AF':    nbr_af_key_map,
+                      'BGP_PEER_GROUP_AF':  nbr_af_key_map,
+                      'ROUTE_MAP':          route_map_key_map}
+
+    def __init__(self, daemon):
+        self.daemon = daemon
+        # VRF ==> local_as
+        self.bgp_asn = {}
+        # VRF ==> grp_name ==> peer_group
+        self.bgp_peer_group = {}
+        self.bgp_message = Queue.Queue(0)
+        self.table_data_cache = {}
+        daemon.add_manager(swsscommon.CONFIG_DB, swsscommon.CFG_DEVICE_METADATA_TABLE_NAME, self.__metadata_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_GLOBALS', self.__bgp_globals_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, swsscommon.CFG_BGP_NEIGHBOR_TABLE_NAME, self.__bgp_neighbor_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_NEIGHBOR_AF', self.__bgp_neighbor_af_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_PEER_GROUP', self.__bgp_neighbor_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_PEER_GROUP_AF', self.__bgp_neighbor_af_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'ROUTE_MAP', self.__route_map_handler)
+
+    def __metadata_handler(self, key, op, table, data):
+        if key != "localhost" \
+            or "bgp_asn" not in data \
+                or (self.DEFAULT_VRF in self.bgp_asn and self.bgp_asn[self.DEFAULT_VRF] == data["bgp_asn"]):
+            return
+
+        new_dft_asn = data['bgp_asn']
+        syslog.syslog(syslog.LOG_INFO, 'set default VRF local ASN to {}'.format(new_dft_asn))
+        if self.DEFAULT_VRF in self.bgp_asn:
+            old_dft_asn = self.bgp_asn[self.DEFAULT_VRF]
+            syslog.syslog(syslog.LOG_DEBUG, 'remove old local ASN {}'.format(old_dft_asn))
+            upd_data = CachedDataWithOp(old_dft_asn, CachedDataWithOp.OP_DELETE)
+            self.bgp_message.put(('BGP_GLOBALS&&%s' % self.DEFAULT_VRF, swsscommon.DEL_COMMAND, {'local_asn': upd_data}))
+            self.__update_bgp()
+            if upd_data.status == CachedDataWithOp.STAT_SUCC:
+                del(self.bgp_asn[self.DEFAULT_VRF])
+        syslog.syslog(syslog.LOG_DEBUG, 'add new local ASN {}'.format(new_dft_asn))
+        upd_data = CachedDataWithOp(new_dft_asn, CachedDataWithOp.OP_ADD)
+        self.bgp_message.put(('BGP_GLOBALS&&%s' % self.DEFAULT_VRF, swsscommon.SET_COMMAND, {'local_asn': upd_data}))
+        self.__update_bgp()
+        if upd_data.status == CachedDataWithOp.STAT_SUCC:
+            self.bgp_asn[self.DEFAULT_VRF] = new_dft_asn
+
+    def __delete_vrf_asn(self, vrf, data):
+        if vrf != self.DEFAULT_VRF and vrf not in self.bgp_asn:
+            syslog.syslog(syslog.LOG_ERR, 'non-default VRF {} was not configured'.format(vrf))
+            return False
+        command = "vtysh -c 'configure terminal' -c 'no router bgp {}".format(self.bgp_asn[vrf])
+        if vrf != self.DEFAULT_VRF:
+            command += " vrf {}'".format(vrf)
+        else:
+            command += "'"
+        if not run_command(command):
+            syslog.syslog(syslog.LOG_ERR, 'failed to delete local_asn for VRF %s' % vrf)
+            return False
+        del(self.bgp_asn[vrf])
+        for dkey, dval in data.items():
+            # force delete all VRF instance attributes in cache
+            dval.status = CachedDataWithOp.STAT_SUCC
+            dval.op = CachedDataWithOp.OP_DELETE
+        return True
+
+    def __delete_vrf_neighbor(self, vrf, peer, data, is_peer_grp):
+        if is_peer_grp:
+            if vrf in self.bgp_peer_group and peer in self.bgp_peer_group[vrf]:
+                del(self.bgp_peer_group[vrf][peer])
+        else:
+            if vrf in self.bgp_peer_group:
+                for _, peer_grp in self.bgp_peer_group[vrf].items():
+                    if peer in peer_grp.ref_nbrs:
+                        peer_grp.ref_nbrs.remove(peer)
+        for dkey, dval in data.items():
+            # force delete all neighbor attributes in cache
+            dval.status = CachedDataWithOp.STAT_SUCC
+            dval.op = CachedDataWithOp.OP_DELETE
+
+    def __update_bgp(self):
+        while not self.bgp_message.empty():
+            key, op, table, data = self.bgp_message.get()
+            key_list = key.split('|', 1)
+            vrf = key_list[0]
+            if len(key_list) > 1:
+                key = key_list[1]
+            else:
+                key = None
+            syslog.syslog(syslog.LOG_INFO, 'value for table {} vrf {} key {} changed to {}'.format(table, vrf, key, data))
+            if vrf not in self.bgp_asn and (table != 'BGP_GLOBALS' or 'local_asn' not in data):
+                syslog.syslog(syslog.LOG_DEBUG, 'ignore table {} update because local_asn for VRF {} was not configured'.\
+                        format(table, vrf))
+                continue
+            if table not in self.tbl_to_key_map:
+                syslog.syslog(syslog.LOG_DEBUG, 'no key_map found for table %s' % table)
+                continue
+            tbl_key = None
+            if table == 'BGP_NEIGHBOR_AF' or table == 'BGP_PEER_GROUP_AF' and key is not None:
+                _, tbl_key = key.split('|')
+            key_map = BGPKeyMapList(self.tbl_to_key_map[table], table, tbl_key)
+            if table == 'BGP_GLOBALS':
+                if op == swsscommon.SET_COMMAND:
+                    if 'local_asn' in data:
+                        dval = data['local_asn']
+                        if dval.op == CachedDataWithOp.OP_DELETE:
+                            # delete local_asn will delete whole VRF instance
+                            self.__delete_vrf_asn(vrf, data)
+                            continue
+                        prog_asn = True
+                        if dval.op == CachedDataWithOp.OP_UPDATE:
+                            syslog.syslog(syslog.LOG_ERR, 'local_asn could not be modified')
+                            prog_asn = False
+                        if dval.op == CachedDataWithOp.OP_NONE:
+                            prog_asn = False
+                        if vrf == self.DEFAULT_VRF and vrf in self.bgp_asn and dval.data != self.bgp_asn[vrf]:
+                            syslog.syslog(syslog.LOG_ERR, 'mismatched default VRF ASN was configured in DEVICE_METADATA')
+                            prog_asn = False
+                        if prog_asn:
+                            command = "vtysh -c 'configure terminal' -c 'router bgp {} vrf {}' ".format(dval.data, vrf)
+                            if run_command(command):
+                                self.bgp_asn[vrf] = dval.data
+                                dval.status = CachedDataWithOp.STAT_SUCC
+                            else:
+                                syslog.syslog(syslog.LOG_ERR, 'failed to set local_asn %s to VRF' % (dval.data, vrf))
+
+                    cmd_prefix = ['configure terminal', 'router bgp {} vrf {}'.format(self.bgp_asn[vrf], vrf)]
+                    if not key_map.run_command(data, cmd_prefix):
+                        syslog.syslog(syslog.LOG_ERR, 'failed running BGP global config command')
+                        continue
+                elif op == swsscommon.DEL_COMMAND:
+                    self.__delete_vrf_asn(vrf, data)
+            elif table == 'BGP_NEIGHBOR' or table == 'BGP_PEER_GROUP':
+                if op == swsscommon.SET_COMMAND:
+                    if table == 'BGP_PEER_GROUP':
+                        # if peer group is not created, create it before setting other attributes
+                        if vrf not in self.bgp_peer_group:
+                            self.bgp_peer_group[vrf] = {}
+                        if key not in self.bgp_peer_group[vrf]:
+                            command = "vtysh -c 'configure terminal' -c 'router bgp {} vrf {}' ".format(self.bgp_asn[vrf], vrf)
+                            command += "-c 'neighbor {} peer-group'".format(key)
+                            if not run_command(command):
+                                syslog.syslog(syslog.LOG_ERR, 'failed to create peer-group %s for VRF %s' % (key, vrf))
+                                continue
+                            self.bgp_peer_group[vrf][key] = BGPPeerGroup(vrf)
+                    cmd_prefix = ['configure terminal', 'router bgp {} vrf {}'.format(self.bgp_asn[vrf], vrf)]
+                    if not key_map.run_command(data, cmd_prefix, key):
+                        syslog.syslog(syslog.LOG_ERR, 'failed running BGP neighbor config command')
+                        continue
+                    if 'peer_group_name' in data and data['peer_group_name'].op == CachedDataWithOp.OP_ADD:
+                        dval = data['peer_group_name']
+                        if vrf not in self.bgp_peer_group or dval.data not in self.bgp_peer_group[vrf]:
+                            # should not happen because vtysh command will fail if peer_group not exists
+                            syslog.syslog(syslog.LOG_ERR, 'invalid peer-group %s was referenced' % dval.data)
+                            continue
+                        peer_grp = self.bgp_peer_group[vrf][dval.data]
+                        peer_grp.ref_nbrs.add(key)
+                    if (table == 'BGP_NEIGHBOR' and
+                            (('peer_asn' in data and data['peer_asn'].op == CachedDataWithOp.OP_DELETE) or
+                             ('peer_type' in data and data['peer_type'].op == CachedDataWithOp.OP_DELETE) or
+                             ('peer_group_name' in data and data['peer_group_name'].op == CachedDataWithOp.OP_DELETE))):
+                        # delete peer_asn or peer_group will delete all neighbor
+                        self.__delete_vrf_neighbor(vrf, key, data, False)
+                elif op == swsscommon.DEL_COMMAND:
+                    # Neighbor is deleted
+                    if table == 'BGP_PEER_GROUP':
+                        if vrf in self.bgp_peer_group and key in self.bgp_peer_group[vrf]:
+                            peer_grp = self.bgp_peer_group[vrf][key]
+                            if len(peer_grp.ref_nbrs) > 0:
+                                syslog.syslog(syslog.LOG_ERR, 'failed to delete peer-group {} for VRF {}: used by {} neighbors'.\
+                                        format(key, vrf, len(peer_grp.ref_nbrs)))
+                                syslog.syslog(syslog.LEG_ERR, 'referenced neighbors: {}'.format(peer_grp.ref_nbrs))
+                                continue
+                    command = "vtysh -c 'configure terminal' -c 'router bgp {} vrf {}' -c 'no neighbor {}'".\
+                        format(self.bgp_asn[vrf], vrf, key)
+                    if not run_command(command):
+                        syslog.syslog(syslog.LOG_ERR, 'failed to delete VRF %s bgp neigbor %s' % (vrf, key))
+                        continue
+                    self.__delete_vrf_neighbor(vrf, key, data, table == 'BGP_PEER_GROUP')
+            elif table == 'BGP_NEIGHBOR_AF' or table == 'BGP_PEER_GROUP_AF':
+                af_type, nbr = key.split('|')
+                af, ip_type = af_type.lower().split('_')
+                syslog.syslog(syslog.LOG_INFO, 'Set address family for neighbor {} to {} {}'.format(nbr, af, ip_type))
+                if op == swsscommon.SET_COMMAND or op == swsscommon.DEL_COMMAND:
+                    cmd_prefix = ['configure terminal',
+                                  'router bgp {} vrf {}'.format(self.bgp_asn[vrf], vrf),
+                                  'address-family {} {}'.format(af, ip_type)]
+                    if not key_map.run_command(data, cmd_prefix, nbr):
+                        syslog.syslog(syslog.LOG_ERR, 'failed running BGP neighbor AF config command')
+                        continue
+            elif table == 'ROUTE_MAP':
+                map_name = vrf
+                seq_no = key
+                if op == swsscommon.SET_COMMAND:
+                    if 'route_operation' in data:
+                        pass
+                elif op == swsscommon.DEL_COMMAND:
+                    pass
+
+    def __add_op_to_data(self, table_key, data, comb_attr_list):
+        if table_key not in self.table_data_cache:
+            self.table_data_cache[table_key] = {}
+        cached_data = self.table_data_cache[table_key]
+        for key in cached_data:
+            chk_key_list = []
+            for key_set in comb_attr_list:
+                if key in key_set:
+                    chk_key_list = list(key_set)
+                    break
+            if len(chk_key_list) == 0:
+                chk_key_list.append(key)
+            del_data = False
+            for key in chk_key_list:
+                if key not in data:
+                    del_data = True
+                    break
+            if del_data:
+                # Attribute in cache but not in data, set op to delete
+                for key in chk_key_list:
+                    if key in cached_data:
+                        data[key] = CachedDataWithOp(cached_data[key], CachedDataWithOp.OP_DELETE)
+            upd_data = False
+            for key in chk_key_list:
+                if (key in data and not isinstance(data[key], CachedDataWithOp) and
+                        (key not in cached_data or data[key] != cached_data[key])):
+                    upd_data = True
+                    break
+            if not upd_data:
+                # Attribute in cache is the same as in data, set op to none
+                for key in chk_key_list:
+                    if key in data and not isinstance(data[key], CachedDataWithOp):
+                        data[key] = CachedDataWithOp(data[key], CachedDataWithOp.OP_NONE)
+        for key in data:
+            if isinstance(data[key], CachedDataWithOp):
+                continue
+            if key in cached_data:
+                data[key] = CachedDataWithOp(data[key], CachedDataWithOp.OP_UPDATE)
+            else:
+                data[key] = CachedDataWithOp(data[key], CachedDataWithOp.OP_ADD)
+
+    def __update_cache_data(self, table_key, data):
+        if table_key not in self.table_data_cache:
+            syslog.syslog(syslog.LOG_DEBUG, 'data of table %s was not cached' % table_key)
+            return
+        cached_data = self.table_data_cache[table_key]
+        for key, val in data.items():
+            if not isinstance(val, CachedDataWithOp) or val.op == CachedDataWithOp.OP_NONE or val.status == CachedDataWithOp.STAT_FAIL:
+                syslog.syslog(syslog.LOG_DEBUG, 'igore cache update for %s because of %s%s%s' %
+                        (key, ('' if isinstance(val, CachedDataWithOp) else 'INV_DATA '),
+                              ('NO_OP ' if isinstance(val, CachedDataWithOp) and val.op == CachedDataWithOp.OP_NONE else ''),
+                              ('STAT_FAIL ' if isinstance(val, CachedDataWithOp) and val.status == CachedDataWithOp.STAT_FAIL else '')))
+                continue
+            if val.op == CachedDataWithOp.OP_ADD or val.op == CachedDataWithOp.OP_UPDATE:
+                cached_data[key] = val.data
+            elif val.op == CachedDataWithOp.OP_DELETE:
+                del(cached_data[key])
+
+    def __bgp_table_handler_common(self, key, op, table, data, comb_attr_list = []):
+        syslog.syslog(syslog.LOG_DEBUG, '----------------------------------')
+        syslog.syslog(syslog.LOG_DEBUG, ' BGP table handling')
+        syslog.syslog(syslog.LOG_DEBUG, '----------------------------------')
+        syslog.syslog(syslog.LOG_DEBUG, 'table : %s' % table)
+        syslog.syslog(syslog.LOG_DEBUG, 'key   : %s' % key)
+        op_str = ''
+        if op == swsscommon.DEL_COMMAND:
+            op_str = 'DELETE'
+        else:
+            op_str = 'SET'
+        syslog.syslog(syslog.LOG_DEBUG, 'op    : %s' % op_str)
+        syslog.syslog(syslog.LOG_DEBUG, 'data  :')
+        for dkey, dval in data.items():
+            syslog.syslog(syslog.LOG_DEBUG, '        %-10s - %s' % (dkey, dval))
+        syslog.syslog(syslog.LOG_DEBUG, '')
+        table_key = table + '&&' + key
+        self.__add_op_to_data(table_key, data, comb_attr_list)
+        self.bgp_message.put((key, op, table, data))
+        self.__update_bgp()
+        self.__update_cache_data(table_key, data)
+
+    def __bgp_globals_handler(self, key, op, table, data):
+        self.__bgp_table_handler_common(key, op, table, data, [{'ebgp_route_distance', 'ibgp_route_distance'}])
+
+    def __bgp_neighbor_handler(self, key, op, table, data):
+        self.__bgp_table_handler_common(key, op, table, data, [{'keepalive_interval', 'hold_time'}])
+
+    def __bgp_neighbor_af_handler(self, key, op, table, data):
+        self.__bgp_table_handler_common(key, op, table, data, [{'route_map', 'direction'}])
+
+    def __route_map_handler(self, key, op, table, data):
+        self.__bgp_table_handler_common(key, op, table, data)
+
+class Daemon(object):
+
+    SELECT_TIMEOUT = 1000
+    SUPPORT_DATABASE_LIST = (swsscommon.APPL_DB, swsscommon.CONFIG_DB)
 
     def __init__(self):
-        self.config_db = ConfigDBConnector()
-        try:
-            self.config_db.connect()
-        except Exception as e:
-            syslog.syslog(syslog.LOG_ERR, '[bgp cfgd] Failed connecting to config DB with exception:' + str(e))
+        self.appl_db = swsscommon.DBConnector(swsscommon.APPL_DB, swsscommon.DBConnector.DEFAULT_UNIXSOCKET, 0)
+        self.conf_db = swsscommon.DBConnector(swsscommon.CONFIG_DB, swsscommon.DBConnector.DEFAULT_UNIXSOCKET, 0)
+        self.selector = swsscommon.Select()
+        self.db_connectors = {}
+        self.callbacks = {}
+        self.subscribers = []
+        self.table_cache = {}
 
-        self.bgp_asn = self.config_db.get_entry('DEVICE_METADATA', 'localhost')['bgp_asn']
-        self.bgp_neighbor = self.config_db.get_table('BGP_NEIGHBOR')
+    def get_db_connector(self, db):
+        if db not in Daemon.SUPPORT_DATABASE_LIST:
+            raise ValueError("database {} not Daemon support list {}.".format(db, SUPPORT_DATABASE_LIST))
+        # if this database connector has been initialized
+        if db not in self.db_connectors:
+            self.db_connectors[db] = swsscommon.DBConnector(db, swsscommon.DBConnector.DEFAULT_UNIXSOCKET, 0)
+        return self.db_connectors[db]
 
-    def __run_command(self, command):
-#        print command
-        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-        stdout = p.communicate()[0]
-        p.wait()
-        if p.returncode != 0:
-            syslog.syslog(syslog.LOG_ERR, '[bgp cfgd] command execution returned {}. Command: "{}", stdout: "{}"'.format(p.returncode, command, stdout))
-
-    def metadata_handler(self, key, data):
-        if key == 'localhost' and data.has_key('bgp_asn'):
-            if data['bgp_asn'] != self.bgp_asn:
-                syslog.syslog(syslog.LOG_INFO, '[bgp cfgd] ASN changed to {} from {}, restart BGP...'.format(data['bgp_asn'], self.bgp_asn))
-                self.__run_command("supervisorctl restart start.sh")
-                self.__run_command("service quagga restart")
-                self.bgp_asn = data['bgp_asn']
-
-    def bfd_handler(self, key, data):
-        syslog.syslog(syslog.LOG_INFO, '[bgp cfgd](bfd) value for {} changed to {}'.format(key, data))
-        #get frr bfd session key
-        key_params = key.split('|')
-        cmd = 'peer {}'.format(key_params[0])
-        if len(key_params) == 4 and key_params[3] == 'multihop':
-            cmd = cmd + ' multihop '
-       	if key_params[1] != 'null':
-            cmd = cmd + ' local-address ' + key_params[1]
-        if key_params[2] != 'null':
-            cmd = cmd + ' interface ' + key_params[2]
-        if not data:
-            #BFD peer is deleted
-            command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no {}'".format(cmd)
-            self.__run_command(command)
-        else:
-            #create/update case
-            command = "vtysh -c 'configure terminal' -c 'bfd' -c '{}'".format(cmd)
-            for param in data:
-                if param == 'transmit_interval':
-                    command = command + " -c 'transmit-interval {}'".format(data[param])
-                elif param == 'receive_interval':
-                    command = command + " -c 'receive-interval {}'".format(data[param])
-                elif param == 'multiplier':
-                    command = command + " -c 'detect-multiplier {}'".format(data[param])
-                elif param == 'echo_mode' and data[param] == 'true':
-                    command = command + " -c 'echo-mode'"
-                elif param == 'echo_interval':
-                    command = command + " -c 'echo-interval {}'".format(data[param])
-                elif param == 'label':
-                    command = command + " -c 'label {}'".format(data[param])
-                elif param == 'admin_status' and data[param] == 'up':
-                    command = command + " -c 'no shutdown'"
-                elif param == 'admin_status' and data[param] == 'down':
-                    command = command + " -c 'shutdown'"
-            self.__run_command(command)    
-    
-    def bgp_handler(self, key, data):
-        syslog.syslog(syslog.LOG_INFO, '[bgp cfgd] value for {} changed to {}'.format(key, data))
-        if not data:
-            # Neighbor is deleted
-            command = "vtysh -c 'configure terminal' -c 'router bgp {}' -c 'no neighbor {}'".format(self.bgp_asn, key)
-            self.__run_command(command)
-            self.bgp_neighbor.pop(key)
-        else:
-            command = "vtysh -c 'configure terminal' -c 'router bgp {}' -c 'neighbor {} remote-as {}'".format(self.bgp_asn, key, data['asn'])
-            self.__run_command(command)
-            if data.has_key('name'):
-                command = "vtysh -c 'configure terminal' -c 'router bgp {}' -c 'neighbor {} description {}'".format(self.bgp_asn, key, data['name'])
-                self.__run_command(command)
-            if data.has_key('admin_status'):
-                command_mod = 'no ' if data['admin_status'] == 'up' else ''
-                command = "vtysh -c 'configure terminal' -c 'router bgp {}' -c '{}neighbor {} shutdown'".format(self.bgp_asn, command_mod, key)
-                self.__run_command(command)
-            if data.has_key('bfd'):
-                command_mod = 'no ' if data['bfd'] == '0' else ''
-                command = "vtysh -c 'configure terminal' -c 'router bgp {}' -c '{}neighbor {} bfd'".format(self.bgp_asn, command_mod, key)
-                self.__run_command(command)
-            self.bgp_neighbor[key] = data
+    def add_manager(self, db, table_name, callback):
+        if db not in self.callbacks:
+            self.callbacks[db] = {}
+        if table_name not in self.callbacks[db]:
+            self.callbacks[db][table_name] = []
+            conn = self.get_db_connector(db)
+            subscriber = swsscommon.SubscriberStateTable(conn, table_name)
+            self.subscribers.append(subscriber)
+            self.selector.addSelectable(subscriber)
+        self.callbacks[db][table_name].append(callback)
 
     def start(self):
-        try:
-            self.config_db.subscribe('BFD_PEER',
-                lambda table, key, data: self.bfd_handler(key, data))
-            self.config_db.subscribe('BGP_NEIGHBOR', 
-                lambda table, key, data: self.bgp_handler(key, data))
-            self.config_db.subscribe('DEVICE_METADATA',
-                lambda table, key, data: self.metadata_handler(key, data))
-            self.config_db.listen()
-        except Exception as e:
-            syslog.syslog(syslog.LOG_ERR, '[bgp cfgd] Failed subscribing/listening to config DB with exception:' + str(e))
-
+        while True:
+            state, selectable = self.selector.select(Daemon.SELECT_TIMEOUT)
+            if not selectable:
+                continue
+            action_list = SubscriberActionList()
+            for subscriber in self.subscribers:
+                db_id = subscriber.getDbConnector().getDbId()
+                table_name = subscriber.getTableName()
+                while True:
+                    key, op, fvs = subscriber.pop()
+                    # if no new message
+                    if not key:
+                        break
+                    data = dict(fvs)
+                    syslog.syslog(syslog.LOG_DEBUG, "Receive message from DB {} table {}:\n {}".format(db_id, table_name, (key, op, data)))
+                    action_list.append(db_id, op, table_name, key, data)
+            action_list.sort()
+            for db_id, op, table, key, data in action_list:
+                syslog.syslog(syslog.LOG_DEBUG, "processing table message: DB {} table {} op {} key {}".format(db_id, table, op, key))
+                for callback in self.callbacks[db_id][table]:
+                    callback(key, op, table, data)
 
 def main():
-    daemon = BGPConfigDaemon()
+    syslog.openlog("bgpcfgd")
+    daemon = Daemon()
+    bgp_manager = BGPConfigManager(daemon)
     daemon.start()
+    syslog.closelog()
 
 if __name__ == "__main__":
     main()
