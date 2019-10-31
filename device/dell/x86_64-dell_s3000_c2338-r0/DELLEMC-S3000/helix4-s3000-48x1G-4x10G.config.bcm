@@ -115,13 +115,13 @@ dport_map_indexed=1
 bcm56340_config=1
 phy_sgmii_autoneg_ge=1
 higig2_hdr_mode=1
-
+vlan_xlate_mem_entries=1024
 ext_sram_freq=0
 parity_correction=1
 ipv6_lpm_128b_enable=0
-
+mpls_mem_entries=0
 l2_mem_entries=28672
-
+pbmp_valid=0x3C3DFFFFFFFFFFFF
 table_dma_enable=0
 ext_tcam_freq=0
 dport_map_enable=1
@@ -130,7 +130,7 @@ parity_enable=1
 l2xmsg_mode=1
 lls_num_l2uc=12
 mmu_lossless=0
-
+egr_vlan_xlate_mem_entries=1024
 bcm56340_4x10=1
 miim_intr_enable=0
 l3_mem_entries=4096
