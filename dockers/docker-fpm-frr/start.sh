@@ -34,6 +34,8 @@ supervisorctl start bgpcfgd
 supervisorctl start zebra
 supervisorctl start staticd
 supervisorctl start bgpd
+supervisorctl start ospfd
+supervisorctl start pimd
 supervisorctl start bfdd
 
 if [ "$CONFIG_TYPE" == "unified" ] || [ "$CONFIG_TYPE" == "split" ]; then
@@ -41,3 +43,4 @@ if [ "$CONFIG_TYPE" == "unified" ] || [ "$CONFIG_TYPE" == "split" ]; then
 fi
 
 supervisorctl start fpmsyncd
+supervisorctl start ipmcfpmsyncd

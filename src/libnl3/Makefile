@@ -22,6 +22,15 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	dpkg-source -x libnl3_$(LIBNL3_VERSION).dsc
 
 	pushd ./libnl3-$(LIBNL3_VERSION_BASE)
+	git init
+	git add -f *
+	git commit -m "unmodified libnl source"
+
+	# Apply patches
+	stg init
+	stg import -s ../patch/series
+
+	# Build source and Debian packages
 	dpkg-buildpackage -rfakeroot -b -us -uc -j$(SONIC_CONFIG_MAKE_JOBS)
 	popd
 

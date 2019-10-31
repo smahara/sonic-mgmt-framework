@@ -10,6 +10,7 @@ l2xmsg_mode=1
 mem_cache_enable=0
 parity_correction=0
 parity_enable=0
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
 
 ## update the hex string based on case ID: 925941
 ## 1. type "phy info" then get each hg ports' number

@@ -59,6 +59,8 @@ class SfpUtil(SfpUtilBase):
         status = 0
         device = "PORT" + "%d"%(port_num+1)
         port_ps = pddf_obj.get_path(device,"xcvr_present")
+        if port_ps is None:
+            return False
         #print "port_ps value is : %s"%port_ps
         try:
             reg_file = open(port_ps, 'r')
@@ -68,15 +70,27 @@ class SfpUtil(SfpUtilBase):
 
         reg_value = reg_file.readline().rstrip()
         #print "%s: Presence Status %d"%(device, int(reg_value))
+        if 'XCVR' in plugin_data:
+            if 'xcvr_present' in plugin_data['XCVR']:
+                ptype = self._port_to_type_mapping[port_num]
+                vtype = 'valmap-'+ptype
+                if vtype in plugin_data['XCVR']['xcvr_present']:
+                    vmap = plugin_data['XCVR']['xcvr_present'][vtype]
+                    if reg_value in vmap:
+                        #print "valmap value: %s"%vmap[reg_value]
+                        return vmap[reg_value]
+                    else:
+                        return False
+        # if plugin_data doesn't specify anything regarding Transceivers
         if reg_value == '1':
             return True
 
         return False
 
     def populate_port_type(self, port):
-        if self._port_to_type_mapping[port] == 'QSFP':
+        if self._port_to_type_mapping[port] == 'QSFP' or self._port_to_type_mapping[port] == 'QSFP28':
             self._qsfp_ports.append(port)
-        elif self._port_to_type_mapping[port] == 'SFP':
+        elif self._port_to_type_mapping[port] == 'SFP' or self._port_to_type_mapping[port] == 'SFP28':
             self._sfp_ports.append(port)
 
     @property
@@ -101,6 +115,8 @@ class SfpUtil(SfpUtilBase):
 
         device = "PORT" + "%d"%(port_num+1)
         port_ps = pddf_obj.get_path(device,"xcvr_reset")
+        if port_ps is None:
+            return False
         #print "port_ps value is : %s"%port_ps
         try:
             reg_file = open(port_ps, 'w')
@@ -125,6 +141,8 @@ class SfpUtil(SfpUtilBase):
 
         device = "PORT" + "%d"%(port_num+1)
         port_ps = pddf_obj.get_path(device,"xcvr_lpmode")
+        if port_ps is None:
+            return False
         #print "port_ps value is : %s"%port_ps
         try:
             reg_file = open(port_ps, 'w')
@@ -161,6 +179,8 @@ class SfpUtil(SfpUtilBase):
 
         device = "PORT" + "%d"%(port_num+1)
         port_ps = pddf_obj.get_path(device,"xcvr_lpmode")
+        if port_ps is None:
+            return False
         try:
             reg_file = open(port_ps, 'w')
         except IOError as e:

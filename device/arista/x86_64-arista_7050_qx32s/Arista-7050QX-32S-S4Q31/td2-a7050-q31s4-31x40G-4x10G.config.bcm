@@ -12,6 +12,7 @@ mdio_output_delay=0x0d
 miim_intr_enable.0=0
 module_64ports.0=0
 os=unix
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
 pbmp_oversubscribe.0=0x1fffffffffffffffffffffffffe
 pbmp_xport_xe.0=0x1fffffffffffffffffffffffffe
 phy_an_c37_1.0=3

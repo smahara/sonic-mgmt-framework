@@ -265,7 +265,8 @@ RUN apt-get update && apt-get install -y \
         rrdtool \
 # For smartmontools 6.6-1
         automake1.11 \
-        libselinux1-dev\
+        libselinux1-dev \
+		texi2html \
 # For pkg-keepalive
         libnl-3-dev \
         libnl-genl-3-dev \
@@ -319,6 +320,10 @@ RUN pip3 install redis
 
 # For supervisor build
 RUN pip install meld3 mock
+
+# For mgmt-framework build
+RUN pip install mmh3
+RUN pip3 install mmh3
 
 # For vs image build
 RUN pip install pexpect==4.6.0

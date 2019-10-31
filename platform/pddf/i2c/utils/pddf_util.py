@@ -132,12 +132,13 @@ kos = [
 'modprobe pddf_cpld_module'  ,
 'modprobe pddf_xcvr_module',
 'modprobe pddf_mux_module'  ,
+'modprobe pddf_gpio_module'  ,
 'modprobe pddf_cpld_driver' ,
 'modprobe pddf_xcvr_driver_module' ,
 'modprobe pddf_psu_driver_module' ,
 'modprobe pddf_psu_module' ,
 'modprobe pddf_fan_driver_module' ,
-'modprobe -f platform_pddf_fan' ,
+#'modprobe -f platform_pddf_fan' ,
 'modprobe pddf_fan_module' ,
 'modprobe pddf_led_module' ,
 'modprobe pddf_sysstatus_module'
@@ -184,8 +185,14 @@ def get_path_to_pddf_plugin():
 
 def config_pddf_utils():
     device_path = get_path_to_device()
-    device_plugin_path = "/".join([device_path, "plugins"])
     pddf_path = get_path_to_pddf_plugin()
+    #  Check if the new 2.0 platform APIs exists and pddf 2.0 implementation also exist
+    if os.path.isdir(device_path+'/sonic_platform') and os.path.isdir(PLATFORM_ROOT_PATH+'/pddf/sonic_platform'):
+        device_plugin_path = "/".join([device_path,"sonic_platform"])
+        pddf_path = "/".join([PLATFORM_ROOT_PATH, "pddf/sonic_platform"])
+    else:
+        device_plugin_path = "/".join([device_path, "plugins"])
+    
     backup_path = "/".join([device_plugin_path, "orig"])
 
     if os.path.exists(backup_path) is False:
@@ -210,7 +217,12 @@ def config_pddf_utils():
 
 def cleanup_pddf_utils():
     device_path = get_path_to_device()
-    device_plugin_path = "/".join([device_path, "plugins"])
+
+    #  Check if the new 2.0 platform APIs exists and pddf 2.0 implementation also exist
+    if os.path.isdir(device_path+'/sonic_platform') and os.path.isdir(PLATFORM_ROOT_PATH+'/pddf/sonic_platform'):
+        device_plugin_path = "/".join([device_path,"sonic_platform"])
+    else:
+        device_plugin_path = "/".join([device_path, "plugins"])
 
     backup_path = "/".join([device_plugin_path, "orig"])
     if os.path.exists(backup_path) is True:
@@ -235,7 +247,7 @@ def cleanup_pddf_utils():
 
 def create_pddf_log_files():
     if not os.path.exists('/var/log/pddf'):
-    	log_os_system("sudo mkdir /var/log/pddf", 1)
+        log_os_system("sudo mkdir /var/log/pddf", 1)
 
     log_os_system("sudo touch /var/log/pddf/led.txt", 1)
     log_os_system("sudo touch /var/log/pddf/psu.txt", 1)
@@ -299,7 +311,7 @@ def do_install():
 
     if driver_check()== False :
         print PROJECT_NAME.upper() +" has no PDDF driver installed...."
-    	create_pddf_log_files()
+        create_pddf_log_files()
         print "Installing...."    
         status = driver_install()
         if status:
@@ -322,8 +334,8 @@ def do_uninstall():
 
 
     if os.path.exists('/var/log/pddf'):
-	print "Remove pddf log files....."
-    	log_os_system("sudo rm -rf /var/log/pddf", 1)
+        print "Remove pddf log files....."
+        log_os_system("sudo rm -rf /var/log/pddf", 1)
 
     print "Remove all the devices..."
     status = device_uninstall()
@@ -378,16 +390,16 @@ def do_switch_pddf():
             if FORCE==0:
                 return status
 
-        print "Disabling the 'skip_fand' from pmon daemon control script..."
-        if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
-            with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
-                data = json.load(fr)
-            if 'skip_fand' in data.keys():
-                old_val = data['skip_fand']
-                if old_val:
-                    data['skip_fand'] = False
-                    with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
-                        json.dump(data,fw)
+        #print "Disabling the 'skip_fand' from pmon daemon control script..."
+        #if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
+            #with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
+                #data = json.load(fr)
+            #if 'skip_fand' in data.keys():
+                #old_val = data['skip_fand']
+                #if old_val:
+                    #data['skip_fand'] = False
+                    #with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
+                        #json.dump(data,fw)
 
         print "Restart the pmon service ..."
         status, output = log_os_system("systemctl start pmon.service", 1)
@@ -427,16 +439,16 @@ def do_switch_nonpddf():
             if FORCE==0:
                 return status
 
-        print "Enabeling the 'skip_fand' from pmon startup script..."
-        if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
-            with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
-                data = json.load(fr)
-            if 'skip_fand' in data.keys():
-                old_val = data['skip_fand']
-                if not old_val:
-                    data['skip_fand'] = True
-                    with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
-                        json.dump(data,fw)
+        #print "Enabeling the 'skip_fand' from pmon startup script..."
+        #if os.path.exists('/usr/share/sonic/platform/pmon_daemon_control.json'):
+            #with open('/usr/share/sonic/platform/pmon_daemon_control.json','r') as fr:
+                #data = json.load(fr)
+            #if 'skip_fand' in data.keys():
+                #old_val = data['skip_fand']
+                #if not old_val:
+                    #data['skip_fand'] = True
+                    #with open('/usr/share/sonic/platform/pmon_daemon_control.json','w') as fw:
+                        #json.dump(data,fw)
 
         print "Restart the pmon service ..."
         status, output = log_os_system("systemctl start pmon.service", 1)

@@ -1,0 +1,116 @@
+log quiet=yes append=no file=/var/log/bcm_diag_post
+
+set rcerror=false
+tm -stoponerror +SIlent +Quiet -Run -Progress
+#ts -*
+
+set rct=true
+#echo "--------------------------------------------------"
+echo "POST: RC Load" 
+#echo "--------------------------------------------------"
+time 'rcload rc.soc'
+counter off
+l2mode off
+linkscan off
+memscan off
+echo " "
+
+#echo "--------------------------------------------------"
+echo "POST: Running PCI Compliance"
+#echo "--------------------------------------------------"
+time 'tr 2'
+echo " "
+
+#echo "--------------------------------------------------"
+echo "POST: Running PCI S-Channel Buf"
+#echo "--------------------------------------------------"
+time 'tr 4'
+echo " "
+
+#echo "--------------------------------------------------"
+echo "POST: Running Register read/write"
+#echo "--------------------------------------------------"
+time 'tr 3'
+echo " "
+
+#echo "--------------------------------------------------"
+echo "POST: Running Register reset defaults"
+#echo "--------------------------------------------------"
+time 'tr 1'
+echo " "
+
+#echo "--------------------------------------------------"
+echo "POST: Running CPU benchmarks"
+#echo "--------------------------------------------------"
+time 'tr 21'
+echo " "
+
+#echo "--------------------------------------------------"
+#echo "POST: Counter width verification"
+#echo "--------------------------------------------------"
+#time 'tr 30'
+#echo " "
+
+#echo "--------------------------------------------------"
+#echo "POST: Counter read/write"
+#echo "--------------------------------------------------"
+#time 'tr 31'
+#echo " "
+
+#echo "--------------------------------------------------"
+echo "POST: MDIO Linkscan"
+#echo "--------------------------------------------------"
+time 'tr 60'
+echo " "
+
+#echo "--------------------------------------------------"
+echo "POST: Running CPU DMA loopback test"
+#echo "--------------------------------------------------"
+#time 'tr 17'
+echo " "
+
+#echo "--------------------------------------------------"
+#echo "POST: Testing MAC Loopback - 10 Gb/s all XE ports"
+#echo "--------------------------------------------------"
+#time 'tr 18 PortBitMap=xe Speed=10G'
+#echo " "
+
+#echo "--------------------------------------------------"
+#echo "POST: Testing MAC Loopback - 100 Gb/s all CE ports"
+#echo "--------------------------------------------------"
+#time 'tr 18 PortBitMap=ce Speed=100G'
+#echo " "
+
+#echo "--------------------------------------------------"
+#echo "POST: Testing PHY Loopback - 10 Gb/s all XE ports"
+#echo "--------------------------------------------------"
+#time 'tr 19 PortBitMap=xe Speed=10G'
+#echo " "
+
+#echo "--------------------------------------------------"
+#echo "POST: Testing PHY Loopback - 100 Gb/s all CE ports"
+#echo "--------------------------------------------------"
+#time 'tr 19 PortBitMap=ce Speed=100G'
+#echo " "
+
+#echo "--------------------------------------------------"
+#echo "POST: Running Traffic Test in MAC mode on CE ports..."
+#echo "--------------------------------------------------"
+#time 'tr 72 RunMode=MAC PortBitMap=ce TimeInSeconds=1'
+#echo " "
+
+#echo "--------------------------------------------------"
+echo "POST: Internal Snake on all XE/CE ports"
+#echo "--------------------------------------------------"
+#time 'tr 39'
+time 'tr 39 Duration=1 Count=1'
+echo " "
+
+#echo "--------------------------------------------------"
+echo "POST: Restore default state"
+#echo "--------------------------------------------------"
+tr 1
+echo " "
+
+log off
+

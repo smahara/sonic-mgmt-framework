@@ -114,3 +114,12 @@
 	path = src/sonic-mgmt-framework
 	url = https://github.com/project-arlo/sonic-mgmt-framework.git
 	branch = master
+[submodule "src/sonic-l2mcd"]
+	path = src/sonic-l2mcd
+	url = ../sonic-l2mcd.git
+	branch = dell_sonic
+[submodule "src/sonic-udld"]
+	path = src/sonic-udld
+	url = ../sonic-udld.git
+	branch = dell_sonic
+

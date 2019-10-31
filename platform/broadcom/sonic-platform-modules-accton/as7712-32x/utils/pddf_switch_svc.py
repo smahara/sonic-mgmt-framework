@@ -49,6 +49,12 @@ def start_platform_svc():
     return True
 
 def start_platform_pddf():
+    # Enable PDDF 2.0 object class for AS7712
+    status, output = commands.getstatusoutput("mkdir /usr/share/sonic/platform/sonic_platform")
+    if status:
+        print "Unable to create 2.0 object class folder /usr/share/sonic/platform/sonic_platform"
+        return False
+
     status, output = commands.getstatusoutput("systemctl start pddf-platform-init.service")
     if status:
         print "Start pddf-platform-init.service failed %d"%status
@@ -57,6 +63,12 @@ def start_platform_pddf():
     return True
 
 def stop_platform_pddf():
+    # Disable PDDF 2.0 object class for AS7712
+    status, output = commands.getstatusoutput("rm -r /usr/share/sonic/platform/sonic_platform")
+    if status:
+        print "Unable to delete 2.0 object class folder /usr/share/sonic/platform/sonic_platform"
+        return False
+
     status, output = commands.getstatusoutput("systemctl stop pddf-platform-init.service")
     if status:
         print "Stop pddf-platform-init.service failed %d"%status

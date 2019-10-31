@@ -10,3 +10,4 @@
 0009-CVE-2018-5733.patch
 0010-CVE-2018-5732.patch
 0011-Write-Statistics-to-file.patch
+0012-SIGUSR1-Handler-to-enable-debug-log-level.patch

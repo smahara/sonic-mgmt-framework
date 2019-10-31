@@ -26,7 +26,8 @@ RUN dpkg -i \
 debs/{{ deb }}{{' '}}
 {%- endfor %}
 
-COPY ["start.sh", "/usr/bin/"]
+COPY ["files/supervisor-proc-exit-listener", "start.sh", "/usr/bin/"]
+COPY ["critical_processes", "/etc/supervisor/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 COPY ["restore_nat_entries.py", "/usr/bin/"]
 

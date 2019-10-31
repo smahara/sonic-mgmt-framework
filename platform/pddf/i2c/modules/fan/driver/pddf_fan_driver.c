@@ -54,6 +54,19 @@ FAN_SYSFS_ATTR_DATA data_fan5_present = {FAN5_PRESENT, S_IRUGO, fan_show_default
 EXPORT_SYMBOL(data_fan5_present);
 FAN_SYSFS_ATTR_DATA data_fan6_present = {FAN6_PRESENT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_present_default, NULL, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(data_fan6_present);
+FAN_SYSFS_ATTR_DATA data_fan7_present = {FAN7_PRESENT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_present_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan7_present);
+FAN_SYSFS_ATTR_DATA data_fan8_present = {FAN8_PRESENT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_present_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan8_present);
+FAN_SYSFS_ATTR_DATA data_fan9_present = {FAN9_PRESENT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_present_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan9_present);
+FAN_SYSFS_ATTR_DATA data_fan10_present = {FAN10_PRESENT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_present_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan10_present);
+FAN_SYSFS_ATTR_DATA data_fan11_present = {FAN11_PRESENT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_present_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan11_present);
+FAN_SYSFS_ATTR_DATA data_fan12_present = {FAN12_PRESENT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_present_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan12_present);
+
 
 FAN_SYSFS_ATTR_DATA data_fan1_direction = {FAN1_DIRECTION, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_direction_default, NULL, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(data_fan1_direction);
@@ -67,32 +80,44 @@ FAN_SYSFS_ATTR_DATA data_fan5_direction = {FAN5_DIRECTION, S_IRUGO, fan_show_def
 EXPORT_SYMBOL(data_fan5_direction);
 FAN_SYSFS_ATTR_DATA data_fan6_direction = {FAN6_DIRECTION, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_direction_default, NULL, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(data_fan6_direction);
+FAN_SYSFS_ATTR_DATA data_fan7_direction = {FAN7_DIRECTION, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_direction_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan7_direction);
+FAN_SYSFS_ATTR_DATA data_fan8_direction = {FAN8_DIRECTION, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_direction_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan8_direction);
+FAN_SYSFS_ATTR_DATA data_fan9_direction = {FAN9_DIRECTION, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_direction_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan9_direction);
+FAN_SYSFS_ATTR_DATA data_fan10_direction = {FAN10_DIRECTION, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_direction_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan10_direction);
+FAN_SYSFS_ATTR_DATA data_fan11_direction = {FAN11_DIRECTION, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_direction_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan11_direction);
+FAN_SYSFS_ATTR_DATA data_fan12_direction = {FAN12_DIRECTION, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_direction_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan12_direction);
 
-FAN_SYSFS_ATTR_DATA data_fan1_front_rpm = {FAN1_FRONT_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan1_front_rpm);                                                                                                              
-FAN_SYSFS_ATTR_DATA data_fan2_front_rpm = {FAN2_FRONT_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan2_front_rpm);                                                                                                              
-FAN_SYSFS_ATTR_DATA data_fan3_front_rpm = {FAN3_FRONT_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan3_front_rpm);                                                                                                              
-FAN_SYSFS_ATTR_DATA data_fan4_front_rpm = {FAN4_FRONT_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan4_front_rpm);                                                                                                              
-FAN_SYSFS_ATTR_DATA data_fan5_front_rpm = {FAN5_FRONT_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan5_front_rpm);                                                                                                              
-FAN_SYSFS_ATTR_DATA data_fan6_front_rpm = {FAN6_FRONT_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan6_front_rpm);
 
-FAN_SYSFS_ATTR_DATA data_fan1_rear_rpm = {FAN1_REAR_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan1_rear_rpm);             
-FAN_SYSFS_ATTR_DATA data_fan2_rear_rpm = {FAN2_REAR_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan2_rear_rpm);             
-FAN_SYSFS_ATTR_DATA data_fan3_rear_rpm = {FAN3_REAR_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan3_rear_rpm);             
-FAN_SYSFS_ATTR_DATA data_fan4_rear_rpm = {FAN4_REAR_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan4_rear_rpm);              
-FAN_SYSFS_ATTR_DATA data_fan5_rear_rpm = {FAN5_REAR_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan5_rear_rpm);             
-FAN_SYSFS_ATTR_DATA data_fan6_rear_rpm = {FAN6_REAR_RPM, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
-EXPORT_SYMBOL(data_fan6_rear_rpm);
+FAN_SYSFS_ATTR_DATA data_fan1_input = {FAN1_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan1_input);                                                                                                              
+FAN_SYSFS_ATTR_DATA data_fan2_input = {FAN2_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan2_input);                                                                                                              
+FAN_SYSFS_ATTR_DATA data_fan3_input = {FAN3_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan3_input);                                                                                                              
+FAN_SYSFS_ATTR_DATA data_fan4_input = {FAN4_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan4_input);                                                                                                              
+FAN_SYSFS_ATTR_DATA data_fan5_input = {FAN5_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan5_input);                                                                                                              
+FAN_SYSFS_ATTR_DATA data_fan6_input = {FAN6_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan6_input);
+FAN_SYSFS_ATTR_DATA data_fan7_input = {FAN7_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan7_input);             
+FAN_SYSFS_ATTR_DATA data_fan8_input = {FAN8_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan8_input);             
+FAN_SYSFS_ATTR_DATA data_fan9_input = {FAN9_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan9_input);             
+FAN_SYSFS_ATTR_DATA data_fan10_input = {FAN10_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan10_input);              
+FAN_SYSFS_ATTR_DATA data_fan11_input = {FAN11_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan11_input);             
+FAN_SYSFS_ATTR_DATA data_fan12_input = {FAN12_INPUT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_rpm_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan12_input);
 
 
 FAN_SYSFS_ATTR_DATA data_fan1_pwm = {FAN1_PWM, S_IRUGO | S_IWUSR, fan_show_default, NULL, sonic_i2c_get_fan_pwm_default, NULL, fan_store_default, NULL, sonic_i2c_set_fan_pwm_default, NULL, NULL};
@@ -107,6 +132,19 @@ FAN_SYSFS_ATTR_DATA data_fan5_pwm = {FAN5_PWM, S_IRUGO | S_IWUSR, fan_show_defau
 EXPORT_SYMBOL(data_fan5_pwm);             
 FAN_SYSFS_ATTR_DATA data_fan6_pwm = {FAN6_PWM, S_IRUGO | S_IWUSR, fan_show_default, NULL, sonic_i2c_get_fan_pwm_default, NULL, fan_store_default, NULL, sonic_i2c_set_fan_pwm_default, NULL, NULL};
 EXPORT_SYMBOL(data_fan6_pwm);
+FAN_SYSFS_ATTR_DATA data_fan7_pwm = {FAN7_PWM, S_IRUGO | S_IWUSR, fan_show_default, NULL, sonic_i2c_get_fan_pwm_default, NULL, fan_store_default, NULL, sonic_i2c_set_fan_pwm_default, NULL, NULL};
+EXPORT_SYMBOL(data_fan7_pwm);             
+FAN_SYSFS_ATTR_DATA data_fan8_pwm = {FAN8_PWM, S_IRUGO | S_IWUSR, fan_show_default, NULL, sonic_i2c_get_fan_pwm_default, NULL, fan_store_default, NULL, sonic_i2c_set_fan_pwm_default, NULL, NULL};
+EXPORT_SYMBOL(data_fan8_pwm);             
+FAN_SYSFS_ATTR_DATA data_fan9_pwm = {FAN9_PWM, S_IRUGO | S_IWUSR, fan_show_default, NULL, sonic_i2c_get_fan_pwm_default, NULL, fan_store_default, NULL, sonic_i2c_set_fan_pwm_default, NULL, NULL};
+EXPORT_SYMBOL(data_fan9_pwm);             
+FAN_SYSFS_ATTR_DATA data_fan10_pwm = {FAN10_PWM, S_IRUGO | S_IWUSR, fan_show_default, NULL, sonic_i2c_get_fan_pwm_default, NULL, fan_store_default, NULL, sonic_i2c_set_fan_pwm_default, NULL, NULL};
+EXPORT_SYMBOL(data_fan10_pwm);              
+FAN_SYSFS_ATTR_DATA data_fan11_pwm = {FAN11_PWM, S_IRUGO | S_IWUSR, fan_show_default, NULL, sonic_i2c_get_fan_pwm_default, NULL, fan_store_default, NULL, sonic_i2c_set_fan_pwm_default, NULL, NULL};
+EXPORT_SYMBOL(data_fan11_pwm);             
+FAN_SYSFS_ATTR_DATA data_fan12_pwm = {FAN12_PWM, S_IRUGO | S_IWUSR, fan_show_default, NULL, sonic_i2c_get_fan_pwm_default, NULL, fan_store_default, NULL, sonic_i2c_set_fan_pwm_default, NULL, NULL};
+EXPORT_SYMBOL(data_fan12_pwm);
+
 
 FAN_SYSFS_ATTR_DATA data_fan1_fault = {FAN1_FAULT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_fault_default, NULL, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(data_fan1_fault);
@@ -120,6 +158,19 @@ FAN_SYSFS_ATTR_DATA data_fan5_fault = {FAN5_FAULT, S_IRUGO, fan_show_default, NU
 EXPORT_SYMBOL(data_fan5_fault);
 FAN_SYSFS_ATTR_DATA data_fan6_fault = {FAN6_FAULT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_fault_default, NULL, NULL, NULL, NULL, NULL, NULL};
 EXPORT_SYMBOL(data_fan6_fault);
+FAN_SYSFS_ATTR_DATA data_fan7_fault = {FAN7_FAULT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_fault_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan7_fault);
+FAN_SYSFS_ATTR_DATA data_fan8_fault = {FAN8_FAULT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_fault_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan8_fault);
+FAN_SYSFS_ATTR_DATA data_fan9_fault = {FAN9_FAULT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_fault_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan9_fault);
+FAN_SYSFS_ATTR_DATA data_fan10_fault = {FAN10_FAULT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_fault_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan10_fault);
+FAN_SYSFS_ATTR_DATA data_fan11_fault = {FAN11_FAULT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_fault_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan11_fault);
+FAN_SYSFS_ATTR_DATA data_fan12_fault = {FAN12_FAULT, S_IRUGO, fan_show_default, NULL, sonic_i2c_get_fan_fault_default, NULL, NULL, NULL, NULL, NULL, NULL};
+EXPORT_SYMBOL(data_fan12_fault);
+
 
 FAN_SYSFS_ATTR_DATA_ENTRY fan_sysfs_attr_data_tbl[]=
 {
@@ -129,36 +180,60 @@ FAN_SYSFS_ATTR_DATA_ENTRY fan_sysfs_attr_data_tbl[]=
     { "fan4_present", &data_fan4_present},
     { "fan5_present", &data_fan5_present},
     { "fan6_present", &data_fan6_present},
+	{ "fan7_present", &data_fan7_present},
+    { "fan8_present", &data_fan8_present},
+    { "fan9_present", &data_fan9_present},
+    { "fan10_present", &data_fan10_present},
+    { "fan11_present", &data_fan11_present},
+    { "fan12_present", &data_fan12_present},
 	{ "fan1_direction", &data_fan1_direction},
     { "fan2_direction", &data_fan2_direction},
     { "fan3_direction", &data_fan3_direction},
     { "fan4_direction", &data_fan4_direction},
     { "fan5_direction", &data_fan5_direction},
     { "fan6_direction", &data_fan6_direction},
-	{ "fan1_front_rpm", &data_fan1_front_rpm},
-    { "fan2_front_rpm", &data_fan2_front_rpm},
-    { "fan3_front_rpm", &data_fan3_front_rpm},
-    { "fan4_front_rpm", &data_fan4_front_rpm},
-    { "fan5_front_rpm", &data_fan5_front_rpm},
-    { "fan6_front_rpm", &data_fan6_front_rpm},
-	{ "fan1_rear_rpm", &data_fan1_rear_rpm},
-    { "fan2_rear_rpm", &data_fan2_rear_rpm},
-    { "fan3_rear_rpm", &data_fan3_rear_rpm},
-    { "fan4_rear_rpm", &data_fan4_rear_rpm},
-    { "fan5_rear_rpm", &data_fan5_rear_rpm},
-    { "fan6_rear_rpm", &data_fan6_rear_rpm},
+	{ "fan7_direction", &data_fan7_direction},
+    { "fan8_direction", &data_fan8_direction},
+    { "fan9_direction", &data_fan9_direction},
+    { "fan10_direction", &data_fan10_direction},
+    { "fan11_direction", &data_fan11_direction},
+    { "fan12_direction", &data_fan12_direction},
+	{ "fan1_input", &data_fan1_input},
+    { "fan2_input", &data_fan2_input},
+    { "fan3_input", &data_fan3_input},
+    { "fan4_input", &data_fan4_input},
+    { "fan5_input", &data_fan5_input},
+    { "fan6_input", &data_fan6_input},
+	{ "fan7_input", &data_fan7_input},
+    { "fan8_input", &data_fan8_input},
+    { "fan9_input", &data_fan9_input},
+    { "fan10_input", &data_fan10_input},
+    { "fan11_input", &data_fan11_input},
+    { "fan12_input", &data_fan12_input},
 	{ "fan1_pwm", &data_fan1_pwm},
     { "fan2_pwm", &data_fan2_pwm},
     { "fan3_pwm", &data_fan3_pwm},
     { "fan4_pwm", &data_fan4_pwm},
     { "fan5_pwm", &data_fan5_pwm},
     { "fan6_pwm", &data_fan6_pwm},
+	{ "fan7_pwm", &data_fan7_pwm},
+    { "fan8_pwm", &data_fan8_pwm},
+    { "fan9_pwm", &data_fan9_pwm},
+    { "fan10_pwm", &data_fan10_pwm},
+    { "fan11_pwm", &data_fan11_pwm},
+    { "fan12_pwm", &data_fan12_pwm},
 	{ "fan1_fault", &data_fan1_fault},
     { "fan2_fault", &data_fan2_fault},
     { "fan3_fault", &data_fan3_fault},
     { "fan4_fault", &data_fan4_fault},
     { "fan5_fault", &data_fan5_fault},
     { "fan6_fault", &data_fan6_fault},
+	{ "fan7_fault", &data_fan7_fault},
+    { "fan8_fault", &data_fan8_fault},
+    { "fan9_fault", &data_fan9_fault},
+    { "fan10_fault", &data_fan10_fault},
+    { "fan11_fault", &data_fan11_fault},
+    { "fan12_fault", &data_fan12_fault},
 };
 
 void *get_fan_access_data(char *name)

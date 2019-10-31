@@ -9,6 +9,7 @@ parity_correction=0
 parity_enable=0
 pbmp_oversubscribe=0x000fffc0000ffff0003ffffc0000001e
 pbmp_xport_xe=0x000fffc0000ffff0003ffffc0000001e
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
 
 # Tile-0: 1, 5, 9, 21
 portmap_1=1:100

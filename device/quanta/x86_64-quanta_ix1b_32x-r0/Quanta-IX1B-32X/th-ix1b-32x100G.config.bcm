@@ -22,6 +22,8 @@ lpm_ipv6_128b_reserved=0
 lpm_scaling_enable=1
 num_ipv6_lpm_128b_entries=3072
 
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
+
 portmap_68=65:100
 portmap_72=69:100
 portmap_76=73:100
