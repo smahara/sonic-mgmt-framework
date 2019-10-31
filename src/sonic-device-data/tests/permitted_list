@@ -161,6 +161,10 @@ phy_enable
 l2xlrn_thread_interval
 l2xlrn_intr_en
 serdes_lane_config_media_type
+pbmp_valid
+vlan_xlate_mem_entries
+mpls_mem_entries
+egr_vlan_xlate_mem_entries
 sai_preinit_cmd_file
 sai_preinit_warmboot_cmd_file
 sai_postinit_cmd_file
