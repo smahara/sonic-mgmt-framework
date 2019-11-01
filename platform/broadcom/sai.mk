@@ -11,12 +11,7 @@ endif
 
 #BRCM_SAI
 ifeq ($(LOCAL_SAI_DEBS_PATH),)
-<<<<<<< HEAD
-# $(BRCM_SAI)_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/LATEST_INT_OCP_SAI_3.6/build/$(BRCM_SAI)"
-$(BRCM_SAI)_URL = "http://10.11.45.77/~nirenjan/saibcm/$(BRCM_SAI)"
-=======
-$(BRCM_SAI)_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/LATEST_INT_OCP_SAI_3.X/build/$(BRCM_SAI)"
->>>>>>> broadcom_sonic_share
+$(BRCM_SAI)_URL = "http://artifactory.force10networks.com/sonic-debs/$(BRCM_SAI)"
 SONIC_ONLINE_DEBS += $(BRCM_SAI)
 else
 $(BRCM_SAI)_PATH = $(SAI_LIBS_MOUNT_POINT)
@@ -26,12 +21,7 @@ endif
 #BRCM_SAI_DEV
 $(eval $(call add_derived_package,$(BRCM_SAI),$(BRCM_SAI_DEV)))
 ifeq ($(LOCAL_SAI_DEBS_PATH),)
-<<<<<<< HEAD
-# $(BRCM_SAI_DEV)_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/LATEST_INT_OCP_SAI_3.6/build/$(BRCM_SAI_DEV)"
-$(BRCM_SAI_DEV)_URL = "10.11.45.77/~nirenjan/saibcm/$(BRCM_SAI_DEV)"
-=======
-$(BRCM_SAI_DEV)_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/LATEST_INT_OCP_SAI_3.X/build/$(BRCM_SAI_DEV)"
->>>>>>> broadcom_sonic_share
+$(BRCM_SAI_DEV)_URL = "http://artifactory.force10networks.com/sonic-debs/$(BRCM_SAI_DEV)"
 else
 $(BRCM_SAI_DEV)_PATH = $(SAI_LIBS_MOUNT_POINT)
 endif
@@ -39,10 +29,10 @@ endif
 $(BRCM_SAI_DEV)_DEPENDS += $(BRCM_SAI)
 
 #BRCM_SAI_DIAG
-ifeq ($(LOCAL_SAI_DEBS_PATH),)
-$(BRCM_SAI_DIAG)_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/LATEST_INT_OCP_SAI_3.X/build/$(BRCM_SAI_DIAG)"
-SONIC_ONLINE_DEBS += $(BRCM_SAI_DIAG)
-else
-$(BRCM_SAI_DIAG)_PATH = $(SAI_LIBS_MOUNT_POINT)
-SONIC_COPY_DEBS += $(BRCM_SAI_DIAG)
-endif
+#ifeq ($(LOCAL_SAI_DEBS_PATH),)
+#$(BRCM_SAI_DEV)_URL = "http://artifactory.force10networks.com/sonic-debs/$(BRCM_SAI_DIAG)"
+#SONIC_ONLINE_DEBS += $(BRCM_SAI_DIAG)
+#else
+#$(BRCM_SAI_DIAG)_PATH = $(SAI_LIBS_MOUNT_POINT)
+#SONIC_COPY_DEBS += $(BRCM_SAI_DIAG)
+#endif
