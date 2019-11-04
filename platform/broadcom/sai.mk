@@ -30,7 +30,7 @@ $(BRCM_SAI_DEV)_DEPENDS += $(BRCM_SAI)
 
 #BRCM_SAI_DIAG
 ifeq ($(LOCAL_SAI_DEBS_PATH),)
-$(BRCM_SAI_DEV)_URL = "http://artifactory.force10networks.com/sonic-debs/$(BRCM_SAI_DIAG)"
+$(BRCM_SAI_DIAG)_URL = "http://artifactory.force10networks.com/sonic-debs/$(BRCM_SAI_DIAG)"
 SONIC_ONLINE_DEBS += $(BRCM_SAI_DIAG)
 else
 $(BRCM_SAI_DIAG)_PATH = $(SAI_LIBS_MOUNT_POINT)
