@@ -370,7 +370,8 @@ initpde:
 
 init :
 	@git submodule update --init --recursive
-	@git submodule foreach --recursive 'git checkout dell_sonic || git checkout master' 
+	@git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
+	@git submodule foreach --recursive 'git checkout dell_sonic || git checkout master'
 
 reset :
 	@echo && echo -n "Warning! All local changes will be lost. Proceed? [y/N]: "
