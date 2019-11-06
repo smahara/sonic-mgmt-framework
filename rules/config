@@ -104,7 +104,7 @@ ENABLE_SYSTEM_TELEMETRY = y
 #   for the build. This variable is required when the 'cache' procure method is used,
 #   and may be overridden by specifying the KERNEL_CACHE_PATH variable when invoking
 #   the make command.
-DEFAULT_KERNEL_PROCURE_METHOD = cache
+DEFAULT_KERNEL_PROCURE_METHOD = build
 DEFAULT_KERNEL_CACHE_PATH = /projects/csg_sonic/kern_debcache
 
 # FRR user and group id values. These only take effect when SONIC_ROUTING_STACK is frr.
