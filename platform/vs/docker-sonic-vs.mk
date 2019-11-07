@@ -9,7 +9,8 @@ $(DOCKER_SONIC_VS)_DEPENDS += $(SWSS) \
                               $(PYTHON_SWSSCOMMON) \
                               $(LIBTEAMDCT) \
                               $(LIBTEAM_UTILS) \
-                              $(SONIC_DEVICE_DATA)
+                              $(SONIC_DEVICE_DATA) \
+                              $(L2MCD)
 
 $(DOCKER_SONIC_VS)_PYTHON_DEBS += $(SONIC_UTILS)
 
