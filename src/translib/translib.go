@@ -972,6 +972,14 @@ func getAllDbs() ([db.MaxDB]*db.DB, error) {
 		return dbs, err
 	}
 
+    //Create User DB connection
+    dbs[db.UserDB], err = db.NewDB(getDBOptions(db.UserDB))
+
+	if err != nil {
+		closeAllDbs(dbs[:])
+		return dbs, err
+	}
+
 	return dbs, err
 }
 
@@ -1003,7 +1011,7 @@ func getDBOptions(dbNo db.DBNum) db.Options {
 	case db.ApplDB, db.CountersDB:
 		opt = getDBOptionsWithSeparator(dbNo, "", ":", ":")
 		break
-	case db.FlexCounterDB, db.AsicDB, db.LogLevelDB, db.ConfigDB, db.StateDB, db.ErrorDB:
+	case db.FlexCounterDB, db.AsicDB, db.LogLevelDB, db.ConfigDB, db.StateDB, db.ErrorDB, db.UserDB:
 		opt = getDBOptionsWithSeparator(dbNo, "", "|", "|")
 		break
 	}
