@@ -15,8 +15,10 @@ lpm_ipv6_128b_reserved=0
 parity_correction=0
 parity_enable=0
 sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
-pbmp_oversubscribe=0x00003fc000000ff0000003fc000001fe
-pbmp_xport_xe=0x00003fc000000ff0000003fc000001fe
+
+pbmp_oversubscribe=0x3ffffffffffffffffffffffffffffffffe
+pbmp_xport_xe=0x3ffffffffffffffffffffffffffffffffe
+
 port_phy_clause_1=45
 port_phy_clause_2=45
 port_phy_clause_3=45
@@ -89,275 +91,407 @@ port_phy_addr_107=0xff
 port_phy_addr_108=0xff
 port_phy_addr_109=0xff
 
-# Tile-0
-portmap_1=1:100
-portmap_2=5:100
-portmap_3=9:100
-portmap_4=13:100
-portmap_5=17:100
-portmap_6=21:100
-portmap_7=25:100
-portmap_8=29:100
-
-# Tile-1
-portmap_34=33:100
-portmap_35=37:100
-portmap_36=41:100
-portmap_37=45:100
-portmap_38=49:100
-portmap_39=53:100
-portmap_40=57:100
-portmap_41=61:100
-
-# Tile-2
-portmap_68=65:100
-portmap_69=69:100
-portmap_70=73:100
-portmap_71=77:100
-portmap_72=81:100
-portmap_73=85:100
-portmap_74=89:100
-portmap_75=93:100
-
-# Tile-3
-portmap_102=97:100
-portmap_103=101:100
-portmap_104=105:100
-portmap_105=109:100
-portmap_106=113:100
-portmap_107=117:100
-portmap_108=121:100
-portmap_109=125:100
-
 dport_map_enable=1
 dport_map_indexed=1
 dport_map_direct=0
 
-dport_map_port_36=1
-dport_map_port_37=2
-dport_map_port_38=3
-dport_map_port_35=4
-dport_map_port_34=5
-dport_map_port_39=6
-dport_map_port_40=7
-dport_map_port_41=8
+# Tile-0
+portmap_1=1:100
+portmap_5=5:100
+portmap_9=9:100
+portmap_13=13:100
+portmap_17=17:100
+portmap_21=21:100
+portmap_25=25:100
+portmap_29=29:100
 
-dport_map_port_68=34
-dport_map_port_69=35
-dport_map_port_70=36
-dport_map_port_71=37
-dport_map_port_72=38
-dport_map_port_73=39
-dport_map_port_74=40
-dport_map_port_75=41
 
-dport_map_port_102=68
-dport_map_port_103=69
-dport_map_port_104=70
-dport_map_port_105=71
-dport_map_port_108=72
-dport_map_port_106=73
-dport_map_port_1=74
-dport_map_port_107=75
+# Tile-1
+portmap_34=33:100
+portmap_38=37:100
+portmap_42=41:100
+portmap_46=45:100
+portmap_50=49:100
+portmap_54=53:100
+portmap_58=57:100
+portmap_62=61:100
 
-dport_map_port_2=102
-dport_map_port_109=103
-dport_map_port_8=104
-dport_map_port_3=105
-dport_map_port_4=106
-dport_map_port_7=107
-dport_map_port_5=108
-dport_map_port_6=109
+
+# Tile-2
+portmap_68=65:100
+portmap_72=69:100
+portmap_76=73:100
+portmap_80=77:100
+portmap_84=81:100
+portmap_88=85:100
+portmap_92=89:100
+portmap_96=93:100
+
+
+# Tile-3
+portmap_102=97:100
+portmap_106=101:100
+portmap_110=105:100
+portmap_114=109:100
+portmap_118=113:100
+portmap_122=117:100
+portmap_126=121:100
+portmap_130=125:100
+
+# dport mapping
+
+dport_map_port_42=1
+dport_map_port_43=2
+dport_map_port_44=3
+dport_map_port_45=4
+
+dport_map_port_46=5
+dport_map_port_47=6
+dport_map_port_48=7
+dport_map_port_49=8
+
+dport_map_port_50=9
+dport_map_port_51=10
+dport_map_port_52=11
+dport_map_port_53=12
+
+dport_map_port_38=13
+dport_map_port_39=14
+dport_map_port_40=15
+dport_map_port_41=16
+
+dport_map_port_34=17
+dport_map_port_35=18
+dport_map_port_36=19
+dport_map_port_37=20
+
+dport_map_port_54=21
+dport_map_port_55=22
+dport_map_port_56=23
+dport_map_port_57=24
+
+dport_map_port_58=25
+dport_map_port_59=26
+dport_map_port_60=27
+dport_map_port_61=28
+
+dport_map_port_62=29
+dport_map_port_63=30
+dport_map_port_64=31
+dport_map_port_65=32
+
+dport_map_port_68=33
+dport_map_port_69=34
+dport_map_port_70=35
+dport_map_port_71=36
+
+dport_map_port_72=37
+dport_map_port_73=38
+dport_map_port_74=39
+dport_map_port_75=40
+
+dport_map_port_76=41
+dport_map_port_77=42
+dport_map_port_78=43
+dport_map_port_79=44
+
+dport_map_port_80=45
+dport_map_port_81=46
+dport_map_port_82=47
+dport_map_port_83=48
+
+dport_map_port_84=49
+dport_map_port_85=50
+dport_map_port_86=51
+dport_map_port_87=52
+
+dport_map_port_88=53
+dport_map_port_89=54
+dport_map_port_90=55
+dport_map_port_91=56
+
+dport_map_port_92=57
+dport_map_port_93=58
+dport_map_port_94=59
+dport_map_port_95=60
+
+dport_map_port_96=61
+dport_map_port_97=62
+dport_map_port_98=63
+dport_map_port_99=64
+
+dport_map_port_102=65
+dport_map_port_103=66
+dport_map_port_104=67
+dport_map_port_105=68
+
+dport_map_port_106=69
+dport_map_port_107=70
+dport_map_port_108=71
+dport_map_port_109=72
+
+dport_map_port_110=73
+dport_map_port_111=74
+dport_map_port_112=75
+dport_map_port_113=76
+
+dport_map_port_114=77
+dport_map_port_115=78
+dport_map_port_116=79
+dport_map_port_117=80
+
+dport_map_port_126=81
+dport_map_port_127=82
+dport_map_port_128=83
+dport_map_port_129=84
+
+dport_map_port_118=85
+dport_map_port_119=86
+dport_map_port_120=87
+dport_map_port_121=88
+
+dport_map_port_1=89
+dport_map_port_2=90
+dport_map_port_3=91
+dport_map_port_4=92
+
+dport_map_port_122=93
+dport_map_port_123=94
+dport_map_port_124=95
+dport_map_port_125=96
+
+dport_map_port_5=97
+dport_map_port_6=98
+dport_map_port_7=99
+dport_map_port_8=100
+
+dport_map_port_130=101
+dport_map_port_131=102
+dport_map_port_132=103
+dport_map_port_133=104
+
+dport_map_port_29=105
+dport_map_port_30=106
+dport_map_port_31=107
+dport_map_port_32=108
+
+dport_map_port_9=109
+dport_map_port_10=110
+dport_map_port_11=111
+dport_map_port_12=112
+
+dport_map_port_13=113
+dport_map_port_14=114
+dport_map_port_15=115
+dport_map_port_16=116
+
+dport_map_port_25=117
+dport_map_port_26=118
+dport_map_port_27=119
+dport_map_port_28=120
+
+dport_map_port_17=121
+dport_map_port_18=122
+dport_map_port_19=123
+dport_map_port_20=124
+
+dport_map_port_21=125
+dport_map_port_22=126
+dport_map_port_23=127
+dport_map_port_24=128
+
 
 # Tile-0  FC0~FC7
 # TX polarity
 phy_xaui_tx_polarity_flip_1=0xF
-phy_xaui_tx_polarity_flip_2=0xF
-phy_xaui_tx_polarity_flip_3=0x0
-phy_xaui_tx_polarity_flip_4=0x0
-phy_xaui_tx_polarity_flip_5=0x0
-phy_xaui_tx_polarity_flip_6=0x0
-phy_xaui_tx_polarity_flip_7=0xF
-phy_xaui_tx_polarity_flip_8=0xF
+phy_xaui_tx_polarity_flip_5=0xF
+phy_xaui_tx_polarity_flip_9=0x0
+phy_xaui_tx_polarity_flip_13=0x0
+phy_xaui_tx_polarity_flip_17=0x0
+phy_xaui_tx_polarity_flip_21=0x0
+phy_xaui_tx_polarity_flip_25=0xF
+phy_xaui_tx_polarity_flip_29=0xF
 
 # RX polarity
 phy_xaui_rx_polarity_flip_1=0xF
-phy_xaui_rx_polarity_flip_2=0xF
-phy_xaui_rx_polarity_flip_3=0x0
-phy_xaui_rx_polarity_flip_4=0x0
-phy_xaui_rx_polarity_flip_5=0x0
-phy_xaui_rx_polarity_flip_6=0x0
-phy_xaui_rx_polarity_flip_7=0xF
-phy_xaui_rx_polarity_flip_8=0xF
+phy_xaui_rx_polarity_flip_5=0xF
+phy_xaui_rx_polarity_flip_9=0x0
+phy_xaui_rx_polarity_flip_13=0x0
+phy_xaui_rx_polarity_flip_17=0x0
+phy_xaui_rx_polarity_flip_21=0x0
+phy_xaui_rx_polarity_flip_25=0xF
+phy_xaui_rx_polarity_flip_29=0xF
 
 # TX lane swap
 xgxs_tx_lane_map_1=0x1302
-xgxs_tx_lane_map_2=0x1302
-xgxs_tx_lane_map_3=0x0213
-xgxs_tx_lane_map_4=0x1302
-xgxs_tx_lane_map_5=0x1032
-xgxs_tx_lane_map_6=0x0213
-xgxs_tx_lane_map_7=0x3120
-xgxs_tx_lane_map_8=0x1302
+xgxs_tx_lane_map_5=0x1302
+xgxs_tx_lane_map_9=0x0213
+xgxs_tx_lane_map_13=0x1302
+xgxs_tx_lane_map_17=0x1032
+xgxs_tx_lane_map_21=0x0213
+xgxs_tx_lane_map_25=0x3120
+xgxs_tx_lane_map_29=0x1302
 
 # RX lane swap
 xgxs_rx_lane_map_1=0x1302
-xgxs_rx_lane_map_2=0x1302
-xgxs_rx_lane_map_3=0x0213
-xgxs_rx_lane_map_4=0x1302
-xgxs_rx_lane_map_5=0x0123
-xgxs_rx_lane_map_6=0x1032
-xgxs_rx_lane_map_7=0x0213
-xgxs_rx_lane_map_8=0x2031
+xgxs_rx_lane_map_5=0x1302
+xgxs_rx_lane_map_9=0x0213
+xgxs_rx_lane_map_13=0x1302
+xgxs_rx_lane_map_17=0x0123
+xgxs_rx_lane_map_21=0x1032
+xgxs_rx_lane_map_25=0x0213
+xgxs_rx_lane_map_29=0x2031
  
 # Tile-1  FC8~FC15
 #TX polarity
 phy_xaui_tx_polarity_flip_34=0x0
-phy_xaui_tx_polarity_flip_35=0x1
-phy_xaui_tx_polarity_flip_36=0x0
-phy_xaui_tx_polarity_flip_37=0x1
-phy_xaui_tx_polarity_flip_38=0xF
-phy_xaui_tx_polarity_flip_39=0xE
-phy_xaui_tx_polarity_flip_40=0x0
-phy_xaui_tx_polarity_flip_41=0xE
+phy_xaui_tx_polarity_flip_38=0x1
+phy_xaui_tx_polarity_flip_42=0x0
+phy_xaui_tx_polarity_flip_46=0x1
+phy_xaui_tx_polarity_flip_50=0xF
+phy_xaui_tx_polarity_flip_54=0xE
+phy_xaui_tx_polarity_flip_58=0x0
+phy_xaui_tx_polarity_flip_62=0xE
 
 #RX polarity
 phy_xaui_rx_polarity_flip_34=0x0
-phy_xaui_rx_polarity_flip_35=0x0
-phy_xaui_rx_polarity_flip_36=0x0
-phy_xaui_rx_polarity_flip_37=0x2
-phy_xaui_rx_polarity_flip_38=0xF
-phy_xaui_rx_polarity_flip_39=0xF
-phy_xaui_rx_polarity_flip_40=0x0
-phy_xaui_rx_polarity_flip_41=0xF
+phy_xaui_rx_polarity_flip_38=0x0
+phy_xaui_rx_polarity_flip_42=0x0
+phy_xaui_rx_polarity_flip_46=0x2
+phy_xaui_rx_polarity_flip_50=0xF
+phy_xaui_rx_polarity_flip_54=0xF
+phy_xaui_rx_polarity_flip_58=0x0
+phy_xaui_rx_polarity_flip_62=0xF
 
 # TX lane swap
 xgxs_tx_lane_map_34=0x0213
-xgxs_tx_lane_map_35=0x2031
-xgxs_tx_lane_map_36=0x0123
-xgxs_tx_lane_map_37=0x1032
-xgxs_tx_lane_map_38=0x0213
-xgxs_tx_lane_map_39=0x1302
-xgxs_tx_lane_map_40=0x0213
-xgxs_tx_lane_map_41=0x1302
+xgxs_tx_lane_map_38=0x2031
+xgxs_tx_lane_map_42=0x0123
+xgxs_tx_lane_map_46=0x1032
+xgxs_tx_lane_map_50=0x0213
+xgxs_tx_lane_map_54=0x1302
+xgxs_tx_lane_map_58=0x0213
+xgxs_tx_lane_map_62=0x1302
 
 # RX lane swap
 xgxs_rx_lane_map_34=0x3120
-xgxs_rx_lane_map_35=0x2301
-xgxs_rx_lane_map_36=0x1032
-xgxs_rx_lane_map_37=0x0123
-xgxs_rx_lane_map_38=0x0213
-xgxs_rx_lane_map_39=0x1302
-xgxs_rx_lane_map_40=0x0213
-xgxs_rx_lane_map_41=0x1302
+xgxs_rx_lane_map_38=0x2301
+xgxs_rx_lane_map_42=0x1032
+xgxs_rx_lane_map_46=0x0123
+xgxs_rx_lane_map_50=0x0213
+xgxs_rx_lane_map_54=0x1302
+xgxs_rx_lane_map_58=0x0213
+xgxs_rx_lane_map_62=0x1302
+
 
 # Tile-2  FC16~FC23
 # TX polarity
 phy_xaui_tx_polarity_flip_68=0x0
-phy_xaui_tx_polarity_flip_69=0xE
-phy_xaui_tx_polarity_flip_70=0x0
-phy_xaui_tx_polarity_flip_71=0xE
-phy_xaui_tx_polarity_flip_72=0xF
-phy_xaui_tx_polarity_flip_73=0xE
-phy_xaui_tx_polarity_flip_74=0xF
-phy_xaui_tx_polarity_flip_75=0xE
+phy_xaui_tx_polarity_flip_72=0xE
+phy_xaui_tx_polarity_flip_76=0x0
+phy_xaui_tx_polarity_flip_80=0xE
+phy_xaui_tx_polarity_flip_84=0xF
+phy_xaui_tx_polarity_flip_88=0xE
+phy_xaui_tx_polarity_flip_92=0xF
+phy_xaui_tx_polarity_flip_96=0xE
 
 # RX polarity
 phy_xaui_rx_polarity_flip_68=0x0
-phy_xaui_rx_polarity_flip_69=0xD
-phy_xaui_rx_polarity_flip_70=0x0
-phy_xaui_rx_polarity_flip_71=0xF
-phy_xaui_rx_polarity_flip_72=0xF
-phy_xaui_rx_polarity_flip_73=0xF
-phy_xaui_rx_polarity_flip_74=0xF
-phy_xaui_rx_polarity_flip_75=0xF
+phy_xaui_rx_polarity_flip_72=0xD
+phy_xaui_rx_polarity_flip_76=0x0
+phy_xaui_rx_polarity_flip_80=0xF
+phy_xaui_rx_polarity_flip_84=0xF
+phy_xaui_rx_polarity_flip_88=0xF
+phy_xaui_rx_polarity_flip_92=0xF
+phy_xaui_rx_polarity_flip_96=0xF
 
 # TX lane swap
 xgxs_tx_lane_map_68=0x3120
-xgxs_tx_lane_map_69=0x1302
-xgxs_tx_lane_map_70=0x0213
-xgxs_tx_lane_map_71=0x0123
-xgxs_tx_lane_map_72=0x0213
-xgxs_tx_lane_map_73=0x2031
-xgxs_tx_lane_map_74=0x0213
-xgxs_tx_lane_map_75=0x2031
+xgxs_tx_lane_map_72=0x1302
+xgxs_tx_lane_map_76=0x0213
+xgxs_tx_lane_map_80=0x0123
+xgxs_tx_lane_map_84=0x0213
+xgxs_tx_lane_map_88=0x2031
+xgxs_tx_lane_map_92=0x0213
+xgxs_tx_lane_map_96=0x2031
 
 # RX lane swap
 xgxs_rx_lane_map_68=0x3120
-xgxs_rx_lane_map_69=0x1302
-xgxs_rx_lane_map_70=0x0213
-xgxs_rx_lane_map_71=0x2103
-xgxs_rx_lane_map_72=0x2031
-xgxs_rx_lane_map_73=0x0213
-xgxs_rx_lane_map_74=0x3210
-xgxs_rx_lane_map_75=0x0213
+xgxs_rx_lane_map_72=0x1302
+xgxs_rx_lane_map_76=0x0213
+xgxs_rx_lane_map_80=0x2103
+xgxs_rx_lane_map_84=0x2031
+xgxs_rx_lane_map_88=0x0213
+xgxs_rx_lane_map_92=0x3210
+xgxs_rx_lane_map_96=0x0213
+
 
 # Tile-3
 # portmap_0=x:xx // cpu port (not required, but included for illustration purposes)
 # TX polarity
 phy_xaui_tx_polarity_flip_102=0x0
-phy_xaui_tx_polarity_flip_103=0xF
-phy_xaui_tx_polarity_flip_104=0x0
-phy_xaui_tx_polarity_flip_105=0x0
-phy_xaui_tx_polarity_flip_106=0x0
-phy_xaui_tx_polarity_flip_107=0x0
-phy_xaui_tx_polarity_flip_108=0xF
-phy_xaui_tx_polarity_flip_109=0x0
+phy_xaui_tx_polarity_flip_106=0xF
+phy_xaui_tx_polarity_flip_110=0x0
+phy_xaui_tx_polarity_flip_114=0x0
+phy_xaui_tx_polarity_flip_118=0x0
+phy_xaui_tx_polarity_flip_122=0x0
+phy_xaui_tx_polarity_flip_126=0xF
+phy_xaui_tx_polarity_flip_130=0x0
 
 # RX polarity
 phy_xaui_rx_polarity_flip_102=0x0
-phy_xaui_rx_polarity_flip_103=0x2
-phy_xaui_rx_polarity_flip_104=0x0
-phy_xaui_rx_polarity_flip_105=0xF
-phy_xaui_rx_polarity_flip_106=0x0
-phy_xaui_rx_polarity_flip_107=0x0
-phy_xaui_rx_polarity_flip_108=0xF
-phy_xaui_rx_polarity_flip_109=0x2
+phy_xaui_rx_polarity_flip_106=0x2
+phy_xaui_rx_polarity_flip_110=0x0
+phy_xaui_rx_polarity_flip_114=0xF
+phy_xaui_rx_polarity_flip_118=0x0
+phy_xaui_rx_polarity_flip_122=0x0
+phy_xaui_rx_polarity_flip_126=0xF
+phy_xaui_rx_polarity_flip_130=0x2
 
 # TX lane swap
 xgxs_tx_lane_map_102=0x2031
-xgxs_tx_lane_map_103=0x0213
-xgxs_tx_lane_map_104=0x2031
-xgxs_tx_lane_map_105=0x0213
-xgxs_tx_lane_map_106=0x0123
-xgxs_tx_lane_map_107=0x0213
-xgxs_tx_lane_map_108=0x0312
-xgxs_tx_lane_map_109=0x3120
+xgxs_tx_lane_map_106=0x0213
+xgxs_tx_lane_map_110=0x2031
+xgxs_tx_lane_map_114=0x0213
+xgxs_tx_lane_map_118=0x0123
+xgxs_tx_lane_map_122=0x0213
+xgxs_tx_lane_map_126=0x0312
+xgxs_tx_lane_map_130=0x3120
 
 # RX lane swap
 xgxs_rx_lane_map_102=0x0213
-xgxs_rx_lane_map_103=0x2031
-xgxs_rx_lane_map_104=0x0213
-xgxs_rx_lane_map_105=0x2031
-xgxs_rx_lane_map_106=0x0123
-xgxs_rx_lane_map_107=0x0213
-xgxs_rx_lane_map_108=0x1302
-xgxs_rx_lane_map_109=0x3120
+xgxs_rx_lane_map_106=0x2031
+xgxs_rx_lane_map_110=0x0213
+xgxs_rx_lane_map_114=0x2031
+xgxs_rx_lane_map_118=0x0123
+xgxs_rx_lane_map_122=0x0213
+xgxs_rx_lane_map_126=0x1302
+xgxs_rx_lane_map_130=0x3120
 
 #serdes_preemphasis_lane0_1=0x(post)(main)(pre)
 #ce0
-serdes_preemphasis_lane0_36=0x3c320f
-serdes_preemphasis_lane1_36=0x3c320f
-serdes_preemphasis_lane2_36=0x3c320c
-serdes_preemphasis_lane3_36=0x3c320c
+serdes_preemphasis_lane0_42=0x3c320f
+serdes_preemphasis_lane1_42=0x3c320f
+serdes_preemphasis_lane2_42=0x3c320c
+serdes_preemphasis_lane3_42=0x3c320c
 
 #ce1
-serdes_preemphasis_lane0_37=0x3c320f
-serdes_preemphasis_lane1_37=0x3c320f
-serdes_preemphasis_lane2_37=0x3c320c
-serdes_preemphasis_lane3_37=0x37320c
+serdes_preemphasis_lane0_46=0x3c320f
+serdes_preemphasis_lane1_46=0x3c320f
+serdes_preemphasis_lane2_46=0x3c320c
+serdes_preemphasis_lane3_46=0x37320c
 
 #ce2
-serdes_preemphasis_lane0_38=0x3c3206
-serdes_preemphasis_lane1_38=0x373206
-serdes_preemphasis_lane2_38=0x373206
-serdes_preemphasis_lane3_38=0x373206
+serdes_preemphasis_lane0_50=0x3c3206
+serdes_preemphasis_lane1_50=0x373206
+serdes_preemphasis_lane2_50=0x373206
+serdes_preemphasis_lane3_50=0x373206
 
 #ce3
-serdes_preemphasis_lane0_35=0x3c3206
-serdes_preemphasis_lane1_35=0x3c3206
-serdes_preemphasis_lane2_35=0x3c3206
-serdes_preemphasis_lane3_35=0x3c3206
+serdes_preemphasis_lane0_38=0x3c3206
+serdes_preemphasis_lane1_38=0x3c3206
+serdes_preemphasis_lane2_38=0x3c3206
+serdes_preemphasis_lane3_38=0x3c3206
 
 #ce4
 serdes_preemphasis_lane0_34=0x3c3206
@@ -366,22 +500,22 @@ serdes_preemphasis_lane2_34=0x3c3206
 serdes_preemphasis_lane3_34=0x373206
 
 #ce5
-serdes_preemphasis_lane0_39=0x323206
-serdes_preemphasis_lane1_39=0x323206
-serdes_preemphasis_lane2_39=0x323206
-serdes_preemphasis_lane3_39=0x323206
+serdes_preemphasis_lane0_54=0x323206
+serdes_preemphasis_lane1_54=0x323206
+serdes_preemphasis_lane2_54=0x323206
+serdes_preemphasis_lane3_54=0x323206
 
 #ce6
-serdes_preemphasis_lane0_40=0x323206
-serdes_preemphasis_lane1_40=0x2D3206
-serdes_preemphasis_lane2_40=0x2D3206
-serdes_preemphasis_lane3_40=0x2D3206
+serdes_preemphasis_lane0_58=0x323206
+serdes_preemphasis_lane1_58=0x2D3206
+serdes_preemphasis_lane2_58=0x2D3206
+serdes_preemphasis_lane3_58=0x2D3206
 
 #ce7
-serdes_preemphasis_lane0_41=0x2D3206
-serdes_preemphasis_lane1_41=0x2D3206
-serdes_preemphasis_lane2_41=0x2D3206
-serdes_preemphasis_lane3_41=0x2D3206
+serdes_preemphasis_lane0_62=0x2D3206
+serdes_preemphasis_lane1_62=0x2D3206
+serdes_preemphasis_lane2_62=0x2D3206
+serdes_preemphasis_lane3_62=0x2D3206
 
 #ce8
 serdes_preemphasis_lane0_68=0x283206
@@ -390,46 +524,46 @@ serdes_preemphasis_lane2_68=0x283206
 serdes_preemphasis_lane3_68=0x283206
 
 #ce9
-serdes_preemphasis_lane0_69=0x283206
-serdes_preemphasis_lane1_69=0x283206
-serdes_preemphasis_lane2_69=0x283206
-serdes_preemphasis_lane3_69=0x283206
+serdes_preemphasis_lane0_72=0x283206
+serdes_preemphasis_lane1_72=0x283206
+serdes_preemphasis_lane2_72=0x283206
+serdes_preemphasis_lane3_72=0x283206
 
 #ce10
-serdes_preemphasis_lane0_70=0x2D3206
-serdes_preemphasis_lane1_70=0x2D3206
-serdes_preemphasis_lane2_70=0x2D3206
-serdes_preemphasis_lane3_70=0x2D3206
+serdes_preemphasis_lane0_76=0x2D3206
+serdes_preemphasis_lane1_76=0x2D3206
+serdes_preemphasis_lane2_76=0x2D3206
+serdes_preemphasis_lane3_76=0x2D3206
 
 #ce11
-serdes_preemphasis_lane0_71=0x2D3206
-serdes_preemphasis_lane1_71=0x2D3206
-serdes_preemphasis_lane2_71=0x2D3206
-serdes_preemphasis_lane3_71=0x2D3206
+serdes_preemphasis_lane0_80=0x2D3206
+serdes_preemphasis_lane1_80=0x2D3206
+serdes_preemphasis_lane2_80=0x2D3206
+serdes_preemphasis_lane3_80=0x2D3206
 
 #ce12
-serdes_preemphasis_lane0_72=0x2D3203
-serdes_preemphasis_lane1_72=0x2D3206
-serdes_preemphasis_lane2_72=0x2D3206
-serdes_preemphasis_lane3_73=0x2D3206
+serdes_preemphasis_lane0_84=0x2D3203
+serdes_preemphasis_lane1_84=0x2D3206
+serdes_preemphasis_lane2_84=0x2D3206
+serdes_preemphasis_lane3_84=0x2D3206
 
 #ce13
-serdes_preemphasis_lane0_73=0x2D3206
-serdes_preemphasis_lane1_73=0x283206
-serdes_preemphasis_lane2_73=0x283206
-serdes_preemphasis_lane3_73=0x283206
+serdes_preemphasis_lane0_88=0x2D3206
+serdes_preemphasis_lane1_88=0x283206
+serdes_preemphasis_lane2_88=0x283206
+serdes_preemphasis_lane3_88=0x283206
 
 #ce14
-serdes_preemphasis_lane0_74=0x2D3203
-serdes_preemphasis_lane1_74=0x2D3203
-serdes_preemphasis_lane2_74=0x2D3203
-serdes_preemphasis_lane3_74=0x283206
+serdes_preemphasis_lane0_92=0x2D3203
+serdes_preemphasis_lane1_92=0x2D3203
+serdes_preemphasis_lane2_92=0x2D3203
+serdes_preemphasis_lane3_92=0x283206
 
 #ce15
-serdes_preemphasis_lane0_75=0x2D3206
-serdes_preemphasis_lane1_75=0x283206
-serdes_preemphasis_lane2_75=0x283206
-serdes_preemphasis_lane3_75=0x283206
+serdes_preemphasis_lane0_96=0x2D3206
+serdes_preemphasis_lane1_96=0x283206
+serdes_preemphasis_lane2_96=0x283206
+serdes_preemphasis_lane3_96=0x283206
 
 #ce16
 serdes_preemphasis_lane0_102=0x2D3206
@@ -438,34 +572,34 @@ serdes_preemphasis_lane2_102=0x2D3206
 serdes_preemphasis_lane3_102=0x2D3206
 
 #ce17
-serdes_preemphasis_lane0_103=0x2D3206
-serdes_preemphasis_lane1_103=0x283206
-serdes_preemphasis_lane2_103=0x283206
-serdes_preemphasis_lane3_103=0x283206
-
-#ce18
-serdes_preemphasis_lane0_104=0x2D3206
-serdes_preemphasis_lane1_104=0x283206
-serdes_preemphasis_lane2_104=0x283206
-serdes_preemphasis_lane3_104=0x283206
-
-#ce19
-serdes_preemphasis_lane0_105=0x2D3206
-serdes_preemphasis_lane1_105=0x2D3206
-serdes_preemphasis_lane2_105=0x2D3206
-serdes_preemphasis_lane3_105=0x2D3206
-
-#ce20
-serdes_preemphasis_lane0_108=0x323206
-serdes_preemphasis_lane1_108=0x283206
-serdes_preemphasis_lane2_108=0x283206
-serdes_preemphasis_lane3_108=0x283206
-
-#ce21
 serdes_preemphasis_lane0_106=0x2D3206
 serdes_preemphasis_lane1_106=0x283206
 serdes_preemphasis_lane2_106=0x283206
 serdes_preemphasis_lane3_106=0x283206
+
+#ce18
+serdes_preemphasis_lane0_110=0x2D3206
+serdes_preemphasis_lane1_110=0x283206
+serdes_preemphasis_lane2_110=0x283206
+serdes_preemphasis_lane3_110=0x283206
+
+#ce19
+serdes_preemphasis_lane0_114=0x2D3206
+serdes_preemphasis_lane1_114=0x2D3206
+serdes_preemphasis_lane2_114=0x2D3206
+serdes_preemphasis_lane3_114=0x2D3206
+
+#ce20
+serdes_preemphasis_lane0_126=0x323206
+serdes_preemphasis_lane1_126=0x283206
+serdes_preemphasis_lane2_126=0x283206
+serdes_preemphasis_lane3_126=0x283206
+
+#ce21
+serdes_preemphasis_lane0_118=0x2D3206
+serdes_preemphasis_lane1_118=0x283206
+serdes_preemphasis_lane2_118=0x283206
+serdes_preemphasis_lane3_118=0x283206
 
 #ce22
 serdes_preemphasis_lane0_1=0x323206
@@ -474,58 +608,58 @@ serdes_preemphasis_lane2_1=0x283206
 serdes_preemphasis_lane3_1=0x283206
 
 #ce23
-serdes_preemphasis_lane0_107=0x323206
-serdes_preemphasis_lane1_107=0x283206
-serdes_preemphasis_lane2_107=0x283206
-serdes_preemphasis_lane3_107=0x283206
+serdes_preemphasis_lane0_122=0x323206
+serdes_preemphasis_lane1_122=0x283206
+serdes_preemphasis_lane2_122=0x283206
+serdes_preemphasis_lane3_122=0x283206
 
 #ce24
-serdes_preemphasis_lane0_2=0x2D3206
-serdes_preemphasis_lane1_2=0x2D3206
-serdes_preemphasis_lane2_2=0x323206
-serdes_preemphasis_lane3_3=0x2D3206
+serdes_preemphasis_lane0_5=0x2D3206
+serdes_preemphasis_lane1_5=0x2D3206
+serdes_preemphasis_lane2_5=0x323206
+serdes_preemphasis_lane3_5=0x2D3206
 
 #ce25
-serdes_preemphasis_lane0_109=0x323203
-serdes_preemphasis_lane1_109=0x2D3206
-serdes_preemphasis_lane2_109=0x2D3206
-serdes_preemphasis_lane3_109=0x2D3206
+serdes_preemphasis_lane0_130=0x323203
+serdes_preemphasis_lane1_130=0x2D3206
+serdes_preemphasis_lane2_130=0x2D3206
+serdes_preemphasis_lane3_130=0x2D3206
 
 #ce26
-serdes_preemphasis_lane0_8=0x373206
-serdes_preemphasis_lane1_8=0x373206
-serdes_preemphasis_lane2_8=0x373206
-serdes_preemphasis_lane3_8=0x373206
+serdes_preemphasis_lane0_29=0x373206
+serdes_preemphasis_lane1_29=0x373206
+serdes_preemphasis_lane2_29=0x373206
+serdes_preemphasis_lane3_29=0x373206
 
 #ce27
-serdes_preemphasis_lane0_3=0x323203
-serdes_preemphasis_lane1_3=0x323203
-serdes_preemphasis_lane2_3=0x323203
-serdes_preemphasis_lane3_3=0x323203
+serdes_preemphasis_lane0_9=0x323203
+serdes_preemphasis_lane1_9=0x323203
+serdes_preemphasis_lane2_9=0x323203
+serdes_preemphasis_lane3_9=0x323203
 
 #ce28
-serdes_preemphasis_lane0_4=0x373203
-serdes_preemphasis_lane1_4=0x323203
-serdes_preemphasis_lane2_4=0x323203
-serdes_preemphasis_lane3_4=0x323205
+serdes_preemphasis_lane0_13=0x373203
+serdes_preemphasis_lane1_13=0x323203
+serdes_preemphasis_lane2_13=0x323203
+serdes_preemphasis_lane3_13=0x323205
 
 #ce29
-serdes_preemphasis_lane0_7=0x3c3203
-serdes_preemphasis_lane1_7=0x3c3203
-serdes_preemphasis_lane2_7=0x3c3203
-serdes_preemphasis_lane3_7=0x3c3205
+serdes_preemphasis_lane0_25=0x3c3203
+serdes_preemphasis_lane1_25=0x3c3203
+serdes_preemphasis_lane2_25=0x3c3203
+serdes_preemphasis_lane3_25=0x3c3205
 
 #ce30
-serdes_preemphasis_lane0_5=0x3c320f
-serdes_preemphasis_lane1_5=0x3c320f
-serdes_preemphasis_lane2_5=0x3c320c
-serdes_preemphasis_lane3_5=0x2c320c
+serdes_preemphasis_lane0_17=0x3c320f
+serdes_preemphasis_lane1_17=0x3c320f
+serdes_preemphasis_lane2_17=0x3c320c
+serdes_preemphasis_lane3_17=0x2c320c
 
 #ce31
-serdes_preemphasis_lane0_6=0x3c320f
-serdes_preemphasis_lane1_6=0x3c320f
-serdes_preemphasis_lane2_6=0x2c320c
-serdes_preemphasis_lane3_6=0x2c320c
+serdes_preemphasis_lane0_21=0x3c320f
+serdes_preemphasis_lane1_21=0x3c320f
+serdes_preemphasis_lane2_21=0x2c320c
+serdes_preemphasis_lane3_21=0x2c320c
 
 
 
