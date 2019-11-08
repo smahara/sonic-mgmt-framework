@@ -1,1 +1,0 @@
-SAI_INIT_CONFIG_FILE=/usr/share/sonic/hwsku/th2-z9264f-8x100G-112x25G.config.bcm
