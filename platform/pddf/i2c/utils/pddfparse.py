@@ -5,7 +5,7 @@ import re
 import argparse
 import subprocess
 import glob
-import os, time
+import os, time, unicodedata
 from jsonschema import validate
 
 
@@ -1269,7 +1269,7 @@ class PddfParse():
             #print "led_parse cmd: " + ops['cmd']
             getattr(self, ops['cmd']+"_led_platform_device")("PLATFORM", ops)
             for key in self.data.keys():
-                    if key != 'PLATFORM':
+                    if key != 'PLATFORM' and 'dev_info' in self.data[key]:
                             attr=self.data[key]['dev_info']
                             if attr['device_type'] == 'LED':
                                     getattr(self, ops['cmd']+"_led_device")(key, ops)
@@ -1277,7 +1277,7 @@ class PddfParse():
 
     def get_device_list(self, list, type):
             for key in self.data.keys():
-                    if key != 'PLATFORM':
+                    if key != 'PLATFORM' and 'dev_info' in self.data[key]:
                             attr=self.data[key]['dev_info']
                             if attr['device_type'] == type:
                                     list.append(self.data[key])
@@ -1305,7 +1305,10 @@ class PddfParse():
         self.dev_parse(self.data['SYSTEM'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
         if 'SYSSTATUS' in self.data:
             self.dev_parse(self.data['SYSSTATUS'], { "cmd": "show_attr", "target":"all", "attr":"all" } )
-        return self.data_sysfs_obj[component]
+        if component in self.data_sysfs_obj:
+            return self.data_sysfs_obj[component]
+        else:
+            return None 
 
 
     def validate_pddf_devices(self, *args):
@@ -1316,18 +1319,145 @@ class PddfParse():
         #dev_parse(self.data, self.data[devtype], v_ops )
         self.dev_parse(self.data['SYSTEM'], v_ops )
 
+    #################################################################################################################################
+    #   BMC APIs 
+    #################################################################################################################################
+    def non_raw_ipmi_get_request(self, bmc_attr):
+        value = 'N/A'
+        cmd = bmc_attr['bmc_cmd'] + "| grep " + bmc_attr['field_name'] + " | awk '{print $" + bmc_attr['field_pos'] + " }'"
+        try:
+            value = subprocess.check_output(cmd, shell=True).strip()
+        except IOError:
+            pass
+        
+        if 'mult' in bmc_attr.keys():
+            value = float(value) * float(bmc_attr['mult'])
+    
+        return str(value)
 
+    def raw_ipmi_get_request(self, bmc_attr):
+        value = 'N/A'
+	cmd = bmc_attr['bmc_cmd'] + " 2>/dev/null"
+	if bmc_attr['type'] == 'raw':
+            try:
+                value = subprocess.check_output(cmd, shell=True).strip()
+            except Exception as e:
+                #print "Unable to run the ipmitool raw command: %s"%str(e)
+                pass
 
+            if value != 'N/A':
+                value = str(int(value, 16))
+            return value
 
+	if bmc_attr['type'] == 'mask':
+            mask = int(bmc_attr['mask'].encode('utf-8'), 16)
+            try:
+                value = subprocess.check_output(cmd, shell=True).strip()
+            except Exception as e:
+                #print "Unable to run the ipmitool raw command: %s"%str(e)
+                pass
 
+            if value != 'N/A':
+                value = str(int(value, 16) & mask)
+           
+            return value
 
+	if bmc_attr['type'] == 'ascii':
+            try:
+                value = subprocess.check_output(cmd, shell=True)
+            except Exception as e:
+                #print "Unable to run the ipmitool raw command: %s"%str(e)
+                pass
 
+            if value != 'N/A':
+                #value = value.decode("hex")
+                tmp = ''.join(chr(int(i, 16)) for i in value.split())
+                tmp = "".join(i for i in unicode(tmp) if unicodedata.category(i)[0]!="C")
+                value = str(tmp)
 
+            return (value)
 
+	return value
 
+    def bmc_get_cmd(self, bmc_attr): 
+        if int(bmc_attr['raw']) == 1: 
+            value = self.raw_ipmi_get_request(bmc_attr)
+	else:		
+            value = self.non_raw_ipmi_get_request(bmc_attr)
+	return (value)
 
+    def non_raw_ipmi_set_request(self, bmc_attr, val):
+        value = 'N/A'
+        # TODO: Implement it
+        return value
 
+    def raw_ipmi_set_request(self, bmc_attr, val):
+        value = 'N/A'
+        # TODO: Implement this
+	return value
 
+    def bmc_set_cmd(self, bmc_attr, val): 
+        if int(bmc_attr['raw']) == 1: 
+            value = self.raw_ipmi_set_request(bmc_attr, val)
+	else:		
+            value = self.non_raw_ipmi_set_request(bmc_attr, val)
+	return (value)
+
+    #
+    # bmc-based attr: return attr obj
+    # non-bmc-based attr: return empty obj
+    def check_bmc_based_attr(self, device_name, attr_name):
+        if device_name in self.data.keys():
+            if "bmc" in self.data[device_name].keys() and 'ipmitool' in self.data[device_name]['bmc'].keys():
+                attr_list = self.data[device_name]['bmc']['ipmitool']['attr_list']
+                for attr in attr_list:
+                    if attr['attr_name'].strip() == attr_name.strip():
+                        return attr
+	return {} 
+
+    def get_attr_name_output(self, device_name, attr_name):
+	bmc_attr = self.check_bmc_based_attr(device_name, attr_name)
+        output={"mode":"", "status":""}	
+	   
+        if bmc_attr:
+           output['mode']="bmc"
+           output['status']=self.bmc_get_cmd(bmc_attr)
+        else:
+           output['mode']="i2c"
+           node = self.get_path(device_name, attr_name)
+           if node is None:
+              return {} 
+           try:
+              with open(node, 'r') as f:
+                 output['status'] = f.read()
+           except IOError:
+              return {} 
+        return output
+
+    def set_attr_name_output(self, device_name, attr_name, val):
+	bmc_attr = self.check_bmc_based_attr(device_name, attr_name)
+        output={"mode":"", "status":""}	
+	   
+        if bmc_attr:
+            output['mode']="bmc"
+            #output['status']=self.bmc_set_cmd(bmc_attr, val)
+            output['status']=False  # No set operation allowed for BMC attributes as they are handled by BMC itself
+        else:
+            output['mode']="i2c"
+            node = self.get_path(device_name, attr_name)
+            if node is None:
+                return {} 
+            try:
+                with open(node, 'w') as f:
+                    f.write(str(val))
+            except IOError:
+                return {}
+
+            output['status'] = True
+
+        return output
+
+    #################################################################################################################################
 
 def main():
     parser = argparse.ArgumentParser()
