@@ -35,7 +35,14 @@ if [ "$(id -u)" = "0" ] ; then
 fi
 cd $tmp_dir
 echo -n "Preparing image archive ..."
-sed -e '1,/^exit_marker$/d' $archive_path | tar xf - || exit 1
+# Check if the installer file is a package or binary
+sed -e '1,/^exit_marker$/d' $archive_path | tar tf - | grep -q nos.bin && PKG_FILE=1
+if [ "$PKG_FILE" = "1" ]; then
+    sed -e '1,/^exit_marker$/d' $archive_path | tar xf - installer || exit 1
+    sed -e '1,/^exit_marker$/d' $archive_path | tar --to-stdout -xf - nos.bin | sed -e '1,/^exit_marker$/d' | tar -xf - || exit 1
+else
+    sed -e '1,/^exit_marker$/d' $archive_path | tar xf - || exit 1
+fi
 echo " OK."
 cd $cur_wd
 if [ -n "$extract" ] ; then

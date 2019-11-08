@@ -2,6 +2,7 @@ arl_clean_timeout_usec
 asf_mem_profile
 bcm_linkscan_interval
 bcm_num_cos
+default_cpu_tx_queue
 bcm_stat_flags
 bcm_stat_interval
 bcm_stat_jumbo
@@ -47,6 +48,7 @@ riot_overlay_l3_intf_mem_size
 riot_overlay_l3_egress_mem_size
 l3_ecmp_levels
 riot_overlay_ecmp_resilient_hash_size
+led_fw_path
 lls_num_l2uc
 load_firmware
 logical_ports
@@ -171,6 +173,10 @@ phy_enable
 l2xlrn_thread_interval
 l2xlrn_intr_en
 serdes_lane_config_media_type
+pbmp_valid
+vlan_xlate_mem_entries
+mpls_mem_entries
+egr_vlan_xlate_mem_entries
 sai_preinit_cmd_file
 sai_preinit_warmboot_cmd_file
 sai_postinit_cmd_file

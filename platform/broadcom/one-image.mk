@@ -9,8 +9,10 @@ $(SONIC_ONE_IMAGE)_LAZY_INSTALLS += $(DELL_S6000_PLATFORM_MODULE) \
                                $(DELL_Z9264F_PLATFORM_MODULE) \
                                $(DELL_S5232F_PLATFORM_MODULE) \
                                $(DELL_Z9332F_PLATFORM_MODULE) \
+                               $(DELL_S5248F_PLATFORM_MODULE) \
                                $(DELL_Z9100_PLATFORM_MODULE) \
                                $(DELL_S6100_PLATFORM_MODULE) \
+                               $(DELL_S3000_PLATFORM_MODULE) \
                                $(INGRASYS_S8900_54XC_PLATFORM_MODULE) \
                                $(INGRASYS_S8900_64XC_PLATFORM_MODULE) \
                                $(INGRASYS_S9100_PLATFORM_MODULE) \
@@ -40,7 +42,9 @@ $(SONIC_ONE_IMAGE)_LAZY_INSTALLS += $(DELL_S6000_PLATFORM_MODULE) \
                                $(DELTA_AG5648_PLATFORM_MODULE) \
                                $(DELTA_ET6248BRB_PLATFORM_MODULE) \
                                $(QUANTA_IX1B_32X_PLATFORM_MODULE) \
+                               $(QUANTA_IX4_64X_PLATFORM_MODULE) \
                                $(QUANTA_IX8_56X_PLATFORM_MODULE) \
+                               $(QUANTA_IX9_32X_PLATFORM_MODULE) \
                                $(MITAC_LY1200_32X_PLATFORM_MODULE) \
                                $(ALPHANETWORKS_SNH60A0_320FV2_PLATFORM_MODULE) \
                                $(ALPHANETWORKS_SNH60B0_640F_PLATFORM_MODULE) \

@@ -1,0 +1,2 @@
+PRODUCT_NAME = "Generic"
+NOS_NAME = SONiC-OS

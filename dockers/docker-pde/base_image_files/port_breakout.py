@@ -45,6 +45,13 @@ sonic_platforms = {
             "0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120": [ "4x25", "4x10", "1x100", "1x40" ]
         }
     },
+    "x86_64-quanta_ix4_bwde-r0": {
+        "breakout": {
+            "128,132,136,140,144,148,152,156,192,196,200,204,208,212,216,220": [
+                "4x10", "4x25", "1x100", "1x40"
+            ],
+        }
+    },
     "x86_64-quanta_ix8_rglbmc-r0": {
         "breakout": {
             "48,52,56,60,64,68,72": [ "4x10", "4x25", "1x100", "1x40" ]
@@ -151,6 +158,13 @@ def get_cfg_file(platform, hwsku):
     else:
         cfg_file = "config_db.json"
     return cfg_file
+
+def get_led_file(platform, hwsku):
+    if not SIM_HOST:
+        led_file = get_platform_path() + "/led_proc_init.soc"
+    else:
+        led_file = "led_proc_init.soc"
+    return led_file
 
 def display_files(platform, hwsku):
     print("BCM File:[%s]" % (get_bcm_file(platform, hwsku)))
@@ -804,6 +818,12 @@ def main(argv):
 
     break_a_port(port, opt, platform, hwsku)
 
+    ### disable pre-emphasis workaround in 'led_proc_init.soc'
+    #file = get_led_file(platform, hwsku)
+    #if os.path.exists(file):
+    #    run_command("sed -i 's/^rcload/#rcload/g' " + file)
+
 if __name__ == "__main__":
     main(sys.argv[1:])
+
 

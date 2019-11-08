@@ -13,6 +13,8 @@
 
 SONIC_VERSION=$(sonic-cfggen -y /etc/sonic/sonic_version.yml -v build_version)
 FIRST_BOOT_FILE="/host/image-${SONIC_VERSION}/platform/firsttime"
+SONIC_FIRST_BOOT_SCRIPT="/host/image-${SONIC_VERSION}/first_boot.sh"
+SONIC_BRANDING_FILE="/host/image-${SONIC_VERSION}/sonic_branding.yml"
 
 # In case the unit is migrating from another NOS, save the logs
 log_migration() {
@@ -269,6 +271,10 @@ if [ -f $FIRST_BOOT_FILE ]; then
         dpkg -i /host/image-$SONIC_VERSION/platform/$platform/*.deb
     fi
 
+    if [ -f $SONIC_BRANDING_FILE ]; then
+        cp -f $SONIC_BRANDING_FILE /etc/sonic/sonic_branding.yml
+    fi
+
     # If the unit booted into SONiC from another NOS's grub,
     # we now install a grub for SONiC.
     if [ -n "$onie_platform" ] && [ -n "$migration" ]; then
@@ -349,6 +355,11 @@ if [ -f $FIRST_BOOT_FILE ]; then
 
         # Initialize the SONiC's grub config
         mv /host/grub.cfg /host/grub/grub.cfg
+    fi
+
+    if [ -e $SONIC_FIRST_BOOT_SCRIPT ]; then
+        chmod +x $SONIC_FIRST_BOOT_SCRIPT
+        $SONIC_FIRST_BOOT_SCRIPT
     fi
 
     rm -rf $FIRST_BOOT_FILE

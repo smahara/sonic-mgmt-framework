@@ -9,7 +9,8 @@ SHELL = /bin/bash
 USER = $(shell id -un)
 UID = $(shell id -u)
 GUID = $(shell id -g)
-SONIC_GET_VERSION=$(shell export BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) && export BUILD_NUMBER=$(BUILD_NUMBER) && export BUILD_PRODUCT=$(BUILD_PRODUCT) && . functions.sh && sonic_get_version)
+
+SONIC_GET_VERSION=$(shell export BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) && export BUILD_NUMBER=$(BUILD_NUMBER) && export BUILD_PRODUCT=$(BUILD_PRODUCT) && export BUILD_VERSION=$(BUILD_VERSION)  && . functions.sh && sonic_get_version)
 
 .SECONDEXPANSION:
 
@@ -44,6 +45,9 @@ export BUILD_NUMBER
 export BUILD_TIMESTAMP
 export BUILD_PRODUCT
 export CONFIGURED_PLATFORM
+export BUILD_VERSION
+export NOS_NAME
+export PRODUCT_NAME
 
 SONIC_MAKEFILE_LIST=slave.mk rules/functions
 
@@ -264,7 +268,10 @@ $(info "DPKG_CACHE_PATH"                 : "$(SONIC_DPKG_CACHE_SOURCE)")
 endif
 $(info "BUILD_NUMBER"                    : "$(BUILD_NUMBER)")
 $(info "BUILD_TIMESTAMP"                 : "$(BUILD_TIMESTAMP)")
+$(info "BUILD_VERSION"                   : "$(BUILD_VERSION)")
 $(info "BUILD_PRODUCT"                   : "$(BUILD_PRODUCT)")
+$(info "NOS_NAME"                        : "$(NOS_NAME)")
+$(info "PRODUCT_NAME"                    : "$(PRODUCT_NAME)")
 $(info "BLDENV"                          : "$(BLDENV)")
 $(info "VS_PREPARE_MEM"                  : "$(VS_PREPARE_MEM)")
 $(info "VERSION"                         : "$(SONIC_GET_VERSION)")
@@ -919,6 +926,8 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
 	export swsssdk_py2_wheel_path="$(addprefix $(PYTHON_WHEELS_PATH)/,$(SWSSSDK_PY2))"
 	export platform_common_py2_wheel_path="$(addprefix $(PYTHON_WHEELS_PATH)/,$(SONIC_PLATFORM_COMMON_PY2))"
 	export redis_dump_load_py2_wheel_path="$(addprefix $(PYTHON_WHEELS_PATH)/,$(REDIS_DUMP_LOAD_PY2))"
+	export nos_name="$(NOS_NAME)"
+	export product_name="$(PRODUCT_NAME)"
 
 	$(foreach docker, $($*_DOCKERS),\
 		export docker_image="$(docker)"

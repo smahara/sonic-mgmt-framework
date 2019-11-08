@@ -30,6 +30,7 @@ debs/{{ deb }}{{' '}}
 COPY ["start.sh", "/usr/bin/"]
 COPY ["files/tsmgrd", "/usr/bin/"]
 COPY ["files/dropmgrd", "/usr/bin/"]
+COPY ["files/ifamgrd", "/usr/bin/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 
 ENTRYPOINT ["/usr/bin/supervisord"]
