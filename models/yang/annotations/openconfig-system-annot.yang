@@ -208,5 +208,253 @@ module openconfig-system-annot {
 
 /*********************************************************/
 
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:config {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:state {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:config {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:config/oc-sys:authentication-method {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:state {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:state/oc-sys:authentication-method {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users {
+      deviate add {
+        sonic-ext:db-name "USER_DB";
+        sonic-ext:table-name "USER_TABLE";
+        sonic-ext:key-delim "|";
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:state {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:state/oc-sys:username {
+      deviate add {
+        sonic-ext:field-name "user";
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:state/oc-sys:password {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:state/oc-sys:password-hashed {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:state/oc-sys:ssh-key {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:state/oc-sys:role {
+      deviate add {
+        sonic-ext:field-name "role";
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:username {
+      deviate add {
+        sonic-ext:field-name "user";
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:config {
+      deviate add {
+        sonic-ext:field-name "user";
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:config/oc-sys:password {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:config/oc-sys:password-hashed {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:config/oc-sys:ssh-key {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:config/oc-sys:role {
+      deviate add {
+        sonic-ext:field-name "role";
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:config/oc-sys:username {
+      deviate add {
+        sonic-ext:field-name "user";
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:events {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:events/oc-sys:event {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:events/oc-sys:event/oc-sys:state {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:events/oc-sys:event/oc-sys:state/oc-sys:event-type {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:events/oc-sys:event/oc-sys:event-type {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:events/oc-sys:event/oc-sys:config {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:events/oc-sys:event/oc-sys:config/oc-sys:event-type {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:config {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:config/oc-sys:authorization-method {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:state {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:authorization/oc-sys:state/oc-sys:authorization-method {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:config {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:config/oc-sys:accounting-method {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:state {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:state/oc-sys:accounting-method {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:events {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:events/oc-sys:event {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:events/oc-sys:event/oc-sys:state {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:events/oc-sys:event/oc-sys:state/oc-sys:record {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:events/oc-sys:event/oc-sys:state/oc-sys:event-type {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:events/oc-sys:event/oc-sys:event-type {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:events/oc-sys:event/oc-sys:config {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:events/oc-sys:event/oc-sys:config/oc-sys:event-type {
+      deviate add {
+      }
+    }
+
+    deviation /oc-sys:system/oc-sys:aaa/oc-sys:accounting/oc-sys:events/oc-sys:event/oc-sys:config/oc-sys:record {
+      deviate add {
+      }
+    }
 
 }
