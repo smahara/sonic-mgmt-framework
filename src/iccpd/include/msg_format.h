@@ -484,12 +484,22 @@ typedef enum mclag_sub_option_type_e_
 } mclag_sub_option_type_e;
 
 enum MCLAG_DOMAIN_CFG_OP_TYPE {
-    MCLAG_CFG_OPER_ADD        = 1,     //Add 
-    MCLAG_CFG_OPER_DEL        = 2,     //Delete
-    MCLAG_CFG_KEEPALIVE_TIME  = 3,     //configure Keepalive timer value
-    MCLAG_CFG_SESSION_TIMEOUT = 4      //configure Session Timeout value
+    MCLAG_CFG_OPER_NONE       = 0,  //NOP
+    MCLAG_CFG_OPER_ADD        = 1,  //Add domain
+    MCLAG_CFG_OPER_DEL        = 2,  //Delete domain
+    MCLAG_CFG_OPER_UPDATE     = 3,   //update domain
+    MCLAG_CFG_OPER_ATTR_DEL   = 4   //Attribute del 
 };
 
+
+enum MCLAG_DOMAIN_CFG_ATTR_BMAP_FLAGS {
+    MCLAG_CFG_ATTR_NONE                  = 0x0,  
+    MCLAG_CFG_ATTR_SRC_ADDR              = 0x1,  
+    MCLAG_CFG_ATTR_PEER_ADDR             = 0x2,  
+    MCLAG_CFG_ATTR_PEER_LINK             = 0x4,   
+    MCLAG_CFG_ATTR_KEEPALIVE_INTERVAL    = 0x8,   
+    MCLAG_CFG_ATTR_SESSION_TIMEOUT       = 0x10   
+};
 
 struct IccpSyncdHDr
 {
@@ -532,7 +542,7 @@ struct mclag_l2mc_info
 
 struct mclag_domain_cfg_info
 {
-    int op_type; /*add/del mclag domain */
+    int op_type;/*add/del domain; add/del mclag domain */
     int domain_id;
     int keepalive_time;
     int session_timeout;
@@ -540,6 +550,7 @@ struct mclag_domain_cfg_info
     char peer_ip[INET_ADDRSTRLEN];
     char peer_ifname[MAX_L_PORT_NAME];
     uint8_t  system_mac[ETHER_ADDR_LEN];
+    int attr_bmap;
 };
 
 struct mclag_iface_cfg_info
