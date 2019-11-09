@@ -66,8 +66,8 @@ class BGPPeerGroup:
 class SubscriberActionList(list):
     def __init__(self):
         super(SubscriberActionList, self).__init__()
-    def append(self, db_id, op, table, key, data):
-        super(SubscriberActionList, self).append((db_id, op, table, key, data))
+    def append(self, db_id, op, table_id, key, data):
+        super(SubscriberActionList, self).append((db_id, op, table_id, key, data))
     def cmp_obj(self, o1, o2):
         if o1[0] != o2[0]:
             return cmp(o1[0], o2[0])
@@ -78,27 +78,10 @@ class SubscriberActionList(list):
             else:
                 return 1
         op = o1[1]
-        table1 = o1[2]
-        table2 = o2[2]
-        is_table_front = lambda t1, t2: ((t2 != 'BGP_NEIGHBOR' and t2 != 'BGP_PEER_GROUP') or
-                                         (op == swsscommon.DEL_COMMAND and t1 == 'BGP_NEIGHBOR') or
-                                         (op == swsscommon.SET_COMMAND and t1 == 'BGP_PEER_GROUP'))
-        if table1 != table2:
-            if table1 == 'DEVICE_METADATA' or table2 == 'DEVICE_METADATA':
-                return (-1 if table1 == 'DEVICE_METADATA' else 1)
-            elif table1 == 'BGP_GLOBALS' or table2 == 'BGP_GLOBALS':
-                return (-1 if table1 == 'BGP_GLOBALS' else 1)
-            elif table1 == 'ROUTE_MAP' or table2 == 'ROUTE_MAP':
-                return (-1 if table1 == 'ROUTE_MAP' else 1)
-            elif table1 == 'BGP_NEIGHBOR' or table1 == 'BGP_PEER_GROUP':
-                return (-1 if is_table_front(table1, table2) else 1)
-            elif table2 == 'BGP_NEIGHBOR' or table2 == 'BGP_PEER_GROUP':
-                return (1 if is_table_front(table2, table1) else -1)
-            else:
-                return cmp(table1, table2)
+        if o1[2] != o2[2]:
+            return (cmp(o1[2], o2[2]) if op == swsscommon.SET_COMMAND else cmp(o2[2], o1[2]))
         else:
             return cmp(o1[3].split('|'), o2[3].split('|'))
-        return ret_val
     def sort(self):
         super(SubscriberActionList, self).sort(cmp = self.cmp_obj)
 
@@ -107,6 +90,7 @@ class BGPKeyMapInfo:
         self.run_cmd = cmd_str
         self.bool_values = bool_vals
     def get_command(self, op, *vals):
+        chk_val = None
         if op == CachedDataWithOp.OP_DELETE:
             if self.bool_values is not None and len(self.bool_values) >= 3:
                 # set to default if given
@@ -120,14 +104,23 @@ class BGPKeyMapInfo:
                     syslog.syslog(syslog.LOG_ERR, 'No input token for running cmd: %s' % self.run_cmd)
                     return None
                 chk_val = vals[-1]
-                if chk_val == self.bool_values[0]:
-                    cmd_enable = True
-                elif chk_val == self.bool_values[1]:
+                if type(chk_val) is dict:
                     cmd_enable = False
+                    for _, v in chk_val.items():
+                        if not v[1]:
+                            continue
+                        if v[0] == self.bool_values[0]:
+                            cmd_enable = True
+                            break
                 else:
-                    syslog.syslog(syslog.LOG_ERR, 'Input token %s is neither %s or %s for cmd: %s' %
+                    if chk_val == self.bool_values[0]:
+                        cmd_enable = True
+                    elif chk_val == self.bool_values[1]:
+                        cmd_enable = False
+                    else:
+                        syslog.syslog(syslog.LOG_ERR, 'Input token %s is neither %s or %s for cmd: %s' %
                                                   (chk_val, self.bool_values[0], self.bool_values[1], self.run_cmd))
-                    return None
+                        return None
         cmd_args = [CommandArgument(cmd_enable, v) for v in vals]
         return self.run_cmd.format(*cmd_args, no = CommandArgument(cmd_enable))
     def __str__(self):
@@ -162,52 +155,140 @@ class BGPKeyMapList(list):
             if table_key is not None and fld_key is not None and table_key != fld_key:
                 continue
             super(BGPKeyMapList, self).append((db_field, BGPKeyMapInfo(cmd_str, bool_vals)))
+    @staticmethod
+    def get_cmd_data(key_list, data, chg_list, no_chg_list, merge_data):
+        if merge_data:
+            cmd_data = {}
+            for idx in chg_list:
+                key = key_list[idx]
+                cmd_data[idx] = (data[key].data, True)
+            for idx in no_chg_list:
+                key = key_list[idx]
+                cmd_data[idx] = (data[key].data, False)
+            return (cmd_data,)
+        else:
+            cmd_data = []
+            for idx in range(len(key_list)):
+                if idx in chg_list or idx in no_chg_list:
+                    cmd_data.append(data[key_list[idx]].data)
+                else:
+                    cmd_data.append('')
+            return tuple(cmd_data)
     def run_command(self, data, prefix_list, *upper_vals):
         for db_field, key_map in self:
-            if type(db_field) is not list:
+            merge_vals = False
+            if type(db_field) is not list and type(db_field) is not tuple:
                 db_field = [db_field]
-            run_cmd = False
+            elif type(db_field) is tuple:
+                db_field = list(db_field)
+                merge_vals = True
             op = None
+            upd_id_list = set()
+            del_id_list = set()
+            no_chg_id_list = set()
+            run_cmd = True
+            idx = 0
+            key_list = []
             for dkey in db_field:
-                if dkey not in data:
-                    syslog.syslog(syslog.LOG_DEBUG, 'key %s is not in data, bypass command' % dkey)
+                optional = False
+                if len(dkey) > 0 and dkey[0] == '+':
+                    dkey = dkey[1:]
+                    optional = True
+                if not optional and dkey not in data:
                     run_cmd = False
                     break
-                dval = data[dkey]
-                if not isinstance(dval, CachedDataWithOp):
-                    syslog.syslog(syslog.LOG_ERR, 'invalid vaule type of key %s' % dkey)
-                    run_cmd = False
-                    break
-                if dval.op != CachedDataWithOp.OP_NONE:
-                    run_cmd = True
-                    if op is None or dval.op == CachedDataWithOp.OP_DELETE:
-                        op = dval.op
+                if dkey in data and isinstance(data[dkey], CachedDataWithOp):
+                    dval = data[dkey]
+                    if dval.op == CachedDataWithOp.OP_NONE:
+                        no_chg_id_list.add(idx)
+                    elif dval.op == CachedDataWithOp.OP_ADD or dval.op == CachedDataWithOp.OP_UPDATE:
+                        upd_id_list.add(idx)
+                    elif dval.op == CachedDataWithOp.OP_DELETE:
+                        del_id_list.add(idx)
+                key_list.append(dkey)
+                idx += 1
             if not run_cmd:
-                syslog.syslog(syslog.LOG_DEBUG, 'ignore command running for db_field %s' % db_field)
                 continue
+            cmd_list = []
+            if len(upd_id_list) > 0:
+                data_val = self.get_cmd_data(key_list, data, upd_id_list, no_chg_id_list, merge_vals)
+                cmd = key_map.get_command(CachedDataWithOp.OP_UPDATE, *(upper_vals + data_val))
+                if cmd is not None:
+                    cmd_list.append(cmd)
+            if len(del_id_list) > 0:
+                data_val = self.get_cmd_data(key_list, data, del_id_list, no_chg_id_list, merge_vals)
+                cmd = key_map.get_command(CachedDataWithOp.OP_DELETE, *(upper_vals + data_val))
+                if cmd is not None:
+                    cmd_list.append(cmd)
             cmd_prefix = 'vtysh '
             for pfx in prefix_list:
                 cmd_prefix += "-c '%s' " % pfx
-            cmd = key_map.get_command(op, *(upper_vals + tuple([data[dkey].data for dkey in db_field])))
-            if cmd is None:
-                return False
-            if not run_command(cmd_prefix + "-c '%s'" % cmd):
-                syslog.syslog(syslog.LOG_ERR, 'failed running FRR command: %s' % cmd)
-                return False
-            for dkey in db_field:
-                data[dkey].status = CachedDataWithOp.STAT_SUCC
+            for cmd in cmd_list:
+                if not run_command(cmd_prefix + "-c '%s'" % cmd):
+                    syslog.syslog(syslog.LOG_ERR, 'failed running FRR command: %s' % cmd)
+                    return False
+            for dkey in key_list:
+                if dkey in data:
+                    data[dkey].status = CachedDataWithOp.STAT_SUCC
         return True
 
 class CommandArgument(object):
     def __init__(self, enabled, val = None):
         self.enabled = enabled
         self.value = val
+    def to_str(self):
+        if type(self.value) is list or type(self.value) is tuple:
+            return ' '.join([v for v in self.value])
+        elif type(self.value) is dict:
+            id_list = self.value.keys()
+            id_list.sort()
+            return ' '.join([self.value[i][0] for i in id_list])
+        else:
+            return str(self.value)
+    @staticmethod
+    def parse_ext_community(com_str):
+        if com_str.startswith('route-target:'):
+            return 'rt %s' % com_str[len('route-target:'):]
+        elif com_str.startswith('route-origin:'):
+            return 'soo %s' % com_str[len('route-origin:'):]
+        return None
     def __format__(self, format):
         if format == 'no-prefix':
             return 'no ' if not self.enabled else ''
         elif format == 'enable-only' and not enabled:
             return ''
-        return str(self.value)
+        elif format == 'com-list':
+            return ' '.join(self.to_str(self.value).split(','))
+        elif format == 'com-ref':
+            # get communities from existing community-set
+            pass
+        elif format == 'ext-com-list':
+            com_list = []
+            for comm in self.to_str(self.value).split(','):
+                frr_comm = self.parse_ext_community(comm)
+                if frr_comm is not None:
+                    com_list.append(frr_comm)
+            return ' '.join(com_list)
+        elif format == 'ext-com-ref':
+            # get communities from existing extcommunity-set
+            pass
+        elif format == 'repeat' and type(self.value) is dict:
+            if 1 in self.value:
+                rep_cnt = int(self.value[1][0])
+            else:
+                rep_cnt = 1
+            if 0 in self.value:
+                return ' '.join([self.value[0][0]] * rep_cnt)
+        elif format == 'unchg-attr' and type(self.value) is dict:
+            attr_tags = ['as-path', 'med', 'next-hop']
+            attr_list = []
+            for idx in self.value:
+                if not self.value[idx][1] or idx >= len(attr_tags):
+                    continue
+                if self.value[idx][0] == 'true':
+                    attr_list.append(attr_tags[idx])
+            return ' '.join(attr_list)
+        return self.to_str()
 
 class BGPConfigManager(object):
     DEFAULT_VRF = 'default'
@@ -220,68 +301,109 @@ class BGPConfigManager(object):
                       ('ignore_as_path_length',                         '{no:no-prefix}bgp bestpath as-path ignore', ['true', 'false']),
                       ('graceful_restart_enable',                       '{no:no-prefix}bgp graceful-restart', ['true', 'false']),
                       ('gr_restart_time',                               '{no:no-prefix}bgp graceful-restart restart-time {}'),
-                      ('gr_stale_routes_time',                          '{no:no-prefix}bgp graceful-restart stalepath-time {}'),
-                      (['ebgp_route_distance', 'ibgp_route_distance'],  '{{no:no-prefix}}distance bgp {{}} {{}} {}'.format(LOCAL_ROUTE_DISTANCE))
+                      ('gr_stale_routes_time',                          '{no:no-prefix}bgp graceful-restart stalepath-time {}')
     ]
 
-    nbr_key_map = [('peer_asn',                             '{no:no-prefix}neighbor {} remote-as {}'),
+    global_af_key_map = [(['ebgp_route_distance',
+                           'ibgp_route_distance'],          '{{no:no-prefix}}distance bgp {{}} {{}} {}'.format(LOCAL_ROUTE_DISTANCE))
+    ]
+
+    cmn_key_map = [('peer_asn',                             '{no:no-prefix}neighbor {} remote-as {}'),
                    ('peer_type',                            '{no:no-prefix}neighbor {} remote-as {}'),
-                   ('peer_group_name',                      '{no:no-prefix}neighbor {} peer-group {}'),
                    ('local_asn',                            '{no:no-prefix}neighbor {} local-as {}'),
                    ('local_address',                        '{no:no-prefix}neighbor {} update-source {}'),
-                   ('enabled',                              '{no:no-prefix}neighbor {} shutdown', ['false', 'true']),
                    ('description',                          '{no:no-prefix}neighbor {} description {}'),
                    ('ebgp_multihop',                        '{no:no-prefix}neighbor {} ebgp-multihop', ['true', 'false']),
                    ('ebgp_multihop_ttl',                    '{no:no-prefix}neighbor {} ebgp-multihop {}'),
                    ('auth_password',                        '{no:no-prefix}neighbor {} password {}'),
                    (['keepalive_interval', 'hold_time'],    '{no:no-prefix}neighbor {} timers {} {}'),
                    ('conn_retry',                           '{no:no-prefix}neighbor {} timers connect {}'),
-                   ('min_adv_intfvl',                       '{no:no-prefix}neighbor {} advertisement-interval {}'),
+                   ('min_adv_interval',                     '{no:no-prefix}neighbor {} advertisement-interval {}'),
                    ('passive_mode',                         '{no:no-prefix}neighbor {} passive', ['true', 'false']),
+                   ('capability_ext_nexthop',               '{no:no-prefix}neighbor {} capability extended-nexthop', ['true', 'false']),
+                   ('diable_ebgp_connected_route_check',    '{no:no-prefix}neighbor {} disable-connected-check', ['true', 'false']),
+                   ('enforce_first_as',                     '{no:no-prefix}neighbor {} enforce-first-as', ['true', 'false']),
+                   ('solo_peer',                            '{no:no-prefix}neighbor {} solo', ['true', 'false']),
+                   ('ttl_security_hops',                    '{no:no-prefix}neighbor {} ttl-security hops {}')
     ]
 
-    nbr_af_key_map = [('allow_asin',                                '{no:no-prefix}neighbor {} allowas-in {}'),
-                      ('enabled|ipv4',                              '{no:no-prefix}neighbor {} activate', ['true', 'false', True]),
-                      ('enabled|ipv6',                              '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
-                      ('send_dflt_route',                           '{no:no-prefix}neighbor {} default-originate', ['true', 'false']),
-                      ('max_pfx_limit',                             '{no:no-prefix}neighbor {} maximum-prefix {}'),
-                      (['max_pfx_limit', 'max_pfx_warn_only'],      '{no:no-prefix}neighbor {} maximum-prefix {} warning-only', ['true', 'false']),
-                      (['max_pfx_limit', 'max_pfx_warn_thrshld'],   '{no:no-prefix}neighbor {} maximum-prefix {} {}'),
-                      (['max_pfx_limit', 'max_pfx_restart_timer'],  '{no:no-prefix}neighbor {} maximum-prefix {} restart {}'),
-                      (['route_name', 'direction'],                 '{no:no-prefix}neighbor {} route-map {} {}'),
-                      ('route_map_in',                              '{no:no-prefix}neighbor {} route-map {} in'),
-                      ('route_map_out',                             '{no:no-prefix}neighbor {} route-map {} out'),
+    nbr_key_map = [('peer_group_name',  '{no:no-prefix}neighbor {} peer-group {}'),
+                   ('enabled',          '{no:no-prefix}neighbor {} shutdown', ['false', 'true'])
     ]
 
-    route_map_key_map = [('match_interface',            '{no:no-prefix}match interface {}'),
-                         ('match_prefix_set',           '{no:no-prefix}match '),
-                         ('match_address_family',       '{no:no-prefix}match '),
-                         ('match_med',                  '{no:no-prefix}match metric {}'),
-                         ('match_origin',               '{no:no-prefix}match origin {}'),
-                         ('match_local_pref',           '{no:no-prefix}match '),
-                         ('match_route_type',           '{no:no-prefix}match '),
-                         ('match_community',            '{no:no-prefix}match community {}'),
-                         ('match_ext_community',        '{no:no-prefix}match extcommunity {}'),
-                         ('match_as_path',              '{no:no-prefix}match as-path'),
-                         ('call_route_map',             '{no:no-prefix}call {:enable-only}'),
-                         ('set_origin',                 '{no:no-prefix}set origin {}'),
-                         ('set_local_pref',             '{no:no-prefix}set '),
-                         ('set_next_hop',               '{no:no-prefix}set '),
-                         ('set_med',                    '{no:no-prefix}set metric {}'),
-                         ('set_repeat_asn',             '{no:no-prefix}set '),
-                         ('set_asn',                    '{no:no-prefix}set '),
-                         ('set_community_inline',       '{no:no-prefix}set '),
-                         ('set_community_ref',          '{no:no-prefix}set '),
-                         ('set_ext_community_inline',   '{no:no-prefix}set '),
-                         ('set_ext_community_ref',      '{no:no-prefix}set ')
+    nbr_af_key_map = [('allow_as_in',                                       '{no:no-prefix}neighbor {} allowas-in', ['true', 'false']),
+                      ('allow_as_count',                                    '{no:no-prefix}neighbor {} allowas-in {}'),
+                      ('allow_as_origin',                                   '{no:no-prefix}neighbor {} allowas-in origin', ['true', 'false']),
+                      ('enabled|ipv4',                                      '{no:no-prefix}neighbor {} activate', ['true', 'false', True]),
+                      ('enabled|ipv6',                                      '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
+                      ('send_default_route',                                '{no:no-prefix}neighbor {} default-originate', ['true', 'false']),
+                      ('default_rmap',                                      '{no:no-prefix}neighbor {} default-originate route-map {}'),
+                      ('max_prefix_limit',                                  '{no:no-prefix}neighbor {} maximum-prefix {}'),
+                      (['max_prefix_limit', 'max_prefix_warning_only'],     '{no:no-prefix}neighbor {} maximum-prefix {} warning-only', ['true', 'false']),
+                      (['max_prefix_limit', 'max_prefix_warning_threshold'],'{no:no-prefix}neighbor {} maximum-prefix {} {}'),
+                      (['max_prefix_limit', 'max_prefix_restart_timer'],    '{no:no-prefix}neighbor {} maximum-prefix {} restart {}'),
+                      ('route_map_in',                                      '{no:no-prefix}neighbor {} route-map {} in'),
+                      ('route_map_out',                                     '{no:no-prefix}neighbor {} route-map {} out'),
+                      ('soft_reconfiguration_in',                           '{no:no-prefix}neighbor {} soft-reconfiguration inbound', ['true', 'false']),
+                      ('unsuppress_map_name',                               '{no:no-prefix}neighbor {} unsuppress-map {}'),
+                      ('route_reflector_client',                            '{no:no-prefix}neighbor {} route-reflector-client', ['true', 'false']),
+                      ('weight',                                            '{no:no-prefix}neighbor {} weight {}'),
+                      ('as_override',                                       '{no:no-prefix}neighbor {} as-override', ['true', 'false']),
+                      ('send_community',                                    '{no:no-prefix}neighbor {} send-community {}'),
+                      ('add_path_tx_all',                                   '{no:no-prefix}neighbor {} addpath-tx-all-paths', ['true', 'false']),
+                      ('add_path_tx_bestpath',                              '{no:no-prefix}neighbor {} addpath-tx-bestpath-per-AS', ['true', 'false']),
+                      (('+unchanged_as_path',
+                        '+unchanged_med', '+unchanged_next_hop'),           '{no:no-prefix}neighbor {} attribute-unchanged {:unchg-attr}', ['true', 'false']),
+                      (['filter_list_name', 'filter_list_direction'],       '{no:no-prefix}neighbor {} filter-list {} {}'),
+                      ('nexthop_self_enabled',                              '{no:no-prefix}neighbor {} next-hop-self', ['true', 'false']),
+                      ('nexthop_self_force',                                '{no:no-prefix}neighbor {} next-hop-self force', ['true', 'false']),
+                      (['prefix_list_name', 'prefix_list_direction'],       '{no:no-prefix}neighbor {} prefix-list {} {}'),
+                      ('remove_private_as_enabled',                          '{no:no-prefix}neighbor {} remove-private-AS', ['true', 'false']),
+                      ('replace_private_as',                                '{no:no-prefix}neighbor {} remove-private-AS replace-AS', ['true', 'false'])
     ]
+
+    route_map_key_map = [('match_interface',                '{no:no-prefix}match interface {}'),
+                         (['match_address_family',
+                           'match_prefix_set'],             '{no:no-prefix}match {} address prefix-list {}'),
+                         ('match_med',                      '{no:no-prefix}match metric {}'),
+                         ('match_origin',                   '{no:no-prefix}match origin {}'),
+                         ('match_local_pref',               '{no:no-prefix}match local-preference {}'),
+                         ('match_route_type',               '{no:no-prefix}match source-protocol {}'),
+                         ('match_community',                '{no:no-prefix}match community {}'),
+                         ('match_ext_community',            '{no:no-prefix}match extcommunity {}'),
+                         ('match_as_path',                  '{no:no-prefix}match as-path {}'),
+                         ('call_route_map',                 '{no:no-prefix}call {:enable-only}'),
+                         ('set_origin',                     '{no:no-prefix}set origin {}'),
+                         ('set_local_pref',                 '{no:no-prefix}set local-perference {}'),
+                         ('set_next_hop',                   '{no:no-prefix}set ip next-hop {}'),
+                         ('set_med',                        '{no:no-prefix}set metric {}'),
+                         ('set_asn',                        '{no:no-prefix}set as-path prepend {}'),
+                         (('set_asn', 'set-repeat-asn'),    '{no:no-prefix}set as-path prepend {:repeat}'),
+                         ('set_community_inline',           '{no:no-prefix}set community {:com-list}'),
+                         ('set_community_ref',              '{no:no-prefix}set community {:com-ref}'),
+                         ('set_ext_community_inline',       '{no:no-prefix}set extcommunity {:ext-com-list}'),
+                         ('set_ext_community_ref',          '{no:no-prefix}set extcommunity {:ext-com-ref}')
+    ]
+
+    comm_list_key_map = [(['type', 'community_member'], '{no:no-prefix}bgp community-list {1} {0} permit {2:com-list}')]
+    ext_comm_list_key_map = [(['type', 'community_member'], '{no:no-prefix}bgp community-list {1} {0} permit {2:ext-com-list}')]
+
+    as_path_key_map = [('as_path_member', '{no:no-prefix}bgp as-path access-list {} permit {:as-list}')]
+
+    prefix_key_map = [('masklength_range', '{no:no-prefix}{} prefix-list {} permit {} {:msklen-range}')]
 
     tbl_to_key_map = {'BGP_GLOBALS':        global_key_map,
-                      'BGP_NEIGHBOR':       nbr_key_map,
-                      'BGP_PEER_GROUP':     nbr_key_map[0:1] + nbr_key_map[2:],
+                      'BGP_GLOBALS_AF':     global_af_key_map,
+                      'BGP_NEIGHBOR':       cmn_key_map[0:2] + nbr_key_map + cmn_key_map[2:],
+                      'BGP_PEER_GROUP':     cmn_key_map,
                       'BGP_NEIGHBOR_AF':    nbr_af_key_map,
                       'BGP_PEER_GROUP_AF':  nbr_af_key_map,
-                      'ROUTE_MAP':          route_map_key_map}
+                      'ROUTE_MAP':          route_map_key_map,
+                      'COMMUNITY_SET':      comm_list_key_map,
+                      'EXTCOMMUNITY_SET':   ext_comm_list_key_map,
+                      'ASPATH_SET':         as_path_key_map,
+                      'PREFIX':             prefix_key_map
+    }
 
     def __init__(self, daemon):
         self.daemon = daemon
@@ -289,15 +411,24 @@ class BGPConfigManager(object):
         self.bgp_asn = {}
         # VRF ==> grp_name ==> peer_group
         self.bgp_peer_group = {}
+        # map_name ==> seq_no ==> operation
+        self.route_map = {}
+
         self.bgp_message = Queue.Queue(0)
         self.table_data_cache = {}
         daemon.add_manager(swsscommon.CONFIG_DB, swsscommon.CFG_DEVICE_METADATA_TABLE_NAME, self.__metadata_handler)
-        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_GLOBALS', self.__bgp_globals_handler)
-        daemon.add_manager(swsscommon.CONFIG_DB, swsscommon.CFG_BGP_NEIGHBOR_TABLE_NAME, self.__bgp_neighbor_handler)
-        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_NEIGHBOR_AF', self.__bgp_neighbor_af_handler)
-        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_PEER_GROUP', self.__bgp_neighbor_handler)
-        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_PEER_GROUP_AF', self.__bgp_neighbor_af_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_GLOBALS', self.__bgp_table_handler_common)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_GLOBALS_AF', self.__bgp_af_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'ASPATH_SET', self.__bgp_table_handler_common)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'PREFIX_SET', self.__bgp_table_handler_common)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'PREFIX', self.__bgp_table_handler_common)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'COMMUNITY_SET', self.__bgp_table_handler_common)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'EXTCOMMUNITY_SET', self.__bgp_table_handler_common)
         daemon.add_manager(swsscommon.CONFIG_DB, 'ROUTE_MAP', self.__route_map_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_PEER_GROUP', self.__bgp_neighbor_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, swsscommon.CFG_BGP_NEIGHBOR_TABLE_NAME, self.__bgp_neighbor_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_PEER_GROUP_AF', self.__bgp_neighbor_af_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_NEIGHBOR_AF', self.__bgp_neighbor_af_handler)
 
     def __metadata_handler(self, key, op, table, data):
         if key != "localhost" \
@@ -355,20 +486,30 @@ class BGPConfigManager(object):
             dval.status = CachedDataWithOp.STAT_SUCC
             dval.op = CachedDataWithOp.OP_DELETE
 
+    def __delete_route_map(self, map_name, seq_no):
+        if map_name in self.route_map and seq_no in self.route_map[map_name]:
+            del(self.route_map[map_name][seq_no])
+        for dkey, dval in data.items():
+            # force delete all neighbor attributes in cache
+            dval.status = CachedDataWithOp.STAT_SUCC
+            dval.op = CachedDataWithOp.OP_DELETE
+
     def __update_bgp(self):
         while not self.bgp_message.empty():
             key, op, table, data = self.bgp_message.get()
             key_list = key.split('|', 1)
-            vrf = key_list[0]
             if len(key_list) > 1:
                 key = key_list[1]
             else:
                 key = None
-            syslog.syslog(syslog.LOG_INFO, 'value for table {} vrf {} key {} changed to {}'.format(table, vrf, key, data))
-            if vrf not in self.bgp_asn and (table != 'BGP_GLOBALS' or 'local_asn' not in data):
-                syslog.syslog(syslog.LOG_DEBUG, 'ignore table {} update because local_asn for VRF {} was not configured'.\
-                        format(table, vrf))
-                continue
+            prefix = key_list[0]
+            syslog.syslog(syslog.LOG_INFO, 'value for table {} prefix {} key {} changed to {}'.format(table, prefix, key, data))
+            if table != 'ROUTE_MAP':
+                vrf = prefix
+                if vrf not in self.bgp_asn and (table != 'BGP_GLOBALS' or 'local_asn' not in data):
+                    syslog.syslog(syslog.LOG_DEBUG, 'ignore table {} update because local_asn for VRF {} was not configured'.\
+                            format(table, vrf))
+                    continue
             if table not in self.tbl_to_key_map:
                 syslog.syslog(syslog.LOG_DEBUG, 'no key_map found for table %s' % table)
                 continue
@@ -407,6 +548,16 @@ class BGPConfigManager(object):
                         continue
                 elif op == swsscommon.DEL_COMMAND:
                     self.__delete_vrf_asn(vrf, data)
+            elif table == 'BGP_GLOBALS_AF':
+                af, ip_type = key.lower().split('_')
+                syslog.syslog(syslog.LOG_INFO, 'Set address family global to {} {}'.format(af, ip_type))
+                if op == swsscommon.SET_COMMAND or op == swsscommon.DEL_COMMAND:
+                    cmd_prefix = ['configure terminal',
+                                  'router bgp {} vrf {}'.format(self.bgp_asn[vrf], vrf),
+                                  'address-family {} {}'.format(af, ip_type)]
+                    if not key_map.run_command(data, cmd_prefix):
+                        syslog.syslog(syslog.LOG_ERR, 'failed running BGP global AF config command')
+                        continue
             elif table == 'BGP_NEIGHBOR' or table == 'BGP_PEER_GROUP':
                 if op == swsscommon.SET_COMMAND:
                     if table == 'BGP_PEER_GROUP':
@@ -455,7 +606,7 @@ class BGPConfigManager(object):
                         continue
                     self.__delete_vrf_neighbor(vrf, key, data, table == 'BGP_PEER_GROUP')
             elif table == 'BGP_NEIGHBOR_AF' or table == 'BGP_PEER_GROUP_AF':
-                af_type, nbr = key.split('|')
+                nbr, af_type = key.split('|')
                 af, ip_type = af_type.lower().split('_')
                 syslog.syslog(syslog.LOG_INFO, 'Set address family for neighbor {} to {} {}'.format(nbr, af, ip_type))
                 if op == swsscommon.SET_COMMAND or op == swsscommon.DEL_COMMAND:
@@ -466,13 +617,42 @@ class BGPConfigManager(object):
                         syslog.syslog(syslog.LOG_ERR, 'failed running BGP neighbor AF config command')
                         continue
             elif table == 'ROUTE_MAP':
-                map_name = vrf
+                map_name = prefix
                 seq_no = key
                 if op == swsscommon.SET_COMMAND:
                     if 'route_operation' in data:
-                        pass
+                        dval = data['route_operation']
+                        enable = (dval.op != CachedDataWithOp.OP_DELETE)
+                        no_arg = CommandArgument(enable)
+                        command = "vtysh -c 'configure terminal' -c '{:no-prefix}route-map {} {} {}'".\
+                                   format(no_arg, map_name, dval.data, seq_no)
+                        if not run_command(command):
+                            syslog.syslog(syslog.LOG_ERR, 'failed to configure route-map {} seq {}'.format(map_name, seq_no))
+                            continue
+                        if dval.op == CachedDataWithOp.OP_DELETE:
+                            self.__delete_route_map(map_name, seq_no)
+                            continue
+                        if map_name not in self.route_map:
+                            self.route_map[map_name] = {}
+                        self.route_map[map_name][seq_no] = dval.data
+                    if map_name not in self.route_map or seq_no not in self.route_map[map_name]:
+                        syslog.syslog(syslog.LOG_ERR, 'route-map {} seq {} not found'.format(map_name, seq_no))
+                        continue
+                    cmd_prefix = ['configure terminal',
+                                  'route-map {} {} {}'.format(map_name, self.route_map[map_name][seq_no], seq_no)]
+                    if not key_map.run_command(data, cmd_prefix):
+                        syslog.syslog(syslog.LOG_ERR, 'failed running route-map config command')
+                        continue
                 elif op == swsscommon.DEL_COMMAND:
-                    pass
+                    if map_name not in self.route_map or seq_no not in self.route_map[map_name]:
+                        syslog.syslog(syslog.LOG_ERR, 'route-map {} seq {} not found'.format(map_name, seq_no))
+                        continue
+                    command = "vtysh -c 'configure terminal' -c 'no route map {} {} {}'".\
+                               format(map_name, self.route_map[map_name][seq_no], seq_no)
+                    if not run_command(command):
+                        syslog.syslog(syslog.LOG_ERR, 'failed running route-map delete command')
+                        continue
+                    self.__delete_route_map(map_name, seq_no)
 
     def __add_op_to_data(self, table_key, data, comb_attr_list):
         if table_key not in self.table_data_cache:
@@ -554,14 +734,14 @@ class BGPConfigManager(object):
         self.__update_bgp()
         self.__update_cache_data(table_key, data)
 
-    def __bgp_globals_handler(self, key, op, table, data):
+    def __bgp_af_handler(self, key, op, table, data):
         self.__bgp_table_handler_common(key, op, table, data, [{'ebgp_route_distance', 'ibgp_route_distance'}])
 
     def __bgp_neighbor_handler(self, key, op, table, data):
         self.__bgp_table_handler_common(key, op, table, data, [{'keepalive_interval', 'hold_time'}])
 
     def __bgp_neighbor_af_handler(self, key, op, table, data):
-        self.__bgp_table_handler_common(key, op, table, data, [{'route_map', 'direction'}])
+        self.__bgp_table_handler_common(key, op, table, data, [{'filter_list_name', 'filter_list_direction'}, {'prefix_list_name', 'prefix_list_direction'}])
 
     def __route_map_handler(self, key, op, table, data):
         self.__bgp_table_handler_common(key, op, table, data)
@@ -578,7 +758,7 @@ class Daemon(object):
         self.db_connectors = {}
         self.callbacks = {}
         self.subscribers = []
-        self.table_cache = {}
+        self.table_list = []
 
     def get_db_connector(self, db):
         if db not in Daemon.SUPPORT_DATABASE_LIST:
@@ -595,6 +775,14 @@ class Daemon(object):
             self.callbacks[db][table_name] = []
             conn = self.get_db_connector(db)
             subscriber = swsscommon.SubscriberStateTable(conn, table_name)
+            try:
+                idx = self.table_list.index(table_name)
+            except ValueError:
+                idx = None
+            if idx is not None:
+                syslog.syslog(syslog.LOG_ERR, 'table %s was already added' % table_name)
+                return
+            self.table_list.append(table_name)
             self.subscribers.append(subscriber)
             self.selector.addSelectable(subscriber)
         self.callbacks[db][table_name].append(callback)
@@ -615,9 +803,15 @@ class Daemon(object):
                         break
                     data = dict(fvs)
                     syslog.syslog(syslog.LOG_DEBUG, "Receive message from DB {} table {}:\n {}".format(db_id, table_name, (key, op, data)))
-                    action_list.append(db_id, op, table_name, key, data)
+                    try:
+                        table_id = self.table_list.index(table_name)
+                    except ValueError:
+                        syslog.syslog(syslog.LOG_ERR, 'handler of table %s was not added' % table_name)
+                        continue
+                    action_list.append(db_id, op, table_id, key, data)
             action_list.sort()
-            for db_id, op, table, key, data in action_list:
+            for db_id, op, table_id, key, data in action_list:
+                table = self.table_list[table_id]
                 syslog.syslog(syslog.LOG_DEBUG, "processing table message: DB {} table {} op {} key {}".format(db_id, table, op, key))
                 for callback in self.callbacks[db_id][table]:
                     callback(key, op, table, data)
