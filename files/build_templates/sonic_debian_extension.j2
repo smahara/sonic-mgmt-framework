@@ -8,6 +8,9 @@
 ## PARAMETERS:
 ##   FILESYSTEM_ROOT
 ##          Path to debian file system root directory
+if [ -z "$CONFIGURED_ARCH" ]; then
+    CONFIGURED_ARCH=amd64
+fi
 
 FILESYSTEM_ROOT=$1
 [ -n "$FILESYSTEM_ROOT" ] || {
@@ -156,6 +159,10 @@ sudo cp -f $IMAGE_CONFIGS/bash/bash.bashrc $FILESYSTEM_ROOT/etc/
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/sonic-device-data_*.deb || \
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
 
+# Install SONiC Host Service (and its dependencies via 'apt-get -y install -f')
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/sonic-host-service_*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
 # Install pam-tacplus and nss-tacplus
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libtac2_*.deb || \
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
@@ -166,6 +173,16 @@ sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libnss-tacplus_*.deb || \
 # Disable tacplus by default
 sudo LANG=C chroot $FILESYSTEM_ROOT pam-auth-update --remove tacplus
 sudo sed -i -e '/^passwd/s/ tacplus//' $FILESYSTEM_ROOT/etc/nsswitch.conf
+
+# Install pam-radius-auth and nss-radius
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libpam-radius-auth_*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libnss-radius_*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+# Disable radius by default
+# radius does not have any profiles
+#sudo LANG=C chroot $FILESYSTEM_ROOT pam-auth-update --remove radius tacplus
+sudo sed -i -e '/^passwd/s/ radius//' $FILESYSTEM_ROOT/etc/nsswitch.conf
 
 #Install the HWDIAG package
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/hwdiag*.deb || \
@@ -245,11 +262,7 @@ sudo cp files/dhcp/ifupdown2_policy.json $FILESYSTEM_ROOT/etc/network/ifupdown2/
 sudo cp files/dhcp/90-dhcp6-systcl.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/
 
 # Copy initial interfaces configuration file, will be overwritten on first boot
-{% if enable_pde == "y" %}
-sudo cp $IMAGE_CONFIGS/interfaces/init_pde_interfaces $FILESYSTEM_ROOT/etc/network/interfaces
-{% else %}
 sudo cp $IMAGE_CONFIGS/interfaces/init_interfaces $FILESYSTEM_ROOT/etc/network/interfaces
-{% endif %}
 
 
 sudo mkdir -p $FILESYSTEM_ROOT/etc/network/interfaces.d
@@ -387,6 +400,20 @@ sudo cp $IMAGE_CONFIGS/platform/rc.local $FILESYSTEM_ROOT/etc/
 ## copy blacklist file
 sudo cp $IMAGE_CONFIGS/platform/linux_kernel_bde.conf $FILESYSTEM_ROOT/etc/modprobe.d/
 
+# Enable psample drivers to support sFlow on vs
+{% if sonic_asic_platform == "vs" %}
+sudo tee -a $FILESYSTEM_ROOT/etc/modules-load.d/modules.conf > /dev/null <<EOF
+psample
+act_sample
+EOF
+{% endif %}
+
+## Bind docker path
+if [[ $CONFIGURED_ARCH == armhf || $CONFIGURED_ARCH == arm64 ]]; then
+    sudo mkdir -p $FILESYSTEM_ROOT/dockerfs
+    sudo mount --bind dockerfs $FILESYSTEM_ROOT/dockerfs 
+fi
+
 {% if installer_images.strip() -%}
 sudo chroot $FILESYSTEM_ROOT docker info
 {% for image in installer_images.strip().split(' ') -%}
@@ -411,6 +438,9 @@ if [ -f {{service}} ]; then
     sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable {{service}}
 fi
 {% endfor %}
+if [ -f iccpd.service ]; then
+    sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable iccpd.service
+fi
 sudo LANG=C chroot $FILESYSTEM_ROOT fuser -km /sys || true
 sudo LANG=C chroot $FILESYSTEM_ROOT umount -lf /sys
 {% endif %}

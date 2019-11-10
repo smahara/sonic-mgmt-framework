@@ -20,7 +20,8 @@ class SYSStatusUtil():
 
         device = "SYSSTATUS"
         node = pddf_obj.get_path(device,"board_info")
-       
+        if node is None:
+            return False
         try:
             with open(node, 'r') as f:
                 status = f.read()
@@ -32,7 +33,8 @@ class SYSStatusUtil():
 
         device = "SYSSTATUS"
         node = pddf_obj.get_path(device,"cpld1_version")
-   
+        if node is None:
+            return False
         try:
             with open(node, 'r') as f:
                 status = f.read()
@@ -41,10 +43,10 @@ class SYSStatusUtil():
             return False
 
     def get_power_module_status(self):
-
        device = "SYSSTATUS"
        node = pddf_obj.get_path(device,"power_module_status")
-
+        if node is None:
+            return False
        try:
            with open(node, 'r') as f:
              status = f.read()
@@ -58,7 +60,8 @@ class SYSStatusUtil():
         device = "SYSSTATUS"
         for i in range(1,8):
            node = pddf_obj.get_path(device,"system_reset"+str(i))
-
+            if node is None:
+                return False
            try:
              with open(node, 'r') as f:
                status = f.read()
@@ -68,11 +71,11 @@ class SYSStatusUtil():
 
 
     def get_misc_status(self):
-
         device = "SYSSTATUS"
         for i in range(1,3):
            node = pddf_obj.get_path(device,"misc"+str(i))
-
+            if node  is None:
+                retun False
            try:
              with open(node, 'r') as f:
                status = f.read()

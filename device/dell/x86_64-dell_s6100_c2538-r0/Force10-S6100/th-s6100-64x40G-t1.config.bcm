@@ -11,6 +11,8 @@ ipv6_lpm_128b_enable=1
 l2xmsg_mode=1
 oversubscribe_mode=1
 
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
+
 phy_gearbox_enable=1
 phy_84752=1
 phy_ext_rom_boot=0

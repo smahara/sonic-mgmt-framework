@@ -73,14 +73,14 @@ MAKEFLAGS += -B
 
 CFG_PLATFORM = $(if $(PLATFORM),$(PLATFORM),$(shell cat .platform 2>/dev/null))
 ifeq ($(BLDENV), stretch)
-SLAVE_BASE_TAG = $(shell cat sonic-slave-stretch/Dockerfile .git/HEAD | sha1sum | awk '{print substr($$1,0,11);}')
-SLAVE_TAG = $(shell (cat sonic-slave-stretch/Dockerfile.user sonic-slave-stretch/Dockerfile .git/HEAD && echo $(USER)/$(PWD)/$(CFG_PLATFORM)) | sha1sum | awk '{print substr($$1,0,11);}')
+SLAVE_BASE_TAG = $(shell cat sonic-slave-stretch/Dockerfile | sha1sum | awk '{print substr($$1,0,11);}')
+SLAVE_TAG = $(shell (cat sonic-slave-stretch/Dockerfile.user sonic-slave-stretch/Dockerfile) | sha1sum | awk '{print substr($$1,0,11);}')
 SLAVE_BASE_IMAGE = sonic-slave-stretch-base
 SLAVE_IMAGE = sonic-slave-stretch-$(USER)
 SLAVE_DIR = sonic-slave-stretch
 else
-SLAVE_BASE_TAG = $(shell cat sonic-slave/Dockerfile .git/HEAD | sha1sum | awk '{print substr($$1,0,11);}')
-SLAVE_TAG = $(shell (cat sonic-slave/Dockerfile.user sonic-slave/Dockerfile .git/HEAD && echo $(USER)/$(PWD)/$(CFG_PLATFORM)) | sha1sum | awk '{print substr($$1,0,11);}')
+SLAVE_BASE_TAG = $(shell cat sonic-slave/Dockerfile | sha1sum | awk '{print substr($$1,0,11);}')
+SLAVE_TAG = $(shell (cat sonic-slave/Dockerfile.user sonic-slave/Dockerfile) | sha1sum | awk '{print substr($$1,0,11);}')
 SLAVE_BASE_IMAGE = sonic-slave-base
 SLAVE_IMAGE = sonic-slave-$(USER)
 SLAVE_DIR = sonic-slave
@@ -290,6 +290,7 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            HTTPS_PROXY=$(https_proxy) \
                            DOCKER_USERNAME=$(DOCKER_USERNAME) \
                            DOCKER_USERTAG=$(DOCKER_USERTAG) \
+                           DOCKER_LOCKDIR=$(DOCKER_LOCKDIR) \
                            DOCKER_LOCKFILE_SAVE=$(DOCKER_LOCKFILE_SAVE) \
                            SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD=$(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD) \
                            SONIC_CONFIG_NATIVE_DOCKERD_SHARED=$(SONIC_CONFIG_NATIVE_DOCKERD_SHARED) \
@@ -305,6 +306,8 @@ PDESUBMODULES = src/sonic-linux-kernel \
                 src/sonic-py-swsssdk \
                 src/redis-dump-load \
                 src/sonic-sairedis \
+                src/sonic-ztp \
+                src/sonic-platform-daemons \
                 src/sonic-platform-pde
 
 .PHONY: sonic-slave-build sonic-slave-bash init initpde reset developer
@@ -368,6 +371,7 @@ initpde:
 init :
 	@git submodule update --init --recursive
 	@git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
+	@git submodule foreach --recursive 'git checkout dell_sonic || git checkout master'
 
 reset :
 	@echo && echo -n "Warning! All local changes will be lost. Proceed? [y/N]: "

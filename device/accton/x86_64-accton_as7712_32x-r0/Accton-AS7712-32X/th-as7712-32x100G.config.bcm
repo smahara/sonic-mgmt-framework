@@ -1,3 +1,9 @@
+#BFD HW-Assist
+pci_cmcs_num=3
+num_queues_pci=32
+num_queues_uc0=1
+bfd_cosq=32
+
 # accton_as7712_32x
 os=unix
 schan_intr_enable=0
@@ -7,6 +13,8 @@ l3_mem_entries=40000
 parity_correction=1
 parity_enable=1
 mmu_lossless=1
+
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
 
 pbmp_oversubscribe=0x3ffffffffffffffffffffffffffffffffe
 pbmp_xport_xe=0x3ffffffffffffffffffffffffffffffffe
@@ -27,6 +35,7 @@ num_ipv6_lpm_128b_entries=3072
 max_vp_lags=0
 miim_intr_enable=0
 oversubscribe_mode=1
+bcm_sdk_diag_run=1
 
 # portmap
 portmap_50=49:100

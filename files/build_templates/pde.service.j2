@@ -2,6 +2,7 @@
 Description=PDE container
 {% if sonic_asic_platform == 'broadcom' %}
 Requires=opennsl-modules.service
+ConditionPathExists=!/usr/bin/swss.sh
 {% endif %}
 
 After=updategraph.service

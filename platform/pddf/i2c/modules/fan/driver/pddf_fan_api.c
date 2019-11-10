@@ -30,42 +30,6 @@ void get_fan_duplicate_sysfs(int idx, char *str)
 {
 	switch (idx)
 	{
-		case FAN1_FRONT_RPM:
-			strcpy(str, "fan1_input");
-			break;
-		case FAN2_FRONT_RPM:
-			strcpy(str, "fan2_input");
-            break;
-		case FAN3_FRONT_RPM:
-			strcpy(str, "fan3_input");
-            break;
-		case FAN4_FRONT_RPM:
-			strcpy(str, "fan4_input");
-            break;
-		case FAN5_FRONT_RPM:
-			strcpy(str, "fan5_input");
-            break;
-		case FAN6_FRONT_RPM:
-			strcpy(str, "fan6_input");
-            break;
-		case FAN1_REAR_RPM:
-			strcpy(str, "fan11_input");
-            break;
-		case FAN2_REAR_RPM:
-			strcpy(str, "fan12_input");
-            break;
-		case FAN3_REAR_RPM:
-			strcpy(str, "fan13_input");
-            break;
-		case FAN4_REAR_RPM:
-			strcpy(str, "fan14_input");
-            break;
-		case FAN5_REAR_RPM:
-			strcpy(str, "fan15_input");
-            break;
-		case FAN6_REAR_RPM:
-			strcpy(str, "fan16_input");
-            break;
 		default:
 			break;
 	}
@@ -196,36 +160,60 @@ ssize_t fan_show_default(struct device *dev, struct device_attribute *da, char *
 		case FAN4_PRESENT:
 		case FAN5_PRESENT:
 		case FAN6_PRESENT:
+		case FAN7_PRESENT:
+		case FAN8_PRESENT:
+		case FAN9_PRESENT:
+		case FAN10_PRESENT:
+		case FAN11_PRESENT:
+		case FAN12_PRESENT:
 		case FAN1_DIRECTION:
 		case FAN2_DIRECTION:
 		case FAN3_DIRECTION:
 		case FAN4_DIRECTION:
 		case FAN5_DIRECTION:
 		case FAN6_DIRECTION:
-		case FAN1_FRONT_RPM:
-		case FAN2_FRONT_RPM:
-		case FAN3_FRONT_RPM:
-		case FAN4_FRONT_RPM:
-		case FAN5_FRONT_RPM:
-		case FAN6_FRONT_RPM:
-		case FAN1_REAR_RPM:
-		case FAN2_REAR_RPM:
-		case FAN3_REAR_RPM:
-		case FAN4_REAR_RPM:
-		case FAN5_REAR_RPM:
-		case FAN6_REAR_RPM:
+		case FAN7_DIRECTION:
+		case FAN8_DIRECTION:
+		case FAN9_DIRECTION:
+		case FAN10_DIRECTION:
+		case FAN11_DIRECTION:
+		case FAN12_DIRECTION:
+		case FAN1_INPUT:
+		case FAN2_INPUT:
+		case FAN3_INPUT:
+		case FAN4_INPUT:
+		case FAN5_INPUT:
+		case FAN6_INPUT:
+		case FAN7_INPUT:
+		case FAN8_INPUT:
+		case FAN9_INPUT:
+		case FAN10_INPUT:
+		case FAN11_INPUT:
+		case FAN12_INPUT:
 		case FAN1_PWM:
 		case FAN2_PWM:
 		case FAN3_PWM:
 		case FAN4_PWM:
 		case FAN5_PWM:
 		case FAN6_PWM:
+		case FAN7_PWM:
+		case FAN8_PWM:
+		case FAN9_PWM:
+		case FAN10_PWM:
+		case FAN11_PWM:
+		case FAN12_PWM:
 		case FAN1_FAULT:
 		case FAN2_FAULT:
 		case FAN3_FAULT:
 		case FAN4_FAULT:
 		case FAN5_FAULT:
 		case FAN6_FAULT:
+		case FAN7_FAULT:
+		case FAN8_FAULT:
+		case FAN9_FAULT:
+		case FAN10_FAULT:
+		case FAN11_FAULT:
+		case FAN12_FAULT:
     status = attr_info->val.intval;
 			break;
 		default:
@@ -271,6 +259,12 @@ ssize_t fan_store_default(struct device *dev, struct device_attribute *da, const
 		case FAN4_PWM:
 		case FAN5_PWM:
 		case FAN6_PWM:
+		case FAN7_PWM:
+		case FAN8_PWM:
+		case FAN9_PWM:
+		case FAN10_PWM:
+		case FAN11_PWM:
+		case FAN12_PWM:
 			ret = kstrtoint(buf, 10, &val);
 			if (ret)
 			{

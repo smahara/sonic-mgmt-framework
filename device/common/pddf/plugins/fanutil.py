@@ -5,11 +5,10 @@
 # All the supported FAN SysFS aattributes are
 #- fan<idx>_present
 #- fan<idx>_direction
-#- fan<idx>_front_rpm
-#- fan<idx>_rear_rpm
+#- fan<idx>_input
 #- fan<idx>_pwm
 #- fan<idx>_fault
-# where idx is in the range [1-8]
+# where idx is in the range [1-6]
 #
 
 
@@ -38,17 +37,18 @@ class FanUtil(FanBase):
         self.platform = pddf_obj.get_platform()
 
     def get_num_fans(self):
-        return self.platform['num_fans']
+        return self.platform['num_fantrays']
 
     def get_presence(self, idx):
         # 1 based fan index
-        if idx<1 or idx>self.platform['num_fans']:
+        if idx<1 or idx>self.platform['num_fantrays']:
             print "Invalid fan index %d\n"%idx
             return False
 
-        attr_name = "fan" + str(idx) + "_present"
+        attr_name = "fan" + str((idx-1)*self.platform['num_fans_pertray']+1) + "_present"
         sysfs_path = pddf_obj.get_path("FAN-CTRL", attr_name)
-
+        if sysfs_path is None:
+            return False
         try:
             with open(sysfs_path, 'r') as f:
                 presence = int(f.read())
@@ -60,7 +60,7 @@ class FanUtil(FanBase):
 
     def get_status(self, idx):
         # 1 based fan index
-        if idx<1 or idx>self.platform['num_fans']:
+        if idx<1 or idx>self.platform['num_fantrays']:
             print "Invalid fan index %d\n"%idx
             return False
 
@@ -71,12 +71,14 @@ class FanUtil(FanBase):
 
     def get_direction(self, idx):
         # 1 based fan index
-        if idx<1 or idx>self.platform['num_fans']:
+        if idx<1 or idx>self.platform['num_fantrays']:
             print "Invalid fan index %d\n"%idx
             return None
 
-        attr = "fan" + str(idx) + "_direction"
+        attr = "fan" + str((idx-1)*self.platform['num_fans_pertray']+1) + "_direction"
         path = pddf_obj.get_path("FAN-CTRL", attr)
+        if path is None:
+            return None
         try:
             with open(path, 'r') as f:
                 val = f.read()
@@ -95,8 +97,10 @@ class FanUtil(FanBase):
         num_fan = self.get_num_fan();
 
         for i in range(1, num_fan+1):
-            attr = "fan" + str(i) + "_direction"
+            attr = "fan" + str((i-1)*self.platform['num_fans_pertray']+1) + "_direction"
             path = pddf_obj.get_path("FAN-CTRL", attr)
+            if path is None:
+                return False
             #print "%d-%s"%(i,path)
             try:
                 with open(path, 'r') as f:
@@ -113,12 +117,14 @@ class FanUtil(FanBase):
 
     def get_speed(self, idx):
         # 1 based fan index
-        if idx<1 or idx>self.platform['num_fans']:
+        if idx<1 or idx>self.platform['num_fantrays']:
             print "Invalid fan index %d\n"%idx
             return 0
 
-        attr = "fan" + str(idx) + "_front_rpm"
+        attr = "fan" + str((idx-1)*self.platform['num_fans_pertray']+1) + "_input"
         path = pddf_obj.get_path("FAN-CTRL", attr)
+        if path is None:
+            return 0
         try:
             with open(path, 'r') as f:
                 frpm = int(f.read())
@@ -129,12 +135,14 @@ class FanUtil(FanBase):
 
     def get_speed_rear(self, idx):
         # 1 based fan index
-        if idx<1 or idx>self.platform['num_fans']:
+        if idx<1 or idx>self.platform['num_fantrays']:
             print "Invalid fan index %d\n"%idx
             return 0
 
-        attr = "fan" + str(idx) + "_rear_rpm"
+        attr = "fan" + str(idx*self.platform['num_fans_pertray']) + "_input"
         path = pddf_obj.get_path("FAN-CTRL", attr)
+        if path is None:
+            return 0
         try:
             with open(path, 'r') as f:
                 rrpm = int(f.read())
@@ -148,10 +156,14 @@ class FanUtil(FanBase):
         ret = "FAN_INDEX\t\tFRONT_RPM\t\tREAR_RPM\n"
 
         for i in range(1, num_fan+1):
-            attr1 = "fan" + str(i) + "_front_rpm"
-            attr2 = "fan" + str(i) + "_rear_rpm"
+            attr1 = "fan" + str((i-1)*self.platform['num_fans_pertray']+1) + "_input"
+            attr2 = "fan" + str(i*self.platform['num_fans_pertray']) + "_input"
             path1 = pddf_obj.get_path("FAN-CTRL", attr1)
+            if path1 is None:
+                return False
             path2 = pddf_obj.get_path("FAN-CTRL", attr2)
+            if path2 is None:
+                return False
             try:
                 with open(path1, 'r') as f1:
                     frpm = int(f1.read())
@@ -169,15 +181,17 @@ class FanUtil(FanBase):
             print "Error: Invalid speed %d. Please provide a valid speed percentage"%val
             return False
         
-        num_fan = self.platform['num_fans']
+        num_fan = self.platform['num_fantrays']
         duty_cycle_to_pwm = eval(plugin_data['FAN']['duty_cycle_to_pwm'])
         pwm = duty_cycle_to_pwm(val)
         print "New Speed: %d%% - PWM value to be set is %d\n"%(val,pwm)
 
         status = 0
         for i in range(1, num_fan+1):
-            attr = "fan" + str(i) + "_pwm"
+            attr = "fan" + str((i-1)*self.platform['num_fans_pertray']+1) + "_pwm"
             node = pddf_obj.get_path("FAN-CTRL", attr)
+            if node is None:
+                return False
             try:
                 with open(node, 'w') as f:
                     f.write(str(pwm))

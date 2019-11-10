@@ -1,0 +1,26 @@
+#!/bin/bash
+
+
+# Platform specific script to trigger reset/shdutdown of all hw components
+# in addition to the CPU.
+
+
+function platform_reset {
+    count=0;
+
+    while [ $count -lt 3 ]
+    do
+        # reset via CPLD
+         /usr/local/bin/portiocfg.py --set --val 0xaa  --offset 0x113
+
+        let "count = count + 1"
+    done
+
+    # If reset was successful, this line will not be reached.
+    # Hence the fact we are here implies reset failed.
+    echo "Platform_reset failed.  Some components might not have been reset" > /dev/console
+
+}
+
+platform_reset
+

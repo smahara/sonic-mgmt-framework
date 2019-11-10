@@ -1,0 +1,7 @@
+# postinst script for S3000
+
+# Enable Dell-S3000-platform-service
+depmod -a 
+systemctl enable platform-modules-s3000.service
+systemctl start platform-modules-s3000.service
+#DEBHELPER#
