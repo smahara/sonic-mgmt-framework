@@ -633,7 +633,8 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
             /*If the po is under a vlan, update vlan mac*/
             if (local_if_is_l3_mode(vlan->vlan_itf))
             {
-                if (memcmp(vlan->vlan_itf->l3_mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN) != 0)
+                if ((memcmp(vlan->vlan_itf->l3_mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN) != 0)
+                        && (vlan->vlan_itf->is_l3_proto_enabled == false))
                 {
                     ret = iccp_netlink_if_hwaddr_set(vlan->vlan_itf->ifindex, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
                     if (ret != 0)
@@ -712,7 +713,7 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
                 continue;
 
             /*If the po is under a vlan, update vlan mac*/
-            if (local_if_is_l3_mode(vlan->vlan_itf))
+            if (local_if_is_l3_mode(vlan->vlan_itf) && (vlan->vlan_itf->is_l3_proto_enabled == false))
             {
                 ret = iccp_netlink_if_hwaddr_set(vlan->vlan_itf->ifindex, MLACP(csm).system_id, ETHER_ADDR_LEN);
                 if (ret != 0)
@@ -1143,6 +1144,7 @@ void iccp_event_handler_obj_input_newaddr(struct nl_object *obj, void *arg)
     char addrStr[65] = { 0 };
     char addr_null[16] = { 0 };
     addr = (struct rtnl_addr *)obj;
+    int sync_add = 1, is_v4 = 0, is_v6 = 0, sync_mac = 0;
 
     ifindex = rtnl_addr_get_ifindex(addr);
     nl_addr = rtnl_addr_get_local(addr);
@@ -1157,8 +1159,17 @@ void iccp_event_handler_obj_input_newaddr(struct nl_object *obj, void *arg)
         lif->l3_mode = 1;
         lif->port_config_sync = 1;
         if (memcmp((char *)lif->ipv6_addr, addr_null, 16) == 0)
+        {
             update_if_ipmac_on_standby(lif);
-        ICCPD_LOG_DEBUG(__FUNCTION__, " ifname %s index %d  address %s \n", lif->name, lif->ifindex, show_ip_str(lif->ipv4_addr));
+            sync_mac = 1;
+        }
+        if (lif->is_l3_proto_enabled)
+        {
+            is_v4 = 1;
+            syn_local_neigh_mac_info_to_peer(lif, sync_add, is_v4, is_v6, sync_mac, 1);
+        }
+        ICCPD_LOG_DEBUG(__FUNCTION__, " ifname %s index %d  address %s l3_proto %d\n",
+                lif->name, lif->ifindex, show_ip_str(lif->ipv4_addr), lif->is_l3_proto_enabled);
     }
     else if (rtnl_addr_get_family(addr) == AF_INET6)
     {
@@ -1167,12 +1178,21 @@ void iccp_event_handler_obj_input_newaddr(struct nl_object *obj, void *arg)
             return;
 
         memcpy((char *)lif->ipv6_addr, nl_addr_get_binary_addr(nl_addr), 16);
-        lif->prefixlen = nl_addr_get_prefixlen(nl_addr);
+        lif->prefixlen_v6 = nl_addr_get_prefixlen(nl_addr);
         lif->l3_mode = 1;
         lif->port_config_sync = 1;
         if (lif->ipv4_addr == 0)
+        {
             update_if_ipmac_on_standby(lif);
-        ICCPD_LOG_DEBUG(__FUNCTION__, " ifname %s index %d  address %s \n", lif->name, lif->ifindex, show_ipv6_str((char *)lif->ipv6_addr));
+            sync_mac = 1;
+        }
+        if (lif->is_l3_proto_enabled)
+        {
+            is_v6 = 1;
+            syn_local_neigh_mac_info_to_peer(lif, sync_add, is_v4, is_v6, sync_mac, 1);
+        }
+        ICCPD_LOG_DEBUG(__FUNCTION__, " ifname %s index %d  address %s l3_proto %d\n",
+                lif->name, lif->ifindex, show_ipv6_str((char *)lif->ipv6_addr), lif->is_l3_proto_enabled);
     }
 
     return;
@@ -1185,6 +1205,7 @@ void iccp_event_handler_obj_input_deladdr(struct nl_object *obj, void *arg)
     struct LocalInterface *lif;
     uint32_t ifindex;
     char addr_null[16] = { 0 };
+    int sync_add = 0, is_v4 = 0, is_v6 = 0, sync_mac = 0;
 
     addr = (struct rtnl_addr *)obj;
 
@@ -1196,6 +1217,17 @@ void iccp_event_handler_obj_input_deladdr(struct nl_object *obj, void *arg)
 
     if (rtnl_addr_get_family(addr) == AF_INET)
     {
+        ICCPD_LOG_DEBUG(__FUNCTION__, "l3_proto %d, ifname %s index %d address %s\n",
+                lif->is_l3_proto_enabled, lif->name, lif->ifindex, show_ip_str(lif->ipv4_addr));
+        if (lif->is_l3_proto_enabled)
+        {
+            if (memcmp((char *)lif->ipv6_addr, addr_null, 16) == 0)
+            {
+                sync_mac = 1;
+            }
+            is_v4 = 1;
+            syn_local_neigh_mac_info_to_peer(lif, sync_add, is_v4, is_v6, sync_mac, 0);
+        }
         lif->ipv4_addr = 0;
         lif->prefixlen = 0;
     }
@@ -1205,6 +1237,17 @@ void iccp_event_handler_obj_input_deladdr(struct nl_object *obj, void *arg)
             || memcmp(show_ipv6_str((char *)nl_addr_get_binary_addr(nl_addr)), "fe80", 4) == 0)
             return;
 
+        ICCPD_LOG_DEBUG(__FUNCTION__, "l3_proto %d, ifname %s index %d address %s\n",
+                lif->is_l3_proto_enabled, lif->name, lif->ifindex, show_ipv6_str((char *)lif->ipv6_addr));
+        if (lif->is_l3_proto_enabled)
+        {
+            if (lif->ipv4_addr == 0)
+            {
+                sync_mac = 1;
+            }
+            is_v6 = 1;
+            syn_local_neigh_mac_info_to_peer(lif, sync_add, is_v4, is_v6, sync_mac, 0);
+        }
         memset((char *)lif->ipv6_addr, 0, 16);
         lif->prefixlen_v6 = 0;
     }
@@ -1788,8 +1831,10 @@ int iccp_receive_ndisc_packet_handler(struct System *sys)
         }
     }
 
+#if 0
      ICCPD_LOG_DEBUG(__FUNCTION__, "Recv na pkt(%s,%02X:%02X:%02X:%02X:%02X:%02X)!", show_ipv6_str((char *)&target), mac_addr[0], mac_addr[1],
        mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]); 
+#endif
     do_ndisc_update_from_reply_packet(ifindex, (char *)&target, mac_addr);
 
     return 0;
