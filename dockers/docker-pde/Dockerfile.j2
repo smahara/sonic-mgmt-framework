@@ -65,6 +65,7 @@ RUN rm -rf /debs ~/.cache
 
 RUN mkdir -p /home/pde
 
+COPY ["base_image_files/port_breakout.py", "/usr/local/bin/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
-COPY ["pde_init.sh", "/usr/bin/"]
-ENTRYPOINT ["/usr/bin/pde_init.sh"]
+COPY ["docker_init.sh", "/usr/bin/"]
+ENTRYPOINT ["/usr/bin/docker_init.sh"]

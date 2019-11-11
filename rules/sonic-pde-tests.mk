@@ -10,7 +10,8 @@
 #       then add the aforementioned runtime dependencies here.
 #
 
-SONIC_PDE_TESTS = python-sonic-pde-tests_1.0-1_all.deb
-$(SONIC_PDE_TESTS)_SRC_PATH = $(SRC_PATH)/sonic-platform-pde/sonic-pde-tests
-$(SONIC_PDE_TESTS)_WHEEL_DEPENDS = $(SONIC_CONFIG_ENGINE)
-SONIC_PYTHON_STDEB_DEBS += $(SONIC_PDE_TESTS)
+SONIC_PLATFORM_PDE = sonic-platform-pde_1.0_amd64.deb
+$(SONIC_PLATFORM_PDE)_SRC_PATH = $(SRC_PATH)/sonic-platform-pde
+$(SONIC_PLATFORM_PDE)_DEPENDS += $(BRCM_SAI) $(BRCM_SAI_DEV) $(SWIG)
+
+SONIC_DPKG_DEBS += $(SONIC_PLATFORM_PDE)
