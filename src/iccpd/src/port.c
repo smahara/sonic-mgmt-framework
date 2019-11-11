@@ -132,6 +132,7 @@ void local_if_init(struct LocalInterface* local_if)
     local_if->prefixlen = 32;
     local_if->csm = NULL;
     local_if->isolate_to_peer_link = 0;
+    local_if->is_l3_proto_enabled = false;
     RB_INIT(vlan_rb_tree, &local_if->vlan_tree);
 
     return;

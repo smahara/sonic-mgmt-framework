@@ -373,6 +373,7 @@ struct mLACPMACInfoTLV
 struct ARPMsg
 {
     uint8_t op_type;
+    uint8_t flag;
     char ifname[MAX_L_PORT_NAME];
     uint32_t ipv4_addr;         // net order
     uint8_t mac_addr[ETHER_ADDR_LEN];
@@ -381,6 +382,7 @@ struct ARPMsg
 struct NDISCMsg
 {
     uint8_t op_type;
+    uint8_t flag;
     char ifname[MAX_L_PORT_NAME];
     uint32_t ipv6_addr[4];
     uint8_t mac_addr[ETHER_ADDR_LEN];
@@ -486,9 +488,10 @@ struct mLACPIfUpAckTLV {
 
 enum NEIGH_OP_TYPE
 {
-    NEIGH_SYNC_LIF,
-    NEIGH_SYNC_ADD,
-    NEIGH_SYNC_DEL,
+    NEIGH_SYNC_LIF = 0,
+    NEIGH_SYNC_ADD = 1,
+    NEIGH_SYNC_DEL = 2,
+    NEIGH_SYNC_ACK = 4,
 };
 
 enum MAC_AGE_TYPE
