@@ -18,12 +18,14 @@ try:
     from sonic_platform.thermal import Thermal
     from sonic_platform.fan import Fan
     from sonic_platform.psu import Psu
+    from sonic_platform.sfp import Sfp
 except ImportError as e:
     raise ImportError(str(e) + "- required module not found")
 
 NUM_THERMAL = 6
 NUM_FAN = 6
 NUM_PSU = 2
+NUM_SFP = 82
 CONFIG_DB_PATH = "/etc/sonic/config_db.json"
 
 class Chassis(ChassisBase):
@@ -40,6 +42,9 @@ class Chassis(ChassisBase):
         for index in range(0, NUM_PSU):
             psu = Psu(index)
             self._psu_list.append(psu)
+        for index in range(0, NUM_SFP):
+            sfp = Sfp(index)
+            self._sfp_list.append(sfp)
 
     def __read_config_db(self):
         try:
