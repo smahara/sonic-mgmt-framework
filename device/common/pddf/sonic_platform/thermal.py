@@ -33,48 +33,52 @@ class Thermal(ThermalBase):
 
 
     def get_temperature(self):
-        node = pddf_obj.get_path(self.get_name(), "temp1_input")
-        if node is None:
-	    print "ERROR %s does not exist"%node
+        print "Get: " + self.get_name()
+        output = pddf_obj.get_attr_name_output(self.get_name(), "temp1_input")
+        if not output:
             return (0.0) 
-        try:
-            with open(node, 'r') as f:
-            	attr_value = int(f.read())
-        except IOError:
-	     print "ERROR cannot read " + node
-             return (0.0) 
 
-        return (attr_value/float(1000))
+        if output['status'].isalpha():
+            attr_value = None
+        else:
+            attr_value = float(output['status'])
+        
+        if output['mode']=='bmc':
+	    return attr_value
+        else:
+            return (attr_value/float(1000))
 
 
     def get_high_threshold(self):
-        node = pddf_obj.get_path(self.get_name(), "temp1_max")
-        if node is None:
-            print "ERROR %s does not exist"%node
+        output = pddf_obj.get_attr_name_output(self.get_name(), "temp1_max")
+        if not output:
             return (0.0)
-        try:
-            with open(node, 'r') as f:
-                attr_value = int(f.read())
-        except IOError:
-             print "ERROR cannot read " + node
-             return (0.0)
 
-        return (attr_value/float(1000))
+        if output['status'].isalpha():
+            attr_value = None
+        else:
+            attr_value = float(output['status'])
+
+        if output['mode']=='bmc':
+	    return attr_value
+        else:
+            return (attr_value/float(1000))
 
 
     def get_low_threshold(self):
-        node = pddf_obj.get_path(self.get_name(), "temp1_max_hyst")
-        if node is None:
-            print "ERROR %s does not exist"%node
+        output = pddf_obj.get_attr_name_output(self.get_name(), "temp1_max_hyst")
+        if not output:
             return (0.0)
-        try:
-            with open(node, 'r') as f:
-                attr_value = int(f.read())
-        except IOError:
-             print "ERROR cannot read " + node
-             return (0.0)
 
-        return (attr_value/float(1000))
+        if output['status'].isalpha():
+            attr_value = None
+        else:
+            attr_value = float(output['status'])
+        
+        if output['mode']=='bmc':
+	    return attr_value
+        else:
+            return (attr_value/float(1000))
 
 
     def set_high_threshold(self, temperature):
@@ -100,9 +104,12 @@ class Thermal(ThermalBase):
         return (True)
 
     def get_temp_label(self):
-        dev= pddf_obj.data[self.get_name()]
-        topo_info = dev['i2c']['topo_info']
-        label="%s-i2c-%d-%x" % (topo_info['dev_type'], int(topo_info['parent_bus'], 0), int(topo_info['dev_addr'], 0))
+	if 'bmc' in pddf_obj.data[self.get_name()].keys():
+	    lable=""
+	else:   
+            dev= pddf_obj.data[self.get_name()]
+            topo_info = dev['i2c']['topo_info']
+            label="%s-i2c-%d-%x" % (topo_info['dev_type'], int(topo_info['parent_bus'], 0), int(topo_info['dev_addr'], 0))
 
 
     def dump_sysfs(self):
