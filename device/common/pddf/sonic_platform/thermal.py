@@ -31,9 +31,14 @@ class Thermal(ThermalBase):
 	device_name="TEMP{}".format(self.thermal_index)
 	return (device_name)
 
+    def get_display_name(self):
+        if 'bmc' in pddf_obj.data[self.get_name()].keys():
+            display_name=pddf_obj.data[self.get_name()]['bmc']['dev_attr']['display_name']
+        else:
+            display_name=self.get_name()
+        return (display_name)
 
     def get_temperature(self):
-        print "Get: " + self.get_name()
         output = pddf_obj.get_attr_name_output(self.get_name(), "temp1_input")
         if not output:
             return (0.0) 
@@ -105,11 +110,12 @@ class Thermal(ThermalBase):
 
     def get_temp_label(self):
 	if 'bmc' in pddf_obj.data[self.get_name()].keys():
-	    lable=""
+	    return None 
 	else:   
             dev= pddf_obj.data[self.get_name()]
             topo_info = dev['i2c']['topo_info']
             label="%s-i2c-%d-%x" % (topo_info['dev_type'], int(topo_info['parent_bus'], 0), int(topo_info['dev_addr'], 0))
+	    return (label)
 
 
     def dump_sysfs(self):
