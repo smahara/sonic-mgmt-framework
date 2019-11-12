@@ -44,6 +44,7 @@
 #include "../include/iccp_cmd.h"
 #include "../include/mlacp_link_handler.h"
 #include "../include/iccp_netlink.h"
+#include "../include/scheduler.h"
 
 /*****************************************
 * Enum
@@ -3199,45 +3200,85 @@ int iccp_mclagsyncd_mclag_domain_cfg_handler(struct System *sys, char *msg_buf)
 
         memcpy(system_mac_str, mac_addr_to_str(cfg_info->system_mac), sizeof(system_mac_str));
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "recv cfg msg ; domain_id:%d op_type:%d local_ip:%s peer_ip:%s peer_ifname:%s system_mac:%s session_timeout:%d keepalive_time:%d",cfg_info->domain_id, cfg_info->op_type, cfg_info->local_ip, cfg_info->peer_ip, cfg_info->peer_ifname, system_mac_str, cfg_info->session_timeout, cfg_info->keepalive_time);  
+        ICCPD_LOG_DEBUG(__FUNCTION__, "recv cfg msg ; domain_id:%d op_type:%d attr_bmap:0x%x local_ip:%s peer_ip:%s peer_ifname:%s system_mac:%s session_timeout:%d keepalive_time:%d",cfg_info->domain_id, cfg_info->op_type, cfg_info->attr_bmap, cfg_info->local_ip, cfg_info->peer_ip, cfg_info->peer_ifname, system_mac_str, cfg_info->session_timeout, cfg_info->keepalive_time);  
 
-        if (cfg_info->op_type == MCLAG_CFG_KEEPALIVE_TIME)
+        if (cfg_info->op_type == MCLAG_CFG_OPER_ADD || cfg_info->op_type == MCLAG_CFG_OPER_UPDATE) //mclag domain create/update
         {
-            if (cfg_info->keepalive_time != -1)
+            if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
             {
-                set_keepalive_time(cfg_info->domain_id, cfg_info->keepalive_time);
-            }
-        }
-        else if (cfg_info->op_type == MCLAG_CFG_SESSION_TIMEOUT)
-        {
-            if (cfg_info->keepalive_time != -1)
-            {
-                set_session_timeout(cfg_info->domain_id, cfg_info->session_timeout);
-            }
-        }
-        else if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
-        {
-            set_mc_lag_by_id(cfg_info->domain_id);
-
-            if (cfg_info->keepalive_time != -1)
-            {
-                set_keepalive_time(cfg_info->domain_id, cfg_info->keepalive_time);
-            }
-            if (cfg_info->session_timeout != -1)
-            {
-                set_session_timeout(cfg_info->domain_id, cfg_info->session_timeout);
+                set_mc_lag_by_id(cfg_info->domain_id);
+                set_local_system_id(system_mac_str);
             }
 
-            set_local_address(cfg_info->domain_id, cfg_info->local_ip);
-            set_peer_address(cfg_info->domain_id, cfg_info->peer_ip);
-            set_peer_link(cfg_info->domain_id, cfg_info->peer_ifname);
-            set_local_system_id(system_mac_str);
-        }
-        else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL)
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_SRC_ADDR)
+            {
+                set_local_address(cfg_info->domain_id, cfg_info->local_ip);
+            }
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_PEER_ADDR)
+            {
+                set_peer_address(cfg_info->domain_id, cfg_info->peer_ip);
+            }
+
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_PEER_LINK)
+            {
+                set_peer_link(cfg_info->domain_id, cfg_info->peer_ifname);
+            }
+
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_KEEPALIVE_INTERVAL)
+            {
+                if (cfg_info->keepalive_time != -1)
+                {
+                    set_keepalive_time(cfg_info->domain_id, cfg_info->keepalive_time);
+                }
+                else
+                {
+                    set_keepalive_time(cfg_info->domain_id, CONNECT_INTERVAL_SEC);
+                }
+            }
+
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_SESSION_TIMEOUT)
+            {
+                if (cfg_info->session_timeout != -1)
+                {
+                    set_session_timeout(cfg_info->domain_id, cfg_info->session_timeout);
+                }
+                else
+                {
+                    set_session_timeout(cfg_info->domain_id, HEARTBEAT_TIMEOUT_SEC);
+                }
+            }
+        } //MCLAG Domain create/update End
+        else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL) //mclag domain delete
         {
             unset_mc_lag_by_id(cfg_info->domain_id);
-        }
+        } //MCLAG Domain delete End
+        else if (cfg_info->op_type == MCLAG_CFG_OPER_ATTR_DEL) //mclag domain attribute delete
+        {
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_PEER_LINK)
+            {
+                unset_peer_link(cfg_info->domain_id);
+            } 
+            else if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_KEEPALIVE_INTERVAL)
+            {
+                //reset to default
+                set_keepalive_time(cfg_info->domain_id, CONNECT_INTERVAL_SEC);
+            }
+            else if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_SESSION_TIMEOUT)
+            {
+                //reset to default
+                set_session_timeout(cfg_info->domain_id, HEARTBEAT_TIMEOUT_SEC);
+            }
+            else if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_SRC_ADDR)
+            {
+                unset_local_address(cfg_info->domain_id);
+            }
+            else if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_PEER_ADDR)
+            {
+                unset_peer_address(cfg_info->domain_id);
+            }
+        } //MCLAG Domain Attribute delete End
     }
+
     return 0;
 }
 
