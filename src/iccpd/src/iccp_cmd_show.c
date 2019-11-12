@@ -382,8 +382,8 @@ int iccp_l2mc_dump(char * *buf, int *num, int mclag_id)
 
             mclagd_l2mc.op_type = iccpd_l2mc->op_type;
             mclagd_l2mc.l2mc_type = iccpd_l2mc->l2mc_type;
-            memcpy(mclagd_l2mc.saddr, iccpd_l2mc->saddr, 16);
-            memcpy(mclagd_l2mc.gaddr, iccpd_l2mc->gaddr, 16);
+            memcpy(mclagd_l2mc.saddr, iccpd_l2mc->saddr, INET_ADDRSTRLEN);
+            memcpy(mclagd_l2mc.gaddr, iccpd_l2mc->gaddr, INET_ADDRSTRLEN);
             mclagd_l2mc.vid = iccpd_l2mc->vid;
             memcpy(mclagd_l2mc.ifname, iccpd_l2mc->ifname, strlen(iccpd_l2mc->ifname));
             memcpy(mclagd_l2mc.origin_ifname, iccpd_l2mc->origin_ifname, strlen(iccpd_l2mc->origin_ifname));

@@ -1790,8 +1790,8 @@ void iccp_send_l2mc_entry_to_syncd( struct L2MCMsg* l2mc_msg, uint8_t l2mc_type)
     l2mc_info = (struct mclag_l2mc_info *)&msg_buf[sizeof(struct IccpSyncdHDr)];
     l2mc_info->vid = l2mc_msg->vid;
     memcpy(l2mc_info->port_name, l2mc_msg->ifname, MAX_L_PORT_NAME);
-    memcpy(l2mc_info->saddr, l2mc_msg->saddr, 16);
-    memcpy(l2mc_info->gaddr, l2mc_msg->gaddr, 16);
+    memcpy(l2mc_info->saddr, l2mc_msg->saddr, INET_ADDRSTRLEN);
+    memcpy(l2mc_info->gaddr, l2mc_msg->gaddr, INET_ADDRSTRLEN);
     l2mc_info->type = l2mc_type;
     l2mc_info->op_type = l2mc_msg->op_type;
     msg_hdr->len = sizeof(struct IccpSyncdHDr) + sizeof(struct mclag_l2mc_info);
@@ -2932,8 +2932,8 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
     l2mc_msg = (struct L2MCMsg*)buf;
     l2mc_msg->op_type = op_type;
     l2mc_msg->l2mc_type = l2mc_type;
-    memcpy(l2mc_msg->saddr, saddr, 16);
-    memcpy(l2mc_msg->gaddr, gaddr, 16);
+    memcpy(l2mc_msg->saddr, saddr, INET_ADDRSTRLEN);
+    memcpy(l2mc_msg->gaddr, gaddr, INET_ADDRSTRLEN);
     l2mc_msg->vid = vid;
 
     /*Debug*/
@@ -2985,8 +2985,8 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
     csm = first_csm;
 
     l2mc_find.vid = vid;
-    memcpy(l2mc_find.saddr,saddr, 16);
-    memcpy(l2mc_find.gaddr,gaddr, 16);
+    memcpy(l2mc_find.saddr,saddr, INET_ADDRSTRLEN);
+    memcpy(l2mc_find.gaddr,gaddr, INET_ADDRSTRLEN);
     memcpy(l2mc_find.ifname, ifname, MAX_L_PORT_NAME);
 
     l2mc_info = RB_FIND(l2mc_rb_tree, &MLACP(csm).l2mc_rb ,&l2mc_find);

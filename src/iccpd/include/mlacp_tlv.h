@@ -425,8 +425,8 @@ struct mLACPL2MCData
 {
     uint8_t     type;/*add or del*/
     uint8_t     l2mc_type;
-    uint8_t     saddr[16];
-    uint8_t     gaddr[16];
+    uint8_t     saddr[INET_ADDRSTRLEN];
+    uint8_t     gaddr[INET_ADDRSTRLEN];
     uint16_t vid;
     /*Current if name that set in chip*/
     char     ifname[MAX_L_PORT_NAME];
@@ -558,8 +558,8 @@ struct L2MCMsg
 {
     RB_ENTRY(L2MCMsg) l2mc_entry_rb;
     uint16_t    vid;
-    uint8_t     saddr[16];
-    uint8_t     gaddr[16];
+    uint8_t     saddr[INET_ADDRSTRLEN];
+    uint8_t     gaddr[INET_ADDRSTRLEN];
     uint8_t     op_type;    /*add or del*/
     uint8_t     l2mc_type;   /*static or dynamic*/
 

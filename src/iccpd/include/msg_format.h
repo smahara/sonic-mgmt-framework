@@ -531,10 +531,10 @@ struct mclag_fdb_info
 
 struct mclag_l2mc_info
 {
-    uint8_t     saddr[16];
-    uint8_t     gaddr[16];
+    uint8_t     saddr[INET_ADDRSTRLEN];
+    uint8_t     gaddr[INET_ADDRSTRLEN];
     unsigned int vid;
-    char port_name[20];
+    char port_name[MAX_L_PORT_NAME];
     short type;    /*dynamic or static*/
     short op_type; /*add or del*/
     bool leave;

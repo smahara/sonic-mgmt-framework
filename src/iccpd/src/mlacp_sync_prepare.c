@@ -496,8 +496,8 @@ int mlacp_prepare_for_l2mc_info_to_peer(struct CSM* csm, char* buf, size_t max_b
     L2mcData = (struct mLACPL2MCData *)&buf[sizeof(ICCHdr) + sizeof(struct mLACPL2MCInfoTLV) + sizeof(struct mLACPL2MCData) * count];
     L2mcData->type = l2mc_msg->op_type;
     L2mcData->l2mc_type = l2mc_msg->l2mc_type;
-    memcpy(L2mcData->saddr, l2mc_msg->saddr,16);
-    memcpy(L2mcData->gaddr, l2mc_msg->gaddr,16);
+    memcpy(L2mcData->saddr, l2mc_msg->saddr,INET_ADDRSTRLEN);
+    memcpy(L2mcData->gaddr, l2mc_msg->gaddr,INET_ADDRSTRLEN);
     sprintf(L2mcData->ifname, "%s", l2mc_msg->origin_ifname);
     L2mcData->vid = htons(l2mc_msg->vid);
 

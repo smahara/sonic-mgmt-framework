@@ -483,9 +483,12 @@ int mlacp_fsm_update_l2mc_entry_from_peer( struct CSM* csm, struct mLACPL2MCData
     }
 
     l2mc_find.vid = ntohs(L2mcData->vid);
-    memcpy(&l2mc_find.saddr, L2mcData->saddr, 16);
-    memcpy(&l2mc_find.gaddr, L2mcData->gaddr, 16);
-    memcpy(&l2mc_find.ifname, L2mcData->ifname, 20);
+    memcpy(&l2mc_find.saddr, L2mcData->saddr, INET_ADDRSTRLEN);
+    memcpy(&l2mc_find.gaddr, L2mcData->gaddr, INET_ADDRSTRLEN);
+    if (from_mclag_intf)
+        memcpy(&l2mc_find.ifname, L2mcData->ifname, MAX_L_PORT_NAME);
+    else
+        memcpy(&l2mc_find.ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
     l2mc_msg = RB_FIND(l2mc_rb_tree, &MLACP(csm).l2mc_rb ,&l2mc_find);
 
     if (l2mc_msg)
@@ -544,8 +547,8 @@ int mlacp_fsm_update_l2mc_entry_from_peer( struct CSM* csm, struct mLACPL2MCData
         l2mc_msg = (struct L2MCMsg*)&l2mc_data;
         l2mc_msg->l2mc_type = L2mcData->l2mc_type;
         l2mc_msg->vid = ntohs(L2mcData->vid);
-        memcpy(l2mc_msg->saddr, L2mcData->saddr, 16);
-        memcpy(l2mc_msg->gaddr, L2mcData->gaddr, 16);
+        memcpy(l2mc_msg->saddr, L2mcData->saddr, INET_ADDRSTRLEN);
+        memcpy(l2mc_msg->gaddr, L2mcData->gaddr, INET_ADDRSTRLEN);
         sprintf(l2mc_msg->ifname, "%s", L2mcData->ifname);
         sprintf(l2mc_msg->origin_ifname, "%s", L2mcData->ifname);
         l2mc_msg->del_flag = 0;
