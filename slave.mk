@@ -122,9 +122,8 @@ endif
 include $(RULES_PATH)/config
 include $(RULES_PATH)/functions
 include $(RULES_PATH)/*.mk
+
 ifneq ($(CONFIGURED_PLATFORM), undefined)
-include $(PLATFORM_PATH)/rules.mk
-endif
 
 ifeq ($(SONIC_USE_PDDF_FRAMEWORK),y)
 PDDF_SUPPORT = y
@@ -137,6 +136,8 @@ PLATFORM_PDDF_PATH = platform/$(PDDF_DIR)
 include $(PLATFORM_PDDF_PATH)/rules.mk
 endif
 
+include $(PLATFORM_PATH)/rules.mk
+endif
 
 ifeq ($(USERNAME),)
 override USERNAME := $(DEFAULT_USERNAME)
