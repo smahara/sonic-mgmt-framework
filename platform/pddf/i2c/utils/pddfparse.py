@@ -451,16 +451,14 @@ class PddfParse():
     #################################################################################################################################
     #   SHOW ATTRIBIUTES DEFS
     #################################################################################################################################
-    def is_led_device_configured(self, device_name, index):
-            for key in self.data.keys():
-                    if key != 'PLATFORM':
-                            dev_info=self.data[key]['dev_info']
-                            if dev_info['device_type'] == 'LED':
-                                    attr=self.data[key]['dev_attr']
-                                    if((device_name==dev_info['device_name']) and (index==attr['index'])):
-                                            return(True)
+    def is_led_device_configured(self, device_name, attr_name):
+        if device_name in self.data.keys():
+            attr_list=self.data[device_name]['i2c']['attr_list']
+            for attr in attr_list:
+                if attr['attr_name'].strip() == attr_name.strip():
+                    return (True)
+        return (False)
 
-            return (False)
 
     def show_device_sysfs(self, dev, ops):
         parent=dev['dev_info']['device_parent']

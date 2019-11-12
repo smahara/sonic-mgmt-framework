@@ -22,15 +22,14 @@ class LedUtil:
 
     def set_status_led(self, led_device_name, color, color_state="SOLID"):
         if (not led_device_name in pddf_obj.data.keys()):
-                status="ERROR: " + led_device_name + ": not configured"
+                status="ERROR: " + led_device_name + " is not configured"
+                return (status)
+
+        if (not color in self.color_map.keys()):
+                status="ERROR: Invalid color"
                 return (status)
 
         index=pddf_obj.data[led_device_name]['dev_attr']['index']
-
-	if(not pddf_obj.is_led_device_configured(led_device_name, index)):
-		status="ERROR :" + device_name + ' ' + index + " :  is not supported in the platform" 
-		return (status)
-
         pddf_obj.create_attr('device_name', led_device_name,  self.path)
         pddf_obj.create_attr('index', index, self.path)
         pddf_obj.create_attr('color', self.color_map[color], self.cur_state_path)
@@ -40,17 +39,11 @@ class LedUtil:
 
     def get_status_led(self, led_device_name):
         if (not led_device_name in pddf_obj.data.keys()):
-                status="ERROR: " + led_device_name + ": not configured"
+                status="ERROR: " + led_device_name + " is not configured"
                 return (status)
 
         index=pddf_obj.data[led_device_name]['dev_attr']['index']
-
-	if(not pddf_obj.is_led_device_configured(led_device_name, index)):
-		status="ERROR : " + device_name + ' ' + index + " : is not supported in the platform" 
-		return (status)
- 
         pddf_obj.create_attr('device_name', led_device_name,  self.path)
-
         pddf_obj.create_attr('index', index, self.path)
         pddf_obj.create_attr('dev_ops', 'get_status',  self.path)
         color_f="/sys/kernel/" + self.cur_state_path +"/color"  

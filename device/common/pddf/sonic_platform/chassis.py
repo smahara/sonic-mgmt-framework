@@ -475,15 +475,20 @@ class Chassis(ChassisBase):
     def set_system_led(self, led_device_name, color):
         color_state="SOLID"
         if (not led_device_name in pddf_obj.data.keys()):
-		print "ERROR: Set " + led_device_name + " : is not supported in the platform"
+                print "ERROR: " + led_device_name + " is not configured"
                 return (False)
 
-        index=pddf_obj.data[led_device_name]['dev_attr']['index']
 
         if (not color in self.color_map.keys()):
                 print "ERROR: Invalid color"
-		return (False)
+                return (False)
 
+
+        if(not pddf_obj.is_led_device_configured(led_device_name, self.color_map[color])):
+                print "ERROR :" + led_device_name + ' ' + color + " is not supported in the platform"
+                return (False)
+
+        index=pddf_obj.data[led_device_name]['dev_attr']['index']
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
         pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
         pddf_obj.create_attr('color', self.color_map[color], pddf_obj.get_led_cur_state_path())
@@ -494,11 +499,10 @@ class Chassis(ChassisBase):
 
     def get_system_led(self, led_device_name):
         if (not led_device_name in pddf_obj.data.keys()):
-		status = "ERROR: Get " + led_device_name + " : is not supported in the platform"
-		return (status)
+                status="ERROR: " + led_device_name + " is not configured"
+                return (status)
 
         index=pddf_obj.data[led_device_name]['dev_attr']['index']
-
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
         pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
         pddf_obj.create_attr('dev_ops', 'get_status',  pddf_obj.get_led_path())
