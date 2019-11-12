@@ -885,6 +885,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
                 $(SONIC_DEVICE_DATA) \
                 $(PYTHON_CLICK) \
                 $(IFUPDOWN2) \
+                $(KDUMP_TOOLS) \
                 $(HWDIAG) \
                 $(NTP) \
                 $(LIBPAM_RADIUS) \

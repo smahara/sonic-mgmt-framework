@@ -1,0 +1,22 @@
+# Check if the backup copy has kdump enabled
+
+function kdump_migration {
+    python3 - <<END
+import sys
+import os
+import json
+
+try:
+    with open('/etc/sonic/config_db.json') as json_file:
+        data = json.load(json_file)
+        kdump_data = data['KDUMP']
+        kdump_config = kdump_data['config']
+        kdump_enabled = kdump_config['enabled']
+        if kdump_enabled.lower() == "true":
+            os.system("sonic-kdump-config --config-next")
+except:
+    pass
+END
+}
+
+kdump_migration

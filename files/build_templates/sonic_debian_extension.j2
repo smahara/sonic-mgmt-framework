@@ -184,6 +184,9 @@ sudo sed -i -e '/^passwd/s/ radius//' $FILESYSTEM_ROOT/etc/nsswitch.conf
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/hwdiag*.deb || \
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
 
+# Install a custom version of kdump-tools  (and its dependencies via 'apt-get -y install -f')
+sudo DEBIAN_FRONTEND=noninteractive dpkg --root=$FILESYSTEM_ROOT -i $debs_path/kdump-tools_*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=truechroot $FILESYSTEM_ROOT apt-get -q --no-install-suggests --no-install-recommends --force-no install
 
 #system monitor service files
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libswsscommon*.deb || \
@@ -303,17 +306,23 @@ sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable config-setup.service
 
 # Copy config migration hooks
 sudo mkdir -p $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d
-sudo cp $IMAGE_CONFIGS/config-setup/migration-hooks-pre/*  $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d/
+if [ -d $IMAGE_CONFIGS/config-setup/migration-hooks-pre ]; then
+    sudo cp $IMAGE_CONFIGS/config-setup/migration-hooks-pre/*  $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d/
+fi
 sudo mkdir -p $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d
-sudo cp $IMAGE_CONFIGS/config-setup/migration-hooks-post/*  $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d/
+if [ -d $IMAGE_CONFIGS/config-setup/migration-hooks-post ]; then
+    sudo cp $IMAGE_CONFIGS/config-setup/migration-hooks-post/*  $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d/
+fi
 for hook_dir in $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d \
                 $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d ; do
-    for hook in $(ls -1 $hook_dir/*.j2); do
-        hook_full_filename=$(basename $hook)
-        hook_file="${hook_full_filename%.*}"
-        j2 $hook | sudo tee $hook_dir/$hook_file
-        sudo rm -f $hook
-    done
+    if [ -d $hook_dir ]; then
+        for hook in $(ls -1 $hook_dir/*.j2); do
+            hook_full_filename=$(basename $hook)
+            hook_file="${hook_full_filename%.*}"
+            j2 $hook | sudo tee $hook_dir/$hook_file
+            sudo rm -f $hook
+        done
+    fi
 done
 
 # Copy SNMP configuration files
