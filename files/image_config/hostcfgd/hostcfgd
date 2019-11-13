@@ -250,7 +250,7 @@ class MgmtIntfCfg:
             mgmt_intf['mtu'] = "1500"
             mgmt_intf['speed'] = "1000"
             mgmt_intf['admin_status'] = MGMT_INTF_ADMIN_STATUS_DEFAULT
-            mgmt_intf['autoneg'] = "on"
+            mgmt_intf['autoneg'] = "true"
             mgmt_intf['description'] = "Management0"
             syslog.syslog(syslog.LOG_INFO, "Default config populated for {}".format(key))
             config_db.set_entry(CFG_MGMT_PORT_TABLE, key, mgmt_intf)
