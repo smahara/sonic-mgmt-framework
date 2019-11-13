@@ -243,6 +243,20 @@ class MgmtIntfCfg:
         self.app_db.db_connect('APPL_DB', wait_for_init=False, retry_on=True)
         syslog.syslog(syslog.LOG_INFO, 'AppDB connect success')
 
+    def mgmt_intf_handle_default_cfg (self, config_db):
+        key = "eth0"
+        mgmt_intf = config_db.get_entry(CFG_MGMT_PORT_TABLE, key)
+        if mgmt_intf == {}:
+            mgmt_intf['mtu'] = "1500"
+            mgmt_intf['speed'] = "1000"
+            mgmt_intf['admin_status'] = MGMT_INTF_ADMIN_STATUS_DEFAULT
+            mgmt_intf['autoneg'] = "on"
+            mgmt_intf['description'] = "Management0"
+            syslog.syslog(syslog.LOG_INFO, "Default config populated for {}".format(key))
+            config_db.set_entry(CFG_MGMT_PORT_TABLE, key, mgmt_intf)
+
+        self.handle_mgmt_port_cfg(key, mgmt_intf)
+
     def mgmt_intf_mtu_set (self, ifname, mtu, appIntf):
         cmd = 'ifconfig {} mtu {}'.format(ifname, mtu)
         syslog.syslog(syslog.LOG_INFO, "Configure MTU, cmd - {}".format(cmd))
@@ -400,6 +414,7 @@ class HostConfigDaemon:
         self.aaacfg.load(aaa, tacacs_global, tacacs_server, radius_global, radius_server)
         self.hostname_cache=""
         self.mgmtcfg = MgmtIntfCfg()
+        self.mgmtcfg.mgmt_intf_handle_default_cfg(self.config_db)
 
     def aaa_handler(self, key, data):
         self.aaacfg.aaa_update(key, data)
