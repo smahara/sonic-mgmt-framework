@@ -30,11 +30,10 @@ def invoke(func, args):
     # Gather tech support information into a compressed file
     if func == 'rpc_sonic_show_techsupport_sonic_show_techsupport_info':
         keypath = cc.Path('/restconf/operations/sonic-show-techsupport:sonic-show-techsupport-info')
-        body = {}
-        if len(args) < 2:
+        if args is None:
             body = {"sonic-show-techsupport:input":{"date": None}}
         else:
-            body = {"sonic-show-techsupport:input":{"date": args[1]}}
+            body = {"sonic-show-techsupport:input":{"date": args[0]}}
         return aa.post(keypath, body)
     else:
         print("%Error: not implemented")
@@ -49,22 +48,27 @@ def run(func, args):
         if api_response.ok():
             response = api_response.content
 
-	    if response is None:
+            if response is None:
                 print ("ERROR: No output file generated: \n"
                        "Invalid input: Incorrect DateTime format")
 
 	    else:
 		if func == 'rpc_sonic_show_techsupport_sonic_show_techsupport_info':
                     if not response['sonic-show-techsupport:output']:
-                        print("ERROR: No top level output object")
-                        show_cli_output(sys.argv[2], "")
+                        print("ERROR: No top level output object: no output file available")
                         return
                     elif response['sonic-show-techsupport:output'] is None:
-                        print("ERROR: No second level output object")
-		        show_cli_output(sys.argv[2], "")
+                        print("ERROR: No second level output object: No output file available")
 		        return
-                    output_file = response['sonic-show-techsupport:output']
-		    show_cli_output(sys.argv[2], output_file)
+                    output_file_object = response['sonic-show-techsupport:output']
+                    if output_file_object['output-filename'] is None:
+                        print("ERROR: No output file available")
+                        return
+                    output_filename = output_file_object['output-filename']
+                    if len(output_filename) is 0:
+                        print("Invalid input: Incorrect DateTime format")
+                    else:
+                        print("Output stored in:  " + output_filename)
 		else:
                     print("ERROR: Python: Show Techsupport parsing Failed: Invalid function")
         else:
@@ -76,4 +80,7 @@ def run(func, args):
 
 if __name__ == '__main__':
     pipestr().write(sys.argv)
-    run(sys.argv[1], sys.argv[2:])
+    if len(sys.argv) == 3:
+	    run(sys.argv[1], sys.argv[2:])
+    else:
+            run(sys.argv[1], None)

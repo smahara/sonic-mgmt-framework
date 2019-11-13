@@ -7,18 +7,14 @@ module sonic-show-techsupport {
 		prefix yang;
 	}
 
-	import ietf-inet-types {
-                prefix inet;
-    }
-
 	organization
-		"BRCM";
+		"SONiC";
 
 	contact
-		"BRCM";
+		"SONiC";
 
 	description
-		"SONIC TECH SUPPORT INFORMATION";
+		"SONiC TECH SUPPORT INFORMATION";
 
 	revision 2019-10-15 {
 		description

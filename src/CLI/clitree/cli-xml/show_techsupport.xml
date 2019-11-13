@@ -43,7 +43,7 @@ limitations under the License.
         <ACTION>
             python $SONIC_CLI_ROOT/sonic-cli-show-techsupport.py
             rpc_sonic_show_techsupport_sonic_show_techsupport_info
-            show_techsupport_output.j2 ${date}
+            ${date}
         </ACTION>
         <xi:include href="include/pipe.xml"/>
    </COMMAND>
