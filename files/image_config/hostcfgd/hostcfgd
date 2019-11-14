@@ -378,6 +378,8 @@ class MgmtIntfCfg:
 
     def handle_mgmt_intf_cfg(self, key, data, op):
         intf_keys = key.split("|")
+        if (len(intf_keys) < 2):
+            return
         input_ip = ipaddress.ip_interface(intf_keys[1])
         cur_appdb_key = key.replace('|', ':')
         appdb_keys = self.app_db.get_table(APP_MGMT_INTF_TABLE).keys()
