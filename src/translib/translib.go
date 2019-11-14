@@ -59,6 +59,9 @@ const (
 type SetRequest struct {
 	Path    string
 	Payload []byte
+	User    string
+	Group   string
+	Role	string
 }
 
 type SetResponse struct {
@@ -67,7 +70,10 @@ type SetResponse struct {
 }
 
 type GetRequest struct {
-	Path string
+	Path    string
+	User    string
+	Group   string
+	Role    string
 }
 
 type GetResponse struct {
@@ -78,6 +84,9 @@ type GetResponse struct {
 type ActionRequest struct {
 	Path    string
 	Payload []byte
+	User    string
+	Group   string
+	Role    string
 }
 
 type ActionResponse struct {
@@ -90,6 +99,9 @@ type BulkRequest struct {
 	ReplaceRequest []SetRequest
 	UpdateRequest  []SetRequest
 	CreateRequest  []SetRequest
+	User           string
+	Group          string
+	Role           string
 }
 
 type BulkResponse struct {
@@ -97,6 +109,15 @@ type BulkResponse struct {
 	ReplaceResponse []SetResponse
 	UpdateResponse  []SetResponse
 	CreateResponse  []SetResponse
+}
+
+type SubscribeRequest struct {
+	Paths			[]string
+	Q				*queue.PriorityQueue
+	Stop			chan struct{}
+	User			string
+	Group           string
+	Role            string
 }
 
 type SubscribeResponse struct {
@@ -113,6 +134,13 @@ const (
 	Sample NotificationType = iota
 	OnChange
 )
+
+type IsSubscribeRequest struct {
+	Paths				[]string
+	User				string
+	Group               string
+	Role                string
+}
 
 type IsSubscribeResponse struct {
 	Path                string
@@ -973,7 +1001,7 @@ func getAllDbs() ([db.MaxDB]*db.DB, error) {
 	}
 
     //Create User DB connection
-    dbs[db.UserDB], err = db.NewDB(getDBOptions(db.UserDB))
+    dbs[db.UserDB], err = db.NewDB(getDBOptions(db.UserDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
@@ -1012,7 +1040,7 @@ func getDBOptions(dbNo db.DBNum) db.Options {
 		opt = getDBOptionsWithSeparator(dbNo, "", ":", ":")
 		break
 	case db.FlexCounterDB, db.AsicDB, db.LogLevelDB, db.ConfigDB, db.StateDB, db.ErrorDB, db.UserDB:
-		opt = getDBOptionsWithSeparator(dbNo, "", "|", "|")
+		opt = getDBOptionsWithSeparator(dbNo, "", "|", "|", isWriteDisabled)
 		break
 	}
 
