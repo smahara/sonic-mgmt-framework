@@ -8,6 +8,7 @@ bfd_cosq=46
 l3_alpm_ipv6_128b_bkt_rsvd=1
 bcm_tunnel_term_compatible_mode=1
 bcm_num_cos=10
+default_cpu_tx_queue=9
 core_clock_frequency=1525
 dpp_clock_ratio=2:3
 l2_mem_entries=40000

@@ -17,6 +17,7 @@ l2xmsg_mode=1
 
 # Platform specfic
 bcm_num_cos=10
+default_cpu_tx_queue=9
 bcm_stat_interval=2000000
 cdma_timeout_usec=3000000
 ipv6_lpm_128b_enable=0x1
