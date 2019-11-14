@@ -85,4 +85,5 @@ int syn_local_neigh_mac_info_to_peer(struct LocalInterface *local_if, int sync_a
 int syn_local_mac_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add);
 int syn_local_arp_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add, int ack);
 int syn_local_nd_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add, int ack);
+int is_unique_ip_configured(char *ifname);
 #endif
