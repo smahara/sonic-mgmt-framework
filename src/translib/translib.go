@@ -60,6 +60,8 @@ type SetRequest struct {
 	Path    string
 	Payload []byte
 	User    string
+	Group   string
+	Role	string
 }
 
 type SetResponse struct {
@@ -70,6 +72,8 @@ type SetResponse struct {
 type GetRequest struct {
 	Path    string
 	User    string
+	Group   string
+	Role    string
 }
 
 type GetResponse struct {
@@ -81,6 +85,8 @@ type ActionRequest struct {
 	Path    string
 	Payload []byte
 	User    string
+	Group   string
+	Role    string
 }
 
 type ActionResponse struct {
@@ -94,6 +100,8 @@ type BulkRequest struct {
 	UpdateRequest  []SetRequest
 	CreateRequest  []SetRequest
 	User           string
+	Group          string
+	Role           string
 }
 
 type BulkResponse struct {
@@ -108,6 +116,8 @@ type SubscribeRequest struct {
 	Q				*queue.PriorityQueue
 	Stop			chan struct{}
 	User			string
+	Group           string
+	Role            string
 }
 
 type SubscribeResponse struct {
@@ -128,6 +138,8 @@ const (
 type IsSubscribeRequest struct {
 	Paths				[]string
 	User				string
+	Group               string
+	Role                string
 }
 
 type IsSubscribeResponse struct {
@@ -1059,7 +1071,7 @@ func getAllDbs(isGetCase bool) ([db.MaxDB]*db.DB, error) {
 	}
 
     //Create User DB connection
-    dbs[db.UserDB], err = db.NewDB(getDBOptions(db.UserDB))
+    dbs[db.UserDB], err = db.NewDB(getDBOptions(db.UserDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])

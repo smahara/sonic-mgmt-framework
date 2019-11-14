@@ -52,10 +52,23 @@ func isUserAuthorizedForSet(user string) bool {
 	return false
 }
 
+func isAuthorizedForSet(req SetRequest) bool {
+	// TODO: Allow empty user for now
+	return req.Group == "admin" || req.User == ""
+}
+
 func isUserAuthorizedForGet(user string) bool {
 	return  true
 }
 
+func isAuthorizedForGet(req GetRequest) bool {
+	return  true
+}
+
 func isUserAuthorizedForAction(user string) bool {
+	return  true
+}
+
+func isAuthorizedForAction(req ActionRequest) bool {
 	return  true
 }

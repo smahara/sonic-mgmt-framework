@@ -1,15 +1,7 @@
 module sonic-aaa {
     namespace "http://github.com/Azure/sonic-aaa";
-    prefix sacl;
+    prefix saaa;
     yang-version 1.1;
-
-    import ietf-inet-types {
-        prefix inet;
-    }
-
-    import sonic-common {
-        prefix cmn;
-    }
 
     organization
         "SONiC";
@@ -47,7 +39,7 @@ module sonic-aaa {
                 }
             }
 
-            container PRIVILEGE_TABLE {
+            list PRIVILEGE_TABLE {
                 key "role feature";
 
                 leaf role {
