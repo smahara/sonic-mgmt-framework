@@ -150,6 +150,10 @@ func JwtAuthenAndAuthor(r *http.Request, rc *RequestContext) (jwtToken, error) {
 		glog.Errorf("[%s] Failed to authenticate, Invalid JWT Token", rc.ID)
 		return token, httpError(http.StatusUnauthorized, "Invalid JWT Token")
 	}
+	if err := PopulateAuthStruct(claims.Username, &rc.Auth); err != nil {
+		glog.Infof("[%s] Failed to retrieve authentication information; %v", rc.ID, err)
+		return token, httpError(http.StatusUnauthorized, "")	
+	}
 	return token, nil
 }
 
