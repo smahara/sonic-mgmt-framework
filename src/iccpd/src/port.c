@@ -28,6 +28,7 @@
 #include "../include/port.h"
 #include "../include/system.h"
 #include "../include/iccp_csm.h"
+#include "../include/mlacp_link_handler.h"
 
 #if 0
 /* Ethernet MAC Address setter - set by string. */
@@ -206,7 +207,10 @@ struct LocalInterface* local_if_create(int ifindex, char* ifname, int type, uint
             break;
 
         case IF_T_VLAN:
-            /* do nothing currently. */
+            if(is_unique_ip_configured(local_if->name))
+            {
+                local_if->is_l3_proto_enabled = true;
+            }
             break;
 
         case IF_T_VXLAN:
@@ -741,4 +745,27 @@ int set_sys_arp_accept_flag(char* ifname, int flag)
 
     fclose(file_ptr);
     return result;
+}
+
+int local_if_l3_proto_enabled(const char* ifname)
+{
+    struct System* sys = NULL;
+    struct LocalInterface* local_if = NULL;
+
+    if (!ifname)
+        return 0;
+
+    if (!(sys = system_get_instance()))
+        return 0;
+
+    LIST_FOREACH(local_if, &(sys->lif_list), system_next)
+    {
+        if (strcmp(local_if->name, ifname) == 0)
+        {
+            if (local_if->is_l3_proto_enabled)
+                return 1;
+        }
+    }
+
+    return 0;
 }

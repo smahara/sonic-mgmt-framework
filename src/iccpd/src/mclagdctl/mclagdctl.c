@@ -41,6 +41,7 @@ char *mclagdctl_sock_path = "/var/run/iccpd/mclagdctl.sock";
    mclagdctl -i dump nd
    mclagdctl -i dump mac
    mclagdctl -i dump l2mc
+   mclagdctl -i dump unique_ip
    mclagdctl -i dump portlist local
    mclagdctl -i dump portlist peer
  */
@@ -104,6 +105,14 @@ static struct command_type command_types[] =
         .name = "l2mc",
         .enca_msg = mclagdctl_enca_dump_l2mc,
         .parse_msg = mclagdctl_parse_dump_l2mc,
+    },
+    {
+        .id = ID_CMDTYPE_D_A,
+        .parent_id = ID_CMDTYPE_D,
+        .info_type = INFO_TYPE_DUMP_UNIQUE_IP,
+        .name = "unique_ip",
+        .enca_msg = mclagdctl_enca_dump_unique_ip,
+        .parse_msg = mclagdctl_parse_dump_unique_ip,
     },
     {
         .id = ID_CMDTYPE_D_P,
@@ -472,7 +481,6 @@ int mclagdctl_parse_dump_mac(char *msg, int data_len)
     return 0;
 }
 
-
 int mclagdctl_enca_dump_l2mc(char *msg, int mclag_id, int argc, char **argv)
 {
     struct mclagdctl_req_hdr req;
@@ -676,6 +684,63 @@ int mclagdctl_parse_dump_peer_portlist(char *msg, int data_len)
         fprintf(stdout, "\n\n");
     }
 
+    return 0;
+}
+
+int mclagdctl_enca_dump_unique_ip(char *msg, int mclag_id, int argc, char **argv)
+{
+    struct mclagdctl_req_hdr req;
+
+    if (mclag_id <= 0)
+    {
+        fprintf(stderr, "Need to specify mclag-id through the parameter i !\n");
+        return MCLAG_ERROR;
+    }
+
+    memset(&req, 0, sizeof(struct mclagdctl_req_hdr));
+    req.info_type = INFO_TYPE_DUMP_UNIQUE_IP;
+    req.mclag_id = mclag_id;
+    memcpy((struct mclagdctl_req_hdr *)msg, &req, sizeof(struct mclagdctl_req_hdr));
+
+    return 1;
+}
+
+int mclagdctl_parse_dump_unique_ip(char *msg, int data_len)
+{
+    struct mclagd_unique_ip_if *ip_if_info = NULL;
+    int len = 0;
+    int count = 0;
+    int pos = 0;
+
+    for (pos = 0; pos < 60; ++pos)
+        fprintf(stdout, "-");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "%-20s", "Ifname");
+    fprintf(stdout, "%-5s", "Active");
+    fprintf(stdout, "\n");
+
+    for (pos = 0; pos < 60; ++pos)
+        fprintf(stdout, "-");
+    fprintf(stdout, "\n");
+
+    len = sizeof(struct mclagd_unique_ip_if);
+
+    for (; data_len >= len; data_len -= len, count++)
+    {
+        ip_if_info = (struct mclagd_unique_ip_if*)(msg + len * count);
+
+        fprintf(stdout, "%-20s  %-5s\n", ip_if_info->name, ip_if_info->active?"Yes":"No");
+    }
+
+    if (count == 0)
+    {
+        fprintf(stdout, "%s\n", "Unique IP configuration not enabled on any interface");
+    }
+
+    for (pos = 0; pos < 60; ++pos)
+        fprintf(stdout, "-");
+
+    fprintf(stdout, "\n\n");
     return 0;
 }
 
