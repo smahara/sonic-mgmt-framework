@@ -2,12 +2,13 @@
     "PLATFORM":
     {
         "num_psus":2,
-        "num_fans":4,
+        "num_fantrays":4,
+        "num_fans_pertray":2,
         "num_ports":32,
         "num_temps":5,
-        "drivers":
+        "pddf_dev_types":
         {
-            "description":"IX1 - Below is the list of supported PDDF drivers for various components. If any component uses some other driver, we will create the client using 'echo <dev-address> <dev-type> > <path>/new_device' method",
+            "description":"IX1 - Below is the list of supported PDDF device types (chip names) for various components. If any component uses some other driver, we will create the client using 'echo <dev-address> <dev-type> > <path>/new_device' method",
             "CPLD":
             [
                 "i2c_cpld"
@@ -27,7 +28,30 @@
                 "pddf_xcvr"
             ]
 
-        }
+        },
+        "std_kos":
+        [
+            "lpc_ich",
+            "i2c-i801",
+            "i2c_dev",
+            "ipmi_devintf",
+            "i2c_mux_pca954x",
+            "gpio-pca953x",
+            "leds-gpio",
+            "optoe"
+        ],
+        "pddf_kos":
+        [
+            "pddf_client_module",
+            "pddf_cpld_module",
+            "pddf_cpld_driver",
+            "pddf_mux_module",
+            "pddf_xcvr_module",
+            "pddf_xcvr_driver_module",
+            "pddf_psu_driver_module",
+            "pddf_psu_module",
+            "pddf_led_module"
+        ]
     },
 
     "SYSTEM":
@@ -213,17 +237,8 @@
             [
                 { "itf":"pmbus", "dev":"PSU1-PMBUS" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [
-                { "attr_name":"PSU_OK", "bmc_cmd":"ipmitool bmc info"},
-                { "attr_name":"PSU_VIN", "bmc_cmd":"ipmitool bmc info"},
-                { "attr_name":"PSU_VOUT", "bmc_cmd":"ipmitool bmc info"}
-            ]
         }
+
     },
 
     "PSU1-PMBUS":
@@ -258,16 +273,8 @@
             [
                 { "itf":"pmbus", "dev":"PSU2-PMBUS"}
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":[
-                { "attr_name":"PSU_OK", "bmc_cmd":"ipmitool bmc info"},
-                { "attr_name":"PSU_VIN", "bmc_cmd":"ipmitool bmc info"},
-                { "attr_name":"PSU_VOUT", "bmc_cmd":"ipmitool bmc info"}
-            ]
         }
+
     },
 
     "PSU2-PMBUS":
@@ -387,12 +394,6 @@
                 { "itf":"eeprom", "dev":"PORT1-EEPROM" },
                 { "itf":"control", "dev":"PORT1-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT1-EEPROM":
@@ -434,12 +435,6 @@
                 { "itf":"eeprom", "dev":"PORT2-EEPROM" },
                 { "itf":"control", "dev":"PORT2-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT2-EEPROM":
@@ -481,12 +476,6 @@
                 { "itf":"eeprom", "dev":"PORT3-EEPROM" },
                 { "itf":"control", "dev":"PORT3-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT3-EEPROM":
@@ -528,12 +517,6 @@
                 { "itf":"eeprom", "dev":"PORT4-EEPROM" },
                 { "itf":"control", "dev":"PORT4-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT4-EEPROM":
@@ -575,12 +558,6 @@
                 { "itf":"eeprom", "dev":"PORT5-EEPROM" },
                 { "itf":"control", "dev":"PORT5-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT5-EEPROM":
@@ -622,12 +599,6 @@
                 { "itf":"eeprom", "dev":"PORT6-EEPROM" },
                 { "itf":"control", "dev":"PORT6-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT6-EEPROM":
@@ -669,12 +640,6 @@
                 { "itf":"eeprom", "dev":"PORT7-EEPROM" },
                 { "itf":"control", "dev":"PORT7-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT7-EEPROM":
@@ -716,12 +681,6 @@
                 { "itf":"eeprom", "dev":"PORT8-EEPROM" },
                 { "itf":"control", "dev":"PORT8-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT8-EEPROM":
@@ -763,12 +722,6 @@
                 { "itf":"eeprom", "dev":"PORT9-EEPROM" },
                 { "itf":"control", "dev":"PORT9-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT9-EEPROM":
@@ -810,12 +763,6 @@
                 { "itf":"eeprom", "dev":"PORT10-EEPROM" },
                 { "itf":"control", "dev":"PORT10-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT10-EEPROM":
@@ -857,12 +804,6 @@
                 { "itf":"eeprom", "dev":"PORT11-EEPROM" },
                 { "itf":"control", "dev":"PORT11-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT11-EEPROM":
@@ -904,12 +845,6 @@
                 { "itf":"eeprom", "dev":"PORT12-EEPROM" },
                 { "itf":"control", "dev":"PORT12-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT12-EEPROM":
@@ -951,13 +886,8 @@
                 { "itf":"eeprom", "dev":"PORT13-EEPROM" },
                 { "itf":"control", "dev":"PORT13-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
+
     },
     "PORT13-EEPROM":
     {
@@ -998,13 +928,8 @@
                 { "itf":"eeprom", "dev":"PORT14-EEPROM" },
                 { "itf":"control", "dev":"PORT14-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
+
     },
     "PORT14-EEPROM":
     {
@@ -1045,12 +970,6 @@
                 { "itf":"eeprom", "dev":"PORT15-EEPROM" },
                 { "itf":"control", "dev":"PORT15-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT15-EEPROM":
@@ -1092,12 +1011,6 @@
                 { "itf":"eeprom", "dev":"PORT16-EEPROM" },
                 { "itf":"control", "dev":"PORT16-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT16-EEPROM":
@@ -1139,12 +1052,6 @@
                 { "itf":"eeprom", "dev":"PORT17-EEPROM" },
                 { "itf":"control", "dev":"PORT17-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT17-EEPROM":
@@ -1186,12 +1093,6 @@
                 { "itf":"eeprom", "dev":"PORT18-EEPROM" },
                 { "itf":"control", "dev":"PORT18-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT18-EEPROM":
@@ -1233,12 +1134,6 @@
                 { "itf":"eeprom", "dev":"PORT19-EEPROM" },
                 { "itf":"control", "dev":"PORT19-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT19-EEPROM":
@@ -1280,12 +1175,6 @@
                 { "itf":"eeprom", "dev":"PORT20-EEPROM" },
                 { "itf":"control", "dev":"PORT20-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT20-EEPROM":
@@ -1327,12 +1216,6 @@
                 { "itf":"eeprom", "dev":"PORT21-EEPROM" },
                 { "itf":"control", "dev":"PORT21-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT21-EEPROM":
@@ -1374,12 +1257,6 @@
                 { "itf":"eeprom", "dev":"PORT22-EEPROM" },
                 { "itf":"control", "dev":"PORT22-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT22-EEPROM":
@@ -1421,12 +1298,6 @@
                 { "itf":"eeprom", "dev":"PORT23-EEPROM" },
                 { "itf":"control", "dev":"PORT23-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT23-EEPROM":
@@ -1468,12 +1339,6 @@
                 { "itf":"eeprom", "dev":"PORT24-EEPROM" },
                 { "itf":"control", "dev":"PORT24-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT24-EEPROM":
@@ -1515,12 +1380,6 @@
                 { "itf":"eeprom", "dev":"PORT25-EEPROM" },
                 { "itf":"control", "dev":"PORT25-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT25-EEPROM":
@@ -1562,12 +1421,6 @@
                 { "itf":"eeprom", "dev":"PORT26-EEPROM" },
                 { "itf":"control", "dev":"PORT26-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT26-EEPROM":
@@ -1609,12 +1462,6 @@
                 { "itf":"eeprom", "dev":"PORT27-EEPROM" },
                 { "itf":"control", "dev":"PORT27-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT27-EEPROM":
@@ -1656,12 +1503,6 @@
                 { "itf":"eeprom", "dev":"PORT28-EEPROM" },
                 { "itf":"control", "dev":"PORT28-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT28-EEPROM":
@@ -1703,12 +1544,6 @@
                 { "itf":"eeprom", "dev":"PORT29-EEPROM" },
                 { "itf":"control", "dev":"PORT29-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT29-EEPROM":
@@ -1750,12 +1585,6 @@
                 { "itf":"eeprom", "dev":"PORT30-EEPROM" },
                 { "itf":"control", "dev":"PORT30-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT30-EEPROM":
@@ -1797,12 +1626,6 @@
                 { "itf":"eeprom", "dev":"PORT31-EEPROM" },
                 { "itf":"control", "dev":"PORT31-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT31-EEPROM":
@@ -1844,12 +1667,6 @@
                 { "itf":"eeprom", "dev":"PORT32-EEPROM" },
                 { "itf":"control", "dev":"PORT32-CTRL" }
             ]
-        },
-
-        "bmc":
-        {
-            "attr_list":
-            [ ]
         }
     },
     "PORT32-EEPROM":

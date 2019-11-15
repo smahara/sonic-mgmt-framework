@@ -147,7 +147,7 @@ class PddfParse():
                     self.runcmd(cmd)
 
     def create_psu_i2c_device(self, dev, ops):
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PSU']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['PSU']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/psu/i2c", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/psu/i2c/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
@@ -184,7 +184,7 @@ class PddfParse():
                     #self.create_psu_bmc_device(dev)
                     
     def create_fan_device(self, dev, ops):
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['FAN']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['FAN']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/fan/i2c", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/fan/i2c/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
@@ -207,7 +207,7 @@ class PddfParse():
 
     def create_temp_sensor_device(self, dev, ops):
         # NO PDDF driver for temp_sensors device
-        #if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['TEMP_SENSOR']:
+        #if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['TEMP_SENSOR']:
             #create_device(dev['i2c']['topo_info'], "pddf/devices/fan/i2c", ops)
             #create_device(dev['i2c']['dev_attr'], "pddf/devices/fan/i2c", ops)
             #for attr in dev['i2c']['attr_list']:
@@ -224,7 +224,7 @@ class PddfParse():
 
 
     def create_cpld_device(self, dev, ops):
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['CPLD']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['CPLD']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/cpld", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/cpld/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
@@ -274,7 +274,7 @@ class PddfParse():
             #os.system("sleep 1")
 
     def create_xcvr_i2c_device(self, dev, ops):
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PORT_MODULE']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['PORT_MODULE']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/xcvr/i2c", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/xcvr/i2c/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
@@ -315,7 +315,7 @@ class PddfParse():
             #print "\n"
 
     def create_eeprom_device(self, dev, ops):
-        if "EEPROM" in self.data['PLATFORM']['drivers'] and dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['EEPROM']:
+        if "EEPROM" in self.data['PLATFORM']['pddf_dev_types'] and dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['EEPROM']:
             self.create_device(dev['i2c']['topo_info'], "pddf/devices/eeprom/i2c", ops)
             cmd= "echo '%s' > /sys/kernel/pddf/devices/eeprom/i2c/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
@@ -335,7 +335,7 @@ class PddfParse():
     #   DELETE DEFS
     #################################################################################################################################
     def delete_eeprom_device(self, dev, ops):
-        if "EEPROM" in self.data['PLATFORM']['drivers'] and dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['EEPROM']:
+        if "EEPROM" in self.data['PLATFORM']['pddf_dev_types'] and dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['EEPROM']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/eeprom/i2c/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
             cmd = "echo 'delete' > /sys/kernel/pddf/devices/eeprom/i2c/dev_ops"
@@ -358,7 +358,7 @@ class PddfParse():
             #self.runcmd(cmd)
 
     def delete_xcvr_i2c_device(self, dev, ops):
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PORT_MODULE']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['PORT_MODULE']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/xcvr/i2c/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
             cmd="echo 'delete' > /sys/kernel/pddf/devices/xcvr/i2c/dev_ops"
@@ -389,7 +389,7 @@ class PddfParse():
             #os.system("sleep 1")
 
     def delete_cpld_device(self, dev, ops):
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['CPLD']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['CPLD']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/cpld/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
             cmd= "echo 'delete' > /sys/kernel/pddf/devices/cpld/dev_ops"
@@ -403,7 +403,7 @@ class PddfParse():
 
     def delete_temp_sensor_device(self, dev, ops):
         # NO PDDF driver for temp_sensors device
-        #if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['TEMP_SENSOR']:
+        #if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['TEMP_SENSOR']:
             #cmd= "echo '%s' > /sys/kernel/pddf/devices/temp_sensor/i2c/i2c_name"%(dev['dev_info']['device_name'])
             #self.runcmd(cmd)
             #cmd= "echo 'add' > /sys/kernel/pddf/devices/temp_sensor/i2c/dev_ops"
@@ -416,7 +416,7 @@ class PddfParse():
             #os.system("sleep 1")
 
     def delete_fan_device(self, dev, ops):
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['FAN']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['FAN']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/fan/i2c/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
             cmd= "echo 'delete' > /sys/kernel/pddf/devices/fan/i2c/dev_ops"
@@ -430,7 +430,7 @@ class PddfParse():
 
 
     def delete_psu_i2c_device(self, dev, ops):
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PSU']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['PSU']:
             cmd= "echo '%s' > /sys/kernel/pddf/devices/psu/i2c/i2c_name"%(dev['dev_info']['device_name'])
             self.runcmd(cmd)
             cmd = "echo 'delete' > /sys/kernel/pddf/devices/psu/i2c/dev_ops"
@@ -754,7 +754,7 @@ class PddfParse():
     def show_psu_i2c_device(self, dev, ops):
         KEY ='psu'
         path='pddf/devices/psu/i2c'
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PSU']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['PSU']:
             if not KEY in self.sysfs_obj:
                     self.sysfs_obj[KEY] = []
                     self.sysfs_device(dev['i2c']['topo_info'], path, self.sysfs_obj, KEY)
@@ -788,7 +788,7 @@ class PddfParse():
     def show_fan_device(self, dev, ops):
         KEY ='fan'
         path='pddf/devices/fan/i2c'
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['FAN']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['FAN']:
             if not KEY in self.sysfs_obj:
                     self.sysfs_obj[KEY] = []
 
@@ -822,7 +822,7 @@ class PddfParse():
 
     def show_xcvr_i2c_device(self, dev, ops):
         KEY ='xcvr'
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PORT_MODULE']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['PORT_MODULE']:
             if not KEY in self.sysfs_obj:
                     self.sysfs_obj[KEY] = []
                     self.sysfs_device(dev['i2c']['topo_info'], "pddf/devices/xcvr/i2c", self.sysfs_obj, KEY)
@@ -845,7 +845,7 @@ class PddfParse():
 
     def show_cpld_device(self, dev, ops):
         KEY ='cpld'
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['CPLD']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['CPLD']:
             if not KEY in self.sysfs_obj:
                     self.sysfs_obj[KEY] = []
                     self.sysfs_device(dev['i2c']['topo_info'], "pddf/devices/cpld", self.sysfs_obj, KEY)
@@ -903,7 +903,7 @@ class PddfParse():
                     print "xcvr validation Failed"
                     return
 
-        elif dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PORT_MODULE']:
+        elif dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['PORT_MODULE']:
             for attr in dev['i2c']['attr_list']:
                 #if 'attr_name' in attr.keys() and 'xcvr_present' in attr.values():
                 if attr.get("attr_name") in dev_attribs:
@@ -975,7 +975,7 @@ class PddfParse():
         dev_attribs = ['none']
         ret_val = "fan failed"
 
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['FAN']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['FAN']:
             if dev['i2c']['dev_attr']['num_fan'] is not None:
                 numfans = dev['i2c']['dev_attr']['num_fan']
                 #for fn in range(0, numfans):
@@ -992,7 +992,7 @@ class PddfParse():
                       ]
         ret_val = "psu failed"
 
-        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['drivers']['PSU']:
+        if dev['i2c']['topo_info']['dev_type'] in self.data['PLATFORM']['pddf_dev_types']['PSU']:
             for attr in dev['i2c']['attr_list']:
                 if attr.get("attr_name") in dev_attribs:
                     if attr.get("attr_devaddr") is not None:
@@ -1328,7 +1328,7 @@ class PddfParse():
         except IOError:
             pass
         
-        if 'mult' in bmc_attr.keys():
+        if 'mult' in bmc_attr.keys() and not value.isalpha():
             value = float(value) * float(bmc_attr['mult'])
     
         return str(value)

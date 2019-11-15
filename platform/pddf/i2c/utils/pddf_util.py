@@ -39,6 +39,8 @@ DEBUG = False
 args = []
 ALL_DEVICE = {}               
 FORCE = 0
+kos = []
+devs = []
 
 # Instantiate the class pddf_obj 
 pddf_obj = pddfparse.PddfParse()
@@ -58,6 +60,7 @@ def main():
     global DEBUG
     global args
     global FORCE
+    global kos
         
     if len(sys.argv)<2:
         show_help()
@@ -70,7 +73,12 @@ def main():
         print options
         print args
         print len(sys.argv)
-            
+    
+    # generate the KOS list from pddf device JSON file
+    kos.extend(pddf_obj.data['PLATFORM']['std_kos'])
+    kos.extend(pddf_obj.data['PLATFORM']['pddf_kos'])
+    kos = ['modprobe '+i for i in kos]
+
     for opt, arg in options:
         if opt in ('-h', '--help'):
             show_help()
@@ -122,29 +130,6 @@ def driver_check():
         return False   
     return True
 
-kos = [
-'modprobe i2c-ismt',
-'modprobe i2c-i801',
-'modprobe i2c_dev',
-'modprobe i2c_mux_pca954x force_deselect_on_exit=1',
-'modprobe pddf_client_module'  ,
-'modprobe optoe'      ,
-'modprobe pddf_cpld_module'  ,
-'modprobe pddf_xcvr_module',
-'modprobe pddf_mux_module'  ,
-'modprobe pddf_gpio_module'  ,
-'modprobe pddf_cpld_driver' ,
-'modprobe pddf_xcvr_driver_module' ,
-'modprobe pddf_psu_driver_module' ,
-'modprobe pddf_psu_module' ,
-'modprobe pddf_fan_driver_module' ,
-#'modprobe -f platform_pddf_fan' ,
-'modprobe pddf_fan_module' ,
-'modprobe pddf_led_module' ,
-'modprobe pddf_sysstatus_module'
-]
-
-devs = []
 
 # Returns platform and HW SKU
 def get_platform_and_hwsku():
