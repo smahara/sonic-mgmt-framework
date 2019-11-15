@@ -594,8 +594,9 @@ module openconfig-system-annot {
     }
 
     deviation /oc-sys:system/oc-sys:processes {
-      deviate add {
-      }
+        deviate add {
+            sonic-ext:subtree-transformer "sys_procs_xfmr";
+        }
     }
 
     deviation /oc-sys:system/oc-sys:processes/oc-sys:process {
@@ -1104,8 +1105,9 @@ module openconfig-system-annot {
     }
 
     deviation /oc-sys:system/oc-sys:memory {
-      deviate add {
-      }
+        deviate add {
+            sonic-ext:subtree-transformer "sys_memory_xfmr";
+        }
     }
 
     deviation /oc-sys:system/oc-sys:memory/oc-sys:config {
@@ -1194,8 +1196,9 @@ module openconfig-system-annot {
     }
 
     deviation /oc-sys:system/oc-sys:cpus {
-      deviate add {
-      }
+        deviate add {
+            sonic-ext:subtree-transformer "sys_cpus_xfmr";
+        }
     }
 
     deviation /oc-sys:system/oc-sys:cpus/oc-sys:cpu {
@@ -1849,8 +1852,9 @@ module openconfig-system-annot {
     }
 
     deviation /oc-sys:system/oc-sys:state {
-      deviate add {
-      }
+        deviate add {
+            sonic-ext:subtree-transformer "sys_state_xfmr";
+        }
     }
 
     deviation /oc-sys:system/oc-sys:state/oc-sys:domain-name {
@@ -1982,6 +1986,5 @@ module openconfig-system-annot {
       deviate add {
       }
     }
-
 }
 
