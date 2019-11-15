@@ -1071,7 +1071,7 @@ func getAllDbs(isGetCase bool) ([db.MaxDB]*db.DB, error) {
 	}
 
     //Create User DB connection
-    dbs[db.UserDB], err = db.NewDB(getDBOptions(db.UserDB, isWriteDisabled))
+    dbs[db.UserDB], err = db.NewDB(getDBOptions(db.UserDB))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
@@ -1110,7 +1110,7 @@ func getDBOptions(dbNo db.DBNum, isWriteDisabled bool) db.Options {
 		opt = getDBOptionsWithSeparator(dbNo, "", ":", ":", isWriteDisabled)
 		break
 	case db.FlexCounterDB, db.AsicDB, db.LogLevelDB, db.ConfigDB, db.StateDB, db.ErrorDB, db.UserDB:
-		opt = getDBOptionsWithSeparator(dbNo, "", "|", "|", isWriteDisabled)
+		opt = getDBOptionsWithSeparator(dbNo, "", "|", "|")
 		break
 	}
 
