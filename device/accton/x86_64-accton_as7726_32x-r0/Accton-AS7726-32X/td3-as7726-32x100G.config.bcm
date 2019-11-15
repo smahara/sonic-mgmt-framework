@@ -4,11 +4,6 @@ dpp_clock_ratio=2:3
 
 oversubscribe_mode=1
 
-#Evpn-Vxlan parameters
-use_all_splithorizon_groups=1
-flow_init_mode=1
-sai_tunnel_support=1
-
 #RIOT Enable
 riot_enable=1
 riot_overlay_l3_intf_mem_size=4096
@@ -22,8 +17,6 @@ parity_enable=0
 mem_cache_enable=0
 
 l3_alpm_ipv6_128b_bkt_rsvd=1
-l2_mem_entries=40960
-l3_mem_entries=40960
 fpem_mem_entries=0
 ifp_inports_support_enable=1
 l2xmsg_mode=1
@@ -35,7 +28,6 @@ bcm_stat_interval=2000000
 cdma_timeout_usec=3000000
 ipv6_lpm_128b_enable=0x1
 l3_max_ecmp_mode=1
-#l3_alpm_enable=2
 lpm_scaling_enable=0
 max_vp_lags=0
 miim_intr_enable=0

@@ -11,6 +11,7 @@ if [ -d  ${CONFIG_PROFILES_BASE} ]; then
     CONFIG_FILE_ACTIVE_PROFILE_DIR=/usr/share/sonic/device/$PLATFORM/$HW_KEY/$(cat ${ACTIVE_PROFILE_FLAG})
     if [ -d ${CONFIG_FILE_ACTIVE_PROFILE_DIR} ]; then
         sudo sed -i "/\b\(l2_mem_entries\|l3_mem_entries\|l3_alpm_enable\)\b/d" ${CONFIG_FILE_DIR}/*config.bcm 
+        sudo sed -i "/\b\(use_all_splithorizon_groups\|flow_init_mode\|sai_tunnel_support\)\b/d" ${CONFIG_FILE_DIR}/*config.bcm 
         sudo cat ${CONFIG_FILE_ACTIVE_PROFILE_DIR}/config >> ${CONFIG_FILE_DIR}/*config.bcm
     fi
 fi
