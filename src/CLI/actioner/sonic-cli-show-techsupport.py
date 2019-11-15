@@ -34,10 +34,10 @@ def run(func, args):
 	    else:
 		if func == 'rpc_sonic_show_techsupport_sonic_show_techsupport_info':
                     if not response['sonic-show-techsupport:output']:
-                        print("ERROR: No top level output object: no output file available")
+                        print("ERROR: no output file available")
                         return
                     elif response['sonic-show-techsupport:output'] is None:
-                        print("ERROR: No second level output object: No output file available")
+                        print("ERROR: No output file available")
 		        return
                     output_file_object = response['sonic-show-techsupport:output']
                     if output_file_object['output-filename'] is None:
