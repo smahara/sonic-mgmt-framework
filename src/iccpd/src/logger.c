@@ -71,7 +71,7 @@ struct LoggerConfig* logger_get_configuration()
     if (config.init == 0)
     {
         config.console_log_enabled = 0;
-        config.log_level = DEBUG_LOG_LEVEL;
+        config.log_level = NOTICE_LOG_LEVEL;
         config.init = 1;
     }
 
