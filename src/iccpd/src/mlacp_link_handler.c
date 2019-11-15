@@ -2249,6 +2249,8 @@ void mlacp_peer_conn_handler(struct CSM* csm)
             csm->mlag_id, peer_if->name,
             (peer_if->state == PORT_STATE_UP)? true : false);
     }
+
+    sync_unique_ip();
     return;
 }
 
@@ -3315,8 +3317,9 @@ int iccp_mclagsyncd_mclag_unique_ip_cfg_handler(struct System *sys, char *msg_bu
     struct IccpSyncdHDr *msg_hdr;
     struct mclag_unique_ip_cfg_info *cfg_info;
     struct LocalInterface *lif = NULL;
-    int count, i = 0;
+    int count = 0, i = 0;
     int sync_add = 0, is_v4 = 0, is_v6 = 0;
+    struct Unq_ip_If_info* unq_ip_if = NULL;
 
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
 
@@ -3328,6 +3331,42 @@ int iccp_mclagsyncd_mclag_unique_ip_cfg_handler(struct System *sys, char *msg_bu
         cfg_info = (struct mclag_unique_ip_cfg_info*)((char *)(msg_buf) + sizeof(struct IccpSyncdHDr) + i * sizeof(struct mclag_unique_ip_cfg_info));
         ICCPD_LOG_NOTICE(__FUNCTION__, "recv mclag unique ip cfg msg, op_type:%d ifname:%s ",
                 cfg_info->op_type, cfg_info->mclag_unique_ip_ifname);
+
+        if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
+        {
+            LIST_FOREACH(unq_ip_if, &(sys->unq_ip_if_list), if_next)
+            {
+                if (strcmp(unq_ip_if->name, cfg_info->mclag_unique_ip_ifname) == 0)
+                {
+                    break;
+                }
+            }
+
+            if (!unq_ip_if) 
+            {
+                unq_ip_if = (struct Unq_ip_If_info *)malloc(sizeof(struct Unq_ip_If_info));
+                if (!unq_ip_if)
+                    return -1;
+
+                snprintf(unq_ip_if->name, MAX_L_PORT_NAME, "%s", cfg_info->mclag_unique_ip_ifname);
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Add mclag_unique_ip_ifname %s", unq_ip_if->name);
+                LIST_INSERT_HEAD(&(sys->unq_ip_if_list), unq_ip_if, if_next);
+            }
+
+        }
+        else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL)
+        {
+            LIST_FOREACH(unq_ip_if, &(sys->unq_ip_if_list), if_next)
+            {
+                if (strcmp(unq_ip_if->name, cfg_info->mclag_unique_ip_ifname) == 0)
+                {
+                    ICCPD_LOG_DEBUG(__FUNCTION__, "Del mclag_unique_ip_ifname %s", unq_ip_if->name);
+                    LIST_REMOVE(unq_ip_if, if_next);
+                    free(unq_ip_if);
+                    break;
+                }
+            }
+        }
 
         lif = local_if_find_by_name(cfg_info->mclag_unique_ip_ifname);
         if (lif)
@@ -3558,6 +3597,8 @@ char * mclagd_ctl_cmd_str(int req_type)
         case INFO_TYPE_DUMP_DBG_COUNTERS:
             return "dump debug counters";
 
+        case INFO_TYPE_DUMP_UNIQUE_IP:
+            return "dump unique_ip";
         default:
             break;
     }
@@ -3900,7 +3941,7 @@ void mclagd_ctl_handle_dump_local_portlist(int client_fd, int mclag_id)
 {
     char * Pbuf = NULL;
     char buf[512] = { 0 };
-    int lif_num = 0;;
+    int lif_num = 0;
     int ret = 0;
     struct mclagd_reply_hdr *hd = NULL;
     int len_tmp = 0;
@@ -4013,6 +4054,46 @@ void mclagd_ctl_handle_dump_dbg_counters(int client_fd, int mclag_id)
        free(Pbuf);
 }
 
+void mclagd_ctl_handle_dump_unique_ip(int client_fd, int mclag_id)
+{
+    char *Pbuf = NULL;
+    char buf[512] = { 0 };
+    int lif_num = 0;
+    int ret = 0;
+    struct mclagd_reply_hdr *hd = NULL;
+    int len_tmp = 0;
+
+    ret = iccp_unique_ip_if_dump(&Pbuf, &lif_num, mclag_id);
+    if (ret != EXEC_TYPE_SUCCESS)
+    {
+        len_tmp = sizeof(struct mclagd_reply_hdr);
+        memcpy(buf, &len_tmp, sizeof(int));
+        hd = (struct mclagd_reply_hdr *)(buf + sizeof(int));
+        hd->exec_result = ret;
+        hd->info_type = INFO_TYPE_DUMP_LOCAL_PORTLIST;
+        hd->data_len = 0;
+        mclagd_ctl_sock_write(client_fd, buf, MCLAGD_REPLY_INFO_HDR);
+
+        if (Pbuf)
+            free(Pbuf);
+
+        return;
+    }
+
+    hd = (struct mclagd_reply_hdr *)(Pbuf + sizeof(int));
+    hd->exec_result = EXEC_TYPE_SUCCESS;
+    hd->info_type = INFO_TYPE_DUMP_UNIQUE_IP;
+    hd->data_len = lif_num * sizeof(struct mclagd_unique_ip_if);
+    len_tmp = (hd->data_len + sizeof(struct mclagd_reply_hdr));
+    memcpy(Pbuf, &len_tmp, sizeof(int));
+    mclagd_ctl_sock_write(client_fd, Pbuf, MCLAGD_REPLY_INFO_HDR + hd->data_len);
+
+    if (Pbuf)
+        free(Pbuf);
+
+    return;
+}
+
 int mclagd_ctl_interactive_process(int client_fd)
 {
     char buf[512] = { 0 };
@@ -4066,6 +4147,9 @@ int mclagd_ctl_interactive_process(int client_fd)
              mclagd_ctl_handle_dump_dbg_counters(client_fd, req->mclag_id);
             break;
 
+        case INFO_TYPE_DUMP_UNIQUE_IP:
+            mclagd_ctl_handle_dump_unique_ip(client_fd, req->mclag_id);
+            break;
         default:
             return MCLAG_ERROR;
     }
@@ -4078,8 +4162,12 @@ int syn_local_mac_info_to_peer(struct CSM* csm, struct LocalInterface *local_if,
     struct MACMsg mac_msg;
     int msg_len = 0, rc = MCLAG_ERROR;
     int vid = 0;
+    uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
     if (!csm || !local_if)
+        return MCLAG_ERROR;
+
+    if (memcmp(MLACP(csm).system_id, null_mac, ETHER_ADDR_LEN) == 0)
         return MCLAG_ERROR;
 
     if (sync_add) {
@@ -4093,7 +4181,7 @@ int syn_local_mac_info_to_peer(struct CSM* csm, struct LocalInterface *local_if,
     mac_msg.vid = vid;
     mac_msg.fdb_type = MAC_TYPE_STATIC;
     memcpy(mac_msg.origin_ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
-    memcpy(mac_msg.mac_addr, local_if->mac_addr, ETHER_ADDR_LEN);
+    memcpy(mac_msg.mac_addr, MLACP(csm).system_id, ETHER_ADDR_LEN);
 
     ICCPD_LOG_DEBUG(__FUNCTION__,"add %d, mac name %s, vid %d", sync_add, mac_msg.origin_ifname, mac_msg.vid);
     ICCPD_LOG_DEBUG(__FUNCTION__,"mac [%02X:%02X:%02X:%02X:%02X:%02X]",
@@ -4256,9 +4344,45 @@ int syn_ack_local_neigh_mac_info_to_peer(char *ifname)
         {
             is_v6 = 1;
         }
-        ICCPD_LOG_DEBUG(__FUNCTION__," v4 %d, v6 %d, l3_mode %d", is_v4, is_v6, lif->l3_mode);
-        if (lif->l3_mode) {
+        ICCPD_LOG_DEBUG(__FUNCTION__," v4 %d, v6 %d, l3_mode %d, proto %d", is_v4, is_v6, lif->l3_mode, lif->is_l3_proto_enabled);
+        if (lif->l3_mode && lif->is_l3_proto_enabled) {
             syn_local_neigh_mac_info_to_peer(lif, 1, is_v4, is_v6, 1, 0);
         }
     }
+}
+
+int is_unique_ip_configured(char *ifname)
+{
+    struct System* sys = NULL;
+    struct Unq_ip_If_info* unq_ip_if = NULL;
+
+    if (!(sys = system_get_instance()))
+        return 0;
+
+    LIST_FOREACH(unq_ip_if, &(sys->unq_ip_if_list), if_next)
+    {
+        if (strcmp(unq_ip_if->name, ifname) == 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int sync_unique_ip()
+{
+    struct System* sys = NULL;
+    struct Unq_ip_If_info* unq_ip_if = NULL;
+
+    if (!(sys = system_get_instance()))
+        return 0;
+
+    LIST_FOREACH(unq_ip_if, &(sys->unq_ip_if_list), if_next)
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__, "unq_ip_if name %s", unq_ip_if->name);
+        syn_ack_local_neigh_mac_info_to_peer(unq_ip_if->name);
+    }
+
+    return 0;
 }

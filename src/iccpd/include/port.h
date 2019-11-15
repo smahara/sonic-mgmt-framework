@@ -71,6 +71,12 @@ struct If_info
     LIST_ENTRY(If_info) csm_next;
 };
 
+struct Unq_ip_If_info
+{
+    char name[MAX_L_PORT_NAME];
+    LIST_ENTRY(Unq_ip_If_info) if_next;
+};
+
 struct VLAN_ID
 {
     uint16_t vid;

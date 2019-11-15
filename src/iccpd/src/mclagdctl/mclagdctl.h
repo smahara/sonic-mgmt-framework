@@ -82,6 +82,7 @@ enum mclagdctl_notify_peer_type
     INFO_TYPE_DUMP_NDISC,
     INFO_TYPE_DUMP_MAC,
     INFO_TYPE_DUMP_L2MC,
+    INFO_TYPE_DUMP_UNIQUE_IP,
     INFO_TYPE_DUMP_LOCAL_PORTLIST,
     INFO_TYPE_DUMP_PEER_PORTLIST,
     INFO_TYPE_DUMP_DBG_COUNTERS,
@@ -226,6 +227,12 @@ typedef struct mclagd_dbg_counter_info
      */
 }mclagd_dbg_counter_info_t;
 
+struct mclagd_unique_ip_if
+{
+    int active;
+    char name[MCLAGDCTL_MAX_L_PORT_NANE];
+};
+
 extern int mclagdctl_enca_dump_state(char *msg, int mclag_id,  int argc, char **argv);
 extern int mclagdctl_parse_dump_state(char *msg, int data_len);
 extern int mclagdctl_enca_dump_arp(char *msg, int mclag_id, int argc, char **argv);
@@ -242,3 +249,5 @@ extern int mclagdctl_enca_dump_peer_portlist(char *msg, int mclag_id,  int argc,
 extern int mclagdctl_parse_dump_peer_portlist(char *msg, int data_len);
 extern int mclagdctl_enca_dump_dbg_counters(char *msg, int mclag_id, int argc, char **argv);
 extern int mclagdctl_parse_dump_dbg_counters(char *msg, int data_len);
+extern int mclagdctl_enca_dump_unique_ip(char *msg, int mclag_id, int argc, char **argv);
+extern int mclagdctl_parse_dump_unique_ip(char *msg, int data_len);

@@ -199,6 +199,7 @@ struct System
     LIST_HEAD(csm_list, CSM) csm_list;
     LIST_HEAD(lif_all_list, LocalInterface) lif_list;
     LIST_HEAD(lif_purge_all_list, LocalInterface) lif_purge_list;
+    LIST_HEAD(unq_ip_all_if_list, Unq_ip_If_info) unq_ip_if_list;
 
     /* Settings */
     char* log_file_path;

@@ -68,6 +68,7 @@ void system_init(struct System* sys)
     LIST_INIT(&(sys->csm_list));
     LIST_INIT(&(sys->lif_list));
     LIST_INIT(&(sys->lif_purge_list));
+    LIST_INIT(&(sys->unq_ip_if_list));
 
     sys->log_file_path = strdup("/var/log/iccpd.log");
     sys->cmd_file_path = strdup("/var/run/iccpd/iccpd.vty");
@@ -91,6 +92,7 @@ void system_finalize()
     struct System* sys = NULL;
     struct CSM* csm = NULL;
     struct LocalInterface* local_if = NULL;
+    struct Unq_ip_If_info* unq_ip_if = NULL;
 
     if ((sys = system_get_instance()) == NULL )
         return;
@@ -121,6 +123,13 @@ void system_finalize()
         local_if = LIST_FIRST(&(sys->lif_purge_list));
         LIST_REMOVE(local_if, system_purge_next);
         local_if_finalize(local_if);
+    }
+
+    while (!LIST_EMPTY(&(sys->unq_ip_if_list)))
+    {
+        unq_ip_if = LIST_FIRST(&(sys->unq_ip_if_list));
+        LIST_REMOVE(unq_ip_if, if_next);
+        free(unq_ip_if);
     }
 
     iccp_system_dinit_netlink_socket();
