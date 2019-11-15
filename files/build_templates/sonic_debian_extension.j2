@@ -184,6 +184,9 @@ sudo sed -i -e '/^passwd/s/ radius//' $FILESYSTEM_ROOT/etc/nsswitch.conf
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/hwdiag*.deb || \
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
 
+# Install a custom version of kdump-tools  (and its dependencies via 'apt-get -y install -f')
+sudo DEBIAN_FRONTEND=noninteractive dpkg --root=$FILESYSTEM_ROOT -i $debs_path/kdump-tools_*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=truechroot $FILESYSTEM_ROOT apt-get -q --no-install-suggests --no-install-recommends --force-no install
 
 #system monitor service files
 sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/libswsscommon*.deb || \
@@ -260,7 +263,6 @@ sudo cp files/dhcp/90-dhcp6-systcl.conf.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMP
 # Copy initial interfaces configuration file, will be overwritten on first boot
 sudo cp $IMAGE_CONFIGS/interfaces/init_interfaces $FILESYSTEM_ROOT/etc/network/interfaces
 
-
 sudo mkdir -p $FILESYSTEM_ROOT/etc/network/interfaces.d
 
 # Copy hostcfgd files
@@ -301,6 +303,27 @@ sudo bash -c "echo '{ \"DEVICE_METADATA\": { \"localhost\": { \"default_bgp_stat
 j2 files/build_templates/config-setup.service.j2 | sudo tee $FILESYSTEM_ROOT/etc/systemd/system/config-setup.service
 sudo cp $IMAGE_CONFIGS/config-setup/config-setup $FILESYSTEM_ROOT/usr/bin/config-setup
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable config-setup.service
+
+# Copy config migration hooks
+sudo mkdir -p $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d
+if [ -d $IMAGE_CONFIGS/config-setup/migration-hooks-pre ]; then
+    sudo cp $IMAGE_CONFIGS/config-setup/migration-hooks-pre/*  $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d/
+fi
+sudo mkdir -p $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d
+if [ -d $IMAGE_CONFIGS/config-setup/migration-hooks-post ]; then
+    sudo cp $IMAGE_CONFIGS/config-setup/migration-hooks-post/*  $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d/
+fi
+for hook_dir in $FILESYSTEM_ROOT/etc/config-setup/config-migration-pre-hooks.d \
+                $FILESYSTEM_ROOT/etc/config-setup/config-migration-post-hooks.d ; do
+    if [ -d $hook_dir ]; then
+        for hook in $(ls -1 $hook_dir/*.j2); do
+            hook_full_filename=$(basename $hook)
+            hook_file="${hook_full_filename%.*}"
+            j2 $hook | sudo tee $hook_dir/$hook_file
+            sudo rm -f $hook
+        done
+    fi
+done
 
 # Copy SNMP configuration files
 sudo cp $IMAGE_CONFIGS/snmp/snmp.yml $FILESYSTEM_ROOT/etc/sonic/

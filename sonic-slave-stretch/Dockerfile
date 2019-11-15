@@ -277,7 +277,9 @@ RUN apt-get update && apt-get install -y \
 # For iptables
         libmnl-dev \
         libnetfilter-conntrack-dev \
-        libnftnl-dev
+        libnftnl-dev \
+# For kdump-tools
+        liblzo2-dev
 
 # For smartmontools 6.6-1
 RUN apt-get -t stretch-backports install -y debhelper

@@ -4,6 +4,9 @@ num_queues_pci=32
 num_queues_uc0=1
 bfd_cosq=32
 
+#PTP
+num_queues_uc1=1
+
 # accton_as7712_32x
 os=unix
 schan_intr_enable=0
@@ -23,6 +26,7 @@ pbmp_xport_xe=0x3ffffffffffffffffffffffffffffffffe
 arl_clean_timeout_usec=15000000
 asf_mem_profile=2
 bcm_num_cos=10
+default_cpu_tx_queue=9
 bcm_stat_flags=1
 bcm_stat_jumbo=9236
 cdma_timeout_usec=15000000

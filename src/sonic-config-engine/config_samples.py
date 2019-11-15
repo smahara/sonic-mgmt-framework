@@ -32,10 +32,10 @@ def generate_t1_sample_config(data):
                 }
         port_count += 1
 
-    data['ACL_CONTROL'] = {}
-    data['ACL_CONTROL']['ACL_LOOKUP'] = {}
-    data['ACL_CONTROL']['ACL_LOOKUP']['TYPE'] = 'Advanced'
-    data['ACL_CONTROL']['ACL_LOOKUP']['MODE'] = 'Dedicated'
+    data['HARDWARE'] = {}
+    data['HARDWARE']['ACCESS_LIST'] = {}
+    data['HARDWARE']['ACCESS_LIST']['LOOKUP'] = 'advanced'
+    data['HARDWARE']['ACCESS_LIST']['TCAM_SHARING'] = []
     return data;
 
 def generate_empty_config(data):
@@ -44,10 +44,10 @@ def generate_empty_config(data):
         new_data['DEVICE_METADATA']['localhost']['hostname'] = 'sonic'
     if not new_data['DEVICE_METADATA']['localhost'].has_key('type'):
         new_data['DEVICE_METADATA']['localhost']['type'] = 'LeafRouter'
-    data['ACL_CONTROL'] = {}
-    data['ACL_CONTROL']['ACL_LOOKUP'] = {}
-    data['ACL_CONTROL']['ACL_LOOKUP']['TYPE'] = 'Advanced'
-    data['ACL_CONTROL']['ACL_LOOKUP']['MODE'] = 'Dedicated'
+    data['HARDWARE'] = {}
+    data['HARDWARE']['ACCESS_LIST'] = {}
+    data['HARDWARE']['ACCESS_LIST']['LOOKUP'] = 'advanced'
+    data['HARDWARE']['ACCESS_LIST']['TCAM_SHARING'] = []
     return new_data
 
 def generate_l2_config(data):
@@ -61,10 +61,10 @@ def generate_l2_config(data):
     data['VLAN_MEMBER'] = {}
     for port in natsorted(data['PORT'].keys()):
         data['VLAN_MEMBER']['Vlan1000|{}'.format(port)] = {'tagging_mode': 'untagged'}
-    data['ACL_CONTROL'] = {}
-    data['ACL_CONTROL']['ACL_LOOKUP'] = {}
-    data['ACL_CONTROL']['ACL_LOOKUP']['TYPE'] = 'Advanced'
-    data['ACL_CONTROL']['ACL_LOOKUP']['MODE'] = 'Dedicated'
+    data['HARDWARE'] = {}
+    data['HARDWARE']['ACCESS_LIST'] = {}
+    data['HARDWARE']['ACCESS_LIST']['LOOKUP'] = 'advanced'
+    data['HARDWARE']['ACCESS_LIST']['TCAM_SHARING'] = []
     return data
 
 _sample_generators = {

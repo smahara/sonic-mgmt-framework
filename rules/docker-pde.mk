@@ -9,13 +9,12 @@ DOCKER_PDE_DBG = $(DOCKER_PDE_STEM)-$(DBG_IMAGE_MARK).gz
 
 $(DOCKER_PDE)_PATH = $(DOCKERS_PATH)/$(DOCKER_PDE_STEM)
 
-$(DOCKER_PDE)_DEPENDS += $(BRCM_SAI) $(PYTHON_NETIFACES)
+$(DOCKER_PDE)_DEPENDS += $(PYTHON_NETIFACES)
 ifeq ($(CONFIGURED_PLATFORM),broadcom)
-$(DOCKER_PDE)_DEPENDS += $(PYTHON_PDETEST) $(PDE_TEST_HOST) $(LIBPDETEST)
+$(DOCKER_PDE)_DEPENDS += $(BRCM_SAI) $(SONIC_PLATFORM_PDE) $(PYTHON_PDETEST) $(PDE_TEST_HOST) $(LIBPDETEST)
 endif
 $(DOCKER_PDE_RDEPENDS += $(PYTHON_NETIFACES)
 
-$(DOCKER_PDE)_PYTHON_DEBS += $(SONIC_PDE_TESTS)
 $(DOCKER_PDE)_PYTHON_DEBS += $(SONIC_UTILS)
 $(DOCKER_PDE)_PYTHON_WHEELS += $(SONIC_PLATFORM_COMMON_PY2)
 
@@ -40,7 +39,8 @@ $(DOCKER_PDE)_RUN_OPT += -v /usr/lib/python2.7/dist-packages:/usr/share/sonic/cl
 $(DOCKER_PDE)_RUN_OPT += -v /var/log/syslog:/var/log/syslog:ro
 $(DOCKER_PDE)_RUN_OPT += -v /lib/modules:/lib/modules:ro
 $(DOCKER_PDE)_RUN_OPT += -v /boot:/boot:ro
-$(DOCKER_PDE)_BASE_IMAGE_FILES += port_breakout.py:/usr/local/bin/port_breakout.py
 
+$(DOCKER_PDE)_BASE_IMAGE_FILES += port_breakout.py:/usr/local/bin/port_breakout.py
+$(DOCKER_PDE)_BASE_IMAGE_FILES += pde-test-harness:/usr/local/bin/pde-test-harness
 
 endif

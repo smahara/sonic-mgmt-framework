@@ -44,6 +44,7 @@
 #include "../include/iccp_cmd.h"
 #include "../include/mlacp_link_handler.h"
 #include "../include/iccp_netlink.h"
+#include "../include/scheduler.h"
 
 /*****************************************
 * Enum
@@ -1789,8 +1790,8 @@ void iccp_send_l2mc_entry_to_syncd( struct L2MCMsg* l2mc_msg, uint8_t l2mc_type)
     l2mc_info = (struct mclag_l2mc_info *)&msg_buf[sizeof(struct IccpSyncdHDr)];
     l2mc_info->vid = l2mc_msg->vid;
     memcpy(l2mc_info->port_name, l2mc_msg->ifname, MAX_L_PORT_NAME);
-    memcpy(l2mc_info->saddr, l2mc_msg->saddr, 16);
-    memcpy(l2mc_info->gaddr, l2mc_msg->gaddr, 16);
+    memcpy(l2mc_info->saddr, l2mc_msg->saddr, INET_ADDRSTRLEN);
+    memcpy(l2mc_info->gaddr, l2mc_msg->gaddr, INET_ADDRSTRLEN);
     l2mc_info->type = l2mc_type;
     l2mc_info->op_type = l2mc_msg->op_type;
     msg_hdr->len = sizeof(struct IccpSyncdHDr) + sizeof(struct mclag_l2mc_info);
@@ -2735,6 +2736,14 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
 
                 ICCPD_LOG_DEBUG(__FUNCTION__, "Update MAC %s, vlan %d ifname %s",
                     mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
+                // MAC is local now Del entry from MCLAG_FDB_TABLE if peer not aged.
+                if (!(mac_msg->age_flag & MAC_AGE_PEER))
+                {
+                    ICCPD_LOG_DEBUG(__FUNCTION__, "MAC move Update MAC remote to local %s, vlan %d"
+                            " ifname %s, del entry from MCLAG_FDB_TABLE",
+                            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
+                    del_mac_from_chip(mac_msg);
+                }
             }
             else
             {
@@ -2743,6 +2752,14 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                 mac_info->age_flag = set_mac_local_age_flag(csm, mac_info, 0, 1);
                 ICCPD_LOG_DEBUG(__FUNCTION__, "Duplicate update MAC %s, vlan %d ifname %s",
                         mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
+                // MAC is local now Del entry from MCLAG_FDB_TABLE if peer not aged.
+                if (!(mac_msg->age_flag & MAC_AGE_PEER))
+                {
+                    ICCPD_LOG_DEBUG(__FUNCTION__, "Update MAC remote to local %s, vlan %d"
+                            " ifname %s, del entry from MCLAG_FDB_TABLE",
+                            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
+                    del_mac_from_chip(mac_msg);
+                }
                 return;
             }
         }
@@ -2915,8 +2932,8 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
     l2mc_msg = (struct L2MCMsg*)buf;
     l2mc_msg->op_type = op_type;
     l2mc_msg->l2mc_type = l2mc_type;
-    memcpy(l2mc_msg->saddr, saddr, 16);
-    memcpy(l2mc_msg->gaddr, gaddr, 16);
+    memcpy(l2mc_msg->saddr, saddr, INET_ADDRSTRLEN);
+    memcpy(l2mc_msg->gaddr, gaddr, INET_ADDRSTRLEN);
     l2mc_msg->vid = vid;
 
     /*Debug*/
@@ -2968,8 +2985,8 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
     csm = first_csm;
 
     l2mc_find.vid = vid;
-    memcpy(l2mc_find.saddr,saddr, 16);
-    memcpy(l2mc_find.gaddr,gaddr, 16);
+    memcpy(l2mc_find.saddr,saddr, INET_ADDRSTRLEN);
+    memcpy(l2mc_find.gaddr,gaddr, INET_ADDRSTRLEN);
     memcpy(l2mc_find.ifname, ifname, MAX_L_PORT_NAME);
 
     l2mc_info = RB_FIND(l2mc_rb_tree, &MLACP(csm).l2mc_rb ,&l2mc_find);
@@ -3183,45 +3200,85 @@ int iccp_mclagsyncd_mclag_domain_cfg_handler(struct System *sys, char *msg_buf)
 
         memcpy(system_mac_str, mac_addr_to_str(cfg_info->system_mac), sizeof(system_mac_str));
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "recv cfg msg ; domain_id:%d op_type:%d local_ip:%s peer_ip:%s peer_ifname:%s system_mac:%s session_timeout:%d keepalive_time:%d",cfg_info->domain_id, cfg_info->op_type, cfg_info->local_ip, cfg_info->peer_ip, cfg_info->peer_ifname, system_mac_str, cfg_info->session_timeout, cfg_info->keepalive_time);  
+        ICCPD_LOG_DEBUG(__FUNCTION__, "recv cfg msg ; domain_id:%d op_type:%d attr_bmap:0x%x local_ip:%s peer_ip:%s peer_ifname:%s system_mac:%s session_timeout:%d keepalive_time:%d",cfg_info->domain_id, cfg_info->op_type, cfg_info->attr_bmap, cfg_info->local_ip, cfg_info->peer_ip, cfg_info->peer_ifname, system_mac_str, cfg_info->session_timeout, cfg_info->keepalive_time);  
 
-        if (cfg_info->op_type == MCLAG_CFG_KEEPALIVE_TIME)
+        if (cfg_info->op_type == MCLAG_CFG_OPER_ADD || cfg_info->op_type == MCLAG_CFG_OPER_UPDATE) //mclag domain create/update
         {
-            if (cfg_info->keepalive_time != -1)
+            if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
             {
-                set_keepalive_time(cfg_info->domain_id, cfg_info->keepalive_time);
-            }
-        }
-        else if (cfg_info->op_type == MCLAG_CFG_SESSION_TIMEOUT)
-        {
-            if (cfg_info->keepalive_time != -1)
-            {
-                set_session_timeout(cfg_info->domain_id, cfg_info->session_timeout);
-            }
-        }
-        else if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
-        {
-            set_mc_lag_by_id(cfg_info->domain_id);
-
-            if (cfg_info->keepalive_time != -1)
-            {
-                set_keepalive_time(cfg_info->domain_id, cfg_info->keepalive_time);
-            }
-            if (cfg_info->session_timeout != -1)
-            {
-                set_session_timeout(cfg_info->domain_id, cfg_info->session_timeout);
+                set_mc_lag_by_id(cfg_info->domain_id);
+                set_local_system_id(system_mac_str);
             }
 
-            set_local_address(cfg_info->domain_id, cfg_info->local_ip);
-            set_peer_address(cfg_info->domain_id, cfg_info->peer_ip);
-            set_peer_link(cfg_info->domain_id, cfg_info->peer_ifname);
-            set_local_system_id(system_mac_str);
-        }
-        else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL)
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_SRC_ADDR)
+            {
+                set_local_address(cfg_info->domain_id, cfg_info->local_ip);
+            }
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_PEER_ADDR)
+            {
+                set_peer_address(cfg_info->domain_id, cfg_info->peer_ip);
+            }
+
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_PEER_LINK)
+            {
+                set_peer_link(cfg_info->domain_id, cfg_info->peer_ifname);
+            }
+
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_KEEPALIVE_INTERVAL)
+            {
+                if (cfg_info->keepalive_time != -1)
+                {
+                    set_keepalive_time(cfg_info->domain_id, cfg_info->keepalive_time);
+                }
+                else
+                {
+                    set_keepalive_time(cfg_info->domain_id, CONNECT_INTERVAL_SEC);
+                }
+            }
+
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_SESSION_TIMEOUT)
+            {
+                if (cfg_info->session_timeout != -1)
+                {
+                    set_session_timeout(cfg_info->domain_id, cfg_info->session_timeout);
+                }
+                else
+                {
+                    set_session_timeout(cfg_info->domain_id, HEARTBEAT_TIMEOUT_SEC);
+                }
+            }
+        } //MCLAG Domain create/update End
+        else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL) //mclag domain delete
         {
             unset_mc_lag_by_id(cfg_info->domain_id);
-        }
+        } //MCLAG Domain delete End
+        else if (cfg_info->op_type == MCLAG_CFG_OPER_ATTR_DEL) //mclag domain attribute delete
+        {
+            if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_PEER_LINK)
+            {
+                unset_peer_link(cfg_info->domain_id);
+            } 
+            else if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_KEEPALIVE_INTERVAL)
+            {
+                //reset to default
+                set_keepalive_time(cfg_info->domain_id, CONNECT_INTERVAL_SEC);
+            }
+            else if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_SESSION_TIMEOUT)
+            {
+                //reset to default
+                set_session_timeout(cfg_info->domain_id, HEARTBEAT_TIMEOUT_SEC);
+            }
+            else if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_SRC_ADDR)
+            {
+                unset_local_address(cfg_info->domain_id);
+            }
+            else if(cfg_info->attr_bmap & MCLAG_CFG_ATTR_PEER_ADDR)
+            {
+                unset_peer_address(cfg_info->domain_id);
+            }
+        } //MCLAG Domain Attribute delete End
     }
+
     return 0;
 }
 
@@ -3255,9 +3312,11 @@ int iccp_mclagsyncd_mclag_iface_cfg_handler(struct System *sys, char *msg_buf)
 
 int iccp_mclagsyncd_mclag_unique_ip_cfg_handler(struct System *sys, char *msg_buf)
 {
-    struct IccpSyncdHDr * msg_hdr;
-    struct mclag_unique_ip_cfg_info* cfg_info;
+    struct IccpSyncdHDr *msg_hdr;
+    struct mclag_unique_ip_cfg_info *cfg_info;
+    struct LocalInterface *lif = NULL;
     int count, i = 0;
+    int sync_add = 0, is_v4 = 0, is_v6 = 0;
 
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
 
@@ -3270,13 +3329,42 @@ int iccp_mclagsyncd_mclag_unique_ip_cfg_handler(struct System *sys, char *msg_bu
         ICCPD_LOG_NOTICE(__FUNCTION__, "recv mclag unique ip cfg msg, op_type:%d ifname:%s ",
                 cfg_info->op_type, cfg_info->mclag_unique_ip_ifname);
 
-        if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
+        lif = local_if_find_by_name(cfg_info->mclag_unique_ip_ifname);
+        if (lif)
         {
-            //TBD
-        }
-        else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL)
-        {
-            //TBD
+            if (cfg_info->op_type == MCLAG_CFG_OPER_ADD)
+            {
+                lif->is_l3_proto_enabled = true;
+                sync_add = 1;
+                if (lif->ipv4_addr)
+                {
+                    is_v4 = 1;
+                }
+
+                if (lif->prefixlen_v6)
+                {
+                    is_v6 = 1;
+                }
+            }
+            else if (cfg_info->op_type == MCLAG_CFG_OPER_DEL)
+            {
+                lif->is_l3_proto_enabled = false;
+                sync_add = 0;
+                if (lif->ipv4_addr)
+                {
+                    is_v4 = 1;
+                }
+
+                if (lif->prefixlen_v6)
+                {
+                    is_v6 = 1;
+                }
+            }
+
+            ICCPD_LOG_DEBUG(__FUNCTION__,"add %d, v4 %d, v6 %d, l3_mode %d", sync_add, is_v4, is_v6, lif->l3_mode);
+            if (lif->l3_mode) {
+                syn_local_neigh_mac_info_to_peer(lif, sync_add, is_v4, is_v6, 1, 1);
+            }
         }
     }
     return 0;
@@ -3985,4 +4073,192 @@ int mclagd_ctl_interactive_process(int client_fd)
     return 0;
 }
 
+int syn_local_mac_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add)
+{
+    struct MACMsg mac_msg;
+    int msg_len = 0, rc = MCLAG_ERROR;
+    int vid = 0;
 
+    if (!csm || !local_if)
+        return MCLAG_ERROR;
+
+    if (sync_add) {
+        mac_msg.op_type = MAC_SYNC_ADD;
+    } else {
+        mac_msg.op_type = MAC_SYNC_DEL;
+    }
+
+    sscanf (local_if->name,"Vlan%d",&vid);
+
+    mac_msg.vid = vid;
+    mac_msg.fdb_type = MAC_TYPE_STATIC;
+    memcpy(mac_msg.origin_ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
+    memcpy(mac_msg.mac_addr, local_if->mac_addr, ETHER_ADDR_LEN);
+
+    ICCPD_LOG_DEBUG(__FUNCTION__,"add %d, mac name %s, vid %d", sync_add, mac_msg.origin_ifname, mac_msg.vid);
+    ICCPD_LOG_DEBUG(__FUNCTION__,"mac [%02X:%02X:%02X:%02X:%02X:%02X]",
+        mac_msg.mac_addr[0], mac_msg.mac_addr[1], mac_msg.mac_addr[2], mac_msg.mac_addr[3], mac_msg.mac_addr[4], mac_msg.mac_addr[5]);
+
+    memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
+    msg_len = mlacp_prepare_for_mac_info_to_peer(csm, g_csm_buf, CSM_BUFFER_SIZE, &mac_msg, 0);
+    if (msg_len > 0)
+        rc = iccp_csm_send(csm, g_csm_buf, msg_len);
+
+    if (rc <= 0)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "failed rc %d", rc);
+    }
+    else
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__,"success");
+    }
+    return rc;
+}
+
+int syn_local_arp_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add, int ack)
+{
+    struct ARPMsg arp_msg;
+    int msg_len = 0, rc = MCLAG_ERROR;
+
+    if (!csm || !local_if)
+        return MCLAG_ERROR;
+
+    if (sync_add) {
+        arp_msg.op_type = NEIGH_SYNC_ADD;
+        if (ack) {
+            arp_msg.flag = NEIGH_SYNC_ACK;
+        }
+    } else {
+        arp_msg.op_type = NEIGH_SYNC_DEL;
+    }
+
+    arp_msg.ipv4_addr = local_if->ipv4_addr;
+    memcpy(arp_msg.ifname, local_if->name, MAX_L_PORT_NAME);
+    memcpy(arp_msg.mac_addr, local_if->mac_addr, ETHER_ADDR_LEN);
+
+    ICCPD_LOG_DEBUG(__FUNCTION__," add %d ack %d ifname %s, ip %s", sync_add, ack, arp_msg.ifname, show_ip_str(arp_msg.ipv4_addr));
+    ICCPD_LOG_DEBUG(__FUNCTION__," mac [%02X:%02X:%02X:%02X:%02X:%02X]",
+        arp_msg.mac_addr[0], arp_msg.mac_addr[1], arp_msg.mac_addr[2], arp_msg.mac_addr[3], arp_msg.mac_addr[4], arp_msg.mac_addr[5]);
+
+    memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
+    msg_len = mlacp_prepare_for_arp_info(csm, g_csm_buf, CSM_BUFFER_SIZE, &arp_msg, 0);
+    if (msg_len > 0)
+        rc = iccp_csm_send(csm, g_csm_buf, msg_len);
+
+    if (rc <= 0)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "failed rc %d", rc);
+    }
+    else
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__,"success");
+    }
+
+    return rc;
+}
+
+int syn_local_nd_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add, int ack)
+{
+    struct NDISCMsg nd_msg;
+    int msg_len = 0, rc = MCLAG_ERROR;
+
+    if (!csm || !local_if)
+        return MCLAG_ERROR;
+
+    if (sync_add) {
+        nd_msg.op_type = NEIGH_SYNC_ADD;
+        if (ack) {
+            nd_msg.flag = NEIGH_SYNC_ACK;
+        }
+    } else {
+        nd_msg.op_type = NEIGH_SYNC_DEL;
+    }
+
+    memcpy(nd_msg.ipv6_addr, local_if->ipv6_addr, 32);
+    memcpy(nd_msg.ifname, local_if->name, MAX_L_PORT_NAME);
+    memcpy(nd_msg.mac_addr, local_if->mac_addr, ETHER_ADDR_LEN);
+
+    ICCPD_LOG_DEBUG(__FUNCTION__,"add %d, ack %d ifname %s, ip %s", sync_add, ack, nd_msg.ifname, show_ipv6_str((char *)nd_msg.ipv6_addr));
+    ICCPD_LOG_DEBUG(__FUNCTION__,"mac [%02X:%02X:%02X:%02X:%02X:%02X]",
+        nd_msg.mac_addr[0], nd_msg.mac_addr[1], nd_msg.mac_addr[2], nd_msg.mac_addr[3], nd_msg.mac_addr[4], nd_msg.mac_addr[5]);
+
+    memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
+    msg_len = mlacp_prepare_for_ndisc_info(csm, g_csm_buf, CSM_BUFFER_SIZE, &nd_msg, 0);
+    if (msg_len > 0)
+        rc = iccp_csm_send(csm, g_csm_buf, msg_len);
+
+    if (rc <= 0)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "failed rc %d", rc);
+    }
+    else
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__,"success");
+    }
+
+    return rc;
+}
+
+int syn_local_neigh_mac_info_to_peer(struct LocalInterface *local_if,
+        int sync_add, int is_v4, int is_v6, int sync_mac, int ack)
+{
+    struct System* sys = NULL;
+    struct CSM* csm = NULL;
+
+    if ((sys = system_get_instance()) == NULL)
+        return MCLAG_ERROR;
+
+    while (!LIST_EMPTY(&(sys->csm_list)))
+    {
+        csm = LIST_FIRST(&(sys->csm_list));
+        break;
+    }
+
+    if (!csm)
+        return MCLAG_ERROR;
+
+    if (local_if->type != IF_T_VLAN)
+        return MCLAG_ERROR;
+
+    ICCPD_LOG_DEBUG(__FUNCTION__,"add %d, v4 %d, v6 %d, mac %d ack %d", sync_add, is_v4, is_v6, sync_mac, ack);
+    if (sync_mac) {
+        syn_local_mac_info_to_peer(csm, local_if, sync_add);
+    }
+
+    if (is_v4) {
+        syn_local_arp_info_to_peer(csm, local_if, sync_add, ack);
+    }
+
+    if (is_v6) {
+        syn_local_nd_info_to_peer(csm, local_if, sync_add, ack);
+    }
+
+    return 0;
+}
+
+int syn_ack_local_neigh_mac_info_to_peer(char *ifname)
+{
+    struct LocalInterface *lif = NULL;
+    int sync_add = 0, is_v4 = 0, is_v6 = 0;
+
+    if (!ifname)
+        return -1;
+
+    lif = local_if_find_by_name(ifname);
+    if (lif)
+    {
+        if (lif->ipv4_addr)
+        {
+            is_v4 = 1;
+        }
+
+        if (lif->prefixlen_v6)
+        {
+            is_v6 = 1;
+        }
+        ICCPD_LOG_DEBUG(__FUNCTION__," v4 %d, v6 %d, l3_mode %d", is_v4, is_v6, lif->l3_mode);
+        if (lif->l3_mode) {
+            syn_local_neigh_mac_info_to_peer(lif, 1, is_v4, is_v6, 1, 0);
+        }
+    }
+}

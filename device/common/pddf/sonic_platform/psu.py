@@ -85,15 +85,14 @@ class Psu(PsuBase):
         """
         status = 0
         device = "PSU{}".format(self.psu_index)
-        node = pddf_obj.get_path(device, "psu_present")
-        if node is None:
-            return False
-        try:
-            with open(node, 'r') as f:
-                status = f.read()
-        except IOError:
-            return False
-        vmap = plugin_data['PSU']['psu_present']['valmap']
+        output = pddf_obj.get_attr_name_output(device, "psu_present")
+	if not output:
+	    return False
+
+        mode = output['mode']
+	status = output['status']
+
+        vmap = plugin_data['PSU']['psu_present'][mode]['valmap']
 
         if status.rstrip('\n') in vmap:
             return vmap[status.rstrip('\n')]
@@ -108,14 +107,11 @@ class Psu(PsuBase):
             string: Model/part number of device
         """
         device = "PSU{}".format(self.psu_index)
-        node = pddf_obj.get_path(device, "psu_model_name")
-        if node is None:
-            return None
-        try:
-            with open(node, 'r') as f:
-                model = f.read()
-        except IOError:
-            return None
+        output = pddf_obj.get_attr_name_output(device, "psu_mfr_id")
+        if not output:
+            return None 
+
+        model = output['status']
 
         return model.rstrip('\n')
 
@@ -127,14 +123,11 @@ class Psu(PsuBase):
             string: Serial number of device
         """
         device = "PSU{}".format(self.psu_index)
-        node = pddf_obj.get_path(device, "psu_serial_num")
-        if node is None:
-            return None
-        try:
-            with open(node, 'r') as f:
-                serial = f.read()
-        except IOError:
-            return None
+        output = pddf_obj.get_attr_name_output(device, "psu_mfr_id")
+        if not output:
+            return None 
+
+        serial = output['status']
 
         return serial.rstrip('\n')
 
@@ -146,15 +139,15 @@ class Psu(PsuBase):
             A boolean value, True if device is operating properly, False if not
         """
         device = "PSU{}".format(self.psu_index)
-        node = pddf_obj.get_path(device,"psu_power_good")
-        if node is None:
+
+        output = pddf_obj.get_attr_name_output(device, "psu_power_good")
+        if not output:
             return False
-        try:
-            with open(node, 'r') as f:
-                status = f.read()
-        except IOError:
-            return False
-        vmap = plugin_data['PSU']['psu_power_good']['valmap']
+
+        mode = output['mode']
+        status = output ['status']
+
+        vmap = plugin_data['PSU']['psu_power_good'][mode]['valmap']
 
         if status.rstrip('\n') in vmap:
             return vmap[status.rstrip('\n')]
@@ -169,14 +162,11 @@ class Psu(PsuBase):
             string: Manufacturer Id of device
         """
         device = "PSU{}".format(self.psu_index)
-        node = pddf_obj.get_path(device, "psu_mfr_id")
-        if node is None:
-            return None
-        try:
-            with open(node, 'r') as f:
-                mfr = f.read()
-        except IOError:
-            return None
+        output = pddf_obj.get_attr_name_output(device, "psu_mfr_id")
+        if not output:
+            return None 
+
+	mfr = output['status']
 
         return mfr.rstrip('\n')
 
@@ -189,16 +179,12 @@ class Psu(PsuBase):
             e.g. 12.1
         """
         device = "PSU{}".format(self.psu_index)        
-        node = pddf_obj.get_path(device, "psu_v_out")
-        if node is None:
+        output = pddf_obj.get_attr_name_output(device, "psu_v_out")
+        if not output:
             return 0.0
-        try:
-            with open(node, 'r') as f:
-                v_out = f.read()
-        except IOError:
-            return 0.0
+		
+        v_out = output['status']
 
-        # voltage in mV
         return float(v_out)
 
     def get_current(self):
@@ -210,14 +196,11 @@ class Psu(PsuBase):
             e.g. 15.4
         """
         device = "PSU{}".format(self.psu_index)
-        node = pddf_obj.get_path(device, "psu_i_out")
-        if node is None:
+        output = pddf_obj.get_attr_name_output(device, "psu_i_out")
+        if not output:
             return 0.0
-        try:
-            with open(node, 'r') as f:
-                i_out = f.read()
-        except IOError:
-            return 0.0
+
+        i_out = output['status']
 
         # current in mA
         return float(i_out)
@@ -231,14 +214,11 @@ class Psu(PsuBase):
             e.g. 302.6
         """
         device = "PSU{}".format(self.psu_index)
-        node = pddf_obj.get_path(device, "psu_p_out")
-        if node is None:
+        output = pddf_obj.get_attr_name_output(device, "psu_p_out")
+        if not output:
             return 0.0
-        try:
-            with open(node, 'r') as f:
-                p_out = f.read()
-        except IOError:
-            return 0.0
+
+        p_out = output['status']
 
         # power is returned in micro watts
         return float(p_out)
@@ -257,12 +237,18 @@ class Psu(PsuBase):
         index = str(self.psu_index-1)
         color_state="SOLID"
         led_device_name = "PSU{}".format(self.psu_index) + "_LED"
-        if(not pddf_obj.is_led_device_configured(led_device_name, index)):
-		print "Set " + led_device_name + " : is not supported in the platform"
+
+        if (not led_device_name in pddf_obj.data.keys()):
+                print "ERROR: " + led_device_name + " is not configured"
                 return (False)
 
-        if (not color in color_map.keys()):
-                print "Invalid " + color
+        if (not color in self.color_map.keys()):
+                print "ERROR: Invalid color"
+                return (False)
+
+
+        if(not pddf_obj.is_led_device_configured(led_device_name, self.color_map[color])):
+                print "ERROR :" + led_device_name + ' ' + color + " :  is not supported in the platform"
                 return (False)
 
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
@@ -276,8 +262,9 @@ class Psu(PsuBase):
     def get_status_led(self, color):
         index = str(self.psu_index-1)
         led_device_name = "PSU{}".format(self.psu_index) + "_LED"
-        if(not pddf_obj.is_led_device_configured(led_device_name, index)):
-		print "Set " + led_device_name + " : is not supported in the platform"
+
+        if (not led_device_name in pddf_obj.data.keys()):
+                print "ERROR: " + led_device_name + " is not configured"
                 return (False)
 
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())

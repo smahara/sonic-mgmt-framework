@@ -1,6 +1,6 @@
-BRCM_SAI = libsaibcm_3.255.6.2_amd64.deb
-BRCM_SAI_DEV = libsaibcm-dev_3.255.6.2_amd64.deb
-BRCM_SAI_DIAG = libsaibcm-diag_3.255.6.2_amd64.deb
+BRCM_SAI = libsaibcm_3.255.6.4_amd64.deb
+BRCM_SAI_DEV = libsaibcm-dev_3.255.6.4_amd64.deb
+BRCM_SAI_DIAG = libsaibcm-diag_3.255.6.4_amd64.deb
 SAI_LIBS_MOUNT_POINT = /sai_libs
 
 ifneq  ($(LOCAL_SAI_DEBS_PATH),)

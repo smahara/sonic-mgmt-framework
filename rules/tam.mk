@@ -23,3 +23,8 @@ SONIC_COPY_FILES += $(SONIC_TS_MGR)
 SONIC_DROP_MGR = dropmgrd
 $(SONIC_DROP_MGR)_PATH = $(SRC_PATH)/sonic-tam/dropmgr
 SONIC_COPY_FILES += $(SONIC_DROP_MGR)
+
+# SONiC IFA Manager
+SONIC_IFA_MGR = ifamgrd
+$(SONIC_IFA_MGR)_PATH = $(SRC_PATH)/sonic-tam/ifamgr
+SONIC_COPY_FILES += $(SONIC_IFA_MGR)

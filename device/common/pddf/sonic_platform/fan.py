@@ -79,16 +79,21 @@ class Fan(FanBase):
         else:
             idx = (self.fantray_index-1)*self.platform['num_fans_pertray'] + self.fan_index
             attr_name = "fan" + str(idx) + "_present"
-            sysfs_path = pddf_obj.get_path("FAN-CTRL", attr_name)
-            if sysfs_path is None:
+            #sysfs_path = pddf_obj.get_path("FAN-CTRL", attr_name)
+            output = pddf_obj.get_attr_name_output("FAN-CTRL", attr_name)
+            if not output:
                 return False
-            try:
-                with open(sysfs_path, 'r') as f:
-                    presence = int(f.read())
-            except IOError:
-                return False
-            
-            status = (True if presence==1 else False)
+
+            mode = output['mode']
+            presence = output['status'].rstrip()
+
+            vmap = plugin_data['FAN']['present'][mode]['valmap']
+
+            if presence in vmap:
+                status = vmap[presence]
+            else:
+                status = False
+
             return status
 
     #def get_model(self):
@@ -126,17 +131,16 @@ class Fan(FanBase):
         if self.is_psu_fan:
             attr = "psu_fan_dir"
             device = "PSU{}".format(self.fans_psu_index)
-            path = pddf_obj.get_path(device, "psu_fan_dir")
-            if path is None:
-                return None
-            try:
-                with open(path, 'r') as f:
-                    val = f.read()
-            except IOError:
-                return None
+            output = pddf_obj.get_attr_name_output(device, "psu_fan_dir")
+            if not output:
+                return False
+
+            mode = output['mode']
+            val = output['status']
 
             val = val.rstrip()
-            vmap = plugin_data['PSU']['psu_fan_dir']['valmap']
+            vmap = plugin_data['PSU']['psu_fan_dir'][mode]['valmap']
+
             if val in vmap:
                 direction = vmap[val]
             else:
@@ -145,20 +149,17 @@ class Fan(FanBase):
         else:
             idx = (self.fantray_index-1)*self.platform['num_fans_pertray'] + self.fan_index
             attr = "fan" + str(self.fan_index) + "_direction"
-            path = pddf_obj.get_path("FAN-CTRL", attr)
-        
-            if path is None:
-                return None
-            try:
-                with open(path, 'r') as f:
-                    val = f.read()
-            except IOError:
-                return None
+            output = pddf_obj.get_attr_name_output("FAN-CTRL", attr)
+            if not output:
+                return False
+
+            mode = output['mode']
+            val = output['status']
 
             val = val.rstrip()
-            vmap = plugin_data['FAN']['direction']['valmap']
-            if val.rstrip('\n') in vmap:
-                direction = vmap[val.rstrip('\n')]
+            vmap = plugin_data['FAN']['direction'][mode]['valmap']
+            if val in vmap:
+                direction = vmap[val]
             else:
                 direction = val
 
@@ -175,30 +176,26 @@ class Fan(FanBase):
         if self.is_psu_fan:
             attr = "psu_fan{}_speed_rpm".format(self.fan_index)
             device = "PSU{}".format(self.fans_psu_index)
-            path = pddf_obj.get_path(device, attr)
-            if path is None:
-                return 0
-            try:
-                with open(path, 'r') as f:
-                    speed = int(f.read())
-            except IOError:
-                return 0
-            
+            output = pddf_obj.get_attr_name_output(device, attr)
+            if not output:
+                return False
+
+            mode = output['mode']
+            speed = int(output['status'].rstrip())
+
             max_speed = int(plugin_data['PSU']['PSU_FAN_MAX_SPEED'])
             speed_percentage = (speed*100)/max_speed
             return speed_percentage
         else:
             idx = (self.fantray_index-1)*self.platform['num_fans_pertray'] + self.fan_index
             attr = "fan" + str(idx) + "_pwm"
-            path = pddf_obj.get_path("FAN-CTRL", attr)
+            output = pddf_obj.get_attr_name_output("FAN-CTRL", attr)
 
-            if path is None:
+            if not output:
                 return 0
-            try:
-                with open(path, 'r') as f:
-                    fpwm = int(f.read())
-            except IOError:
-                return 0
+            
+            mode = output['mode']
+            fpwm = int(output['status'].rstrip())
 
             pwm_to_dc = eval(plugin_data['FAN']['pwm_to_duty_cycle'])
             speed_percentage = pwm_to_dc(fpwm)
@@ -216,29 +213,25 @@ class Fan(FanBase):
         if self.is_psu_fan:
             attr = "psu_fan{}_speed_rpm".format(self.fan_index)
             device = "PSU{}".format(self.fans_psu_index)
-            path = pddf_obj.get_path(device, attr)
-            if path is None:
-                return 0
-            try:
-                with open(path, 'r') as f:
-                    speed = int(f.read())
-            except IOError:
+            output = pddf_obj.get_attr_name_output(device, attr)
+            if not output:
                 return 0
             
+            mode = output['mode']
+            speed = int(float(output['status'].rstrip()))
+
             rpm_speed = speed
             return rpm_speed
         else:
             idx = (self.fantray_index-1)*self.platform['num_fans_pertray'] + self.fan_index
             attr = "fan" + str(idx) + "_input"
-            path = pddf_obj.get_path("FAN-CTRL", attr)
+            output = pddf_obj.get_attr_name_output("FAN-CTRL", attr)
 
-            if path is None:
+            if output is None:
                 return 0
-            try:
-                with open(path, 'r') as f:
-                    rpm_speed = int(f.read())
-            except IOError:
-                return 0
+
+            mode = output['mode']
+            rpm_speed = int(float(output['status'].rstrip()))
 
 
             return rpm_speed
@@ -282,35 +275,45 @@ class Fan(FanBase):
                 print "Error: Invalid speed %d. Please provide a valid speed percentage"%speed
                 return False
 
-            duty_cycle_to_pwm = eval(plugin_data['FAN']['duty_cycle_to_pwm'])
-            pwm = duty_cycle_to_pwm(speed)
-            #print "New Speed: %d%% - PWM value to be set is %d\n"%(speed,pwm)
-
-            status = 0
-            idx = (self.fantray_index-1)*self.platform['num_fans_pertray'] + self.fan_index
-            attr = "fan" + str(idx) + "_pwm"
-            node = pddf_obj.get_path("FAN-CTRL", attr)
-            if node is None:
+            if 'duty_cycle_to_pwm' not in plugin_data['FAN']:
+                print "Setting fan speed is not allowed !"
                 return False
-            try:
-                with open(node, 'w') as f:
-                    f.write(str(pwm))
-            except IOError:
-                return False
+            else:
+                duty_cycle_to_pwm = eval(plugin_data['FAN']['duty_cycle_to_pwm'])
+                pwm = duty_cycle_to_pwm(speed)
 
-            #print "Done changing the speed of all the fans ... Reading the speed to crossscheck\n"
-            return True
+                #print "New Speed: %d%% - PWM value to be set is %d\n"%(speed,pwm)
+
+                status = False
+                idx = (self.fantray_index-1)*self.platform['num_fans_pertray'] + self.fan_index
+                attr = "fan" + str(idx) + "_pwm"
+                output = pddf_obj.set_attr_name_output("FAN-CTRL", attr, pwm)
+                if not output:
+                    return False
+                
+                mode = output['mode']
+                status = output['status']
+
+                #print "Done changing the speed of all the fans ... Reading the speed to crossscheck\n"
+                return status
 
     def set_status_led(self, color):
         index = str(self.fantray_index-1)
         color_state="SOLID"
         led_device_name = "FANTRAY{}".format(self.fantray_index) + "_LED"
-        if(not pddf_obj.is_led_device_configured(led_device_name, index)):
-                print "Set " + led_device_name + " : is not supported in the platform"
+
+        if (not led_device_name in pddf_obj.data.keys()):
+                print "ERROR: " + led_device_name + " is not configured"
                 return (False)
 
         if (not color in self.color_map.keys()):
-                return ("Invalid color")
+                print "ERROR: Invalid color"
+                return (False)
+
+
+        if(not pddf_obj.is_led_device_configured(led_device_name, self.color_map[color])):
+                print "ERROR :" + led_device_name + ' ' + color + " is not supported in the platform"
+                return (False)
 
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())
         pddf_obj.create_attr('index', index, pddf_obj.get_led_path())
@@ -323,8 +326,9 @@ class Fan(FanBase):
     def get_status_led(self, color):
         index = str(self.fantray_index-1)
         led_device_name = "FANTRAY{}".format(self.fantray_index) + "_LED"
-        if(not pddf_obj.is_led_device_configured(led_device_name, index)):
-                print "Read " + led_device_name  + " : is not supported in the platform"
+
+        if (not led_device_name in pddf_obj.data.keys()):
+                print "ERROR: " + led_device_name + " is not configured"
                 return (False)
 
         pddf_obj.create_attr('device_name', led_device_name,  pddf_obj.get_led_path())

@@ -174,8 +174,8 @@ struct mclagd_l2mc_msg
 {
     unsigned char     op_type;/*add or del*/
     unsigned char     l2mc_type;/*static or dynamic*/
-    uint8_t     saddr[16];
-    uint8_t     gaddr[16];
+    uint8_t     saddr[INET_ADDRSTRLEN];
+    uint8_t     gaddr[INET_ADDRSTRLEN];
     unsigned short vid;
     /*Current if name that set in chip*/
     char     ifname[MCLAGDCTL_MAX_L_PORT_NANE];
