@@ -25,8 +25,8 @@ class Showtech(host_service.HostModule):
             output = ""
             print("Host side: Failed", rc)
             return rc, output
-
-        output_file_match = re.search('\/var\/.*dump.*\.gz', output)
+        output_string = output.decode("utf-8")
+        output_file_match = re.search('\/var\/.*dump.*\.gz', output_string)
         if output_file_match is not None:
             output_filename = output_file_match.group()
         else:
@@ -35,4 +35,4 @@ class Showtech(host_service.HostModule):
 
 def register():
     """Return the class name"""
-    return Showtech
+    return Showtech, MOD_NAME

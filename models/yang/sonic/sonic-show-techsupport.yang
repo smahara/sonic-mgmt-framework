@@ -25,11 +25,17 @@ module sonic-show-techsupport {
         input {
             leaf date {
                 type yang:date-and-time;
+                description
+                    "Date and time specification (in Linux 'date' format) of desired
+                    start point for collected log information";
             }
         }
         output {
             leaf output-filename {
                 type string;
+                description
+                    "Name of the host compressed tar file containing the collected
+                    technical support information";
             }
         }
 	}

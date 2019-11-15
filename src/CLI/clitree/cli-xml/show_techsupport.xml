@@ -45,7 +45,6 @@ limitations under the License.
             rpc_sonic_show_techsupport_sonic_show_techsupport_info
             ${date}
         </ACTION>
-        <xi:include href="include/pipe.xml"/>
    </COMMAND>
 </VIEW>
 </CLISH_MODULE>

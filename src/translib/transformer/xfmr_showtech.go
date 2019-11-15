@@ -19,39 +19,36 @@
 package transformer
 
 import (
-//	"bytes"
-//	"errors"
-//	"fmt"
-	"encoding/json"
-	"translib/tlerr"
-	"translib/db"
-	"github.com/golang/glog"
+    "encoding/json"
+    "translib/tlerr"
+    "translib/db"
+    "github.com/golang/glog"
 )
 
 func init() {
-	XlateFuncBind("rpc_showtech_cb", rpc_showtech_cb)
+    XlateFuncBind("rpc_showtech_cb", rpc_showtech_cb)
 }
 
 var rpc_showtech_cb RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) ([]byte, error) {
-	var err error
+    var err error
     var output string
-	var operand struct {
-		Input struct {
-			Date string `json:"date"`
-		} `json:"sonic-show-techsupport:input"`
-	}
+    var operand struct {
+        Input struct {
+        Date string `json:"date"`
+        } `json:"sonic-show-techsupport:input"`
+    }
 
-	err = json.Unmarshal(body, &operand)
-	if err != nil {
-		glog.Errorf("Failed to parse rpc input; err=%v", err)
-		return nil,tlerr.InvalidArgs("Invalid rpc input")
-	}
+    err = json.Unmarshal(body, &operand)
+        if err != nil {
+        glog.Errorf("Failed to parse rpc input; err=%v", err)
+        return nil,tlerr.InvalidArgs("Invalid rpc input")
+    }
 
-	var showtech struct {
-		Output struct {
-			Result string `json:"output-filename"`
-		} `json:"sonic-show-techsupport:output"`
-	}
+    var showtech struct {
+        Output struct {
+        Result string `json:"output-filename"`
+        } `json:"sonic-show-techsupport:output"`
+    }
 
     host_output := hostQuery("showtech.info", operand.Input.Date)
     if host_output.Err != nil {
@@ -65,5 +62,5 @@ var rpc_showtech_cb RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) ([]by
 
     result, err := json.Marshal(&showtech)
 
-	return result, nil
+    return result, nil
 }

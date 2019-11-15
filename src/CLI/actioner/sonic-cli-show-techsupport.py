@@ -1,27 +1,7 @@
 #!/usr/bin/python
+
 import sys
-import time
-import json
-import ast
-import re
-from scripts.render_cli import show_cli_output
-from rpipe_utils import pipestr
 import cli_client as cc
-import urllib3
-
-api = cc.ApiClient()
-urllib3.disable_warnings()
-plugins = dict()
-
-
-def register(func):
-    """Register sdk client method as a plug-in"""
-    plugins[func.__name__] = func
-    return func
-
-def call_method(name, args):
-    method = plugins[name]
-    return method(args)
 
 def invoke(func, args):
     body = None
@@ -49,8 +29,7 @@ def run(func, args):
             response = api_response.content
 
             if response is None:
-                print ("ERROR: No output file generated: \n"
-                       "Invalid input: Incorrect DateTime format")
+                print ("ERROR: No output file generated")
 
 	    else:
 		if func == 'rpc_sonic_show_techsupport_sonic_show_techsupport_info':
@@ -76,10 +55,11 @@ def run(func, args):
             print api_response.error_message()
 
     except:
-        print("Exception calling SonicShowTechsupportApi->%s\n" %(func))
+        print("An exception occurred while attempting to gather the requested "
+              "information via a remote procedure call. The failing RPC function "
+              " is: %s\n" %(func))
 
 if __name__ == '__main__':
-    pipestr().write(sys.argv)
     if len(sys.argv) == 3:
 	    run(sys.argv[1], sys.argv[2:])
     else:
