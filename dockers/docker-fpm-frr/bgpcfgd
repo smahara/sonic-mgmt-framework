@@ -529,6 +529,8 @@ class BGPConfigManager(object):
                          ('set_ext_community_ref',          '{no:no-prefix}set extcommunity {:ext-com-ref}')
     ]
 
+    listen_prefix_key_map = [('peer_group', '{no:no-prefix}bgp listen range {} peer-group {}')]
+
     comm_list_key_map = [(['type', 'community_member'], '{no:no-prefix}bgp community-list {1} {0} permit {2:com-list}')]
     ext_comm_list_key_map = [(['type', 'community_member'], '{no:no-prefix}bgp community-list {1} {0} permit {2:ext-com-list}')]
 
@@ -536,17 +538,18 @@ class BGPConfigManager(object):
 
     prefix_key_map = [('masklength_range', '{no:no-prefix}{} prefix-list {} permit {} {:msklen-range}')]
 
-    tbl_to_key_map = {'BGP_GLOBALS':        global_key_map,
-                      'BGP_GLOBALS_AF':     global_af_key_map,
-                      'BGP_NEIGHBOR':       cmn_key_map[0:2] + nbr_key_map + cmn_key_map[2:],
-                      'BGP_PEER_GROUP':     cmn_key_map,
-                      'BGP_NEIGHBOR_AF':    nbr_af_key_map,
-                      'BGP_PEER_GROUP_AF':  nbr_af_key_map,
-                      'ROUTE_MAP':          route_map_key_map,
-                      'COMMUNITY_SET':      comm_list_key_map,
-                      'EXTCOMMUNITY_SET':   ext_comm_list_key_map,
-                      'ASPATH_SET':         as_path_key_map,
-                      'PREFIX':             prefix_key_map
+    tbl_to_key_map = {'BGP_GLOBALS':                global_key_map,
+                      'BGP_GLOBALS_AF':             global_af_key_map,
+                      'BGP_GLOBALS_LISTEN_PREFIX':  listen_prefix_key_map,
+                      'BGP_NEIGHBOR':               cmn_key_map[0:2] + nbr_key_map + cmn_key_map[2:],
+                      'BGP_PEER_GROUP':             cmn_key_map,
+                      'BGP_NEIGHBOR_AF':            nbr_af_key_map,
+                      'BGP_PEER_GROUP_AF':          nbr_af_key_map,
+                      'ROUTE_MAP':                  route_map_key_map,
+                      'COMMUNITY_SET':              comm_list_key_map,
+                      'EXTCOMMUNITY_SET':           ext_comm_list_key_map,
+                      'ASPATH_SET':                 as_path_key_map,
+                      'PREFIX':                     prefix_key_map
     }
 
     def __init__(self, daemon):
@@ -574,6 +577,7 @@ class BGPConfigManager(object):
         daemon.add_manager(swsscommon.CONFIG_DB, swsscommon.CFG_BGP_NEIGHBOR_TABLE_NAME, self.__bgp_neighbor_handler)
         daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_PEER_GROUP_AF', self.__bgp_neighbor_af_handler)
         daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_NEIGHBOR_AF', self.__bgp_neighbor_af_handler)
+        daemon.add_manager(swsscommon.CONFIG_DB, 'BGP_GLOBALS_LISTEN_PREFIX', self.__bgp_table_handler_common)
 
     def __metadata_handler(self, key, op, table, data):
         if key != 'localhost':
@@ -629,7 +633,7 @@ class BGPConfigManager(object):
             dval.status = CachedDataWithOp.STAT_SUCC
             dval.op = CachedDataWithOp.OP_DELETE
 
-    def __delete_route_map(self, map_name, seq_no):
+    def __delete_route_map(self, map_name, seq_no, data):
         if map_name in self.route_map and seq_no in self.route_map[map_name]:
             del(self.route_map[map_name][seq_no])
         for dkey, dval in data.items():
@@ -701,6 +705,14 @@ class BGPConfigManager(object):
                                   'address-family {} {}'.format(af, ip_type)]
                     if not key_map.run_command(data, cmd_prefix):
                         syslog.syslog(syslog.LOG_ERR, 'failed running BGP global AF config command')
+                        continue
+            elif table == 'BGP_GLOBALS_LISTEN_PREFIX':
+                syslog.syslog(syslog.LOG_INFO, 'Set BGP listen prefix {}'.format(key))
+                if op == swsscommon.SET_COMMAND or op == swsscommon.DEL_COMMAND:
+                    cmd_prefix = ['configure terminal',
+                                  'router bgp {} vrf {}'.format(local_asn, vrf)]
+                    if not key_map.run_command(data, cmd_prefix, key):
+                        syslog.syslog(syslog.LOG_ERR, 'failed running BGP global listen prefix config command')
                         continue
             elif table == 'BGP_NEIGHBOR' or table == 'BGP_PEER_GROUP':
                 if op == swsscommon.SET_COMMAND:
@@ -774,7 +786,7 @@ class BGPConfigManager(object):
                             syslog.syslog(syslog.LOG_ERR, 'failed to configure route-map {} seq {}'.format(map_name, seq_no))
                             continue
                         if dval.op == CachedDataWithOp.OP_DELETE:
-                            self.__delete_route_map(map_name, seq_no)
+                            self.__delete_route_map(map_name, seq_no, data)
                             continue
                         if map_name not in self.route_map:
                             self.route_map[map_name] = {}
@@ -796,7 +808,7 @@ class BGPConfigManager(object):
                     if not run_command(command):
                         syslog.syslog(syslog.LOG_ERR, 'failed running route-map delete command')
                         continue
-                    self.__delete_route_map(map_name, seq_no)
+                    self.__delete_route_map(map_name, seq_no, data)
 
     def __add_op_to_data(self, table_key, data, comb_attr_list):
         if table_key not in self.table_data_cache:
