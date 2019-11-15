@@ -663,18 +663,13 @@ class Sfp(SfpBase):
             return reset_status
 
         device = 'PORT{}'.format(self.port_index)
-        path = pddf_obj.get_path(device, 'xcvr_reset')
-
-        if path is None:
+        output = pddf_obj.get_attr_name_output(device, 'xcvr_reset')
+        if not output:
             return False
 
-        try:
-            with open(path, 'r') as f:
-                status = f.read()
-        except IOError as e:
-            return False
+        mode = output['mode']
+        status = int(output['status'].rstrip())
 
-        status = status.rstrip()
         if status==1:
             reset_status = True
         else:
@@ -694,9 +689,9 @@ class Sfp(SfpBase):
             return rx_los
 
         device = 'PORT{}'.format(self.port_index)
-        path = pddf_obj.get_path(device, 'xcvr_rxlos')
+        output = pddf_obj.get_attr_name_output(device, 'xcvr_rxlos')
 
-        if path is None:
+        if not output:
             # read the values from EEPROM
             if self.is_osfp_port:
                 pass
@@ -720,13 +715,9 @@ class Sfp(SfpBase):
                     rx_los = (sffbase().test_bit(data, 1) != 0)
 
         else:
-            try:
-                with open(path, 'r') as f:
-                    status = f.read()
-            except IOError as e:
-                return False
+            mode = output['mode']
+            status = int(output['status'].rstrip())
 
-            status = status.rstrip()
             if status==1:
                 rx_los = True
             else:
@@ -746,9 +737,9 @@ class Sfp(SfpBase):
             return tx_fault
 
         device = 'PORT{}'.format(self.port_index)
-        path = pddf_obj.get_path(device, 'xcvr_txfault')
+        output = pddf_obj.get_attr_name_output(device, 'xcvr_txfault')
 
-        if path is None:
+        if not output:
             # read the values from EEPROM
             if self.is_osfp_port:
                 pass
@@ -771,13 +762,9 @@ class Sfp(SfpBase):
                     data = int(status_control_raw[0], 16)
                     tx_fault = (sffbase().test_bit(data, 2) != 0)
         else:
-            try:
-                with open(path, 'r') as f:
-                    status = f.read()
-            except IOError as e:
-                return False
+            mode = output['mode']
+            status = int(output['status'].rstrip())
 
-            status = status.rstrip()
             if status==1:
                 tx_fault = True
             else:
@@ -796,9 +783,9 @@ class Sfp(SfpBase):
             return tx_disable
 
         device = 'PORT{}'.format(self.port_index)
-        path = pddf_obj.get_path(device, 'xcvr_txdisable')
+        output = pddf_obj.get_attr_name_output(device, 'xcvr_txdisable')
 
-        if path is None:
+        if not output:
             # read the values from EEPROM
             if self.is_osfp_port:
                 return tx_disable
@@ -836,13 +823,9 @@ class Sfp(SfpBase):
 
                 return tx_disable
         else:
-            try:
-                with open(path, 'r') as f:
-                    status = f.read()
-            except IOError as e:
-                return False
+            mode = output['mode']
+            status = int(output['status'].rstrip())
 
-            status = status.rstrip()
             if status==1:
                 tx_disable = True
             else:
@@ -888,9 +871,9 @@ class Sfp(SfpBase):
             return lpmode
 
         device = 'PORT{}'.format(self.port_index)
-        path = pddf_obj.get_path(device, 'xcvr_lpmode')
+        output = pddf_obj.get_attr_name_output(device, 'xcvr_lpmode')
 
-        if path is None:
+        if not output:
             # Read from EEPROM
             if self.is_osfp_port:
                 pass
@@ -919,13 +902,9 @@ class Sfp(SfpBase):
                 # SFP
                 pass
         else:
-            try:
-                with open(path, 'r') as f:
-                    status = f.read()
-            except IOError as e:
-                return False
+            mode = output['mode']
+            status = int(output['status'].rstrip())
 
-            status = status.rstrip()
             if status == 1:
                 lpmode = True
             else:
@@ -1054,6 +1033,7 @@ class Sfp(SfpBase):
             return status
 
         device = 'PORT{}'.format(self.port_index)
+        # TODO: Implement a wrapper set function to write the sequence
         path = pddf_obj.get_path(device, 'xcvr_reset')
 
         # TODO: put the optic based reset logic using EEPROM 
@@ -1335,26 +1315,20 @@ class Sfp(SfpBase):
         Returns:
             bool: True if PSU is present, False if not
         """
-        path = pddf_obj.get_path(self.device, 'xcvr_present')
-        if path is None:
+        output = pddf_obj.get_attr_name_output(self.device, 'xcvr_present')
+        if not output:
             return False
 
-        try:
-            with open(path, 'r') as f:
-                modpres = f.read()
-        except IOError as e:
-            print "Error: %s"%str(e)
-            return False
-
-        modpres = modpres.rstrip()
+        mode = output['mode']
+        modpres = output['status'].rstrip()
         if 'XCVR' in plugin_data:
             if 'xcvr_present' in plugin_data['XCVR']:
                 ptype = self.sfp_type
                 vtype = 'valmap-'+ptype
-                if vtype in plugin_data['XCVR']['xcvr_present']:
-                    vmap = plugin_data['XCVR']['xcvr_present'][vtype]
-                    if reg_value in vmap:
-                        #print "valmap value: %s"%vmap[reg_value]
+                if vtype in plugin_data['XCVR']['xcvr_present'][mode]:
+                    vmap = plugin_data['XCVR']['xcvr_present'][mode][vtype]
+                    if modpres in vmap:
+                        #print "valmap value: %s"%vmap[modpres]
                         return vmap[modpres]
                     else:
                         return False
