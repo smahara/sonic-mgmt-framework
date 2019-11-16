@@ -429,7 +429,7 @@ class BGPConfigManager(object):
                       ('rr_cluster_id',                                 '{no:no-prefix}bgp cluster-id {}'),
                       ('rr_allow_out_policy',                           '{no:no-prefix}bgp route-reflector allow-outbound-policy', ['true', 'false']),
                       ('disable_ebgp_connected_rt_check',               '{no:no-prefix}bgp disable-ebgp-connected-route-check', ['true', 'false']),
-                      ('fast_external_failover',                        '{no:no-prefix}bgp fast-external-failover', ['true', 'false']),
+                      ('fast_external_failover',                        '{no:no-prefix}bgp fast-external-failover', ['true', 'false', True]),
                       ('network_import_check',                          '{no:no-prefix}bgp network import-check', ['true', 'false']),
                       ('graceful_shutdown',                             '{no:no-prefix}bgp graceful-shutdown', ['true', 'false']),
                       ('route_flap_dampen',                             '{no:no-prefix}bgp dampening', ['true', 'false']),
@@ -475,7 +475,7 @@ class BGPConfigManager(object):
                    ('enabled',          '{no:no-prefix}neighbor {} shutdown', ['false', 'true'])
     ]
 
-    nbr_af_key_map = [('allow_own_as',                                      '{no:no-prefix}neighbor {} allowas-in', ['true', 'false']),
+    nbr_af_key_map = [('allow_as_in',                                       '{no:no-prefix}neighbor {} allowas-in', ['true', 'false']),
                       ('allow_as_count',                                    '{no:no-prefix}neighbor {} allowas-in {}'),
                       ('allow_as_origin',                                   '{no:no-prefix}neighbor {} allowas-in origin', ['true', 'false']),
                       ('enabled|ipv4',                                      '{no:no-prefix}neighbor {} activate', ['true', 'false', True]),
@@ -663,7 +663,8 @@ class BGPConfigManager(object):
                 continue
             tbl_key = None
             if table == 'BGP_NEIGHBOR_AF' or table == 'BGP_PEER_GROUP_AF' and key is not None:
-                _, tbl_key = key.split('|')
+                _, af_ip_type = key.split('|')
+                tbl_key, _ = af_ip_type.lower().split('_')
             key_map = BGPKeyMapList(self.tbl_to_key_map[table], table, tbl_key)
             if table == 'BGP_GLOBALS':
                 if op == swsscommon.SET_COMMAND:
