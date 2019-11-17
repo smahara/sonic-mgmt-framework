@@ -110,11 +110,22 @@ class VtyshSubprocessMgr(threading.Thread):
         cmd_line = command[len(self.VTYSH_MARK):]
         cmd_list = re.findall(r"-c\s+'([^']+)'\s*", cmd_line)
         cmd_list.append('end')
+        ret_val = True
         for cmd in cmd_list:
+            syslog.syslog(syslog.LOG_DEBUG, 'VTYSH CMD: %s' % cmd)
             reply = self.run_one_command(cmd)
             if reply is not None:
-                syslog.syslog(syslog.LOG_DEBUG, 'REPLY for CMD %s:\n%s' % (cmd, reply))
-        return True
+                lines = reply.splitlines()
+                err_lines = []
+                for ln in lines:
+                    if ln.lstrip().startswith('% '):
+                        err_lines.append(ln)
+                if len(err_lines) > 0:
+                    syslog.syslog(syslog.LOG_ERR, 'Error returned for CMD: %s' % cmd)
+                    for ln in err_lines:
+                        syslog.syslog(syslog.LOG_ERR, ln)
+                    ret_val = False
+        return ret_val
     def shutdown(self):
         syslog.syslog(syslog.LOG_DEBUG, 'terminate vtysh manager')
         os.write(self.master_fd, self.QUIT_MARK + '\n')
@@ -413,6 +424,17 @@ class ExtConfigDBConnector(ConfigDBConnector):
                         super(ExtConfigDBConnector, self)._ConfigDBConnector__fire(table, row, data)
                 except ValueError:
                     pass    #Ignore non table-formated redis entries
+    @staticmethod
+    def get_table_key(table, key):
+        return table + '&&' + key
+    def get_table_data(self, table_list):
+        ret_data = {}
+        for table in table_list:
+            table_data = self.get_table(table)
+            for key, data in table_data.items():
+                table_key = self.get_table_key(table, self.serialize_key(key))
+                ret_data[table_key] = data
+        return ret_data
 
 class BGPConfigDaemon:
     DEFAULT_VRF = 'default'
@@ -567,26 +589,52 @@ class BGPConfigDaemon:
         for vrf, entry in glb_table.items():
             if 'local_asn' in entry:
                 self.bgp_asn[vrf] = entry['local_asn']
+                syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: VRF %s Local_ASN %s' % (vrf, self.bgp_asn[vrf]))
         # VRF ==> grp_name ==> peer_group
         self.bgp_peer_group = {}
         nbr_table = self.config_db.get_table('BGP_NEIGHBOR')
         pg_table = self.config_db.get_table('BGP_PEER_GROUP')
         for key, entry in pg_table.items():
             vrf, pg = key
-            if vrf not in self.bgp_peer_group:
-                self.bgp_peer_group[vrf] = {}
-            self.bgp_peer_group[vrf][pg] = BGPPeerGroup(vrf)
+            self.bgp_peer_group.setdefault(vrf, {})[pg] = BGPPeerGroup(vrf)
+            syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: VRF %s Peer_Group %s' % (vrf, pg))
         for key, entry in nbr_table.items():
             vrf, ip = key
             if 'peer_group_name' in entry:
                 pg_name = entry['peer_group_name']
                 if vrf in self.bgp_peer_group and pg_name in self.bgp_peer_group[vrf]:
                     self.bgp_peer_group[vrf][pg_name].ref_nbrs.add(ip)
+                    syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: VRF %s Neighbor %s Peer_Group %s' %
+                            (vrf, ip, pg_name))
         # map_name ==> seq_no ==> operation
         self.route_map = {}
 
+        self.table_handler_list = [
+            ('DEVICE_METADATA', self.metadata_handler),
+            ('BGP_GLOBALS', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_AF', self.bgp_af_handler),
+            ('ASPATH_SET', self.bgp_table_handler_common),
+            ('PREFIX_SET', self.bgp_table_handler_common),
+            ('PREFIX', self.bgp_table_handler_common),
+            ('COMMUNITY_SET', self.bgp_table_handler_common),
+            ('EXTCOMMUNITY_SET', self.bgp_table_handler_common),
+            ('ROUTE_MAP', self.bgp_table_handler_common),
+            ('BGP_PEER_GROUP', self.bgp_neighbor_handler),
+            ('BGP_NEIGHBOR', self.bgp_neighbor_handler),
+            ('BGP_PEER_GROUP_AF', self.bgp_neighbor_af_handler),
+            ('BGP_NEIGHBOR_AF', self.bgp_neighbor_af_handler),
+            ('BGP_GLOBALS_LISTEN_PREFIX', self.bgp_table_handler_common),
+            ('BFD_PEER', self.bfd_handler)
+        ]
         self.bgp_message = Queue.Queue(0)
-        self.table_data_cache = {}
+        self.table_data_cache = self.config_db.get_table_data([tbl for tbl, _ in self.table_handler_list])
+        syslog.syslog(syslog.LOG_DEBUG, 'Init Cached DB data')
+        for key, entry in self.table_data_cache.items():
+            syslog.syslog(syslog.LOG_DEBUG, '  %-20s : %s' % (key, entry))
+
+    def subscribe_all(self):
+        for table, hdlr in self.table_handler_list:
+            self.config_db.subscribe(table, hdlr)
 
     @staticmethod
     def __run_command(command):
@@ -767,9 +815,7 @@ class BGPConfigDaemon:
                 if not del_table:
                     if table == 'BGP_PEER_GROUP':
                         # if peer group is not created, create it before setting other attributes
-                        if vrf not in self.bgp_peer_group:
-                            self.bgp_peer_group[vrf] = {}
-                        if key not in self.bgp_peer_group[vrf]:
+                        if key not in self.bgp_peer_group.setdefault(vrf, {}):
                             command = "vtysh -c 'configure terminal' -c 'router bgp {} vrf {}' ".format(local_asn, vrf)
                             command += "-c 'neighbor {} peer-group'".format(key)
                             if not self.__run_command(command):
@@ -836,9 +882,7 @@ class BGPConfigDaemon:
                         if dval.op == CachedDataWithOp.OP_DELETE:
                             self.__delete_route_map(map_name, seq_no, data)
                             continue
-                        if map_name not in self.route_map:
-                            self.route_map[map_name] = {}
-                        self.route_map[map_name][seq_no] = dval.data
+                        self.route_map.setdefault(map_name, {})[seq_no] = dval.data
                     if map_name not in self.route_map or seq_no not in self.route_map[map_name]:
                         syslog.syslog(syslog.LOG_ERR, 'route-map {} seq {} not found'.format(map_name, seq_no))
                         continue
@@ -859,9 +903,7 @@ class BGPConfigDaemon:
                     self.__delete_route_map(map_name, seq_no, data)
 
     def __add_op_to_data(self, table_key, data, comb_attr_list):
-        if table_key not in self.table_data_cache:
-            self.table_data_cache[table_key] = {}
-        cached_data = self.table_data_cache[table_key]
+        cached_data = self.table_data_cache.setdefault(table_key, {})
         for key in cached_data:
             chk_key_list = []
             for key_set in comb_attr_list:
@@ -934,7 +976,7 @@ class BGPConfigDaemon:
         for dkey, dval in data.items():
             syslog.syslog(syslog.LOG_DEBUG, '        %-10s - %s' % (dkey, dval))
         syslog.syslog(syslog.LOG_DEBUG, '')
-        table_key = table + '&&' + key
+        table_key = ExtConfigDBConnector.get_table_key(table, key)
         self.__add_op_to_data(table_key, data, comb_attr_list)
         self.bgp_message.put((key, del_table, table, data))
         self.__update_bgp()
@@ -952,21 +994,7 @@ class BGPConfigDaemon:
 
     def start(self):
         try:
-            self.config_db.subscribe('BGP_METADATA', self.metadata_handler)
-            self.config_db.subscribe('BGP_GLOBALS', self.bgp_table_handler_common)
-            self.config_db.subscribe('BGP_GLOBALS_AF', self.bgp_af_handler)
-            self.config_db.subscribe('ASPATH_SET', self.bgp_table_handler_common)
-            self.config_db.subscribe('PREFIX_SET', self.bgp_table_handler_common)
-            self.config_db.subscribe('PREFIX', self.bgp_table_handler_common)
-            self.config_db.subscribe('COMMUNITY_SET', self.bgp_table_handler_common)
-            self.config_db.subscribe('EXTCOMMUNITY_SET', self.bgp_table_handler_common)
-            self.config_db.subscribe('ROUTE_MAP', self.bgp_table_handler_common)
-            self.config_db.subscribe('BGP_PEER_GROUP', self.bgp_neighbor_handler)
-            self.config_db.subscribe('BGP_NEIGHBOR', self.bgp_neighbor_handler)
-            self.config_db.subscribe('BGP_PEER_GROUP_AF', self.bgp_neighbor_af_handler)
-            self.config_db.subscribe('BGP_NEIGHBOR_AF', self.bgp_neighbor_af_handler)
-            self.config_db.subscribe('BGP_GLOBALS_LISTEN_PREFIX', self.bgp_table_handler_common)
-            self.config_db.subscribe('BFD_PEER', self.bfd_handler)
+            self.subscribe_all()
             self.config_db.listen()
         except Exception as e:
             syslog.syslog(syslog.LOG_ERR, '[bgp cfgd] Failed subscribing/listening to config DB with exception:' + str(e))
