@@ -8,4 +8,3 @@ rm -f /var/run/rsyslogd.pid
 supervisorctl start rsyslogd
 
 supervisorctl start telemetry
-supervisorctl start dialout
