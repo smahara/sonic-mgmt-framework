@@ -236,10 +236,9 @@ CFG_MGMT_VRF_KEY  = "vrf_global"
 MGMT_VRF_TABLE_ID = 5000
 
 class MgmtVrfCfg:
-    def __init__(self):
+    def __init__(self, config_db):
         syslog.syslog(syslog.LOG_INFO, 'Initializing MGMT VRF handler')
-        self.config_db = ConfigDBConnector()
-        self.config_db.connect(wait_for_init=True, retry_on=True)
+        self.config_db = config_db
         self.mgmt_vrf_table_created = False
 
     def create_mgmt_vrf_table(self):
@@ -338,14 +337,15 @@ class MgmtVrfCfg:
                         .format(err.cmd, err.returncode, err.output))
                 return
 
-            cmd = 'ip route add table {} 0.0.0.0/0 via {}'.format(MGMT_VRF_TABLE_ID, mgmt_intf_gwaddr)
-            syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
-            try:
-                subprocess.check_call(cmd, shell=True)
-            except subprocess.CalledProcessError as err:
-                syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
-                        .format(err.cmd, err.returncode, err.output))
-                return
+            if mgmt_intf_gwaddr is not None:
+                cmd = 'ip route add table {} 0.0.0.0/0 via {}'.format(MGMT_VRF_TABLE_ID, mgmt_intf_gwaddr)
+                syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
+                try:
+                    subprocess.check_call(cmd, shell=True)
+                except subprocess.CalledProcessError as err:
+                    syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
+                            .format(err.cmd, err.returncode, err.output))
+                    return
 
             cmd = 'sysctl -w net.ipv4.tcp_l3mdev_accept=1'
             syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
@@ -565,7 +565,7 @@ class HostConfigDaemon:
         self.aaacfg = AaaCfg()
         self.aaacfg.load(aaa, tacacs_global, tacacs_server, radius_global, radius_server)
         self.hostname_cache=""
-        self.mgmtvrfcfg = MgmtVrfCfg()
+        self.mgmtvrfcfg = MgmtVrfCfg(self.config_db)
         self.mgmtcfg = MgmtIntfCfg()
         self.mgmtcfg.mgmt_intf_handle_default_cfg(self.config_db)
 
