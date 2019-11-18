@@ -14,8 +14,16 @@ def enable_counters():
     enable_counter_group(db, 'PORT')
     enable_counter_group(db, 'QUEUE')
     enable_counter_group(db, 'PFCWD')
-    enable_counter_group(db, 'PG_WATERMARK')
-    enable_counter_group(db, 'QUEUE_WATERMARK')
+    
+    ## Check snapshot feature support.
+    appl_db = swsssdk.SonicV2Connector(host='127.0.0.1')
+    appl_db.connect(appl_db.APPL_DB)
+
+    key = "SWITCH_TABLE:switch"
+    entry = appl_db.get_all(appl_db.APPL_DB, key)
+    if 'snapshot_supported' not in entry or entry['snapshot_supported'] == "False":
+        enable_counter_group(db, 'PG_WATERMARK')
+        enable_counter_group(db, 'QUEUE_WATERMARK')
 
 def get_uptime():
     with open('/proc/uptime') as fp:
