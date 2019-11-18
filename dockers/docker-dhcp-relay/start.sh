@@ -19,3 +19,6 @@ if [ $(supervisorctl status | grep -c "^isc-dhcp-relay:") -gt 0 ]; then
     # Start all DHCP relay agent(s)
     supervisorctl start isc-dhcp-relay:*
 fi
+
+# Start iphelpermgr
+supervisorctl start iphelpermgrd
