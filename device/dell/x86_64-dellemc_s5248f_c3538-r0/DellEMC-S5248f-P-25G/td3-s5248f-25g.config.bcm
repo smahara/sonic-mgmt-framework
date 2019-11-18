@@ -24,11 +24,8 @@ max_vp_lags=0
 tdma_intr_enable=1
 tdma_timeout_usec=5000000
 mmu_lossless=0
-<<<<<<< HEAD
-=======
 bcm_num_cos=10
 default_cpu_tx_queue=9
->>>>>>> origin/broadcom_sonic_share
 pdma_descriptor_prefetch_enable=1
 pktdma_poll_mode_channel_bitmap=1
 

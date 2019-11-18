@@ -96,17 +96,6 @@ class PsuUtil(PsuBase):
         :param index: An integer, index of the PSU of which to query status
         :return: Boolean, True if PSU is plugged, False if not
         """
-<<<<<<< HEAD
         cmd_status, psu_status = commands.getstatusoutput('ipmitool raw 0x04 0x2d ' + hex(0x30 + index) + " | awk '{print substr($0,9,1)}'")
         return 1 if psu_status == '1' else 0
-=======
-        status = 0
-        psu_reg_name = PSU_PRESENCE.format(index)
-        psu_status = int(self.get_pmc_register(psu_reg_name), 16)
-        if (psu_status != 'ERR'):
-            # Check for PSU presence
-            if (psu_status == 0x00):
-                    status = 1
-        return status
->>>>>>> origin/broadcom_sonic_share
 

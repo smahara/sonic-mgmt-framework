@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 # Dell S6000,Z9100, S6100, Z9264F , S5232, Z9332, S5248F Platform modules
-=======
-# Dell Z9100, S6100, Z9264F, S5232, Z9332, S5248F Platform modules
->>>>>>> origin/broadcom_sonic_share
 
 DELL_Z9100_PLATFORM_MODULE_VERSION = 1.1
 DELL_S6100_PLATFORM_MODULE_VERSION = 1.1

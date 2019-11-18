@@ -32,11 +32,8 @@ tdma_intr_enable=1
 tdma_timeout_usec.0=5000000
 parity_correction.0=1
 mmu_lossless.0=0
-<<<<<<< HEAD
 bcm_num_cos=8
 default_cpu_tx_queue=7
-=======
->>>>>>> origin/broadcom_sonic_share
 pktdma_poll_mode_channel_bitmap=1
 l3_max_ecmp_mode.0=1
 l3_alpm_enable=2
@@ -420,264 +417,151 @@ serdes_core_tx_polarity_flip_physical{209}=0xe9
 serdes_core_rx_polarity_flip_physical{217}=0xec
 serdes_core_tx_polarity_flip_physical{217}=0x68
 
-<<<<<<< HEAD
 serdes_lane_config_media_type_49=backplane
 serdes_lane_config_media_type_50=backplane
 serdes_lane_config_media_type_51=backplane
 serdes_lane_config_media_type_52=backplane
-=======
-serdes_lane_config_media_type_49=copper
-serdes_lane_config_media_type_50=copper
-serdes_lane_config_media_type_51=copper
-serdes_lane_config_media_type_52=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_54=copper
 serdes_lane_config_media_type_55=copper
 serdes_lane_config_media_type_56=copper
 serdes_lane_config_media_type_57=copper
 serdes_lane_config_media_type_53=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_60=backplane
 serdes_lane_config_media_type_61=backplane
 serdes_lane_config_media_type_62=backplane
 serdes_lane_config_media_type_63=backplane
-=======
-serdes_lane_config_media_type_60=copper
-serdes_lane_config_media_type_61=copper
-serdes_lane_config_media_type_62=copper
-serdes_lane_config_media_type_63=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_65=copper
 serdes_lane_config_media_type_66=copper
 serdes_lane_config_media_type_67=copper
 serdes_lane_config_media_type_68=copper
 serdes_lane_config_media_type_64=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_80=backplane
 serdes_lane_config_media_type_81=backplane
 serdes_lane_config_media_type_82=backplane
 serdes_lane_config_media_type_83=backplane
-=======
-serdes_lane_config_media_type_80=copper
-serdes_lane_config_media_type_81=copper
-serdes_lane_config_media_type_82=copper
-serdes_lane_config_media_type_83=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_85=copper
 serdes_lane_config_media_type_86=copper
 serdes_lane_config_media_type_87=copper
 serdes_lane_config_media_type_88=copper
 serdes_lane_config_media_type_84=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_100=backplane
 serdes_lane_config_media_type_101=backplane
 serdes_lane_config_media_type_102=backplane
 serdes_lane_config_media_type_103=backplane
-=======
-serdes_lane_config_media_type_100=copper
-serdes_lane_config_media_type_101=copper
-serdes_lane_config_media_type_102=copper
-serdes_lane_config_media_type_103=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_105=copper
 serdes_lane_config_media_type_106=copper
 serdes_lane_config_media_type_107=copper
 serdes_lane_config_media_type_108=copper
 serdes_lane_config_media_type_104=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_120=backplane
 serdes_lane_config_media_type_121=backplane
 serdes_lane_config_media_type_122=backplane
 serdes_lane_config_media_type_123=backplane
-=======
-serdes_lane_config_media_type_120=copper
-serdes_lane_config_media_type_121=copper
-serdes_lane_config_media_type_122=copper
-serdes_lane_config_media_type_123=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_125=copper
 serdes_lane_config_media_type_126=copper
 serdes_lane_config_media_type_127=copper
 serdes_lane_config_media_type_128=copper
 serdes_lane_config_media_type_124=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_140=backplane
 serdes_lane_config_media_type_141=backplane
 serdes_lane_config_media_type_142=backplane
 serdes_lane_config_media_type_143=backplane
-=======
-serdes_lane_config_media_type_140=copper
-serdes_lane_config_media_type_141=copper
-serdes_lane_config_media_type_142=copper
-serdes_lane_config_media_type_143=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_145=copper
 serdes_lane_config_media_type_146=copper
 serdes_lane_config_media_type_147=copper
 serdes_lane_config_media_type_148=copper
 serdes_lane_config_media_type_144=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_40=backplane
 serdes_lane_config_media_type_41=backplane
 serdes_lane_config_media_type_42=backplane
 serdes_lane_config_media_type_43=backplane
-=======
-serdes_lane_config_media_type_40=copper
-serdes_lane_config_media_type_41=copper
-serdes_lane_config_media_type_42=copper
-serdes_lane_config_media_type_43=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_45=copper
 serdes_lane_config_media_type_46=copper
 serdes_lane_config_media_type_47=copper
 serdes_lane_config_media_type_48=copper
 serdes_lane_config_media_type_44=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_69=backplane
 serdes_lane_config_media_type_70=backplane
 serdes_lane_config_media_type_71=backplane
 serdes_lane_config_media_type_72=backplane
-=======
-serdes_lane_config_media_type_69=copper
-serdes_lane_config_media_type_70=copper
-serdes_lane_config_media_type_71=copper
-serdes_lane_config_media_type_72=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_74=copper
 serdes_lane_config_media_type_75=copper
 serdes_lane_config_media_type_76=copper
 serdes_lane_config_media_type_77=copper
 serdes_lane_config_media_type_73=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_1=backplane
 serdes_lane_config_media_type_2=backplane
 serdes_lane_config_media_type_3=backplane
 serdes_lane_config_media_type_4=backplane
-=======
-serdes_lane_config_media_type_1=copper
-serdes_lane_config_media_type_2=copper
-serdes_lane_config_media_type_3=copper
-serdes_lane_config_media_type_4=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_6=copper
 serdes_lane_config_media_type_7=copper
 serdes_lane_config_media_type_8=copper
 serdes_lane_config_media_type_9=copper
 serdes_lane_config_media_type_5=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_29=backplane
 serdes_lane_config_media_type_30=backplane
 serdes_lane_config_media_type_31=backplane
 serdes_lane_config_media_type_32=backplane
-=======
-serdes_lane_config_media_type_29=copper
-serdes_lane_config_media_type_30=copper
-serdes_lane_config_media_type_31=copper
-serdes_lane_config_media_type_32=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_34=copper
 serdes_lane_config_media_type_35=copper
 serdes_lane_config_media_type_36=copper
 serdes_lane_config_media_type_37=copper
 serdes_lane_config_media_type_33=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_89=backplane
 serdes_lane_config_media_type_90=backplane
 serdes_lane_config_media_type_91=backplane
 serdes_lane_config_media_type_92=backplane
-=======
-serdes_lane_config_media_type_89=copper
-serdes_lane_config_media_type_90=copper
-serdes_lane_config_media_type_91=copper
-serdes_lane_config_media_type_92=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_94=copper
 serdes_lane_config_media_type_95=copper
 serdes_lane_config_media_type_96=copper
 serdes_lane_config_media_type_97=copper
 serdes_lane_config_media_type_93=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_109=backplane
 serdes_lane_config_media_type_110=backplane
 serdes_lane_config_media_type_111=backplane
 serdes_lane_config_media_type_112=backplane
-=======
-serdes_lane_config_media_type_109=copper
-serdes_lane_config_media_type_110=copper
-serdes_lane_config_media_type_111=copper
-serdes_lane_config_media_type_112=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_114=copper
 serdes_lane_config_media_type_115=copper
 serdes_lane_config_media_type_116=copper
 serdes_lane_config_media_type_117=copper
 serdes_lane_config_media_type_113=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_129=backplane
 serdes_lane_config_media_type_130=backplane
 serdes_lane_config_media_type_131=backplane
 serdes_lane_config_media_type_132=backplane
-=======
-serdes_lane_config_media_type_129=copper
-serdes_lane_config_media_type_130=copper
-serdes_lane_config_media_type_131=copper
-serdes_lane_config_media_type_132=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_134=copper
 serdes_lane_config_media_type_135=copper
 serdes_lane_config_media_type_136=copper
 serdes_lane_config_media_type_137=copper
 serdes_lane_config_media_type_133=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_149=backplane
 serdes_lane_config_media_type_150=backplane
 serdes_lane_config_media_type_151=backplane
 serdes_lane_config_media_type_152=backplane
-=======
-serdes_lane_config_media_type_149=copper
-serdes_lane_config_media_type_150=copper
-serdes_lane_config_media_type_151=copper
-serdes_lane_config_media_type_152=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_154=copper
 serdes_lane_config_media_type_155=copper
 serdes_lane_config_media_type_156=copper
 serdes_lane_config_media_type_157=copper
 serdes_lane_config_media_type_153=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_10=backplane
 serdes_lane_config_media_type_11=backplane
 serdes_lane_config_media_type_12=backplane
 serdes_lane_config_media_type_13=backplane
-=======
-serdes_lane_config_media_type_10=copper
-serdes_lane_config_media_type_11=copper
-serdes_lane_config_media_type_12=copper
-serdes_lane_config_media_type_13=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_15=copper
 serdes_lane_config_media_type_16=copper
 serdes_lane_config_media_type_17=copper
 serdes_lane_config_media_type_18=copper
 serdes_lane_config_media_type_14=copper
-<<<<<<< HEAD
 serdes_lane_config_media_type_20=backplane
 serdes_lane_config_media_type_21=backplane
 serdes_lane_config_media_type_22=backplane
 serdes_lane_config_media_type_23=backplane
-=======
-serdes_lane_config_media_type_20=copper
-serdes_lane_config_media_type_21=copper
-serdes_lane_config_media_type_22=copper
-serdes_lane_config_media_type_23=copper
->>>>>>> origin/broadcom_sonic_share
 serdes_lane_config_media_type_25=copper
 serdes_lane_config_media_type_26=copper
 serdes_lane_config_media_type_27=copper
 serdes_lane_config_media_type_28=copper
 serdes_lane_config_media_type_24=copper
 
-<<<<<<< HEAD
 port_fec_20=3
 port_fec_21=3
 port_fec_22=3
@@ -760,10 +644,3 @@ port_fec_132=3
 
 sai_preinit_cmd_file=/usr/share/sonic/hwsku/sai_preinit_cmd.soc
 sai_postinit_cmd_file=/usr/share/sonic/hwsku/sai_postinit_cmd.soc
-
-=======
-sai_preinit_cmd_file=/usr/share/sonic/hwsku/sai_preinit_cmd.soc
-sai_postinit_cmd_file=/usr/share/sonic/hwsku/sai_postinit_cmd.soc
-
-mmu_init_config="TH3-DELL-lossy"
->>>>>>> origin/broadcom_sonic_share
