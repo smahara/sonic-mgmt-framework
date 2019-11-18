@@ -41,6 +41,9 @@
 #  * SONIC_DPKG_CACHE_SOURCE: Debian package cache location when cache enabled for debian packages
 #  * LOCAL_SAI_DEBS_PATH: Full path to the parent directory that holds SAI debian packages
 #  * BUILD_PRODUCT: Optional SONiC product identifier for the image we wish to build
+#  * BUILD_VERSION: Optional SONiC build version string we wish to use for the image
+#  * PRODUCT_NAME: Optional SONiC product identifier for the image we wish to build
+#  * NOS_NAME : Optional SONiC OS name for the image we wish to build
 #
 ###############################################################################
 
@@ -121,6 +124,16 @@ DOCKER_RUN := docker run --rm=true --privileged \
     -e "http_proxy=$(http_proxy)" \
     -e "https_proxy=$(https_proxy)" \
     -i$(if $(TERM),t,)
+
+# Include branding information
+-include branding.mk
+ifeq ($(NOS_NAME),)
+NOS_NAME = SONiC-OS
+endif
+
+ifeq ($(PRODUCT_NAME),)
+PRODUCT_NAME = Generic
+endif
 
 include rules/config
 
@@ -266,6 +279,9 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            BUILD_NUMBER=$(BUILD_NUMBER) \
                            BUILD_PRODUCT=$(BUILD_PRODUCT) \
                            BUILD_TIMESTAMP=$(BUILD_TIMESTAMP) \
+                           BUILD_VERSION=$(BUILD_VERSION) \
+                           NOS_NAME=$(NOS_NAME) \
+                           PRODUCT_NAME=$(PRODUCT_NAME) \
                            SLAVE_TAG=$(SLAVE_TAG) \
                            ENABLE_DHCP_GRAPH_SERVICE=$(ENABLE_DHCP_GRAPH_SERVICE) \
                            ENABLE_ZTP=$(ENABLE_ZTP) \

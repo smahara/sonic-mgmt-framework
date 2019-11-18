@@ -200,6 +200,32 @@ class Handler(FileSystemEventHandler):
             generate_support_save()
             g_last_ts = time.time()
 
+# Check is there is a new kernel dump file to send
+def check_for_new_kdump_files():
+    new_files = False
+    try:
+        d = '/var/crash'
+        list_dirs = [os.path.join(d, o) for o in os.listdir(d) if os.path.isdir(os.path.join(d,o))]
+        if not os.path.exists("/var/crash/export"):
+            f = os.open('/var/crash/export', os.O_CREAT)
+            os.close(f)
+            mtime0 = 0
+            if len(list_dirs) > 0:
+                new_files = True
+        else:
+            stat = os.stat('/var/crash/export')
+            mtime0 = stat.st_mtime
+        for x in list_dirs:
+            stat = os.stat(x)
+            mtime = stat.st_mtime
+            if mtime > mtime0:
+                os.utime(x, None)
+                new_files = True
+        if new_files:
+            os.utime('/var/crash/export', None)
+    except:
+        pass
+    return new_files
 
 #Daemonize the export process
 def export_daemon():
@@ -216,9 +242,13 @@ def export_daemon():
         observer.schedule(event_handler, g_exp_ctx['coredir'], recursive=True)
         observer.start()
 
+    new_kdump_files = False
     try:
 
         g_last_ts = curr_ts = time.time()
+
+        # Check if there a newer kernel dump file to send
+        new_kdump_files = check_for_new_kdump_files()
 
         while True:
             g_cfg= config_db.get_entry('EXPORT', 'export')
@@ -232,17 +262,17 @@ def export_daemon():
                 #logger.debug("Sleeping...{}".format(time.time()))
                 time.sleep(60)
                 continue
-                
 
             curr_ts = time.time()
             diff = curr_ts - g_last_ts
-            if diff > (int(g_exp_ctx['interval'])*60)/2:
+            if diff > (int(g_exp_ctx['interval'])*60)/2 or new_kdump_files:
                    logger.debug("Tech-Support export - curr:{}, last:{}, diff:{}\n".format(curr_ts, g_last_ts, diff))
                    generate_support_save()
             else:
                 logger.debug("Skipping the current slot, curr:{}, last:{}, diff:{}\n".format(curr_ts, g_last_ts, diff))
                 pass
 
+            new_kdump_files = False
             g_last_ts = curr_ts
             time.sleep(int(g_exp_ctx['interval'])*60)
 

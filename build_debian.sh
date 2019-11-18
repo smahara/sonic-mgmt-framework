@@ -255,6 +255,10 @@ sudo sed -i '/After=/s/$/ containerd.service/' $FILESYSTEM_ROOT/lib/systemd/syst
 sudo LANG=C chroot $FILESYSTEM_ROOT useradd -G sudo,docker $USERNAME -c "$DEFAULT_USERINFO" -m -s /bin/bash
 ## Create password for the default user
 echo "$USERNAME:$PASSWORD" | sudo LANG=C chroot $FILESYSTEM_ROOT chpasswd
+if [ "$sonic_asic_platform" != "vs" ]; then
+## Force password change upon first time login
+sudo LANG=C chroot $FILESYSTEM_ROOT chage -d 0 $USERNAME
+fi
 
 ## Pre-install hardware drivers
 sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y install      \
@@ -316,7 +320,12 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     python-argcomplete      \
     python-ipaddr           \
     conntrack               \
-    mcelog
+    mcelog                  \
+    makedumpfile
+
+# Needed to install kdump-tools
+sudo LANG=C chroot $FILESYSTEM_ROOT /bin/bash -c "mkdir -p /etc/initramfs-tools/conf.d"
+sudo LANG=C chroot $FILESYSTEM_ROOT /bin/bash -c "echo 'MODULES=most' >> /etc/initramfs-tools/conf.d/driver-policy"
 
 #Adds a locale to a debian system in non-interactive mode
 sudo sed -i '/^#.* en_US.* /s/^#//' $FILESYSTEM_ROOT/etc/locale.gen && \
@@ -500,6 +509,11 @@ commit_id: '$(git rev-parse --short HEAD)'
 build_date: $(date -u)
 build_number: ${BUILD_NUMBER:-0}
 built_by: $USER@$BUILD_HOSTNAME
+EOF
+
+## Branding file
+sudo tee $FILESYSTEM_ROOT/etc/sonic/sonic_branding.yml > /dev/null <<EOF
+product_name: '$product_name'
 EOF
 
 if [ -f sonic_debian_extension.sh ]; then

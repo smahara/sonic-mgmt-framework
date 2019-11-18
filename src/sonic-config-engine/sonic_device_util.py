@@ -48,6 +48,31 @@ def get_sonic_version_info():
             data = yaml.full_load(stream)
     return data
 
+def get_sonic_branding_info():
+    if not os.path.isfile('/etc/sonic/sonic_branding.yml'):
+        return None
+    data = {}
+    with open('/etc/sonic/sonic_branding.yml') as stream:
+        yaml_version_list = yaml.__version__.split(".")
+        if yaml_version_list[0] == "3" and yaml_version_list[1] == "12":
+            data = yaml.load(stream)
+        else:
+            data = yaml.full_load(stream)
+    return data
+
+def get_sonic_nos_name(image_version=None):
+    try:
+        if image_version is None:
+            version_info = get_sonic_version_info()
+            image_version = version_info['build_version']
+        nos_name_file = '/host/image-{}/nos_name'.format(image_version)
+        fh = open(nos_name_file, 'r')
+        nos_name_str = fh.readline().strip()
+        fh.close()
+    except:
+        nos_name_str =  "SONiC-OS"
+    return nos_name_str
+
 def get_system_mac():
     version_info = get_sonic_version_info()
 

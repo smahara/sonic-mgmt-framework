@@ -1,0 +1,30 @@
+# Restore local user files and passwords from backup copy
+
+# Append new data from SRC file to DST file
+search_and_append()
+{
+  SRC=$1
+  DST=$2
+  for i in $(cat $SRC); do
+     if ! grep -Fxq "$i" $DST ; then
+         echo "$i" >> $DST
+     fi
+  done
+}
+
+BACKUP_DIR=/host/backup/users_info
+if [ -d ${BACKUP_DIR} ]; then
+    # Remove existing admin password
+    sed -i "/{{ sonicadmin_user }}:/d" /etc/shadow
+
+    # Copy user and group information from migrated files
+    cat ${BACKUP_DIR}/shadow.mig >>  /etc/shadow
+    search_and_append ${BACKUP_DIR}/group.mig /etc/group
+    search_and_append ${BACKUP_DIR}/passwd.mig /etc/passwd
+    search_and_append ${BACKUP_DIR}/gshadow.mig /etc/gshadow
+
+    [ -e ${BACKUP_DIR}/home.tar.gz ] && tar -C / -zxvf ${BACKUP_DIR}/home.tar.gz
+    [ -e ${BACKUP_DIR}/mail.tar.gz ] && tar -C / -zxvf ${BACKUP_DIR}/mail.tar.gz
+    # Destroy all backup data
+    rm  -rf ${BACKUP_DIR}
+fi

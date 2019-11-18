@@ -23,6 +23,8 @@ supervisorctl start restore_neighbors
 
 supervisorctl start portsyncd
 
+supervisorctl start gearsyncd
+
 supervisorctl start neighsyncd
 
 supervisorctl start fdbsyncd

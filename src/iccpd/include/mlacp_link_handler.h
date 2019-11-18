@@ -81,5 +81,9 @@ void mlacp_mlag_intf_detach_handler(struct CSM* csm, struct LocalInterface* loca
 void mlacp_peer_mlag_intf_delete_handler(struct CSM* csm, char *mlag_if_name);
 
 int iccp_mclagsyncd_msg_handler(struct System *sys);
-
+int syn_local_neigh_mac_info_to_peer(struct LocalInterface *local_if, int sync_add, int is_v4, int is_v6, int sync_mac, int ack);
+int syn_local_mac_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add);
+int syn_local_arp_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add, int ack);
+int syn_local_nd_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add, int ack);
+int is_unique_ip_configured(char *ifname);
 #endif

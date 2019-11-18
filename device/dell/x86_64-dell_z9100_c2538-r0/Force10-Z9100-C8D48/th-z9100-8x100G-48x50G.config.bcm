@@ -4,7 +4,11 @@ l3_alpm_enable=2
 pfc_deadlock_seq_control=1
 bcm_stat_interval=2000000
 bcm_num_cos=10
+<<<<<<< HEAD
 default_cpu_tx_queue=7
+=======
+default_cpu_tx_queue=9
+>>>>>>> origin/broadcom_sonic_share
 switch_bypass_mode=0
 mmu_lossless=0
 lpm_scaling_enable=0

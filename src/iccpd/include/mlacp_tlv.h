@@ -373,6 +373,7 @@ struct mLACPMACInfoTLV
 struct ARPMsg
 {
     uint8_t op_type;
+    uint8_t flag;
     char ifname[MAX_L_PORT_NAME];
     uint32_t ipv4_addr;         // net order
     uint8_t mac_addr[ETHER_ADDR_LEN];
@@ -381,6 +382,7 @@ struct ARPMsg
 struct NDISCMsg
 {
     uint8_t op_type;
+    uint8_t flag;
     char ifname[MAX_L_PORT_NAME];
     uint32_t ipv6_addr[4];
     uint8_t mac_addr[ETHER_ADDR_LEN];
@@ -423,8 +425,8 @@ struct mLACPL2MCData
 {
     uint8_t     type;/*add or del*/
     uint8_t     l2mc_type;
-    uint8_t     saddr[16];
-    uint8_t     gaddr[16];
+    uint8_t     saddr[INET_ADDRSTRLEN];
+    uint8_t     gaddr[INET_ADDRSTRLEN];
     uint16_t vid;
     /*Current if name that set in chip*/
     char     ifname[MAX_L_PORT_NAME];
@@ -486,9 +488,10 @@ struct mLACPIfUpAckTLV {
 
 enum NEIGH_OP_TYPE
 {
-    NEIGH_SYNC_LIF,
-    NEIGH_SYNC_ADD,
-    NEIGH_SYNC_DEL,
+    NEIGH_SYNC_LIF = 0,
+    NEIGH_SYNC_ADD = 1,
+    NEIGH_SYNC_DEL = 2,
+    NEIGH_SYNC_ACK = 4,
 };
 
 enum MAC_AGE_TYPE
@@ -555,8 +558,8 @@ struct L2MCMsg
 {
     RB_ENTRY(L2MCMsg) l2mc_entry_rb;
     uint16_t    vid;
-    uint8_t     saddr[16];
-    uint8_t     gaddr[16];
+    uint8_t     saddr[INET_ADDRSTRLEN];
+    uint8_t     gaddr[INET_ADDRSTRLEN];
     uint8_t     op_type;    /*add or del*/
     uint8_t     l2mc_type;   /*static or dynamic*/
 

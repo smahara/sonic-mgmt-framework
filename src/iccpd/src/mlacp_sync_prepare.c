@@ -392,11 +392,12 @@ int mlacp_prepare_for_arp_info(struct CSM* csm, char* buf, size_t max_buf_size, 
     ArpData = (struct mLACPMACData *)&buf[sizeof(ICCHdr) + sizeof(struct mLACPARPInfoTLV) + sizeof(struct ARPMsg) * count];
 
     ArpData->op_type = arp_msg->op_type;
+    ArpData->flag = arp_msg->flag;
     sprintf(ArpData->ifname, "%s", arp_msg->ifname);
     ArpData->ipv4_addr = arp_msg->ipv4_addr;
     memcpy(ArpData->mac_addr, arp_msg->mac_addr, ETHER_ADDR_LEN);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Send ARP messge to peer, if name %s mac %02x:%02x:%02x:%02x:%02x:%02x IP %s", ArpData->ifname,
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Send ARP messge to peer, flag %d, if name %s mac %02x:%02x:%02x:%02x:%02x:%02x IP %s", ArpData->flag, ArpData->ifname,
                     ArpData->mac_addr[0], ArpData->mac_addr[1], ArpData->mac_addr[2], ArpData->mac_addr[3], ArpData->mac_addr[4],
                     ArpData->mac_addr[5], show_ip_str(ArpData->ipv4_addr));
     return msg_len;
@@ -408,7 +409,6 @@ int mlacp_prepare_for_arp_info(struct CSM* csm, char* buf, size_t max_buf_size, 
 * ***************************************/
 int mlacp_prepare_for_ndisc_info(struct CSM *csm, char *buf, size_t max_buf_size, struct NDISCMsg *ndisc_msg, int count)
 {
-
     struct mLACPNDISCInfoTLV *tlv = NULL;
     size_t msg_len = 0;
     size_t tlv_len = 0;
@@ -444,11 +444,12 @@ int mlacp_prepare_for_ndisc_info(struct CSM *csm, char *buf, size_t max_buf_size
     NdiscData = (struct mLACPMACData *)&buf[sizeof(ICCHdr) + sizeof(struct mLACPNDISCInfoTLV) + sizeof(struct NDISCMsg) * count];
 
     NdiscData->op_type = ndisc_msg->op_type;
+    NdiscData->flag = ndisc_msg->flag;
     sprintf(NdiscData->ifname, "%s", ndisc_msg->ifname);
     memcpy(NdiscData->ipv6_addr, ndisc_msg->ipv6_addr, 32);
     memcpy(NdiscData->mac_addr, ndisc_msg->mac_addr, ETHER_ADDR_LEN);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Send ND messge to peer, if name %s  mac  =%02x:%02x:%02x:%02x:%02x:%02x IPv6 %s", NdiscData->ifname,
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Send ND messge to peer, flag %d, if name %s  mac  =%02x:%02x:%02x:%02x:%02x:%02x IPv6 %s", NdiscData->flag, NdiscData->ifname,
                     NdiscData->mac_addr[0], NdiscData->mac_addr[1], NdiscData->mac_addr[2], NdiscData->mac_addr[3], NdiscData->mac_addr[4],
                     NdiscData->mac_addr[5], show_ipv6_str((char *)NdiscData->ipv6_addr));
 
@@ -495,8 +496,8 @@ int mlacp_prepare_for_l2mc_info_to_peer(struct CSM* csm, char* buf, size_t max_b
     L2mcData = (struct mLACPL2MCData *)&buf[sizeof(ICCHdr) + sizeof(struct mLACPL2MCInfoTLV) + sizeof(struct mLACPL2MCData) * count];
     L2mcData->type = l2mc_msg->op_type;
     L2mcData->l2mc_type = l2mc_msg->l2mc_type;
-    memcpy(L2mcData->saddr, l2mc_msg->saddr,16);
-    memcpy(L2mcData->gaddr, l2mc_msg->gaddr,16);
+    memcpy(L2mcData->saddr, l2mc_msg->saddr,INET_ADDRSTRLEN);
+    memcpy(L2mcData->gaddr, l2mc_msg->gaddr,INET_ADDRSTRLEN);
     sprintf(L2mcData->ifname, "%s", l2mc_msg->origin_ifname);
     L2mcData->vid = htons(l2mc_msg->vid);
 

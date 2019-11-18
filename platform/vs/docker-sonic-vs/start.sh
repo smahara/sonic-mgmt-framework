@@ -83,6 +83,10 @@ supervisorctl start natmgrd
 
 supervisorctl start natsyncd
 
+supervisorctl start l2mcd
+
+supervisorctl start l2mcmgrd
+
 # Start arp_update when VLAN exists
 VLAN=`sonic-cfggen -d -v 'VLAN.keys() | join(" ") if VLAN'`
 if [ "$VLAN" != "" ]; then

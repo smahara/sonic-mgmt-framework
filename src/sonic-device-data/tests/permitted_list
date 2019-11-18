@@ -48,6 +48,7 @@ riot_overlay_l3_intf_mem_size
 riot_overlay_l3_egress_mem_size
 l3_ecmp_levels
 riot_overlay_ecmp_resilient_hash_size
+led_fw_path
 lls_num_l2uc
 load_firmware
 logical_ports
@@ -173,10 +174,15 @@ l2xlrn_thread_interval
 l2xlrn_intr_en
 serdes_lane_config_media_type
 pbmp_valid
+<<<<<<< HEAD
 ing_share_flex_counter_pool
 vlan_xlate_mem_entries
 mpls_mem_entries
 host_as_route_disable
+=======
+vlan_xlate_mem_entries
+mpls_mem_entries
+>>>>>>> origin/broadcom_sonic_share
 egr_vlan_xlate_mem_entries
 sai_preinit_cmd_file
 sai_preinit_warmboot_cmd_file

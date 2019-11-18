@@ -51,6 +51,11 @@ docker_try_rmi() {
 }
 
 sonic_get_version() {
+    # Custom fixed version requested
+    if [ "${BUILD_VERSION}" != "" ]; then
+        echo "${BUILD_VERSION}"
+        return
+    fi
     local describe=$(git describe --tags)
     local latest_tag=$(git describe --tags --abbrev=0)
     local branch_name=$(git rev-parse --abbrev-ref HEAD)
