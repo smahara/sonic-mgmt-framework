@@ -8,7 +8,6 @@ led auto on
 led start
 
 # Pre-Emphasis: A workaround until pre-emphasis attributes are available in SAI
-# ** Please comment out the following command when activating breakout ports **
 rcload /usr/share/sonic/platform/preemphasis-32x400G.soc
 
 linkscan on

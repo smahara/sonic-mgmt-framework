@@ -128,7 +128,6 @@ extern int
 bkn_hw_tstamp_rx_time_upscale_cb_unregister(knet_hw_tstamp_rx_time_upscale_cb_f hw_tstamp_rx_time_upscale_cb);
 
 
-#ifdef PSAMPLE_SUPPORT
 typedef struct {
     uint8 cmic_type;
     uint8 dcb_type;
@@ -154,8 +153,6 @@ bkn_netif_destroy_cb_register(knet_netif_cb_f netif_cb);
 
 extern int
 bkn_netif_destroy_cb_unregister(knet_netif_cb_f netif_cb);
-
-#endif /* PSAMPLE_SUPPORT */
 
 #endif /* __KERNEL__ */
 

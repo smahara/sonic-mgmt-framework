@@ -159,7 +159,7 @@ static void do_arp_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], int
     fprintf(stderr, "  Type    = [%d] (New=%d, Del=%d)\n", msgtype, RTM_NEWNEIGH, RTM_DELNEIGH);
     fprintf(stderr, "  State   = (%04X)(%d)\n", ndm->ndm_state, fwd_neigh_state_valid(ndm->ndm_state));
     fprintf(stderr, "  ifindex = [%d] (%s)\n", ndm->ndm_ifindex, arp_msg->ifname);
-    fprintf(stderr, "  IP      = [%s]\n", show_ip_str(htonl(arp_msg->ipv4_addr)));
+    fprintf(stderr, "  IP      = [%s]\n", show_ip_str(arp_msg->ipv4_addr));
     fprintf(stderr, "  MAC     = [%02X:%02X:%02X:%02X:%02X:%02X]\n",
             arp_msg->mac_addr[0], arp_msg->mac_addr[1], arp_msg->mac_addr[2], arp_msg->mac_addr[3],
             arp_msg->mac_addr[4], arp_msg->mac_addr[5]);
@@ -311,7 +311,7 @@ static void do_arp_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], int
     TAILQ_FOREACH(msg, &MLACP(csm).arp_list, tail)
     {
         arp_msg = (struct ARPMsg*)msg->buf;
-        fprintf(stderr, "type %d,ifname %s , ip %s\n", arp_msg->op_type, arp_msg->ifname, show_ip_str(htonl(arp_msg->ipv4_addr)));
+        fprintf(stderr, "type %d,ifname %s , ip %s\n", arp_msg->op_type, arp_msg->ifname, show_ip_str(arp_msg->ipv4_addr));
     }
     fprintf(stderr, "==============================\n");
     #endif
@@ -702,7 +702,7 @@ void do_arp_update_from_reply_packet(unsigned int ifindex, unsigned int addr, ui
     fprintf(stderr, "\n======== Kernel ARP Update==========\n");
     fprintf(stderr, "  Type    = (New=%d)\n", RTM_NEWNEIGH);
     fprintf(stderr, "  ifindex = [%d] (%s)\n", ifindex, arp_lif->name);
-    fprintf(stderr, "  IP      = [%s]\n", show_ip_str(htonl(arp_msg->ipv4_addr)));
+    fprintf(stderr, "  IP      = [%s]\n", show_ip_str(arp_msg->ipv4_addr));
     fprintf(stderr, "  MAC     = [%02X:%02X:%02X:%02X:%02X:%02X]\n",
             arp_msg->mac_addr[0], arp_msg->mac_addr[1], arp_msg->mac_addr[2], arp_msg->mac_addr[3],
             arp_msg->mac_addr[4], arp_msg->mac_addr[5]);

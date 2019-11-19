@@ -382,8 +382,8 @@ int iccp_l2mc_dump(char * *buf, int *num, int mclag_id)
 
             mclagd_l2mc.op_type = iccpd_l2mc->op_type;
             mclagd_l2mc.l2mc_type = iccpd_l2mc->l2mc_type;
-            memcpy(mclagd_l2mc.saddr, iccpd_l2mc->saddr, 16);
-            memcpy(mclagd_l2mc.gaddr, iccpd_l2mc->gaddr, 16);
+            memcpy(mclagd_l2mc.saddr, iccpd_l2mc->saddr, INET_ADDRSTRLEN);
+            memcpy(mclagd_l2mc.gaddr, iccpd_l2mc->gaddr, INET_ADDRSTRLEN);
             mclagd_l2mc.vid = iccpd_l2mc->vid;
             memcpy(mclagd_l2mc.ifname, iccpd_l2mc->ifname, strlen(iccpd_l2mc->ifname));
             memcpy(mclagd_l2mc.origin_ifname, iccpd_l2mc->origin_ifname, strlen(iccpd_l2mc->origin_ifname));
@@ -688,5 +688,53 @@ int iccp_cmd_dbg_counter_dump(char **buf, int *data_len, int mclag_id)
     }
     *buf = counter_buf;
     *data_len = buf_size - MCLAGD_REPLY_INFO_HDR;
+    return EXEC_TYPE_SUCCESS;
+}
+
+int iccp_unique_ip_if_dump(char **buf, int *num, int mclag_id)
+{
+    struct System *sys = NULL;
+    struct mclagd_unique_ip_if mclagd_lif;
+    char *str_buf = NULL;
+    int str_size = MCLAGDCTL_PARA3_LEN - 1;
+    int len = 0;
+    int lif_num = 0;
+    int lif_buf_size = MCLAGDCTL_CMD_SIZE;
+    char *lif_buf = NULL;
+    struct Unq_ip_If_info* unq_ip_if = NULL;
+
+    if (!(sys = system_get_instance()))
+    {
+        ICCPD_LOG_INFO(__FUNCTION__, "cannot find sys!\n");
+        return EXEC_TYPE_NO_EXIST_SYS;
+    }
+
+    lif_buf = (char*)malloc(lif_buf_size);
+    if (!lif_buf)
+        return EXEC_TYPE_FAILED;
+
+    LIST_FOREACH(unq_ip_if, &(sys->unq_ip_if_list), if_next)
+    {
+        memset(&mclagd_lif, 0, sizeof(struct mclagd_unique_ip_if));
+        memcpy(mclagd_lif.name, unq_ip_if->name, MAX_L_PORT_NAME);
+        mclagd_lif.active = local_if_l3_proto_enabled(unq_ip_if->name);
+
+        memcpy(lif_buf + MCLAGD_REPLY_INFO_HDR + lif_num * sizeof(struct mclagd_unique_ip_if),
+                &mclagd_lif, sizeof(struct mclagd_unique_ip_if));
+
+        lif_num++;
+
+        if ((lif_num + 1) * sizeof(struct mclagd_unique_ip_if) > (lif_buf_size - MCLAGD_REPLY_INFO_HDR))
+        {
+            lif_buf_size += MCLAGDCTL_CMD_SIZE;
+            lif_buf = (char*)realloc(lif_buf, lif_buf_size);
+            if (!lif_buf)
+                return EXEC_TYPE_FAILED;
+        }
+    }
+
+    *buf = lif_buf;
+    *num = lif_num;
+
     return EXEC_TYPE_SUCCESS;
 }

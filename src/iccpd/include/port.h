@@ -71,6 +71,12 @@ struct If_info
     LIST_ENTRY(If_info) csm_next;
 };
 
+struct Unq_ip_If_info
+{
+    char name[MAX_L_PORT_NAME];
+    LIST_ENTRY(Unq_ip_If_info) if_next;
+};
+
 struct VLAN_ID
 {
     uint16_t vid;
@@ -140,6 +146,7 @@ struct LocalInterface
     uint8_t changed;
     uint8_t port_config_sync;
     bool is_traffic_disable;   /* Disable traffic tx/rx  */ 
+    bool is_l3_proto_enabled;  /* Enable L3 Protocol support */
 
     struct vlan_rb_tree vlan_tree;
 

@@ -1,0 +1,27 @@
+# Take a backup copy of user home directories, user mail,  password related files.
+# Only passwords of non-system users with guid >= 1000 are migrated.
+BACKUP_DIR=/host/backup/users_info
+mkdir -p ${BACKUP_DIR}
+
+UGIDLIMIT=1000
+awk -v LIMIT=$UGIDLIMIT -F: '($3>=LIMIT) && ($3!=65534)' /etc/passwd > ${BACKUP_DIR}/passwd.mig
+
+# Obtain list of non-system users including admin
+awk -v LIMIT=$UGIDLIMIT -F: '($3>=LIMIT) && ($3!=65534) {print $1}' /etc/passwd > /tmp/user_list
+
+# Take a snapshot of passwords of non-system users including admin
+egrep -f /tmp/user_list /etc/shadow >  ${BACKUP_DIR}/shadow.mig
+
+# Take a snapshot of group membership of non-system users including admin
+egrep -f /tmp/user_list /etc/group > ${BACKUP_DIR}/group.mig
+
+cp /etc/gshadow ${BACKUP_DIR}/gshadow.mig
+
+# Take a backup of the home directory to migrate user directories
+tar -zcpf ${BACKUP_DIR}/home.tar.gz -C / home
+
+# Take a backup of mail
+tar -zcpf ${BACKUP_DIR}/mail.tar.gz -C / var/spool/mail
+
+# Clean-up temporary files
+rm -f /tmp/user_list
