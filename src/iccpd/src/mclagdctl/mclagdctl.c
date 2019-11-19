@@ -604,9 +604,9 @@ int mclagdctl_parse_dump_local_portlist(char *msg, int data_len)
             fprintf(stdout, "%s: %s\n", "IsL3Interface", lif_info->l3_mode ? "Yes" : "No");
             /*fprintf(stdout, "%s: %s\n", "IsPeerlink", lif_info->is_peer_link ? "Yes" : "No");*/
             fprintf(stdout, "%s: %s\n", "MemberPorts", lif_info->portchannel_member_buf);
-            /*fprintf(stdout,"%s: %d\n" ,"PortchannelId", lif_info->po_id);
-               fprintf(stdout,"%s: %d\n" ,"PortchannelIsUp", lif_info->po_active);
-               fprintf(stdout,"%s: %s\n", "MlacpState", lif_info->mlacp_state);*/
+            /*fprintf(stdout,"%s: %d\n" ,"PortchannelId", lif_info->po_id);*/
+            fprintf(stdout,"%s: %d\n" ,"PortchannelIsUp", lif_info->po_active);
+            /*fprintf(stdout,"%s: %s\n", "MlacpState", lif_info->mlacp_state);*/
             fprintf(stdout, "%s: %s\n", "IsIsolateWithPeerlink", lif_info->isolate_to_peer_link ? "Yes" : "No");
             fprintf(stdout,"%s: %s\n" ,"IsTrafficDisable", lif_info->is_traffic_disable ? "Yes":"No");
             fprintf(stdout, "%s: %s\n", "VlanList", lif_info->vlanlist);
