@@ -326,7 +326,10 @@ class MgmtVrfCfg:
             entry = self.config_db.get_entry(CFG_MGMT_INTF_TABLE, key)
             mgmt_intf_name = it[0]
             mgmt_intf_ip   = it[1]
-            mgmt_intf_gwaddr = entry['gwaddr']
+            if 'gwaddr' in entry:
+                mgmt_intf_gwaddr = entry['gwaddr']
+            else:
+                mgmt_intf_gwaddr = None
 
             cmd = 'ip link set dev {} master mgmt'.format(mgmt_intf_name)
             syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
