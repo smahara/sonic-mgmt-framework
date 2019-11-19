@@ -32,10 +32,11 @@ class Thermal(ThermalBase):
 	return (device_name)
 
     def get_display_name(self):
-        if 'bmc' in pddf_obj.data[self.get_name()].keys():
-            display_name=pddf_obj.data[self.get_name()]['bmc']['dev_attr']['display_name']
-        else:
+	try:
+            display_name=pddf_obj.data[self.get_name()]['dev_attr']['display_name']
+	except Exception as e:
             display_name=self.get_name()
+
         return (display_name)
 
     def get_temperature(self):
