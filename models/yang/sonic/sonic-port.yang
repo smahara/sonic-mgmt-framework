@@ -57,7 +57,9 @@ module sonic-port {
 				}
 
 				leaf alias {
-					type string;
+					type string {
+					    pattern '[ -~]{0,64}';
+					}
 				}
 
 				leaf description {
