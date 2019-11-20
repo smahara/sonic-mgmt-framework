@@ -1,0 +1,13 @@
+[Unit]
+Description=Host Account Management
+
+#After=nss-user-lookup.target
+
+[Service]
+Type=dbus
+BusName=org.SONiC.HostAccountManagement
+ExecStart=/usr/sbin/hamd
+
+# Resource Limitations
+LimitCORE=infinity
+
