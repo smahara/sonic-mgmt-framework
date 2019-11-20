@@ -32,6 +32,16 @@ supervisorctl start bgpcfgd
 
 # Start Quagga processes
 supervisorctl start zebra
+
+secs=30
+while ((secs-- > 0))
+do
+    zebra_ready=$(netstat -tulpn | grep LISTEN | grep zebra)
+    [[ ! -z $zebra_ready ]] && break
+    sleep 1
+done
+
+
 supervisorctl start staticd
 supervisorctl start bgpd
 supervisorctl start ospfd
