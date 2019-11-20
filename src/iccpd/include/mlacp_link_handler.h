@@ -27,7 +27,9 @@
 #include "../include/iccp_csm.h"
 #include "../include/mlacp_tlv.h"
 
-#define ICCP_MLAGSYNCD_RECV_MSG_BUFFER_SIZE CSM_BUFFER_SIZE
+#define MCLAG_MAX_MSG_LEN 4096
+#define ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE MCLAG_MAX_MSG_LEN
+#define ICCP_MLAGSYNCD_RECV_MSG_BUFFER_SIZE (MCLAG_MAX_MSG_LEN * 256)
 
 extern char g_iccp_recv_buf[];
 
