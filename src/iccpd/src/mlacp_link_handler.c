@@ -64,6 +64,7 @@ typedef enum route_manipulate_type
 char g_ipv4_str[INET_ADDRSTRLEN];
 char g_ipv6_str[INET6_ADDRSTRLEN];
 char g_iccp_mlagsyncd_recv_buf[ICCP_MLAGSYNCD_RECV_MSG_BUFFER_SIZE] = { 0 };
+char g_iccp_mlagsyncd_send_buf[ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE] = { 0 };
 
 
 extern void mlacp_sync_mac(struct CSM* csm);
@@ -489,7 +490,7 @@ static int peer_po_is_alive(struct CSM *csm, int po_ifindex)
 static void mlacp_clean_fdb(void)
 {
     struct IccpSyncdHDr * msg_hdr;
-    char *msg_buf = g_csm_buf;
+    char *msg_buf = g_iccp_mlagsyncd_send_buf;
     ssize_t rc;
     struct System *sys;
 
@@ -499,7 +500,7 @@ static void mlacp_clean_fdb(void)
         ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
         return;
     }
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_FLUSH_FDB;
@@ -529,7 +530,7 @@ void set_peerlink_mlag_port_learn(struct LocalInterface *lif, int enable)
 {
     struct IccpSyncdHDr * msg_hdr;
     mclag_sub_option_hdr_t * sub_msg;
-    char *msg_buf = g_csm_buf;
+    char *msg_buf = g_iccp_mlagsyncd_send_buf;
     int msg_len;
     struct System *sys;
     ssize_t rc;
@@ -543,7 +544,7 @@ void set_peerlink_mlag_port_learn(struct LocalInterface *lif, int enable)
 
     if (!lif)
         return;
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_PORT_MAC_LEARN_MODE;
@@ -595,7 +596,7 @@ static int mlacp_link_set_traffic_dist_mode(
 {
     struct IccpSyncdHDr     *msg_hdr;
     mclag_sub_option_hdr_t  *sub_msg;
-    char                    *msg_buf = g_csm_buf;
+    char                    *msg_buf = g_iccp_mlagsyncd_send_buf;
     int                     msg_len;
     struct System           *sys;
     ssize_t                 rc = 0;
@@ -607,7 +608,7 @@ static int mlacp_link_set_traffic_dist_mode(
         return MCLAG_ERROR;
     }
 
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = is_enable ?
@@ -652,7 +653,7 @@ int mlacp_link_set_iccp_state(
 {
     struct IccpSyncdHDr     *msg_hdr;
     mclag_sub_option_hdr_t  *sub_msg;
-    char                    *msg_buf = g_csm_buf;
+    char                    *msg_buf = g_iccp_mlagsyncd_send_buf;
     struct System           *sys;
     ssize_t                 rc = 0;
 
@@ -673,7 +674,7 @@ int mlacp_link_set_iccp_state(
             mlag_id);
         return MCLAG_ERROR;
     }
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_SET_ICCP_STATE;
@@ -724,7 +725,7 @@ int mlacp_link_set_iccp_role(
 {
     struct IccpSyncdHDr     *msg_hdr;
     mclag_sub_option_hdr_t  *sub_msg;
-    char                    *msg_buf = g_csm_buf;
+    char                    *msg_buf = g_iccp_mlagsyncd_send_buf;
     struct System           *sys;
     ssize_t                 rc = 0;
 
@@ -735,7 +736,7 @@ int mlacp_link_set_iccp_role(
         return MCLAG_ERROR;
     }
 
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_SET_ICCP_ROLE;
@@ -793,7 +794,7 @@ int mlacp_link_set_iccp_system_id(
 {
     struct IccpSyncdHDr     *msg_hdr;
     mclag_sub_option_hdr_t  *sub_msg;
-    char                    *msg_buf = g_csm_buf;
+    char                    *msg_buf = g_iccp_mlagsyncd_send_buf;
     struct System           *sys;
     ssize_t                 rc = 0;
 
@@ -804,7 +805,7 @@ int mlacp_link_set_iccp_system_id(
         return MCLAG_ERROR;
     }
 
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_SET_ICCP_SYSTEM_ID;
@@ -853,7 +854,7 @@ int mlacp_link_del_iccp_info(
 {
     struct IccpSyncdHDr     *msg_hdr;
     mclag_sub_option_hdr_t  *sub_msg;
-    char                    *msg_buf = g_csm_buf;
+    char                    *msg_buf = g_iccp_mlagsyncd_send_buf;
     struct System           *sys;
     ssize_t                 rc = 0;
 
@@ -864,7 +865,7 @@ int mlacp_link_del_iccp_info(
         return MCLAG_ERROR;
     }
 
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_DEL_ICCP_INFO;
@@ -906,7 +907,7 @@ int mlacp_link_set_remote_if_state(
 {
     struct IccpSyncdHDr     *msg_hdr;
     mclag_sub_option_hdr_t  *sub_msg;
-    char                    *msg_buf = g_csm_buf;
+    char                    *msg_buf = g_iccp_mlagsyncd_send_buf;
     struct System           *sys;
     ssize_t                 rc = 0;
 
@@ -917,7 +918,7 @@ int mlacp_link_set_remote_if_state(
         return MCLAG_ERROR;
     }
 
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_SET_REMOTE_IF_STATE;
@@ -974,7 +975,7 @@ int mlacp_link_del_remote_if_info(
 {
     struct IccpSyncdHDr     *msg_hdr;
     mclag_sub_option_hdr_t  *sub_msg;
-    char                    *msg_buf = g_csm_buf;
+    char                    *msg_buf = g_iccp_mlagsyncd_send_buf;
     struct System           *sys;
     ssize_t                 rc = 0;
 
@@ -985,7 +986,7 @@ int mlacp_link_del_remote_if_info(
         return MCLAG_ERROR;
     }
 
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
     msg_hdr->type = MCLAG_MSG_TYPE_DEL_REMOTE_IF_INFO;
@@ -1054,7 +1055,7 @@ void update_peerlink_isolate_from_all_csm_lif(
     struct LocalInterface *lif = NULL;
     struct IccpSyncdHDr * msg_hdr;
     mclag_sub_option_hdr_t * sub_msg;
-    char msg_buf[4096];
+    char *msg_buf = g_iccp_mlagsyncd_send_buf;
     struct System *sys;
 
     char mlag_po_buf[512];
@@ -1071,7 +1072,7 @@ void update_peerlink_isolate_from_all_csm_lif(
     if (!csm || !csm->peer_link_if)
         return;
 
-    memset(msg_buf, 0, 4095);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
     memset(mlag_po_buf, 0, 511);
 
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
@@ -1591,7 +1592,7 @@ void update_stp_peer_link(struct CSM *csm,
 void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type)
 {
     struct IccpSyncdHDr * msg_hdr;
-    char msg_buf[512];
+    char *msg_buf = g_iccp_mlagsyncd_send_buf;
     struct System *sys;
     struct mclag_fdb_info * mac_info;
     ssize_t rc;
@@ -1603,7 +1604,7 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type)
         return;
     }
 
-    memset(msg_buf, 0, 512);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
 
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
@@ -1768,7 +1769,7 @@ uint8_t set_l2mc_local_del_flag(struct CSM *csm, struct L2MCMsg* l2mc_msg, uint8
 void iccp_send_l2mc_entry_to_syncd( struct L2MCMsg* l2mc_msg, uint8_t l2mc_type)
 {
     struct IccpSyncdHDr * msg_hdr;
-    char msg_buf[512];
+    char *msg_buf = g_iccp_mlagsyncd_send_buf;
     struct System *sys;
     struct mclag_l2mc_info * l2mc_info;
     ssize_t rc;
@@ -1780,7 +1781,7 @@ void iccp_send_l2mc_entry_to_syncd( struct L2MCMsg* l2mc_msg, uint8_t l2mc_type)
         return;
     }
 
-    memset(msg_buf, 0, 512);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
 
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
@@ -3462,9 +3463,9 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
 
     if (sys == NULL)
         return MCLAG_ERROR;
-    memset(msg_buf, 0, CSM_BUFFER_SIZE);
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_RECV_MSG_BUFFER_SIZE);
 
-    num_bytes_rxed = read(sys->sync_fd, msg_buf, CSM_BUFFER_SIZE);
+    num_bytes_rxed = read(sys->sync_fd, msg_buf, ICCP_MLAGSYNCD_RECV_MSG_BUFFER_SIZE);
 
     if (num_bytes_rxed <= 0)
     {
