@@ -126,3 +126,7 @@
 	path = src/sonic-udld
 	url = ../sonic-udld.git
 	branch = broadcom_sonic_merge
+[submodule "platform/mellanox/sdk-src/sx-kernel/Switch-SDK-drivers"]
+	path = platform/mellanox/sdk-src/sx-kernel/Switch-SDK-drivers
+	url = ../Switch-SDK-drivers.git
+	branch = broadcom_sonic_merge
