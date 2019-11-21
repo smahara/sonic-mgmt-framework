@@ -17,3 +17,7 @@ src/translib/ocbinds/ocbinds.go
 *.so.2
 *.dbus-proxy.h
 *.dbus-adaptor.h
+hamd
+hamctl
+libnss_ham.so.2
+libham.so

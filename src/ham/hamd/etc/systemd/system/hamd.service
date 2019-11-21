@@ -1,7 +1,14 @@
 [Unit]
 Description=Host Account Management
 
-#After=nss-user-lookup.target
+# Since hamd provides a way for docker containers to
+# access user accounts on the host, we need to make
+# sure it is started before the docker service.
+Before=docker.service
+
+# Make sure the NSS lookup infra is in
+# place before starting hamd
+After=nss-user-lookup.target
 
 [Service]
 Type=dbus
@@ -10,4 +17,7 @@ ExecStart=/usr/sbin/hamd
 
 # Resource Limitations
 LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target
 
