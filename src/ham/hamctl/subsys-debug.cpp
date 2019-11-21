@@ -65,7 +65,7 @@ static int debug(int argc, char *argv[])
     {
         DBus::BusDispatcher         dispatcher;
         DBus::default_dispatcher = &dispatcher;
-        DBus::Connection conn    = DBus::Connection::SystemBus();
+        DBus::Connection    conn = DBus::Connection::SystemBus();
 
         debug_proxy_c debug(conn, DBUS_BUS_NAME_BASE, DBUS_OBJ_PATH_BASE);
 

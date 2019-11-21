@@ -145,7 +145,10 @@ install:
 	$(INSTALL) -d $(DESTDIR)/lib/systemd/system
 	$(INSTALL) -D $(TOPDIR)/scripts/sonic-hostservice.service $(DESTDIR)/lib/systemd/system
 
-
+	# Scripts for Host Account Management (HAM)
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/etc/* $(DESTDIR)/etc/.
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/hamd  $(DESTDIR)/usr/sbin/.
+	$(INSTALL) -D $(TOPDIR)/src/ham/ham/hamctl $(DESTDIR)/usr/bin/.
 
 ifeq ($(SONIC_COVERAGE_ON),y)
 	echo "" > $(DESTDIR)/usr/sbin/.test
