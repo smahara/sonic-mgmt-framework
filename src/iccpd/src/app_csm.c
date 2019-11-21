@@ -239,8 +239,11 @@ int mlacp_bind_local_if(struct CSM* csm, struct LocalInterface* lif)
     }
     ICCPD_LOG_INFO(__FUNCTION__, "%s: MLACP bind on csm %p", lif->name, csm);
     if (lif->type == IF_T_PORT_CHANNEL)
+    {
+        ICCPD_LOG_DEBUG("ICCP_FSM", "MLAG_IF %s bind: interface state %d(%s), po_active %d\n",
+            lif->name, lif->state, (lif->state == PORT_STATE_UP) ? "up" : "down", lif->po_active);
         return 0;
-
+    } 
     /* if join a po member, needs to check po joined also*/
     LIST_FOREACH(lif_po, &(MLACP(csm).lif_list), mlacp_next)
     {

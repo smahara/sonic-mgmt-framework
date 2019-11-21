@@ -931,6 +931,13 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
             /*if(lif->type ==IF_T_PORT_CHANNEL)*/
             ICCPD_LOG_INFO(__FUNCTION__, "update local port %s state up", ifname);
 
+            /* If local interface is not configured as MLAG interface yet,
+             * its po_active status must be updated. Otherwise, incorrect
+             * status will be used to determine the traffic_disable setting
+             */
+            if ((lif->type == IF_T_PORT_CHANNEL) && (lif->csm == NULL))
+                lif->po_active = 1;
+
             iccp_from_netlink_port_state_handler(lif->name, lif->state);
         }
         else if (lif->state == PORT_STATE_UP && ( IF_OPER_UP != op_state || !(link_flag & IFF_LOWER_UP)))
@@ -938,6 +945,13 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
             lif->state = PORT_STATE_DOWN;
             /*if(lif->type ==IF_T_PORT_CHANNEL)*/
             ICCPD_LOG_INFO(__FUNCTION__, "update local port %s state down", ifname);
+
+            /* If local interface is not configured as MLAG interface yet,
+             * its po_active status must be updated. Otherwise, incorrect
+             * status will be used to determine the traffic_disable setting
+             */
+            if ((lif->type == IF_T_PORT_CHANNEL) && (lif->csm == NULL))
+                lif->po_active = 0;
 
             iccp_from_netlink_port_state_handler(lif->name, lif->state);
         }
