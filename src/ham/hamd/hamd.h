@@ -15,20 +15,11 @@
 class config_c
 {
 public:
-    config_c()
-    {
-        poll_period_sec_m = 10;
-        sac_uid_min_m     = 30000;
-        sac_uid_max_m     = 60000;
-        verbose_m         = false;
-    }
-    ~config_c() {}
-
-    gint   poll_period_sec_m;
-    gint   sac_uid_min_m;
-    gint   sac_uid_max_m;
-    bool   verbose_m;
-
+    config_c(int argc, char **argv);
+    gint  poll_period_sec_m = 10;
+    gint  sac_uid_min_m     = 30000;
+    gint  sac_uid_max_m     = 60000;
+    bool  verbose_m         = false;
 };
 
 class hamd_c : public DBus::ObjectAdaptor,
