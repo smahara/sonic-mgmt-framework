@@ -112,35 +112,31 @@ class name_service_proxy_c : public ham::name_service_proxy,
                              public DBus::ObjectProxy
 {
 public:
-    name_service_proxy_c(DBus::Connection &dbus_conn, const char * dbus_bus_name_p, const char * dbus_obj_name_p) :
-    DBus::ObjectProxy(dbus_conn, dbus_obj_name_p, dbus_bus_name_p)
+    name_service_proxy_c(DBus::Connection &conn, const char * dbus_bus_name_p, const char * dbus_obj_name_p) :
+    DBus::ObjectProxy(conn, dbus_obj_name_p, dbus_bus_name_p)
     {
     }
 };
 
+#define SYSLOG(LEVEL, args...) \
+do \
+{ \
+    if (verbose) \
+    { \
+        if (log_p != nullptr) fprintf(log_p, args); \
+        else                  syslog(LEVEL, args);  \
+    } \
+} while (0)
+
+
 /**
- * @brief Initalize module singletons on entry. There are two singletons
- *        needed by this module:
- *
- *        1) dbus_intf_p, which is the DBus interface to hamd
- *        2) cmdline_p contains the command line of the program that
- *        invoked the NSS module. Used for debug purposes only.
+ * @brief Extract cmdline from /proc/self/cmdline. This is only needed for
+ *        debugging purposes
  */
-static char          * cmdline_p   = nullptr;
-name_service_proxy_c * dbus_intf_p = nullptr;
-void __attribute__((constructor)) __module_enter(void)
+static char * cmdline_p = program_invocation_name;
+static void read_cmdline()
 {
-    // Create the DBus interface
-    static DBus::BusDispatcher      dispatcher;
-    DBus::default_dispatcher     = &dispatcher;
-    static DBus::Connection conn = DBus::Connection::SystemBus();
-    dbus_intf_p = new name_service_proxy_c(conn, DBUS_BUS_NAME_BASE, DBUS_OBJ_PATH_BASE);
-
-    // Retrieve the command line (used mainly for debugging)
     const char * fn = "/proc/self/cmdline";
-
-    cmdline_p = program_invocation_name;
-
     struct stat  st;
     if (stat(fn, &st) != 0)
         return;
@@ -177,9 +173,79 @@ void __attribute__((constructor)) __module_enter(void)
             int c = buffer[i];
             if ((c < ' ') || (c > '~')) buffer[i] = ' ';
         }
+
+        // Delete trailing spaces, tabs, and newline chars.
+        char * p = &buffer[strcspn(buffer, "\n\r")];
+        while ((p >= buffer) && (*p == ' ' || *p == '\t' || *p == '\0'))
+        {
+            *p-- = '\0';
+        }
     }
 
     cmdline_p = strdup(buffer);
+}
+
+/**
+ * @brief Get configuration parameters for this module. Parameters are
+ *        retrieved from the file "/etc/libnss_ham.conf"
+ */
+static FILE * log_p     = nullptr;
+static bool   verbose   = false;
+static void read_config()
+{
+    FILE * file = fopen("/etc/libnss_ham.conf", "re");
+    if (file)
+    {
+        #define WHITESPACE " \t\n\r"
+        char    line[LINE_MAX];
+        char  * p;
+        char  * s;
+        while (NULL != (p = fgets(line, sizeof line, file)))
+        {
+            p += strspn(p, WHITESPACE);            // Remove leading newline and spaces
+            if (*p == '#' || *p == '\0') continue; // Skip comments and empty lines
+
+            if (NULL != (s = startswith(p, "debug")))
+            {
+                s += strspn(s, " \t=");
+                if (strneq(s, "yes", 3))
+                    verbose = true;
+            }
+            else if (NULL != (s = startswith(p, "log")))
+            {
+                s += strspn(s, " \t=");
+                s[strcspn(s, WHITESPACE)] = '\0'; // Remove trailing newline and spaces
+                if (*s != '\0')
+                {
+                    if (log_p != nullptr)
+                    {
+                        fclose(log_p);
+                        log_p = nullptr;
+                    }
+                    log_p = fopen(s, "w");
+                }
+            }
+        }
+
+        fclose(file);
+    }
+
+    if (verbose)
+    {
+        read_cmdline();
+    }
+}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Initalize module singletons on entry.
+ */
+void __attribute__((constructor)) __module_enter(void)
+{
+    read_config();
 }
 
 /**
@@ -193,13 +259,21 @@ void __attribute__((destructor)) __module_exit(void)
         cmdline_p = nullptr;
     }
 
-    if (dbus_intf_p != nullptr)
+    if (log_p != nullptr)
     {
-        delete dbus_intf_p;
-        dbus_intf_p = nullptr;
+        fclose(log_p);
+        log_p = nullptr;
     }
 }
 
+#ifdef __cplusplus
+}
+#endif
+
+/**
+ * @brief   Retrieve current system monotonic clock as a 64-bit count in
+ *          nano-sec.
+ */
 uint64_t get_now_nsec()
 {
     struct timespec now;
@@ -208,54 +282,19 @@ uint64_t get_now_nsec()
 }
 
 /**
- * @brief Get configuration parameters for this module. Parameters are
- *        retrieved from the file "/etc/hamfiles.conf"
- *
- * @return An unsigned containing the configuration flags for this module.
- */
-#define OPTS_DEBUG      (1 << 0)
-static unsigned get_options()
-{
-    unsigned options = 0;
-
-    FILE * file = fopen("/etc/libnss_ham.conf", "re");
-    if (file)
-    {
-        #define WHITESPACE " \t\n\r"
-        char    line[LINE_MAX];
-        char  * p;
-        char  * s;
-        while (NULL != (p = fgets(line, sizeof line, file)))
-        {
-            p += strspn(p, WHITESPACE);
-            if (NULL != (s = startswith(p, "debug")))
-            {
-                s += strspn(s, " \t=");
-                if (strneq(s, "yes", 3))
-                    options |= OPTS_DEBUG;
-            }
-        }
-
-        fclose(file);
-    }
-
-    return options;
-}
-
-/**
  * @brief   Fill structure pointed to by @result with the data contained in
- *          the structure pointed to by @passwd_data_r.
+ *          the structure pointed to by @ham_data_r.
  *
  * @details The string fields pointed to by the members of the passwd
  *          structure are stored in @buffer of size buflen. In case @buffer
  *          has insufficient memory to hold the strings of struct passwd,
  *          the ENOMEM error will be reported.
  *
- * @param passwd_data_r This is the data we received from hamd.
- * @param result        Pointer to destination where data gets copied
- * @param buffer        Pointer to memory where strings can be stored
- * @param buflen        Size of buffer
- * @param errnop        Pointer to where errno code can be written
+ * @param ham_data_r  This is the data we received from hamd.
+ * @param result      Pointer to destination where data gets copied
+ * @param buffer      Pointer to memory where strings can be stored
+ * @param buflen      Size of buffer
+ * @param errnop      Pointer to where errno code can be written
  *
  * @return - If no entry was found, return NSS_STATUS_NOTFOUND and set
  *           errno=ENOENT.
@@ -266,7 +305,6 @@ static unsigned get_options()
  */
 static enum nss_status pw_fill_result(const char           * fn_p,
                                       double                 duration_msec,
-                                      bool                   verbose,
                                       const ::DBus::Struct <
                                          bool,        /* _1: success   */
                                          std::string, /* _2: pw_name   */
@@ -276,33 +314,30 @@ static enum nss_status pw_fill_result(const char           * fn_p,
                                          std::string, /* _6: pw_gecos  */
                                          std::string, /* _7: pw_dir    */
                                          std::string  /* _8: pw_shell  */
-                                      >                    & passwd_data_r,
+                                      >                    & ham_data_r,
                                       struct passwd        * result,
                                       char                 * buffer,
                                       size_t                 buflen,
                                       int                  * errnop)
 {
-    bool success = passwd_data_r._1;
-
+    bool success = ham_data_r._1;
     if (!success)
     {
-        if (verbose)
-            syslog(LOG_DEBUG, "%s() - Invoked by \"%s\" RX from hamd: success=false. DBus exec time=%.3f ms", fn_p, cmdline_p, duration_msec);
+        SYSLOG(LOG_DEBUG, "%s() - cmdline=\"%s\" exec time=%.3f ms. Failed!\n", fn_p, cmdline_p, duration_msec);
         *errnop = ENOENT;
         return NSS_STATUS_NOTFOUND;
     }
 
-    const std::string & pw_name_r   = passwd_data_r._2;
-    const std::string & pw_passwd_r = passwd_data_r._3;
-    uid_t               pw_uid      = passwd_data_r._4;
-    gid_t               pw_gid      = passwd_data_r._5;
-    const std::string & pw_gecos_r  = passwd_data_r._6;
-    const std::string & pw_dir_r    = passwd_data_r._7;
-    const std::string & pw_shell_r  = passwd_data_r._8;
+    const std::string & pw_name_r   = ham_data_r._2;
+    const std::string & pw_passwd_r = ham_data_r._3;
+    uid_t               pw_uid      = ham_data_r._4;
+    gid_t               pw_gid      = ham_data_r._5;
+    const std::string & pw_gecos_r  = ham_data_r._6;
+    const std::string & pw_dir_r    = ham_data_r._7;
+    const std::string & pw_shell_r  = ham_data_r._8;
 
-    if (verbose)
-        syslog(LOG_DEBUG, "%s() - Invoked by \"%s\" RX from hamd: success=true. DBus exec time=%.3f ms. pw_name=\"%s\", pw_passwd=\"%s\", pw_uid=%u, pw_gid=%u, pw_gecos=\"%s\", pw_dir=%s, pw_shell=\"%s\"",
-               fn_p, cmdline_p, duration_msec, pw_name_r.c_str(), pw_passwd_r.c_str(), pw_uid, pw_gid, pw_gecos_r.c_str(), pw_dir_r.c_str(), pw_shell_r.c_str());
+    SYSLOG(LOG_DEBUG, "%s() - cmdline=\"%s\" exec time=%.3f ms. Success! pw_name=\"%s\", pw_passwd=\"%s\", pw_uid=%u, pw_gid=%u, pw_gecos=\"%s\", pw_dir=%s, pw_shell=\"%s\"\n",
+           fn_p, cmdline_p, duration_msec, pw_name_r.c_str(), pw_passwd_r.c_str(), pw_uid, pw_gid, pw_gecos_r.c_str(), pw_dir_r.c_str(), pw_shell_r.c_str());
 
     size_t name_l   = pw_name_r.length()   + 1; /* +1 to include NUL terminating char */
     size_t dir_l    = pw_dir_r.length()    + 1;
@@ -311,8 +346,7 @@ static enum nss_status pw_fill_result(const char           * fn_p,
     size_t gecos_l  = pw_gecos_r.length()  + 1;
     if (buflen < (name_l + shell_l + dir_l + passwd_l + gecos_l))
     {
-        if (verbose)
-            syslog(LOG_DEBUG, "%s() - Invoked by \"%s\" not enough memory for struct passwd data", fn_p, cmdline_p);
+        SYSLOG(LOG_DEBUG, "%s() - cmdline=\"%s\" not enough memory for struct passwd data\n", fn_p, cmdline_p);
 
         if (errnop) *errnop = ENOMEM;
         return NSS_STATUS_TRYAGAIN;
@@ -334,14 +368,14 @@ static enum nss_status pw_fill_result(const char           * fn_p,
 
 /**
  * @brief Fill structure pointed to by @result with the data contained in
- *        the structure pointed to by @group_data_r.
+ *        the structure pointed to by @ham_data_r.
  *
  * @details The string fields pointed to by the members of the group
  *          structure are stored in @buffer of size buflen. In case @buffer
  *          has insufficient memory to hold the strings of struct group,
  *          the ENOMEM error will be reported.
  *
- * @param group_data_r This is the data we received from hamd.
+ * @param ham_data_r   This is the data we received from hamd.
  * @param result       Pointer to destination where data gets copied
  * @param buffer       Pointer to memory where strings can be stored
  * @param buflen       Size of buffer
@@ -356,37 +390,34 @@ static enum nss_status pw_fill_result(const char           * fn_p,
  */
 static enum nss_status gr_fill_result(const char                         * fn_p,
                                       double                               duration_msec,
-                                      bool                                 verbose,
                                       const ::DBus::Struct <
                                          bool,                      /* _1: success   */
                                          std::string,               /* _2: gr_name   */
                                          std::string,               /* _3: gr_passwd */
                                          uint32_t,                  /* _4: gr_gid    */
                                          std::vector< std::string > /* _5: gr_mem    */
-                                      >                                  & group_data_r,
+                                      >                                  & ham_data_r,
                                       struct group                       * result,
                                       char                               * buffer,
                                       size_t                               buflen,
                                       int                                * errnop)
 {
-    bool success = group_data_r._1;
+    bool success = ham_data_r._1;
 
     if (!success)
     {
-        if (verbose)
-            syslog(LOG_DEBUG, "%s() - Invoked by \"%s\" RX from hamd: success=false. DBus exec time=%.3f ms", fn_p, cmdline_p, duration_msec);
+        SYSLOG(LOG_DEBUG, "%s() - cmdline=\"%s\" exec time=%.3f ms. Failed!\n", fn_p, cmdline_p, duration_msec);
         *errnop = ENOENT;
         return NSS_STATUS_NOTFOUND;
     }
 
-    const std::string                & gr_name_r   = group_data_r._2;
-    const std::string                & gr_passwd_r = group_data_r._3;
-    gid_t                              gr_gid      = group_data_r._4;
-    const std::vector< std::string > & gr_mem_r    = group_data_r._5;
+    const std::string                & gr_name_r   = ham_data_r._2;
+    const std::string                & gr_passwd_r = ham_data_r._3;
+    gid_t                              gr_gid      = ham_data_r._4;
+    const std::vector< std::string > & gr_mem_r    = ham_data_r._5;
 
-    if (verbose)
-        syslog(LOG_DEBUG, "%s() - Invoked by \"%s\" RX from hamd: success=true. DBus exec time=%.3f ms. gr_name=\"%s\", pw_passwd=\"%s\", gr_gid=%u, pw_mem=[\"%s\"]",
-               fn_p, cmdline_p, duration_msec, gr_name_r.c_str(), gr_passwd_r.c_str(), gr_gid, join(gr_mem_r.begin(), gr_mem_r.end(), "\", \"").c_str());
+    SYSLOG(LOG_DEBUG, "%s() - cmdline=\"%s\" exec time=%.3f ms. Success! gr_name=\"%s\", pw_passwd=\"%s\", gr_gid=%u, pw_mem=[\"%s\"]\n",
+           fn_p, cmdline_p, duration_msec, gr_name_r.c_str(), gr_passwd_r.c_str(), gr_gid, join(gr_mem_r.begin(), gr_mem_r.end(), "\", \"").c_str());
 
     size_t name_l    = gr_name_r.length()   + 1; /* +1 to include NUL terminating char */
     size_t passwd_l  = gr_passwd_r.length() + 1;
@@ -394,8 +425,7 @@ static enum nss_status gr_fill_result(const char                         * fn_p,
     size_t strings_l = std::accumulate(gr_mem_r.begin(), gr_mem_r.end(), 0, [](size_t sum, const std::string& elem) {return sum + elem.length() + 1;}); /* +1 to include NUL terminating char */
     if (buflen < (name_l + passwd_l + array_l + strings_l))
     {
-        if (verbose)
-            syslog(LOG_DEBUG, "%s() - Invoked by \"%s\" not enough memory for struct group data", fn_p, cmdline_p);
+        SYSLOG(LOG_DEBUG, "%s() - cmdline=\"%s\" not enough memory for struct group data\n", fn_p, cmdline_p);
 
         if (errnop) *errnop = ENOMEM;
         return NSS_STATUS_TRYAGAIN;
@@ -442,13 +472,16 @@ enum nss_status _nss_ham_getpwnam_r(const char    * name,
                                     size_t          buflen,
                                     int           * errnop)
 {
-    unsigned  options = get_options();
-    bool      verbose = 0 != (options & OPTS_DEBUG);
-
-    if (verbose)
-        syslog(LOG_DEBUG, "_nss_ham_getpwnam_r() - Invoked by \"%s\" with name=\"%s\" UID=%u GID=%u", cmdline_p, name, getuid(), getgid());
+    SYSLOG(LOG_DEBUG, "_nss_ham_getpwnam_r() - [%u:%u] cmdline=\"%s\" name=\"%s\"\n",
+           getuid(), getgid(), cmdline_p, name);
 
     uint64_t  before_nsec = verbose ? get_now_nsec() : 0ULL;
+
+    DBus::BusDispatcher         dispatcher;
+    DBus::default_dispatcher = &dispatcher;
+    DBus::Connection            conn = DBus::Connection::SystemBus();
+    name_service_proxy_c        intf(conn, DBUS_BUS_NAME_BASE, DBUS_OBJ_PATH_BASE);
+
     ::DBus::Struct <
        bool,        /* _1: success   */
        std::string, /* _2: pw_name   */
@@ -458,13 +491,24 @@ enum nss_status _nss_ham_getpwnam_r(const char    * name,
        std::string, /* _6: pw_gecos  */
        std::string, /* _7: pw_dir    */
        std::string  /* _8: pw_shell  */
-    >  passwd_data = dbus_intf_p->getpwnam(name);
+    >  ham_data;
+
+    try
+    {
+        ham_data = intf.getpwnam(name);
+    }
+    catch (DBus::Error & ex)
+    {
+        SYSLOG(LOG_CRIT, "_nss_ham_getpwnam_r() - cmdline=\"%s\" Exception %s\n", cmdline_p, ex.what());
+        *errnop = ENOENT;
+        return NSS_STATUS_NOTFOUND;
+    }
+
     double  duration_msec = verbose ? (get_now_nsec() - before_nsec)/1000000.0 : 0.0;
 
     return pw_fill_result("_nss_ham_getpwnam_r",
                           duration_msec,
-                          verbose,
-                          passwd_data,
+                          ham_data,
                           result,
                           buffer,
                           buflen,
@@ -489,13 +533,16 @@ enum nss_status _nss_ham_getpwuid_r(uid_t           uid,
                                     size_t          buflen,
                                     int           * errnop)
 {
-    unsigned options = get_options();
-    bool     verbose = 0 != (options & OPTS_DEBUG);
-
-    if (verbose)
-        syslog(LOG_DEBUG, "_nss_ham_getpwuid_r() - Invoked by \"%s\" with uid=%u UID=%u GID=%u", cmdline_p, uid, getuid(), getgid());
+    SYSLOG(LOG_DEBUG, "_nss_ham_getpwuid_r() - [%u:%u] cmdline=\"%s\" uid=%u\n",
+           getuid(), getgid(), cmdline_p, uid);
 
     uint64_t  before_nsec = verbose ? get_now_nsec() : 0ULL;
+
+    DBus::BusDispatcher         dispatcher;
+    DBus::default_dispatcher = &dispatcher;
+    DBus::Connection            conn = DBus::Connection::SystemBus();
+    name_service_proxy_c        intf(conn, DBUS_BUS_NAME_BASE, DBUS_OBJ_PATH_BASE);
+
     ::DBus::Struct <
        bool,        /* _1: success   */
        std::string, /* _2: pw_name   */
@@ -505,13 +552,24 @@ enum nss_status _nss_ham_getpwuid_r(uid_t           uid,
        std::string, /* _6: pw_gecos  */
        std::string, /* _7: pw_dir    */
        std::string  /* _8: pw_shell  */
-    >  passwd_data = dbus_intf_p->getpwuid(uid);
+    >  ham_data;
+
+    try
+    {
+        ham_data = intf.getpwuid(uid);
+    }
+    catch (DBus::Error & ex)
+    {
+        SYSLOG(LOG_CRIT, "_nss_ham_getpwuid_r() - cmdline=\"%s\" Exception %s\n", cmdline_p, ex.what());
+        *errnop = ENOENT;
+        return NSS_STATUS_NOTFOUND;
+    }
+
     double  duration_msec = verbose ? (get_now_nsec() - before_nsec)/1000000.0 : 0.0;
 
     return pw_fill_result("_nss_ham_getpwuid_r",
                           duration_msec,
-                          verbose,
-                          passwd_data,
+                          ham_data,
                           result,
                           buffer,
                           buflen,
@@ -536,26 +594,40 @@ enum nss_status _nss_ham_getgrnam_r(const char    * name,
                                     size_t          buflen,
                                     int           * errnop)
 {
-    unsigned options = get_options();
-    bool     verbose = 0 != (options & OPTS_DEBUG);
-
-    if (verbose)
-        syslog(LOG_DEBUG, "_nss_ham_getgrnam_r() - Invoked by \"%s\" with name=\"%s\" UID=%u GID=%u", cmdline_p, name, getuid(), getgid());
+    SYSLOG(LOG_DEBUG, "_nss_ham_getgrnam_r() - [%u:%u] cmdline=\"%s\" name=\"%s\"\n",
+           getuid(), getgid(), cmdline_p, name);
 
     uint64_t  before_nsec = verbose ? get_now_nsec() : 0ULL;
+
+    DBus::BusDispatcher         dispatcher;
+    DBus::default_dispatcher = &dispatcher;
+    DBus::Connection            conn = DBus::Connection::SystemBus();
+    name_service_proxy_c        intf(conn, DBUS_BUS_NAME_BASE, DBUS_OBJ_PATH_BASE);
+
     ::DBus::Struct <
        bool,                      /* _1: success   */
        std::string,               /* _2: gr_name   */
        std::string,               /* _3: gr_passwd */
        uint32_t,                  /* _4: gr_gid    */
        std::vector< std::string > /* _5: gr_mem    */
-    >  group_data = dbus_intf_p->getgrnam(name);
+    >  ham_data;
+
+    try
+    {
+        ham_data = intf.getgrnam(name);
+    }
+    catch (DBus::Error & ex)
+    {
+        SYSLOG(LOG_CRIT, "_nss_ham_getgrnam_r() - cmdline=\"%s\" Exception %s\n", cmdline_p, ex.what());
+        *errnop = ENOENT;
+        return NSS_STATUS_NOTFOUND;
+    }
+
     double  duration_msec = verbose ? (get_now_nsec() - before_nsec)/1000000.0 : 0.0;
 
     return gr_fill_result("_nss_ham_getgrnam_r",
                           duration_msec,
-                          verbose,
-                          group_data,
+                          ham_data,
                           result,
                           buffer,
                           buflen,
@@ -580,26 +652,40 @@ enum nss_status _nss_ham_getgrgid_r(gid_t           gid,
                                     size_t          buflen,
                                     int           * errnop)
 {
-    unsigned options = get_options();
-    bool     verbose = 0 != (options & OPTS_DEBUG);
-
-    if (verbose)
-        syslog(LOG_DEBUG, "_nss_ham_getgrgid_r() - Invoked by \"%s\" with gid=%u UID=%u GID=%u", cmdline_p, gid, getuid(), getgid());
+    SYSLOG(LOG_DEBUG, "_nss_ham_getgrgid_r() - [%u:%u] cmdline=\"%s\" gid=%u\n",
+           getuid(), getgid(), cmdline_p, gid);
 
     uint64_t  before_nsec = verbose ? get_now_nsec() : 0ULL;
+
+    DBus::BusDispatcher         dispatcher;
+    DBus::default_dispatcher = &dispatcher;
+    DBus::Connection            conn = DBus::Connection::SystemBus();
+    name_service_proxy_c        intf(conn, DBUS_BUS_NAME_BASE, DBUS_OBJ_PATH_BASE);
+
     ::DBus::Struct <
        bool,                      /* _1: success   */
        std::string,               /* _2: gr_name   */
        std::string,               /* _3: gr_passwd */
        uint32_t,                  /* _4: gr_gid    */
        std::vector< std::string > /* _5: gr_mem    */
-    >  group_data = dbus_intf_p->getgrgid(gid);
+    >  ham_data;
+
+    try
+    {
+        ham_data = intf.getgrgid(gid);
+    }
+    catch (DBus::Error & ex)
+    {
+        SYSLOG(LOG_CRIT, "_nss_ham_getgrgid_r() - cmdline=\"%s\" Exception %s\n", cmdline_p, ex.what());
+        *errnop = ENOENT;
+        return NSS_STATUS_NOTFOUND;
+    }
+
     double  duration_msec = verbose ? (get_now_nsec() - before_nsec)/1000000.0 : 0.0;
 
     return gr_fill_result("_nss_ham_getgrgid_r",
                           duration_msec,
-                          verbose,
-                          group_data,
+                          ham_data,
                           result,
                           buffer,
                           buflen,
@@ -635,56 +721,68 @@ enum nss_status _nss_ham_getspnam_r(const char    * name,
                                     size_t          buflen,
                                     int           * errnop)
 {
-    unsigned  options     = get_options();
-    bool      verbose     = 0 != (options & OPTS_DEBUG);
-
-    if (verbose)
-        syslog(LOG_DEBUG, "_nss_ham_getspnam_r() - Invoked by \"%s\" with name=\"%s\" UID=%u GID=%u", cmdline_p, name, getuid(), getgid());
+    SYSLOG(LOG_DEBUG, "_nss_ham_getspnam_r() - [%u:%u] cmdline=\"%s\" name=\"%s\"\n",
+           getuid(), getgid(), cmdline_p, name);
 
     uint64_t  before_nsec = verbose ? get_now_nsec() : 0ULL;
 
-    ::DBus::Struct< bool,        /* _1:  success   */
-                    std::string, /* _2:  sp_namp   */
-                    std::string, /* _3:  sp_pwdp   */
-                    int32_t,     /* _4:  sp_lstchg */
-                    int32_t,     /* _5:  sp_min    */
-                    int32_t,     /* _6:  sp_max    */
-                    int32_t,     /* _7:  sp_warn   */
-                    int32_t,     /* _8:  sp_inact  */
-                    int32_t,     /* _9:  sp_expire */
-                    uint32_t >   /* _10: sp_flag   */ hamd_data = dbus_intf_p->getspnam(name);
+    DBus::BusDispatcher         dispatcher;
+    DBus::default_dispatcher = &dispatcher;
+    DBus::Connection            conn = DBus::Connection::SystemBus();
+    name_service_proxy_c        intf(conn, DBUS_BUS_NAME_BASE, DBUS_OBJ_PATH_BASE);
 
-    double  duration_msec = verbose ? (get_now_nsec() - before_nsec)/1000000.0 : 0.0;
-    bool    success       = hamd_data._1;
+    ::DBus::Struct <
+        bool,        /* _1:  success   */
+        std::string, /* _2:  sp_namp   */
+        std::string, /* _3:  sp_pwdp   */
+        int32_t,     /* _4:  sp_lstchg */
+        int32_t,     /* _5:  sp_min    */
+        int32_t,     /* _6:  sp_max    */
+        int32_t,     /* _7:  sp_warn   */
+        int32_t,     /* _8:  sp_inact  */
+        int32_t,     /* _9:  sp_expire */
+        uint32_t     /* _10: sp_flag   */
+    > ham_data;
 
-    if (!success)
+    try
     {
-        if (verbose)
-            syslog(LOG_DEBUG, "_nss_ham_getspnam_r() - Invoked by \"%s\" RX from hamd: success=false. DBus exec time=%.3f ms", cmdline_p, duration_msec);
+       ham_data = intf.getspnam(name);
+    }
+    catch (DBus::Error & ex)
+    {
+        SYSLOG(LOG_CRIT, "_nss_ham_getspnam_r() - cmdline=\"%s\" Exception %s\n", cmdline_p, ex.what());
         *errnop = ENOENT;
         return NSS_STATUS_NOTFOUND;
     }
 
-    std::string   & sp_namp_r = hamd_data._2;
-    std::string   & sp_pwdp_r = hamd_data._3;
-    long            sp_lstchg = hamd_data._4;
-    long            sp_min    = hamd_data._5;
-    long            sp_max    = hamd_data._6;
-    long            sp_warn   = hamd_data._7;
-    long            sp_inact  = hamd_data._8;
-    long            sp_expire = hamd_data._9;
-    unsigned long   sp_flag   = hamd_data._10;
+    double  duration_msec = verbose ? (get_now_nsec() - before_nsec)/1000000.0 : 0.0;
+    bool    success       = ham_data._1;
 
-    if (verbose)
-        syslog(LOG_DEBUG, "_nss_ham_getspnam_r() - Invoked by \"%s\" RX from hamd: success=true. DBus exec time=%.3f ms. sp_namp=\"%s\", sp_pwdp=\"%s\", sp_lstchg=%ld, sp_min=%ld, sp_max=%ld, sp_warn=%ld, sp_inact=%ld, sp_expire=%ld, sp_flag=%lu",
-               cmdline_p, duration_msec, sp_namp_r.c_str(), sp_pwdp_r.c_str(), sp_lstchg, sp_min, sp_max, sp_warn, sp_inact, sp_expire, sp_flag);
+    if (!success)
+    {
+        SYSLOG(LOG_DEBUG, "_nss_ham_getspnam_r() - cmdline=\"%s\" exec time=%.3f ms. Failed!\n", cmdline_p, duration_msec);
+        *errnop = ENOENT;
+        return NSS_STATUS_NOTFOUND;
+    }
+
+    std::string   & sp_namp_r = ham_data._2;
+    std::string   & sp_pwdp_r = ham_data._3;
+    long            sp_lstchg = ham_data._4;
+    long            sp_min    = ham_data._5;
+    long            sp_max    = ham_data._6;
+    long            sp_warn   = ham_data._7;
+    long            sp_inact  = ham_data._8;
+    long            sp_expire = ham_data._9;
+    unsigned long   sp_flag   = ham_data._10;
+
+    SYSLOG(LOG_DEBUG, "_nss_ham_getspnam_r() - cmdline=\"%s\" exec time=%.3f ms. Success! sp_namp=\"%s\", sp_pwdp=\"%s\", sp_lstchg=%ld, sp_min=%ld, sp_max=%ld, sp_warn=%ld, sp_inact=%ld, sp_expire=%ld, sp_flag=%lu\n",
+           cmdline_p, duration_msec, sp_namp_r.c_str(), sp_pwdp_r.c_str(), sp_lstchg, sp_min, sp_max, sp_warn, sp_inact, sp_expire, sp_flag);
 
     size_t sp_namp_l = sp_namp_r.length() + 1; /* +1 to include NUL terminating char */
     size_t sp_pwdp_l = sp_pwdp_r.length() + 1;
     if (buflen < (sp_namp_l + sp_pwdp_l))
     {
-        if (verbose)
-            syslog(LOG_DEBUG, "_nss_ham_getspnam_r() - Invoked by \"%s\" not enough memory for struct spwd data", cmdline_p);
+        SYSLOG(LOG_DEBUG, "_nss_ham_getspnam_r() - cmdline=\"%s\" not enough memory for struct spwd data\n", cmdline_p);
 
         if (errnop) *errnop = ENOMEM;
         return NSS_STATUS_TRYAGAIN;
