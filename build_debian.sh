@@ -436,7 +436,7 @@ set /files/etc/sysctl.conf/net.ipv6.conf.default.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.all.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.keep_addr_on_down 1
 
-set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 0
+set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 1
 set /files/etc/sysctl.conf/net.ipv4.udp_l3mdev_accept 1
 
 set /files/etc/sysctl.conf/net.ipv6.ip_nonlocal_bind 1
