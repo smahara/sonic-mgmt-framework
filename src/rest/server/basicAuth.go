@@ -25,10 +25,6 @@ func BasicAuthenAndAuthor(r *http.Request, rc *RequestContext) error {
 		glog.Infof("[%s] Failed to retrieve authentication information; %v", rc.ID, err)
 		return httpError(http.StatusUnauthorized, "")	
 	}
-	if isWriteOperation(r) && IsAdminUser(rc.Auth) == false {
-		glog.Errorf("[%s] Not an admin; cannot allow %s", rc.ID, r.Method)
-		return httpError(http.StatusForbidden, "Not an admin user")
-	}
 
 	glog.Infof("[%s] Authorization passed", rc.ID)
 	return nil

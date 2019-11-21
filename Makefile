@@ -52,7 +52,8 @@ GO_DEPS_LIST = github.com/gorilla/mux \
                github.com/facette/natsort \
 	       github.com/philopon/go-toposort \
                gopkg.in/godbus/dbus.v5 \
-               github.com/dgrijalva/jwt-go
+               github.com/dgrijalva/jwt-go \
+               github.com/msteinert/pam
 
 
 REST_BIN = $(BUILD_DIR)/rest_server/main
