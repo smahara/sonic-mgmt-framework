@@ -15,11 +15,6 @@
 #include "hamd.h"               // hamd_c
 #include "../shared/utils.h"     // startswith()
 
-extern "C"
-{
-#include "siphash24.h"          // siphash24()
-}
-
 /**
  * @brief DBus adaptor class constructor
  *
