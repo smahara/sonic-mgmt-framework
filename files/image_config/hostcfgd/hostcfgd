@@ -376,8 +376,11 @@ class MgmtVrfCfg:
     def handle_mgmt_vrf_cfg(self, key, data):
         syslog.syslog(syslog.LOG_INFO, "Received MGMT VRF config, key: {}, data: {}".format(key, data))
         try:
-            if data['mgmtVrfEnabled'] == 'true':
-                self.configure_mgmt_vrf()
+            if data:
+                if data['mgmtVrfEnabled'] == 'true':
+                    self.configure_mgmt_vrf()
+                else:
+                    self.unconfigure_mgmt_vrf()
             else:
                 self.unconfigure_mgmt_vrf()
 
