@@ -170,9 +170,15 @@ func init() {
 func Create(req SetRequest) (SetResponse, error) {
 	var keys []db.WatchKeys
 	var resp SetResponse
-
 	path := req.Path
 	payload := req.Payload
+	if !isAuthorizedForSet(req) {
+		return resp, tlerr.AuthorizationError{
+			Format: "User is unauthorized for Create Operation",
+			Path: path,
+		}
+				
+	}
 
 	log.Info("Create request received with path =", path)
 	log.Info("Create request received with payload =", string(payload))
@@ -238,9 +244,15 @@ func Create(req SetRequest) (SetResponse, error) {
 func Update(req SetRequest) (SetResponse, error) {
 	var keys []db.WatchKeys
 	var resp SetResponse
-
 	path := req.Path
 	payload := req.Payload
+	if !isAuthorizedForSet(req) {
+		return resp, tlerr.AuthorizationError{
+			Format: "User is unauthorized for Update Operation",
+			Path: path,
+		}
+	}
+
 
 	log.Info("Update request received with path =", path)
 	log.Info("Update request received with payload =", string(payload))
@@ -307,9 +319,15 @@ func Replace(req SetRequest) (SetResponse, error) {
 	var err error
 	var keys []db.WatchKeys
 	var resp SetResponse
-
 	path := req.Path
 	payload := req.Payload
+	if !isAuthorizedForSet(req) {
+		return resp, tlerr.AuthorizationError{
+			Format: "User is unauthorized for Replace Operation",
+			Path: path,
+		}
+	}
+	
 
 	log.Info("Replace request received with path =", path)
 	log.Info("Replace request received with payload =", string(payload))
@@ -376,8 +394,13 @@ func Delete(req SetRequest) (SetResponse, error) {
 	var err error
 	var keys []db.WatchKeys
 	var resp SetResponse
-
 	path := req.Path
+	if !isAuthorizedForSet(req) {
+		return resp, tlerr.AuthorizationError{
+			Format: "User is unauthorized for Delete Operation",
+			Path: path,
+		}
+	}
 
 	log.Info("Delete request received with path =", path)
 
@@ -442,8 +465,13 @@ func Delete(req SetRequest) (SetResponse, error) {
 func Get(req GetRequest) (GetResponse, error) {
 	var payload []byte
 	var resp GetResponse
-
 	path := req.Path
+	if !isAuthorizedForGet(req) {
+		return resp, tlerr.AuthorizationError{
+			Format: "User is unauthorized for Get Operation",
+			Path: path,
+		}
+	}
 
 	log.Info("Received Get request for path = ", path)
 
@@ -485,8 +513,13 @@ func Get(req GetRequest) (GetResponse, error) {
 func Action(req ActionRequest) (ActionResponse, error) {
 	var payload []byte
 	var resp ActionResponse
-
 	path := req.Path
+	if !isAuthorizedForAction(req) {
+		return resp, tlerr.AuthorizationError{
+			Format: "User is unauthorized for Action Operation",
+			Path: path,
+		}
+	}
 
 	log.Info("Received Action request for path = ", path)
 
