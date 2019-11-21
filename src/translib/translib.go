@@ -34,7 +34,7 @@ This package can also talk to non-DB clients.
 package translib
 
 import (
-	//"errors"
+	"errors"
 	"sync"
 	"translib/db"
 	"translib/tlerr"
@@ -177,7 +177,6 @@ func Create(req SetRequest) (SetResponse, error) {
 			Format: "User is unauthorized for Create Operation",
 			Path: path,
 		}
-				
 	}
 
 	log.Info("Create request received with path =", path)
@@ -200,7 +199,8 @@ func Create(req SetRequest) (SetResponse, error) {
 	writeMutex.Lock()
 	defer writeMutex.Unlock()
 
-	d, err := db.NewDB(getDBOptions(db.ConfigDB))
+	isWriteDisabled := false
+	d, err := db.NewDB(getDBOptions(db.ConfigDB, isWriteDisabled))
 
 	if err != nil {
 		resp.ErrSrc = ProtoErr
@@ -274,7 +274,8 @@ func Update(req SetRequest) (SetResponse, error) {
 	writeMutex.Lock()
 	defer writeMutex.Unlock()
 
-	d, err := db.NewDB(getDBOptions(db.ConfigDB))
+	isWriteDisabled := false
+	d, err := db.NewDB(getDBOptions(db.ConfigDB, isWriteDisabled))
 
 	if err != nil {
 		resp.ErrSrc = ProtoErr
@@ -327,7 +328,6 @@ func Replace(req SetRequest) (SetResponse, error) {
 			Path: path,
 		}
 	}
-	
 
 	log.Info("Replace request received with path =", path)
 	log.Info("Replace request received with payload =", string(payload))
@@ -349,7 +349,8 @@ func Replace(req SetRequest) (SetResponse, error) {
 	writeMutex.Lock()
 	defer writeMutex.Unlock()
 
-	d, err := db.NewDB(getDBOptions(db.ConfigDB))
+	isWriteDisabled := false
+	d, err := db.NewDB(getDBOptions(db.ConfigDB, isWriteDisabled))
 
 	if err != nil {
 		resp.ErrSrc = ProtoErr
@@ -421,7 +422,8 @@ func Delete(req SetRequest) (SetResponse, error) {
 	writeMutex.Lock()
 	defer writeMutex.Unlock()
 
-	d, err := db.NewDB(getDBOptions(db.ConfigDB))
+	isWriteDisabled := false
+	d, err := db.NewDB(getDBOptions(db.ConfigDB, isWriteDisabled))
 
 	if err != nil {
 		resp.ErrSrc = ProtoErr
@@ -489,7 +491,8 @@ func Get(req GetRequest) (GetResponse, error) {
 		return resp, err
 	}
 
-	dbs, err := getAllDbs()
+	isGetCase := true
+	dbs, err := getAllDbs(isGetCase)
 
 	if err != nil {
 		resp = GetResponse{Payload: payload, ErrSrc: ProtoErr}
@@ -541,7 +544,8 @@ func Action(req ActionRequest) (ActionResponse, error) {
 		return resp, err
 	}
 
-	dbs, err := getAllDbs()
+	isGetCase := false
+	dbs, err := getAllDbs(isGetCase)
 
 	if err != nil {
 		resp = ActionResponse{Payload: payload, ErrSrc: ProtoErr}
@@ -577,10 +581,15 @@ func Bulk(req BulkRequest) (BulkResponse, error) {
 		UpdateResponse: updateResp,
 		CreateResponse: createResp}
 
+    if (!isUserAuthorizedForSet(req.User)) {
+        return resp, errors.New("User is not authorized to perform this operation")
+    }
+
 	writeMutex.Lock()
 	defer writeMutex.Unlock()
 
-	d, err := db.NewDB(getDBOptions(db.ConfigDB))
+	isWriteDisabled := false
+	d, err := db.NewDB(getDBOptions(db.ConfigDB, isWriteDisabled))
 
 	if err != nil {
 		return resp, err
@@ -803,10 +812,13 @@ func Bulk(req BulkRequest) (BulkResponse, error) {
 }
 
 //Subscribes to the paths requested and sends notifications when the data changes in DB
-func Subscribe(paths []string, q *queue.PriorityQueue, stop chan struct{}) ([]*IsSubscribeResponse, error) {
+func Subscribe(req SubscribeRequest) ([]*IsSubscribeResponse, error) {
 	var err error
 	var sErr error
-	//err = errors.New("Not implemented")
+
+	paths := req.Paths
+	q     := req.Q
+	stop  := req.Stop
 
 	dbNotificationMap := make(map[db.DBNum][]*notificationInfo)
 
@@ -820,7 +832,12 @@ func Subscribe(paths []string, q *queue.PriorityQueue, stop chan struct{}) ([]*I
 			Err:                 nil}
 	}
 
-	dbs, err := getAllDbs()
+    if (!isUserAuthorizedForGet(req.User)) {
+        return resp, errors.New("User is not authorized to perform this operation")
+    }
+
+	isGetCase := true
+	dbs, err := getAllDbs(isGetCase)
 
 	if err != nil {
 		return resp, err
@@ -907,8 +924,9 @@ func Subscribe(paths []string, q *queue.PriorityQueue, stop chan struct{}) ([]*I
 }
 
 //Check if subscribe is supported on the given paths
-func IsSubscribeSupported(paths []string) ([]*IsSubscribeResponse, error) {
+func IsSubscribeSupported(req IsSubscribeRequest) ([]*IsSubscribeResponse, error) {
 
+	paths := req.Paths
 	resp := make([]*IsSubscribeResponse, len(paths))
 
 	for i, _ := range resp {
@@ -919,7 +937,12 @@ func IsSubscribeSupported(paths []string) ([]*IsSubscribeResponse, error) {
 			Err:                 nil}
 	}
 
-	dbs, err := getAllDbs()
+    if (!isUserAuthorizedForGet(req.User)) {
+        return resp, errors.New("User is not authorized to perform this operation")
+    }
+
+	isGetCase := true
+	dbs, err := getAllDbs(isGetCase)
 
 	if err != nil {
 		return resp, err
@@ -965,12 +988,19 @@ func GetModels() ([]ModelData, error) {
 }
 
 //Creates connection will all the redis DBs. To be used for get request
-func getAllDbs() ([db.MaxDB]*db.DB, error) {
+func getAllDbs(isGetCase bool) ([db.MaxDB]*db.DB, error) {
 	var dbs [db.MaxDB]*db.DB
 	var err error
+	var isWriteDisabled bool
+
+	if isGetCase {
+		isWriteDisabled = true
+	} else {
+		isWriteDisabled = false
+	}
 
 	//Create Application DB connection
-	dbs[db.ApplDB], err = db.NewDB(getDBOptions(db.ApplDB))
+	dbs[db.ApplDB], err = db.NewDB(getDBOptions(db.ApplDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
@@ -978,7 +1008,7 @@ func getAllDbs() ([db.MaxDB]*db.DB, error) {
 	}
 
 	//Create ASIC DB connection
-	dbs[db.AsicDB], err = db.NewDB(getDBOptions(db.AsicDB))
+	dbs[db.AsicDB], err = db.NewDB(getDBOptions(db.AsicDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
@@ -986,7 +1016,7 @@ func getAllDbs() ([db.MaxDB]*db.DB, error) {
 	}
 
 	//Create Counter DB connection
-	dbs[db.CountersDB], err = db.NewDB(getDBOptions(db.CountersDB))
+	dbs[db.CountersDB], err = db.NewDB(getDBOptions(db.CountersDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
@@ -994,23 +1024,31 @@ func getAllDbs() ([db.MaxDB]*db.DB, error) {
 	}
 
 	//Create Log Level DB connection
-	dbs[db.LogLevelDB], err = db.NewDB(getDBOptions(db.LogLevelDB))
+	dbs[db.LogLevelDB], err = db.NewDB(getDBOptions(db.LogLevelDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
 		return dbs, err
 	}
+
+    isWriteDisabled = true 
 
 	//Create Config DB connection
-	dbs[db.ConfigDB], err = db.NewDB(getDBOptions(db.ConfigDB))
+	dbs[db.ConfigDB], err = db.NewDB(getDBOptions(db.ConfigDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
 		return dbs, err
 	}
 
+    if isGetCase {
+        isWriteDisabled = true 
+    } else {
+        isWriteDisabled = false
+    }
+
 	//Create Flex Counter DB connection
-	dbs[db.FlexCounterDB], err = db.NewDB(getDBOptions(db.FlexCounterDB))
+	dbs[db.FlexCounterDB], err = db.NewDB(getDBOptions(db.FlexCounterDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
@@ -1018,7 +1056,7 @@ func getAllDbs() ([db.MaxDB]*db.DB, error) {
 	}
 
 	//Create State DB connection
-	dbs[db.StateDB], err = db.NewDB(getDBOptions(db.StateDB))
+	dbs[db.StateDB], err = db.NewDB(getDBOptions(db.StateDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
@@ -1026,7 +1064,7 @@ func getAllDbs() ([db.MaxDB]*db.DB, error) {
 	}
 
     //Create Error DB connection
-    dbs[db.ErrorDB], err = db.NewDB(getDBOptions(db.ErrorDB))
+    dbs[db.ErrorDB], err = db.NewDB(getDBOptions(db.ErrorDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
@@ -1065,27 +1103,28 @@ func (val SubscribeResponse) Compare(other queue.Item) int {
 	return -1
 }
 
-func getDBOptions(dbNo db.DBNum) db.Options {
+func getDBOptions(dbNo db.DBNum, isWriteDisabled bool) db.Options {
 	var opt db.Options
 
 	switch dbNo {
 	case db.ApplDB, db.CountersDB:
-		opt = getDBOptionsWithSeparator(dbNo, "", ":", ":")
+		opt = getDBOptionsWithSeparator(dbNo, "", ":", ":", isWriteDisabled)
 		break
 	case db.FlexCounterDB, db.AsicDB, db.LogLevelDB, db.ConfigDB, db.StateDB, db.ErrorDB, db.UserDB:
-		opt = getDBOptionsWithSeparator(dbNo, "", "|", "|")
+		opt = getDBOptionsWithSeparator(dbNo, "", "|", "|", isWriteDisabled)
 		break
 	}
 
 	return opt
 }
 
-func getDBOptionsWithSeparator(dbNo db.DBNum, initIndicator string, tableSeparator string, keySeparator string) db.Options {
+func getDBOptionsWithSeparator(dbNo db.DBNum, initIndicator string, tableSeparator string, keySeparator string, isWriteDisabled bool) db.Options {
 	return (db.Options{
 		DBNo:               dbNo,
 		InitIndicator:      initIndicator,
 		TableNameSeparator: tableSeparator,
 		KeySeparator:       keySeparator,
+		IsWriteDisabled:    isWriteDisabled,
 	})
 }
 
