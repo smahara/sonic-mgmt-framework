@@ -5,10 +5,11 @@
 #include <getopt.h>         // getopt_long()
 #include <stdlib.h>         // EXIT_SUCCESS, EXIT_FAILURE
 #include <errno.h>          // program_invocation_short_name
-#include <glib.h>           // G_N_ELEMENTS
 
 #include "subsys.h"
 #include "hamctl.h"
+
+#define N_ELEMENTS(arr)  (sizeof (arr) / sizeof ((arr)[0]))
 
 static const struct subsys_c * subsystems[] =
 {
@@ -34,7 +35,7 @@ static int help(int argc, char *argv[])
             "\n"
             "SUBSYS:\n"
            );
-    for (i = 0; i < G_N_ELEMENTS(subsystems); i++)
+    for (i = 0; i < N_ELEMENTS(subsystems); i++)
     {
         if ((subsystems[i]->help_pm != NULL) && !subsystems[i]->hidden_m)
             printf("  %-12s %s\n", subsystems[i]->name_pm, subsystems[i]->help_pm);
@@ -112,7 +113,7 @@ int main(int argc, char *argv[])
 
     if (command != NULL)
     {
-        for (i = 0; i < G_N_ELEMENTS(subsystems); i++)
+        for (i = 0; i < N_ELEMENTS(subsystems); i++)
         {
             if (0 == strcmp(subsystems[i]->name_pm, command))
             {

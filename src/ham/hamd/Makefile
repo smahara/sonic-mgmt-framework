@@ -1,4 +1,4 @@
-# sudo apt-get install libsystemd-dev libglib2.0-dev libgudev-1.0-dev libdbus-c++-dev
+# sudo apt-get install libsystemd-dev libglib2.0-dev libdbus-c++-dev
 TARGET    := hamd
 
 SRCS      := main.cpp hamd.cpp timer.cpp siphash24.c
