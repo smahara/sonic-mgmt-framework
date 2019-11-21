@@ -11,21 +11,14 @@ inline const char * true_false          (bool x, const char * pos_p = "true", co
 
 /**
  * @brief Parse command-line options/arguments
- *
  */
 config_c::config_c(int argc, char **argv)
 {
     GOptionContext  * context_p;
-    std::string       poll_help    = "Main loop polling period [" + std::to_string(poll_period_sec_m) + "s]";
-    std::string       min_uid_help = "Minimum UID              [" + std::to_string(sac_uid_min_m) + ']';
-    std::string       max_uid_help = "Maximum UID              [" + std::to_string(sac_uid_max_m) + ']';
     std::string       verbose_help = "Print extra debug        [" + std::string(true_false(verbose_m)) + ']';
 
     static const GOptionEntry options[] =
     {
-        { "poll-period", 'p',  G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,  &poll_period_sec_m, poll_help.c_str(),    NULL },
-        { "min-uid",     'm',  G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,  &sac_uid_min_m,     min_uid_help.c_str(), NULL },
-        { "max-uid",     'M',  G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,  &sac_uid_max_m,     max_uid_help.c_str(), NULL },
         { "verbose",     'v',  G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &verbose_m,         verbose_help.c_str(), NULL },
         { NULL,          '\0', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, NULL,               NULL,                 NULL }
     };
