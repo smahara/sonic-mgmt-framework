@@ -29,6 +29,8 @@
 #include "../include/system.h"
 #include "../include/iccp_csm.h"
 #include "../include/mlacp_link_handler.h"
+#include "../include/scheduler.h"
+#include "../include/iccp_netlink.h"
 
 #if 0
 /* Ethernet MAC Address setter - set by string. */
@@ -560,8 +562,9 @@ struct PeerInterface* peer_if_find_by_name(struct CSM* csm, char* name)
 void peer_if_del_all_vlan(struct PeerInterface* pif)
 {
     struct VLAN_ID *vlan = NULL;
+    struct VLAN_ID* vlan_temp = NULL;
 
-    RB_FOREACH(vlan, vlan_rb_tree, &(pif->vlan_tree))
+    RB_FOREACH_SAFE(vlan, vlan_rb_tree, &(pif->vlan_tree), vlan_temp)
     {
         ICCPD_LOG_DEBUG(__FUNCTION__, "remove VLAN ID = %d from peer's %s",
                 vlan->vid, pif->name);
@@ -643,8 +646,9 @@ void local_if_del_vlan(struct LocalInterface* local_if, uint16_t vid)
 void local_if_del_all_vlan(struct LocalInterface* lif)
 {
     struct VLAN_ID* vlan = NULL;
+    struct VLAN_ID* vlan_temp = NULL;
 
-    RB_FOREACH(vlan, vlan_rb_tree, &(lif->vlan_tree))
+    RB_FOREACH_SAFE(vlan, vlan_rb_tree, &(lif->vlan_tree), vlan_temp)
     {
         ICCPD_LOG_DEBUG(__FUNCTION__, "remove VLAN ID = %d on %s", vlan->vid, lif->name);
         VLAN_RB_REMOVE(vlan_rb_tree, &(lif->vlan_tree), vlan);
@@ -690,9 +694,10 @@ int peer_if_clean_unused_vlan(struct PeerInterface* peer_if)
 {
     struct VLAN_ID *peer_vlan = NULL;
     struct VLAN_ID *peer_vlan_next = NULL;
+    struct VLAN_ID *vlan_temp = NULL;
 
     /* traverse 1 time */
-    RB_FOREACH(peer_vlan_next, vlan_rb_tree, &(peer_if->vlan_tree))
+    RB_FOREACH_SAFE(peer_vlan_next, vlan_rb_tree, &(peer_if->vlan_tree), vlan_temp)
     {
         if (peer_vlan != NULL)
         {

@@ -2045,11 +2045,7 @@ void mlacp_portchannel_state_handler(struct CSM* csm,
      * Traffic is re-enabled back after the interface is up and ack is
      * received from peer
      */
-    if ( po_state == 0 && 
-         ( !csm->peer_link_if ||
-           !(strcmp(csm->peer_link_if->name, local_if->name)) 
-         ) 
-       )
+    if (po_state == 0)
         mlacp_link_disable_traffic_distribution(local_if);
 
     return;

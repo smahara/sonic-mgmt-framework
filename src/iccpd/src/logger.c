@@ -90,7 +90,7 @@ void log_finalize()
     /*do nothing*/
 }
 
-void write_log(const int level, const char* tag, const char* format, ...)
+void write_log(int level, const char* tag, const char* format, ...)
 {
     struct LoggerConfig* config = logger_get_configuration();
     char buf[LOGBUF_SIZE];
@@ -103,6 +103,11 @@ void write_log(const int level, const char* tag, const char* format, ...)
     if (!config->console_log_enabled)
         return;
 #endif
+
+    if (tag && strcmp(tag,"ICCP_FSM") == 0)
+    {
+        level =  NOTICE_LOG_LEVEL;
+    }
 
     if (level < config->log_level)
         return;
