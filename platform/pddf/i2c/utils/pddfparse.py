@@ -8,7 +8,7 @@ import glob
 import os, time, unicodedata
 from jsonschema import validate
 
-
+bmc_cache={}
 cache={}
 SONIC_CFGGEN_PATH = '/usr/local/bin/sonic-cfggen'
 HWSKU_KEY = 'DEVICE_METADATA.localhost.hwsku'
@@ -1320,15 +1320,41 @@ class PddfParse():
     #################################################################################################################################
     #   BMC APIs 
     #################################################################################################################################
+    def populate_bmc_cache_db(self, bmc_attr):
+        bmc_cmd = str(bmc_attr['bmc_cmd']).strip()
+        field_name = str(bmc_attr['field_name']).strip()
+        field_pos= int(bmc_attr['field_pos'])-1
+
+        o_list = subprocess.check_output(bmc_cmd, shell=True).strip().split('\n')
+        bmc_cache[bmc_cmd]={}
+        bmc_cache[bmc_cmd]['time']=time.time()
+        for entry in o_list:
+            name = entry.split()[0]
+            bmc_cache[bmc_cmd][name]=entry
+
     def non_raw_ipmi_get_request(self, bmc_attr):
+        bmc_db_update_time=1
         value = 'N/A'
-        cmd = bmc_attr['bmc_cmd'] + "| grep " + bmc_attr['field_name'] + " | awk '{print $" + bmc_attr['field_pos'] + " }'"
+        bmc_cmd = str(bmc_attr['bmc_cmd']).strip()
+        field_name = str(bmc_attr['field_name']).strip()
+        field_pos= int(bmc_attr['field_pos'])-1
+
+        if not bmc_cmd in bmc_cache:
+           self.populate_bmc_cache_db(bmc_attr)
+        else:
+           now = time.time()
+           if (int(now - bmc_cache[bmc_cmd]['time']) > bmc_db_update_time):
+               self.populate_bmc_cache_db(bmc_attr)
+
         try:
-            value = subprocess.check_output(cmd, shell=True).strip()
-        except IOError:
-            pass
-        
+           data=bmc_cache[bmc_cmd][field_name]
+           value = data.split()[field_pos]
+        except Exception as e:
+           pass
+
         if 'mult' in bmc_attr.keys() and not value.isalpha():
+            if value.isalpha():
+                value = 0.0
             value = float(value) * float(bmc_attr['mult'])
     
         return str(value)

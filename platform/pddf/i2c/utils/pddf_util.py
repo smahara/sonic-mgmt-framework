@@ -198,6 +198,16 @@ def config_pddf_utils():
         shutil.copy(device_path+"/pddf/fancontrol",device_path+"/fancontrol")
         #print "*** Copied the pddf fancontrol file "
 
+    # BMC support
+    f_sensors="/usr/bin/sensors"
+    f_sensors_org="/usr/bin/sensors.org"
+    f_pddf_sensors="/usr/local/bin/pddf_sensors"
+    if os.path.exists(f_pddf_sensors) is True:
+        if os.path.exists(f_sensors_org) is False:
+            shutil.copy(f_sensors, f_sensors_org)
+        shutil.copy(f_pddf_sensors, f_sensors)
+
+
     return 0
 
 def cleanup_pddf_utils():
@@ -227,6 +237,12 @@ def cleanup_pddf_utils():
     if os.path.exists(device_path+"/fancontrol.bak"):
         log_os_system("mv "+device_path+"/fancontrol.bak"+" "+device_path+"/fancontrol", 0)
         #print "***Moved fancotnrol.bak to fancontrol"
+
+    # BMC support
+    f_sensors="/usr/bin/sensors"
+    f_sensors_org="/usr/bin/sensors.org"
+    if os.path.exists(f_sensors_org) is True:
+        shutil.copy(f_sensors_org, f_sensors)
 
     return 0
 
