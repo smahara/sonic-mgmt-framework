@@ -16,10 +16,7 @@ class config_c
 {
 public:
     config_c(int argc, char **argv);
-    gint  poll_period_sec_m = 10;
-    gint  sac_uid_min_m     = 30000;
-    gint  sac_uid_max_m     = 60000;
-    bool  verbose_m         = false;
+    bool  verbose_m = false;
 };
 
 class hamd_c : public DBus::ObjectAdaptor,
@@ -45,10 +42,6 @@ public:
     virtual ::DBus::Struct< bool, std::string, std::string, uint32_t, std::vector< std::string > > getgrgid(const uint32_t& gid);
     virtual ::DBus::Struct< bool, std::string, std::string, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, uint32_t > getspnam(const std::string& name);
 
-    // DBus "sac" interface
-    virtual bool add_unconfirmed_user(const std::string& username, const uint32_t& pid);
-    virtual bool confirm_user(const std::string& username, const std::string& groupname, const std::string& groups, const std::string& label);
-
     // DBus "debug" interface
     virtual std::string  tron();
     virtual std::string  troff();
@@ -59,21 +52,7 @@ public:
     virtual void  cleanup();
 
 private:
-    const gint    sac_uid_min_m;
-    const gint    sac_uid_max_m;
-    const gint    sac_uid_range_m; // 1 + (max - min)
     bool          tron_m;
-    gtimer_c      poll_timer_m;
-    static bool   on_poll_timeout(gpointer user_data_p); // This callback functions must follow GSourceFunc signature.
-    void          rm_unconfirmed_users() const;
-
-    uid_t uid_fit_into_range(uint64_t hash)
-    {
-        return (uid_t)((hash % sac_uid_range_m) + sac_uid_min_m);
-    }
-
-public:
-    virtual const char * class_name() const { return "hamd_c"; }
 };
 
 
