@@ -2,54 +2,50 @@
 #include <glib.h>                       // g_main_loop_new(), g_main_context_default(), g_main_loop_run(), g_main_loop_unref(), g_main_loop_quit(), gboolean, etc...
 #include <glib-unix.h>                  // g_unix_signal_add()
 #include <dbus-c++/glib-integration.h>  // DBus::Glib::BusDispatcher, DBus::default_dispatcher
-#include <stdlib.h>                     // EXIT_SUCCESS, EXIT_FAILURE
-#include <systemd/sd-journal.h>         // sd_journal_print()
-
-#include "hamd.h"                       // hamd_c
-
-inline const char * true_false          (bool x, const char * pos_p = "true", const char * neg_p = "false")   { return (x) ? pos_p : neg_p; }
-
-/**
- * @brief Parse command-line options/arguments
- */
-config_c::config_c(int argc, char **argv)
-{
-    GOptionContext  * context_p;
-    std::string       verbose_help = "Print extra debug        [" + std::string(true_false(verbose_m)) + ']';
-
-    static const GOptionEntry options[] =
-    {
-        { "verbose",     'v',  G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &verbose_m,         verbose_help.c_str(), NULL },
-        { NULL,          '\0', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, NULL,               NULL,                 NULL }
-    };
-
-    context_p = g_option_context_new (NULL);
-    g_option_context_set_summary (context_p, "Host Account Management Daemon (hamd)");
-    g_option_context_add_main_entries (context_p, &options[0], NULL);
-    g_option_context_parse (context_p, &argc, &argv, NULL);
-    g_option_context_free (context_p);
-}
+#include <stdlib.h>                     // EXIT_SUCCESS
+#include "hamd.h"                       // hamd_c, hamd_config_c
+#include "../shared/utils.h"            // LOG_CONDITIONAL()
 
 /**
  * @brief This callback will be invoked when this process receives SIGINT
  *        or SIGTERM.
  *
- * @param data
+ * @param data Pointer to the GMainLoop object
  *
- * @return gboolean
+ * @return G_SOURCE_REMOVE to indicate that this event is no longer needed
+ *         and should be removed from the main loop.
  */
 static gboolean terminationSignalCallback(gpointer data)
 {
     GMainLoop * loop_p = static_cast<GMainLoop *>(data);
     g_main_loop_quit(loop_p);
-    return FALSE;
+    return G_SOURCE_REMOVE; // No need to keep this event source since we're about to exit
+}
+
+/**
+ * @brief This callback will be invoked when this process receives SIGHUP,
+ *        which is usually triggered by "systemctl reload". This signal is
+ *        used to tell the process to reload its configuration file and
+ *        reconfigure itself without doing a complete shutdown-restart
+ *        cycle.
+ *
+ * @param data Pointer to the hamd_c object
+ *
+ * @return G_SOURCE_CONTINUE to indicate that we want the main loop to keep
+ *         processing this event.
+ */
+static gboolean reloadConfigCallback(gpointer data)
+{
+    hamd_c * hamd_p = static_cast<hamd_c *>(data);
+    hamd_p->reload();
+    return G_SOURCE_CONTINUE; // Keep this event source.
 }
 
 /**
  * @brief Program entry point
  *
- * @param argc
- * @param argv
+ * @param argc Argument count (i.e. argv array size)
+ * @param argv Array of argument strings passed to the program.
  *
  * @return int
  */
@@ -59,9 +55,9 @@ int main(int argc, char *argv[])
 
     //putenv("DBUSXX_VERBOSE=1");
 
-    config_c  config(argc, argv);
+    hamd_config_c  config(argc, argv);
 
-    sd_journal_print(LOG_DEBUG, "Creating a GMainLoop");
+    LOG_CONDITIONAL(config.tron_m, LOG_DEBUG, "Creating a GMainLoop");
     GMainContext * main_ctx_p = g_main_context_default();
     GMainLoop    * loop_p     = g_main_loop_new(main_ctx_p, FALSE);
 
@@ -70,26 +66,27 @@ int main(int argc, char *argv[])
     g_unix_signal_add(SIGTERM, terminationSignalCallback, loop_p); // systemctl stop
 
     // DBus setup
-    sd_journal_print(LOG_DEBUG, "Initializing the loop's dispatcher");
+    LOG_CONDITIONAL(config.tron_m, LOG_DEBUG, "Initializing the loop's dispatcher");
     DBus::Glib::BusDispatcher   dispatcher;
     DBus::default_dispatcher = &dispatcher;
     dispatcher.attach(main_ctx_p);
 
-    sd_journal_print(LOG_DEBUG, "Requesting System DBus connection \"" DBUS_BUS_NAME_BASE "\"");
+    LOG_CONDITIONAL(config.tron_m, LOG_DEBUG, "Requesting System DBus connection \"" DBUS_BUS_NAME_BASE "\"");
     DBus::Connection  dbus_conn(DBus::Connection::SystemBus());
     dbus_conn.request_name(DBUS_BUS_NAME_BASE);
 
     hamd_c  hamd(config, dbus_conn); // DBus handlers
+    g_unix_signal_add(SIGHUP, reloadConfigCallback, &hamd); // systemctl reload
 
-    sd_journal_print(LOG_DEBUG, "Entering main loop");
+    LOG_CONDITIONAL(config.tron_m, LOG_DEBUG, "Entering main loop");
     g_main_loop_run(loop_p);
 
     hamd.cleanup();
 
-    sd_journal_print(LOG_DEBUG, "Cleaning up and exiting");
+    LOG_CONDITIONAL(config.tron_m, LOG_DEBUG, "Cleaning up and exiting");
     g_main_loop_unref(loop_p);
 
-    sd_journal_print(LOG_DEBUG, "Exiting daemon.");
+    LOG_CONDITIONAL(config.tron_m, LOG_DEBUG, "Exiting daemon.");
 
     fflush(stdout);
 

@@ -1,7 +1,7 @@
 # sudo apt-get install libsystemd-dev libglib2.0-dev libdbus-c++-dev
 TARGET    := hamd
 
-SRCS      := main.cpp hamd.cpp
+SRCS      := $(wildcard *.c) $(wildcard *.cpp)
 
 PKGS      := libsystemd glib-2.0 dbus-c++-glib-1
 LDLIBS    := $(shell pkg-config --libs   ${PKGS})
