@@ -5,6 +5,8 @@
 #include <string.h>             /* strcmp(), strncmp() */
 #include <systemd/sd-journal.h> /* sd_journal_print() */
 
+#define LOG_CONDITIONAL(condition, args...) do { if (condition) {sd_journal_print(args);} } while(0)
+
 #define streq(a,b)    (strcmp((a),(b)) == 0)
 #define strneq(a,b,n) (strncmp((a),(b),(n)) == 0)
 
