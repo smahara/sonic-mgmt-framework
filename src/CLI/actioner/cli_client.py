@@ -20,6 +20,9 @@
 import os
 import json
 import urllib3
+import pwd
+import os
+import requests_unixsocket
 from six.moves.urllib.parse import quote
 
 urllib3.disable_warnings()
@@ -33,11 +36,17 @@ class ApiClient(object):
         """
         Create a RESTful API client.
         """
-        self.api_uri = os.getenv('REST_API_ROOT', 'https://localhost')
+        self.api_uri = os.getenv('REST_API_ROOT', 'https+unix://%2Fvar%2Frun%2Frest-local.sock')
 
         self.checkCertificate = False
 
         self.version = "0.0.1"
+
+        homedir = pwd.getpwuid(os.getuid())[5]
+        self.clientCert = os.path.join(homedir, ".sonic-mgmt")
+
+        # This is needed to use the unix domain socket
+        requests_unixsocket.monkeypatch()
 
     def set_headers(self):
         from requests.structures import CaseInsensitiveDict
