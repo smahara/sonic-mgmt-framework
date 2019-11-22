@@ -23,7 +23,7 @@ except ImportError as e:
     raise ImportError(str(e) + "- required module not found")
 
 NUM_THERMAL = 6
-NUM_FAN = 6
+NUM_FAN = 12
 NUM_PSU = 2
 NUM_SFP = 82
 CONFIG_DB_PATH = "/etc/sonic/config_db.json"
