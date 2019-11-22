@@ -40,7 +40,6 @@ func init() {
 }
 
 //TODO:Subscribe to UserDB changes and repopulate the cache on any notification
-
 func isUserAuthorizedForSet(user string) bool {
 	//TODO:Need code to get role from username and then authorize based on that
 	//This is a temporary code, this needs to be fixed

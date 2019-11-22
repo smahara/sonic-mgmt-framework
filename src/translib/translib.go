@@ -34,7 +34,6 @@ This package can also talk to non-DB clients.
 package translib
 
 import (
-	"errors"
 	"sync"
 	"translib/db"
 	"translib/tlerr"
@@ -584,7 +583,9 @@ func Bulk(req BulkRequest) (BulkResponse, error) {
 		CreateResponse: createResp}
 
     if (!isUserAuthorizedForSet(req.User)) {
-        return resp, errors.New("User is not authorized to perform this operation")
+		return resp, tlerr.AuthorizationError{
+			Format: "User is unauthorized for Action Operation",
+		}
     }
 
 	writeMutex.Lock()
@@ -835,7 +836,9 @@ func Subscribe(req SubscribeRequest) ([]*IsSubscribeResponse, error) {
 	}
 
     if (!isUserAuthorizedForGet(req.User)) {
-        return resp, errors.New("User is not authorized to perform this operation")
+		return resp, tlerr.AuthorizationError{
+			Format: "User is unauthorized for Action Operation",
+		}
     }
 
 	isGetCase := true
@@ -940,7 +943,9 @@ func IsSubscribeSupported(req IsSubscribeRequest) ([]*IsSubscribeResponse, error
 	}
 
     if (!isUserAuthorizedForGet(req.User)) {
-        return resp, errors.New("User is not authorized to perform this operation")
+		return resp, tlerr.AuthorizationError{
+			Format: "User is unauthorized for Action Operation",
+		}
     }
 
 	isGetCase := true
@@ -1074,7 +1079,7 @@ func getAllDbs(isGetCase bool) ([db.MaxDB]*db.DB, error) {
 	}
 
     //Create User DB connection
-    dbs[db.UserDB], err = db.NewDB(getDBOptions(db.UserDB))
+    dbs[db.UserDB], err = db.NewDB(getDBOptions(db.UserDB, isWriteDisabled))
 
 	if err != nil {
 		closeAllDbs(dbs[:])
