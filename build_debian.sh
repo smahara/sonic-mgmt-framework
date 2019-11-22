@@ -321,6 +321,7 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     python-ipaddr           \
     conntrack               \
     mcelog                  \
+    ipmitool                \
     makedumpfile
 
 # Needed to install kdump-tools

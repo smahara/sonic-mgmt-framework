@@ -265,6 +265,7 @@ def driver_install():
     for i in range(0,len(kos)):
         status, output = log_os_system(kos[i], 1)
         if status:
+            print "driver_install() failed with error %d"%status
             if FORCE == 0:        
                 return status       
 
@@ -278,10 +279,14 @@ def driver_uninstall():
     status = cleanup_pddf_utils()
 
     for i in range(0,len(kos)):
+        if 'i2c-i801' in kos[-(i+1)]:
+            continue
+
         rm = kos[-(i+1)].replace("modprobe", "modprobe -rq")
         rm = rm.replace("insmod", "rmmod")        
         status, output = log_os_system(rm, 1)
         if status:
+            print "driver_uninstall() failed with error %d"%status
             if FORCE == 0:        
                 return status              
     return 0
@@ -291,6 +296,7 @@ def device_install():
     # trigger the pddf_obj script for FAN, PSU, CPLD, MUX, etc
     status = pddf_obj.create_pddf_devices()
     if status:
+        print "Error: create_pddf_devices() failed with error %d"%status
         if FORCE == 0:
             return status
     return
@@ -300,6 +306,7 @@ def device_uninstall():
     # Trigger the paloparse script for deletion of FAN, PSU, OPTICS, CPLD clients
     status = pddf_obj.delete_pddf_devices()
     if status:
+        print "Error: delete_pddf_devices() failed with error %d"%status
         if FORCE == 0:
             return status
     return 
@@ -313,7 +320,7 @@ def do_install():
     if driver_check()== False :
         print PROJECT_NAME.upper() +" has no PDDF driver installed...."
         create_pddf_log_files()
-        print "Installing...."    
+        print "Installing ..."    
         status = driver_install()
         if status:
             return  status
@@ -369,6 +376,7 @@ def do_switch_pddf():
         print "Stopping the pmon service ..."
         status, output = log_os_system("systemctl stop pmon.service", 1)
         if status:
+            print "Pmon stop failed"
             if FORCE==0:
                 return status
 
@@ -405,6 +413,7 @@ def do_switch_pddf():
         print "Restart the pmon service ..."
         status, output = log_os_system("systemctl start pmon.service", 1)
         if status:
+            print "Pmon restart failed"
             if FORCE==0:
                 return status
 
@@ -418,6 +427,7 @@ def do_switch_nonpddf():
         print "Stopping the pmon service ..."
         status, output = log_os_system("systemctl stop pmon.service", 1)
         if status:
+            print "Stopping pmon service failed"
             if FORCE==0:
                 return status
 
@@ -454,6 +464,7 @@ def do_switch_nonpddf():
         print "Restart the pmon service ..."
         status, output = log_os_system("systemctl start pmon.service", 1)
         if status:
+            print "Restarting pmon service failed"
             if FORCE==0:
                 return status
 

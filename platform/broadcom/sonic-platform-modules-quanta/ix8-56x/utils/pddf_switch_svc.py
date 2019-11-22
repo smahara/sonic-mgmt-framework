@@ -9,19 +9,34 @@ def check_pddf_support():
     return True
 
 def stop_platform_svc():
-    status, output = commands.getstatusoutput("systemctl stop ix8-platform-init.service")
-    if status:
-        print "Stop ix8-platform-init.service failed %d"%status
-        return False
     status, output = commands.getstatusoutput("systemctl disable ix8-platform-init.service")
     if status:
         print "Disable ix8-platform-init.service failed %d"%status
         return False
 
+    # Below step leads to kernel panic Hence commenting them
+    #status, output = commands.getstatusoutput("systemctl stop ix8-platform-init.service")
+    #if status:
+        #print "Stop ix8-platform-init.service failed %d"%status
+        #return False
+
     # HACK , stop the pddf-platform-init service if it is active
     status, output = commands.getstatusoutput("systemctl stop pddf-platform-init.service")
     if status:
         print "Stop pddf-platform-init.service along with other platform serives failed %d"%status
+        return False
+
+    status, output = commands.getstatusoutput("touch /usr/share/sonic/platform/pddf_support")
+    
+    # Enable PDDF 2.0 object class for IX8
+    status, output = commands.getstatusoutput("mkdir /usr/share/sonic/platform/sonic_platform")
+    if status:
+        print "Unable to create 2.0 object class folder /usr/share/sonic/platform/sonic_platform"
+        return False
+
+    status, output = commands.getstatusoutput("reboot -y")
+    if status:
+        print "Reboot %d"%status
         return False
 
     return True
@@ -39,11 +54,6 @@ def start_platform_svc():
     return True
 
 def start_platform_pddf():
-    # Enable PDDF 2.0 object class for IX8
-    status, output = commands.getstatusoutput("mkdir /usr/share/sonic/platform/sonic_platform")
-    if status:
-        print "Unable to create 2.0 object class folder /usr/share/sonic/platform/sonic_platform"
-        return False
 
     status, output = commands.getstatusoutput("systemctl start pddf-platform-init.service")
     if status:
