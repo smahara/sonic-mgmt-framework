@@ -55,11 +55,6 @@ int unset_mc_lag_id( struct CSM *csm, uint16_t id)
     /* Remove ICCP info from STATE_DB */
     mlacp_link_del_iccp_info(csm->mlag_id);
 
-    /* Mlag-ID, RG-ID, MLACP-ID*/
-    csm->mlag_id = 0;
-    csm->iccp_info.icc_rg_id = 0;
-    csm->app_csm.mlacp.id = 0;
-
     iccp_csm_finalize(csm);
 
     return 0;
