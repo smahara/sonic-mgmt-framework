@@ -172,7 +172,7 @@ int mlacp_fsm_update_Aggport_state(struct CSM* csm, mLACPAggPortStateTLV* tlv)
         update_peerlink_isolate_from_pif(csm, peer_if, po_active, 0);
 
         peer_if->po_active = po_active;
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Update  Msg for %s  state %s", peer_if->name, tlv->agg_state ? "down" : "up");
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Update peer interface %s to state %s", peer_if->name, tlv->agg_state ? "down" : "up");
 
         /* Update remote interface state if ICCP reaches EXCHANGE state.
          * Otherwise, it is updated after the session comes up
@@ -203,9 +203,9 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
     memset(&mac_find, 0, sizeof(struct MACMsg));
 
     ICCPD_LOG_INFO(__FUNCTION__,
-        "Received MAC Info, interface=[%s] vid[%d] MAC[%s] Oper type %d, Mac type: %d ",
+        "Received MAC Info, interface=[%s] vid[%d] MAC[%s] OperType[%s] MacType[%d] ",
         MacData->ifname, ntohs(MacData->vid), mac_addr_to_str(MacData->mac_addr),
-        MacData->type, MacData->mac_type);
+        MacData->type == MAC_SYNC_ADD ? "add" : "del", MacData->mac_type);
 
     /*Find the interface in MCLAG interface list*/
     LIST_FOREACH(local_if, &(MLACP(csm).lif_list), mlacp_next)
@@ -980,7 +980,6 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
                         }
                     }
                 }
-
                 ICCPD_LOG_DEBUG(__FUNCTION__,
                                 "ND is learnt from intf %s, peer-link %s is the member of this vlan",
                                 vlan_id_list->vlan_itf->name, peer_link_if->name);
@@ -1203,7 +1202,7 @@ int mlacp_fsm_update_port_channel_info(struct CSM* csm,
 
         iccp_consistency_check(peer_if->name);
 
-        ICCPD_LOG_DEBUG("ICCP_FSM", "RX po_info: %s ip %s l3 mode  %d",
+        ICCPD_LOG_DEBUG("ICCP_FSM", "RX Peer po_info: %s ipv4 addr %s l3 mode  %d",
             peer_if->name, show_ip_str( tlv->ipv4_addr), peer_if->l3_mode);
         break;
     }
@@ -1222,15 +1221,15 @@ int mlacp_fsm_update_peerlink_info(struct CSM* csm,
 
     if (!csm->peer_link_if)
     {
-        ICCPD_LOG_DEBUG(__FUNCTION__, "peerlink port info from peer, local peerlink is not exist!");
+        ICCPD_LOG_WARN(__FUNCTION__, "Peerlink port info recv from peer, local peerlink is not exist!");
         return 0;
     }
 
     if (csm->peer_link_if->type != tlv->port_type)
-        ICCPD_LOG_DEBUG(__FUNCTION__, "peerlink port type of peer %d is not same with local %d !", tlv->port_type, csm->peer_link_if->type);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peerlink port type of peer %d is not same with local %d !", tlv->port_type, csm->peer_link_if->type);
 
     if (tlv->port_type == IF_T_VXLAN && strncmp(csm->peer_itf_name, tlv->if_name, strlen(csm->peer_itf_name)))
-        ICCPD_LOG_DEBUG(__FUNCTION__, "peerlink port is vxlan port and peerlink port at peer %s is not same with local peerlink port %s !", tlv->if_name, csm->peer_itf_name);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peerlink port is vxlan port, but peerlink port of peer %s is not same with local %s !", tlv->if_name, csm->peer_itf_name);
 
     return 0;
 }
