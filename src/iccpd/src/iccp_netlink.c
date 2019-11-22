@@ -495,7 +495,7 @@ void iccp_set_interface_ipadd_mac(struct LocalInterface *lif, char * mac_addr )
     dst_len = strlen(mac_addr);
     memcpy(sub_msg->data, mac_addr, dst_len);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "lif name %s    address %s mac    msg data %s  %d \n", lif->name, show_ip_str(htonl(lif->ipv4_addr)), sub_msg->data, dst_len);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "If name %s ip %s mac %s", lif->name, show_ip_str(htonl(lif->ipv4_addr)), sub_msg->data);
 
     sub_msg->op_len = dst_len;
     msg_hdr->len += sizeof(mclag_sub_option_hdr_t);
@@ -596,15 +596,15 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
         memcpy(lif_po->mac_addr_ori, lif_po->mac_addr, ETHER_ADDR_LEN);
 
         ICCPD_LOG_DEBUG(__FUNCTION__,
-                        "%s Change the system-id of po%d from [%02X:%02X:%02X:%02X:%02X:%02X] to [%02X:%02X:%02X:%02X:%02X:%02X].",
+                        "%s Change the system-id of %s from [%02X:%02X:%02X:%02X:%02X:%02X] to [%02X:%02X:%02X:%02X:%02X:%02X].",
                         (csm->role_type == STP_ROLE_STANDBY) ? "Standby" : "Active",
-                        lif_po->po_id,  lif_po->mac_addr[0], lif_po->mac_addr[1], lif_po->mac_addr[2], lif_po->mac_addr[3], lif_po->mac_addr[4], lif_po->mac_addr[5],
+                        lif_po->name,  lif_po->mac_addr[0], lif_po->mac_addr[1], lif_po->mac_addr[2], lif_po->mac_addr[3], lif_po->mac_addr[4], lif_po->mac_addr[5],
                         MLACP(csm).remote_system.system_id[0], MLACP(csm).remote_system.system_id[1], MLACP(csm).remote_system.system_id[2], MLACP(csm).remote_system.system_id[3], MLACP(csm).remote_system.system_id[4], MLACP(csm).remote_system.system_id[5]);
 
         ret =  iccp_netlink_if_hwaddr_set(lif_po->ifindex,  MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
         if (ret != 0)
         {
-            ICCPD_LOG_ERR(__FUNCTION__, " set %s mac error, ret = %d", lif_po->name, ret);
+            ICCPD_LOG_ERR(__FUNCTION__, "Set %s mac error, ret = %d", lif_po->name, ret);
         }
 
         /* Refresh link local address according the new MAC */
@@ -639,7 +639,7 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
                     ret = iccp_netlink_if_hwaddr_set(vlan->vlan_itf->ifindex, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
                     if (ret != 0)
                     {
-                        ICCPD_LOG_ERR(__FUNCTION__, " set %s mac error, ret = %d", vlan->vlan_itf->name, ret);
+                        ICCPD_LOG_ERR(__FUNCTION__, "Set %s mac error, ret = %d", vlan->vlan_itf->name, ret);
                     }
 
                     /* Refresh link local address according the new MAC */
@@ -681,15 +681,15 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
     if (memcmp( lif_po->mac_addr, MLACP(csm).system_id, ETHER_ADDR_LEN) != 0)
     {
         ICCPD_LOG_DEBUG(__FUNCTION__,
-                        "%s Recover the system-id of po%d from [%02X:%02X:%02X:%02X:%02X:%02X] to [%02X:%02X:%02X:%02X:%02X:%02X].",
+                        "%s Recover the system-id of %s from [%02X:%02X:%02X:%02X:%02X:%02X] to [%02X:%02X:%02X:%02X:%02X:%02X].",
                         (csm->role_type == STP_ROLE_STANDBY) ? "Standby" : "Active",
-                        lif_po->po_id,  lif_po->mac_addr[0], lif_po->mac_addr[1], lif_po->mac_addr[2], lif_po->mac_addr[3], lif_po->mac_addr[4], lif_po->mac_addr[5],
+                        lif_po->name,  lif_po->mac_addr[0], lif_po->mac_addr[1], lif_po->mac_addr[2], lif_po->mac_addr[3], lif_po->mac_addr[4], lif_po->mac_addr[5],
                         MLACP(csm).system_id[0], MLACP(csm).system_id[1], MLACP(csm).system_id[2], MLACP(csm).system_id[3], MLACP(csm).system_id[4], MLACP(csm).system_id[5]);
 
         ret = iccp_netlink_if_hwaddr_set(lif_po->ifindex,  MLACP(csm).system_id, ETHER_ADDR_LEN);
         if (ret != 0)
         {
-            ICCPD_LOG_ERR(__FUNCTION__, " set %s mac error, ret = %d", lif_po->name, ret);
+            ICCPD_LOG_ERR(__FUNCTION__, "Set %s mac error, ret = %d", lif_po->name, ret);
         }
 
         /* Refresh link local address according the new MAC */
@@ -718,7 +718,7 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
                 ret = iccp_netlink_if_hwaddr_set(vlan->vlan_itf->ifindex, MLACP(csm).system_id, ETHER_ADDR_LEN);
                 if (ret != 0)
                 {
-                    ICCPD_LOG_ERR(__FUNCTION__, " set %s mac error, ret = %d", vlan->vlan_itf->name, ret);
+                    ICCPD_LOG_ERR(__FUNCTION__, "Set %s mac error, ret = %d", vlan->vlan_itf->name, ret);
                 }
 
                 /* Refresh link local address according the new MAC */
@@ -733,41 +733,6 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
 
     return;
 }
-
-#if 0
-void update_local_system_id(struct LocalInterface* local_if)
-{
-    struct System* sys = NULL;
-    struct CSM* csm = NULL;
-
-    if ((sys = system_get_instance()) == NULL)
-    {
-        ICCPD_LOG_WARN(__FUNCTION__, "Failed to obtain System instance.");
-        return;
-    }
-
-    if (local_if->type != IF_T_PORT_CHANNEL)
-        return;
-
-    /* traverse all CSM */
-    LIST_FOREACH(csm, &(sys->csm_list), next)
-    {
-        /* sync system info from one port-channel device*/
-        if (memcmp(MLACP(csm).system_id, local_if->mac_addr, ETHER_ADDR_LEN) != 0)
-        {
-            memcpy(MLACP(csm).system_id, local_if->mac_addr, ETHER_ADDR_LEN);
-            MLACP(csm).system_config_changed = 1;
-
-            update_if_ipmac_on_standby(local_if);
-            ICCPD_LOG_INFO(__FUNCTION__,
-                           "update csm %d local system id to mac %02x:%02x:%02x:%02x:%02x:%02x  of %s ", csm->mlag_id, local_if->mac_addr[0], local_if->mac_addr[1],
-                           local_if->mac_addr[2], local_if->mac_addr[3], local_if->mac_addr[4], local_if->mac_addr[5], local_if->name );
-        }
-    }
-
-    return;
-}
-#endif
 
 int iccp_netlink_neighbor_request(int family, uint8_t *addr, int add, uint8_t *mac, char *portname)
 {
@@ -929,7 +894,7 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
         {
             lif->state = PORT_STATE_UP;
             /*if(lif->type ==IF_T_PORT_CHANNEL)*/
-            ICCPD_LOG_INFO(__FUNCTION__, "update local port %s state up", ifname);
+            ICCPD_LOG_NOTICE(__FUNCTION__, "Update local port %s state up", ifname);
 
             /* If local interface is not configured as MLAG interface yet,
              * its po_active status must be updated. Otherwise, incorrect
@@ -944,7 +909,7 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
         {
             lif->state = PORT_STATE_DOWN;
             /*if(lif->type ==IF_T_PORT_CHANNEL)*/
-            ICCPD_LOG_INFO(__FUNCTION__, "update local port %s state down", ifname);
+            ICCPD_LOG_NOTICE(__FUNCTION__, "Update local port %s state down", ifname);
 
             /* If local interface is not configured as MLAG interface yet,
              * its po_active status must be updated. Otherwise, incorrect
@@ -1140,7 +1105,7 @@ int iccp_local_if_addr_update(struct nl_msg *msg, void *arg)
             lif->l3_mode = 1;
             lif->port_config_sync = 1;
             update_if_ipmac_on_standby(lif);
-            ICCPD_LOG_DEBUG(__FUNCTION__, " if name %s   index %d    address %s \n", lif->name, lif->ifindex, show_ip_str(htonl(lif->ipv4_addr)));
+            ICCPD_LOG_DEBUG(__FUNCTION__, "If name %s index %d ip %s", lif->name, lif->ifindex, show_ip_str(htonl(lif->ipv4_addr)));
         }
         rth = RTA_NEXT(rth, rtl);
     }
@@ -1336,7 +1301,7 @@ int iccp_sys_local_if_list_get_addr()
         nl_cb_put(cb);
         if (ret < 0)
         {
-            ICCPD_LOG_ERR(__FUNCTION__, "receive netlink msg error  ret = %d  errno = %d .", ret, errno);
+            ICCPD_LOG_ERR(__FUNCTION__, "Receive netlink msg error, ret = %d  errno = %d .", ret, errno);
             if (ret != -NLE_DUMP_INTR)
                 return ret;
             retry = 1;
@@ -1355,13 +1320,13 @@ static int iccp_route_event_handler(struct nl_msg *msg, void *arg)
     {
         case RTM_NEWLINK:
             if (nl_msg_parse(msg, &iccp_event_handler_obj_input_newlink, &event) < 0)
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Unknown message type. ");
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Unknown message type(RTM_NEWLINK)");
             iccp_parse_if_vlan_info_from_netlink(nlh);
             break;
 
         case RTM_DELLINK:
             if (nl_msg_parse(msg, &iccp_event_handler_obj_input_dellink, NULL) < 0)
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Unknown message type.");
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Unknown message type(RTM_DELLINK)");
             break;
 
         case RTM_NEWNEIGH:
@@ -1744,7 +1709,7 @@ static int iccp_receive_arp_packet_handler(struct System *sys)
                  (struct sockaddr*)&sll, &sll_len);
     if (n < 0)
     {
-        ICCPD_LOG_DEBUG(__FUNCTION__, "arp recvfrom: %s", buf);
+        ICCPD_LOG_WARN(__FUNCTION__, "ARP recvfrom error: %s", buf);
         return MCLAG_ERROR;
     }
 

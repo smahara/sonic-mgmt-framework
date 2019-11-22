@@ -239,7 +239,7 @@ static void mlacp_sync_send_sysConf(struct CSM* csm)
     if (msg_len > 0)
         iccp_csm_send(csm, g_csm_buf, msg_len);
     else
-        ICCPD_LOG_WARN("mlacp_fsm", "    Invalid sysconf packet.");
+        ICCPD_LOG_WARN(__FUNCTION__, "Invalid sysconf packet.");
 
     /*ICCPD_LOG_DEBUG("mlacp_fsm", "  [SYNC_Send] SysConf, len=[%d]", msg_len);*/
 
@@ -897,7 +897,7 @@ void mlacp_fsm_transit(struct CSM* csm)
         if ((time(NULL) - csm->warm_reboot_disconn_time) >= WARM_REBOOT_TIMEOUT)
         {
             csm->warm_reboot_disconn_time = 0;
-            ICCPD_LOG_DEBUG(__FUNCTION__, "Peer warm reboot, reconnection timeout, recover to normal reboot!");
+            ICCPD_LOG_NOTICE(__FUNCTION__, "Peer warm reboot, reconnection timeout, recover to normal reboot!");
             mlacp_peer_disconn_handler(csm);
         }
     }
@@ -1185,7 +1185,7 @@ static void mlacp_sync_send_nak_handler(struct CSM* csm,  struct Msg* msg)
 
     icc_hdr = (ICCHdr*)msg->buf;
 
-    ICCPD_LOG_WARN("mlacp_fsm", "  ### Send NAK ###");
+    ICCPD_LOG_WARN(__FUNCTION__, "Send NAK");
 
     memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
     csm->app_csm.invalid_msg_id = ntohl(icc_hdr->ldp_hdr.msg_id);
@@ -1199,7 +1199,7 @@ static void mlacp_sync_recv_nak_handler(struct CSM* csm,  struct Msg* msg)
     uint16_t tlvType = -1;
     int i;
 
-    ICCPD_LOG_WARN("mlacp_fsm", "  ### Receive NAK ###");
+    ICCPD_LOG_WARN(__FUNCTION__, "Receive NAK ");
 
     /* Dequeuq NAK*/
     naktlv = (NAKTLV*)&msg->buf[sizeof(ICCHdr)];
@@ -1221,18 +1221,18 @@ static void mlacp_sync_recv_nak_handler(struct CSM* csm,  struct Msg* msg)
             case TLV_T_MLACP_SYSTEM_CONFIG:
                 MLACP(csm).node_id--;
                 MLACP(csm).system_config_changed = 1;
-                ICCPD_LOG_WARN("mlacp_fsm", "    [%X] change NodeID as %d", tlvType & 0x00FF, MLACP(csm).node_id);
+                ICCPD_LOG_WARN(__FUNCTION__, "[%X] change NodeID as %d", tlvType & 0x00FF, MLACP(csm).node_id);
                 break;
 
             default:
-                ICCPD_LOG_WARN("mlacp_fsm", "    [%X]", tlvType & 0x00FF);
+                ICCPD_LOG_WARN(__FUNCTION__, "    [%X]", tlvType & 0x00FF);
                 MLACP(csm).need_to_sync = 1;
                 break;
         }
     }
     else
     {
-        ICCPD_LOG_WARN("mlacp_fsm", "    Unknow NAK");
+        ICCPD_LOG_WARN(__FUNCTION__, "Unknow NAK");
         MLACP(csm).need_to_sync = 1;
     }
 
@@ -1615,7 +1615,7 @@ static void mlacp_exchange_handler(struct CSM* csm, struct Msg* msg)
         if ((time(NULL) - csm->peer_warm_reboot_time) >= WARM_REBOOT_TIMEOUT)
         {
             csm->peer_warm_reboot_time = 0;
-            ICCPD_LOG_DEBUG(__FUNCTION__, "Peer warm reboot timeout, recover to normal reboot!");
+            ICCPD_LOG_NOTICE(__FUNCTION__, "Peer warm reboot timeout, recover to normal reboot!");
         }
     }
 

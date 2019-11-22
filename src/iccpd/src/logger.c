@@ -30,15 +30,15 @@
 
 static uint32_t _iccpd_log_level_map[] =
 {
-    LOG_DEBUG,
-    LOG_INFO,
-    LOG_NOTICE,
-    LOG_WARNING,
-    LOG_ERR,
     LOG_CRIT,
+    LOG_ERR,
+    LOG_WARNING,
+    LOG_NOTICE,
+    LOG_INFO,
+    LOG_DEBUG
 };
 
-static char* log_level_to_string(int level)
+char* log_level_to_string(int level)
 {
     switch (level)
     {
@@ -76,6 +76,16 @@ struct LoggerConfig* logger_get_configuration()
     }
 
     return &config;
+}
+
+void logger_set_configuration(int log_level)
+{
+    struct LoggerConfig* config = logger_get_configuration();
+
+    config->log_level = log_level;
+    config->init = 1;
+
+    return;
 }
 
 void log_init(struct CmdOptionParser* parser)

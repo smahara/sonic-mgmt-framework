@@ -378,7 +378,7 @@ static void set_route_by_linux_route(struct CSM* csm,
             (is_add) ? "add" : "del", ipv4_dest_str, local_if->prefixlen, csm->peer_ip);
 
     ret = system(syscmd);
-    ICCPD_LOG_DEBUG(__FUNCTION__, "  %s  ret = %d", syscmd, ret);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "%s  ret = %d", syscmd, ret);
 
     return;
 }
@@ -439,8 +439,8 @@ static void set_l3_itf_state(struct CSM *csm,
     {
         /*set_default_route(csm);*/
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "  route set Interface = %s   route type = %d   route = %s   nexthop via = %s ",
-                        set_l3_local_if->name, route_type, show_ip_str(htonl(set_l3_local_if->ipv4_addr)), csm->peer_ip );
+        /*ICCPD_LOG_DEBUG(__FUNCTION__, "  route set Interface = %s   route type = %d   route = %s   nexthop via = %s ",
+                        set_l3_local_if->name, route_type, show_ip_str(htonl(set_l3_local_if->ipv4_addr)), csm->peer_ip );*/
 
         /* set static route*/
         if (route_type == ROUTE_ADD)
@@ -521,8 +521,7 @@ static void mlacp_clean_fdb(void)
                 sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
         }
     }
-    ICCPD_LOG_DEBUG(__FUNCTION__, "notify mclagsyncd clear fdb");
-
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Notify mclagsyncd to clear FDB");
     return;
 }
 
@@ -564,8 +563,8 @@ void set_peerlink_mlag_port_learn(struct LocalInterface *lif, int enable)
     msg_hdr->len += sizeof(mclag_sub_option_hdr_t);
     msg_hdr->len += sub_msg->op_len;
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, " send port-learn msg to sync for %s , member %s",
-                    lif->name, sub_msg->data);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Send %s port MAC learn msg to mclagsyncd for %s",
+                    sub_msg->op_type == MCLAG_SUB_OPTION_TYPE_MAC_LEARN_DISABLE ? "DISABLE":"ENABLE", lif->name);
 
     /*send msg*/
     if (sys->sync_fd)
@@ -1154,7 +1153,11 @@ void update_peerlink_isolate_from_all_csm_lif(
     if (dst_len)
     {
         memcpy(sub_msg->data, mlag_po_buf, dst_len);
-        ICCPD_LOG_DEBUG(__FUNCTION__, "isolate dst %s, data %s, len %d", mlag_po_buf, sub_msg->data, dst_len);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Send port isolate msg to mclagsyncd, src port %s, dst port %s", csm->peer_link_if->name, mlag_po_buf);
+    }
+    else
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Send port isolate msg to mclagsyncd, src port %s, dst port is NULL", csm->peer_link_if->name);
     }
 
     /*send msg*/
@@ -1253,11 +1256,11 @@ void update_peerlink_isolate_from_pif(
 
     if (!lif)
     {
-        ICCPD_LOG_DEBUG(__FUNCTION__, "can't find lif");
+        ICCPD_LOG_WARN(__FUNCTION__, "Can't find local if for %s", pif->name);
         return;
     }
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, " from peer %s local(%s) / peer(%s)",
+    ICCPD_LOG_DEBUG(__FUNCTION__, "From if %s local(%s) / peer(%s)",
                     lif->name,
                     (lif_po_state) ? "up" : "down",
                     (pif_po_state) ? "up" : "down");
@@ -1473,12 +1476,12 @@ void syn_arp_info_to_peer(struct CSM *csm, struct LocalInterface *local_if)
             if (iccp_csm_init_msg(&msg_send, (char*)arp_msg, sizeof(struct ARPMsg)) == 0)
             {
                 TAILQ_INSERT_TAIL(&(MLACP(csm).arp_msg_list), msg_send, tail);
-                ICCPD_LOG_DEBUG( __FUNCTION__, "Enqueue ARP[ADD] for %s",
-                                 show_ip_str(arp_msg->ipv4_addr));
+                /*ICCPD_LOG_DEBUG( __FUNCTION__, "Enqueue ARP[ADD] for %s",
+                                 show_ip_str(htonl(arp_msg->ipv4_addr)));*/
             }
             else
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to enqueue ARP[ADD] for %s",
-                                show_ip_str(arp_msg->ipv4_addr));
+                ICCPD_LOG_WARN(__FUNCTION__, "Failed to enqueue ARP[ADD] for %s",
+                                show_ip_str(htonl(arp_msg->ipv4_addr)));
         }
     }
 
@@ -1687,10 +1690,8 @@ uint8_t set_mac_local_age_flag(struct CSM *csm, struct MACMsg* mac_msg, uint8_t 
                 {
                     TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
                 }
-
-                ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface: %s, "
-                    "MAC %s vlan-id %d, age_flag %d", mac_msg->ifname,
-                    mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+                /*ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue: %s, add %s vlan-id %d, age_flag %d",
+                               mac_msg->ifname, mac_msg->mac_str, mac_msg->vid, mac_msg->age_flag);*/
             }
         }
     }
@@ -2469,6 +2470,7 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
     return;
 }
 
+
 /*****************************************
 * Po add/remove handler
 *
@@ -2520,7 +2522,6 @@ int iccp_connect_syncd()
     {
         count = 0;
     }
-
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0)
     {
@@ -2547,7 +2548,7 @@ int iccp_connect_syncd()
         goto conn_fail;
     }
 
-    ICCPD_LOG_WARN(__FUNCTION__, "success to link syncd");
+    ICCPD_LOG_NOTICE(__FUNCTION__, "Success to link syncd");
     sys->sync_fd = fd;
 
     event.data.fd = fd;
@@ -2559,8 +2560,7 @@ int iccp_connect_syncd()
 
 conn_fail:
     if (count == 0)
-        ICCPD_LOG_DEBUG(__FUNCTION__, "%s:%d, mclag syncd socket connect fail",
-                        __FUNCTION__, __LINE__);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Mclag syncd socket connect fail");
 
     count++;
 
@@ -2623,8 +2623,8 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
     mac_msg->vid = vid;
 
     mac_msg->age_flag = 0;
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Recv MAC msg vid %d mac %s port %s optype %s ", vid, mac_addr_to_str(mac_addr), ifname, op_type == MAC_SYNC_ADD ? "add" : "del");
 
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Recv MAC msg from mclagsyncd, vid %d mac %s port %s optype %s ", vid,mac_addr_to_str(mac_addr), ifname, op_type == MAC_SYNC_ADD ? "add" : "del");
     /*Debug*/
     #if 0
     /* dump receive MAC info*/
@@ -3596,6 +3596,9 @@ char * mclagd_ctl_cmd_str(int req_type)
 
         case INFO_TYPE_DUMP_UNIQUE_IP:
             return "dump unique_ip";
+
+        case INFO_TYPE_CONFIG_LOGLEVEL:
+            return "config loglevel";
         default:
             break;
     }
@@ -3623,7 +3626,7 @@ int mclagd_ctl_sock_create()
     sys->sync_ctrl_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sys->sync_ctrl_fd < 0)
     {
-        ICCPD_LOG_WARN(__FUNCTION__, "Failed to create mclagd ctl sock\n");
+        ICCPD_LOG_WARN(__FUNCTION__, "Failed to create mclagd ctl sock");
         return sys->sync_ctrl_fd;
     }
 
@@ -3636,14 +3639,14 @@ int mclagd_ctl_sock_create()
 
     if ((ret = bind(sys->sync_ctrl_fd, (struct sockaddr*)&addr, addr_len)) < 0)
     {
-        ICCPD_LOG_WARN(__FUNCTION__, "Failed to bind mclagd ctl socket %s:%s\n", sys->mclagdctl_file_path, strerror(errno));
+        ICCPD_LOG_WARN(__FUNCTION__, "Failed to bind mclagd ctl socket %s:%s", sys->mclagdctl_file_path, strerror(errno));
         close(sys->sync_ctrl_fd);
         return MCLAG_ERROR;
     }
 
     if (listen(sys->sync_ctrl_fd, 5) < 0)
     {
-        ICCPD_LOG_WARN(__FUNCTION__, "Failed to listen unix mclagd ctl socket%s:%s\n", sys->mclagdctl_file_path, strerror(errno));
+        ICCPD_LOG_WARN(__FUNCTION__, "Failed to listen unix mclagd ctl socket%s:%s", sys->mclagdctl_file_path, strerror(errno));
         close(sys->sync_ctrl_fd);
         return MCLAG_ERROR;
     }
@@ -3666,7 +3669,7 @@ int mclagd_ctl_sock_accept(int fd)
     client_fd = accept(fd, (struct sockaddr*)&client_addr, &addr_len);
     if (client_fd < 0)
     {
-        ICCPD_LOG_WARN(__FUNCTION__, "failed to accept a client from mclagdctl\n");
+        ICCPD_LOG_WARN(__FUNCTION__, "Failed to accept a client from mclagdctl");
         return MCLAG_ERROR;
     }
 
@@ -3739,7 +3742,6 @@ void mclagd_ctl_handle_dump_state(int client_fd, int mclag_id)
     int len_tmp = 0;
 
     ret = iccp_mclag_config_dump(&Pbuf, &state_num, mclag_id);
-    ICCPD_LOG_WARN(__FUNCTION__, "state_num = %d", state_num);
     if (ret != EXEC_TYPE_SUCCESS)
     {
         len_tmp = sizeof(struct mclagd_reply_hdr);
@@ -4091,6 +4093,25 @@ void mclagd_ctl_handle_dump_unique_ip(int client_fd, int mclag_id)
     return;
 }
 
+void mclagd_ctl_handle_config_loglevel(int client_fd, int log_level)
+{
+    char buf[sizeof(struct mclagd_reply_hdr)+sizeof(int)];
+    struct mclagd_reply_hdr *hd = NULL;
+    int len_tmp = 0;
+
+    logger_set_configuration(log_level);
+
+    len_tmp = sizeof(struct mclagd_reply_hdr);
+    memcpy(buf, &len_tmp, sizeof(int));
+    hd = (struct mclagd_reply_hdr *)(buf + sizeof(int));
+    hd->exec_result = EXEC_TYPE_SUCCESS;
+    hd->info_type = INFO_TYPE_CONFIG_LOGLEVEL;
+    hd->data_len = 0;
+    mclagd_ctl_sock_write(client_fd, buf, MCLAGD_REPLY_INFO_HDR);
+
+    return;
+}
+
 int mclagd_ctl_interactive_process(int client_fd)
 {
     char buf[512] = { 0 };
@@ -4108,7 +4129,7 @@ int mclagd_ctl_interactive_process(int client_fd)
 
     req = (struct mclagdctl_req_hdr*)buf;
 
-    ICCPD_LOG_WARN(__FUNCTION__, "rcv request %s from mclagdctl", mclagd_ctl_cmd_str(req->info_type));
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Receive request %s from mclagdctl", mclagd_ctl_cmd_str(req->info_type));
 
     switch (req->info_type)
     {
@@ -4147,6 +4168,11 @@ int mclagd_ctl_interactive_process(int client_fd)
         case INFO_TYPE_DUMP_UNIQUE_IP:
             mclagd_ctl_handle_dump_unique_ip(client_fd, req->mclag_id);
             break;
+
+        case INFO_TYPE_CONFIG_LOGLEVEL:
+            mclagd_ctl_handle_config_loglevel(client_fd, req->mclag_id);
+            break;
+			
         default:
             return MCLAG_ERROR;
     }
