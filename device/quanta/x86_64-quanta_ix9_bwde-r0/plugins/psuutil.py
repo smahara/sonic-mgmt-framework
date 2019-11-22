@@ -2,7 +2,6 @@
 # psuutil.py
 # Platform-specific PSU status interface for SONiC
 #
-
 import logging
 import os.path
 
@@ -54,7 +53,6 @@ class PsuUtil(PsuBase):
         Retrieves the number of PSUs available on the device
         :return: An integer, the number of PSUs available on the device
          """
-
         return self.MAX_PSUS
 
     def get_psu_status(self, index):

@@ -15,6 +15,8 @@ RUN apt-get update \
  && apt-get -y install libjemalloc1 \
  && apt-get -y install conntrack
 
+RUN apt-get install -f -y libatomic1 liblua5.1-0 lua-bitop lua-cjson
+
 COPY \
 {% for deb in docker_nat_debs.split(' ') -%}
 debs/{{ deb }}{{' '}}

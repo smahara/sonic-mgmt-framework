@@ -23,7 +23,7 @@ table_dma_enable=1
 tdma_timeout_usec=5000000
 mmu_lossless=0
 bcm_num_cos=10
-default_cpu_tx_queue=9
+default_cpu_tx_queue=7
 
 l2xmsg_mode=1
 l2xmsg_hostbuf_size=8192
@@ -544,3 +544,4 @@ dport_map_port_130=128
 
 mmu_init_config="TD3-DELL-lossless"
 sai_preinit_cmd_file=/usr/share/sonic/hwsku/sai_preinit_cmd.soc
+

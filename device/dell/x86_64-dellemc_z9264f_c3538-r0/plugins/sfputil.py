@@ -4,6 +4,7 @@
 #
 
 try:
+    import io
     import struct
     import sys
     import getopt
@@ -12,10 +13,40 @@ try:
     from sonic_sfp.sfputilbase import SfpUtilBase
     from os import *
     from mmap import *
+    from sonic_sfp.sff8436 import sff8436InterfaceId
+    from sonic_sfp.sff8436 import sff8436Dom
+    from sonic_sfp.sff8472 import sff8472InterfaceId
+    from sonic_sfp.sff8472 import sff8472Dom
 
 except ImportError as e:
     raise ImportError("%s - required module not found" % str(e))
 
+#definitions of the offset and width for values in DOM info eeprom
+QSFP_DOM_REV_OFFSET = 1
+QSFP_DOM_REV_WIDTH = 1
+QSFP_TEMPE_OFFSET = 22
+QSFP_TEMPE_WIDTH = 2
+QSFP_VOLT_OFFSET = 26
+QSFP_VOLT_WIDTH = 2
+QSFP_CHANNL_MON_OFFSET = 34
+QSFP_CHANNL_MON_WIDTH = 16
+QSFP_CHANNL_MON_WITH_TX_POWER_WIDTH = 24
+QSFP_MODULE_THRESHOLD_OFFSET = 128
+QSFP_MODULE_THRESHOLD_WIDTH = 24
+QSFP_CHANNL_THRESHOLD_OFFSET = 176
+QSFP_CHANNL_THRESHOLD_WIDTH = 16
+QSFP_CHANNL_MON_MASK_OFFSET = 242
+QSFP_CHANNL_MON_MASK_WIDTH = 4
+
+SFP_TEMPE_OFFSET = 96
+SFP_TEMPE_WIDTH = 2
+SFP_VOLT_OFFSET = 98
+SFP_VOLT_WIDTH = 2
+SFP_MODULE_THRESHOLD_OFFSET = 0
+SFP_MODULE_THRESHOLD_WIDTH = 56
+
+XCVR_DOM_CAPABILITY_OFFSET = 92
+XCVR_DOM_CAPABILITY_WIDTH = 1
 
 class SfpUtil(SfpUtilBase):
     """Platform-specific SfpUtil class"""

@@ -462,7 +462,7 @@ phy_chain_tx_polarity_flip_physical{122.0}=0x1
 phy_chain_tx_polarity_flip_physical{123.0}=0x1
 phy_chain_tx_polarity_flip_physical{124.0}=0x0
 
-# Not able to breakout, Since overlap with mgmt port
+# Not able to breakout, Since overlap with possible mgmt ports
 dport_map_port_127=77
 portmap_127=125:100
 phy_chain_rx_lane_map_physical{125.0}=0x1203

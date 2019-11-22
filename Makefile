@@ -18,4 +18,7 @@ endif
 
 clean reset init configure docker-cleanup showtag sonic-slave-build sonic-slave-bash :
 	@echo "+++ Making $@ +++"
+ifeq ($(NOJESSIE), 0)
+	make -f Makefile.work $@
+endif
 	BLDENV=stretch make -f Makefile.work $@

@@ -27,10 +27,11 @@ do_idt_init()
   echo pca9548 0x71 > /sys/bus/i2c/devices/i2c-1/new_device
   sleep 1
 
-  if [ $(grep -c warm-reboot ${PREVIOUS_REBOOT_CAUSE_FILE}) -gt 0 ]
-  then
-    pr_info "warm-reboot detected, skipping PCI and MAC reset..."
-    return 0
+  if [ -f ${PREVIOUS_REBOOT_CAUSE_FILE} ]; then
+      if [ $(grep -c warm-reboot ${PREVIOUS_REBOOT_CAUSE_FILE}) -gt 0 ]; then
+          pr_info "warm-reboot detected, skipping PCI and MAC reset..."
+          return 0
+      fi
   fi
 
   #

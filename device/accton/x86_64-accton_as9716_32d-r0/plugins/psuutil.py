@@ -72,6 +72,7 @@ class PsuUtil(PsuBase):
             return False
 
         return status == 1
+
     def get_powergood_status(self, index):
         if index is None:
             return False
@@ -85,7 +86,6 @@ class PsuUtil(PsuBase):
             return False
 
         return status == 1
-
 
     def get_model(self, index):
         if index is None:

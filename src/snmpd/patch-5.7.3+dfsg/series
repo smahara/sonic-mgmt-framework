@@ -7,3 +7,6 @@
 0007-arp_netlink-should-drop-AF_BRIDGE-netlink-messages
 0008-ioctl-fail-debug.patch
 0009-if_index1.patch
+0006-From-Jiri-Cervenka-snmpd-Fixed-agentx-crashing-and-or-freezing-on-timeout.patch
+0007-Linux-VRF-5.7.3-Support.patch
+0008-Enable-macro-DEB_BUILD_ARCH_OS-in-order-to-build-ipv.patch
