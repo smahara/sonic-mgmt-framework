@@ -203,8 +203,6 @@ func getNwInstRoot(s *ygot.GoStruct) *ocbinds.OpenconfigNetworkInstance_NetworkI
         return deviceObj.NetworkInstances
 }
 
-
-
 /* Table name in config DB correspoinding to the top level network instance name */
 var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams)  ([]string, error) {
         var tblList []string
@@ -221,9 +219,6 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
 
         /* get the name at the top network-instance table level, this is the key */
         keyName := pathInfo.Var("name")
-        if keyName == "default" {
-           return tblList, err
-        }
 
         if keyName == "" {
                 /* for GET with no keyName, return table name for mgmt VRF and data VRF */
@@ -246,9 +241,14 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
                 return tblList, errors.New("Invalide network instance name")
         }
 
-        /* For CREATE or PATCH at top level (Network_instances), check the config type if user provides one */
-        if ((inParams.oper == CREATE) ||
-            ((inParams.oper == UPDATE) && (inParams.requestUri == "/openconfig-network-instance:network-instances"))) {
+        /*
+         * For CREATE or PATCH at top level (Network_instances), check the config type if user provides one 
+         * For other cases of UPATE, CREATE, or GET/DELETE, get the table name from the key only
+         */ 
+        if (((inParams.oper == CREATE) ||
+             (inParams.oper == REPLACE) ||
+             (inParams.oper == UPDATE)) &&
+             (inParams.requestUri == "/openconfig-network-instance:network-instances")) {
                 oc_nwInstType, ierr := getNwInstType(nwInstObj, keyName)
                 if (ierr != nil ) {
                         log.Info("network_instance_table_name_xfmr, network instance type not correct ", oc_nwInstType)
@@ -258,53 +258,14 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
                 log.Info("network_instance_table_name_xfmr, name ", keyName)
                 log.Info("network_instance_table_name_xfmr, type ", oc_nwInstType)
 
-                tblList = append(tblList, NwInstTblNameMapWithNameAndType[NwInstMapKey{intNwInstName, oc_nwInstType}])
-
-        } else if (inParams.oper == UPDATE) {
-                if (keyName == "default") {
-                        log.Info("network_instance_table_name_xfmr: UPDATE case for default network instance")
-                        return tblList, err
+                tblName, ok  := NwInstTblNameMapWithNameAndType[NwInstMapKey{intNwInstName, oc_nwInstType}]
+                if !ok {
+                        log.Info("network_instance_table_name_xfmr, type not matching name")
+                        return tblList, errors.New("network instance type not matching name")
                 }
 
-                /* for a real UPDATE, check if the respective table entry is in the config DB, if not reject */
-                //tblName := NwInstTblNameMapWithName[intNwInstName]
-                /* build the table entry and check if the entry is in the db */
-                d, err := db.NewDB(getDBOptions(db.ConfigDB))
-                if err != nil {
-                        log.Info("network_instance_table_name_xfmr: no DB found")
-                        return tblList, errors.New("no config DB found for network instance")
-                }
-
-                var nwInstTable     *db.TableSpec
-
-                if (intNwInstName == "mgmt") {
-                        nwInstTable =  &db.TableSpec{Name: "MGMT_VRF_CONFIG"}
-                        dbInfo, _ := d.GetEntry(nwInstTable, buildKey("vrf_global"))
-                        if (!dbInfo.IsPopulated()) {
-                                log.Info("network_instance_table_name_xfmr: UPDATE case, DB entry not created for mgmt")
-                                return tblList, errors.New("DB entry not created yet")
-                        }
-               } else if (intNwInstName == "Vrf") {
-                       nwInstTable = &db.TableSpec{Name: "VRF"}
-                       dbInfo, _ := d.GetEntry(nwInstTable, buildKey(keyName))
-                       if (!dbInfo.IsPopulated()) {
-                                log.Info("network_instance_table_name_xfmr: UPDATE case, DB entry not created for ", keyName)
-                                return tblList, errors.New("DB entry not created yet")
-                        }
-               } else {
-                       log.Info("network_instance_table_name_xfmr: UPDATE case, unknown name ", keyName)
-                       return tblList, errors.New("Unknown network instance name")
-               }
-
-               log.Info("network_instance_table_name_xfmr, name ", keyName)
-               tblList = append(tblList, NwInstTblNameMapWithName[intNwInstName]) 
-        } else  {
-                if (keyName == "default") {
-                        log.Info("network_instance_table_name_xfmr: GET or DELETE case for default network instance")
-                        return tblList, err
-                }
-
-                /* for GET or DELETE */
+                tblList = append(tblList, tblName)
+        } else {
                 tblList = append(tblList, NwInstTblNameMapWithName[intNwInstName])
         }
 
