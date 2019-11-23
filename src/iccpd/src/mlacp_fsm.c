@@ -300,9 +300,11 @@ static void mlacp_sync_send_syncMacInfo(struct CSM* csm)
 {
     int msg_len = 0;
     struct MACMsg* mac_msg = NULL;
+    struct MACMsg mac_find;
     int count = 0;
 
     memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
+    memset(&mac_find, 0, sizeof(struct MACMsg));
 
     while (!TAILQ_EMPTY(&(MLACP(csm).mac_msg_list)))
     {
@@ -315,8 +317,15 @@ static void mlacp_sync_send_syncMacInfo(struct CSM* csm)
         //free mac_msg if marked for delete.
         if (mac_msg->op_type == MAC_SYNC_DEL)
         {
-            assert(!(mac_msg->mac_entry_rb.rbt_parent));
-            free(mac_msg);
+            if (!(mac_msg->mac_entry_rb.rbt_parent))
+            {
+                //If the entry is parent then the parent pointer would be null
+                //search to confirm if the MAC is present in RB tree. if not then free.
+                mac_find.vid = mac_msg->vid ;
+                memcpy(mac_find.mac_addr, mac_msg->mac_addr, ETHER_ADDR_LEN);
+                if (!RB_FIND(mac_rb_tree, &MLACP(csm).mac_rb ,&mac_find))
+                    free(mac_msg);
+            }
         }
 
         if (count >= MAX_MAC_ENTRY_NUM)
