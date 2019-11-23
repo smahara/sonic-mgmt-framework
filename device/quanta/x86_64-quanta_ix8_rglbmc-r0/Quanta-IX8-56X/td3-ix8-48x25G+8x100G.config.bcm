@@ -520,3 +520,9 @@ phy_chain_rx_polarity_flip_physical{130.0}=0x0
 phy_chain_rx_polarity_flip_physical{131.0}=0x0
 phy_chain_rx_polarity_flip_physical{132.0}=0x0
 
+flow_init_mode=1
+l2_mem_entries=40960
+l3_mem_entries=40960
+l3_alpm_enable=2
+use_all_splithorizon_groups=1
+sai_tunnel_support=1

@@ -623,3 +623,10 @@ phy_chain_tx_polarity_flip_physical{125.0}=0x0
 phy_chain_tx_polarity_flip_physical{126.0}=0x1
 phy_chain_tx_polarity_flip_physical{127.0}=0x0
 phy_chain_tx_polarity_flip_physical{128.0}=0x0
+
+flow_init_mode=1
+l2_mem_entries=40960
+l3_mem_entries=40960
+l3_alpm_enable=2
+use_all_splithorizon_groups=1
+sai_tunnel_support=1
