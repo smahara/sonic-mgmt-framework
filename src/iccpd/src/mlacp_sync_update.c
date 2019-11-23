@@ -553,11 +553,11 @@ int mlacp_fsm_update_l2mc_entry_from_peer( struct CSM* csm, struct mLACPL2MCData
         sprintf(l2mc_msg->origin_ifname, "%s", L2mcData->ifname);
         l2mc_msg->del_flag = 0;
 
-        /*Set L2MC_DEL_LOCAL flag*/
-        l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 1, 0);
-
         if (from_mclag_intf == 0 || local_if->state == PORT_STATE_DOWN)
         {
+            /*Set L2MC_DEL_LOCAL flag*/
+            l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 1, 0);
+
             if (strlen(csm->peer_itf_name) == 0)
             {
                 ICCPD_LOG_NOTICE(__FUNCTION__, "Ignore , is mclag intf %d orphan or "
