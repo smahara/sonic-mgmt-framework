@@ -6,7 +6,6 @@ import (
         "github.com/openconfig/ygot/ygot"
         "strings"
         "translib/ocbinds"
-        "translib/db"
 )
 
 type NwInstMapKey struct {
@@ -169,11 +168,6 @@ func isMgmtVrf(inParams XfmrParams) (bool, error) {
         } else {
                 return false, err
         }
-}
-
-/* build db key from a given key string */
-func  buildKey(keyParts ...string) db.Key {
-        return db.Key{Comp: keyParts}
 }
 
 func init() {
@@ -519,5 +513,3 @@ var DbToYang_network_instance_route_distinguisher_field_xfmr KeyXfmrDbToYang = f
 
         return res_map, err
 }
-
-
