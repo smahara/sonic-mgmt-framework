@@ -28,17 +28,7 @@ hamd_c::hamd_c(hamd_config_c & config_r, DBus::Connection & conn_r) :
     config_rm(config_r),
     poll_timer_m((double)config_rm.poll_period_sec_m, hamd_c::on_poll_timeout, this)
 {
-    if (config_rm.poll_period_sec_m > 0)
-        poll_timer_m.start();
-}
-
-/**
- * @brief This is called just before the destructor is called and is used
- *        to clean up all resources in use by the class instance.
- */
-void hamd_c::cleanup()
-{
-    poll_timer_m.stop();
+    apply_config();
 }
 
 /**
@@ -63,27 +53,56 @@ void hamd_c::reload()
 {
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::reload()");
     config_rm.reload();
+    apply_config();
+}
+
+/**
+ * @brief Apply the configuration to the running daemon
+ */
+void hamd_c::apply_config()
+{
     if (config_rm.poll_period_sec_m > 0)
         poll_timer_m.start((double)config_rm.poll_period_sec_m);
     else
         poll_timer_m.stop();
 }
 
+/**
+ * @brief This is called just before the destructor is called and is used
+ *        to clean up all resources in use by the class instance.
+ */
+void hamd_c::cleanup()
+{
+    poll_timer_m.stop();
+}
+
+/**
+ * @brief Create a new user
+ */
 int32_t hamd_c::useradd(const std::string& login, const std::string& options)
 {
     return 0;
 }
 
+/**
+ * @brief Modify a user account
+ */
 int32_t hamd_c::usermod(const std::string& login, const std::string& options)
 {
     return 0;
 }
 
+/**
+ * @brief Create a new group
+ */
 int32_t hamd_c::groupadd(const std::string& group, const std::string& options)
 {
     return 0;
 }
 
+/**
+ * @brief Modify a group definition on the system
+ */
 int32_t hamd_c::groupmod(const std::string& group, const std::string& options)
 {
     return 0;
