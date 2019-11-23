@@ -77,6 +77,7 @@ public:
     bool                 is_tron() const { return config_rm.tron_m; }
     virtual void         cleanup();
     void                 reload();
+    void                 apply_config();
 
 private:
     hamd_config_c      & config_rm;
