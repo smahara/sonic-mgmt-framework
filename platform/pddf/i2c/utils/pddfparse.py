@@ -1069,21 +1069,64 @@ class PddfParse():
                                                                     self.verify_attr(entry, attr, 'pddf/devices/led')
 
 
+
     def schema_validation(self, validate_type):
+	    process_validate_type = 0
             for key in self.data.keys():
                     if (key != 'PLATFORM'):
                             temp_obj={}
-                            schema_file=""
-                            device_type=self.data[key]["dev_info"]["device_type"]
-                            if (validate_type=='all' or validate_type==device_type):
-                                    temp_obj[device_type]=self.data[key]
-                                    schema_file="schema/"+device_type + ".schema"
-                                    if (os.path.exists(schema_file)):
-                                            #print "Validate " + key + " Schema: " + device_type
-                                            json_data=json.dumps(temp_obj)
-                                            with open(schema_file, 'r') as f:
-                                                    schema=json.load(f)
-                                            validate(temp_obj, schema)
+                            schema_list=[]
+                            try:
+                            	device_type=self.data[key]["dev_info"]["device_type"]
+                            except Exception as e:
+                            	print "dev_info or device_type ERROR: " + key
+                            	print e 
+
+			    if validate_type == 'mismatch':
+	    			 process_validate_type = 1
+	                         device_type="PSU"
+                                 schema_file="/usr/local/bin/schema/FAN.schema"
+                                 schema_list.append(schema_file)
+		            elif validate_type == 'missing':
+	    			 process_validate_type = 1
+                                 schema_file="/usr/local/bin/schema/PLATFORM.schema"
+                                 schema_list.append(schema_file)
+
+		            elif validate_type == 'empty':
+	    			 process_validate_type = 1
+				 if not device_type:
+			            print "Empty device_type for " + key		
+                                    continue
+                            elif (validate_type=='all' or validate_type==device_type):
+	    			 process_validate_type = 1
+                                 if "bmc" in self.data[key].keys():
+                                    schema_file="/usr/local/bin/schema/"+device_type + "_BMC.schema"
+                                    schema_list.append(schema_file)
+
+                                 if "i2c" in self.data[key].keys():
+                                    schema_file="/usr/local/bin/schema/"+device_type + ".schema"
+                                    schema_list.append(schema_file)
+			    if device_type:
+                                 temp_obj[device_type]=self.data[key]
+                                 for schema_file in schema_list:
+                                      if (os.path.exists(schema_file)):
+				          print "Validate " + schema_file + ";" + key
+                                          json_data=json.dumps(temp_obj)
+                                          with open(schema_file, 'r') as f:
+                                              schema=json.load(f)
+	      			          try:
+                                              validate(temp_obj, schema)
+			                  except Exception as e:
+              	  			      print "Validation ERROR: " + schema_file + ";" + key
+					      if validate_type == 'mismatch':
+					  	 return	
+				              else:		
+					  	 print e
+                                      else:
+                                         print "ERROR Missing File: " + schema_file
+            if not process_validate_type:
+	         print "ERROR invalid device_type: " + validate_type 
+
 
     #################################################################################################################################
     #   PARSE DEFS

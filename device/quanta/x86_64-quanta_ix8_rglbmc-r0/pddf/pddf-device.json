@@ -415,7 +415,7 @@
 
     "PSU1":
     {
-
+	"dev_info": { "device_type":"PSU"},
         "dev_attr": { "dev_idx":"1", "num_psu_fans": "1"},
         "bmc": {
             "ipmitool" : {
@@ -438,7 +438,8 @@
     
     "PSU2":
     {
-		"dev_attr": { "dev_idx":"2", "num_psu_fans": "1"},
+	"dev_info": { "device_type":"PSU"},
+	"dev_attr": { "dev_idx":"2", "num_psu_fans": "1"},
         "bmc": {
             "ipmitool" : {
                 "attr_list":
@@ -461,6 +462,7 @@
 
     "FAN-CTRL":
     {
+	  "dev_info": { "device_type":"FAN"},
           "bmc": {
              "ipmitool" : {
                   "attr_list":
@@ -520,6 +522,7 @@
 
     "TEMP1":
     {
+	  "dev_info": { "device_type":"TEMP_SENSOR"},
 	  "dev_attr": { "display_name":"Temp_Ambient_0"},
           "bmc": {
               "ipmitool" : {
@@ -536,6 +539,7 @@
 
     "TEMP2":
     {
+	  "dev_info": { "device_type":"TEMP_SENSOR"},
 	  "dev_attr": { "display_name":"Temp_Ambient_1"},
           "bmc": {
               "ipmitool" : {
@@ -552,6 +556,7 @@
 
     "TEMP3":
     {
+	  "dev_info": { "device_type":"TEMP_SENSOR"},
 	  "dev_attr": { "display_name":"Temp_Ambient_2"},
           "bmc": {
               "ipmitool" : {
@@ -568,6 +573,7 @@
 
     "TEMP4":
     {
+	  "dev_info": { "device_type":"TEMP_SENSOR"},
 	  "dev_attr": { "display_name":"Temp_Ambient_3"},
           "bmc": {
               "ipmitool" : {
@@ -584,6 +590,7 @@
 
     "TEMP5":
     {
+	  "dev_info": { "device_type":"TEMP_SENSOR"},
 	  "dev_attr": { "display_name":"Temp_Ambient_4"},
           "bmc": {
               "ipmitool" : {
@@ -600,6 +607,7 @@
 
     "TEMP6":
     {
+	  "dev_info": { "device_type":"TEMP_SENSOR"},
 	  "dev_attr": { "display_name":"Temp_Ambient_5"},
           "bmc": {
               "ipmitool" : {
@@ -616,6 +624,7 @@
 
     "TEMP7":
     {
+	  "dev_info": { "device_type":"TEMP_SENSOR"},
 	  "dev_attr": { "display_name":"Temp_Ambient_6"},
           "bmc": {
               "ipmitool" : {
@@ -632,6 +641,7 @@
 
     "TEMP8":
     {
+	  "dev_info": { "device_type":"TEMP_SENSOR"},
 	  "dev_attr": { "display_name":"Temp_CPU"},
           "bmc": {
               "ipmitool" : {
