@@ -402,6 +402,7 @@ static void mlacp_sync_send_syncL2mcInfo(struct CSM* csm)
 {
     int msg_len = 0;
     struct L2MCMsg* l2mc_msg = NULL;
+    struct L2MCMsg l2mc_find;
     int count = 0;
 
     memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
@@ -417,8 +418,14 @@ static void mlacp_sync_send_syncL2mcInfo(struct CSM* csm)
         //free l2mc_msg if marked for delete.
         if (l2mc_msg->op_type == L2MC_SYNC_DEL)
         {
-            assert(!(l2mc_msg->l2mc_entry_rb.rbt_parent));
-            free(l2mc_msg);
+            if (!(l2mc_msg->l2mc_entry_rb.rbt_parent)) {
+                l2mc_find.vid = l2mc_msg->vid;
+                memcpy(l2mc_find.saddr,l2mc_msg->saddr, INET_ADDRSTRLEN);
+                memcpy(l2mc_find.gaddr,l2mc_msg->gaddr, INET_ADDRSTRLEN);
+                memcpy(l2mc_find.ifname, l2mc_msg->ifname, MAX_L_PORT_NAME);
+                if (!RB_FIND(l2mc_rb_tree, &MLACP(csm).l2mc_rb ,&l2mc_find))
+                    free(l2mc_msg);
+            }
         }
 
         if (count >= MAX_L2MC_ENTRY_NUM)
