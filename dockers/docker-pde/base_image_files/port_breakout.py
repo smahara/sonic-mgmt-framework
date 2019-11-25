@@ -125,7 +125,10 @@ if not SIM_HOST:
         sai_profile_kvs = {}
 
         sai_file = get_platform_path() + "/" + hwsku + "/" + "sai.profile"
-        command = "cat "+ sai_file
+        if os.path.exists(sai_file):
+            command = "grep SAI_INIT_CONFIG_FILE "+ sai_file
+        else:
+            command = "sonic-cfggen -d -t " + sai_file + ".j2 | grep SAI_INIT_CONFIG_FILE"
         sai_profile_content, _ = run_command(command, print_to_console=False)
 
         for line in sai_profile_content.split('\n'):
@@ -180,6 +183,8 @@ bko_dict_4 = {
     "1x40":  { "lanes":4, "speed":40,  "step":4, "bko":0, "name": "fourtyGigE" },
     "4x10":  { "lanes":4, "speed":10,  "step":1, "bko":1, "name": "tenGigE" },
     "4x25":  { "lanes":4, "speed":25,  "step":1, "bko":1, "name": "twentyfiveGigE" },
+    "2x10":  { "lanes":2, "speed":10,  "step":1, "bko":1, "name": "tenGigE" },
+    "2x25":  { "lanes":2, "speed":25,  "step":1, "bko":1, "name": "twentyfiveGigE" },
 }
 
 bko_dict_8 = {
@@ -283,6 +288,7 @@ def break_in_ini(port, ini_file, opt):
     first_port = True
     title = []
 
+    done = False
     for line in f_in.readlines():
         line.strip()
         if len(line.rstrip()) == 0:
@@ -301,6 +307,10 @@ def break_in_ini(port, ini_file, opt):
         line_port = line.split()[0]
 
         if line_port in get_bkout_ports(port, opt):
+            if done:
+                f_out.write(line)
+                continue
+            done = True
             oidx, olanes, name, oporti, fp_idx = get_info_in_ini(line, title)
 
             if get_is_bkout(opt) and len(olanes) < get_bkout_lanes(opt):
@@ -543,8 +553,12 @@ def break_in_cfg(port, cfg_file, lanes, opt):
 
     ### remove port instance in data
     ###
+    idx = 0
     ports = get_bkout_ports(port, opt)
     for x in ports:
+        if idx >= get_bkout_lanes(opt):
+            break
+        idx += 1
         if data['PORT'].get(x) != None:
             port_instance = data['PORT'].get(x)
             data['PORT'].pop(x)
@@ -829,5 +843,4 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
 
