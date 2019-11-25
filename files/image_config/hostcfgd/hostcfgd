@@ -317,31 +317,20 @@ class MgmtVrfCfg:
                     .format(err.cmd, err.returncode, err.output))
             return
 
+        self.bind_mgmt_intf()
+
+    def bind_mgmt_intf(self):
         syslog.syslog(syslog.LOG_INFO, "Handle MGMT intf:")
-
         keys = self.config_db.get_keys(CFG_MGMT_INTF_TABLE)
-        syslog.syslog(syslog.LOG_INFO, str(keys))
+        syslog.syslog(syslog.LOG_INFO, "MGMT interfaces keys: {}".format(str(keys)))
+
+        mgmt_intf_bound = False
         for it in keys:
-            key = it[0] + "|" + it[1]
-            entry = self.config_db.get_entry(CFG_MGMT_INTF_TABLE, key)
-            mgmt_intf_name = it[0]
-            mgmt_intf_ip   = it[1]
-            if 'gwaddr' in entry:
-                mgmt_intf_gwaddr = entry['gwaddr']
-            else:
-                mgmt_intf_gwaddr = None
+            if type(it) is unicode:
 
-            cmd = 'ip link set dev {} master mgmt'.format(mgmt_intf_name)
-            syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
-            try:
-                subprocess.check_call(cmd, shell=True)
-            except subprocess.CalledProcessError as err:
-                syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
-                        .format(err.cmd, err.returncode, err.output))
-                return
+                mgmt_intf_name = it
 
-            if mgmt_intf_gwaddr is not None:
-                cmd = 'ip route add table {} 0.0.0.0/0 via {}'.format(MGMT_VRF_TABLE_ID, mgmt_intf_gwaddr)
+                cmd = 'ip link set dev {} master mgmt'.format(mgmt_intf_name)
                 syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
                 try:
                     subprocess.check_call(cmd, shell=True)
@@ -350,14 +339,39 @@ class MgmtVrfCfg:
                             .format(err.cmd, err.returncode, err.output))
                     return
 
-            cmd = 'sysctl -w net.ipv4.tcp_l3mdev_accept=1'
-            syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
-            try:
-                subprocess.check_call(cmd, shell=True)
-            except subprocess.CalledProcessError as err:
-                syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
-                        .format(err.cmd, err.returncode, err.output))
-                return
+                cmd = 'sysctl -w net.ipv4.tcp_l3mdev_accept=1'
+                syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
+                try:
+                    subprocess.check_call(cmd, shell=True)
+                except subprocess.CalledProcessError as err:
+                    syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
+                            .format(err.cmd, err.returncode, err.output))
+                    return
+
+                mgmt_intf_bound = True
+                break
+
+        if not mgmt_intf_bound:
+            syslog.syslog(syslog.LOG_ERR, "MGMT VRF: MGMT interface not bound")
+        else:
+            for it in keys:
+                if type(it) is unicode:
+                    key = it
+                else:
+                    key = it[0] + "|" + it[1]
+
+                entry = self.config_db.get_entry(CFG_MGMT_INTF_TABLE, key)
+                if 'gwaddr' in entry:
+                    mgmt_intf_gwaddr = entry['gwaddr']
+                    cmd = 'ip route add table {} 0.0.0.0/0 via {}'.format(MGMT_VRF_TABLE_ID, mgmt_intf_gwaddr)
+                    syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
+                    try:
+                        subprocess.check_call(cmd, shell=True)
+                    except subprocess.CalledProcessError as err:
+                        syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
+                                .format(err.cmd, err.returncode, err.output))
+                        return
+
 
     def unconfigure_mgmt_vrf(self):
         syslog.syslog(syslog.LOG_INFO, "Unconfigure MGMT VRF:")
@@ -372,6 +386,38 @@ class MgmtVrfCfg:
 
         self.delete_mgmt_vrf_table()
         return
+
+    def handle_mgmt_intf_gwaddr_cfg(self, op, ifname, gwaddr):
+        syslog.syslog(syslog.LOG_INFO, "Received MGMT Intf gwaddr config, op: {}, ifname: {}, gwaddr: {}".format(op, ifname, gwaddr))
+        keys = self.config_db.get_keys(CFG_MGMT_VRF)
+        if keys:
+            syslog.syslog(syslog.LOG_INFO, "MGMT VRF created")
+
+            cmd = 'ip route del table {} 0.0.0.0/0'.format(MGMT_VRF_TABLE_ID)
+            syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except subprocess.CalledProcessError as err:
+                syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}".format(err.cmd, err.returncode, err.output))
+                pass
+
+            if op == "ADD":
+                cmd = 'ip route add table {} 0.0.0.0/0 via {}'.format(MGMT_VRF_TABLE_ID, gwaddr)
+                syslog.syslog(syslog.LOG_INFO, "cmd - {}".format(cmd))
+                try:
+                    subprocess.check_call(cmd, shell=True)
+                except subprocess.CalledProcessError as err:
+                    syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}".format(err.cmd, err.returncode, err.output))
+                    pass
+
+            return True
+
+    def handle_mgmt_intf_creation(self, mgmt_intf_key):
+        syslog.syslog(syslog.LOG_INFO, "Received MGMT Intf creation, key: {}".format(mgmt_intf_key))
+        keys = self.config_db.get_keys(CFG_MGMT_VRF)
+        if keys:
+            syslog.syslog(syslog.LOG_INFO, "MGMT VRF created")
+            self.bind_mgmt_intf()
 
     def handle_mgmt_vrf_cfg(self, key, data):
         syslog.syslog(syslog.LOG_INFO, "Received MGMT VRF config, key: {}, data: {}".format(key, data))
@@ -394,9 +440,10 @@ APP_MGMT_INTF_TABLE = "MGMT_INTF_TABLE"
 
 
 class MgmtIntfCfg:
-    def __init__(self):
+    def __init__(self, mgmt_vrf_cfg):
         self.app_db = ConfigDBConnector()
         self.app_db.db_connect('APPL_DB', wait_for_init=False, retry_on=True)
+        self.mgmt_vrf_cfg = mgmt_vrf_cfg
         syslog.syslog(syslog.LOG_INFO, 'AppDB connect success')
 
     def mgmt_intf_handle_default_cfg (self, config_db):
@@ -466,16 +513,17 @@ class MgmtIntfCfg:
 
     def mgmt_intf_gwaddr_set(self, ifname, gwaddr, appIntf, op):
 
-        try:
-            if op == "DEL":
-                cmd = "route del default gw {} {}".format(gwaddr, ifname)
-            else:
-                cmd = "ip route add default via {} dev {} table default".format(gwaddr, ifname)
-            syslog.syslog(syslog.LOG_INFO, "Configure gwaddr , cmd : {}".format(cmd))
-            subprocess.check_call(cmd, shell=True)
-        except subprocess.CalledProcessError as err:
-            syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}".format(err.cmd, err.returncode, err.output))
-            pass
+        if not self.mgmt_vrf_cfg.handle_mgmt_intf_gwaddr_cfg(op, ifname, gwaddr):
+            try:
+                if op == "DEL":
+                    cmd = "route del default gw {} {}".format(gwaddr, ifname)
+                else:
+                    cmd = "ip route add default via {} dev {} table default".format(gwaddr, ifname)
+                syslog.syslog(syslog.LOG_INFO, "Configure gwaddr , cmd : {}".format(cmd))
+                subprocess.check_call(cmd, shell=True)
+            except subprocess.CalledProcessError as err:
+                syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}".format(err.cmd, err.returncode, err.output))
+                pass
 
 
 
@@ -533,6 +581,10 @@ class MgmtIntfCfg:
         self.app_db.set_entry(APP_MGMT_PORT_TABLE, key, mgmt_intf)
 
     def handle_mgmt_intf_cfg(self, key, data, op):
+        if op == "CREATE":
+            self.mgmt_vrf_cfg.handle_mgmt_intf_creation(key)
+            return
+        
         intf_keys = key.split("|")
         if (len(intf_keys) < 2):
             return
@@ -572,7 +624,7 @@ class HostConfigDaemon:
         self.aaacfg.load(aaa, tacacs_global, tacacs_server, radius_global, radius_server)
         self.hostname_cache=""
         self.mgmtvrfcfg = MgmtVrfCfg(self.config_db)
-        self.mgmtcfg = MgmtIntfCfg()
+        self.mgmtcfg = MgmtIntfCfg(self.mgmtvrfcfg)
         self.mgmtcfg.mgmt_intf_handle_default_cfg(self.config_db)
 
     def aaa_handler(self, key, data):
@@ -654,6 +706,10 @@ class HostConfigDaemon:
         op = "DEL"
         keys = self.config_db.get_keys(CFG_MGMT_INTF_TABLE)
         for it in keys:
+            if it[0] == key:
+                op = "CREATE"
+                break
+
             it_key = it[0] + "|" + it[1]
             if it_key == key:
                 op = "ADD"
