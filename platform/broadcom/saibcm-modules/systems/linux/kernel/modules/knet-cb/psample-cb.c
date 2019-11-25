@@ -65,7 +65,7 @@ extern int debug;
 #define SOC_HIGIG2_SOP        (0xfb) //0xfc - TODO: how can we differentiate between Higig and higig2?
 #define SOC_HIGIG2_START(x)   ((x[0] >> 24) & 0xff)
 #define SOC_HIGIG2_DSTPORT(x) ((x[0] >>  0) & 0xff)
-#define SOC_HIGIG2_SRCPORT(x) ((x[1] >> 16) & 0x7f)
+#define SOC_HIGIG2_SRCPORT(x) ((x[1] >> 16) & 0xff)
 #define SOC_DCB32_HG_OFFSET   (6)
 
 #define PSAMPLE_RATE_DFLT 1
