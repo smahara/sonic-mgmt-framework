@@ -250,6 +250,8 @@ RUN apt-get update && apt-get install -y \
         python3-colorama \
 # For initramfs
         bash-completion \
+# For mgmt-framework build
+        libdbus-c++-dev \
 # For sonic vs image build
         dosfstools \
         qemu-kvm \
@@ -334,9 +336,6 @@ RUN pip install pexpect==4.6.0
 RUN pip install mockredispy==2.9.3
 RUN pip install pytest-runner==4.4
 RUN pip install setuptools==40.8.0
-
-# For sonic-mgmt-framework build
-RUN pip install mmh3
 
 # Install dependencies for isc-dhcp-relay build
 RUN apt-get -y build-dep isc-dhcp
