@@ -1592,7 +1592,7 @@ void update_stp_peer_link(struct CSM *csm,
     return;
 }
 
-void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type)
+void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type, uint8_t oper)
 {
     struct IccpSyncdHDr * msg_hdr;
     char *msg_buf = g_iccp_mlagsyncd_send_buf;
@@ -1619,11 +1619,12 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type)
     memcpy(mac_info->port_name, mac_msg->ifname, MAX_L_PORT_NAME);
     memcpy(mac_info->mac, mac_msg->mac_addr, ETHER_ADDR_LEN);
     mac_info->type = mac_type;
-    mac_info->op_type = mac_msg->op_type;
+    mac_info->op_type = oper;
     msg_hdr->len = sizeof(struct IccpSyncdHDr) + sizeof(struct mclag_fdb_info);
 
     ICCPD_LOG_DEBUG(__FUNCTION__, "write mac msg vid : %d ; ifname %s ; mac %s fdb type %s ; op type %s",
-                    mac_info->vid, mac_info->port_name, mac_info->mac, mac_info->type == MAC_TYPE_STATIC ? "static" : "dynamic", mac_info->op_type == MAC_SYNC_ADD ? "add" : "del");
+        mac_info->vid, mac_info->port_name, mac_info->mac, mac_info->type == MAC_TYPE_STATIC ? "static" : "dynamic",
+        oper == MAC_SYNC_ADD ? "add" : "del");
 
     /*send msg*/
     if (sys->sync_fd > 0 )
@@ -1652,16 +1653,14 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type)
 
 void add_mac_to_chip(struct MACMsg* mac_msg, uint8_t mac_type)
 {
-    mac_msg->op_type = MAC_SYNC_ADD;
-    iccp_send_fdb_entry_to_syncd( mac_msg, mac_type);
+    iccp_send_fdb_entry_to_syncd( mac_msg, mac_type, MAC_SYNC_ADD);
 
     return;
 }
 
 void del_mac_from_chip(struct MACMsg* mac_msg)
 {
-    mac_msg->op_type = MAC_SYNC_DEL;
-    iccp_send_fdb_entry_to_syncd(  mac_msg, mac_msg->fdb_type);
+    iccp_send_fdb_entry_to_syncd(  mac_msg, mac_msg->fdb_type, MAC_SYNC_DEL);
 
     return;
 }
@@ -2750,8 +2749,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
         if (!(mac_lif = local_if_find_by_name(ifname)))
         {
             ICCPD_LOG_ERR(__FUNCTION__, " interface %s not present failed "
-                "to add MAC %s vlan %d", mac_info->ifname,
-                mac_addr_to_str(mac_info->mac_addr), mac_info->vid);
+                "to add MAC %s vlan %d", ifname, mac_addr_to_str(mac_addr), vid);
             return;
         }
 
