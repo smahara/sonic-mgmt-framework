@@ -368,8 +368,14 @@ func (app *AclApp) processAclGet(dbs [db.MaxDB]*db.DB) error {
 				ygot.BuildEmptyTree(intfData)
 				if isSubtreeRequest(targetUriPath, "/openconfig-acl:acl/interfaces/interface/ingress-acl-sets") {
 					err = app.getAclBindingInfoForInterfaceData(d, intfData, intfId, "INGRESS")
+					if err != nil {
+						log.Infof("processGetAcl: no ingress-acl for  Interface %s", intfId)
+					}
 				} else if isSubtreeRequest(targetUriPath, "/openconfig-acl:acl/interfaces/interface/egress-acl-sets") {
 					err = app.getAclBindingInfoForInterfaceData(d, intfData, intfId, "EGRESS")
+					if err != nil {
+						log.Infof("processGetAcl: no  egress-acl for  Interface %s", intfId)
+					}
 				} else {
 					// Direction unknown. Check ACL Table for binding information.
 					err = app.getAclBindingInfoForInterfaceData(d, intfData, intfId, "INGRESS")
@@ -377,6 +383,9 @@ func (app *AclApp) processAclGet(dbs [db.MaxDB]*db.DB) error {
 						return err
 					}
 					err = app.getAclBindingInfoForInterfaceData(d, intfData, intfId, "EGRESS")
+					if (err != nil) {
+						log.Infof("processGetAcl: (direction unknown) no egress-acl for  Interface %s", intfId)
+					}
 				}
 			}
 		} else {
@@ -600,21 +609,22 @@ func (app *AclApp) convertDBAclRulesToInternal(dbs [db.MaxDB]*db.DB, aclName str
 	}
 	if ruleKey.Len() > 1 {
 		ruleName := ruleKey.Get(1)
+		var co_err error
 		ruleData, err := dbCl.GetEntry(app.ruleTs, ruleKey)
 		if err != nil {
+			log.Info("Configdb getentry failed for rule " , ruleName)		
 			return err
 		}
 		if app.ruleTableMap[aclName] == nil {
 			app.ruleTableMap[aclName] = make(map[string]db.Value)
 		}
-		counterData, err := dbCo.GetEntry(app.counterTs, ruleKey)
-		if err == nil {
+		counterData, co_err := dbCo.GetEntry(app.counterTs, ruleKey)
+		if co_err == nil {
 			for k, x := range counterData.Field {
 				ruleData.Field[k] = x
-				// log.Info("Packets count " ,x,  " found in  COUNTER db for rulekey ", ruleKey.Comp) 
 			}
 		}
-		app.ruleTableMap[aclName][ruleName] = ruleData 
+		app.ruleTableMap[aclName][ruleName] = ruleData
 	} else {
 		ruleKeys, err := dbCl.GetKeys(app.ruleTs)
 		if err != nil {
@@ -745,7 +755,6 @@ func (app *AclApp) convertInternalToOCAclRuleProperties(ruleData db.Value, aclTy
 	ygot.BuildEmptyTree(entrySet.Actions)
 
 	for ruleKey := range ruleData.Field {
-		// log.Info("convertInternalToOCAclRuleProperties ruleKey is ", ruleKey) 
 		if "L4_SRC_PORT" == ruleKey || "L4_SRC_PORT_RANGE" == ruleKey {
 			port := ruleData.Get(ruleKey)
 			srcPort := getTransportSrcDestPorts(port, "src")
@@ -769,9 +778,9 @@ func (app *AclApp) convertInternalToOCAclRuleProperties(ruleData db.Value, aclTy
 				entrySet.Actions.State.ForwardingAction = ocbinds.OpenconfigAcl_FORWARDING_ACTION_DROP
 			}
 		} else if "Packets" == ruleKey {
-				pkts, _ := strconv.ParseUint(ruleData.Get(ruleKey), 10, 64) 
+				pkts, _ := strconv.ParseUint(ruleData.Get(ruleKey), 10, 64)
 				entrySet.State.MatchedPackets = &pkts
-				log.Info("Packets count " ,pkts,  " found in  COUNTER db for rulekey ", ruleKey) 
+				log.Info("Packets count " ,pkts,  " found in  COUNTER db for rulekey ", ruleKey)
 		} else if "Bytes" == ruleKey {
 				bytes, _ :=  strconv.ParseUint(ruleData.Get(ruleKey), 10, 64)
 				entrySet.State.MatchedOctets  = &bytes
