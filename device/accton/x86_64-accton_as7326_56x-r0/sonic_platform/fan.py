@@ -21,12 +21,17 @@ class Fan(FanBase):
 
     FAN_MOD_NAME = 'as7326_56x_fan-i2c-11-66'
     FAN_RPM_MAX = 21500
+    NUM_FANTRAYS = 6
+    FANS_PERTRAY = 2
     BASE_VAL_PATH = '/sys/bus/i2c/devices/11-0066/{0}'
     FAN_DUTY_PATH = '/sys/bus/i2c/devices/11-0066/fan_duty_cycle_percentage'
 
     def __init__(self, fan_index):
         self.index = fan_index + 1
         FanBase.__init__(self)
+        
+        self.fantray_index = (fan_index)/self.FANS_PERTRAY + 1
+        self.fan_index_intray = self.index - ((self.fantray_index-1)*self.FANS_PERTRAY)
 
     def get_name(self):
         """
@@ -35,7 +40,7 @@ class Fan(FanBase):
         Returns:
             string: The name of the device
         """
-        return "{}:fan{}".format(self.FAN_MOD_NAME, self.index)
+        return "Fantray{}_{}".format(self.fantray_index, self.fan_index_intray)
 
     def get_status(self):
         """
@@ -45,7 +50,7 @@ class Fan(FanBase):
             A boolean value, True if device is operating properly, False if not
         """
         status = 0
-        attr = 'fan' + str(self.index) + '_fault'
+        attr = 'fan' + str(self.fantray_index) + '_fault'
         node = self.BASE_VAL_PATH.format(attr)
         try:
             with open(node, 'r') as fault:
@@ -63,7 +68,7 @@ class Fan(FanBase):
             bool: True if device is present, False if not
         """
         status = 0
-        attr = 'fan' + str(self.index) + '_present'
+        attr = 'fan' + str(self.fantray_index) + '_present'
         node = self.BASE_VAL_PATH.format(attr)
         try:
             with open(node, 'r') as presence_status:
@@ -82,7 +87,7 @@ class Fan(FanBase):
             depending on fan direction
         """
         direction = ""
-        attr = 'fan' + str(self.index) + '_direction'
+        attr = 'fan' + str(self.fantray_index) + '_direction'
         node = self.BASE_VAL_PATH.format(attr)
         try:
             with open(node, 'r') as fan_dir:
@@ -104,15 +109,34 @@ class Fan(FanBase):
                  to 100 (full speed)
         """
         frpm = 0
-        attr = 'fan' + str(self.index) + '_front_speed_rpm'
+        attr = 'fan' + str(self.fantray_index) + '_{}_speed_rpm'.format('front' if (self.fan_index_intray==1) else 'rear')
         node = self.BASE_VAL_PATH.format(attr)
         try:
-            with open(node, 'r') as front_speed:
-                frpm = int(front_speed.read())
+            with open(node, 'r') as speed:
+                frpm = int(speed.read())
         except IOError as e:
             print "Error: %s"%str(e)
             return 0
         return (frpm * 100) / self.FAN_RPM_MAX
+
+    def get_speed_rpm(self):
+        """
+        Retrieves the speed of fan in RPM
+
+        Returns:
+            An integer, representing speed of the FAN in rpm
+        """
+        frpm = 0
+        attr = 'fan' + str(self.fantray_index) + '_{}_speed_rpm'.format('front' if (self.fan_index_intray==1) else 'rear')
+        node = self.BASE_VAL_PATH.format(attr)
+        try:
+            with open(node, 'r') as speed:
+                frpm = int(speed.read())
+        except IOError as e:
+            print "Error: %s"%str(e)
+            return 0
+        
+        return frpm
 
     def get_target_speed(self):
         """
