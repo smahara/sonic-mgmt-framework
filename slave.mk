@@ -115,10 +115,6 @@ ifneq ($(SONIC_COVERAGE_ON_PARAM),)
 SONIC_COVERAGE_ON = $(SONIC_COVERAGE_ON_PARAM)
 endif
 
-ifneq ($(ENABLE_BROADCOM_EXCLUSIVE_PARAM),)
-ENABLE_BROADCOM_EXCLUSIVE = $(ENABLE_BROADCOM_EXCLUSIVE_PARAM)
-endif
-
 ifneq ($(SONIC_SANITIZER_ON_PARAM),)
 SONIC_SANITIZER_ON = $(SONIC_SANITIZER_ON_PARAM)
 endif
@@ -173,10 +169,6 @@ export COV_CFLAGS := -O0 -coverage
 export COV_CFG_FLAGS := --enable-gcov=yes
 export COV_LDFLAGS := -lgcov
 export SONIC_COVERAGE_ON := y
-endif
-
-ifeq ($(ENABLE_BROADCOM_EXCLUSIVE),y)
-export ENABLE_BROADCOM_EXCLUSIVE := y
 endif
 
 ifeq ($(SONIC_SANITIZER_ON),y)
@@ -301,7 +293,6 @@ $(info "VS_PREPARE_MEM"                  : "$(VS_PREPARE_MEM)")
 $(info "VERSION"                         : "$(SONIC_GET_VERSION)")
 $(info "PDDF_SUPPORT"                    : "$(PDDF_SUPPORT)")
 $(info "ENABLE_SFLOW"                    : "$(ENABLE_SFLOW)")
-$(info "ENABLE_BROADCOM_EXCLUSIVE"       : "$(ENABLE_BROADCOM_EXCLUSIVE)")
 $(info )
 
 ###############################################################################
