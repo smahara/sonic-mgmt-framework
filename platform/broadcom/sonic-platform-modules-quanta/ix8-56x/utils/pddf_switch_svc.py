@@ -26,7 +26,7 @@ def stop_platform_svc():
         print "Stop pddf-platform-init.service along with other platform serives failed %d"%status
         return False
 
-    status, output = commands.getstatusoutput("touch /usr/share/sonic/platform/pddf_support")
+    #status, output = commands.getstatusoutput("touch /usr/share/sonic/platform/pddf_support")
     
     # Enable PDDF 2.0 object class for IX8
     status, output = commands.getstatusoutput("mkdir /usr/share/sonic/platform/sonic_platform")
@@ -34,10 +34,10 @@ def stop_platform_svc():
         print "Unable to create 2.0 object class folder /usr/share/sonic/platform/sonic_platform"
         return False
 
-    status, output = commands.getstatusoutput("reboot -y")
-    if status:
-        print "Reboot %d"%status
-        return False
+    #status, output = commands.getstatusoutput("reboot -y")
+    #if status:
+        #print "Reboot %d"%status
+        #return False
 
     return True
     
@@ -55,11 +55,12 @@ def start_platform_svc():
 
 def start_platform_pddf():
 
-    status, output = commands.getstatusoutput("systemctl start pddf-platform-init.service")
-    if status:
-        print "Start pddf-platform-init.service failed %d"%status
-        return False
+    #status, output = commands.getstatusoutput("systemctl start pddf-platform-init.service")
+    #if status:
+        #print "Start pddf-platform-init.service failed %d"%status
+        #return False
     
+    print "!!! TO ENABLE PDDF MODE, A REBOOT IS REQUIRED IMMEDIATELY AFTER THIS COMMAND COMPLETES !!!"
     return True
 
 def stop_platform_pddf():
