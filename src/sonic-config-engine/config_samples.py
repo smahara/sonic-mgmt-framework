@@ -34,7 +34,8 @@ def generate_t1_sample_config(data):
 
     data['HARDWARE'] = {}
     data['HARDWARE']['ACCESS_LIST'] = {}
-    data['HARDWARE']['ACCESS_LIST']['LOOKUP'] = 'advanced'
+    data['HARDWARE']['ACCESS_LIST']['LOOKUP_MODE'] = 'advanced'
+    data['HARDWARE']['ACCESS_LIST']["COUNTER_MODE"] = "per-rule"
     data['HARDWARE']['ACCESS_LIST']['TCAM_SHARING'] = []
     return data;
 
