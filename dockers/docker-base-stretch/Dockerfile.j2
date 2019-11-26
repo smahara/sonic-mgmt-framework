@@ -71,6 +71,10 @@ RUN apt-get -y install {{ dbg_pkg }}
 RUN ln /usr/bin/vim.tiny /usr/bin/vim
 {%- endif %}
 
+# Base packages for bpf
+RUN apt-get install -f -y libbpf-dev libelf-dev
+
+
 # Clean up apt
 # Remove /var/lib/apt/lists/*, could be obsoleted for derived images
 RUN apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
