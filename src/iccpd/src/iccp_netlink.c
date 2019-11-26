@@ -495,7 +495,7 @@ void iccp_set_interface_ipadd_mac(struct LocalInterface *lif, char * mac_addr )
     dst_len = strlen(mac_addr);
     memcpy(sub_msg->data, mac_addr, dst_len);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "If name %s ip %s mac %s", lif->name, show_ip_str(htonl(lif->ipv4_addr)), sub_msg->data);
+    ICCPD_LOG_NOTICE(__FUNCTION__, "If name %s ip %s mac %s", lif->name, show_ip_str(lif->ipv4_addr), sub_msg->data);
 
     sub_msg->op_len = dst_len;
     msg_hdr->len += sizeof(mclag_sub_option_hdr_t);
@@ -1140,17 +1140,15 @@ void iccp_event_handler_obj_input_newaddr(struct nl_object *obj, void *arg)
         if (memcmp((char *)lif->ipv6_addr, addr_null, 16) == 0)
         {
             update_if_ipmac_on_standby(lif);
+            update_vlan_if_mac_on_standby(lif);
             sync_mac = 1;
         }
         if (lif->is_l3_proto_enabled)
         {
-            if (sync_mac) {
-                update_vlan_if_mac_on_standby(lif);
-            }
             is_v4 = 1;
             syn_local_neigh_mac_info_to_peer(lif, sync_add, is_v4, is_v6, sync_mac, 1);
         }
-        ICCPD_LOG_DEBUG(__FUNCTION__, " ifname %s index %d  address %s l3_proto %d\n",
+        ICCPD_LOG_NOTICE(__FUNCTION__, " ifname %s index %d  address %s l3_proto %d\n",
                 lif->name, lif->ifindex, show_ip_str(lif->ipv4_addr), lif->is_l3_proto_enabled);
     }
     else if (rtnl_addr_get_family(addr) == AF_INET6)
@@ -1166,17 +1164,15 @@ void iccp_event_handler_obj_input_newaddr(struct nl_object *obj, void *arg)
         if (lif->ipv4_addr == 0)
         {
             update_if_ipmac_on_standby(lif);
+            update_vlan_if_mac_on_standby(lif);
             sync_mac = 1;
         }
         if (lif->is_l3_proto_enabled)
         {
-            if (sync_mac) {
-                update_vlan_if_mac_on_standby(lif);
-            }
             is_v6 = 1;
             syn_local_neigh_mac_info_to_peer(lif, sync_add, is_v4, is_v6, sync_mac, 1);
         }
-        ICCPD_LOG_DEBUG(__FUNCTION__, " ifname %s index %d  address %s l3_proto %d\n",
+        ICCPD_LOG_NOTICE(__FUNCTION__, " ifname %s index %d  address %s l3_proto %d\n",
                 lif->name, lif->ifindex, show_ipv6_str((char *)lif->ipv6_addr), lif->is_l3_proto_enabled);
     }
 
@@ -1202,7 +1198,7 @@ void iccp_event_handler_obj_input_deladdr(struct nl_object *obj, void *arg)
 
     if (rtnl_addr_get_family(addr) == AF_INET)
     {
-        ICCPD_LOG_DEBUG(__FUNCTION__, "l3_proto %d, ifname %s index %d address %s\n",
+        ICCPD_LOG_NOTICE(__FUNCTION__, "l3_proto %d, ifname %s index %d address %s\n",
                 lif->is_l3_proto_enabled, lif->name, lif->ifindex, show_ip_str(lif->ipv4_addr));
         if (lif->is_l3_proto_enabled)
         {
@@ -1223,7 +1219,7 @@ void iccp_event_handler_obj_input_deladdr(struct nl_object *obj, void *arg)
             || memcmp(show_ipv6_str((char *)nl_addr_get_binary_addr(nl_addr)), "fe80", 4) == 0)
             return;
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "l3_proto %d, ifname %s index %d address %s\n",
+        ICCPD_LOG_NOTICE(__FUNCTION__, "l3_proto %d, ifname %s index %d address %s\n",
                 lif->is_l3_proto_enabled, lif->name, lif->ifindex, show_ipv6_str((char *)lif->ipv6_addr));
         if (lif->is_l3_proto_enabled)
         {
@@ -2043,52 +2039,80 @@ void update_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
 {
     struct CSM* csm = NULL;
     struct System* sys = NULL;
+    struct LocalInterface *lif_po = NULL;
     uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     char macaddr[64];
+    uint8_t system_mac[ETHER_ADDR_LEN];
     int ret = 0;
+    struct VLAN_ID vlan_key = { 0 };
+    struct VLAN_ID *vlan = NULL;
+    int vid = 0, vlan_member = 0;
+
+    if (lif_vlan->type != IF_T_VLAN)
+        return;
 
     if ((sys = system_get_instance()) == NULL)
         return;
 
-    while (!LIST_EMPTY(&(sys->csm_list)))
+    sscanf (lif_vlan->name, "Vlan%d", &vid);
+
+    memset(&vlan_key, 0, sizeof(struct VLAN_ID));
+    vlan_key.vid = vid;
+
+    ICCPD_LOG_NOTICE(__FUNCTION__, " ifname %s vid %d\n", lif_vlan->name, vid);
+    LIST_FOREACH(csm, &(sys->csm_list), next)
     {
-        csm = LIST_FIRST(&(sys->csm_list));
-        break;
+        LIST_FOREACH(lif_po, &(MLACP(csm).lif_list), mlacp_next)
+        {
+            if (lif_po->type == IF_T_PORT_CHANNEL)
+            {
+                vlan = RB_FIND(vlan_rb_tree, &(lif_po->vlan_tree), &vlan_key);
+                if (vlan)
+                {
+                    vlan_member = 1;
+                    break;
+                }
+            }
+        }
+        if (vlan_member)
+        {
+            break;
+        }
     }
 
     if (!csm) {
         return;
     }
 
-    if (lif_vlan->is_l3_proto_enabled == false)
-        return;
-
-    if (lif_vlan->type != IF_T_VLAN)
-        return;
-
     if (csm->role_type != STP_ROLE_STANDBY)
         return;
 
-    if (memcmp(MLACP(csm).system_id, null_mac, ETHER_ADDR_LEN) == 0)
+    memset(macaddr, 0, 64);
+    memset(system_mac, 0, ETHER_ADDR_LEN);
+    if (lif_vlan->is_l3_proto_enabled == false)
+    {
+        memcpy(system_mac, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
+        SET_MAC_STR(macaddr, MLACP(csm).remote_system.system_id);
+    } else {
+        memcpy(system_mac, MLACP(csm).system_id, ETHER_ADDR_LEN);
+        SET_MAC_STR(macaddr, MLACP(csm).system_id);
+    }
+
+    if (memcmp(system_mac, null_mac, ETHER_ADDR_LEN) == 0)
         return;
 
-    ICCPD_LOG_DEBUG(__FUNCTION__,
+    ICCPD_LOG_NOTICE(__FUNCTION__,
             "%s Change the system-id of %s from [%02X:%02X:%02X:%02X:%02X:%02X] to [%02X:%02X:%02X:%02X:%02X:%02X].",
             (csm->role_type == STP_ROLE_STANDBY) ? "Standby" : "Active",
             lif_vlan->name, lif_vlan->mac_addr[0], lif_vlan->mac_addr[1], lif_vlan->mac_addr[2], 
             lif_vlan->mac_addr[3], lif_vlan->mac_addr[4], lif_vlan->mac_addr[5],
-            MLACP(csm).system_id[0], MLACP(csm).system_id[1], MLACP(csm).system_id[2], 
-            MLACP(csm).system_id[3], MLACP(csm).system_id[4], MLACP(csm).system_id[5]);
-
-    /*Set portchannel ip mac */
-    memset(macaddr, 0, 64);
-    SET_MAC_STR(macaddr, MLACP(csm).system_id);
+            system_mac[0], system_mac[1], system_mac[2], system_mac[3], system_mac[4], system_mac[5]);
 
     if (local_if_is_l3_mode(lif_vlan))
     {
-        if (memcmp(lif_vlan->l3_mac_addr, MLACP(csm).system_id, ETHER_ADDR_LEN) != 0)
+        if (memcmp(lif_vlan->l3_mac_addr, system_mac, ETHER_ADDR_LEN) != 0)
         {
-            ret = iccp_netlink_if_hwaddr_set(lif_vlan->ifindex, MLACP(csm).system_id, ETHER_ADDR_LEN);
+            ret = iccp_netlink_if_hwaddr_set(lif_vlan->ifindex, system_mac, ETHER_ADDR_LEN);
             if (ret != 0)
             {
                 ICCPD_LOG_ERR(__FUNCTION__, " set %s mac error, ret = %d", lif_vlan->name, ret);
@@ -2099,7 +2123,7 @@ void update_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
             iccp_netlink_if_startup_set(lif_vlan->ifindex);
 
             iccp_set_interface_ipadd_mac(lif_vlan, macaddr);
-            memcpy(lif_vlan->l3_mac_addr, MLACP(csm).system_id, ETHER_ADDR_LEN);
+            memcpy(lif_vlan->l3_mac_addr, system_mac, ETHER_ADDR_LEN);
         }
     }
 
