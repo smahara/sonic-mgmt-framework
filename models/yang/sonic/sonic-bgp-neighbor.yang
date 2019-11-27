@@ -15,6 +15,10 @@ module sonic-bgp-neighbor {
         prefix sbgpg;
     }
 
+    import sonic-bgp-peergroup {
+        prefix pg;
+    }
+
     organization
         "SONiC";
 
@@ -45,6 +49,11 @@ module sonic-bgp-neighbor {
                     type inet:ip-address;
                     description "Neighbor description";
                 }
+
+                leaf peer_group_name {
+                    type string;
+		    description "Peer group name";
+		}
 
                 uses sbc:sonic-bgp-cmn;
 
