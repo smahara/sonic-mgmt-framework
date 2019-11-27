@@ -3087,7 +3087,9 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
         else
         {
             struct PeerInterface* pif=NULL;
-            pif = peer_if_find_by_name(csm, lif_po->name);
+            if (from_mclag_intf) {
+                pif = peer_if_find_by_name(csm, lif_po->name);
+            }
 
             /*If the port change to down before the entry
                sync to iccp, this entry must be deleted */
