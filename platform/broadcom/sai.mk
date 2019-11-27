@@ -1,4 +1,4 @@
-BRCM_SAI_VER = 3.255.6.5
+BRCM_SAI_VER = 3.255.6.6
 BRCM_SAI = "libsaibcm_$(BRCM_SAI_VER)_amd64.deb"
 BRCM_SAI_DEV = "libsaibcm-dev_$(BRCM_SAI_VER)_amd64.deb"
 BRCM_SAI_DIAG = "libsaibcm-diag_$(BRCM_SAI_VER)_amd64.deb"
