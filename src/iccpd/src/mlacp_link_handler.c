@@ -1987,7 +1987,53 @@ static void update_l2mc_state(struct CSM *csm,
         /*portchannel down*/
         if (po_state == 0)
         {
-            /* interface down is handled by l2mcd */
+            l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 1, 1);
+
+            ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, del flag %d, saddr %s, gaddr %s "
+                "vlan-id %d, Interface: %s", l2mc_msg->del_flag ,
+                l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid, l2mc_msg->ifname);
+
+            if (l2mc_msg->del_flag == (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
+            {
+                /*send mac  message to mclagsyncd.*/
+                del_l2mc_from_chip(l2mc_msg);
+
+                L2MC_RB_REMOVE(l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_msg);
+
+                if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail))
+                {
+                    free(l2mc_msg);
+                }
+            }
+            else
+            {
+                if (strlen(csm->peer_itf_name) != 0)
+                {
+                    if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
+                    {
+                        del_l2mc_from_chip(l2mc_msg);
+                        memcpy(l2mc_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
+                        add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type);
+                        ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, del flag %d, "
+                           "redirect to peer-link: %s, saddr %s gaddr %s vlan-id %d",
+                           l2mc_msg->del_flag, l2mc_msg->ifname,
+                           l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
+                    }
+                    else
+                    {
+                        del_l2mc_from_chip(l2mc_msg);
+                        memcpy(l2mc_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
+                        ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, del flag %d, "
+                           "can not redirect, del L2MC as peer-link: %s down, "
+                           "saddr %s gaddr %s vlanid %d", l2mc_msg->del_flag, l2mc_msg->ifname,
+                           l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
+                    }
+                }
+                else
+                {
+                    del_l2mc_from_chip(l2mc_msg);
+                }
+            }
         }
         else /*portchannel up*/
         {
@@ -2000,7 +2046,8 @@ static void update_l2mc_state(struct CSM *csm,
                 l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
 
                 l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 0, 1);
-
+                del_l2mc_from_chip(l2mc_msg);
+                
                 /*Reverse interface from peer-link to the original portchannel*/
                 memcpy(l2mc_msg->ifname, l2mc_msg->origin_ifname, MAX_L_PORT_NAME);
 
@@ -2488,6 +2535,7 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
 {
     struct Msg* msg = NULL;
     struct MACMsg* mac_msg = NULL;
+    struct L2MCMsg* l2mc_msg = NULL;
 
     if (!csm)
         return;
@@ -2521,6 +2569,32 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
             if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
             {
                 free(mac_msg);
+            }
+        }
+    }
+    /*If peer link down, remove all the l2mc entries that point to the peer-link*/
+    RB_FOREACH (l2mc_msg, l2mc_rb_tree, &MLACP(csm).l2mc_rb)
+    {
+        /* Find the entry that the port is peer-link to be deleted*/
+        if (strcmp(l2mc_msg->ifname, csm->peer_itf_name) != 0)
+            continue;
+
+       l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 1, 1);
+
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer link down, del L2MC for peer-link: %s,"
+            " saddr %s gaddr %s vlan-id %d", l2mc_msg->ifname, l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
+
+        /*Send del message to mclagsyncd*/
+        del_l2mc_from_chip(l2mc_msg);
+
+        /*If peer is not del, keep the entry in l2mc_rb, but ASIC is deleted*/
+        if (l2mc_msg->del_flag == (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
+        {
+            L2MC_RB_REMOVE(l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_msg);
+
+            if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail))
+            {
+                free(l2mc_msg);
             }
         }
     }
@@ -3158,41 +3232,14 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
                    send delete to peer and re-add entry 
                    if remote has not deleted */
 
-                if (strcmp(l2mc_info->ifname, csm->peer_itf_name) == 0)
+                if ((strcmp(l2mc_info->ifname, csm->peer_itf_name) == 0) ||
+                    from_mclag_intf)
                 {
-                    /*Set L2MC_DEL_LOCAL flag*/
-                    //l2mc_info->del_flag = set_l2mc_local_del_flag(csm, l2mc_info, 1, 1);
-                    l2mc_info->del_flag |= L2MC_DEL_LOCAL;
-
-                    if (l2mc_info->del_flag == (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
-                    {
-                        ICCPD_LOG_NOTICE(__FUNCTION__, "Recv L2MC del interface %s(peer-link), "
-                            "saddr %s gaddr %s vlan-id %d", l2mc_info->ifname,
-                            l2mc_info->saddr, l2mc_info->gaddr, l2mc_info->vid);
-
-                        /*If peer link is down, del the entry*/
-                        L2MC_RB_REMOVE(l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_info);
-
-                        // free only if not in change list to be send to peer node,
-                        // else free is taken care after sending the update to peer
-                        if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_info, tail))
-                        {
-                            free(l2mc_info);
-                        }
-                    }
-                    else if (csm->peer_link_if && csm->peer_link_if->state != PORT_STATE_DOWN)
-                    {
-                        add_l2mc_to_chip(l2mc_info, l2mc_info->l2mc_type);
-
-                        ICCPD_LOG_DEBUG(__FUNCTION__, "Recv L2MC del interface %s(peer-link is up), "
-                            "add back saddr %s gaddr %s vlan-id %d", l2mc_info->ifname,
-                            l2mc_info->saddr, l2mc_info->gaddr, l2mc_info->vid);
-                    }
-
+                    ICCPD_LOG_NOTICE(__FUNCTION__, "Recv Del due to link down on peer link or mlag interface");
                     return;
                 }
 
-                if (l2mc_info->del_flag == (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
+                if (l2mc_info->del_flag & L2MC_DEL_PEER)
                 {
                     /*Add L2MC_DEL_LOCAL flag*/
                     l2mc_info->del_flag = set_l2mc_local_del_flag(csm, l2mc_info, 1, 1);
@@ -3215,28 +3262,6 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
                     ICCPD_LOG_DEBUG(__FUNCTION__, "Recv L2MC del interface %s, "
                         "saddr %s gaddr %s vlan-id %d, peer is not deleted, add back to chip",
                         l2mc_info->ifname, l2mc_info->saddr, l2mc_info->gaddr, l2mc_info->vid);
-
-                    if (from_mclag_intf && lif_po && lif_po->state == PORT_STATE_DOWN)
-                    {
-                        /*Add L2MC_DEL_LOCAL flag*/
-                        l2mc_info->del_flag = set_l2mc_local_del_flag(csm, l2mc_info, 1, 1);
-
-                        /*If local if is down, redirect to peer-link*/
-                        if (strlen(csm->peer_itf_name) != 0)
-                        {
-                            memcpy(&l2mc_info->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
-
-                            if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
-                            {
-                                add_l2mc_to_chip(l2mc_info, l2mc_info->l2mc_type);
-                                ICCPD_LOG_DEBUG(__FUNCTION__, "Recv L2MC del interface %s(down), "
-                                    "saddr %s, gaddr %s vlan-id %d, redirect to peer-link",
-                                    l2mc_info->ifname, l2mc_info->saddr, l2mc_info->gaddr, l2mc_info->vid);
-                            }
-                        }
-
-                        return;
-                    }
 
                     if (!(l2mc_lif = local_if_find_by_name(l2mc_info->ifname)))
                         return;
