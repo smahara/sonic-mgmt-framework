@@ -485,10 +485,13 @@ int mlacp_fsm_update_l2mc_entry_from_peer( struct CSM* csm, struct mLACPL2MCData
     l2mc_find.vid = ntohs(L2mcData->vid);
     memcpy(&l2mc_find.saddr, L2mcData->saddr, INET_ADDRSTRLEN);
     memcpy(&l2mc_find.gaddr, L2mcData->gaddr, INET_ADDRSTRLEN);
-    if (from_mclag_intf)
+    if (!from_mclag_intf)
+        memcpy(&l2mc_find.ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
+    else if (local_if->state == PORT_STATE_UP)
         memcpy(&l2mc_find.ifname, L2mcData->ifname, MAX_L_PORT_NAME);
     else
         memcpy(&l2mc_find.ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
+
     l2mc_msg = RB_FIND(l2mc_rb_tree, &MLACP(csm).l2mc_rb ,&l2mc_find);
 
     if (l2mc_msg)
