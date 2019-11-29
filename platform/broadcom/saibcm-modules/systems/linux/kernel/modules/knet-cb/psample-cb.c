@@ -425,7 +425,7 @@ psample_netif_create_cb(int unit, kcom_netif_t *netif, struct net_device *dev)
     psample_netif_t *psample_netif, *lpsample_netif;
     unsigned long flags;
 
-    if ((psample_netif = kmalloc(sizeof(psample_netif_t), GFP_KERNEL)) == NULL) {
+    if ((psample_netif = kmalloc(sizeof(psample_netif_t), GFP_ATOMIC)) == NULL) {
         gprintk("%s: failed to alloc psample mem for netif '%s'\n", 
                 __func__, dev->name);
         return (-1);
