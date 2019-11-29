@@ -107,7 +107,7 @@ class Psu(PsuBase):
             string: Model/part number of device
         """
         device = "PSU{}".format(self.psu_index)
-        output = pddf_obj.get_attr_name_output(device, "psu_mfr_id")
+        output = pddf_obj.get_attr_name_output(device, "psu_model_name")
         if not output:
             return None 
 
@@ -123,7 +123,7 @@ class Psu(PsuBase):
             string: Serial number of device
         """
         device = "PSU{}".format(self.psu_index)
-        output = pddf_obj.get_attr_name_output(device, "psu_mfr_id")
+        output = pddf_obj.get_attr_name_output(device, "psu_serial_num")
         if not output:
             return None 
 

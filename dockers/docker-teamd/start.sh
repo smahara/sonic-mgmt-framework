@@ -9,6 +9,6 @@ chmod +x /usr/bin/portchannelstat
 
 supervisorctl start rsyslogd
 
-supervisorctl start teammgrd
-
 supervisorctl start teamsyncd
+
+supervisorctl start teammgrd

@@ -146,14 +146,14 @@ MODULE_PARM_DESC(fw_core,
 
 /* Service request commands to R5 */
 enum {
-    BCM_KSYNC_DONE=0,
-    BCM_KSYNC_INIT,
-    BCM_KSYNC_DEINIT,
-    BCM_KSYNC_GETTIME,
-    BCM_KSYNC_SETTIME,
-    BCM_KSYNC_FREQCOR,
-    BCM_KSYNC_PBM_UPDATE,
-    BCM_KSYNC_ADJTIME,
+    BCM_KSYNC_DONE = 0x0,
+    BCM_KSYNC_INIT = 0x1,
+    BCM_KSYNC_DEINIT = 0x2,
+    BCM_KSYNC_GETTIME = 0x3,
+    BCM_KSYNC_SETTIME = 0x4,
+    BCM_KSYNC_FREQCOR = 0x5,
+    BCM_KSYNC_PBM_UPDATE = 0x6,
+    BCM_KSYNC_ADJTIME = 0x7,
 };
 
 /* Usage macros */
@@ -527,38 +527,43 @@ int bksync_ptp_hw_tstamp_tx_time_get(int dev_no, int port, uint8_t *pkt, uint64_
     uint64_t timestamp = 0;
     uint16_t tpid = 0;
     int retry_cnt = retry_count;
-    int pkt_offset;
+    int seq_id_offset, tpid_offset;
 
-    if (!ptp_priv || !pkt || !ts || port < 1 || port > 255)
+    if (!ptp_priv || !pkt || !ts || port < 1 || port > 255) {
         return -1;
+    }
+
     *ts = 0;
+
+    tpid_offset = 12;
 
     switch(network_transport)
     {
         case 2:
-            pkt_offset = 0x2c;
+            seq_id_offset = 0x2c;
             break;
         case 4:
-            pkt_offset = 0x48;
+            seq_id_offset = 0x48;
             break;
         case 6:
-            pkt_offset = 0x2c;
+            seq_id_offset = 0x2c;
             break;
         default:
-            pkt_offset = 0x2c;
+            seq_id_offset = 0x2c;
             break;
     }
 
     /* Need to check VLAN tag if packet is tagged */
-    tpid = (*(pkt + 12) << 8) | *(pkt+13);
+    tpid = pkt[tpid_offset] << 8 | pkt[tpid_offset + 1];
     if (tpid == 0x8100) {
-        pkt_offset += 4;
+        seq_id_offset += 4;
     }
 
-    pktseq_id = *((uint16_t *)(pkt + pkt_offset));
 
+    pktseq_id = pkt[seq_id_offset] << 8 | pkt[seq_id_offset + 1];
 
     port -= 1;
+
     /* Fetch the TX timestamp from shadow memory */
     do {
         ts_valid = ptp_priv->shared_addr->port_ts_data[port].ts_valid;
@@ -577,6 +582,11 @@ int bksync_ptp_hw_tstamp_tx_time_get(int dev_no, int port, uint8_t *pkt, uint64_
             if (seq_id == pktseq_id) {
                 *ts = timestamp;
                 ptp_priv->ts_match[port] += 1;
+#if 0
+                if (seq_id == 1) {
+                    DBG_ERR(("Port: %d Skb_SeqID %d FW_SeqId %d and TS:%llx\n", port, pktseq_id, seq_id, timestamp));
+                }
+#endif
                 break;
             } else {
                 DBG_ERR(("discard timestamp on port %d Skb_SeqID %d FW_SeqId %d\n", port, pktseq_id, seq_id));

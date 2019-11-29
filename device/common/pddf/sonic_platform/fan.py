@@ -148,7 +148,7 @@ class Fan(FanBase):
 
         else:
             idx = (self.fantray_index-1)*self.platform['num_fans_pertray'] + self.fan_index
-            attr = "fan" + str(self.fan_index) + "_direction"
+            attr = "fan" + str(idx) + "_direction"
             output = pddf_obj.get_attr_name_output("FAN-CTRL", attr)
             if not output:
                 return False
@@ -178,10 +178,14 @@ class Fan(FanBase):
             device = "PSU{}".format(self.fans_psu_index)
             output = pddf_obj.get_attr_name_output(device, attr)
             if not output:
-                return False
+                return 0
 
             mode = output['mode']
-            speed = int(output['status'].rstrip())
+            output['status'] = output['status'].rstrip()
+            if output['status'].isalpha():
+                return 0
+            else:
+                speed = int(output['status'])
 
             max_speed = int(plugin_data['PSU']['PSU_FAN_MAX_SPEED'])
             speed_percentage = (speed*100)/max_speed
@@ -195,7 +199,11 @@ class Fan(FanBase):
                 return 0
             
             mode = output['mode']
-            fpwm = int(output['status'].rstrip())
+            output['status'] = output['status'].rstrip()
+            if output['status'].isalpha():
+                return 0
+            else:
+                fpwm = int(output['status'])
 
             pwm_to_dc = eval(plugin_data['FAN']['pwm_to_duty_cycle'])
             speed_percentage = pwm_to_dc(fpwm)
@@ -218,7 +226,11 @@ class Fan(FanBase):
                 return 0
             
             mode = output['mode']
-            speed = int(float(output['status'].rstrip()))
+            output['status'] = output['status'].rstrip()
+            if output['status'].isalpha():
+                return 0
+            else:
+                speed = int(float(output['status']))
 
             rpm_speed = speed
             return rpm_speed
@@ -231,7 +243,11 @@ class Fan(FanBase):
                 return 0
 
             mode = output['mode']
-            rpm_speed = int(float(output['status'].rstrip()))
+            output['status'] = output['status'].rstrip()
+            if output['status'].isalpha():
+                return 0
+            else:
+                rpm_speed = int(float(output['status']))
 
 
             return rpm_speed

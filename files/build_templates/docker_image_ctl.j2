@@ -281,6 +281,7 @@ start() {
 {%- if sonic_asic_platform != "mellanox" %}
         --tmpfs /tmp \
 {%- endif %}
+		--ulimit memlock=-1:-1 \
         --tmpfs /var/tmp \
         --hostname "$HOSTNAME" \
         --name={{docker_container_name}} {{docker_image_name}}:latest || {

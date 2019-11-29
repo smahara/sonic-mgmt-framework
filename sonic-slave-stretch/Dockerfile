@@ -279,7 +279,11 @@ RUN apt-get update && apt-get install -y \
         libnetfilter-conntrack-dev \
         libnftnl-dev \
 # For kdump-tools
-        liblzo2-dev
+        liblzo2-dev \
+		clang-6.0 \
+		llvm-6.0 \
+		libbpf-dev \
+		libelf-dev
 
 # For smartmontools 6.6-1
 RUN apt-get -t stretch-backports install -y debhelper

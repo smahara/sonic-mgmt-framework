@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = 1
+export DH_BUILD_DDEBS=1
+#export DEB_BUILD_OPTIONS=nostrip
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
+
+# main packaging script based on dh7 syntax
+%:
+	dh $@  --with autotools-dev
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/libebpf
+ifeq ($(SONIC_COVERAGE_ON),y)
+	find . -name "*.gcno" | sed 's|.*|tar -uvf debian/gcov_libebpf_$(shell date '+%y%m%d_%H%M').tar &|g'|sh
+endif
+
+.PHONY: override_dh_strip
+override_dh_strip:
+	dh_strip  --dbg-package=libebpf-dbg
+	#dh_strip  --keep-debug -plibebpf --dbg-package=libebpf-dbg
+	#dh_strip --ddebs  --automatic-dbgsym  

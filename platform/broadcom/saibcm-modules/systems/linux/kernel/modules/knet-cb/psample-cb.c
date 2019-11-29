@@ -65,8 +65,11 @@ extern int debug;
 #define SOC_HIGIG2_SOP        (0xfb) //0xfc - TODO: how can we differentiate between Higig and higig2?
 #define SOC_HIGIG2_START(x)   ((x[0] >> 24) & 0xff)
 #define SOC_HIGIG2_DSTPORT(x) ((x[0] >>  0) & 0xff)
-#define SOC_HIGIG2_SRCPORT(x) ((x[1] >> 16) & 0x7f)
+#define SOC_HIGIG2_SRCPORT(x) ((x[1] >> 16) & 0xff)
 #define SOC_DCB32_HG_OFFSET   (6)
+
+#define FCS_SZ 4
+#define PSAMPLE_NLA_PADDING 4
 
 #define PSAMPLE_RATE_DFLT 1
 #define PSAMPLE_SIZE_DFLT 128
@@ -100,6 +103,7 @@ typedef struct psample_stats_s {
     unsigned long pkts_d_metadata;
     unsigned long pkts_d_meta_srcport;
     unsigned long pkts_d_meta_dstport;
+    unsigned long pkts_d_invalid_size;
 } psample_stats_t;
 static psample_stats_t g_psample_stats = {0};
 
@@ -342,7 +346,7 @@ psample_filter_cb(uint8_t * pkt, int size, int dev_no, void *pkt_meta,
         rv = psample_info_get (dev_no, &g_psample_info);
         if (rv < 0) {
             gprintk("%s: failed to get psample info\n", __func__);
-            return (0);
+            goto PSAMPLE_FILTER_CB_PKT_HANDLED;
         }
         info_get = 1;
     }
@@ -356,7 +360,7 @@ psample_filter_cb(uint8_t * pkt, int size, int dev_no, void *pkt_meta,
     if (!group) {
         gprintk("%s: Could not find psample genetlink group %d\n", __func__, kf->cb_user_data);
         g_psample_stats.pkts_d_no_group++;
-        return (1);
+        goto PSAMPLE_FILTER_CB_PKT_HANDLED;
     }
 
     /* get psample metadata */
@@ -364,12 +368,24 @@ psample_filter_cb(uint8_t * pkt, int size, int dev_no, void *pkt_meta,
     if (rv < 0) {
         gprintk("%s: Could not parse pkt metadata\n", __func__);
         g_psample_stats.pkts_d_metadata++;
-        return (1);
+        goto PSAMPLE_FILTER_CB_PKT_HANDLED;
     }
 
-    if (meta.trunc_size > size) {
-        meta.trunc_size = size;
+    /* Adjust original pkt size to remove 4B FCS */
+    if (size < FCS_SZ) {
+        g_psample_stats.pkts_d_invalid_size++;
+        goto PSAMPLE_FILTER_CB_PKT_HANDLED;
+    } else {
+       size -= FCS_SZ; 
     }
+
+    /* Account for padding in libnl used by psample */
+    if (meta.trunc_size >= size) {
+        meta.trunc_size = size - PSAMPLE_NLA_PADDING;
+    }
+
+    PSAMPLE_CB_DBG_PRINT("%s: group 0x%x, trunc_size %d, src_ifdx %d, dst_ifdx %d, sample_rate %d\n",
+            __func__, group->group_num, meta.trunc_size, meta.src_ifindex, meta.dst_ifindex, meta.sample_rate);
 
     /* drop if configured sample rate is 0 */
     if (meta.sample_rate > 0) {
@@ -378,8 +394,6 @@ psample_filter_cb(uint8_t * pkt, int size, int dev_no, void *pkt_meta,
         skb.len = size;
         skb.data = pkt; 
 
-        PSAMPLE_CB_DBG_PRINT("%s: group 0x%x, trunc_size %d, src_ifdx %d, dst_ifdx %d, sample_rate %d\n",
-                __func__, group->group_num, meta.trunc_size, meta.src_ifindex, meta.dst_ifindex, meta.sample_rate);
         psample_sample_packet(group, 
                               &skb, 
                               meta.trunc_size,
@@ -392,6 +406,7 @@ psample_filter_cb(uint8_t * pkt, int size, int dev_no, void *pkt_meta,
         g_psample_stats.pkts_d_sampling_disabled++;
     }
 
+PSAMPLE_FILTER_CB_PKT_HANDLED:
     /* if sample reason only, consume pkt. else pass through */
     rv = psample_meta_sample_reason(pkt, pkt_meta);
     if (rv) {
@@ -410,7 +425,7 @@ psample_netif_create_cb(int unit, kcom_netif_t *netif, struct net_device *dev)
     psample_netif_t *psample_netif, *lpsample_netif;
     unsigned long flags;
 
-    if ((psample_netif = kmalloc(sizeof(psample_netif_t), GFP_KERNEL)) == NULL) {
+    if ((psample_netif = kmalloc(sizeof(psample_netif_t), GFP_ATOMIC)) == NULL) {
         gprintk("%s: failed to alloc psample mem for netif '%s'\n", 
                 __func__, dev->name);
         return (-1);
@@ -769,6 +784,7 @@ psample_proc_stats_show(struct seq_file *m, void *v)
     seq_printf(m, "  pkts drop metadata parse error %10lu\n", g_psample_stats.pkts_d_metadata);
     seq_printf(m, "  pkts with invalid src port     %10lu\n", g_psample_stats.pkts_d_meta_srcport);
     seq_printf(m, "  pkts with invalid dst port     %10lu\n", g_psample_stats.pkts_d_meta_dstport);
+    seq_printf(m, "  pkts with invalid orig pkt sz  %10lu\n", g_psample_stats.pkts_d_invalid_size);
     return 0;
 }
 
@@ -832,7 +848,7 @@ int psample_init(void)
     /* create procfs for debug log */
     PROC_CREATE(entry, "debug", 0666, psample_proc_root, &psample_proc_debug_file_ops);
     if (entry == NULL) {
-        gprintk("%s: Unable to create procfs entry '/procfs/%s/size'\n", __func__, psample_procfs_path);
+        gprintk("%s: Unable to create procfs entry '/procfs/%s/debug'\n", __func__, psample_procfs_path);
         return -1;
     }
 

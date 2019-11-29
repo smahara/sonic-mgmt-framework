@@ -1,0 +1,41 @@
+#!/bin/bash 
+
+echo "-------------------------"
+echo "Platform Syseeprom" 
+echo "-------------------------"
+echo ""
+
+show platform syseeprom
+
+echo ""
+echo "-------------------------"
+echo "Psu"
+echo "-------------------------"
+echo ""
+
+show platform psusummary
+
+echo ""
+echo "-------------------------"
+echo "Fan"
+echo "-------------------------"
+echo ""
+
+show platform fanstatus 
+
+echo ""
+echo "-------------------------"
+echo "Thermal"
+echo "-------------------------"
+echo ""
+
+sudo pddf_thermalutil gettemp
+
+echo ""
+echo "-------------------------"
+echo "Sensors"
+echo "-------------------------"
+echo ""
+
+docker exec -i pmon sensors "$@"
+

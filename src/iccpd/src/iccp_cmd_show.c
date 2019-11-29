@@ -41,6 +41,7 @@ int iccp_mclag_config_dump(char * *buf,  int *num, int mclag_id)
     struct CSM *csm = NULL;
     struct LocalInterface *peer_link_if = NULL;
     struct LocalInterface *lif_po = NULL;
+    struct LoggerConfig* logconfig;
     char unknown[] = { "Unknown" };
     int mclag_num = 0;
     int id_exist = 0;
@@ -51,7 +52,6 @@ int iccp_mclag_config_dump(char * *buf,  int *num, int mclag_id)
 
     if (!(sys = system_get_instance()))
     {
-        ICCPD_LOG_INFO(__FUNCTION__, "cannot find sys!\n");
         return EXEC_TYPE_NO_EXIST_SYS;
     }
 
@@ -101,6 +101,9 @@ int iccp_mclag_config_dump(char * *buf,  int *num, int mclag_id)
 
         state_info.keepalive_time  = csm->keepalive_time;
         state_info.session_timeout = csm->session_timeout;
+
+        logconfig = logger_get_configuration();
+        memcpy(state_info.loglevel, log_level_to_string(logconfig->log_level), strlen( log_level_to_string(logconfig->log_level)));
 
         state_info.role = csm->role_type;
 
@@ -159,7 +162,6 @@ int iccp_arp_dump(char * *buf, int *num, int mclag_id)
 
     if (!(sys = system_get_instance()))
     {
-        ICCPD_LOG_INFO(__FUNCTION__, "cannot find sys!\n");
         return EXEC_TYPE_NO_EXIST_SYS;
     }
 
@@ -225,7 +227,6 @@ int iccp_ndisc_dump(char * *buf, int *num, int mclag_id)
 
     if (!(sys = system_get_instance()))
     {
-        ICCPD_LOG_INFO(__FUNCTION__, "cannot find sys!\n");
         return EXEC_TYPE_NO_EXIST_SYS;
     }
 
@@ -290,7 +291,6 @@ int iccp_mac_dump(char * *buf, int *num, int mclag_id)
 
     if (!(sys = system_get_instance()))
     {
-        ICCPD_LOG_INFO(__FUNCTION__, "cannot find sys!\n");
         return EXEC_TYPE_NO_EXIST_SYS;
     }
 
@@ -430,7 +430,6 @@ int iccp_local_if_dump(char * *buf,  int *num, int mclag_id)
 
     if (!(sys = system_get_instance()))
     {
-        ICCPD_LOG_INFO(__FUNCTION__, "cannot find sys!\n");
         return EXEC_TYPE_NO_EXIST_SYS;
     }
 

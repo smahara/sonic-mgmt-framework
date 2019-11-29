@@ -321,6 +321,7 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     python-ipaddr           \
     conntrack               \
     mcelog                  \
+    ipmitool                \
     makedumpfile
 
 # Needed to install kdump-tools
@@ -400,6 +401,7 @@ sudo augtool --autosave "
 
 set /files/etc/sysctl.conf/kernel.softlockup_panic 1
 set /files/etc/sysctl.conf/kernel.panic 10
+set /files/etc/sysctl.conf/kernel.sysrq 1
 set /files/etc/sysctl.conf/vm.panic_on_oom 2
 set /files/etc/sysctl.conf/fs.suid_dumpable 2
 
@@ -436,7 +438,7 @@ set /files/etc/sysctl.conf/net.ipv6.conf.default.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.all.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.keep_addr_on_down 1
 
-set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 0
+set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 1
 set /files/etc/sysctl.conf/net.ipv4.udp_l3mdev_accept 1
 
 set /files/etc/sysctl.conf/net.ipv6.ip_nonlocal_bind 1
@@ -446,7 +448,7 @@ set /files/etc/sysctl.conf/net.core.wmem_max 16777216
 
 set /files/etc/sysctl.conf/net.core.somaxconn 512
 
-set /files/etc/sysctl.conf/net.ipv6.conf.default.disable_ipv6 1
+set /files/etc/sysctl.conf/net.ipv6.conf.default.disable_ipv6 0 
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.disable_ipv6 0
 set /files/etc/sysctl.conf/net.ipv6.conf.lo.disable_ipv6 0
 set /files/etc/sysctl.conf/net.ipv6.conf.docker0.disable_ipv6 0
