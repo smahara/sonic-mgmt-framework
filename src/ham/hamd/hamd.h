@@ -4,7 +4,6 @@
 
 #include <dbus-c++/dbus.h>          // DBus::Connection
 #include <glib.h>                   // gboolean, gpointer
-#include "timer.h"                  // gtimer_c, dbus_name_c
 #include "../shared/dbus-address.h" // DBUS_BUS_NAME_BASE
 
 #pragma GCC diagnostic push
