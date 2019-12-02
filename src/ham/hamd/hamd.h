@@ -3,8 +3,7 @@
 #define HAMD_H
 
 #include <dbus-c++/dbus.h>          // DBus::Connection
-#include <glib.h>                   // gint, gpointer
-#include "timer.h"                  // gtimer_c
+#include <glib.h>                   // gboolean, gpointer
 #include "../shared/dbus-address.h" // DBUS_BUS_NAME_BASE
 
 #pragma GCC diagnostic push
