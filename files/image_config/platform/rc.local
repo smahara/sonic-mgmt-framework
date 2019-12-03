@@ -379,4 +379,7 @@ mkdir -p /var/platform
 # Start system information poller
 /usr/bin/syspoll &
 
+# create image tables on state db 
+/usr/bin/python /usr/bin/image_tables_init.py
+
 exit 0
