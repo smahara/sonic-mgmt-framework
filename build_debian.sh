@@ -448,7 +448,7 @@ set /files/etc/sysctl.conf/net.core.wmem_max 16777216
 
 set /files/etc/sysctl.conf/net.core.somaxconn 512
 
-set /files/etc/sysctl.conf/net.ipv6.conf.default.disable_ipv6 0 
+set /files/etc/sysctl.conf/net.ipv6.conf.default.disable_ipv6 1 
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.disable_ipv6 0
 set /files/etc/sysctl.conf/net.ipv6.conf.lo.disable_ipv6 0
 set /files/etc/sysctl.conf/net.ipv6.conf.docker0.disable_ipv6 0
