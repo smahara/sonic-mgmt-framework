@@ -71,8 +71,8 @@ module sonic-bgp-neighbor {
 
                 leaf peer_group_name {
                     type string;
-		    description "Peer group name";
-		}
+                    description "Peer group name";
+                }
 
                 uses sbc:sonic-bgp-cmn;
 
@@ -99,23 +99,10 @@ module sonic-bgp-neighbor {
                         path "../../../BGP_NEIGHBOR/BGP_NEIGHBOR_LIST/neighbor";
                     }
 
-                leaf vrf_name {
-                    type leafref {
-                        path "/sbgpg:sonic-bgp-global/sbgpg:BGP_GLOBALS/sbgpg:BGP_GLOBALS_LIST/sbgpg:vrf";
-                    }
-                   description "Network-instance/VRF name";
-                }
-
-                leaf neighbor {
-                    type leafref {
-                        path "../../../BGP_NEIGHBOR/BGP_NEIGHBOR_LIST/neighbor";
-                    }
-
                     must "/sbnbr:sonic-bgp-neighbor/sbnbr:BGP_NEIGHBOR/sbnbr:BGP_NEIGHBOR_LIST[vrf_name=current()/../vrf_name][neighbor=current()]" {
                             error-message "BGP Neighbor Table is not configured with vrf_name and neighbor";
                     }
                     description "Neighbor for address family, it will be neighbor address or interface name";
-
                 }
 
                 uses sbc:sonic-bgp-cmn-af;

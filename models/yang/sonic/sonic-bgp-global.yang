@@ -7,10 +7,6 @@ module sonic-bgp-global {
         prefix svrf;
     }
 
-    import sonic-vrf {
-        prefix svrf;
-    }
-
     import ietf-inet-types {
         prefix inet;
     }
