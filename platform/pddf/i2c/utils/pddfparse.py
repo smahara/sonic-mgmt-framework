@@ -1529,7 +1529,6 @@ class PddfParse():
                                             self.create_attr(attr_key, attr[attr_key],state_path)
                             cmd="echo '" + ops['cmd'] + '_' + attr['attr_name']+"' > /sys/kernel/pddf/devices/led/dev_ops"
                             self.runcmd(cmd)
-                            #print "\n"
 
 
 
@@ -1552,6 +1551,7 @@ class PddfParse():
 
 
     def create_pddf_devices(self):
+        self.led_parse({ "cmd": "create", "target":"all", "attr":"all" })
         create_ret = 0
         create_ret = self.dev_parse(self.data['SYSTEM'], { "cmd": "create", "target":"all", "attr":"all" } )
         if create_ret!=0:
@@ -1560,7 +1560,6 @@ class PddfParse():
             create_ret = self.dev_parse(self.data['SYSSTATUS'], { "cmd": "create", "target":"all", "attr":"all" } )
             if create_ret!=0:
                 return create_ret
-        self.led_parse({ "cmd": "create", "target":"all", "attr":"all" })
         
     def delete_pddf_devices(self):
         self.dev_parse(self.data['SYSTEM'], { "cmd": "delete", "target":"all", "attr":"all" } )
