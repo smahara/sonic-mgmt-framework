@@ -181,7 +181,7 @@ func init() {
         XlateFuncBind("YangToDb_network_instance_enabled_field_xfmr", YangToDb_network_instance_enabled_field_xfmr)
         XlateFuncBind("DbToYang_network_instance_enabled_field_xfmr", DbToYang_network_instance_enabled_field_xfmr)
         XlateFuncBind("YangToDb_network_instance_name_key_xfmr", YangToDb_network_instance_name_key_xfmr)
-        XlateFuncBind("DbToYang_network_instance_name_key_xfmr", DbToYang_network_instance_name_field_xfmr)
+        XlateFuncBind("DbToYang_network_instance_name_key_xfmr", DbToYang_network_instance_name_key_xfmr)
         XlateFuncBind("YangToDb_network_instance_name_field_xfmr", YangToDb_network_instance_name_field_xfmr)
         XlateFuncBind("DbToYang_network_instance_name_field_xfmr", DbToYang_network_instance_name_field_xfmr)
         XlateFuncBind("YangToDb_network_instance_type_field_xfmr", YangToDb_network_instance_type_field_xfmr)
@@ -372,7 +372,26 @@ var YangToDb_network_instance_name_key_xfmr FieldXfmrYangToDb = func(inParams Xf
 
         log.Info("YangToDb_network_instance_name_key_xfmr")
 
+        /* the key name is not repeated as attr name in the DB */
+
         return res_map, err
+}
+
+/* DbToYang Field transformer for name(Key) in the top level network instance */
+var DbToYang_network_instance_name_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
+        res_map := make(map[string]interface{})
+        var err error
+
+        log.Info("DbToYang_network_instance_name_key_xfmr")
+
+        if (isMgmtVrfDbTbl(inParams) == true) {
+                res_map["name"] = "mgmt"
+        } else if (isVrfDbTbl(inParams) == true){
+                res_map["name"] = inParams.key
+        }
+
+        /* ToDo in else if cases */
+        return  res_map, err
 }
 
 /* YangToDb Field transformer for name in the top level network instance config */
