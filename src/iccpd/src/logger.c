@@ -114,7 +114,7 @@ void write_log(int level, const char* tag, const char* format, ...)
         return;
 #endif
 
-    if (tag && strcmp(tag,"ICCP_FSM") == 0)
+    if (tag && ((strcmp(tag,"ICCP_FSM") == 0) || (strcmp(tag,"ICCP_FDB") == 0)))
     {
         level =  NOTICE_LOG_LEVEL;
     }

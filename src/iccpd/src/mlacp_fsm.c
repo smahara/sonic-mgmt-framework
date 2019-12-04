@@ -183,7 +183,6 @@ RB_GENERATE(l2mc_rb_tree, L2MCMsg, l2mc_entry_rb, L2MCMsg_compare);
 char *mlacp_state(struct CSM* csm);
 static void mlacp_resync_arp(struct CSM* csm);
 static void mlacp_resync_ndisc(struct CSM *csm);
-static void mlacp_resync_mac(struct CSM* csm);
 /* Sync Sender APIs*/
 static void mlacp_sync_send_sysConf(struct CSM* csm);
 static void mlacp_sync_send_aggConf(struct CSM* csm);
@@ -1075,7 +1074,7 @@ void mlacp_sync_mac(struct CSM* csm)
                 TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
             }
 
-            ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface %s, "
+            ICCPD_LOG_DEBUG("ICCP_FDB", "Sync MAC: MAC-msg-list enqueue interface %s, "
                     "MAC %s vlan %d, age_flag %d", mac_msg->ifname,
                     mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
         }
@@ -1084,7 +1083,7 @@ void mlacp_sync_mac(struct CSM* csm)
             /*If MAC with local age flag and is point to MCLAG enabled port, reomove local age flag*/
             if (strcmp(mac_msg->ifname, csm->peer_itf_name) != 0)
             {
-                ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list not enqueue for local age flag: %s, mac %s vlan-id %d, age_flag %d, remove local age flag",
+                ICCPD_LOG_DEBUG("ICCP_FDB", "Sync MAC: MAC-msg-list not enqueue for local age flag: %s, mac %s vlan-id %d, age_flag %d, remove local age flag",
                         mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
                 mac_msg->age_flag &= ~MAC_AGE_LOCAL;
             }
@@ -1092,22 +1091,6 @@ void mlacp_sync_mac(struct CSM* csm)
     }
     return;
 }
-
-
-/******************************************
-* When peerlink ready, prepare the MACMsg
-*
-******************************************/
-static void mlacp_resync_mac(struct CSM* csm)
-{
-    if (!csm)
-        return;
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Re-sync MAC addresses to peer ");
-    mlacp_sync_mac(csm);
-
-    return;
-}
-
 
 void mlacp_sync_l2mc(struct CSM* csm)
 {
