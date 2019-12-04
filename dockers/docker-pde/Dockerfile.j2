@@ -11,6 +11,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Update apt's cache of available packages
 RUN apt-get update && apt-get install -y ipmitool telnet busybox kmod
 
+# Packages for benchmark tool - nench.sh
+RUN apt-get install -y bzip2 curl ioping openssl
+
 RUN pip install pytest pexpect
 
 {% if docker_pde_debs.strip() -%}
@@ -65,6 +68,7 @@ RUN rm -rf /debs ~/.cache
 
 RUN mkdir -p /home/pde
 
+COPY ["nench.sh", "/home/pde/"]
 COPY ["base_image_files/port_breakout.py", "/usr/local/bin/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 COPY ["docker_init.sh", "/usr/bin/"]
