@@ -403,6 +403,24 @@ def hdl_send_com(cmd_str, op, args, data):
         cmd_list.append(cmd_str.format(CommandArgument(True, args[0]), CommandArgument(True, 'extended'), no = CommandArgument(True)))
     return cmd_list
 
+def hdl_ibgp_maxpath(daemon, cmd_str, op, args, data):
+    if len(args) == 0 or 0 not in args[0]:
+        return None
+    cmd_list = [cmd_str.format(CommandArgument(daemon, True, ''), no = CommandArgument(daemon, False))]
+    if op != CachedDataWithOp.OP_DELETE or not args[0][0][1]:
+        if op == CachedDataWithOp.OP_DELETE:
+            cluster_len = False
+        else:
+            if 1 not in args[0] or args[0][1][0] == data[1]:
+                cluster_len = False
+            else:
+                cluster_len = True
+        arg_str = ' ' + args[0][0][0]
+        if cluster_len:
+            arg_str += ' equal-cluster-length'
+        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, arg_str), no = CommandArgument(daemon, True)))
+    return cmd_list
+
 class ExtConfigDBConnector(ConfigDBConnector):
     def __raw_to_typed(self, raw_data):
         if len(raw_data) == 0:
@@ -461,12 +479,31 @@ class BGPConfigDaemon:
                         'route_flap_dampen_reuse_threshold',
                         'route_flap_dampen_suppress_thresold',
                         'route_flap_dampen_max_suppress'],              '{no:no-prefix}bgp dampening {} {} {} {}'),
+                      ('rr_clnt_to_clnt_reflection',                    '{no:no-prefix}bgp client-to-client refection', ['true', 'false']),
+                      ('max_dynamic_neighbors',                         '{no:no-prefix}bgp listen limit {}'),
+                      ('read_quanta',                                   '{no:no-prefix}read-quanta {}'),
+                      ('write_quanta',                                  '{no:no-prefix}write-quanta {}'),
+                      ('coalesce_time',                                 '{no:no-prefix}coalesce-time {}'),
+                      ('route_map_process_delay',                       '{no:no-prefix}bgp route-map delay-timer {}'),
+                      ('deterministic_med',                             '{no:no-prefix}bgp deterministic-med', ['true', 'false']),
+                      ('med_confed',                                    '{no:no-prefix}bgp bestpath med confed', ['true', 'false']),
+                      ('med_missing_as_worst',                          '{no:no-prefix}bgp bestpath med confed missing-as-worst', ['true', 'false']),
+                      ('compare_confed_as_path',                        '{no:no-prefix}bgp bestpath as-path confed', ['true', 'false']),
+                      ('as_path_mp_as_set',                             '{no:no-prefix}bgp bestpath as-path multipath-relax as-set', ['true', 'false']),
+                      ('default_ipv4_unicast',                          '{no:no-prefix}bgp default ipv4-unicast', ['true', 'false']),
+                      ('default_local_preference',                      '{no:no-prefix}bgp default local-preference', ['true', 'false']),
+                      ('default_show_hostname',                         '{no:no-prefix}bgp default show-hostname', ['true', 'false']),
+                      ('default_shutdown',                              '{no:no-prefix}bgp default shutdown', ['true', 'false']),
+                      ('default_subgroup_pkt_queue_max',                '{no:no-prefix}bgp default subgroup-pkt-queue-max {}'),
+                      (['max_med_time', '+max_med_val'],                '{no:no-prefix}bgp max-med on-startup {} {}'),
+                      (['max_delay', '+establish_wait'],                '{no:no-prefix}update-delay {} {}')
     ]
 
     global_af_key_map = [(['ebgp_route_distance',
                            'ibgp_route_distance'],                  '{{no:no-prefix}}distance bgp {{}} {{}} {}'.format(LOCAL_ROUTE_DISTANCE)),
                          ('max_ebgp_paths',                         '{no:no-prefix}maximum-paths {}'),
-                         ('max_ibgp_paths',                         '{no:no-prefix}maximum-paths ibgp {}'),
+                         (('max_ibgp_paths',
+                           '+ibgp_equal_cluster_length'),           '{no:no-prefix}maximum-paths ibgp{}', hdl_ibgp_maxpath, ['true', 'false']),
                          (('aggregate_prefix',
                            '+aggregate_as_set',
                            '+aggregate_summary_only'),              '{no:no-prefix}aggregate-address {:aggregate}'),
@@ -491,7 +528,8 @@ class BGPConfigDaemon:
                    ('diable_ebgp_connected_route_check',    '{no:no-prefix}neighbor {} disable-connected-check', ['true', 'false']),
                    ('enforce_first_as',                     '{no:no-prefix}neighbor {} enforce-first-as', ['true', 'false']),
                    ('solo_peer',                            '{no:no-prefix}neighbor {} solo', ['true', 'false']),
-                   ('ttl_security_hops',                    '{no:no-prefix}neighbor {} ttl-security hops {}')
+                   ('ttl_security_hops',                    '{no:no-prefix}neighbor {} ttl-security hops {}'),
+                   ('bfd',                                  '{no:no-prefix}neighbor {} bfd', ['true', 'false'])
     ]
 
     nbr_key_map = [('peer_group_name',  '{no:no-prefix}neighbor {} peer-group {}'),

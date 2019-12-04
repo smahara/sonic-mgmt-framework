@@ -1,0 +1,47 @@
+{% if ROUTE_MAP is defined and ROUTE_MAP|length > 0 %}
+{% for rm_key, rm_val in ROUTE_MAP.items() %}
+{% if rm_val.has_key('route_operation') %}
+!
+route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
+{% if rm_val.has_key('match_as_path') %}
+ match as-path {{rm_val['match_as_path']}}
+{% endif %}
+{% if rm_val.has_key('call_route_map') %}
+ match call {{rm_val['call_route_map']}}
+{% endif %}
+{% if rm_val.has_key('match_community') %}
+ match community {{rm_val['match_community']}}
+{% endif %}
+{% if rm_val.has_key('match_ext_community') %}
+ match extcommunity {{rm_val['match_ext_community']}}
+{% endif %}
+{% if rm_val.has_key('match_address_family') and rm_val.has_key('match_prefix_set') %}
+ match {{rm_val['match_address_family']}} address prefix-list {{rm_val['match_prefix_set']}}
+{% endif %}
+{% if rm_val.has_key('match_local_pref') %}
+ match local-preference {{rm_val['match_local_pref']}}
+{% endif %}
+{% if rm_val.has_key('match_med') %}
+ match metric {{rm_val['match_med']}}
+{% endif %}
+{% if rm_val.has_key('match_origin') %}
+ match origin {{rm_val['match_origin']}}
+{% endif %}
+{% if rm_val.has_key('match_route_type') %}
+ match source-protocol {{rm_val['match_route_type']}}
+{% endif %}
+{% if rm_val.has_key('set_next_hop') %}
+ set ip next-hop {{rm_val['set_next_hop']}}
+{% endif %}
+{% if rm_val.has_key('set_local_preference') %}
+ set local-preference {{rm_val['set_local_preference']}}
+{% endif %}
+{% if rm_val.has_key('set_med') %}
+ set metric {{rm_val['set_med']}}
+{% endif %}
+{% if rm_val.has_key('set_origin') %}
+ set origin {{rm_val['set_origin']}}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}

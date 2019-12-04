@@ -1,0 +1,67 @@
+{# -----------------------------------------------------------------------------------------#}
+{# this is invoked with the "vrf" variable set						    #}
+{# -----------------------------------------------------------------------------------------#}
+{# -------address-family --------------------------- #}
+{% if (BGP_GLOBALS_AF is defined and BGP_GLOBALS_AF|length > 0) or
+      (BGP_NEIGHBOR_AF is defined and BGP_NEIGHBOR_AF|length > 0) %}
+{% set af_str_map = { 'IPV4_UNICAST': 'ipv4', 'IPV6_UNICAST':'ipv6'} %}
+{% for af, af_str in af_str_map|dictsort %}
+ !
+ address-family {{af_str}} unicast
+{% if BGP_GLOBALS_AF is defined and BGP_GLOBALS_AF|length > 0 %}
+{% for af_key, af_val in BGP_GLOBALS_AF.iteritems() %}
+{% if vrf == af_key[0] and af == af_key[1] %}
+{% if af_val.has_key('ebgp_route_distance') and af_val.has_key('ibgp_route_distance') %}
+  distance bgp {{af_val['ebgp_route_distance']}} {{af_val['ibgp_route_distance']}} 20
+{% endif %}
+{# ------- aggregate-prefix  --------------------------- #}
+{% if af_val.has_key('aggregate_prefix') %}
+{% set ag_end = '' %}
+{% if af_val.has_key('aggregate_as_set') and af_val['aggregate_as_set'] == 'true' %}
+{% set ag_end = 'as-set ' %}
+{% endif %}
+{% if af_val.has_key('aggregate_summary_only') and af_val['aggregate_summary_only'] == 'true' %}
+{% set ag_end = ag_end + 'summary-only' %}
+{% endif %}
+  aggregate-address {{af_val['aggregate_prefix']}} {{ag_end}}
+{% endif %}
+{# ------- aggregate-prefix end --------------------------- #}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# ------- peer-group af--------------------------- #}
+{% if BGP_PEER_GROUP_AF is defined and BGP_PEER_GROUP_AF|length > 0 %}
+{% for n_af_key, n_af_val in BGP_PEER_GROUP_AF.items() %}
+{% if vrf == n_af_key[0] and af == n_af_key[2] %}
+{% set nbr_name = n_af_key[1] %}
+{% include "bgpd.conf.db.nbr_af.j2" %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# ------- peer-group af end --------------------------- #}
+{# ------- neighbor af--------------------------- #}
+{% if BGP_NEIGHBOR_AF is defined and BGP_NEIGHBOR_AF|length > 0 %}
+{% for n_af_key, n_af_val in BGP_NEIGHBOR_AF.items() %}
+{% if vrf == n_af_key[0] and af == n_af_key[2] %}
+{% set nbr_name = n_af_key[1] %}
+{% include "bgpd.conf.db.nbr_af.j2" %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# ------- neighbor af end --------------------------- #}
+{% if BGP_GLOBALS_AF is defined and BGP_GLOBALS_AF|length > 0 %}
+{% for af_key, af_val in BGP_GLOBALS_AF.items() %}
+{% if vrf == af_key[0] and af == af_key[1] %}
+{% if af_val.has_key('max_ebgp_paths') %}
+  maximum-paths {{af_val['max_ebgp_paths']}}
+{% endif %}
+{% if af_val.has_key('max_ibgp_paths') %}
+  maximum-paths ibgp {{af_val['max_ibgp_paths']}}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+ exit-address-family
+{% endfor %}
+{% endif %}
+{# -------address-family end --------------------------- #}
