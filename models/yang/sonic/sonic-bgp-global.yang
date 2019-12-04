@@ -318,7 +318,7 @@ module sonic-bgp-global {
 
 
                 leaf aggregate_prefix {
-					type inet:ip-prefix;
+                    type inet:ip-prefix;
                 }
 
                 leaf aggregate_as_set {
@@ -330,7 +330,7 @@ module sonic-bgp-global {
                 }
 
                 leaf network_prefix{
-					type inet:ip-prefix;
+                    type inet:ip-prefix;
                 }
 
                 leaf network_policy {
@@ -375,7 +375,7 @@ module sonic-bgp-global {
 
                 leaf vrf {
                     type leafref {
-                        path "/svrf:sonic-vrf/svrf:VRF/svrf:VRF_LIST/svrf:vrf_name";
+                        path "../../../BGP_GLOBALS/BGP_GLOBALS_LIST/vrf";
                     }
                 }
 
