@@ -39,6 +39,9 @@ while /bin/true; do
         if [[ -n "$neigh_entry" ]]; then
             # get the interface from the neighbor entry 
             intf="$(ip -4 neigh show | grep $neighbor | cut -d ' ' -f 3)"
+            if [[ -z "$intf" ]]; then
+                continue
+            fi
             # get the ipv4 addr for this interface
             intf_ip=$(ip -4 addr show $intf | grep 'inet' | cut -d: -f2  | awk '{print $2}')
             #if the interface has no ip then no need to do the arping
