@@ -638,6 +638,12 @@ $onie_menuentry
 EOF
 fi
 
+# correct machine.conf in case of onie-discovery-install
+if [ "$install_env" = "onie" ] && [ -f $demo_mnt/machine.conf ]; then
+    #echo "********** INSTALL_ENV is $install_env. Correcting machine.conf **********"
+    sed -i '/.*=[^"].* .*/s/\(.*\)=\(.*\)/\1="\2"/g' $demo_mnt/machine.conf
+fi
+
 if [ "$install_env" = "build" ]; then
     cp $grub_cfg $demo_mnt/grub.cfg
     umount $demo_mnt
