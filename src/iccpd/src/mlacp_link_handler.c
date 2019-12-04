@@ -2352,6 +2352,15 @@ void mlacp_peer_conn_handler(struct CSM* csm)
             csm->mlag_id, peer_if->name,
             (peer_if->state == PORT_STATE_UP)? true : false);
     }
+    /* Port isolation is cleaned up when session goes down via
+     * peerlink_port_isolate_cleanup(). MlagOrch blocks all traffic from
+     * ISL to all MLAG interfaces to avoid packet duplicate and transient
+     * loop to cover the case where peer link is still up when ICCP goes
+     * down. On session up, update port isolation group based on the
+     * latest remote interface state. This is needed to cover the case
+     * where all remote MLAG interfaces are down after ICCP comes back up
+     */
+    update_peerlink_isolate_from_all_csm_lif(csm);
 
     sync_unique_ip();
     return;
@@ -2452,6 +2461,12 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
         }
     }
 
+    /* Send ICCP down update to Mclagsyncd before clearing all port isolation
+     * so that mclagsync can differentiate between session down and all remote
+     * MLAG interface down
+     */
+    mlacp_link_set_iccp_state(csm->mlag_id, false);
+
     /* Clean all port block*/
     peerlink_port_isolate_cleanup(csm);
 
@@ -2473,9 +2488,6 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
     ICCPD_LOG_DEBUG(__FUNCTION__, "Peer disconnect %u times",
         SYSTEM_GET_SESSION_DOWN_COUNTER(sys));
     SYSTEM_INCR_SESSION_DOWN_COUNTER(sys);
-
-    /* Send ICCP down update to Mclagsyncd */
-    mlacp_link_set_iccp_state(csm->mlag_id, false);
 
     /* On standby, system ID is reverted back to its local system ID.
      * Update Mclagsyncd
