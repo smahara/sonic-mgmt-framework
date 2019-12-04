@@ -40,8 +40,13 @@ module sonic-bgp-global {
                 key "vrf";
 
                 leaf vrf {
-                    type leafref {
-                        path "/svrf:sonic-vrf/svrf:VRF/svrf:VRF_LIST/svrf:vrf_name";
+                    type union {
+                        type string {
+                            pattern "default";
+                        }
+                        type leafref {
+                            path "/svrf:sonic-vrf/svrf:VRF/svrf:VRF_LIST/svrf:vrf_name";
+                        }
                     }
                 }
 
@@ -291,7 +296,7 @@ module sonic-bgp-global {
 
                 leaf vrf {
                     type leafref {
-                        path "/svrf:sonic-vrf/svrf:VRF/svrf:VRF_LIST/svrf:vrf_name";
+                        path "../../../BGP_GLOBALS/BGP_GLOBALS_LIST/vrf";
                     }
                 }
 
