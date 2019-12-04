@@ -369,25 +369,5 @@ module sonic-bgp-global {
             }
         }
 
-        container BGP_GLOBALS_LISTEN_PREFIX {
-            list BGP_GLOBALS_LISTEN_PREFIX_LIST {
-                key "vrf ip_prefix";
-
-                leaf vrf {
-                    type leafref {
-                        path "/svrf:sonic-vrf/svrf:VRF/svrf:VRF_LIST/svrf:vrf_name";
-                    }
-                }
-
-                leaf ip_prefix {
-                    type inet:ip-prefix;
-                }
-
-                leaf peer_group {
-                    type string;
-                }
-
-            }
-        }
     }
 }
