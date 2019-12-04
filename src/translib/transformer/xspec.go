@@ -432,6 +432,8 @@ func annotEntryFill(xYangSpecMap map[string]*yangXpathInfo, xpath string, entry 
 					xpathData.dbIndex  = db.StateDB
 				} else if ext.NName() == "ERROR_DB" {
 					xpathData.dbIndex  = db.ErrorDB
+				} else if ext.NName() == "USER_DB" {
+					xpathData.dbIndex  = db.UserDB
 				} else {
 					xpathData.dbIndex  = db.ConfigDB
 				}
@@ -550,6 +552,8 @@ func annotDbSpecMapFill(xDbSpecMap map[string]*dbInfo, dbXpath string, entry *ya
 					dbXpathData.dbIndex  = db.StateDB
 				} else if ext.NName() == "ERROR_DB" {
 					dbXpathData.dbIndex  = db.ErrorDB
+				} else if ext.NName() == "USER_DB" {
+					dbXpathData.dbIndex  = db.UserDB
 				} else {
 					dbXpathData.dbIndex  = db.ConfigDB
 				}

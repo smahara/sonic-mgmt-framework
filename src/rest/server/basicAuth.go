@@ -21,13 +21,9 @@ func BasicAuthenAndAuthor(r *http.Request, rc *RequestContext) error {
 		return httpError(http.StatusUnauthorized, "")	
 	}
 
-
-	glog.Infof("[%s] Authentication passed. user=%s ", rc.ID, username)
-
-	//Allow SET request only if user belong to admin group
-	if isWriteOperation(r) && IsAdminGroup(username) == false {
-		glog.Errorf("[%s] Not an admin; cannot allow %s", rc.ID, r.Method)
-		return httpError(http.StatusForbidden, "Not an admin user")
+	if err := PopulateAuthStruct(username, &rc.Auth); err != nil {
+		glog.Infof("[%s] Failed to retrieve authentication information; %v", rc.ID, err)
+		return httpError(http.StatusUnauthorized, "")	
 	}
 
 	glog.Infof("[%s] Authorization passed", rc.ID)

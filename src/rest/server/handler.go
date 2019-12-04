@@ -233,13 +233,15 @@ func getRequestID(r *http.Request) string {
 // invokeTranslib calls appropriate TransLib API for the given HTTP
 // method. Returns response status code and content.
 func invokeTranslib(r *http.Request, path string, payload []byte) (int, []byte, error) {
+	rc, r := GetContext(r)
 	var status = 400
 	var content []byte
 	var err error
 
+	
 	switch r.Method {
 	case "GET":
-		req := translib.GetRequest{Path: path}
+		req := translib.GetRequest{Path: path, User: rc.Auth.User, Group: rc.Auth.Group}
 		resp, err1 := translib.Get(req)
 		if err1 == nil {
 			status = 200
@@ -250,7 +252,7 @@ func invokeTranslib(r *http.Request, path string, payload []byte) (int, []byte, 
 
 	case "POST":
 		if isOperationsRequest(r) {
-			req := translib.ActionRequest{Path: path, Payload: payload}
+			req := translib.ActionRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
 			res, err1 := translib.Action(req)
 			if err1 == nil {
 				status = 200
@@ -260,24 +262,24 @@ func invokeTranslib(r *http.Request, path string, payload []byte) (int, []byte, 
 			}
 		} else {
 			status = 201
-			req := translib.SetRequest{Path: path, Payload: payload}
+			req := translib.SetRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
 			_, err = translib.Create(req)
 		}
 
 	case "PUT":
 		//TODO send 201 if PUT resulted in creation
 		status = 204
-		req := translib.SetRequest{Path: path, Payload: payload}
+		req := translib.SetRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
 		_, err = translib.Replace(req)
 
 	case "PATCH":
 		status = 204
-		req := translib.SetRequest{Path: path, Payload: payload}
+		req := translib.SetRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
 		_, err = translib.Update(req)
 
 	case "DELETE":
 		status = 204
-		req := translib.SetRequest{Path: path}
+		req := translib.SetRequest{Path: path, User: rc.Auth.User, Group: rc.Auth.Group}
 		_, err = translib.Delete(req)
 
 	default:
