@@ -1622,7 +1622,7 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type, uin
     mac_info->op_type = oper;
     msg_hdr->len = sizeof(struct IccpSyncdHDr) + sizeof(struct mclag_fdb_info);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "write mac msg vid : %d ; ifname %s ; mac %s fdb type %s ; op type %s",
+    ICCPD_LOG_DEBUG("ICCP_FDB", "Send fdb to syncd: write mac msg vid : %d ; ifname %s ; mac %s fdb type %s ; op type %s",
         mac_info->vid, mac_info->port_name, mac_info->mac, mac_info->type == MAC_TYPE_STATIC ? "static" : "dynamic",
         oper == MAC_SYNC_ADD ? "add" : "del");
 
@@ -1677,7 +1677,7 @@ uint8_t set_mac_local_age_flag(struct CSM *csm, struct MACMsg* mac_msg, uint8_t 
         {
             new_age_flag &= ~MAC_AGE_LOCAL;
 
-            ICCPD_LOG_DEBUG(__FUNCTION__, "After Remove local age, flag: %d interface  %s, "
+            ICCPD_LOG_DEBUG("ICCP_FDB", "After Remove local age, flag: %d interface  %s, "
                 "add %s vlan-id %d, old age_flag %d", new_age_flag, mac_msg->ifname,
                 mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
 
@@ -1700,7 +1700,7 @@ uint8_t set_mac_local_age_flag(struct CSM *csm, struct MACMsg* mac_msg, uint8_t 
         {
             new_age_flag |= MAC_AGE_LOCAL;
 
-            ICCPD_LOG_DEBUG(__FUNCTION__, "After local age set, flag: %d interface %s, "
+            ICCPD_LOG_DEBUG("ICCP_FDB", "After local age set, flag: %d interface %s, "
                     "MAC %s vlan-id %d, old age_flag %d", new_age_flag, mac_msg->ifname,
                     mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
 
@@ -1713,7 +1713,7 @@ uint8_t set_mac_local_age_flag(struct CSM *csm, struct MACMsg* mac_msg, uint8_t 
                     TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
                 }
 
-                ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface: %s, oper: %s "
+                ICCPD_LOG_DEBUG("ICCP_FDB", "Set local age: MAC-msg-list enqueue interface: %s, oper: %s "
                         "MAC %s vlan-id %d, age_flag %d", mac_msg->ifname,
                         (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del",
                         mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
@@ -1865,7 +1865,7 @@ static void update_l2_mac_state(struct CSM *csm,
         {
             mac_msg->age_flag = set_mac_local_age_flag(csm, mac_msg, 1, 1);
 
-            ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, age flag %d, MAC %s, "
+            ICCPD_LOG_DEBUG("ICCP_FDB", "Intf down, age flag %d, MAC %s, "
                 "vlan-id %d, Interface: %s", mac_msg->age_flag ,
                 mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
 
@@ -1875,7 +1875,7 @@ static void update_l2_mac_state(struct CSM *csm,
                 if (mac_msg->fdb_type != MAC_TYPE_STATIC)
                     del_mac_from_chip(mac_msg);
 
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, del MAC %s, vlan-id %d,"
+                ICCPD_LOG_DEBUG("ICCP_FDB", "Intf down, del MAC %s, vlan-id %d,"
                         " Interface: %s,", mac_addr_to_str(mac_msg->mac_addr),
                        mac_msg->vid, mac_msg->ifname);
 
@@ -1899,7 +1899,7 @@ static void update_l2_mac_state(struct CSM *csm,
                     {
                         memcpy(mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
                         add_mac_to_chip(mac_msg, mac_msg->fdb_type);
-                        ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, age flag %d, "
+                        ICCPD_LOG_DEBUG("ICCP_FDB", "Intf down, age flag %d, "
                            "redirect MAC to peer-link: %s, MAC %s vlan-id %d",
                            mac_msg->age_flag, mac_msg->ifname,
                            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
@@ -1910,7 +1910,7 @@ static void update_l2_mac_state(struct CSM *csm,
                         /*if peerlink change to up, mac will add back to ASIC*/
                         del_mac_from_chip(mac_msg);
                         memcpy(mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
-                        ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, age flag %d, "
+                        ICCPD_LOG_DEBUG("ICCP_FDB", "Intf down, age flag %d, "
                            "can not redirect, del MAC as peer-link: %s down, "
                            "MAC %s vlan-id %d", mac_msg->age_flag, mac_msg->ifname,
                            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
@@ -1921,7 +1921,7 @@ static void update_l2_mac_state(struct CSM *csm,
                     /*peer-link is not configured, del mac from ASIC, mac still in mac_rb*/
                     del_mac_from_chip(mac_msg);
 
-                    ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, flag %d, peer-link: %s not available, "
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "Intf down, flag %d, peer-link: %s not available, "
                     "MAC %s vlan-id %d", mac_msg->age_flag, mac_msg->ifname,
                     mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
                 }
@@ -1933,7 +1933,7 @@ static void update_l2_mac_state(struct CSM *csm,
             /*when this portchannel up, recover the mac back*/
             if (strcmp(mac_msg->ifname, csm->peer_itf_name) == 0)
             {
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Intf up, redirect MAC to Interface: %s,"
+                ICCPD_LOG_DEBUG("ICCP_FDB", "Intf up, redirect MAC to Interface: %s,"
                 " MAC %s vlan-id %d", mac_msg->ifname,
                 mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
@@ -1952,12 +1952,17 @@ static void update_l2_mac_state(struct CSM *csm,
             {
                 /*this may be peerlink is not configured and portchannel is down*/
                 /*when this portchannel up, add the mac back to ASIC*/
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Intf up, add MAC %s to ASIC,"
+                ICCPD_LOG_DEBUG("ICCP_FDB", "Intf up, add MAC %s to ASIC,"
                     " vlan-id %d Interface %s", mac_addr_to_str(mac_msg->mac_addr),
                     mac_msg->vid, mac_msg->ifname);
 
+// Dont set local learn unless learned from MCLAGSYNCD.
+#if 0
                 /*Remove MAC_AGE_LOCAL flag*/
                 mac_msg->age_flag = set_mac_local_age_flag(csm, mac_msg, 0, 1);
+#endif
+
+                memcpy(mac_msg->ifname, mac_msg->origin_ifname, MAX_L_PORT_NAME);
 
                 /*Send dynamic or static mac add message to mclagsyncd*/
                 add_mac_to_chip(mac_msg, mac_msg->fdb_type);
@@ -2091,7 +2096,7 @@ static void update_remote_macs_to_peerlink(struct CSM *csm, struct LocalInterfac
             continue;
         }
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "age flag %d, MAC %s, "
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Update remote macs to peer: age flag %d, MAC %s, "
                 "vlan-id %d, Interface: %s", mac_entry->age_flag ,
                 mac_addr_to_str(mac_entry->mac_addr), mac_entry->vid, mac_entry->ifname);
 
@@ -2108,7 +2113,7 @@ static void update_remote_macs_to_peerlink(struct CSM *csm, struct LocalInterfac
                 {
                     memcpy(mac_entry->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
                     add_mac_to_chip(mac_entry, mac_entry->fdb_type);
-                    ICCPD_LOG_DEBUG(__FUNCTION__, "age flag %d, "
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "Update remote macs to peer: age flag %d, "
                             "redirect MAC to peer-link: %s, MAC %s vlan-id %d",
                             mac_entry->age_flag, mac_entry->ifname,
                             mac_addr_to_str(mac_entry->mac_addr), mac_entry->vid);
@@ -2401,7 +2406,7 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
     RB_FOREACH_SAFE (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb, mac_temp)
     {
         mac_msg->age_flag |= MAC_AGE_PEER;
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Add peer age flag %d interface %s, MAC %s vlan-id %d,"
+        ICCPD_LOG_DEBUG("ICCP_FDB", "ICCP session down: Add peer age flag %d interface %s, MAC %s vlan-id %d,"
                 " op_type %s", mac_msg->age_flag, mac_msg->ifname,
                 mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
                 (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del");
@@ -2411,7 +2416,7 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
         if (mac_msg->age_flag != (MAC_AGE_LOCAL | MAC_AGE_PEER))
             continue;
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer disconnect, del MAC for %s, "
+        ICCPD_LOG_DEBUG("ICCP_FDB", "ICCP session down: del MAC for %s, "
             "MAC %s vlan-id %d", mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
         /*Send mac del message to mclagsyncd, may be already deleted*/
@@ -2510,7 +2515,7 @@ void mlacp_peerlink_up_handler(struct CSM* csm)
         if (strcmp(mac_msg->ifname, csm->peer_itf_name) != 0)
             continue;
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer link up, add MAC to ASIC for peer-link: %s, "
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Peer link up, add MAC to ASIC for peer-link: %s, "
                 "MAC %s vlan-id %d", mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
         /*Send mac add message to mclagsyncd, local age flag is already set*/
@@ -2552,7 +2557,7 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
 
         mac_msg->age_flag = set_mac_local_age_flag(csm, mac_msg, 1, 1);
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer link down, del MAC for peer-link: %s,"
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Peer link down, del MAC for peer-link: %s,"
             " MAC %s vlan-id %d", mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
         /*Send mac del message to mclagsyncd*/
@@ -2756,7 +2761,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
 
     mac_msg->age_flag = 0;
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Recv MAC msg from mclagsyncd, vid %d mac %s port %s optype %s ", vid,mac_addr_to_str(mac_addr), ifname, op_type == MAC_SYNC_ADD ? "add" : "del");
+    ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: vid %d mac %s port %s optype %s ", vid,mac_addr_to_str(mac_addr), ifname, op_type == MAC_SYNC_ADD ? "add" : "del");
     /*Debug*/
     #if 0
     /* dump receive MAC info*/
@@ -2811,7 +2816,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
     if(mac_info)
     {
         mac_exist = 1;
-        ICCPD_LOG_DEBUG(__FUNCTION__, " RB_FIND success for the MAC entry : %s, "
+        ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: RB_FIND success for the MAC entry : %s, "
             " vid: %d , ifname %s", mac_addr_to_str(mac_info->mac_addr),
             mac_info->vid, mac_info->ifname );
     }
@@ -2846,7 +2851,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                }*/
             if ( (mac_lif->state == PORT_STATE_DOWN) && (mac_msg->fdb_type == MAC_TYPE_DYNAMIC) )
             {
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Ignore MAC add received, "
+                ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Ignore MAC add received, "
                     "MAC exists interface %s down, MAC %s, vlan %d ",
                     mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
                 return;
@@ -2864,12 +2869,12 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                 /*Remove MAC_AGE_LOCAL flag*/
                 mac_info->age_flag = set_mac_local_age_flag(csm, mac_info, 0, 1);
 
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Update MAC %s, vlan %d ifname %s",
+                ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Update MAC %s, vlan %d ifname %s",
                     mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
                 // MAC is local now Del entry from MCLAG_FDB_TABLE if peer not aged.
                 if (!(mac_msg->age_flag & MAC_AGE_PEER))
                 {
-                    ICCPD_LOG_DEBUG(__FUNCTION__, "MAC move Update MAC remote to local %s, vlan %d"
+                    ICCPD_LOG_DEBUG("ICCP_FDB", " MAC update from mclagsyncd: MAC move Update MAC remote to local %s, vlan %d"
                             " ifname %s, del entry from MCLAG_FDB_TABLE",
                             mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
                     del_mac_from_chip(mac_msg);
@@ -2880,12 +2885,12 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                 /*All info are the same, Remove MAC_AGE_LOCAL flag, then return*/
                 /*In theory, this will be happened that mac age and then learn*/
                 mac_info->age_flag = set_mac_local_age_flag(csm, mac_info, 0, 1);
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Duplicate update MAC %s, vlan %d ifname %s",
+                ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Duplicate update MAC %s, vlan %d ifname %s",
                         mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
                 // MAC is local now Del entry from MCLAG_FDB_TABLE if peer not aged.
                 if (!(mac_msg->age_flag & MAC_AGE_PEER))
                 {
-                    ICCPD_LOG_DEBUG(__FUNCTION__, "Update MAC remote to local %s, vlan %d"
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Update MAC remote to local %s, vlan %d"
                             " ifname %s, del entry from MCLAG_FDB_TABLE",
                             mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
                     del_mac_from_chip(mac_msg);
@@ -2900,14 +2905,14 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
             if ( (mac_lif->state == PORT_STATE_DOWN) && (mac_msg->fdb_type == MAC_TYPE_DYNAMIC) )
             {
                 del_mac_from_chip(mac_msg);
-                ICCPD_LOG_DEBUG(__FUNCTION__, "New MAC add failed interface %s down, MAC %s, vlan %d ",
+                ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: New MAC add failed interface %s down, MAC %s, vlan %d ",
                         mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
                 return;
             }
 
             /*set MAC_AGE_PEER flag before send this item to peer*/
             mac_msg->age_flag |= MAC_AGE_PEER;
-            ICCPD_LOG_DEBUG(__FUNCTION__, "Add peer age flag, age %d interface %s, "
+            ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Add peer age flag, age %d interface %s, "
                 "MAC %s vlan-id %d ", mac_msg->age_flag, mac_msg->ifname,
                 mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
             mac_msg->op_type = MAC_SYNC_ADD;
@@ -2917,7 +2922,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
             {
                 RB_INSERT(mac_rb_tree, &MLACP(csm).mac_rb, new_mac_msg);
 
-                ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-list enqueue interface %s, "
+                ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: MAC-list enqueue interface %s, "
                         "MAC %s vlan-id %d", mac_msg->ifname,
                         mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
@@ -2925,13 +2930,13 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                 {
                     TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), new_mac_msg, tail);
 
-                    ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface %s, "
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: MAC-msg-list enqueue interface %s, "
                         "MAC %s vlan-id %d, age_flag %d", new_mac_msg->ifname,
                         mac_addr_to_str(new_mac_msg->mac_addr), new_mac_msg->vid, new_mac_msg->age_flag);
                 }
             }
             else
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to enqueue interface %s, MAC %s vlan-id %d",
+                ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Failed to enqueue interface %s, MAC %s vlan-id %d",
                     mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
         }
     }
@@ -2948,7 +2953,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
 
                 if (mac_info->age_flag == (MAC_AGE_LOCAL | MAC_AGE_PEER))
                 {
-                    ICCPD_LOG_DEBUG(__FUNCTION__, "Recv MAC del interface %s(peer-link), "
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Recv MAC del interface %s(peer-link), "
                         "MAC %s vlan-id %d", mac_info->ifname,
                         mac_addr_to_str(mac_info->mac_addr), mac_info->vid);
 
@@ -2967,7 +2972,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                     /*peer-link learn mac is control by iccpd, ignore the chip del info*/
                     add_mac_to_chip(mac_info, mac_info->fdb_type);
 
-                    ICCPD_LOG_DEBUG(__FUNCTION__, "Recv MAC del interface %s(peer-link is up), "
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Recv MAC del interface %s(peer-link is up), "
                         "add back MAC %s vlan-id %d", mac_info->ifname,
                         mac_addr_to_str(mac_info->mac_addr), mac_info->vid);
                 }
@@ -2980,7 +2985,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
 
             if (mac_info->age_flag == (MAC_AGE_LOCAL | MAC_AGE_PEER))
             {
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Recv MAC del interface %s, "
+                ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Recv MAC del interface %s, "
                     "MAC %s vlan-id %d", mac_info->ifname,
                     mac_addr_to_str(mac_info->mac_addr), mac_info->vid);
 
@@ -2996,7 +3001,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
             }
             else
             {
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Recv MAC del interface %s, "
+                ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Recv MAC del interface %s, "
                     "MAC %s vlan-id %d, peer is not age, add back to chip",
                     mac_info->ifname, mac_addr_to_str(mac_info->mac_addr), mac_info->vid);
 
@@ -3010,7 +3015,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                         if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
                         {
                             add_mac_to_chip(mac_info, mac_info->fdb_type);
-                            ICCPD_LOG_DEBUG(__FUNCTION__, "Recv MAC del interface %s(down), "
+                            ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Recv MAC del interface %s(down), "
                                 "MAC %s vlan-id %d, redirect to peer-link",
                                 mac_info->ifname, mac_addr_to_str(mac_info->mac_addr), mac_info->vid);
                         }

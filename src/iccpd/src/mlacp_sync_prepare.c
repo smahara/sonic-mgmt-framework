@@ -340,7 +340,7 @@ int mlacp_prepare_for_mac_info_to_peer(struct CSM* csm, char* buf, size_t max_bu
     sprintf(MacData->ifname, "%s", mac_msg->origin_ifname);
     MacData->vid = htons(mac_msg->vid);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Send MAC messge to peer, port %s  mac = %s, vid = %d, type = %s count %d ", mac_msg->origin_ifname,
+    ICCPD_LOG_DEBUG("ICCP_FDB", "Send MAC messge to peer, port %s  mac = %s, vid = %d, type = %s count %d ", mac_msg->origin_ifname,
                                   mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->op_type == MAC_SYNC_ADD ? "add" : "del", count);
 
     return msg_len;

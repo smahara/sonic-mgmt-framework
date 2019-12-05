@@ -202,7 +202,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
     memset(&mac_data, 0, sizeof(struct MACMsg));
     memset(&mac_find, 0, sizeof(struct MACMsg));
 
-    ICCPD_LOG_INFO(__FUNCTION__,
+    ICCPD_LOG_INFO("ICCP_FDB",
         "Received MAC Info, interface=[%s] vid[%d] MAC[%s] OperType[%s] MacType[%d] ",
         MacData->ifname, ntohs(MacData->vid), mac_addr_to_str(MacData->mac_addr),
         MacData->type == MAC_SYNC_ADD ? "add" : "del", MacData->mac_type);
@@ -228,7 +228,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
         if (MacData->type == MAC_SYNC_ADD)
         {
             mac_msg->age_flag &= ~MAC_AGE_PEER;
-            ICCPD_LOG_DEBUG(__FUNCTION__, "Recv ADD, Remove peer age flag:%d interface %s, "
+            ICCPD_LOG_DEBUG("ICCP_FDB", "Recv ADD, Remove peer age flag:%d interface %s, "
                 "MAC %s vlan-id %d, op_type %s", mac_msg->age_flag, mac_msg->ifname,
                 mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
                 (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del");
@@ -244,7 +244,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
                 }
                 else
                 {
-                    ICCPD_LOG_DEBUG(__FUNCTION__, "Ignore Recv MAC ADD, Local static present,"
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "Ignore Recv MAC ADD, Local static present,"
                         " interface  %s, MAC %s vlan-id %d ", mac_msg->ifname,
                         mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
                     //set back the peer age flag
@@ -352,7 +352,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
     if (mac_msg && (MacData->type == MAC_SYNC_DEL))
     {
         mac_msg->age_flag |= MAC_AGE_PEER;
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Add peer age flag: %d interface %s, "
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Recv MAC DEL from peer: Add peer age flag: %d interface %s, "
             "MAC %s vlan %d, op_type %s", mac_msg->age_flag, mac_msg->ifname,
             mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
             (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del");
@@ -400,7 +400,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
                 //MAC to be saved and program when peer_link is configured..? TBD
                 if (from_mclag_intf == 0)
                 {
-                    ICCPD_LOG_DEBUG(__FUNCTION__, "Ignore MAC learn on orphan port "
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "Recv MAC ADD from peer: Ignore MAC learn on orphan port "
                         "peer-link is not configured interface %s, MAC %s vlan-id %d, "
                         " op_type %d", from_mclag_intf, mac_msg->ifname,
                         mac_addr_to_str(mac_msg->mac_addr),
@@ -413,7 +413,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
                 /*Redirect the mac to peer-link*/
                 memcpy(&mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
 
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Redirect to peerlink for orphan port or portchannel is down,"
+                ICCPD_LOG_DEBUG("ICCP_FDB", "Recv MAC ADD from peer: Redirect to peerlink for orphan port or portchannel is down,"
                     " age flag: %d interface %s, MAC %s vlan %d, op_type %d",
                     mac_msg->age_flag, mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr),
                     mac_msg->vid, mac_msg->op_type);

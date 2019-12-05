@@ -278,6 +278,9 @@ start() {
 {%- if docker_container_name == "iccpd" %}
         -v /lib/modules:/lib/modules:ro \
 {%- endif %}
+{%- if docker_container_name == "mgmt-framework" %}
+        -v /var/run/dbus:/var/run/dbus:rw \
+{%- endif %}
 {%- if sonic_asic_platform != "mellanox" %}
         --tmpfs /tmp \
 {%- endif %}
