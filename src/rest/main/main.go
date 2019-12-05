@@ -97,6 +97,10 @@ func main() {
 		}
 	}()
 
+	if caFile == "" && server.ClientAuth.Enabled("cert") {
+		glog.Fatal("Must specify -cacert with -client_auth cert")
+	}
+
 	swagger.Load()
 
 	server.SetUIDirectory(uiDir)
@@ -218,24 +222,13 @@ func prepareCACertificates(file string) *x509.CertPool {
 	return caPool
 }
 
-// getTLSClientAuthType function parses the --client_auth parameter.
-// Returns corresponding tls.ClientAuthType value. Exits the process
-// if value is not valid ('none', 'cert' or 'auth')
+// getTLSClientAuthType function parses requires client cert
+// if caFile is provided, otherwise we just request the client cert.
 func getTLSClientAuthType() tls.ClientAuthType {
-	if !server.ClientAuth.Any() {
-		return tls.RequestClientCert
-	}
-	if server.ClientAuth.Enabled("cert") {
-		if caFile == "" {
-			glog.Fatal("--cacert option is mandatory when --client_auth is 'cert'")
-		}
+	if caFile != "" {
 		return tls.RequireAndVerifyClientCert
 	}
-	if server.ClientAuth.Enabled("password") || server.ClientAuth.Enabled("jwt") {
-		return tls.RequestClientCert
-	}
-
-	return tls.RequireAndVerifyClientCert // dummy
+	return tls.RequestClientCert
 }
 
 func getPreferredCipherSuites() []uint16 {

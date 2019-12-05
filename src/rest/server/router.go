@@ -20,70 +20,15 @@
 package server
 
 import (
-	"bytes"
-	"fmt"
-	"net/http"
-	"sort"
-	"strings"
-	"time"
-	"translib"
-
-	"github.com/golang/glog"
-	"github.com/gorilla/mux"
+    "net/http"
+    "strings"
+    "time"
+    "github.com/golang/glog"
+    "github.com/gorilla/mux"
 )
 
 // Root directory for UI files
 var swaggerUIDir = "./ui"
-
-type UserAuth map[string]bool
-
-var ClientAuth = UserAuth{"password": false, "cert": false, "jwt": false}
-
-func (i UserAuth) String() string {
-	b := new(bytes.Buffer)
-	for key, value := range i {
-		if value {
-			fmt.Fprintf(b, "%s ", key)
-		}
-	}
-	return b.String()
-}
-func (i UserAuth) Any() bool {
-	for _, value := range i {
-		if value {
-			return true
-		}
-	}
-	return false
-}
-func (i UserAuth) Enabled(mode string) bool {
-	if value, exist := i[mode]; exist && value {
-		return true
-	}
-	return false
-}
-func (i UserAuth) Set(mode string) error {
-	modes := strings.Split(mode, ",")
-	for _, m := range modes {
-		m = strings.Trim(m, " ")
-		if _, exist := i[m]; !exist {
-			return fmt.Errorf("Expecting one or more of 'cert', 'password' or 'jwt'")
-		}
-		i[m] = true
-	}
-	return nil
-}
-func (i UserAuth) Unset(mode string) error {
-	modes := strings.Split(mode, ",")
-	for _, m := range modes {
-		m = strings.Trim(m, " ")
-		if _, exist := i[m]; !exist {
-			return fmt.Errorf("Expecting one or more of 'cert', 'password' or 'jwt'")
-		}
-		i[m] = false
-	}
-	return nil
-}
 
 // SetUIDirectory functions sets directiry where Swagger UI
 // resources are maintained.
