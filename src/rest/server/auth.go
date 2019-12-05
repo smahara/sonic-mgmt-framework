@@ -20,16 +20,16 @@
 package server
 
 import (
-	"net/http"
-	"os/user"
-	"github.com/golang/glog"
-	"github.com/msteinert/pam"
+	"bytes"
 	"errors"
 	"fmt"
-	"bytes"
+	"net/http"
+	"os/user"
 	"strings"
-)
 
+	"github.com/golang/glog"
+	"github.com/msteinert/pam"
+)
 
 type UserCredential struct {
 	Username string
@@ -40,49 +40,49 @@ type UserAuth map[string]bool
 var ClientAuth = UserAuth{"password": false, "cert": false, "jwt": false}
 
 func (i UserAuth) String() string {
-    b := new(bytes.Buffer)
-    for key, value := range i {
-        if value {
-            fmt.Fprintf(b, "%s ", key)
-        }
-    }
-    return b.String()
+	b := new(bytes.Buffer)
+	for key, value := range i {
+		if value {
+			fmt.Fprintf(b, "%s ", key)
+		}
+	}
+	return b.String()
 }
 func (i UserAuth) Any() bool {
-    for _, value := range i {
-        if value {
-            return true
-        }
-    }
-    return false
+	for _, value := range i {
+		if value {
+			return true
+		}
+	}
+	return false
 }
 func (i UserAuth) Enabled(mode string) bool {
-    if value, exist := i[mode]; exist && value {
-        return true
-    }
-    return false
+	if value, exist := i[mode]; exist && value {
+		return true
+	}
+	return false
 }
 func (i UserAuth) Set(mode string) error {
-    modes := strings.Split(mode, ",")
-    for _,m := range modes {
-        m = strings.Trim(m, " ")
-        if _, exist := i[m]; !exist {
-            return fmt.Errorf("Expecting one or more of 'cert', 'password' or 'jwt'")
-        }
-        i[m] = true
-    }
-    return nil
+	modes := strings.Split(mode, ",")
+	for _, m := range modes {
+		m = strings.Trim(m, " ")
+		if _, exist := i[m]; !exist {
+			return fmt.Errorf("Expecting one or more of 'cert', 'password' or 'jwt'")
+		}
+		i[m] = true
+	}
+	return nil
 }
 func (i UserAuth) Unset(mode string) error {
-    modes := strings.Split(mode, ",")
-    for _,m := range modes {
-        m = strings.Trim(m, " ")
-        if _, exist := i[m]; !exist {
-            return fmt.Errorf("Expecting one or more of 'cert', 'password' or 'jwt'")
-        }
-        i[m] = false
-    }
-    return nil
+	modes := strings.Split(mode, ",")
+	for _, m := range modes {
+		m = strings.Trim(m, " ")
+		if _, exist := i[m]; !exist {
+			return fmt.Errorf("Expecting one or more of 'cert', 'password' or 'jwt'")
+		}
+		i[m] = false
+	}
+	return nil
 }
 
 //PAM conversation handler.
@@ -119,14 +119,6 @@ func PAMAuthUser(u string, p string) error {
 }
 
 
-func DoesUserExist(username string) bool {
-	_, err := user.Lookup(username)
-	if err != nil {
-		return false
-	}
-	return true
-}
-
 func PopulateAuthStruct(username string, auth *AuthInfo) error {
 	usr, err := user.Lookup(username)
 	if err != nil {
@@ -160,7 +152,6 @@ func PopulateAuthStruct(username string, auth *AuthInfo) error {
 	return nil
 }
 
-
 func DoesUserExist(username string) bool {
 	_, err := user.Lookup(username)
 	if err != nil {
@@ -177,10 +168,10 @@ func UserPwAuth(username string, passwd string) (bool, error) {
 	 * for authentication.
 	 */
 	err := PAMAuthUser(username, passwd)
-    if err != nil {
+	if err != nil {
 		glog.Infof("Authentication failed. user=%s, error:%s", username, err.Error())
-        return false, err
-    }
+		return false, err
+	}
 
 	return true, nil
 }
@@ -190,4 +181,3 @@ func isWriteOperation(r *http.Request) bool {
 	m := r.Method
 	return m == "POST" || m == "PUT" || m == "PATCH" || m == "DELETE"
 }
-

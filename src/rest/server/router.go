@@ -20,11 +20,12 @@
 package server
 
 import (
-    "net/http"
-    "strings"
-    "time"
-    "github.com/golang/glog"
-    "github.com/gorilla/mux"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/golang/glog"
+	"github.com/gorilla/mux"
 )
 
 // Root directory for UI files
