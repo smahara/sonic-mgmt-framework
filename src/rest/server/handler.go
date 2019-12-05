@@ -27,6 +27,7 @@ import (
 	"net/url"
 	"strings"
 	"translib"
+
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 )
@@ -238,7 +239,6 @@ func invokeTranslib(r *http.Request, path string, payload []byte) (int, []byte, 
 	var content []byte
 	var err error
 
-	
 	switch r.Method {
 	case "GET":
 		req := translib.GetRequest{Path: path, User: rc.Auth.User, Group: rc.Auth.Group}
@@ -302,4 +302,3 @@ func hostMetadataHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/xrd+xml")
 	w.Write(data.Bytes())
 }
-
