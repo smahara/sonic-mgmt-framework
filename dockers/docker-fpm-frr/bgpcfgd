@@ -472,7 +472,17 @@ class BGPConfigDaemon:
                            '+aggregate_summary_only'),              '{no:no-prefix}aggregate-address {:aggregate}'),
                          (('network_prefix',
                            '+network_policy', '+network_backdoor'), '{no:no-prefix}network {:network}'),
-                         ('route_download_filter',                  '{no:no-prefix}table-map {}')
+                         ('route_download_filter',                  '{no:no-prefix}table-map {}'),
+                         ('advertise-all-vni',                      '{no:no-prefix}advertise-all-vni', ['true','false']),
+                         ('advertise-default-gw',                   '{no:no-prefix}advertise-default-gw', ['true','false']),
+                         ('advertise-ipv4-unicast',                      '{no:no-prefix}advertise ipv4 unicast', ['true','false']),
+                         ('advertise-ipv6-unicast',                      '{no:no-prefix}advertise ipv6 unicast', ['true','false']),
+                         ('default-originate-ipv4',                      '{no:no-prefix}default-originate ipv4', ['true','false']),
+                         ('default-originate-ipv6',                      '{no:no-prefix}default-originate ipv6', ['true','false']),
+                         ('autort',                                      '{no:no-prefix}autort {}'),
+                         ('flooding',                                    '{no:no-prefix}flooding {}'),
+                         ('dad-enabled',                                 '{no:no-prefix}dup-addr-detection', ['true','false']),
+                         ('route-distinguisher',                         '{no:no-prefix}rd {}')
     ]
 
     cmn_key_map = [('peer_asn',                             '{no:no-prefix}neighbor {} remote-as {}'),
@@ -561,6 +571,10 @@ class BGPConfigDaemon:
 
     prefix_key_map = [('masklength_range', '{no:no-prefix}{} prefix-list {} permit {} {:msklen-range}')]
 
+    global_evpn_vni_key_map = [('advertise-default-gw',                   '{no:no-prefix}advertise-default-gw', ['true','false']),
+                         ('route-distinguisher',                         '{no:no-prefix}rd {}')
+    ]
+
     tbl_to_key_map = {'BGP_GLOBALS':                global_key_map,
                       'BGP_GLOBALS_AF':             global_af_key_map,
                       'BGP_GLOBALS_LISTEN_PREFIX':  listen_prefix_key_map,
@@ -572,7 +586,8 @@ class BGPConfigDaemon:
                       'COMMUNITY_SET':              comm_list_key_map,
                       'EXTCOMMUNITY_SET':           ext_comm_list_key_map,
                       'ASPATH_SET':                 as_path_key_map,
-                      'PREFIX':                     prefix_key_map
+                      'PREFIX':                     prefix_key_map,
+                      'BGP_GLOBALS_EVPN_VNI':       global_evpn_vni_key_map
     }
 
     def __init__(self):
@@ -624,7 +639,9 @@ class BGPConfigDaemon:
             ('BGP_PEER_GROUP_AF', self.bgp_neighbor_af_handler),
             ('BGP_NEIGHBOR_AF', self.bgp_neighbor_af_handler),
             ('BGP_GLOBALS_LISTEN_PREFIX', self.bgp_table_handler_common),
-            ('BFD_PEER', self.bfd_handler)
+            ('BFD_PEER', self.bfd_handler),
+            ('VRF', self.vrf_handler),
+            ('BGP_GLOBALS_EVPN_VNI', self.bgp_table_handler_common)
         ]
         self.bgp_message = Queue.Queue(0)
         self.table_data_cache = self.config_db.get_table_data([tbl for tbl, _ in self.table_handler_list])
@@ -684,6 +701,23 @@ class BGPConfigDaemon:
                     command = command + " -c 'no shutdown'"
                 elif param == 'admin_status' and data[param] == 'down':
                     command = command + " -c 'shutdown'"
+            self.__run_command(command)
+
+    def vrf_handler(self, table, key, data):
+        syslog.syslog(syslog.LOG_INFO, '[bgp cfgd](vrf) value for {} changed to {}'.format(key, data))
+        #get vrf key
+        key_params = key.split('|')
+        cmd = 'vrf {}'.format(key_params[0])
+        if not data:
+            #VRF is deleted
+            command = "vtysh -c 'configure terminal' -c 'no {}'".format(cmd)
+            self.__run_command(command)
+        else:
+            #create/update case
+            command = "vtysh -c 'configure terminal' -c '{}'".format(cmd)
+            for param in data:
+                if param == 'vni':
+                    command = command + " -c 'vni {}'".format(data[param])
             self.__run_command(command)
 
     def __get_vrf_asn(self, vrf):
@@ -865,6 +899,17 @@ class BGPConfigDaemon:
                               'address-family {} {}'.format(af, ip_type)]
                 if not key_map.run_command(data, cmd_prefix, nbr):
                     syslog.syslog(syslog.LOG_ERR, 'failed running BGP neighbor AF config command')
+                    continue
+            elif table == 'BGP_GLOBALS_EVPN_VNI':
+                af_type, vni = key.split('|')
+                af, ip_type = af_type.lower().split('_')
+                syslog.syslog(syslog.LOG_INFO, 'Set address family for VNI {} to {} {}'.format(vni, af, ip_type))
+                cmd_prefix = ['configure terminal',
+                              'router bgp {} vrf {}'.format(local_asn, vrf),
+                              'address-family {} {}'.format(af, ip_type),
+                              'vni {}'.format(vni)]
+                if not key_map.run_command(data, cmd_prefix, vni):
+                    syslog.syslog(syslog.LOG_ERR, 'failed running BGP L2VPN_EVPN VNI config command')
                     continue
             elif table == 'ROUTE_MAP':
                 map_name = prefix
