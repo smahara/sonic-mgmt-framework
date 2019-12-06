@@ -15,13 +15,14 @@
 {% endfor %}
 BGP routing table information for VRF default
 Router identifier {{ vars.routerId }}, local AS number {{ vars.asNum }} 
-Route status codes: * - valid, > - active, e - ECMP
+Route status codes: s - suppressed, * - valid, > - active, # - not installed, E - ECMP head, e - ECMP
+                    S - stale, c - contributing to ECMP, b - backup, L - labeled-unicast
 Origin codes: i - IGP, e - EGP, ? - incomplete
 AS Path Attributes: Or-ID - Originator ID, C-LST - Cluster List, LL Nexthop - Link Local Nexthop
      {{'%-20s'|format("Network")}}{{'%-20s'|format("Next Hop")}}{{'%-15s'|format("Metric")}}{{'%-15s'|format("LocPref")}}{{'%-15s'|format("Path")}}
 {% for key in json_output %}
-{% if "openconfig-network-instance:routes" in key %}
-{% set routeList = json_output["openconfig-network-instance:routes"]["route"] %}
+{% if "openconfig-network-instance:adj-rib-in-post" in key %}
+{% set routeList = json_output["openconfig-network-instance:adj-rib-in-post"]["routes"]["route"] %}
 {% for route in routeList %}
 {% for key in route %}
   {% if vars.update({'prefix':route["prefix"]}) %}{% endif %}
