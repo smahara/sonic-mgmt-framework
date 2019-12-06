@@ -174,7 +174,7 @@ def config_pddf_utils():
     #  Check if the new 2.0 platform APIs exists and pddf 2.0 implementation also exist
     if os.path.isdir(device_path+'/sonic_platform') and os.path.isdir(PLATFORM_ROOT_PATH+'/pddf/sonic_platform'):
         device_plugin_path = "/".join([device_path,"sonic_platform"])
-        pddf_path = "/".join([PLATFORM_ROOT_PATH, "pddf/sonic_platform"])
+        pddf_path = "/".join([device_path, "pddf/pddf_sonic_platform"])
     else:
         device_plugin_path = "/".join([device_path, "plugins"])
     

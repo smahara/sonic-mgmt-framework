@@ -19,15 +19,16 @@ try:
     from sonic_platform.psu import Psu
     from sonic_platform.fan import Fan
     from sonic_platform.thermal import Thermal
-    from eeprom import Eeprom
+    from sonic_platform.eeprom import Eeprom
     import json
+    sys.path.append('/usr/share/sonic/platform/sonic_platform')
     import pddfparse
 except ImportError as e:
     raise ImportError(str(e) + "- required module not found")
 
-class Chassis(ChassisBase):
+class PddfChassis(ChassisBase):
     """
-    PDDF Platform-specific Chassis class
+    PDDF Generic Chassis class
     """
 
     def __init__(self):
@@ -35,18 +36,18 @@ class Chassis(ChassisBase):
         ChassisBase.__init__(self)
         global pddf_obj
         global plugin_data
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../pddf/pd-plugin.json')) as pd:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../../../platform/pddf/pd-plugin.json')) as pd:
             plugin_data = json.load(pd)
 
         pddf_obj = pddfparse.PddfParse()
-        self.platform = pddf_obj.get_platform()
+        self.platform_inventory = pddf_obj.get_platform()
 
         # Initialize EEPROM
         self.sys_eeprom = Eeprom()
 
         # FANs
-        for i in range(self.platform['num_fantrays']):
-            for j in range(self.platform['num_fans_pertray']):
+        for i in range(self.platform_inventory['num_fantrays']):
+            for j in range(self.platform_inventory['num_fans_pertray']):
                 fan = Fan(i, j)
                 self._fan_list.append(fan)
                 #color=""
@@ -57,7 +58,7 @@ class Chassis(ChassisBase):
                 #print "%s"%color
 
         # PSUs
-        for i in range(self.platform['num_psus']):
+        for i in range(self.platform_inventory['num_psus']):
             psu = Psu(i)
             self._psu_list.append(psu)
             # for testing, remove the below lines later on 
@@ -74,12 +75,12 @@ class Chassis(ChassisBase):
             #print "%s"%color
 
         # OPTICs
-        for index in range(self.platform['num_ports']):
+        for index in range(self.platform_inventory['num_ports']):
             sfp = Sfp(index)
             self._sfp_list.append(sfp)
 
         # THERMALs
-        for i in range(self.platform['num_temps']):
+        for i in range(self.platform_inventory['num_temps']):
             thermal = Thermal(i)
             self._thermal_list.append(thermal)
 	    # Thermal Test Cases

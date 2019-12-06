@@ -15,7 +15,10 @@ except ImportError, e:
     raise ImportError (str(e) + "- required module not found")
 
 class board(eeprom_tlvinfo.TlvInfoDecoder):
+    # Display vendor extension for Quanta platforms
+    _TLV_DISPLAY_VENDOR_EXT = True
     _TLV_INFO_MAX_LEN = 256
+
     def __init__(self, name, path, cpld_root, ro):
         self.eeprom_path = "/sys/bus/i2c/devices/18-0054/eeprom"
         super(board, self).__init__(self.eeprom_path, 0, '', True)
