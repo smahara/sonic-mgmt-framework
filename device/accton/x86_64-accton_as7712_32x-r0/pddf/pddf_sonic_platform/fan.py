@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+
+
+try:
+    import os.path
+    import sys, traceback, time
+    from pddf_fan import PddfFan
+except ImportError as e:
+    raise ImportError(str(e) + "- required module not found")
+
+
+class Fan(PddfFan):
+    """PDDF Platform-Specific Fan class"""
+
+    def __init__(self, tray_idx, fan_idx=0, is_psu_fan=False, psu_index=0):
+        # idx is 0-based 
+        PddfFan.__init__(self, tray_idx, fan_idx, is_psu_fan, psu_index)
+
+    # Provide the functions/variables below for which implementation is to be overwritten
+    def get_name(self):
+        # Since AS7712 has two fans in a tray, modifying this function to return proper name
+        if self.is_psu_fan:
+            return "PSU_FAN{}".format(self.fan_index)
+        else:
+            return "Fantray{}_{}".format(self.fantray_index, {1:'Front', 2:'Rear'}.get(self.fan_index,'none'))
+

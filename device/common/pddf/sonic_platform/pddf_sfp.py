@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
-import os.path
-import sys, traceback
-sys.path.append('/usr/share/sonic/platform/sonic_platform')
-import pddfparse
-import json
-
 try:
+    import os.path
+    import sys, traceback
+    sys.path.append('/usr/share/sonic/platform/sonic_platform')
+    import pddfparse
+    import json
     import time
     from ctypes import create_string_buffer
     from sonic_platform_base.chassis_base import ChassisBase
@@ -133,9 +132,9 @@ INFO_OFFSET = 128
 DOM_OFFSET = 0
 DOM_OFFSET1 = 384
 
-class Sfp(SfpBase):
+class PddfSfp(SfpBase):
     """
-    Platform generic PDDF Sfp class
+    PDDF generic Sfp class
     """
 
     _port_to_eeprom_mapping = {}
@@ -169,7 +168,7 @@ class Sfp(SfpBase):
     def __init__(self, index):
         global pddf_obj
         global plugin_data
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../pddf/pd-plugin.json')) as pd:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../../../platform/pddf/pd-plugin.json')) as pd:
             plugin_data = json.load(pd)
 
         pddf_obj = pddfparse.PddfParse()

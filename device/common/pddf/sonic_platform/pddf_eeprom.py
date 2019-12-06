@@ -13,7 +13,7 @@ try:
     import os
     import sys
     import json
-    sys.path.append('/usr/share/sonic/platform/soni_platform')
+    sys.path.append('/usr/share/sonic/platform/sonic_platform')
     import pddfparse
     from sonic_eeprom import eeprom_tlvinfo
     import binascii
@@ -21,7 +21,8 @@ except ImportError, e:
     raise ImportError(str(e) + "- required module not found")
 
 
-class Eeprom(eeprom_tlvinfo.TlvInfoDecoder):
+class PddfEeprom(eeprom_tlvinfo.TlvInfoDecoder):
+    _TLV_INFO_MAX_LEN = 256
 
     def __init__(self):
         global pddf_obj
@@ -31,13 +32,13 @@ class Eeprom(eeprom_tlvinfo.TlvInfoDecoder):
         if self.eeprom_path is None:
             return
 
-        super(Eeprom, self).__init__(self.eeprom_path, 0, '', True)
+        super(PddfEeprom, self).__init__(self.eeprom_path, 0, '', True)
         self.eeprom_tlv_dict = dict()
         try:
             self.eeprom_data = self.read_eeprom()
         except:
             self.eeprom_data = "N/A"
-            raise RuntimeError("Eeprom is not Programmed")
+            raise RuntimeError("PddfEeprom is not Programmed")
         else:
             eeprom = self.eeprom_data
 

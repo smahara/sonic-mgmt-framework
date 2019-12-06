@@ -7,28 +7,19 @@
 #
 #############################################################################
 
-
 try:
     import os
     import sys
-    sys.path.append('/usr/share/sonic/platform')
-    from sonic_platform_base.platform_base import PlatformBase
-    from sonic_platform.chassis import Chassis
+    from pddf_chassis import PddfChassis
 except ImportError as e:
     raise ImportError(str(e) + "- required module not found")
 
-
-class Platform(PlatformBase):
+class Chassis(PddfChassis):
     """
-    PDDF Platform-specific class
+    PDDF Platform-specific Chassis class
     """
 
     def __init__(self):
-        PlatformBase.__init__(self)
-        self._chassis = Chassis()
+        PddfChassis.__init__(self)
 
-
-
-# For testing, remove later on
-#if __name__=="__main__":
-    #obj = Platform()
+    # Provide the functions/variables below for which implementation is to be overwritten
