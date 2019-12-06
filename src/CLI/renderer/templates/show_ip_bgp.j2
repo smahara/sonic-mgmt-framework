@@ -18,7 +18,7 @@ Router identifier {{ vars.routerId }}, local AS number {{ vars.asNum }}
 Route status codes: * - valid, > - active, e - ECMP
 Origin codes: i - IGP, e - EGP, ? - incomplete
 AS Path Attributes: Or-ID - Originator ID, C-LST - Cluster List, LL Nexthop - Link Local Nexthop
-     {{'%-20s'|format("Network")}}{{'%-20s'|format("Next Hop")}}{{'%-15s'|format("Metric")}}{{'%-15s'|format("LocPref")}}{{'%-15s'|format("Weight")}}{{'%-15s'|format("Path")}}
+     {{'%-20s'|format("Network")}}{{'%-20s'|format("Next Hop")}}{{'%-15s'|format("Metric")}}{{'%-15s'|format("LocPref")}}{{'%-15s'|format("Path")}}
 {% endif %}
 {% if "openconfig-network-instance:routes" in key %}
 {% set routeList = json_output["openconfig-network-instance:routes"]["route"] %}
@@ -49,7 +49,7 @@ AS Path Attributes: Or-ID - Originator ID, C-LST - Cluster List, LL Nexthop - Li
 {% else %}
 {% if vars.update({'validRoute':""}) %}{% endif %}
 {% endif %}
-{{'%-5s'|format(vars.validRoute)}}{{'%-20s'|format(vars.prefix)}}{{'%-20s'|format(vars.nxtHop)}}{{'%-15s'|format(vars.med)}}{{'%-15s'|format(vars.locPref)}}{{'%-15s'|format(vars.weight)}}{{'%-1s'|format(vars.pathId)}} {{vars.origin}}
+{{'%-5s'|format(vars.validRoute)}}{{'%-20s'|format(vars.prefix)}}{{'%-20s'|format(vars.nxtHop)}}{{'%-15s'|format(vars.med)}}{{'%-15s'|format(vars.locPref)}}{{'%-1s'|format(vars.pathId)}} {{vars.origin}}
 {% endfor %}
 {% endif %}
 {% endfor %}
