@@ -1200,13 +1200,14 @@ void iccp_event_handler_obj_input_deladdr(struct nl_object *obj, void *arg)
     {
         ICCPD_LOG_NOTICE(__FUNCTION__, "l3_proto %d, ifname %s index %d address %s\n",
                 lif->is_l3_proto_enabled, lif->name, lif->ifindex, show_ip_str(lif->ipv4_addr));
+        if (memcmp((char *)lif->ipv6_addr, addr_null, 16) == 0)
+        {
+            sync_mac = 1;
+            recover_vlan_if_mac_on_standby(lif);
+        }
+
         if (lif->is_l3_proto_enabled)
         {
-            if (memcmp((char *)lif->ipv6_addr, addr_null, 16) == 0)
-            {
-                sync_mac = 1;
-                recover_vlan_if_mac_on_standby(lif);
-            }
             is_v4 = 1;
             syn_local_neigh_mac_info_to_peer(lif, sync_add, is_v4, is_v6, sync_mac, 0);
         }
@@ -1221,13 +1222,14 @@ void iccp_event_handler_obj_input_deladdr(struct nl_object *obj, void *arg)
 
         ICCPD_LOG_NOTICE(__FUNCTION__, "l3_proto %d, ifname %s index %d address %s\n",
                 lif->is_l3_proto_enabled, lif->name, lif->ifindex, show_ipv6_str((char *)lif->ipv6_addr));
+        if (lif->ipv4_addr == 0)
+        {
+            sync_mac = 1;
+            recover_vlan_if_mac_on_standby(lif);
+        }
+
         if (lif->is_l3_proto_enabled)
         {
-            if (lif->ipv4_addr == 0)
-            {
-                sync_mac = 1;
-                recover_vlan_if_mac_on_standby(lif);
-            }
             is_v6 = 1;
             syn_local_neigh_mac_info_to_peer(lif, sync_add, is_v4, is_v6, sync_mac, 0);
         }
@@ -2040,6 +2042,7 @@ void update_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
     struct CSM* csm = NULL;
     struct System* sys = NULL;
     struct LocalInterface *lif_po = NULL;
+    struct LocalInterface *lif_peer = NULL;
     uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     char macaddr[64];
     uint8_t system_mac[ETHER_ADDR_LEN];
@@ -2062,6 +2065,16 @@ void update_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
     ICCPD_LOG_NOTICE(__FUNCTION__, " ifname %s vid %d\n", lif_vlan->name, vid);
     LIST_FOREACH(csm, &(sys->csm_list), next)
     {
+        if (csm->peer_link_if) {
+            lif_peer = csm->peer_link_if;
+            vlan = RB_FIND(vlan_rb_tree, &(lif_peer->vlan_tree), &vlan_key);
+            if (vlan && vlan->vlan_itf)
+            {
+                vlan_member = 1;
+                break;
+            }
+        }
+
         LIST_FOREACH(lif_po, &(MLACP(csm).lif_list), mlacp_next)
         {
             if (lif_po->type == IF_T_PORT_CHANNEL)
@@ -2136,7 +2149,11 @@ void recover_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
     struct System* sys = NULL;
     uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     char macaddr[64];
+    uint8_t system_mac[ETHER_ADDR_LEN];
     int ret = 0;
+
+    if (lif_vlan->type != IF_T_VLAN)
+        return;
 
     if ((sys = system_get_instance()) == NULL)
         return;
@@ -2151,35 +2168,35 @@ void recover_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
         return;
     }
 
-    if (lif_vlan->is_l3_proto_enabled == false)
-        return;
-
-    if (lif_vlan->type != IF_T_VLAN)
-        return;
-
     if (csm->role_type != STP_ROLE_STANDBY)
         return;
 
-    if (memcmp(MLACP(csm).remote_system.system_id, null_mac, ETHER_ADDR_LEN) == 0)
+    memset(macaddr, 0, 64);
+    memset(system_mac, 0, ETHER_ADDR_LEN);
+    if (lif_vlan->is_l3_proto_enabled == true)
+    {
+        memcpy(system_mac, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
+        SET_MAC_STR(macaddr, MLACP(csm).remote_system.system_id);
+    } else {
+        memcpy(system_mac, MLACP(csm).system_id, ETHER_ADDR_LEN);
+        SET_MAC_STR(macaddr, MLACP(csm).system_id);
+    }
+
+    if (memcmp(system_mac, null_mac, ETHER_ADDR_LEN) == 0)
         return;
 
-    ICCPD_LOG_DEBUG(__FUNCTION__,
+    ICCPD_LOG_NOTICE(__FUNCTION__,
             "%s Change the system-id of %s from [%02X:%02X:%02X:%02X:%02X:%02X] to [%02X:%02X:%02X:%02X:%02X:%02X].",
-            (csm->role_type == STP_ROLE_STANDBY) ? "Standby" : "Active",
-            lif_vlan->name, lif_vlan->mac_addr[0], lif_vlan->mac_addr[1], lif_vlan->mac_addr[2], 
-            lif_vlan->mac_addr[3], lif_vlan->mac_addr[4], lif_vlan->mac_addr[5],
-            MLACP(csm).remote_system.system_id[0], MLACP(csm).remote_system.system_id[1], 
-            MLACP(csm).remote_system.system_id[2], MLACP(csm).remote_system.system_id[3], 
-            MLACP(csm).remote_system.system_id[4], MLACP(csm).remote_system.system_id[5]);
-
-    memset(macaddr, 0, 64);
-    SET_MAC_STR(macaddr, MLACP(csm).remote_system.system_id);
+            (csm->role_type == STP_ROLE_STANDBY) ? "Standby" : "Active", lif_vlan->name,
+            lif_vlan->l3_mac_addr[0], lif_vlan->l3_mac_addr[1], lif_vlan->l3_mac_addr[2],
+            lif_vlan->l3_mac_addr[3], lif_vlan->l3_mac_addr[4], lif_vlan->l3_mac_addr[5],
+            system_mac[0], system_mac[1], system_mac[2], system_mac[3], system_mac[4], system_mac[5]);
 
     if (local_if_is_l3_mode(lif_vlan))
     {
-        if (memcmp(lif_vlan->l3_mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN) != 0)
+        if (memcmp(lif_vlan->l3_mac_addr, system_mac, ETHER_ADDR_LEN) != 0)
         {
-            ret = iccp_netlink_if_hwaddr_set(lif_vlan->ifindex, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
+            ret = iccp_netlink_if_hwaddr_set(lif_vlan->ifindex, system_mac, ETHER_ADDR_LEN);
             if (ret != 0)
             {
                 ICCPD_LOG_ERR(__FUNCTION__, " set %s mac error, ret = %d", lif_vlan->name, ret);
@@ -2190,10 +2207,28 @@ void recover_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
             iccp_netlink_if_startup_set(lif_vlan->ifindex);
 
             iccp_set_interface_ipadd_mac(lif_vlan, macaddr);
-            memcpy(lif_vlan->l3_mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
+            memcpy(lif_vlan->l3_mac_addr, system_mac, ETHER_ADDR_LEN);
         }
     }
 
     return;
 }
 
+void update_vlan_if_mac_on_iccp_up(struct LocalInterface* lif_peer, int is_up)
+{
+    struct VLAN_ID *vlan_id_list = NULL;
+
+    ICCPD_LOG_NOTICE(__FUNCTION__, " lif name %s, up %d", lif_peer->name, is_up);
+    RB_FOREACH(vlan_id_list, vlan_rb_tree, &(lif_peer->vlan_tree))
+    {
+        if (!vlan_id_list->vlan_itf)
+            continue;
+
+        if (is_up) {
+            update_vlan_if_mac_on_standby(vlan_id_list->vlan_itf);
+        } else {
+            recover_vlan_if_mac_on_standby(vlan_id_list->vlan_itf);
+        }
+
+    }
+}

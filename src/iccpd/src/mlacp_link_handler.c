@@ -2367,6 +2367,10 @@ void mlacp_peer_conn_handler(struct CSM* csm)
      */
     update_peerlink_isolate_from_all_csm_lif(csm);
 
+    if (csm->peer_link_if)
+    {
+        update_vlan_if_mac_on_iccp_up(csm->peer_link_if, 1);
+    }
     sync_unique_ip();
     return;
 }
@@ -2490,6 +2494,12 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
             mlacp_link_enable_traffic_distribution(lif);
         }
     }
+
+    if (csm->peer_link_if)
+    {
+        update_vlan_if_mac_on_iccp_up(csm->peer_link_if, 0);
+    }
+
     ICCPD_LOG_DEBUG(__FUNCTION__, "Peer disconnect %u times",
         SYSTEM_GET_SESSION_DOWN_COUNTER(sys));
     SYSTEM_INCR_SESSION_DOWN_COUNTER(sys);
