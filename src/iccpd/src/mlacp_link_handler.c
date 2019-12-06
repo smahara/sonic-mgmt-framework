@@ -1950,22 +1950,24 @@ static void update_l2_mac_state(struct CSM *csm,
             }
             else
             {
+// Dont set local learn unless learned from MCLAGSYNCD.
+// When interface is UP MAC addresses gets re-learned 
+#if 0
                 /*this may be peerlink is not configured and portchannel is down*/
                 /*when this portchannel up, add the mac back to ASIC*/
                 ICCPD_LOG_DEBUG("ICCP_FDB", "Intf up, add MAC %s to ASIC,"
                     " vlan-id %d Interface %s", mac_addr_to_str(mac_msg->mac_addr),
                     mac_msg->vid, mac_msg->ifname);
 
-// Dont set local learn unless learned from MCLAGSYNCD.
-#if 0
                 /*Remove MAC_AGE_LOCAL flag*/
                 mac_msg->age_flag = set_mac_local_age_flag(csm, mac_msg, 0, 1);
-#endif
+
 
                 memcpy(mac_msg->ifname, mac_msg->origin_ifname, MAX_L_PORT_NAME);
 
                 /*Send dynamic or static mac add message to mclagsyncd*/
                 add_mac_to_chip(mac_msg, mac_msg->fdb_type);
+#endif
             }
         }
     }
@@ -2357,7 +2359,20 @@ void mlacp_peer_conn_handler(struct CSM* csm)
             csm->mlag_id, peer_if->name,
             (peer_if->state == PORT_STATE_UP)? true : false);
     }
+    /* Port isolation is cleaned up when session goes down via
+     * peerlink_port_isolate_cleanup(). MlagOrch blocks all traffic from
+     * ISL to all MLAG interfaces to avoid packet duplicate and transient
+     * loop to cover the case where peer link is still up when ICCP goes
+     * down. On session up, update port isolation group based on the
+     * latest remote interface state. This is needed to cover the case
+     * where all remote MLAG interfaces are down after ICCP comes back up
+     */
+    update_peerlink_isolate_from_all_csm_lif(csm);
 
+    if (csm->peer_link_if)
+    {
+        update_vlan_if_mac_on_iccp_up(csm->peer_link_if, 1);
+    }
     sync_unique_ip();
     return;
 }
@@ -2457,6 +2472,12 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
         }
     }
 
+    /* Send ICCP down update to Mclagsyncd before clearing all port isolation
+     * so that mclagsync can differentiate between session down and all remote
+     * MLAG interface down
+     */
+    mlacp_link_set_iccp_state(csm->mlag_id, false);
+
     /* Clean all port block*/
     peerlink_port_isolate_cleanup(csm);
 
@@ -2475,12 +2496,15 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
             mlacp_link_enable_traffic_distribution(lif);
         }
     }
+
+    if (csm->peer_link_if)
+    {
+        update_vlan_if_mac_on_iccp_up(csm->peer_link_if, 0);
+    }
+
     ICCPD_LOG_DEBUG(__FUNCTION__, "Peer disconnect %u times",
         SYSTEM_GET_SESSION_DOWN_COUNTER(sys));
     SYSTEM_INCR_SESSION_DOWN_COUNTER(sys);
-
-    /* Send ICCP down update to Mclagsyncd */
-    mlacp_link_set_iccp_state(csm->mlag_id, false);
 
     /* On standby, system ID is reverted back to its local system ID.
      * Update Mclagsyncd

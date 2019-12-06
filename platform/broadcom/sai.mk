@@ -1,7 +1,7 @@
 BRCM_SAI_VER = 3.255.6.6
-BRCM_SAI = "libsaibcm_$(BRCM_SAI_VER)_amd64.deb"
-BRCM_SAI_DEV = "libsaibcm-dev_$(BRCM_SAI_VER)_amd64.deb"
-BRCM_SAI_DIAG = "libsaibcm-diag_$(BRCM_SAI_VER)_amd64.deb"
+BRCM_SAI = libsaibcm_$(BRCM_SAI_VER)_amd64.deb
+BRCM_SAI_DEV = libsaibcm-dev_$(BRCM_SAI_VER)_amd64.deb
+BRCM_SAI_DIAG = libsaibcm-diag_$(BRCM_SAI_VER)_amd64.deb
 BRCM_SAI_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/$(BRCM_SAI_VER)"
 SAI_LIBS_MOUNT_POINT = /sai_libs
 
