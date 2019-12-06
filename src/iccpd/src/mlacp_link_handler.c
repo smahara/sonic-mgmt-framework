@@ -1950,22 +1950,24 @@ static void update_l2_mac_state(struct CSM *csm,
             }
             else
             {
+// Dont set local learn unless learned from MCLAGSYNCD.
+// When interface is UP MAC addresses gets re-learned 
+#if 0
                 /*this may be peerlink is not configured and portchannel is down*/
                 /*when this portchannel up, add the mac back to ASIC*/
                 ICCPD_LOG_DEBUG("ICCP_FDB", "Intf up, add MAC %s to ASIC,"
                     " vlan-id %d Interface %s", mac_addr_to_str(mac_msg->mac_addr),
                     mac_msg->vid, mac_msg->ifname);
 
-// Dont set local learn unless learned from MCLAGSYNCD.
-#if 0
                 /*Remove MAC_AGE_LOCAL flag*/
                 mac_msg->age_flag = set_mac_local_age_flag(csm, mac_msg, 0, 1);
-#endif
+
 
                 memcpy(mac_msg->ifname, mac_msg->origin_ifname, MAX_L_PORT_NAME);
 
                 /*Send dynamic or static mac add message to mclagsyncd*/
                 add_mac_to_chip(mac_msg, mac_msg->fdb_type);
+#endif
             }
         }
     }
