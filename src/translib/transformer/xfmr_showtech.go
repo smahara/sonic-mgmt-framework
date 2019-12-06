@@ -42,7 +42,7 @@ var rpc_showtech_cb RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) ([]by
 
     err = json.Unmarshal(body, &operand)
     if err != nil {
-        glog.Errorf("Failed to parse rpc input; err=%v", err)
+        glog.Errorf("%Error: Failed to parse rpc input; err=%v", err)
         return nil,tlerr.InvalidArgs("Invalid rpc input")
     }
 
@@ -67,7 +67,7 @@ var rpc_showtech_cb RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) ([]by
 
     host_output := hostQuery("showtech.info", operand.Input.Date)
     if host_output.Err != nil {
-        glog.Errorf("Showtech host Query failed: err=%v", host_output.Err)
+        glog.Errorf("%Error: Showtech host Query failed: err=%v", host_output.Err)
         glog.Flush()
         return nil, host_output.Err
     }
