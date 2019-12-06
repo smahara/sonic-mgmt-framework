@@ -24,7 +24,7 @@ def invoke(func, args):
 def run(func, args):
 
     if func != 'rpc_sonic_show_techsupport_sonic_show_techsupport_info':
-        print("ERROR: Python: Show Techsupport parsing Failed: Invalid "
+        print("%Error: Show Techsupport parsing Failed: Invalid "
               "function")
         return
 
