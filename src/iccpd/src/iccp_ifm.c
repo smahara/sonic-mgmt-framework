@@ -1078,6 +1078,10 @@ void iccp_parse_if_vlan_info_from_netlink(struct nlmsghdr *n)
                     {
                         ICCPD_LOG_DEBUG(__FUNCTION__, "Remove %s from VLAN %d", lif->name, vlan->vid);
 
+                        if (lif->is_peer_link && vlan->vlan_itf)
+                        {
+                            recover_vlan_if_mac_on_standby (vlan->vlan_itf);
+                        }
                         VLAN_RB_REMOVE(vlan_rb_tree, &(lif->vlan_tree), vlan);
                         free(vlan);
                     }
