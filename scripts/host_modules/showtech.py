@@ -39,7 +39,7 @@ class Showtech(host_service.HostModule):
             else:
                 output = errmsg
 
-            print("Host side: Failed: " + str(rc))
+            print("%Error: Host side: Failed: " + str(rc))
             return rc, output
 
         output_string = output.decode("utf-8")

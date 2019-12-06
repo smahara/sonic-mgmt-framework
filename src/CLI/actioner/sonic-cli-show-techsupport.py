@@ -32,19 +32,19 @@ def run(func, args):
         api_response = invoke(func, args)
 
     except:
-        print("An exception occurred while attempting to gather the "
+        print("%Error: An exception occurred while attempting to gather the "
               "requested information via a remote procedure call. ")
 
     response = api_response.content
     if ((response is None) or
        (response['sonic-show-techsupport:output'] is None)):
-        print("Command Failure: Unknown failure type")
+        print("%Error: Command Failure: Unknown failure type")
         return
 
     output_msg_object = response['sonic-show-techsupport:output']
     if ((output_msg_object['output-filename'] is None) or
        (len(output_msg_object['output-filename']) is 0)):
-        print("Command Failure: Unknown failure type")
+        print("%Error: Command Failure: Unknown failure type")
         return
 
     if not api_response.ok():
