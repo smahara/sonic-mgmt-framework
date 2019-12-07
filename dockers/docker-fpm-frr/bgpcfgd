@@ -778,15 +778,15 @@ class BGPConfigDaemon:
                          ('route_download_filter',                  '{no:no-prefix}table-map {}')
     ]
 
-    cmn_key_map = [('peer_asn',                             '{no:no-prefix}neighbor {} remote-as {}'),
+    cmn_key_map = [('asn',                                  '{no:no-prefix}neighbor {} remote-as {}'),
                    ('peer_type',                            '{no:no-prefix}neighbor {} remote-as {}'),
                    ('local_asn',                            '{no:no-prefix}neighbor {} local-as {}'),
-                   ('local_address',                        '{no:no-prefix}neighbor {} update-source {}'),
-                   ('description',                          '{no:no-prefix}neighbor {} description {}'),
+                   ('local_addr',                           '{no:no-prefix}neighbor {} update-source {}'),
+                   ('name',                                 '{no:no-prefix}neighbor {} description {}'),
                    ('ebgp_multihop',                        '{no:no-prefix}neighbor {} ebgp-multihop', ['true', 'false']),
                    ('ebgp_multihop_ttl',                    '{no:no-prefix}neighbor {} ebgp-multihop {}'),
                    ('auth_password',                        '{no:no-prefix}neighbor {} password {}'),
-                   (['keepalive_interval', 'hold_time'],    '{no:no-prefix}neighbor {} timers {} {}'),
+                   (['keepalive', 'holdtime'],              '{no:no-prefix}neighbor {} timers {} {}'),
                    ('conn_retry',                           '{no:no-prefix}neighbor {} timers connect {}'),
                    ('min_adv_interval',                     '{no:no-prefix}neighbor {} advertisement-interval {}'),
                    ('passive_mode',                         '{no:no-prefix}neighbor {} passive', ['true', 'false']),
@@ -806,14 +806,14 @@ class BGPConfigDaemon:
     ]
 
     nbr_key_map = [('peer_group_name',  '{no:no-prefix}neighbor {} peer-group {}'),
-                   ('enabled',          '{no:no-prefix}neighbor {} shutdown', ['false', 'true'])
+                   ('admin_status',     '{no:no-prefix}neighbor {} shutdown', ['false', 'true'])
     ]
 
     nbr_af_key_map = [('allow_as_in',                                       '{no:no-prefix}neighbor {} allowas-in', ['true', 'false']),
                       ('allow_as_count',                                    '{no:no-prefix}neighbor {} allowas-in {}'),
                       ('allow_as_origin',                                   '{no:no-prefix}neighbor {} allowas-in origin', ['true', 'false']),
-                      ('enabled|ipv4',                                      '{no:no-prefix}neighbor {} activate', ['true', 'false']),
-                      ('enabled|ipv6',                                      '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
+                      ('admin_status|ipv4',                                 '{no:no-prefix}neighbor {} activate', ['true', 'false']),
+                      ('admin_status|ipv6',                                 '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
                       ('send_default_route',                                '{no:no-prefix}neighbor {} default-originate', ['true', 'false']),
                       ('default_rmap',                                      '{no:no-prefix}neighbor {} default-originate route-map {}'),
                       ('max_prefix_limit',                                  '{no:no-prefix}neighbor {} maximum-prefix {}'),
@@ -824,7 +824,7 @@ class BGPConfigDaemon:
                       ('route_map_out',                                     '{no:no-prefix}neighbor {} route-map {} out'),
                       ('soft_reconfiguration_in',                           '{no:no-prefix}neighbor {} soft-reconfiguration inbound', ['true', 'false']),
                       ('unsuppress_map_name',                               '{no:no-prefix}neighbor {} unsuppress-map {}'),
-                      ('route_reflector_client',                            '{no:no-prefix}neighbor {} route-reflector-client', ['true', 'false']),
+                      ('rrclient',                                          '{no:no-prefix}neighbor {} route-reflector-client', ['true', 'false']),
                       ('weight',                                            '{no:no-prefix}neighbor {} weight {}'),
                       ('as_override',                                       '{no:no-prefix}neighbor {} as-override', ['true', 'false']),
                       ('send_community',                                    '{no:no-prefix}neighbor {} send-community {}', hdl_send_com),
@@ -833,7 +833,7 @@ class BGPConfigDaemon:
                       (('+unchanged_as_path',
                         '+unchanged_med', '+unchanged_next_hop'),           '{no:no-prefix}neighbor {} attribute-unchanged {:unchg-attr}', ['true', 'false']),
                       (['filter_list_name', 'filter_list_direction'],       '{no:no-prefix}neighbor {} filter-list {} {}'),
-                      ('nexthop_self_enabled',                              '{no:no-prefix}neighbor {} next-hop-self', ['true', 'false']),
+                      ('nhself',                                            '{no:no-prefix}neighbor {} next-hop-self', ['true', 'false']),
                       ('nexthop_self_force',                                '{no:no-prefix}neighbor {} next-hop-self force', ['true', 'false']),
                       (['prefix_list_name', 'prefix_list_direction'],       '{no:no-prefix}neighbor {} prefix-list {} {}'),
                       (('remove_private_as_enabled',
@@ -1100,7 +1100,7 @@ class BGPConfigDaemon:
                 if table == 'BGP_NEIGHBOR_AF' or table == 'BGP_PEER_GROUP_AF' and key is not None:
                     _, af_ip_type = key.split('|')
                     tbl_key, _ = af_ip_type.lower().split('_')
-                    tbl_key = {'enabled': tbl_key}
+                    tbl_key = {'admin_status': tbl_key}
                 elif table == 'ROUTE_MAP':
                     tbl_key = {}
                     for attr_name, table_name in {'match_prefix_set': 'PREFIX', 'match_next_hop': 'PREFIX'}.items():
@@ -1183,10 +1183,10 @@ class BGPConfigDaemon:
                         peer_grp = self.bgp_peer_group[vrf][dval.data]
                         peer_grp.ref_nbrs.add(key)
                     if (table == 'BGP_NEIGHBOR' and
-                            (('peer_asn' in data and data['peer_asn'].op == CachedDataWithOp.OP_DELETE) or
+                            (('asn' in data and data['asn'].op == CachedDataWithOp.OP_DELETE) or
                              ('peer_type' in data and data['peer_type'].op == CachedDataWithOp.OP_DELETE) or
                              ('peer_group_name' in data and data['peer_group_name'].op == CachedDataWithOp.OP_DELETE))):
-                        # delete peer_asn or peer_group will delete all neighbor
+                        # delete asn or peer_group will delete all neighbor
                         self.__delete_vrf_neighbor(vrf, key, data, False)
                 else:
                     # Neighbor is deleted
@@ -1460,7 +1460,7 @@ class BGPConfigDaemon:
         self.bgp_table_handler_common(table, key, data, [{'ebgp_route_distance', 'ibgp_route_distance'}])
 
     def bgp_neighbor_handler(self, table, key, data):
-        self.bgp_table_handler_common(table, key, data, [{'keepalive_interval', 'hold_time'}])
+        self.bgp_table_handler_common(table, key, data, [{'keepalive', 'holdtime'}])
 
     def bgp_neighbor_af_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'filter_list_name', 'filter_list_direction'},
