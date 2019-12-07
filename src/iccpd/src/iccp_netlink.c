@@ -2104,9 +2104,13 @@ void update_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
     memset(system_mac, 0, ETHER_ADDR_LEN);
     if (lif_vlan->is_l3_proto_enabled == false)
     {
+        if (memcmp(MLACP(csm).remote_system.system_id, null_mac, ETHER_ADDR_LEN) == 0)
+            return;
         memcpy(system_mac, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
         SET_MAC_STR(macaddr, MLACP(csm).remote_system.system_id);
     } else {
+        if (memcmp(MLACP(csm).system_id, null_mac, ETHER_ADDR_LEN) == 0)
+            return;
         memcpy(system_mac, MLACP(csm).system_id, ETHER_ADDR_LEN);
         SET_MAC_STR(macaddr, MLACP(csm).system_id);
     }
@@ -2145,7 +2149,7 @@ void update_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
 
 void recover_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
 {
-    struct CSM *csm;
+    struct CSM *csm = NULL;
     struct System* sys = NULL;
     uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     char macaddr[64];
@@ -2158,13 +2162,14 @@ void recover_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
     if ((sys = system_get_instance()) == NULL)
         return;
 
-    while (!LIST_EMPTY(&(sys->csm_list)))
+    LIST_FOREACH(csm, &(sys->csm_list), next)
     {
-        csm = LIST_FIRST(&(sys->csm_list));
-        break;
+        if (csm->peer_link_if) {
+            break;
+        }
     }
 
-    if (!csm) {
+    if (csm == NULL) {
         return;
     }
 
@@ -2175,9 +2180,13 @@ void recover_vlan_if_mac_on_standby(struct LocalInterface* lif_vlan)
     memset(system_mac, 0, ETHER_ADDR_LEN);
     if (lif_vlan->is_l3_proto_enabled == true)
     {
+        if (memcmp(MLACP(csm).remote_system.system_id, null_mac, ETHER_ADDR_LEN) == 0)
+            return;
         memcpy(system_mac, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
         SET_MAC_STR(macaddr, MLACP(csm).remote_system.system_id);
     } else {
+        if (memcmp(MLACP(csm).system_id, null_mac, ETHER_ADDR_LEN) == 0)
+            return;
         memcpy(system_mac, MLACP(csm).system_id, ETHER_ADDR_LEN);
         SET_MAC_STR(macaddr, MLACP(csm).system_id);
     }
