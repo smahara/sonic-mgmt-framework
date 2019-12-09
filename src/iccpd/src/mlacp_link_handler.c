@@ -3138,7 +3138,10 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
     }
 
     if (!first_csm)
+    {
+        ICCPD_LOG_NOTICE(__FUNCTION__, "CSM not ready...");
         return;
+    }
 
     /*If support multiple CSM, the L2MC list of orphan port must be moved to sys->l2mc_rb*/
     csm = first_csm;
@@ -3162,7 +3165,10 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
     {
         /* Find local itf*/
         if (!(l2mc_lif = local_if_find_by_name(ifname)))
+        {
+            ICCPD_LOG_NOTICE(__FUNCTION__, "local if for %s not found", ifname);
             return;
+        }
 
         sprintf(l2mc_msg->ifname, "%s", ifname);
         sprintf(l2mc_msg->origin_ifname, "%s", ifname);
