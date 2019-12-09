@@ -1,11 +1,12 @@
-
 package server
 
 import (
 	"net/http"
-	"github.com/golang/glog"
 	"strings"
+
+	"github.com/golang/glog"
 )
+
 func ClientCertAuthenAndAuthor(r *http.Request, rc *RequestContext) error {
 
 	var username string
@@ -24,7 +25,7 @@ func ClientCertAuthenAndAuthor(r *http.Request, rc *RequestContext) error {
 	}
 	if err := PopulateAuthStruct(username, &rc.Auth); err != nil {
 		glog.Infof("[%s] Failed to retrieve authentication information; %v", rc.ID, err)
-		return httpError(http.StatusUnauthorized, "")	
+		return httpError(http.StatusUnauthorized, "")
 	}
 	glog.Infof("[%s] Received user=%s", rc.ID, username)
 
