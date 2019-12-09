@@ -1,0 +1,6 @@
+*.d
+*.o
+*.so
+*.so.2
+*.dbus-proxy.h
+*.dbus-adaptor.h

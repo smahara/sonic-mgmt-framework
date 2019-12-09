@@ -3,14 +3,15 @@
 #include "dbus-proxy.h"
 #include "../shared/dbus-address.h" /* DBUS_BUS_NAME_BASE, DBUS_OBJ_PATH_BASE */
 
-int ham_usermod(const char * login, const char * options)
+int ham_groupdel(const char * group)
 {
     DBus::BusDispatcher         dispatcher;
     DBus::default_dispatcher = &dispatcher;
     DBus::Connection conn    = DBus::Connection::SystemBus();
 
     accounts_proxy_c interface(conn, DBUS_BUS_NAME_BASE, DBUS_OBJ_PATH_BASE);
-    return interface.usermod(login, options != nullptr ? options : "");
-}
+    ::DBus::Struct< bool, std::string > ret = interface.groupdel(group);
 
+    return ret._1;
+}
 

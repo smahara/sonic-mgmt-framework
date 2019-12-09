@@ -21,6 +21,7 @@ public:
     bool         hidden_m;
 };
 
+extern const subsys_c subsys_accounts;
 extern const subsys_c subsys_debug;
 
 #endif /* SUBSYS_H */

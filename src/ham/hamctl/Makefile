@@ -1,9 +1,9 @@
 # sudo apt-get install libsystemd-dev libdbus-c++-dev
 TARGET    := hamctl
-SRCS      := main.cpp subsys-debug.cpp
+SRCS      := $(wildcard *.cpp)
 
 PKGS      := libsystemd dbus-c++-glib-1
-LDLIBS    := $(shell pkg-config --libs   ${PKGS})
+LDLIBS    := $(shell pkg-config --libs   ${PKGS}) -lcrypt
 CPPFLAGS  := $(shell pkg-config --cflags ${PKGS}) -DCTL_NAME=\"${TARGET}\"
 CFLAGS    := -Wall -Werror -O3
 CXXFLAGS  := -std=c++11 ${CFLAGS}
