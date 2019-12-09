@@ -1,24 +1,26 @@
 #!/usr/bin/env python
 
-import os.path
-import sys, traceback
-import json
-sys.path.append('/usr/share/sonic/platform/sonic_platform')
-import pddfparse
-import argparse
 
 try:
+    import os.path
+    import sys, traceback
+    import json
+    sys.path.append('/usr/share/sonic/platform/sonic_platform')
+    import pddfparse
+    import argparse
     from sonic_platform_base.thermal_base import ThermalBase
 except ImportError as e:
     raise ImportError(str(e) + "- required module not found")
 
 
 
-class Thermal(ThermalBase):
+class PddfThermal(ThermalBase):
+    """PDDF generic Thermal class"""
+
     def __init__(self, index):
         global pddf_obj
         global plugin_data
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../pddf/pd-plugin.json')) as pd:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../../../platform/pddf/pd-plugin.json')) as pd:
             plugin_data = json.load(pd)
 
         pddf_obj = pddfparse.PddfParse()

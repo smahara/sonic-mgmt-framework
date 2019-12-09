@@ -29,10 +29,11 @@ def stop_platform_svc():
     #status, output = commands.getstatusoutput("touch /usr/share/sonic/platform/pddf_support")
     
     # Enable PDDF 2.0 object class for IX8
-    status, output = commands.getstatusoutput("mkdir /usr/share/sonic/platform/sonic_platform")
-    if status:
-        print "Unable to create 2.0 object class folder /usr/share/sonic/platform/sonic_platform"
-        return False
+    if not os.path.exists('/usr/share/sonic/platform/sonic_platform'):
+        status, output = commands.getstatusoutput("mkdir /usr/share/sonic/platform/sonic_platform")
+        if status:
+            print "Unable to create 2.0 object class folder /usr/share/sonic/platform/sonic_platform"
+            return False
 
     #status, output = commands.getstatusoutput("reboot -y")
     #if status:

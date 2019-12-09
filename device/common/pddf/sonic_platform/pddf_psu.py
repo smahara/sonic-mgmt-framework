@@ -15,21 +15,21 @@
 #- psu_fan1_speed_rpm
 #
 
-import os.path
-import sys, traceback
-sys.path.append('/usr/share/sonic/platform/sonic_platform')
-import pddfparse
-import json
 
 try:
+    import os.path
+    import sys, traceback
+    sys.path.append('/usr/share/sonic/platform/sonic_platform')
+    import pddfparse
+    import json
     from sonic_platform_base.psu_base import PsuBase
     from sonic_platform.fan import Fan
 except ImportError as e:
     raise ImportError (str(e) + "- required module not found")
 
 
-class Psu(PsuBase):
-    """PDDF generic PSU util class"""
+class PddfPsu(PsuBase):
+    """PDDF generic PSU class"""
 
     color_map = {
          "STATUS_LED_COLOR_GREEN" : "on",
@@ -42,7 +42,7 @@ class Psu(PsuBase):
         PsuBase.__init__(self)
         global pddf_obj
         global plugin_data
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../pddf/pd-plugin.json')) as pd:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)) + '/../../../platform/pddf/pd-plugin.json')) as pd:
             plugin_data = json.load(pd)
 
         pddf_obj = pddfparse.PddfParse()
