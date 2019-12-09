@@ -77,7 +77,7 @@ static std::string get_hashed_pw()
         }
         else
         {
-            fprintf(stderr, FMT_RED "Error! Unable th hash password" FMT_NORMAL "\n");
+            fprintf(stderr, FMT_RED "Error! Unable to hash password" FMT_NORMAL "\n");
         }
 
     }
@@ -173,12 +173,21 @@ static int accounts(int argc, char *argv[])
                 return -1;
             }
 
-            const char                  * login_p   = argv[2];
-            std::string                   hashed_pw = get_hashed_pw();
-            std::vector< std::string >    roles     = get_roles();
+            const char   * login_p   = argv[2];
+            std::string    hashed_pw = get_hashed_pw();
 
-            ::DBus::Struct< bool, std::string > rv = accounts.useradd(login_p, roles, hashed_pw);
-            if (!rv._1) std::cout << rv._2 << '\n';
+            rc = hashed_pw.length() == 0 ? 1 : 0;
+            if (rc == 0)
+            {
+                std::vector< std::string > roles = get_roles();
+
+                ::DBus::Struct< bool, std::string > rv = accounts.useradd(login_p, roles, hashed_pw);
+                if (!rv._1)
+                {
+                    rc = 1;
+                    std::cout << rv._2 << '\n';
+                }
+            }
         }
         else if (0 == strcmp("userdel", command_p))
         {
@@ -191,7 +200,11 @@ static int accounts(int argc, char *argv[])
             const char * login_p  = argv[2];
 
             ::DBus::Struct< bool, std::string > rv = accounts.userdel(login_p);
-            if (!rv._1) std::cout << rv._2 << '\n';
+            if (!rv._1)
+            {
+                rc = 1;
+                std::cout << rv._2 << '\n';
+            }
         }
         else if (0 == strcmp("passwd", command_p))
         {
@@ -201,11 +214,19 @@ static int accounts(int argc, char *argv[])
                 return -1;
             }
 
-            const char  * login_p   = argv[2];
-            std::string   hashed_pw = get_hashed_pw();
+            const char   * login_p   = argv[2];
+            std::string    hashed_pw = get_hashed_pw();
 
-            ::DBus::Struct< bool, std::string > rv = accounts.passwd(login_p, hashed_pw);
-            if (!rv._1) std::cout << rv._2 << '\n';
+            rc = hashed_pw.length() == 0 ? 1 : 0;
+            if (rc == 0)
+            {
+                ::DBus::Struct< bool, std::string > rv = accounts.passwd(login_p, hashed_pw);
+                if (!rv._1)
+                {
+                    rc = 1;
+                    std::cout << rv._2 << '\n';
+                }
+            }
         }
         else if (0 == strcmp("set_roles", command_p))
         {
@@ -215,11 +236,15 @@ static int accounts(int argc, char *argv[])
                 return -1;
             }
 
-            const char                  * login_p   = argv[2];
-            std::vector< std::string >    roles     = get_roles();
+            const char                  * login_p = argv[2];
+            std::vector< std::string >    roles   = get_roles();
 
             ::DBus::Struct< bool, std::string > rv = accounts.set_roles(login_p, roles);
-            if (!rv._1) std::cout << rv._2 << '\n';
+            if (!rv._1)
+            {
+                rc = 1;
+                std::cout << rv._2 << '\n';
+            }
         }
         else
         {
