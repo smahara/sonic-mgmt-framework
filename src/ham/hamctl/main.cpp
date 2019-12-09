@@ -13,6 +13,7 @@
 
 static const struct subsys_c * subsystems[] =
 {
+    &subsys_accounts,
     &subsys_debug,
 };
 
@@ -86,6 +87,8 @@ static int run_command(const subsys_c & command_r, int argc, char *argv[])
  */
 int main(int argc, char *argv[])
 {
+    setvbuf(stdout, NULL, _IONBF, 0); // Make sure stdout is unbuffered
+
     static const struct option options[] =
     {
         { "help",    no_argument, NULL, 'h' },

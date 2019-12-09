@@ -14,6 +14,7 @@ After=nss-user-lookup.target
 Type=dbus
 BusName=org.SONiC.HostAccountManagement
 ExecStart=/usr/sbin/hamd
+ExecReload=/bin/kill -HUP $MAINPID
 
 # Resource Limitations
 LimitCORE=infinity

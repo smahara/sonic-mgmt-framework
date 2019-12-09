@@ -10,10 +10,13 @@
 extern "C" {
 #endif
 
-int ham_useradd(const char * login, const char * options);
-int ham_usermod(const char * login, const char * options);
+int ham_useradd(const char * login, const char * role, const char * hashed_pw);
+int ham_userdel(const char * login);
+int ham_chpasswd(const char * login, const char * hashed_pw);
+int ham_chrole(const char * login, const char * role);
+
 int ham_groupadd(const char * group, const char * options);
-int ham_groupmod(const char * group, const char * options);
+int ham_groupdel(const char * group);
 
 #ifdef __cplusplus
 }
