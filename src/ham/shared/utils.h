@@ -48,8 +48,9 @@ static inline char * cpy2buf(char * dest, const char * srce, size_t len)
 
 
 #ifdef __cplusplus
-#   include <string>
-#   include <sstream>               /* std::ostringstream */
+#   include <string>                /* std::string */
+#   include <sstream>               /* std::ostringstream, std::istringstream */
+#   include <vector>                /* std::vector */
 
     inline const char * true_false(bool x, const char * pos_p = "true", const char * neg_p = "false")   { return (x) ? pos_p : neg_p; }
 
@@ -86,6 +87,29 @@ static inline char * cpy2buf(char * dest, const char * srce, size_t len)
         ss << concluder;
         return ss.str();
     }
+
+    /**
+     * Returns a list (vector) of the words in the string, separated by the
+     * delimiter character.
+     *
+     * @param s - The string to split
+     * @param delimiter - Character dividing the string into split groups;
+     *                    default is semi-colon.
+     *
+     * @return std::vector<std::string>
+     */
+    std::vector<std::string> split(const std::string& s, char delimiter)
+    {
+       std::vector<std::string> tokens;
+       std::string token;
+       std::istringstream token_stream(s);
+       while (std::getline(token_stream, token, delimiter))
+       {
+          tokens.push_back(token);
+       }
+       return tokens;
+    }
+
 #endif // __cplusplus
 
 #endif /* __UTILS_H */

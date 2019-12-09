@@ -16,6 +16,9 @@ class hamd_config_c
 public:
     hamd_config_c(int argc, char **argv);
 
+    /**
+     * @brief Read configuration and update hamd_config_c object
+     */
     void reload();
 
     uid_t uid_fit_into_range(uint64_t hash) const
@@ -23,20 +26,40 @@ public:
         return (uid_t)((hash % sac_uid_range_m) + sac_uid_min_m);
     }
 
+    /**
+     * @brief return the shell program to assign to new users.
+     */
+    const std::string & shell() const {return shell_m;}
+
+    /**
+     * @brief return the command to execute to create a user's certificates.
+     */
+    std::string certgen_cmd(const std::string & user_r, const std::string & certdir_r) const;
+
 private:
     static const  gint  poll_period_sec_default_m = 30;
     static const  gint  sac_uid_min_default_m     = 5000;  // System-Assigned IDs will be in the
     static const  gint  sac_uid_max_default_m     = 59999; // range [sac_uid_min_m..sac_uid_max_m]
     static const  bool  tron_default_m            = false;
     const gchar       * conf_file_default_pm      = "/etc/sonic/hamd/config";
+    std::string         certgen_cmd_default_m     = "/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout $CERTDIR/key.pem -x509 -days 358000 -out $CERTDIR/certificate.pem -subj \"/C=/ST=/L=/O=/CN=$USERNAME\"";
+    std::string         shell_default_m           = "/usr/bin/run-klish-in-mgmt-framework.py";
 
 public:
+    bool                tron_m            = tron_default_m;
+
+    const gchar       * conf_file_pm      = conf_file_default_pm;
+
     gint                poll_period_sec_m = poll_period_sec_default_m;
+
     gint                sac_uid_min_m     = sac_uid_min_default_m;  // System-Assigned IDs will be in the
     gint                sac_uid_max_m     = sac_uid_max_default_m;  // range [sac_uid_min_m..sac_uid_max_m]
     gint                sac_uid_range_m   = 1 + (sac_uid_max_m - sac_uid_min_m);
-    bool                tron_m            = tron_default_m;
-    const gchar       * conf_file_pm      = conf_file_default_pm;
+
+
+    std::string         certgen_cmd_m     = certgen_cmd_default_m;
+
+    std::string         shell_m           = shell_default_m;
 };
 
 
@@ -52,10 +75,12 @@ public:
     virtual ~hamd_c() {}
 
     // DBus "accounts" interface
-    virtual int32_t useradd(const std::string& login, const std::string& options);
-    virtual int32_t usermod(const std::string& login, const std::string& options);
-    virtual int32_t groupadd(const std::string& group, const std::string& options);
-    virtual int32_t groupmod(const std::string& group, const std::string& options);
+    virtual ::DBus::Struct< bool, std::string > useradd(const std::string& login, const std::vector< std::string >& roles, const std::string& hashed_pw);
+    virtual ::DBus::Struct< bool, std::string > userdel(const std::string& login);
+    virtual ::DBus::Struct< bool, std::string > passwd(const std::string& login, const std::string& hashed_pw);
+    virtual ::DBus::Struct< bool, std::string > set_roles(const std::string& login, const std::vector< std::string >& roles);
+    virtual ::DBus::Struct< bool, std::string > groupadd(const std::string& group);
+    virtual ::DBus::Struct< bool, std::string > groupdel(const std::string& group);
 
     // DBus "nss" interface
     virtual ::DBus::Struct< bool, std::string, std::string, uint32_t, uint32_t, std::string, std::string, std::string > getpwnam(const std::string& name);
@@ -83,6 +108,7 @@ private:
     gtimer_c             poll_timer_m;
     static bool          on_poll_timeout(gpointer user_data_p); // This callback functions must follow GSourceFunc signature.
     void                 rm_unconfirmed_users() const;
+    std::string          certgen(const std::string  & login) const;
 };
 
 #endif /* HAMD_H */
