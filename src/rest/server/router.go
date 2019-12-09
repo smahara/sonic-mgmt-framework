@@ -157,7 +157,7 @@ func authMiddleware(inner http.Handler) http.Handler {
 				success = true
 			}
 		}
-		if !success && ClientAuth.Enabled("cert") {
+		if !success && (ClientAuth.Enabled("cert") || ClientAuth.Enabled("cliuser")) {
 			err = ClientCertAuthenAndAuthor(r, rc)
 			if err == nil {
 				success = true

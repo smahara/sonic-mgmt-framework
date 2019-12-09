@@ -157,7 +157,8 @@ func spawnUnixListener() {
 		CipherSuites:             getPreferredCipherSuites(),
 	}
 
-	localListener, err := net.Listen("unix", "/var/run/rest-local.sock")
+	// localListener, err := net.Listen("unix", "/var/run/rest-local.sock")
+	localListener, err := net.Listen("tcp", "127.0.0.1:8443")
 	if err != nil {
 		glog.Fatal(err)
 	}

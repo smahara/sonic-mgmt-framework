@@ -37,7 +37,7 @@ type UserCredential struct {
 }
 type UserAuth map[string]bool
 
-var ClientAuth = UserAuth{"password": false, "cert": false, "jwt": false}
+var ClientAuth = UserAuth{"password": false, "cert": false, "jwt": false, "cliuser": false}
 
 func (i UserAuth) String() string {
 	b := new(bytes.Buffer)
