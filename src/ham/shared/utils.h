@@ -98,7 +98,7 @@ static inline char * cpy2buf(char * dest, const char * srce, size_t len)
      *
      * @return std::vector<std::string>
      */
-    std::vector<std::string> split(const std::string& s, char delimiter)
+    static inline std::vector<std::string> split(const std::string& s, char delimiter)
     {
        std::vector<std::string> tokens;
        std::string token;
