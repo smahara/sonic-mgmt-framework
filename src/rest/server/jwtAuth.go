@@ -128,8 +128,8 @@ func JwtAuthenAndAuthor(r *http.Request, rc *RequestContext) (jwtToken, error) {
 	}
 	auth_parts := strings.Split(auth_hdr, " ")
 	if len(auth_parts) != 2 || auth_parts[0] != "Bearer" {
-		glog.Errorf("[%s] Bad Request", rc.ID)
-		return token, httpError(http.StatusBadRequest, "Bad Request")
+		glog.Errorf("[%s] Failed to authenticate, Invalid JWT Token", rc.ID)
+		return token, httpError(http.StatusUnauthorized, "Invalid JWT Token")
 	}
 
 	token.Token = auth_parts[1]
@@ -144,8 +144,8 @@ func JwtAuthenAndAuthor(r *http.Request, rc *RequestContext) (jwtToken, error) {
 			return token, httpError(http.StatusUnauthorized, "Invalid JWT Signature")
 
 		}
-		glog.Errorf("[%s] Bad Request", rc.ID)
-		return token, httpError(http.StatusBadRequest, "Bad Request")
+		glog.Errorf("[%s] Failed to authenticate, Invalid JWT Token", rc.ID)
+		return token, httpError(http.StatusUnauthorized, "Invalid JWT Token")
 	}
 	if !tkn.Valid {
 		glog.Errorf("[%s] Failed to authenticate, Invalid JWT Token", rc.ID)
