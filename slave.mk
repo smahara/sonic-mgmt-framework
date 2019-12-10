@@ -514,7 +514,7 @@ SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_ONLINE_FILES))
 # This file contains the values of target environment flags and gets updated only when there is a change in the flags value.
 # This file is added as a dependency to the target, so that any change in the file will trigger the target recompilation.
 # For Eg:
-#       target/debs/stretch/linux-headers-4.9.0-9-2-common_4.9.168-1+deb9u3_all.deb.dep
+#       target/debs/stretch/linux-headers-4.9.0-11-2-common_4.9.189-3+deb9u2_all.deb.dep
 #
 $(addsuffix .dep,$(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS) $(SONIC_DPKG_DEBS))) : \
 	$(DEBS_PATH)/%.dep : $$(eval $$*_DEP_FLAGS_FILE:=$$@)
