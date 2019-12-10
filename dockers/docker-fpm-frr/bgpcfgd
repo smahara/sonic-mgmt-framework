@@ -58,6 +58,7 @@ def g_run_command(command, use_vtysh_mgr):
             vtysh_mgr.start()
         if not vtysh_mgr.run_vtysh_command(command):
             syslog.syslog(syslog.LOG_ERR, 'command execution failure. Command: "{}"'.format(command))
+            return False
     else:
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         stdout = p.communicate()[0]
@@ -71,11 +72,11 @@ def g_run_command(command, use_vtysh_mgr):
 class VtyshSubprocessMgr(threading.Thread):
     QUIT_MARK = '$$quit$$'
     VTYSH_MARK = 'vtysh '
-    FRR_PROMPT = 'sonic'
     def __init__(self):
         super(VtyshSubprocessMgr, self).__init__(name = 'VTYSH sub-process manager')
         self.master_fd, self.slave_fd = pty.openpty()
         self.resp_q = Queue.Queue()
+        self.hostname = os.uname()[1]
     def get_reply_msg(self):
         msg_buf = StringIO.StringIO()
         while True:
@@ -89,9 +90,9 @@ class VtyshSubprocessMgr(threading.Thread):
                     idx += 1
                 chk_line = reply_msg[idx:].strip()
                 if chk_line.endswith('#'):
-                    if chk_line.startswith(self.FRR_PROMPT):
+                    if chk_line.startswith(self.hostname):
                         break
-                    pmpt_idx = chk_line.find(self.FRR_PROMPT)
+                    pmpt_idx = chk_line.find(self.hostname)
                     if pmpt_idx > 0 and chk_line[pmpt_idx - 1] == '.':
                         break
             except Queue.Empty:
@@ -327,14 +328,6 @@ class BGPKeyMapList(list):
             if not run_cmd:
                 continue
             cmd_list = []
-            if len(upd_id_list) > 0:
-                data_val = self.get_cmd_data(key_list, req_idx_list, data, upd_id_list, no_chg_id_list, merge_vals)
-                if data_val is not None:
-                    cmd = key_map.get_command(daemon, CachedDataWithOp.OP_UPDATE, *(upper_vals + data_val))
-                    if cmd is not None:
-                        cmd_list += cmd
-                    else:
-                        syslog.syslog(syslog.LOG_ERR, 'failed to get upd cmd from value: %s' % data_val)
             if len(del_id_list) > 0:
                 data_val = self.get_cmd_data(key_list, req_idx_list, data, del_id_list, no_chg_id_list, merge_vals)
                 if data_val is not None:
@@ -343,6 +336,14 @@ class BGPKeyMapList(list):
                         cmd_list += cmd
                     else:
                         syslog.syslog(syslog.LOG_ERR, 'failed to get del cmd from value: %s' % data_val)
+            if len(upd_id_list) > 0:
+                data_val = self.get_cmd_data(key_list, req_idx_list, data, upd_id_list, no_chg_id_list, merge_vals)
+                if data_val is not None:
+                    cmd = key_map.get_command(daemon, CachedDataWithOp.OP_UPDATE, *(upper_vals + data_val))
+                    if cmd is not None:
+                        cmd_list += cmd
+                    else:
+                        syslog.syslog(syslog.LOG_ERR, 'failed to get upd cmd from value: %s' % data_val)
             cmd_prefix = 'vtysh '
             for pfx in prefix_list:
                 cmd_prefix += "-c '%s' " % pfx
@@ -831,7 +832,7 @@ class BGPConfigDaemon:
                       ('add_path_tx_all',                                   '{no:no-prefix}neighbor {} addpath-tx-all-paths', ['true', 'false']),
                       ('add_path_tx_bestpath',                              '{no:no-prefix}neighbor {} addpath-tx-bestpath-per-AS', ['true', 'false']),
                       (('+unchanged_as_path',
-                        '+unchanged_med', '+unchanged_next_hop'),           '{no:no-prefix}neighbor {} attribute-unchanged {:unchg-attr}', ['true', 'false']),
+                        '+unchanged_med', '+unchanged_nexthop'),            '{no:no-prefix}neighbor {} attribute-unchanged {:unchg-attr}', ['true', 'false']),
                       (['filter_list_name', 'filter_list_direction'],       '{no:no-prefix}neighbor {} filter-list {} {}'),
                       ('nhself',                                            '{no:no-prefix}neighbor {} next-hop-self', ['true', 'false']),
                       ('nexthop_self_force',                                '{no:no-prefix}neighbor {} next-hop-self force', ['true', 'false']),
@@ -849,8 +850,8 @@ class BGPConfigDaemon:
                          ('match_neighbor',                 '{no:no-prefix}match peer {:peer-ip}'),
                          ('match_tag',                      '{no:no-prefix}match tag {}'),
                          ('match_protocol',                 '{no:no-prefix}match source-protocol {}'),
-                         ('match_next_hop|ipv4',            '{no:no-prefix}match ip next-hop prefix-list {}'),
-                         ('match_next_hop|ipv6',            '{no:no-prefix}match ip next-hop prefix-list {}'), #match ipv6 next-hop prefix-list not suppported by frr
+                         ('match_next_hop_set|ipv4',        '{no:no-prefix}match ip next-hop prefix-list {}'),
+                         ('match_next_hop_set|ipv6',        '{no:no-prefix}match ip next-hop prefix-list {}'), #match ipv6 next-hop prefix-list not suppported by frr
                          ('match_med',                      '{no:no-prefix}match metric {}'),
                          ('match_origin',                   '{no:no-prefix}match origin {}'),
                          ('match_local_pref',               '{no:no-prefix}match local-preference {}'),
@@ -1066,9 +1067,9 @@ class BGPConfigDaemon:
 
     @staticmethod
     def __vrf_based_table(table_name):
-        glb_tables = {'ROUTE_MAP', 'COMMUNITY_SET', 'EXTENDED_COMMUNITY_SET',
-                      'PREFIX_SET', 'PREFIX', 'AS_PATH_SET', 'NEIGHBOR_SET', 'TAG_SET'}
-        return table_name not in glb_tables
+        vrf_tables = {'BGP_GLOBALS', 'BGP_GLOBALS_AF', 'BGP_GLOBALS_LISTEN_PREFIX',
+                      'BGP_NEIGHBOR', 'BGP_PEER_GROUP', 'BGP_NEIGHBOR_AF', 'BGP_PEER_GROUP_AF'}
+        return table_name in vrf_tables
 
     @staticmethod
     def get_prefix_set_name(orig_name, table_name):
@@ -1078,6 +1079,7 @@ class BGPConfigDaemon:
         elif table_name == 'NEXTHOP_SET':
             new_name += '_nexthop'
         return new_name
+
     def __update_bgp(self):
         while not self.bgp_message.empty():
             key, del_table, table, data = self.bgp_message.get()
@@ -1103,7 +1105,7 @@ class BGPConfigDaemon:
                     tbl_key = {'admin_status': tbl_key}
                 elif table == 'ROUTE_MAP':
                     tbl_key = {}
-                    for attr_name, table_name in {'match_prefix_set': 'PREFIX', 'match_next_hop': 'PREFIX'}.items():
+                    for attr_name, table_name in {'match_prefix_set': 'PREFIX', 'match_next_hop_set': 'PREFIX'}.items():
                         if attr_name in data:
                             pfx_set_name = self.get_prefix_set_name(data[attr_name].data, table_name)
                             if pfx_set_name in self.prefix_set_list:
@@ -1133,6 +1135,8 @@ class BGPConfigDaemon:
                                 dval.status = CachedDataWithOp.STAT_SUCC
                             else:
                                 syslog.syslog(syslog.LOG_ERR, 'failed to set local_asn %s to VRF %s' % (dval.data, vrf))
+                        else:
+                            dval.status = CachedDataWithOp.STAT_SUCC
                     local_asn = self.__get_vrf_asn(vrf)
                     if local_asn is None:
                         syslog.syslog(syslog.LOG_ERR, 'local ASN for VRF %s was not configured' % vrf)
@@ -1357,6 +1361,7 @@ class BGPConfigDaemon:
                             self.__delete_route_map(map_name, seq_no, data)
                             continue
                         self.route_map.setdefault(map_name, {})[seq_no] = dval.data
+                        dval.status = CachedDataWithOp.STAT_SUCC
                     if map_name not in self.route_map or seq_no not in self.route_map[map_name]:
                         syslog.syslog(syslog.LOG_ERR, 'route-map {} seq {} not found for update'.format(map_name, seq_no))
                         continue
