@@ -5,6 +5,8 @@ import (
 	// "github.com/godbus/dbus/v5"
 	// This works around that problem by using gopkg.in instead
 	"gopkg.in/godbus/dbus.v5"
+
+	"github.com/golang/glog"
 )
 
 // hostAccountCallObject returns a dbus.BusObject which can be used to call
@@ -15,23 +17,24 @@ func hostAccountCallObject(method string) (dbus.BusObject, string, error) {
 		return nil, "", err
 	}
 
-	const bus_name_base = "org.SONiC.HostAccountManagement."
-	bus_name := bus_name_base + method
-	bus_path := dbus.ObjectPath("/org/SONiC/HostAccountManagement/" + method)
+	const bus_name_base = "org.SONiC.HostAccountManagement"
+	bus_name := "ham.accounts." + method
+	bus_path := dbus.ObjectPath("/org/SONiC/HostAccountManagement")
 
-	obj := conn.Object(bus_name, bus_path)
-	dest := bus_name_base + method
+	obj := conn.Object(bus_name_base, bus_path)
 
-	return obj, dest, nil
+	return obj, bus_name, nil
 }
 
 func hostAccountParseCallReturn(call *dbus.Call) (bool, string) {
 	if call.Err != nil {
+		glog.Error(call.Err.Error())
 		return false, call.Err.Error()
 	}
 
-	success := call.Body[0].(bool)
-	errmsg := call.Body[1].(string)
+	body := call.Body[0].([]interface{})
+	success := body[0].(bool)
+	errmsg := body[1].(string)
 
 	return success, errmsg
 }
@@ -43,7 +46,8 @@ func hostAccountUserAdd(login, role, hashed_pw string) (bool, string) {
 		return false, err.Error()
 	}
 
-	return hostAccountParseCallReturn(obj.Call(dest, 0, login, role, hashed_pw))
+	roles := []string{role}
+	return hostAccountParseCallReturn(obj.Call(dest, 0, login, roles, hashed_pw))
 }
 
 // hostAccountUserDel calls the HAM userdel over D-Bus
@@ -73,5 +77,6 @@ func hostAccountChRole(login, role string) (bool, string) {
 		return false, err.Error()
 	}
 
-	return hostAccountParseCallReturn(obj.Call(dest, 0, login, role))
+	roles := []string{role}
+	return hostAccountParseCallReturn(obj.Call(dest, 0, login, roles))
 }
