@@ -73,6 +73,7 @@ router bgp {{ bgp_sess['local_asn']}} vrf {{ vrf }}
 {% endif %}
 {# -------globals end --------------------------- #}
 {# -------peer-group --------------------------- #}
+{% if BGP_PEER_GROUP is defined and BGP_PEER_GROUP|length > 0 %}
 {% for peer_group, nbr_or_peer in BGP_PEER_GROUP.iteritems() %}
 {% if vrf == peer_group[0] %}
 {% set name_or_ip = peer_group[1] %}
@@ -80,8 +81,10 @@ router bgp {{ bgp_sess['local_asn']}} vrf {{ vrf }}
 {% include "bgpd.conf.db.nbr_or_peer.j2" %}
 {% endif %}
 {% endfor %}
+{% endif %}
 {# -------peer-group end --------------------------- #}
 {# -------neighbor --------------------------- #}
+{% if BGP_NEIGHBOR is defined and BGP_NEIGHBOR|length > 0 %}
 {% for nbr_addr, nbr_or_peer in BGP_NEIGHBOR.iteritems() %}
 {% if vrf == nbr_addr[0] and (nbr_or_peer.has_key('peer_asn') or nbr_or_peer.has_key('peer_type'))%}
 {% set name_or_ip = nbr_addr[1] %}
@@ -89,6 +92,7 @@ router bgp {{ bgp_sess['local_asn']}} vrf {{ vrf }}
 {% include "bgpd.conf.db.nbr_or_peer.j2" %}
 {% endif %}
 {% endfor %}
+{% endif %}
 {# -------neighbor end --------------------------- #}
 {# -------listen-prefix --------------------------- #}
 {% if BGP_GLOBALS_LISTEN_PREFIX is defined and BGP_GLOBALS_LISTEN_PREFIX|length > 0 %}
