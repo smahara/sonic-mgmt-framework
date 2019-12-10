@@ -156,10 +156,13 @@ install:
 	$(INSTALL) -D $(TOPDIR)/scripts/sonic-hostservice.service $(DESTDIR)/lib/systemd/system
 
 	# Scripts for Host Account Management (HAM)
-	cp -r $(TOPDIR)/src/ham/hamd/etc $(DESTDIR)/etc
-	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/usr/bin/*  $(DESTDIR)/usr/bin/
-	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/hamd       $(DESTDIR)/usr/sbin/.
-	$(INSTALL) -D $(TOPDIR)/src/ham/hamctl/hamctl   $(DESTDIR)/usr/bin/.
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/etc/dbus-1/system.d/* $(DESTDIR)/etc/dbus-1/system.d/
+	$(INSTALL) -d $(DESTDIR)/etc/sonic/hamd/
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/etc/sonic/hamd/*      $(DESTDIR)/etc/sonic/hamd/
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/lib/systemd/system/*  $(DESTDIR)/lib/systemd/system/
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/usr/bin/*             $(DESTDIR)/usr/bin/
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/hamd     $(DESTDIR)/usr/sbin/.
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamctl/hamctl $(DESTDIR)/usr/bin/.
 	$(INSTALL) -d $(DESTDIR)/lib/x86_64-linux-gnu/
 	$(INSTALL) -D $(TOPDIR)/src/ham/libnss_ham/libnss_ham.so.2 $(DESTDIR)/lib/x86_64-linux-gnu/.
 
