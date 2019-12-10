@@ -159,8 +159,7 @@ install:
 	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/etc/dbus-1/system.d/* $(DESTDIR)/etc/dbus-1/system.d/
 	$(INSTALL) -d $(DESTDIR)/etc/sonic/hamd/
 	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/etc/sonic/hamd/*      $(DESTDIR)/etc/sonic/hamd/
-	$(INSTALL) -d $(DESTDIR)/etc/systemd/system/
-	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/etc/systemd/system/*  $(DESTDIR)/etc/systemd/system/
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/lib/systemd/system/*  $(DESTDIR)/lib/systemd/system/
 	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/usr/bin/*             $(DESTDIR)/usr/bin/
 	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/hamd     $(DESTDIR)/usr/sbin/.
 	$(INSTALL) -D $(TOPDIR)/src/ham/hamctl/hamctl $(DESTDIR)/usr/bin/.
