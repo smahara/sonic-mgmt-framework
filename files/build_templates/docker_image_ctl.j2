@@ -17,6 +17,16 @@ function wait_for_swss_db_flush_done()
     debug "Swss db flush done"
 }
 
+function wait_for_port_init_done()
+{
+    debug "Start waiting for PortInitDone"
+    until [[ $(redis-cli -n 0 GET "PORT_TABLE:PortInitDone") ]]; do
+        debug "Wait 1 second for PORT_TABLE:PortInitDone"
+        sleep 1
+    done
+    debug "Port Init done"
+}
+
 function getMountPoint()
 {
     echo $1 | python -c "import sys, json, os; mnts = [x for x in json.load(sys.stdin)[0]['Mounts'] if x['Destination'] == '/usr/share/sonic/hwsku']; print '' if len(mnts) == 0 else os.path.basename(mnts[0]['Source'])" 2>/dev/null
@@ -111,7 +121,7 @@ function preStartAction()
         docker cp /tmp/dump.rdb database:/var/lib/redis/
     fi
 {%- elif docker_container_name == "teamd" %}
-    wait_for_swss_db_flush_done
+    wait_for_port_init_done
 {%- elif docker_container_name == "nat" %}
     wait_for_swss_db_flush_done
 {%- elif docker_container_name == "syncd" %}
