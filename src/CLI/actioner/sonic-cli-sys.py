@@ -26,6 +26,9 @@ from rpipe_utils import pipestr
 from openconfig_system_client.rest import ApiException
 from scripts.render_cli import show_cli_output
 
+from crypt import crypt
+import base64
+import os
 
 import urllib3
 urllib3.disable_warnings()
@@ -33,6 +36,10 @@ urllib3.disable_warnings()
 
 plugins = dict()
 
+def hashed_pw(pw):
+    salt = base64.b64encode(os.urandom(6), './')
+    return crypt(pw, '$6$' + salt)
+    
 def util_capitalize(value):
     for key,val in value.items():
         temp = key.split('_')
@@ -86,7 +93,7 @@ def generate_body(func, args):
 					     "config": {
  							 "username": args[0],
         						 "password": args[1],
-        						 "password-hashed": "string",
+        						 "password-hashed": hashed_pw(args[1]),
                                                          "ssh-key": "string",
                                                          "role": args[2]
                                                         }
