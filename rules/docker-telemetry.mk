@@ -27,13 +27,8 @@ endif
 $(DOCKER_TELEMETRY)_CONTAINER_NAME = telemetry
 $(DOCKER_TELEMETRY)_RUN_OPT += --net=host --privileged -t
 $(DOCKER_TELEMETRY)_RUN_OPT += -v /etc/sonic:/etc/sonic:ro
-<<<<<<< HEAD
 $(DOCKER_TELEMETRY)_RUN_OPT += -v /var/run/dbus:/var/run/dbus:rw
 $(DOCKER_TELEMETRY)_RUN_OPT += -v /var/run/docker.sock:/var/run/docker.sock
 $(DOCKER_TELEMETRY)_RUN_OPT += -v /usr/bin/docker:/usr/bin/docker:ro
-||||||| merged common ancestors
-=======
-$(DOCKER_TELEMETRY)_RUN_OPT += -v /var/run/dbus:/var/run/dbus:rw
->>>>>>> broadcom_sonic_share
 $(DOCKER_TELEMETRY)_RUN_OPT += --mount type=bind,source="/var/platform/",target="/mnt/platform/"
 $(DOCKER_TELEMETRY)_RUN_OPT += --mount type=bind,source="/var/run/redis/",target="/var/run/redis/"
