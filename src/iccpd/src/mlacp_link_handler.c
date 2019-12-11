@@ -1980,12 +1980,12 @@ static void update_l2mc_state(struct CSM *csm,
                                 struct LocalInterface *lif,
                                 int po_state)
 {
-    struct L2MCMsg* l2mc_msg = NULL;
+    struct L2MCMsg* l2mc_msg = NULL, *l2mc_temp = NULL;
 
     if (!csm || !lif)
         return;
 
-    RB_FOREACH (l2mc_msg, l2mc_rb_tree, &MLACP(csm).l2mc_rb)
+    RB_FOREACH_SAFE (l2mc_msg, l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_temp)
     {
         /* find the L2MC for this interface*/
         if (strcmp(lif->name, l2mc_msg->origin_ifname) != 0)
@@ -2564,7 +2564,7 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
 {
     struct Msg* msg = NULL;
     struct MACMsg* mac_msg = NULL;
-    struct L2MCMsg* l2mc_msg = NULL;
+    struct L2MCMsg* l2mc_msg = NULL, *l2mc_temp = NULL;
 
     if (!csm)
         return;
@@ -2602,7 +2602,7 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
         }
     }
     /*If peer link down, remove all the l2mc entries that point to the peer-link*/
-    RB_FOREACH (l2mc_msg, l2mc_rb_tree, &MLACP(csm).l2mc_rb)
+    RB_FOREACH_SAFE (l2mc_msg, l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_temp)
     {
         /* Find the entry that the port is peer-link to be deleted*/
         if (strcmp(l2mc_msg->ifname, csm->peer_itf_name) != 0)
