@@ -165,7 +165,10 @@ std::string hamd_c::certgen(const std::string  & login) const
     std::string cmd = config_rm.certgen_cmd(login, certdir.native());
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates [%s]", login.c_str(), cmd.c_str());
 
-    auto [ rc, std_out, std_err ] = run(cmd);
+    auto t = run(cmd);
+    auto rc = std::get<0>(t);
+    auto std_out = std::get<1>(t);
+    auto std_err = std::get<2>(t);
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates rc=%d, stdout=%s, stderr=%s",
                     login.c_str(), rc, std_out.c_str(), std_err.c_str());
@@ -216,7 +219,10 @@ std::string hamd_c::certgen(const std::string  & login) const
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" [%s]", login.c_str(), cmd.c_str());
 
-    auto [ rc, std_out, std_err ] = run(cmd);
+    auto t = run(cmd);
+    auto rc = std::get<0>(t);
+    auto std_out = std::get<1>(t);
+    auto std_err = std::get<2>(t);
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" rc=%d, stdout=%s, stderr=%s",
                     login.c_str(), rc, std_out.c_str(), std_err.c_str());
@@ -256,7 +262,10 @@ std::string hamd_c::certgen(const std::string  & login) const
 
         LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::userdel() - executing command \"%s\"", cmd.c_str());
 
-        auto [ rc, std_out, std_err ] = run(cmd);
+        auto t = run(cmd);
+        auto rc = std::get<0>(t);
+        auto std_out = std::get<1>(t);
+        auto std_err = std::get<2>(t);
 
         LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::userdel() - command returned rc=%d, stdout=%s, stderr=%s",
                         rc, std_out.c_str(), std_err.c_str());
@@ -277,7 +286,10 @@ std::string hamd_c::certgen(const std::string  & login) const
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::passwd() - executing command \"%s\"", cmd.c_str());
 
-    auto [ rc, std_out, std_err ] = run(cmd);
+    auto t = run(cmd);
+    auto rc = std::get<0>(t);
+    auto std_out = std::get<1>(t);
+    auto std_err = std::get<2>(t);
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::passwd() - command returned rc=%d, stdout=%s, stderr=%s",
                     rc, std_out.c_str(), std_err.c_str());
@@ -300,7 +312,10 @@ std::string hamd_c::certgen(const std::string  & login) const
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::set_roles() - executing command \"%s\"", cmd.c_str());
 
-    auto [ rc, std_out, std_err ] = run(cmd);
+    auto t = run(cmd);
+    auto rc = std::get<0>(t);
+    auto std_out = std::get<1>(t);
+    auto std_err = std::get<2>(t);
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::set_roles() - command returned rc=%d, stdout=%s, stderr=%s",
                     rc, std_out.c_str(), std_err.c_str());
@@ -511,7 +526,10 @@ void hamd_c::rm_unconfirmed_users() const
 
                     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::rm_unconfirmed_users() - executing command \"%s\"", full_cmd.c_str());
 
-                    auto [ rc, std_out, std_err ] = run(full_cmd);
+                    auto t = run(full_cmd);
+                    auto rc = std::get<0>(t);
+                    auto std_out = std::get<1>(t);
+                    auto std_err = std::get<2>(t);
 
                     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::rm_unconfirmed_users() - command returned rc=%d, stdout=%s, stderr=%s",
                                     rc, std_out.c_str(), std_err.c_str());
@@ -584,7 +602,10 @@ bool hamd_c::add_unconfirmed_user(const std::string& username, const uint32_t& p
 
             LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": executing \"%s\"", username.c_str(), full_cmd.c_str());
 
-            auto [ rc, std_out, std_err ] = run(full_cmd);
+            auto t = run(full_cmd);
+            auto rc = std::get<0>(t);
+            auto std_out = std::get<1>(t);
+            auto std_err = std::get<2>(t);
 
             LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": command returned rc=%d, stdout=%s, stderr=%s",
                             username.c_str(), rc, std_out.c_str(), std_err.c_str());
@@ -635,7 +656,10 @@ bool hamd_c::confirm_user(const std::string& username, const std::string& groupn
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": executing \"%s\"", username.c_str(), cmd.c_str());
 
-    auto [ rc, std_out, std_err ] = run(cmd);
+    auto t = run(cmd);
+    auto rc = std::get<0>(t);
+    auto std_out = std::get<1>(t);
+    auto std_err = std::get<2>(t);
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": command returned rc=%d, stdout=%s, stderr=%s",
                     username.c_str(), rc, std_out.c_str(), std_err.c_str());
