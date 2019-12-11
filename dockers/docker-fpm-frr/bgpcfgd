@@ -655,7 +655,7 @@ class MatchPrefix:
         if self.ip_prefix is None:
             raise ValueError
         if len_range is not None:
-            min_len, max_len = len_range.split('...')
+            min_len, max_len = len_range.split('..')
             self.min_len = int(min_len)
             self.max_len = int(max_len)
             _, pfx_len = self.ip_prefix.split('/')
@@ -677,7 +677,7 @@ class MatchPrefix:
     def __eq__(self, other):
         return (self.ip_prefix == other.ip_prefix and
                 self.min_len == other.min_len and
-                self.max_len == other.max_len,
+                self.max_len == other.max_len and
                 self.action == other.action)
 
 class MatchPrefixList(list):
@@ -1270,6 +1270,8 @@ class BGPConfigDaemon:
                         syslog.syslog(syslog.LOG_ERR, 'could not find prefix-set %s from cache' % pfx_set_name)
                         continue
                     ip_pfx, len_range = key.split('|')
+                    if len_range == 'exact':
+                        len_range = None
                     pfx_action = data.get('action', None)
                     if (pfx_action is None or
                         (pfx_action.op != CachedDataWithOp.OP_ADD and pfx_action.op != CachedDataWithOp.OP_DELETE)):
@@ -1386,8 +1388,8 @@ class BGPConfigDaemon:
                         continue
                     self.__delete_route_map(map_name, seq_no, data)
             elif table == 'ROUTE_REDISTRIBUTE':
-                src_proto, dst_proto, af_type = key.split('|')
-                af, ip_type = af_type.lower().split('_')
+                src_proto, dst_proto, af = key.split('|')
+                ip_type = 'unicast'
                 syslog.syslog(syslog.LOG_INFO, 'Set route distribute for src_proto {} dst_proto {} {}'.\
                                 format(src_proto, dst_proto, af, ip_type))
                 if dst_proto != 'bgp':
