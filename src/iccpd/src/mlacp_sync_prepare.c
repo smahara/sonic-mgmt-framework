@@ -340,13 +340,8 @@ int mlacp_prepare_for_mac_info_to_peer(struct CSM* csm, char* buf, size_t max_bu
     sprintf(MacData->ifname, "%s", mac_msg->origin_ifname);
     MacData->vid = htons(mac_msg->vid);
 
-    #if 1
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg type = TLV_T_MLACP_MAC_INFO");
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg if name %s  mac  = %s, "
-            "vid = %d, type = %s count %d msg len %d", mac_msg->origin_ifname,
-            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
-            (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del", count, msg_len);
-    #endif
+    ICCPD_LOG_DEBUG("ICCP_FDB", "Send MAC messge to peer, port %s  mac = %s, vid = %d, type = %s count %d ", mac_msg->origin_ifname,
+                                  mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->op_type == MAC_SYNC_ADD ? "add" : "del", count);
 
     return msg_len;
 }
@@ -582,14 +577,12 @@ int mlacp_prepare_for_port_channel_info(struct CSM* csm, char* buf,
             tlv->vlanData[num_of_vlan_id].vlan_id = htons(vlan_id->vid);
 
             num_of_vlan_id++;
-            ICCPD_LOG_DEBUG(__FUNCTION__, "  port channel %d: addr = %s vlan id %d     num %d ", port_channel->po_id, show_ip_str( tlv->ipv4_addr), vlan_id->vid, num_of_vlan_id );
+            ICCPD_LOG_DEBUG(__FUNCTION__, "PortChannel%d: ipv4 addr = %s vlan id %d num %d ", port_channel->po_id, show_ip_str( tlv->ipv4_addr), vlan_id->vid, num_of_vlan_id );
         }
     }
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "  port channel %d: addr = %s  l3 mode %d", port_channel->po_id, show_ip_str( tlv->ipv4_addr),  tlv->l3_mode);
-    ICCPD_LOG_DEBUG("ICCP_FSM", "TX po_info: %s has %d vlans",
-        port_channel->name, num_of_vlan_id);
-
+    ICCPD_LOG_DEBUG(__FUNCTION__, "PortChannel%d: ipv4 addr = %s  l3 mode %d", port_channel->po_id, show_ip_str( tlv->ipv4_addr),  tlv->l3_mode);
+    ICCPD_LOG_DEBUG("ICCP_FSM", "TX po_info: %s has %d vlans", port_channel->name, num_of_vlan_id);
     return msg_len;
 }
 

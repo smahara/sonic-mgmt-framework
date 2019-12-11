@@ -3,6 +3,31 @@
 
 {%- macro generate_buffer_pool_and_profiles() %}
     "BUFFER_POOL": {
+<<<<<<< HEAD
+||||||| merged common ancestors
+        "egress_lossy_pool": {
+            "size": "67108864",
+            "type": "egress",
+            "mode": "dynamic"
+        },
+        "ingress_lossless_pool": {
+            "mode": "dynamic",
+            "size": "59001152",
+            "xoff": "7428992",
+            "type": "ingress"
+        }
+=======
+        "ingress_lossless_pool": {
+            "size": "67108864",
+            "type": "ingress",
+            "mode": "static"
+        },
+        "egress_lossy_pool": {
+            "size": "67108864",
+            "type": "egress",
+            "mode": "dynamic"
+        }
+>>>>>>> broadcom_sonic_share
     },
     "BUFFER_PROFILE": {
     },

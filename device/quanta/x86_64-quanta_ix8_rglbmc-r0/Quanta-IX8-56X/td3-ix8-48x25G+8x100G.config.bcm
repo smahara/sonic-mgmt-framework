@@ -2,16 +2,9 @@ core_clock_frequency=1525
 dpp_clock_ratio=2:3
 parity_enable=1
 mem_cache_enable=0
-l2_mem_entries=40960
-l3_mem_entries=40960
 fpem_mem_entries=0
 l2xmsg_mode=1
 l3_alpm_ipv6_128b_bkt_rsvd=1
-
-#Evpn-Vxlan parameters
-use_all_splithorizon_groups=1
-flow_init_mode=1
-sai_tunnel_support=1
 
 #RIOT Enable
 riot_enable=1
@@ -28,7 +21,6 @@ cdma_timeout_usec=3000000
 ifp_inports_support_enable=1
 ipv6_lpm_128b_enable=0x1
 l3_max_ecmp_mode=1
-l3_alpm_enable=2
 lpm_scaling_enable=0
 
 miim_intr_enable=0
@@ -528,3 +520,9 @@ phy_chain_rx_polarity_flip_physical{130.0}=0x0
 phy_chain_rx_polarity_flip_physical{131.0}=0x0
 phy_chain_rx_polarity_flip_physical{132.0}=0x0
 
+flow_init_mode=1
+l2_mem_entries=40960
+l3_mem_entries=40960
+l3_alpm_enable=2
+use_all_splithorizon_groups=1
+sai_tunnel_support=1

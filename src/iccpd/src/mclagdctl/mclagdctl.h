@@ -72,6 +72,8 @@ enum id_command_type
     ID_CMDTYPE_D_P_P,
     ID_CMDTYPE_D_D,
     ID_CMDTYPE_D_D_C,
+    ID_CMDTYPE_C,
+    ID_CMDTYPE_C_L,
 };
 
 enum mclagdctl_notify_peer_type
@@ -86,7 +88,18 @@ enum mclagdctl_notify_peer_type
     INFO_TYPE_DUMP_LOCAL_PORTLIST,
     INFO_TYPE_DUMP_PEER_PORTLIST,
     INFO_TYPE_DUMP_DBG_COUNTERS,
+    INFO_TYPE_CONFIG_LOGLEVEL,
     INFO_TYPE_FINISH,
+};
+
+enum log_level_type
+{
+    CRITICAL = 0,
+    ERR= 1,
+    WARN = 2,
+    NOTICE= 3,
+    INFO = 4,
+    DEBUG = 5
 };
 
 struct mclagdctl_req_hdr
@@ -139,6 +152,7 @@ struct mclagd_state
     char enabled_po[MCLAGDCTL_PORT_MEMBER_BUF_LEN];
     int session_timeout;
     int keepalive_time;
+    char loglevel[MCLAGDCTL_PARA1_LEN];
 };
 
 struct mclagd_arp_msg
@@ -247,6 +261,9 @@ extern int mclagdctl_enca_dump_local_portlist(char *msg, int mclag_id,  int argc
 extern int mclagdctl_parse_dump_local_portlist(char *msg, int data_len);
 extern int mclagdctl_enca_dump_peer_portlist(char *msg, int mclag_id,  int argc, char **argv);
 extern int mclagdctl_parse_dump_peer_portlist(char *msg, int data_len);
+int mclagdctl_enca_config_loglevel(char *msg, int log_level,  int argc, char **argv);
+int mclagdctl_parse_config_loglevel(char *msg, int data_len);
+
 extern int mclagdctl_enca_dump_dbg_counters(char *msg, int mclag_id, int argc, char **argv);
 extern int mclagdctl_parse_dump_dbg_counters(char *msg, int data_len);
 extern int mclagdctl_enca_dump_unique_ip(char *msg, int mclag_id, int argc, char **argv);

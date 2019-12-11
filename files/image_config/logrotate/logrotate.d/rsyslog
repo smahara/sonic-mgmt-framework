@@ -29,9 +29,11 @@
 /var/log/teamd.log
 /var/log/stpd.log
 /var/log/telemetry.log
-/var/log/iccpd.log
+/var/log/iccp/iccpd.log
+/var/log/iccp/iccpd_fdb.log
 /var/log/quagga/bgpd.log
 /var/log/quagga/zebra.log
+
 /var/log/swss/sairedis.rec
 /var/log/swss/swss.rec
 {

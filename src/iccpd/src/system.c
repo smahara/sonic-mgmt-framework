@@ -41,6 +41,7 @@ struct System* system_get_instance()
         sys = (struct System*)malloc(sizeof(struct System));
         if (sys == NULL )
         {
+            ICCPD_LOG_WARN(__FUNCTION__, "Failed to obtain system instance.");
             return NULL;
         }
         system_init(sys);
