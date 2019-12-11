@@ -9,6 +9,19 @@ import (
 	"github.com/golang/glog"
 )
 
+// roleToGroup maps the user role to a list of groups in the host
+func roleToGroup(role string) []string {
+	switch role {
+	case "admin":
+		return []string{"sudo", "docker"}
+	
+	case "operator":
+		return []string{"docker"}
+	
+	default:
+		return []string{}
+	}
+}
 // hostAccountCallObject returns a dbus.BusObject which can be used to call
 // the requested method
 func hostAccountCallObject(method string) (dbus.BusObject, string, error) {
@@ -46,7 +59,11 @@ func hostAccountUserAdd(login, role, hashed_pw string) (bool, string) {
 		return false, err.Error()
 	}
 
-	roles := []string{role}
+	roles := roleToGroup(role)
+	if len(roles) == 0 {
+		return false, fmt.Sprintf("Invalid role %s", role)
+	}
+
 	return hostAccountParseCallReturn(obj.Call(dest, 0, login, roles, hashed_pw))
 }
 
@@ -77,6 +94,10 @@ func hostAccountChRole(login, role string) (bool, string) {
 		return false, err.Error()
 	}
 
-	roles := []string{role}
+	roles := roleToGroup(role)
+	if len(roles) == 0 {
+		return false, fmt.Sprintf("Invalid role %s", role)
+	}
+
 	return hostAccountParseCallReturn(obj.Call(dest, 0, login, roles))
 }
