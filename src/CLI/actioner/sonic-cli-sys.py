@@ -66,7 +66,7 @@ def call_method(name, args):
 def generate_body(func, args):
     body = None
     # Get the rules of all ACL table entries.
-
+    keypath = None
     if func.__name__ == 'get_openconfig_system_system_state':
         keypath = []
     elif func.__name__ == 'get_openconfig_system_system_clock':
@@ -80,9 +80,21 @@ def generate_body(func, args):
     elif func.__name__ == 'get_openconfig_system_components':
         keypath = []
 
-    else:
-       body = {}
-
+    elif func.__name__ == 'patch_openconfig_system_system_aaa_authentication_users_user':
+        keypath = []
+        body =  { "openconfig-system:user": [{"username": args[0],
+					     "config": {
+ 							 "username": args[0],
+        						 "password": args[1],
+        						 "password-hashed": "string",
+                                                         "ssh-key": "string",
+                                                         "role": args[2]
+                                                        }
+                                             }
+                                           ]
+                }
+    elif func.__name__ == 'delete_openconfig_system_system_aaa_authentication_users_user':
+	keypath = []
     return keypath,body
 
 
@@ -96,10 +108,13 @@ def run(func, args):
 
     try:
         if body is not None:
-           api_response = getattr(aa,func.__name__)(*keypath, body=body)
+           api_response = getattr(aa,func.__name__)(*keypath, username= args[0], body=body)
            
         else :
-           api_response = getattr(aa,func.__name__)(*keypath)
+	   if func.__name__ == 'delete_openconfig_system_system_aaa_authentication_users_user':
+	       api_response = getattr(aa,func.__name__)(*keypath, username = args[0])
+           else:
+               api_response = getattr(aa,func.__name__)(*keypath)
         if api_response is None:
             print ("Success")
         else:
@@ -160,5 +175,6 @@ if __name__ == '__main__':
     pipestr().write(sys.argv)
     #pdb.set_trace()
     func = eval(sys.argv[1], globals(), openconfig_system_client.OpenconfigSystemApi.__dict__)
+    print(sys.argv)
     run(func, sys.argv[2:])
 
