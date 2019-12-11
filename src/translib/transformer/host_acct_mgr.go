@@ -7,6 +7,7 @@ import (
 	"gopkg.in/godbus/dbus.v5"
 
 	"github.com/golang/glog"
+	"fmt"
 )
 
 // roleToGroup maps the user role to a list of groups in the host
