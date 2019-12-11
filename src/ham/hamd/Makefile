@@ -4,10 +4,10 @@ TARGET    := hamd
 SRCS      := $(wildcard *.c) $(wildcard *.cpp)
 
 PKGS      := libsystemd glib-2.0 dbus-c++-glib-1
-LDLIBS    := $(shell pkg-config --libs   ${PKGS})
+LDLIBS    := $(shell pkg-config --libs   ${PKGS}) -lstdc++fs
 CPPFLAGS  := $(shell pkg-config --cflags ${PKGS}) -DDAEMON_NAME=\"${TARGET}\"
 CFLAGS    := -Wall -Werror -O3
-CXXFLAGS  := -std=c++11 ${CFLAGS}
+CXXFLAGS  := -std=c++17 ${CFLAGS}
 LL        := g++
 
 DBUS-GLUE := $(patsubst %.xml,%.dbus-adaptor.h,$(wildcard ../shared/*.xml))

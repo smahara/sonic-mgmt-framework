@@ -2,7 +2,7 @@
 #include <glib.h>                       // g_main_loop_new(), g_main_context_default(), g_main_loop_run(), g_main_loop_unref(), g_main_loop_quit(), gboolean, etc...
 #include <stdlib.h>                     // strtoll(), EXIT_SUCCESS
 #include <systemd/sd-journal.h>         // sd_journal_print()
-#include <limits.h>                     // LLONG_MIN, LLONG_MAX
+#include <limits.h>                     // LINE_MAX, LLONG_MIN, LLONG_MAX
 #include <errno.h>                      // errno, EINVAL, ERANGE
 
 #include "hamd.h"                       // hamd_config_c
