@@ -877,6 +877,8 @@ class BGPConfigDaemon:
 
     aspath_set_key_map = [('as_path_set_member', '{no:no-prefix}bgp as-path access-list {}', hdl_aspath_set)]
 
+    route_redist_key_map = [('route_map', '{no:no-prefix}redistribute {} route-map {}')]
+
     tbl_to_key_map = {'BGP_GLOBALS':                global_key_map,
                       'BGP_GLOBALS_AF':             global_af_key_map,
                       'BGP_GLOBALS_LISTEN_PREFIX':  listen_prefix_key_map,
@@ -887,7 +889,8 @@ class BGPConfigDaemon:
                       'ROUTE_MAP':                  route_map_key_map,
                       'COMMUNITY_SET':              community_set_key_map,
                       'EXTENDED_COMMUNITY_SET':     extcommunity_set_key_map,
-                      'AS_PATH_SET':                aspath_set_key_map
+                      'AS_PATH_SET':                aspath_set_key_map,
+                      'ROUTE_REDISTRIBUTE':         route_redist_key_map
     }
 
     def __init__(self):
@@ -950,7 +953,8 @@ class BGPConfigDaemon:
             ('PREFIX', self.bgp_table_handler_common),
             ('NEIGHBOR_SET', self.bgp_table_handler_common),
             ('TAG_SET', self.bgp_table_handler_common),
-            ('AS_PATH_SET', self.bgp_table_handler_common)
+            ('AS_PATH_SET', self.bgp_table_handler_common),
+            ('ROUTE_REDISTRIBUTE', self.bgp_table_handler_common)
         ]
         self.bgp_message = Queue.Queue(0)
         self.table_data_cache = self.config_db.get_table_data([tbl for tbl, _ in self.table_handler_list])
@@ -1068,7 +1072,8 @@ class BGPConfigDaemon:
     @staticmethod
     def __vrf_based_table(table_name):
         vrf_tables = {'BGP_GLOBALS', 'BGP_GLOBALS_AF', 'BGP_GLOBALS_LISTEN_PREFIX',
-                      'BGP_NEIGHBOR', 'BGP_PEER_GROUP', 'BGP_NEIGHBOR_AF', 'BGP_PEER_GROUP_AF'}
+                      'BGP_NEIGHBOR', 'BGP_PEER_GROUP', 'BGP_NEIGHBOR_AF', 'BGP_PEER_GROUP_AF',
+                      'ROUTE_REDISTRIBUTE'}
         return table_name in vrf_tables
 
     @staticmethod
@@ -1380,6 +1385,20 @@ class BGPConfigDaemon:
                         syslog.syslog(syslog.LOG_ERR, 'failed running route-map delete command')
                         continue
                     self.__delete_route_map(map_name, seq_no, data)
+            elif table == 'ROUTE_REDISTRIBUTE':
+                src_proto, dst_proto, af_type = key.split('|')
+                af, ip_type = af_type.lower().split('_')
+                syslog.syslog(syslog.LOG_INFO, 'Set route distribute for src_proto {} dst_proto {} {}'.\
+                                format(src_proto, dst_proto, af, ip_type))
+                if dst_proto != 'bgp':
+                    syslog.syslog(syslog.LOG_ERR, 'only bgp could be used as dst protocol, but {} was given'.format(dst_proto))
+                    continue
+                cmd_prefix = ['configure terminal',
+                              'router bgp {} vrf {}'.format(local_asn, vrf),
+                              'address-family {} {}'.format(af, ip_type)]
+                if not key_map.run_command(self, data, cmd_prefix, src_proto):
+                    syslog.syslog(syslog.LOG_ERR, 'failed running BGP route redistribute config command')
+                    continue
 
     def __add_op_to_data(self, table_key, data, comb_attr_list):
         cached_data = self.table_data_cache.setdefault(table_key, {})
