@@ -644,10 +644,3 @@ port_fec_132=3
 
 sai_preinit_cmd_file=/usr/share/sonic/hwsku/sai_preinit_cmd.soc
 sai_postinit_cmd_file=/usr/share/sonic/hwsku/sai_postinit_cmd.soc
-<<<<<<< HEAD
-||||||| merged common ancestors
-
-mmu_init_config="TH3-DELL-lossy"
-=======
-
->>>>>>> broadcom_sonic_share

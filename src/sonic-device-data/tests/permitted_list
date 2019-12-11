@@ -192,11 +192,4 @@ sai_ifa_config
 sai_eapp_config_file
 use_all_splithorizon_groups
 sai_tunnel_support
-<<<<<<< HEAD
 port_fec
-
-||||||| merged common ancestors
-
-=======
-port_fec
->>>>>>> broadcom_sonic_share
