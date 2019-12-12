@@ -46,10 +46,12 @@ function load_kernel_modules()
     modprobe linux-bcm-knet use_rx_skb=1 rx_buffer_size=9238 debug=0x5020 rx_rate=30000,30000,30000,30000,30000,30000,30000
     modprobe psample
     modprobe linux-knet-cb
+    modprobe linux-bcm-ptp-clock
 }
 
 function remove_kernel_modules()
 {
+    rmmod linux-bcm-ptp-clock
     rmmod linux-knet-cb
     rmmod psample
     rmmod linux-bcm-knet
