@@ -13,88 +13,88 @@
 #define SHELL_PATH  "/bin/sh"
 #define SHELL_NAME  "sh"
 
-class StdPipe
+class capture_pipe_c
 {
 private:
-    int   stdfd_m = -1;
-    int   fds[2];
-    bool  failure = false;
+    #define RD_END 0
+    #define WR_END 1
 
-    void _close(int id)
+    int   stdout_pipe_fds[2] = { -1, -1 };
+    int   stderr_pipe_fds[2] = { -1, -1 };
+    bool  broken_m           = true;
+
+    void _close(int fd_id)
     {
-        if (fds[id] != -1)
-        {
-            ::close(fds[id]);
-            fds[id] = -1;
-        }
+        (void)close(stdout_pipe_fds[fd_id]);
+        stdout_pipe_fds[fd_id] = -1;
+
+        (void)close(stderr_pipe_fds[fd_id]);
+        stderr_pipe_fds[fd_id] = -1;
     }
 
-    int _dup(int id)
+    void _remap(int fd_id)
     {
-        if (fds[id] == -1) return -1;
-        int new_fd = ::dup2(fds[id], stdfd_m);
-        _close(id);
-        return new_fd;
+        (void)dup2(stdout_pipe_fds[fd_id], STDOUT_FILENO);
+        _close(stdout_pipe_fds[fd_id]); // Not needed anymore since it's been mapped to STDOUT
+
+        (void)dup2(stderr_pipe_fds[fd_id], STDERR_FILENO);
+        _close(stderr_pipe_fds[fd_id]); // Not needed anymore since it's been mapped to STDOUT
     }
 
 public:
-    StdPipe(int stdfd) :stdfd_m(stdfd)
+    capture_pipe_c()
     {
-        fds[0] = -1; // Reader
-        fds[1] = -1; // Writer
-        failure = 0 == ::pipe(fds);
+        broken_m = (0 != pipe(stdout_pipe_fds)) ||
+                   (0 != pipe(stderr_pipe_fds));
     }
 
-    ~StdPipe()
+    ~capture_pipe_c()
     {
-        close();
+        _close(RD_END); // Close the reader end of both pipes
+        _close(WR_END); // Close the writer end of both pipes
     }
 
-    bool failed() const { return failure; }
+    bool broken() const { return broken_m; }
 
-    int  remap_rd() { return _dup(0); }
-    int  remap_wr() { return _dup(1); }
-
-    void close_rd() { _close(0); }
-    void close_wr() { _close(1); }
-    void close()    { _close(0); _close(1); }
-
-    std::string get()
+    void running_as_child()
     {
-        if (failure)
-            return "failed to create pipe";
+        _remap(WR_END); // Remap stdout/stderr to the writer end of the two pipes
+        _close(RD_END); // Close the reader end of the pipes when running in the child process
+    }
 
-        if (fds[0] != -1)
-        {
-            char buf[LINE_MAX];
-            if (::recv(fds[0], buf, sizeof(buf), MSG_DONTWAIT) > 0)
-                    return buf;
-        }
+    void running_as_parent()
+    {
+        _close(WR_END);  // Close the writer end of the pipes when running in the parent process
+    }
 
-        return "";
+    std::string stdout()
+    {
+        char    buf[LINE_MAX];
+        ssize_t len = read(stdout_pipe_fds[RD_END], buf, sizeof(buf));
+        return (len > 0) ? std::string(buf, len) : "";
+    }
+
+    std::string stderr()
+    {
+        char    buf[LINE_MAX];
+        ssize_t len = read(stderr_pipe_fds[RD_END], buf, sizeof(buf));
+        return (len > 0) ? std::string(buf, len) : "";
     }
 };
 
 std::tuple<int/*rc*/, std::string/*stdout*/, std::string/*stderr*/> run(const std::string & cmd_r)
 {
-    StdPipe  std_out(STDOUT_FILENO);
-    StdPipe  std_err(STDERR_FILENO);
+    capture_pipe_c  pipe; // CREATE THE PIPE BEFORE FORKING!!!!
+    if (pipe.broken())
+        return std::make_tuple(-1, "", "failed to create stdout/stderr capture pipe");
 
-    if (std_out.failed() || std_err.failed())
-        return std::make_tuple(-1, "", "failed to create pipe");
-
-    pid_t  pid = fork();
-
+    pid_t pid = fork();
     if (pid < (pid_t)0) // Did fork fail?
         return std::make_tuple(-1, "", "failed to fork process");
 
     if (pid == (pid_t)0) /* Child */
     {
-        std_out.close_rd(); // close the read end of the pipe in the child
-        std_err.close_rd(); // close the read end of the pipe in the child
-
-        std_out.remap_wr(); // Map writer end of pipe to child's stdout
-        std_err.remap_wr(); // Map writer end of pipe to child's stderr
+        pipe.running_as_child();
 
         const char  * new_argv[4];
         new_argv[0] = SHELL_NAME;
@@ -102,15 +102,14 @@ std::tuple<int/*rc*/, std::string/*stdout*/, std::string/*stderr*/> run(const st
         new_argv[2] = cmd_r.c_str();
         new_argv[3] = NULL;
 
-        /* Exec the shell.  */
+        // Execute the shell
         (void)execve(SHELL_PATH, (char *const *)new_argv, environ);
 
         exit(127); // exit the child
     }
 
     /* Parent */
-    std_out.close_wr(); // close the write end of the pipe in the parent
-    std_err.close_wr(); // close the write end of the pipe in the parent
+    pipe.running_as_parent();
 
     int exit_status = -1;
     if (TEMP_FAILURE_RETRY(waitpid(pid, &exit_status, 0)) != pid)
@@ -121,5 +120,5 @@ std::tuple<int/*rc*/, std::string/*stdout*/, std::string/*stderr*/> run(const st
         return std::make_tuple(-1, "", "abnormal command termination");
 
     int    rc = WEXITSTATUS(exit_status);
-    return std::make_tuple(rc, std_out.get(), std_err.get());
+    return std::make_tuple(rc, pipe.stdout(), pipe.stderr());
 }

@@ -1,4 +1,9 @@
 // Host Account Management
+#include "hamd.h"               // hamd_c
+#include "../shared/utils.h"    // startswith(), streq()
+#include "siphash24.h"          // siphash24()
+#include "subprocess.h"         // run()
+                                //
 #include <glib.h>               // g_file_test()
 #include <glib/gstdio.h>        // g_chdir()
 #include <stdio.h>
@@ -21,11 +26,7 @@
     typedef std::experimental::filesystem::path   path_t;
 #endif // __GNUC_PREREQ(8,0)
 
-
-#include "hamd.h"               // hamd_c
-#include "../shared/utils.h"    // startswith(), streq()
-#include "siphash24.h"          // siphash24()
-#include "subprocess.h"         // run()
+//#define EXTRA_DEBUG
 
 int change_credentials(uid_t uid, gid_t gid)
 {
@@ -163,9 +164,20 @@ std::string hamd_c::certgen(const std::string  & login) const
 
     // Generate certificates
     std::string cmd = config_rm.certgen_cmd(login, certdir.native());
+
+#ifdef EXTRA_DEBUG
+printf("cmd=%s\n", cmd.c_str());
+#endif
+
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates [%s]", login.c_str(), cmd.c_str());
 
     auto [ rc, std_out, std_err ] = run(cmd);
+
+#ifdef EXTRA_DEBUG
+printf("rc     = %d\n", rc);
+printf("stdout = %s\n", std_out.c_str());
+printf("stderr = %s\n", std_err.c_str());
+#endif
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates rc=%d, stdout=%s, stderr=%s",
                     login.c_str(), rc, std_out.c_str(), std_err.c_str());
@@ -174,7 +186,7 @@ std::string hamd_c::certgen(const std::string  & login) const
     change_credentials(euid, egid);
 
     if (rc != 0)
-        return "Failed to generate certificates for: " + login + ". " + std_err;
+        return "Failed to generate certificates for " + login + ". " + std_err;
 
     // Set permissions on newly created certificates
     GDir * dir = g_dir_open(certdir.c_str(), 0, nullptr);
@@ -210,13 +222,25 @@ std::string hamd_c::certgen(const std::string  & login) const
                       " --create-home"
                       " --user-group"
                       " --shell " + config_rm.shell() +
-                      " --password '" + hashed_pw + "'"
-                      " --groups " + join(roles.cbegin(), roles.cend(), ",", " ") +
-                      login;
+                      " --password '" + hashed_pw + "' ";
+    if (roles.size())
+        cmd += "--groups " + join(roles.cbegin(), roles.cend(), ",", " ");
+
+    cmd += login;
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" [%s]", login.c_str(), cmd.c_str());
 
+#ifdef EXTRA_DEBUG
+printf("cmd=%s\n", cmd.c_str());
+#endif
+
     auto [ rc, std_out, std_err ] = run(cmd);
+
+#ifdef EXTRA_DEBUG
+printf("rc     = %d\n", rc);
+printf("stdout = %s\n", std_out.c_str());
+printf("stderr = %s\n", std_err.c_str());
+#endif
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" rc=%d, stdout=%s, stderr=%s",
                     login.c_str(), rc, std_out.c_str(), std_err.c_str());
