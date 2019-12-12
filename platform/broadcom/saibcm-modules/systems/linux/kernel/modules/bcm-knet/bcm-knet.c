@@ -1,22 +1,17 @@
 /*
  * Copyright 2017 Broadcom
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, version 2, as
  * published by the Free Software Foundation (the "GPL").
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License version 2 (GPLv2) for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * version 2 (GPLv2) along with this source code.
- */
-/*
- * $Id: bcm-knet.c,v 1.90 Broadcom SDK $
- * $Copyright: (c) 2005 Broadcom Corp.
- * All Rights Reserved.$
  */
 
 /*
@@ -930,6 +925,8 @@ static knet_hw_tstamp_ptp_clock_index_cb_f knet_hw_tstamp_ptp_clock_index_cb = N
 static knet_hw_tstamp_rx_time_upscale_cb_f knet_hw_tstamp_rx_time_upscale_cb = NULL;
 static knet_netif_cb_f knet_netif_create_cb = NULL;
 static knet_netif_cb_f knet_netif_destroy_cb = NULL;
+static knet_hw_tstamp_ioctl_cmd_cb_f knet_hw_tstamp_ioctl_cmd_cb = NULL;
+
 
 /*
  * Thread management
@@ -2315,11 +2312,7 @@ bkn_rx_refill(bkn_switch_info_t *sinfo, int chan)
         skb = desc->skb;
         desc->dma_size = rx_buffer_size + meta_size;
 #ifdef KNET_NO_AXI_DMA_INVAL
-        /*
-         * FIXME: Need to retain this code until iProc customers have been
-         * migrated to updated u-boot. Old u-boot versions are unable to load
-         * the kernel into non-ACP memory.
-         */
+        
         /*
          * Cache invalidate may corrupt DMA memory on some iProc-based devices
          * if the kernel is mapped to ACP memory.
@@ -2679,13 +2672,13 @@ bkn_hw_tstamp_rx_set(bkn_switch_info_t *sinfo, int phys_port, struct sk_buff *sk
 
 
     if (knet_hw_tstamp_rx_time_upscale_cb) {
-        if (knet_hw_tstamp_rx_time_upscale_cb(sinfo->dev_no, phys_port, skb, &ts) < 0) {
+        if (knet_hw_tstamp_rx_time_upscale_cb(sinfo->dev_no, phys_port, skb, meta, &ts) < 0) {
           return -1;
         }
     }
 
     memset(shhwtstamps, 0, sizeof(*shhwtstamps));
-    shhwtstamps->hwtstamp = ns_to_ktime(be64_to_cpu(ts));
+    shhwtstamps->hwtstamp = ns_to_ktime(ts);
 
     return 0;
 }
@@ -2764,7 +2757,7 @@ packet_is_untagged(uint16_t tpid)
 {
     int is_untagged = 0;
 
-    /* Fixme SDK-111398 */
+    
     /* 0x8100 is used in 802.1Q */
     /* 0x8848 is used in 802.11ad, the dtag tpid can be set to anything besides 0x8848, 0x9100 is a typical value, but couldn't cover all scenarios. */
     is_untagged = ((tpid != 0x8100) && (tpid != 0x8848) && (tpid != 0x9100));
@@ -3060,7 +3053,7 @@ bkn_dpp_packet_header_parse(bkn_switch_info_t *sinfo, uint8 *buff, uint32_t buff
       bkn_dpp_packet_parse_internal(sinfo, &hdr_buff[0], packet_info);
     }
 
-    /* FIXME: */
+    
     /* ignore packets with a double set of FTMH,internals */
     /* ignore the user header size */
     return 0;
@@ -3685,6 +3678,7 @@ bkn_do_api_rx(bkn_switch_info_t *sinfo, int chan, int budget)
                     priv->stats.rx_bytes += skb->len;
 
                     /* Optional SKB updates */
+                    KNET_SKB_CB(skb)->dcb_type = sinfo->dcb_type & 0xFFFF;
                     if (knet_rx_cb != NULL) {
                         KNET_SKB_CB(skb)->netif_user_data = priv->cb_user_data;
                         KNET_SKB_CB(skb)->filter_user_data = filter->kf.cb_user_data;
@@ -3995,6 +3989,7 @@ bkn_do_skb_rx(bkn_switch_info_t *sinfo, int chan, int budget)
                     skb->dev = priv->dev;
 
                     /* Optional SKB updates */
+                    KNET_SKB_CB(skb)->dcb_type = sinfo->dcb_type & 0xFFFF;
                     if (knet_rx_cb != NULL) {
                         KNET_SKB_CB(skb)->netif_user_data = priv->cb_user_data;
                         KNET_SKB_CB(skb)->filter_user_data = filter->kf.cb_user_data;
@@ -4229,7 +4224,7 @@ bkn_hw_tstamp_tx_set(bkn_switch_info_t *sinfo, struct sk_buff *skb)
     }
 
     memset(&shhwtstamps, 0, sizeof(shhwtstamps));
-    shhwtstamps.hwtstamp = ns_to_ktime(be64_to_cpu(ts));
+    shhwtstamps.hwtstamp = ns_to_ktime(ts);
     skb_tstamp_tx(skb, &shhwtstamps);
 
     return 0;
@@ -5567,7 +5562,7 @@ bkn_tx(struct sk_buff *skb, struct net_device *dev)
                         pktdata[1] = priv->port;
                         pktlen += 2;
                     }
-                    dcb[1] = pktlen;
+                    dcb[2] = ((priv->qnum & 0xff) << 24);
                     break;
                 }
             case 29:
@@ -7686,6 +7681,8 @@ bkn_knet_netif_create(kcom_msg_netif_create_t *kmsg, int len)
         }
     }
 
+    spin_unlock_irqrestore(&sinfo->lock, flags);
+
     DBG_VERB(("Assigned ID %d to Ethernet device %s\n",
               priv->id, dev->name));
 
@@ -7695,12 +7692,10 @@ bkn_knet_netif_create(kcom_msg_netif_create_t *kmsg, int len)
     
     if (knet_netif_create_cb != NULL) {
         int retv = knet_netif_create_cb(kmsg->hdr.unit, &(kmsg->netif), dev);
-        if (retv) { 
+        if (retv) {
             gprintk("Warning: knet_netif_create_cb() returned %d for netif '%s'\n", retv, dev->name);
         }
     }
-
-    spin_unlock_irqrestore(&sinfo->lock, flags);
 
     if (device_is_dnx(sinfo)) {
         int idx = 0;
@@ -8235,6 +8230,18 @@ bkn_handle_cmd_req(kcom_msg_t *kmsg, int len)
         DBG_CMD(("KCOM_M_WB_CLEANUP\n"));
         /* Clean up for warmbooting */
         len = bkn_knet_wb_cleanup(&kmsg->wb_cleanup, len);
+        break;
+     case KCOM_M_CLOCK_CMD:
+        /* PHC clock control*/
+        if (knet_hw_tstamp_ioctl_cmd_cb) {
+            DBG_CMD(("KCOM_M_CLOCK_CMD\n"));
+            len = knet_hw_tstamp_ioctl_cmd_cb(&kmsg->clock_cmd, len);
+        } else {
+            DBG_WARN(("Unsupported command (type=%d, opcode=%d)\n",
+                      kmsg->hdr.type, kmsg->hdr.opcode));
+            kmsg->hdr.opcode = 0;
+            len = sizeof(kcom_msg_hdr_t);
+        }
         break;
     default:
         DBG_WARN(("Unsupported command (type=%d, opcode=%d)\n",
@@ -8793,7 +8800,6 @@ bkn_netif_destroy_cb_unregister(knet_netif_cb_f netif_cb)
     return 0;
 }
 
-
 /*
  * Call-back interfaces for other Linux kernel drivers.
  *
@@ -8995,6 +9001,27 @@ bkn_hw_tstamp_rx_time_upscale_cb_unregister(knet_hw_tstamp_rx_time_upscale_cb_f 
     return 0;
 }
 
+int
+bkn_hw_tstamp_ioctl_cmd_cb_register(knet_hw_tstamp_ioctl_cmd_cb_f hw_tstamp_ioctl_cmd_cb)
+{
+    if (knet_hw_tstamp_ioctl_cmd_cb != NULL) {
+        return -1;
+    }
+    knet_hw_tstamp_ioctl_cmd_cb = hw_tstamp_ioctl_cmd_cb;
+    return 0;
+}
+
+int
+bkn_hw_tstamp_ioctl_cmd_cb_unregister(knet_hw_tstamp_ioctl_cmd_cb_f hw_tstamp_ioctl_cmd_cb)
+{
+    if (knet_hw_tstamp_ioctl_cmd_cb == NULL ||
+        knet_hw_tstamp_ioctl_cmd_cb != hw_tstamp_ioctl_cmd_cb) {
+        return -1;
+    }
+    hw_tstamp_ioctl_cmd_cb = NULL;
+    return 0;
+}
+
 LKM_EXPORT_SYM(bkn_rx_skb_cb_register);
 LKM_EXPORT_SYM(bkn_rx_skb_cb_unregister);
 LKM_EXPORT_SYM(bkn_tx_skb_cb_register);
@@ -9013,6 +9040,8 @@ LKM_EXPORT_SYM(bkn_hw_tstamp_ptp_clock_index_cb_register);
 LKM_EXPORT_SYM(bkn_hw_tstamp_ptp_clock_index_cb_unregister);
 LKM_EXPORT_SYM(bkn_hw_tstamp_rx_time_upscale_cb_register);
 LKM_EXPORT_SYM(bkn_hw_tstamp_rx_time_upscale_cb_unregister);
+LKM_EXPORT_SYM(bkn_hw_tstamp_ioctl_cmd_cb_register);
+LKM_EXPORT_SYM(bkn_hw_tstamp_ioctl_cmd_cb_unregister);
 LKM_EXPORT_SYM(bkn_hw_info_get);
 LKM_EXPORT_SYM(bkn_netif_create_cb_register);
 LKM_EXPORT_SYM(bkn_netif_create_cb_unregister);

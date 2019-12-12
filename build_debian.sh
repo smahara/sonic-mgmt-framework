@@ -65,7 +65,7 @@ set -x -e
 
 ## docker engine version (with platform)
 DOCKER_VERSION=5:19.03.0~2.3.rc3-0~debian-stretch
-LINUX_KERNEL_VERSION=4.9.0-9-2
+LINUX_KERNEL_VERSION=4.9.0-11-2
 
 ## Working directory to prepare the file system
 FILESYSTEM_BASE=/sonic/build

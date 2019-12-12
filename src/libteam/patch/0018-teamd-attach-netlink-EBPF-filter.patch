@@ -1,0 +1,637 @@
+diff --git a/Makefile.am b/Makefile.am
+index 540b882..87cb7a0 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -2,4 +2,4 @@ MAINTAINERCLEANFILES = Makefile.in
+ 
+ ACLOCAL_AMFLAGS = -I m4
+ 
+-SUBDIRS = include libteam libteamdctl utils binding examples teamd man doc
++SUBDIRS = include libteam libteamdctl utils binding examples teamd man doc ebpf
+diff --git a/ebpf/Makefile b/ebpf/Makefile
+new file mode 100644
+index 0000000..49bb555
+--- /dev/null
++++ b/ebpf/Makefile
+@@ -0,0 +1,85 @@
++export KVERSION ?= 4.9.0-9-2-amd64
++KBUILD_PATH ?= /lib/modules/$(KVERSION)/build
++KBUILD_SRC_PATH ?= /lib/modules/$(KVERSION)/source
++LLC ?= llc-6.0
++CLANG ?= clang-6.0
++LLVM_OBJDUMP ?= llvm-objdump-6.0
++INC_FLAGS = -nostdinc -isystem $(shell $(CLANG) -print-file-name=include)
++EXTRA_CFLAGS ?= -O2 -g -Wall -emit-llvm
++
++# In case up-to-date headers are not installed locally in /usr/include,
++# use source build.
++
++LINUXINCLUDE =	\
++		-I../../libutil/ \
++		-I$(KBUILD_PATH)/include \
++		-I$(KBUILD_PATH)/arch/x86/include \
++		-I$(KBUILD_SRC_PATH)/include \
++		-I$(KBUILD_SRC_PATH)/arch/x86/include/ \
++		-I$(KBUILD_PATH)/include/uapi \
++		-I$(KBUILD_SRC_PATH)/include/uapi \
++		-I$(KBUILD_SRC_PATH)/arch/x86/include/uapi/ \
++		-I$(KBUILD_PATH)/include/generated/uapi \
++		-I$(KBUILD_PATH)/arch/x86/include/uapi \
++		-I$(KBUILD_PATH)/arch/x86/include/generated/ \
++		-I$(KBUILD_PATH)/arch/x86/include/generated/uapi \
++		-I/usr/include \
++
++
++KERNELBPF =	teamd_filter.bpf
++KERNELOBJ = $(KERNELBPF:%.bpf=%.obj)
++KERNELOBJDUMPS = $(KERNELBPF:%.bpf=%.objdump)
++
++prefix ?= $(DESTDIR)
++INSTALLPATH = $(prefix)/../libteam5/lib/bpf
++
++all: $(KERNELBPF)
++
++debug: DEBUG_FLAGS = -DBPFDEBUG
++debug: all
++	
++.PHONY: clean
++
++clean:
++	rm -f $(KERNELBPF) $(KERNELOBJ) $(KERNELOBJDUMPS)
++
++distclean: clean
++
++test:
++	
++
++install_PROGRAM = install
++install_DIR = install -dv
++
++
++$(KERNELOBJ):  %.obj:%.c
++
++	$(CLANG) $(INC_FLAGS) \
++                -D__KERNEL__ -D__ASM_SYSREG_H \
++		$(DEBUG_FLAGS) \
++		-Wno-unused-value -Wno-pointer-sign \
++                -Wno-compare-distinct-pointer-types \
++                -Wno-gnu-variable-sized-type-not-at-end \
++                -Wno-address-of-packed-member -Wno-tautological-compare \
++                -Wno-unknown-warning-option \
++		-I../include $(LINUXINCLUDE) \
++		$(EXTRA_CFLAGS) -c $< -o $@
++
++$(KERNELBPF):  %.bpf:%.obj
++	cat $^ | $(LLC) -march=bpf -filetype=obj -o $@
++
++
++$(KERNELOBJDUMPS): %.objdump:%.bpf
++	$(LLVM_OBJDUMP) -S -no-show-raw-insn $< > $@
++
++objdump: $(KERNELOBJDUMPS)
++	
++install: $(KERNELBPF)
++	$(install_DIR) -d $(INSTALLPATH) ; \
++	$(install_PROGRAM) $^ -t $(INSTALLPATH)
++	#Comment the below line if the filter has to be disabled
++	touch $(INSTALLPATH)/$^.enable
++
++
++uninstall: $(KERNELBPF)
++	rm -rf $(INSTALLPATH)
+diff --git a/ebpf/teamd_filter.c b/ebpf/teamd_filter.c
+new file mode 100644
+index 0000000..470a326
+--- /dev/null
++++ b/ebpf/teamd_filter.c
+@@ -0,0 +1,178 @@
++#include <linux/kconfig.h>
++#include <linux/socket.h>
++#include <linux/if_ether.h>
++#include <linux/if_packet.h>
++#include <linux/ip.h>
++#include <linux/if.h>
++#include <linux/if_link.h>
++#include <linux/rtnetlink.h>
++#include <linux/byteorder/generic.h>
++#include <net/netlink.h>
++#include <ebpf/bpf_helpers.h>
++#include <ebpf/bpf_helpers.h>
++#include "teamd_filter.h"
++#include <linux/bpf.h>
++
++
++struct bpf_map_def SEC("maps") my_map = {
++	.type = BPF_MAP_TYPE_HASH,
++	.key_size = sizeof(KEY),
++	.value_size = sizeof(VALUE),
++	.max_entries = 256,
++};
++
++SEC("socket")
++int bpf_prog1(struct __sk_buff *skb)
++{
++
++	uint16_t nlmsg_flags = load_half(skb, offsetof(struct  nlmsghdr, nlmsg_flags));
++	nlmsg_flags = htons(nlmsg_flags);
++
++	// accept all pkts with NLM_F_MULTI flag set
++	if ( nlmsg_flags & NLM_F_MULTI)
++		BPF_MAP_ACCEPT_PKT(&my_map);
++
++	uint16_t nlmsg_type = load_half(skb, offsetof(struct nlmsghdr, nlmsg_type));
++	nlmsg_type = htons(nlmsg_type);
++
++	//accept pkt for end of Multi msg
++	if (nlmsg_type == NLMSG_DONE)
++		BPF_MAP_ACCEPT_PKT(&my_map);
++
++	if ( (nlmsg_type != RTM_NEWLINK)
++		&& (nlmsg_type != RTM_DELLINK))
++	{
++		BPF_TR(" TEAMD : [%d] >> Unknown Type : pkt: %d\n", INVALID_IFINDEX, nlmsg_type);
++		BPF_MAP_DROP_PKT(&my_map);
++	}
++
++	uint8_t ifi_family = load_byte(skb, sizeof(struct nlmsghdr) + offsetof(struct  ifinfomsg, ifi_family)); 
++	if (ifi_family != AF_UNSPEC)
++	{
++		BPF_TR(" TEAMD : [%d] >> Invalid family : %d\n", INVALID_IFINDEX, ifi_family);
++		BPF_MAP_DROP_PKT(&my_map);
++	}
++
++	int ifname_hex = 0;
++	KEY m_key = {0, 0}; 
++	VALUE new_val = {0};
++
++	int kif_index = load_word(skb, sizeof(struct nlmsghdr) + offsetof(struct  ifinfomsg, ifi_index));
++	kif_index = _htonl(kif_index);
++	m_key.ifidx = kif_index;
++
++	int tlv_off_st = (sizeof(struct nlmsghdr) + sizeof(struct  ifinfomsg));
++	int tlv_off = bpf_find_nlattr(skb, tlv_off_st, IFLA_IFNAME);
++	if(tlv_off != 0)
++	{
++		BPF_TR(" TEAMD : [%d] >> found IFLA_IFNAME @ off : %d\n", m_key.ifidx, tlv_off);
++		ifname_hex = load_word(skb, tlv_off+sizeof(struct nlattr));
++	}
++
++	if ( (ifname_hex != ETH_ASCII)
++		 && (ifname_hex != PO_ASCII) )
++	{
++		BPF_TR(" TEAMD : [%d] >> Not of Ethernet or PortChannel, ifname : %x\n", m_key.ifidx, ifname_hex);
++		BPF_MAP_DROP_PKT(&my_map);
++	}
++
++
++	BPF_TR(" TEAMD : [%d] >> Recv Pkt : %d\n", m_key.ifidx, nlmsg_type);
++
++	if (nlmsg_type == RTM_DELLINK)
++	{
++		bpf_map_delete_elem(&my_map, &m_key);
++		BPF_MAP_ACCEPT_PKT(&my_map);
++	}
++
++	int t_flags = load_word(skb, sizeof(struct nlmsghdr) + offsetof(struct  ifinfomsg, ifi_flags));
++	new_val.team_info.flags |= (t_flags & _htonl(IFF_RUNNING));
++	new_val.team_info.flags |= (t_flags & _htonl(IFF_UP));
++
++	tlv_off = bpf_find_nlattr(skb, tlv_off_st, IFLA_MASTER);
++	if(tlv_off != 0)
++	{
++		BPF_TR(" TEAMD : [%d] >> found IFLA_MASTER @ off : %d\n", m_key.ifidx, tlv_off);
++		new_val.team_info.master = load_word(skb, tlv_off+sizeof(struct nlattr));
++	}
++
++	tlv_off = bpf_find_nlattr(skb, tlv_off_st, IFLA_ADDRESS);
++	if(tlv_off != 0)
++	{
++		BPF_TR(" TEAMD : [%d] >> found IFLA_ADDRESS @ off : %d\n", m_key.ifidx, tlv_off);
++		new_val.team_info.mac_addr[0] = load_byte(skb, 0+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.mac_addr[1] = load_byte(skb, 1+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.mac_addr[2] = load_byte(skb, 2+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.mac_addr[3] = load_byte(skb, 3+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.mac_addr[4] = load_byte(skb, 4+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.mac_addr[5] = load_byte(skb, 5+tlv_off+sizeof(struct nlattr));
++	}
++
++	tlv_off = bpf_find_nlattr(skb, tlv_off_st, IFLA_PHYS_PORT_ID);
++	if(tlv_off != 0)
++	{
++		// TODO:
++		// This is a variable length attr
++		// may have to write a kernel helper function to run a for loop
++		// and copy all data
++		// for now just copying a 6 bytes
++		// coz from code walk it looks like phy_port_id is nothing but port-MAC
++		//
++		BPF_TR(" TEAMD : [%d] >> found IFLA_PHYS_PORT_ID @ off : %d\n", m_key.ifidx, tlv_off);
++		new_val.team_info.ppid.id[0] = load_byte(skb, 0+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.ppid.id[1] = load_byte(skb, 1+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.ppid.id[2] = load_byte(skb, 2+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.ppid.id[3] = load_byte(skb, 3+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.ppid.id[4] = load_byte(skb, 4+tlv_off+sizeof(struct nlattr));
++		new_val.team_info.ppid.id[5] = load_byte(skb, 5+tlv_off+sizeof(struct nlattr));
++	}
++
++
++	tlv_off = bpf_find_nlattr(skb, tlv_off_st, IFLA_LINKINFO);
++	if(tlv_off != 0)
++	{
++		BPF_TR(" TEAMD : [%d] >> found IFLA_LINKINFO @ off : %d\n", m_key.ifidx,tlv_off);
++		tlv_off = bpf_find_nlattr_nest(skb, tlv_off, IFLA_INFO_SLAVE_KIND);
++		if(tlv_off != 0)
++		{
++			new_val.team_info.slave_info = load_word(skb, tlv_off+sizeof(struct nlattr));
++			BPF_TR(" TEAMD : [%d] >> found IFLA_INFO_SLAVE @ off : %d\n slave-info : %x",tlv_off, new_val.team_info.slave_info);
++		}
++		else
++			BPF_TR(" TEAMD : [%d] >> NOT found SLAVE_IFLA_LINKINFO @ off : %d\n", m_key.ifidx,tlv_off);
++	}
++	else
++		BPF_TR(" TEAMD : [%d] >> NOT found IFLA_LINKINFO @ off : %d\n", m_key.ifidx,tlv_off);
++
++	VALUE *old_val = 0;
++	uint8_t update_flag = 0;
++
++	old_val = bpf_map_lookup_elem(&my_map, &m_key);
++	if (old_val)
++	{
++
++		if (	   (old_val->team_info.slave_info != new_val.team_info.slave_info)
++				|| (old_val->team_info.master != new_val.team_info.master)
++				|| (old_val->team_info.flags != new_val.team_info.flags)
++				|| (*((uint32_t *)&old_val->team_info.mac_addr[0]) != *((uint32_t *)&new_val.team_info.mac_addr[0]))
++				|| (*((uint16_t *)&old_val->team_info.mac_addr[4]) != *((uint16_t *)&new_val.team_info.mac_addr[4]))
++				|| (*((uint32_t *)&old_val->team_info.ppid.id[0])  != *((uint32_t *)&new_val.team_info.ppid.id[0]))
++				|| (*((uint16_t *)&old_val->team_info.ppid.id[4])  != *((uint16_t *)&new_val.team_info.ppid.id[4]))
++		   )
++		{
++			new_val.count = old_val->count + 1;
++			bpf_map_update_elem(&my_map, &m_key, &new_val, BPF_EXIST);
++		}
++		else
++		{
++			BPF_TR(" TEAMD : [%d] >> No Change Drop pkt\n", m_key.ifidx);
++			BPF_MAP_DROP_PKT(&my_map);
++		}
++	} 
++	else {
++		bpf_map_update_elem(&my_map, &m_key, &new_val, BPF_NOEXIST);
++	}
++	BPF_TR("TEAMD: [%d] >> ACCEPT\n\n", m_key.ifidx);
++	BPF_MAP_ACCEPT_PKT(&my_map);
++}
++char _license[] SEC("license") = "GPL";
+diff --git a/ebpf/teamd_filter.h b/ebpf/teamd_filter.h
+new file mode 100644
+index 0000000..457e9ef
+--- /dev/null
++++ b/ebpf/teamd_filter.h
+@@ -0,0 +1,103 @@
++#ifndef __EBPFTEST_H__
++#define __EBPFTEST_H__
++
++#pragma pack(push,1)
++typedef struct {
++	int ifidx;
++	int pad;
++}KEY;
++
++
++
++#define MAX_PHYS_ITEM_ID_LEN 32
++
++/* This structure holds a unique identifier to identify some
++ *  * physical item (port for example) used by a netdevice.
++ *   */
++#if 0
++struct netdev_phys_item_id {
++	unsigned char id[MAX_PHYS_ITEM_ID_LEN];
++	unsigned char id_len;
++};
++#endif
++
++#define KEY_VALUE_FORMAT "K:%d, V:(S[%x] M[%x] F[%x] MC[%x:%x:%x:%x:%x:%x] P[%x:%x:%x:%x:%x:%x])"
++typedef struct {
++	// i think name can never change for a given kernel ifindex 
++	// not sure why teamd code checks for this as well.
++	// To reduce complexity of filter logic i'm commenting this out for now.
++	/*char		ifname[IFNAMSIZ];*/
++	int slave_info;
++	int	master;
++	int	flags;
++	char mac_addr[6];
++	struct netdev_phys_item_id ppid;
++}TEAMD_INFO;
++
++typedef struct {
++	int count;
++	int accept;
++	TEAMD_INFO team_info;
++}VALUE;
++#pragma pack(pop)
++
++//ref : tcbpf1_kern.c
++//should we use this?
++/* compiler workaround */
++#define _htonl __builtin_bswap32
++
++#//define DEBUG_MODE_ON
++#define ACCEPT_PKT 0xFFFF
++#define DROP_PKT 0
++#define INVALID_IFINDEX 0
++
++#define ETH_ASCII 0x45746865 // Ascii equivalent for "Ethe" to filter out Ethernet nl-msgs
++#define PO_ASCII 0x506F7274  // Ascii equivalent for "Port" to filter out Portchannel nl-msgs
++#define TEAM_ASCII 0x7465616d // Ascii equivalent for "team" to filter out Ethernet nl-msgs
++
++#ifdef DEBUG_MODE_ON
++#define BPF_TR(_fmt,...) \
++{ \
++	char fmt[]=_fmt; \
++	bpf_trace_printk(fmt, sizeof(fmt), ##__VA_ARGS__); \
++}
++#else
++#define BPF_TR(_fmt,...) {};
++#endif
++
++
++
++/*if(drop_counter_val->count %100 == 0) BPF_TR("DROP COUNT: %d\n",drop_counter_val->count); */
++#define  BPF_MAP_DROP_PKT(map)  \
++{ \
++	KEY counter_key = {0, 50000}; \
++	VALUE *counter_val = (VALUE*)bpf_map_lookup_elem(map, &counter_key); \
++	if ( counter_val ){        \
++		counter_val->count++;  \
++                BPF_TR("TEAMD count : [%d] >> D[ %d ] A[ %d ]\n\n", 0, counter_val->count, counter_val->accept); \
++	}else{ \
++		VALUE init_counter_val ={0}; \
++		bpf_map_update_elem(map, &counter_key, &init_counter_val, BPF_NOEXIST); \
++		BPF_TR("TEAMD: [%d] >> INIT DROP [ %d ] \n\n", 0,  init_counter_val.count); \
++	}                \
++	return DROP_PKT; \
++}\
++
++
++
++#define  BPF_MAP_ACCEPT_PKT(map)  \
++{ \
++	KEY counter_key = {0, 50000}; \
++	VALUE *counter_val = (VALUE*)bpf_map_lookup_elem(map, &counter_key); \
++	if ( counter_val ){        \
++		counter_val->accept++;  \
++                BPF_TR("TEAMD: [%d] >> D[ %d ] A[ %d ]\n\n", 0, counter_val->count, counter_val->accept); \
++	}else{ \
++		VALUE init_counter_val ={0}; \
++		bpf_map_update_elem(map, &counter_key, &init_counter_val, BPF_NOEXIST); \
++		BPF_TR("TEAMD: [%d] >> INIT ACCEPT [ %d ] \n\n", 0,  init_counter_val.accept); \
++	}                \
++	return ACCEPT_PKT; \
++}\
++
++#endif
+diff --git a/examples/Makefile.am b/examples/Makefile.am
+index 83804aa..5dc07cf 100644
+--- a/examples/Makefile.am
++++ b/examples/Makefile.am
+@@ -4,7 +4,7 @@ ACLOCAL_AMFLAGS = -I m4
+ 
+ AM_CFLAGS = -I${top_srcdir}/include
+ 
+-LDADD = $(top_builddir)/libteam/libteam.la
++LDADD = $(top_builddir)/libteam/libteam.la  -lbpf  -lebpf -lelf -lgcov
+ 
+ noinst_PROGRAMS=team_manual_control team_monitor
+ team_manual_control_SOURCES=team_manual_control.c
+diff --git a/libteam/ifinfo.c b/libteam/ifinfo.c
+index 24f5e48..4e2d63c 100644
+--- a/libteam/ifinfo.c
++++ b/libteam/ifinfo.c
+@@ -81,6 +81,11 @@ struct team_ifinfo {
+ 			 CHANGED_MASTER_IFINDEX | CHANGED_PHYS_PORT_ID | \
+ 			 CHANGED_PHYS_PORT_ID_LEN | CHANGED_ADMIN_STATE)
+ 
++#define TEAM_PORTCHANNEL_NAME "PortChannel"
++#define TEAM_PORTCHANNEL_NAME_LEN 11
++#define TEAM_MEMBER_PORT_NAME "Ethernet"
++#define TEAM_MEMBER_PORT_NAME_LEN 8
++
+ static void set_changed(struct team_ifinfo *ifinfo, int bit)
+ {
+ 	ifinfo->changed |= bit;
+@@ -248,6 +253,16 @@ void ifinfo_destroy_removed(struct team_handle *th)
+ 	}
+ }
+ 
++void dump_ifinfo_list(struct team_handle *th)
++{
++	struct team_ifinfo *ifinfo, *tmp;
++
++	list_for_each_node_entry_safe(ifinfo, tmp, &th->ifinfo_list, list) {
++		info(th, "interface name %s index %d", ifinfo->ifname, ifinfo->ifindex);
++	}
++	return;
++}
++
+ static void obj_input_newlink(struct nl_object *obj, void *arg, bool event)
+ {
+ 	struct team_handle *th = arg;
+@@ -255,15 +270,30 @@ static void obj_input_newlink(struct nl_object *obj, void *arg, bool event)
+ 	struct team_ifinfo *ifinfo;
+ 	uint32_t ifindex;
+ 	int err;
++	char *ifname;
+ 
+ 	ifinfo_destroy_removed(th);
+ 
+ 	link = (struct rtnl_link *) obj;
+ 
++	ifname = rtnl_link_get_name(link);
++	if (ifname)
++	{
++		if ((strncmp(ifname, TEAM_MEMBER_PORT_NAME, TEAM_MEMBER_PORT_NAME_LEN) == 0) ||
++			(strncmp(ifname, TEAM_PORTCHANNEL_NAME, TEAM_PORTCHANNEL_NAME_LEN) == 0))
++		{
++			info(th, "Received a new link event for %s", ifname);
++		}
++		else
++		{
++			info(th, "Not interested in the new link event for %s", ifname);
++			if (event)
++				rtnl_link_put(link);
++			return;
++		}
++	}
++
+ 	ifindex = rtnl_link_get_ifindex(link);
+-	ifinfo = ifinfo_find_create(th, ifindex);
+-	if (!ifinfo)
+-		return;
+ 
+ 	if (event) {
+ 		err = rtnl_link_get_kernel(th->nl_cli.sock, ifindex, NULL, &link);
+@@ -271,6 +301,10 @@ static void obj_input_newlink(struct nl_object *obj, void *arg, bool event)
+ 			return;
+ 	}
+ 
++	ifinfo = ifinfo_find_create(th, ifindex);
++	if (!ifinfo)
++		return;
++
+ 	clear_changed(ifinfo);
+ 	ifinfo_update(ifinfo, link);
+ 
+@@ -453,9 +487,16 @@ int ifinfo_link_with_port(struct team_handle *th, uint32_t ifindex,
+ 
+ 	ifinfo = ifinfo_find(th, ifindex);
+ 	if (!ifinfo)
++	{
++		err(th, "Failed to find the ifinfo for the interface index %d th is %p.", ifindex, th->ifindex, th);
+ 		return -ENOENT;
++	}
+ 	if (ifinfo->linked)
++	{
++		err(th, "Found ifinfo for the interface index %d with master_ifindex %d.", ifindex, ifinfo->master_ifindex);
+ 		return -EBUSY;
++	}
++	
+ 	ifinfo->port = port;
+ 	ifinfo->linked = true;
+ 	if (p_ifinfo)
+diff --git a/libteam/libteam.c b/libteam/libteam.c
+index 2cc80ca..18191e0 100644
+--- a/libteam/libteam.c
++++ b/libteam/libteam.c
+@@ -161,13 +161,19 @@ int send_and_recv(struct team_handle *th, struct nl_msg *msg,
+ 	ret = nl_send_auto(th->nl_sock, msg);
+ 	nlmsg_free(msg);
+ 	if (ret < 0)
++	{
++		err(th, "nl_send_auto failed with error %d -nl2syserr %d ", ret, -nl2syserr(ret));
+ 		return -nl2syserr(ret);
++	}
+ 
+ 	orig_cb = nl_socket_get_cb(th->nl_sock);
+ 	cb = nl_cb_clone(orig_cb);
+ 	nl_cb_put(orig_cb);
+ 	if (!cb)
++	{
++		err(th, "could not get cb %d", ENOMEM);
+ 		return -ENOMEM;
++	}
+ 
+ 	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &acked);
+ 	nl_cb_set(cb, NL_CB_SEQ_CHECK, NL_CB_CUSTOM, seq_check_handler, &seq);
+@@ -189,6 +195,7 @@ int send_and_recv(struct team_handle *th, struct nl_msg *msg,
+ 		ret = nl_recvmsgs(th->nl_sock, cb);
+ 		if (ret) {
+ 			err = -nl2syserr(ret);
++			err(th, "nl_recvmsgs failed with error %d -nl2syserr %d ", ret, err);
+ 			goto put_cb;
+ 		}
+ 	}
+@@ -664,6 +671,13 @@ int team_init(struct team_handle *th, uint32_t ifindex)
+ 		return -nl2syserr(err);
+ 	}
+ 
++	int g_map_fd=0;
++    g_map_fd = attach_ebpf_filter(nl_socket_get_fd(th->nl_cli.sock_event), "/lib/bpf/teamd_filter.bpf");
++    if (g_map_fd < 0)       {
++             err(th, "attach_ebpf_filter failed.");
++             return g_map_fd;
++    }
++
+ 	err = ifinfo_list_init(th);
+ 	if (err) {
+ 		err(th, "Failed to init interface information list.");
+diff --git a/libteam/ports.c b/libteam/ports.c
+index 9ebf30f..7247432 100644
+--- a/libteam/ports.c
++++ b/libteam/ports.c
+@@ -185,7 +185,10 @@ static int get_port_list(struct team_handle *th)
+ 
+ 	msg = nlmsg_alloc();
+ 	if (!msg)
++	{
++		err(th, "Could not allocate memory for the nlmsg  err %d", ENOMEM);
+ 		return -ENOMEM;
++	}
+ 
+ 	genlmsg_put(msg, NL_AUTO_PID, th->nl_sock_seq, th->family, 0, 0,
+ 			 TEAM_CMD_PORT_LIST_GET, 0);
+@@ -194,7 +197,10 @@ static int get_port_list(struct team_handle *th)
+ 	th->msg_recv_started = false;
+ 	err = send_and_recv(th, msg, get_port_list_handler, th);
+ 	if (err)
++	{
++		err(th, "send and recv failed err %d", err);
+ 		return err;
++	}
+ 
+ 	return check_call_change_handlers(th, TEAM_PORT_CHANGE);
+ 
+@@ -216,7 +222,7 @@ int port_list_init(struct team_handle *th)
+ 
+ 	err = get_port_list(th);
+ 	if (err) {
+-		err(th, "Failed to get port list.");
++		err(th, "Failed to get port list. err %d", err);
+ 		return err;
+ 	}
+ 	return 0;
+diff --git a/libteam/team_private.h b/libteam/team_private.h
+index a5eb0be..712dbad 100644
+--- a/libteam/team_private.h
++++ b/libteam/team_private.h
+@@ -117,6 +117,7 @@ int ifinfo_link(struct team_handle *th, uint32_t ifindex,
+ void ifinfo_unlink(struct team_ifinfo *ifinfo);
+ void ifinfo_clear_changed(struct team_handle *th);
+ void ifinfo_destroy_removed(struct team_handle *th);
++void dump_ifinfo_list(struct team_handle *th);
+ int get_ifinfo_list(struct team_handle *th);
+ int get_options_handler(struct nl_msg *msg, void *arg);
+ int option_list_alloc(struct team_handle *th);
+diff --git a/libteamdctl/Makefile.am b/libteamdctl/Makefile.am
+index 64154fd..6d2d63e 100644
+--- a/libteamdctl/Makefile.am
++++ b/libteamdctl/Makefile.am
+@@ -8,7 +8,7 @@ AM_LDFLAGS = -Wl,--gc-sections -Wl,--as-needed
+ lib_LTLIBRARIES = libteamdctl.la
+ libteamdctl_la_SOURCES = libteamdctl.c cli_usock.c cli_dbus.c cli_zmq.c
+ libteamdctl_la_CFLAGS= $(AM_CFLAGS) $(DBUS_CFLAGS) -I${top_srcdir}/include -D_GNU_SOURCE
+-libteamdctl_la_LIBADD= $(DBUS_LIBS) $(ZMQ_LIBS)
++libteamdctl_la_LIBADD= $(DBUS_LIBS) $(ZMQ_LIBS)  -lbpf  -lebpf -lelf -lgcov
+ libteamdctl_la_LDFLAGS = $(AM_LDFLAGS) -version-info @LIBTEAMDCTL_CURRENT@:@LIBTEAMDCTL_REVISION@:@LIBTEAMDCTL_AGE@
+ 
+ pkgconfigdir = $(libdir)/pkgconfig
+diff --git a/teamd/Makefile.am b/teamd/Makefile.am
+index 904d76c..fa94e3e 100644
+--- a/teamd/Makefile.am
++++ b/teamd/Makefile.am
+@@ -8,7 +8,7 @@ AM_CPPFLAGS='-DLOCALSTATEDIR="$(localstatedir)"'
+ 
+ teamd_CFLAGS= $(LIBDAEMON_CFLAGS) $(JANSSON_CFLAGS) $(DBUS_CFLAGS) -I${top_srcdir}/include -D_GNU_SOURCE
+ 
+-teamd_LDADD = $(top_builddir)/libteam/libteam.la $(LIBDAEMON_LIBS) $(JANSSON_LIBS) $(DBUS_LIBS) $(ZMQ_LIBS)
++teamd_LDADD = $(top_builddir)/libteam/libteam.la $(LIBDAEMON_LIBS) $(JANSSON_LIBS) $(DBUS_LIBS) $(ZMQ_LIBS)  -lbpf  -lebpf -lelf -lgcov
+ 
+ bin_PROGRAMS=teamd
+ teamd_SOURCES=teamd.c teamd_common.c teamd_json.c teamd_config.c teamd_state.c \
+diff --git a/utils/Makefile.am b/utils/Makefile.am
+index 80c9aff..8cffcc7 100644
+--- a/utils/Makefile.am
++++ b/utils/Makefile.am
+@@ -5,9 +5,9 @@ ACLOCAL_AMFLAGS = -I m4
+ AM_CFLAGS = -I${top_srcdir}/include
+ 
+ teamnl_CFLAGS= -I${top_srcdir}/include -D_GNU_SOURCE
+-teamnl_LDADD = $(top_builddir)/libteam/libteam.la
++teamnl_LDADD = $(top_builddir)/libteam/libteam.la  -lbpf  -lebpf -lelf -lgcov
+ teamdctl_CFLAGS= $(JANSSON_CFLAGS) -I${top_srcdir}/include -D_GNU_SOURCE
+-teamdctl_LDADD = $(top_builddir)/libteamdctl/libteamdctl.la $(JANSSON_LIBS)
++teamdctl_LDADD = $(top_builddir)/libteamdctl/libteamdctl.la $(JANSSON_LIBS)  -lbpf  -lebpf -lelf -lgcov
+ 
+ bin_PROGRAMS=teamnl teamdctl
+ teamnl_SOURCES=teamnl.c
