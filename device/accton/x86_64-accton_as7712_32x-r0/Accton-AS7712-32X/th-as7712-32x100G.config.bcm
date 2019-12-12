@@ -1,6 +1,6 @@
 #BFD HW-Assist
 #pci_cmcs_num=3
-num_queues_pci=12
+num_queues_pci=24
 num_queues_uc0=1
 bfd_cosq=32
 
