@@ -234,7 +234,7 @@ int iccp_csm_send(struct CSM* csm, char* buf, int msg_len)
     else
         param = (struct ICCParameter*)&buf[sizeof(ICCHdr)];
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Send(%d): len=[%d] msg_type=[%s (0x%X, 0x%X)]", csm->sock_fd, msg_len, get_tlv_type_string(param->type), ldp_hdr->msg_type, param->type);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Send(%d): len=[%d] msg_type=[%s (0x%X, 0x%X)]", csm->sock_fd, msg_len, get_tlv_type_string(ntohs(param->type)), ldp_hdr->msg_type, ntohs(param->type));
     csm->msg_log.msg[csm->msg_log.end_index].msg_id = ntohl(ldp_hdr->msg_id);
     csm->msg_log.msg[csm->msg_log.end_index].type = ntohs(ldp_hdr->msg_type);
     csm->msg_log.msg[csm->msg_log.end_index].tlv = ntohs(param->type);
