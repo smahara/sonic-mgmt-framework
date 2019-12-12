@@ -13,7 +13,7 @@
 #include <string>               // std::string
 #include <sstream>              // std::ostringstream
 #include <algorithm>            // std::find
-#include <systemd/sd-journal.h> // sd_journal_print()
+#include <syslog.h>             // syslog()
 #include <pwd.h>                // getpwnam(), getpwuid()
 #include <grp.h>                // getgrnam(), getgrgid()
 #include <shadow.h>             // getspnam()
@@ -34,14 +34,14 @@ int change_credentials(uid_t uid, gid_t gid)
     rv = setegid(gid);
     if (rv == -1)
     {
-        sd_journal_print(LOG_WARNING, "change_credentials_by_id() - Error! setegid() failed");
+        syslog(LOG_WARNING, "change_credentials() - Error! setegid() failed");
     }
     else
     {
         rv = seteuid(uid);
         if (rv == -1)
         {
-            sd_journal_print(LOG_WARNING, "change_credentials_by_id() - Error! seteuid() failed");
+            syslog(LOG_WARNING, "change_credentials() - Error! seteuid() failed");
         }
     }
 
@@ -181,6 +181,11 @@ std::string hamd_c::certgen(const std::string  & login) const
 {
     std::string errmsg = "";
 
+    #if (1)
+    // Restore credentials
+    change_credentials(euid, egid);
+    #endif
+
     // Generate certificates
     std::string cmd = config_rm.certgen_cmd(login, certdir.native());
 
@@ -191,7 +196,10 @@ std::string hamd_c::certgen(const std::string  & login) const
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates rc=%d, stdout=%s, stderr=%s",
                     login.c_str(), rc, std_out.c_str(), std_err.c_str());
 
-                LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates [%s]", login.c_str(), success ? "OK" : "ERROR");
+    #if (0)
+    // Restore credentials
+    change_credentials(euid, egid);
+    #endif
 
     if (rc != 0)
         return "Failed to generate certificates for " + login + ". " + std_err;
@@ -228,7 +236,11 @@ std::string hamd_c::certgen(const std::string  & login) const
         }
         else
         {
-            errmsg = "Failed to switch to user " + login;
+            fullname = certdir / name;
+            g_chmod(fullname.c_str(), (S_IRUSR | S_IWUSR)/*0600*/);
+            if (0 != chown(fullname.c_str(), pwd->pw_uid, pwd->pw_gid))
+                syslog(LOG_ERR, "failed to change ownership of file %s. errno=%d (%s)",
+                       fullname.c_str(), errno, strerror(errno));
         }
 
         g_free(certdir);
@@ -683,8 +695,8 @@ void hamd_c::rm_unconfirmed_users() const
                     int ret = system(full_cmd.c_str());
                     if (!WIFEXITED(ret) || (WEXITSTATUS(ret) != 0))
                     {
-                        sd_journal_print(LOG_ERR, "User \"%s\": Failed to removed unconfirmed user UID=%d",
-                                         ent->pw_name, ent->pw_uid);
+                        syslog(LOG_ERR, "User \"%s\": Failed to removed unconfirmed user UID=%d. %s",
+                               ent->pw_name, ent->pw_uid, std_err.c_str());
                     }
                 }
             }
@@ -766,8 +778,8 @@ bool hamd_c::add_unconfirmed_user(const std::string& username, const uint32_t& p
         }
     }
 
-    sd_journal_print(LOG_ERR, "User \"%s\": unable to create unconfirmed user after %d attempts",
-                     username.c_str(), n_tries);
+    syslog(LOG_ERR, "User \"%s\": unable to create unconfirmed user after %d attempts",
+           username.c_str(), n_tries);
 
     return false;
 }
