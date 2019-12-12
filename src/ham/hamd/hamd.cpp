@@ -28,15 +28,7 @@
     typedef std::experimental::filesystem::path   path_t;
 #endif // __GNUC_PREREQ(8,0)
 
-//#define EXTRA_DEBUG
-
-typedef struct
-{
-    uid_t   euid;
-    gid_t   egid;
-} credentials_t;
-
-int change_credentials_by_id(uid_t uid, gid_t gid)
+int change_credentials(uid_t uid, gid_t gid)
 {
     int rv;
     rv = setegid(gid);
@@ -192,19 +184,9 @@ std::string hamd_c::certgen(const std::string  & login) const
     // Generate certificates
     std::string cmd = config_rm.certgen_cmd(login, certdir.native());
 
-#ifdef EXTRA_DEBUG
-printf("cmd=%s\n", cmd.c_str());
-#endif
-
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates [%s]", login.c_str(), cmd.c_str());
 
     auto [ rc, std_out, std_err ] = run(cmd);
-
-#ifdef EXTRA_DEBUG
-printf("rc     = %d\n", rc);
-printf("stdout = %s\n", std_out.c_str());
-printf("stderr = %s\n", std_err.c_str());
-#endif
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates rc=%d, stdout=%s, stderr=%s",
                     login.c_str(), rc, std_out.c_str(), std_err.c_str());
@@ -288,6 +270,9 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
                                                     const std::vector< std::string > & roles,
                                                     const std::string                & hashed_pw)
 {
+    std::string errmsg  = "";
+    bool        success = false;
+
     ::DBus::Struct< bool,       /* success */
                     std::string /* errmsg  */ > ret;
 
@@ -308,60 +293,38 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" [%s]", login.c_str(), cmd.c_str());
 
-#ifdef EXTRA_DEBUG
-printf("cmd=%s\n", cmd.c_str());
-#endif
-
     auto [ rc, std_out, std_err ] = run(cmd);
-
-#ifdef EXTRA_DEBUG
-printf("rc     = %d\n", rc);
-printf("stdout = %s\n", std_out.c_str());
-printf("stderr = %s\n", std_err.c_str());
-#endif
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" rc=%d, stdout=%s, stderr=%s",
                     login.c_str(), rc, std_out.c_str(), std_err.c_str());
 
     if (rc == 0)
     {
-        int  exit_status = WEXITSTATUS(rc);
-        bool success     = exit_status == 0;
-        if (success)
-        {
-            LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" [OK]", login.c_str());
+        errmsg  = certgen(login);
+        success = 0 == errmsg.length(); // The errmsg should be empty on success
 
-            ret._2  = certgen(login);
-            success = ret._2.length() == 0;
-        }
-        else
+        if (!success)
         {
-            switch (exit_status)
-            {
-            case 0:  break;
-            case 1:  ret._2 = "can't update password file";               break;
-            case 2:  ret._2 = "invalid command syntax";                   break;
-            case 3:  ret._2 = "invalid argument to option";               break;
-            case 4:  ret._2 = "UID already in use (and no -o)";           break;
-            case 6:  ret._2 = "specified group (role) doesn't exist";     break;
-            case 9:  ret._2 = "username already in use";                  break;
-            case 10: ret._2 = "can't update group (role) file";           break;
-            case 12: ret._2 = "can't create home directory";              break;
-            case 14: ret._2 = "can't update SELinux user mapping";        break;
-            default: ret._2 = "unknown error code " + std::to_string(rc); break;
-            }
-            LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" [%s]", login.c_str(), ret._2.c_str());
-        }
+            // Since we failed to generate the certificates,
+            // we now need to delete the user.
+            cmd = "/usr/sbin/userdel --force --remove " + login;
 
-        ret._1 = success;
+            LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - executing command \"%s\"", cmd.c_str());
+
+            auto [ rc, std_out, std_err ] = run(cmd);
+
+            LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - command returned rc=%d, stdout=%s, stderr=%s",
+                            rc, std_out.c_str(), std_err.c_str());
+        }
     }
     else
     {
-        ret._1 = false;
-        ret._2 = strerror(errno);
-        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Abnornal command termination, errno=%d (%s)",
-                        errno, ret._2.c_str());
+        success = false;
+        errmsg  = std_err;
     }
+
+    ret._1 = success;
+    ret._2 = errmsg;
 
     return ret;
 }
@@ -759,9 +722,8 @@ bool hamd_c::add_unconfirmed_user(const std::string& username, const uint32_t& p
     std::string  full_cmd;
     std::string  base_cmd = "/usr/sbin/useradd"
                             " --create-home"
-                            " --no-user-group"
-                            " --shell /usr/bin/klish"
                             " --user-group"
+                            " --shell " + config_rm.shell() +
                             " --comment \"Unconfirmed system-assigned credentials " + std::to_string(pid) + '"';
 
     for (n_tries = 0; n_tries < 100; n_tries++) /* Give up retrying eventually */
@@ -914,26 +876,12 @@ std::string hamd_c::troff()
  */
 std::string hamd_c::show()
 {
-    std::ostringstream  dbg;
-    dbg << "PID                       = " << getpid() << '\n'
-        << "conf_file_pm              = " << config_rm.conf_file_pm << '\n'
-        << "certgen_cmd_m             = " << config_rm.certgen_cmd_m << '\n'
-        << "poll_period_sec_m         = " << std::to_string(config_rm.poll_period_sec_m)  << "s\n"
-        << "poll_timer_m              = " << poll_timer_m << '\n'
-        << "sac_uid_min_m             = " << std::to_string(config_rm.sac_uid_min_m) << '\n'
-        << "sac_uid_max_m             = " << std::to_string(config_rm.sac_uid_max_m) << '\n'
-        << "sac_uid_range_m           = " << std::to_string(config_rm.sac_uid_range_m)  << '\n'
-        << "shell_m                   = " << config_rm.shell_m << '\n'
-        << "tron_m                    = " << true_false(config_rm.tron_m) << '\n';
-        //<< "\n"
-        //<< "Defaults:                 = "
-        //<< "conf_file_default_pm      = " << config_rm.conf_file_default_pm << '\n'
-        //<< "certgen_cmd_default_m     = " << config_rm.certgen_cmd_default_m << '\n'
-        //<< "poll_period_sec_default_m = " << std::to_string(config_rm.poll_period_sec_default_m)  << "s\n"
-        //<< "sac_uid_min_default_m     = " << std::to_string(config_rm.sac_uid_min_default_m) << '\n'
-        //<< "sac_uid_max_default_m     = " << std::to_string(config_rm.sac_uid_max_default_m) << '\n'
-        //<< "shell_default_m           = " << config_rm.shell_default_m << '\n'
-        //<< "tron_default_m            = " << (config_rm.tron_default_m ? "true" : "false") << '\n';
+    std::ostringstream  oss;
+    oss << "Process data:\n"
+        << "  PID                       = " << getpid() << '\n'
+        << "  poll_timer_m              = " << poll_timer_m << '\n'
+        << '\n'
+        << config_rm << '\n';
 
-    return dbg.str();
+    return oss.str();
 }
