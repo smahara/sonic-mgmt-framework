@@ -1,12 +1,12 @@
 // Host Account Management
-#include <glib.h>                       // g_main_loop_new(), g_main_context_default(), g_main_loop_run(), g_main_loop_unref(), g_main_loop_quit(), gboolean, etc...
-#include <stdlib.h>                     // strtoll(), EXIT_SUCCESS
-#include <systemd/sd-journal.h>         // sd_journal_print()
-#include <limits.h>                     // LLONG_MIN, LLONG_MAX
-#include <errno.h>                      // errno, EINVAL, ERANGE
+#include <glib.h>               // g_option_context_new(), g_file_test(), etc...
+#include <stdlib.h>             // strtoll(), EXIT_SUCCESS
+#include <syslog.h>             // syslog()
+#include <limits.h>             // LINE_MAX, LLONG_MIN, LLONG_MAX
+#include <errno.h>              // errno, EINVAL, ERANGE
 
-#include "hamd.h"                       // hamd_config_c
-#include "../shared/utils.h"            // true_false()
+#include "hamd.h"               // hamd_config_c
+#include "../shared/utils.h"    // true_false()
 
 
 static long long numberize(const char  * str_p, long long minval, long long maxval, const char ** errstr_pp = nullptr);
@@ -80,7 +80,7 @@ void hamd_config_c::reload()
                 poll_period_sec = (gint)numberize(s, 0, G_MAXINT, &errstr_p);
                 if (errstr_p != nullptr)
                 {
-                    sd_journal_print(LOG_ERR, "Error reading %s: poll_period %s (ignored)", conf_file_pm, errstr_p);
+                    syslog(LOG_ERR, "Error reading %s: poll_period %s (ignored)", conf_file_pm, errstr_p);
                 }
             }
             else if (nullptr != (s = startswith(p, "uid_min")))
@@ -90,7 +90,7 @@ void hamd_config_c::reload()
                 sac_uid_min = (gint)numberize(s, 1000, G_MAXUINT, &errstr_p);
                 if (errstr_p != nullptr)
                 {
-                    sd_journal_print(LOG_ERR, "Error reading %s: uid_min %s (ignored)", conf_file_pm, errstr_p);
+                    syslog(LOG_ERR, "Error reading %s: uid_min %s (ignored)", conf_file_pm, errstr_p);
                 }
             }
             else if (nullptr != (s = startswith(p, "uid_max")))
@@ -100,7 +100,7 @@ void hamd_config_c::reload()
                 sac_uid_max = (gint)numberize(s, 1000, G_MAXUINT, &errstr_p);
                 if (errstr_p != nullptr)
                 {
-                    sd_journal_print(LOG_ERR, "Error reading %s: uid_max %s (ignored)", conf_file_pm, errstr_p);
+                    syslog(LOG_ERR, "Error reading %s: uid_max %s (ignored)", conf_file_pm, errstr_p);
                 }
             }
             else if (nullptr != (s = startswith(p, "certgen")))
@@ -122,11 +122,11 @@ void hamd_config_c::reload()
 
         if (sac_uid_min > sac_uid_max)
         {
-            sd_journal_print(LOG_ERR, "Error reading %s: uid_max is less than uid_min", conf_file_pm);
+            syslog(LOG_ERR, "Error reading %s: uid_max is less than uid_min", conf_file_pm);
         }
         else if ((1 + (sac_uid_max - sac_uid_min)) < 200)
         {
-            sd_journal_print(LOG_ERR, "Error reading %s: uid_min..uid_max range too small (should be >= 200).", conf_file_pm);
+            syslog(LOG_ERR, "Error reading %s: uid_min..uid_max range too small (should be >= 200).", conf_file_pm);
         }
         else
         {
@@ -148,7 +148,7 @@ void hamd_config_c::reload()
             }
             else
             {
-                sd_journal_print(LOG_ERR, "Error reading %s: certgen=%s. Invalid command.", conf_file_pm, certgen_cmd_p);
+                syslog(LOG_ERR, "Error reading %s: certgen=%s. Invalid command.", conf_file_pm, certgen_cmd_p);
             }
         }
 
@@ -161,7 +161,7 @@ void hamd_config_c::reload()
             }
             else
             {
-                sd_journal_print(LOG_ERR, "Error reading %s: shell=%s. File not found.", conf_file_pm, shell_p);
+                syslog(LOG_ERR, "Error reading %s: shell=%s. File not found.", conf_file_pm, shell_p);
             }
         }
     }
@@ -182,6 +182,40 @@ std::string hamd_config_c::certgen_cmd(const std::string & user_r,
                                        const std::string & certdir_r) const
 {
     return expand_certgen_cmd(certgen_cmd_m.c_str(), user_r, certdir_r);
+}
+
+//******************************************************************************
+std::string hamd_config_c::to_string() const
+{
+    std::ostringstream  oss;
+
+    oss << "Running config:\n"
+        << "  conf_file_pm              = " << conf_file_pm << '\n'
+        << "  certgen_cmd_m             = " << certgen_cmd_m << '\n'
+        << "  poll_period_sec_m         = " << std::to_string(poll_period_sec_m)  << "s\n"
+        << "  sac_uid_min_m             = " << std::to_string(sac_uid_min_m) << '\n'
+        << "  sac_uid_max_m             = " << std::to_string(sac_uid_max_m) << '\n'
+        << "  sac_uid_range_m           = " << std::to_string(sac_uid_range_m)  << '\n'
+        << "  shell_m                   = " << shell_m << '\n'
+        << "  tron_m                    = " << true_false(tron_m) << '\n'
+        << '\n'
+        << "Default config:\n"
+        << "  conf_file_default_pm      = " << conf_file_default_pm << '\n'
+        << "  certgen_cmd_default_m     = " << certgen_cmd_default_m << '\n'
+        << "  poll_period_sec_default_m = " << std::to_string(poll_period_sec_default_m)  << "s\n"
+        << "  sac_uid_min_default_m     = " << std::to_string(sac_uid_min_default_m) << '\n'
+        << "  sac_uid_max_default_m     = " << std::to_string(sac_uid_max_default_m) << '\n'
+        << "  shell_default_m           = " << shell_default_m << '\n'
+        << "  tron_default_m            = " << (tron_default_m ? "true" : "false");
+
+    return oss.str();
+}
+
+//******************************************************************************
+std::ostream & operator<<(std::ostream  & stream_r, const hamd_config_c  & obj_r)
+{
+    stream_r << obj_r.to_string();
+    return stream_r;
 }
 
 //******************************************************************************
@@ -317,3 +351,6 @@ static long long numberize(const char  * str_p,
 
     return result != OK ? 0 : number;
 }
+
+
+

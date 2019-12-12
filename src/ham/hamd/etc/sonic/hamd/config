@@ -49,13 +49,13 @@
 #   Use $$ to insert a literal $.
 #
 # type: string
-#certgen=/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout $CERTDIR/key.pem -x509 -days 358000 -out $CERTDIR/certificate.pem -subj "/C=/ST=/L=/O=/CN=$USERNAME"
+#certgen=/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout $CERTDIR/key.pem -subj "/O=SONiC/OU=CLI/CN=$USERNAME" | /usr/bin/openssl x509 -req -days 365000 -out $CERTDIR/certificate.pem -CA /root/cli-ca/.cert/certificate.pem -CAkey /root/cli-ca/.cert/key.pem -CAcreateserial -sha256
 
 # ==============================================================================
 # Parameter: shell
 #   Shell program used when creating new users.
 #
 # type: string
-#shell=/usr/bin/run-klish-in-mgmt-framework.py
+#shell=/usr/bin/sonic-cli
 
 
