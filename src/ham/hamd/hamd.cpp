@@ -1,4 +1,9 @@
 // Host Account Management
+#include "hamd.h"               // hamd_c
+#include "../shared/utils.h"    // startswith(), streq()
+#include "siphash24.h"          // siphash24()
+#include "subprocess.h"         // run()
+                                //
 #include <glib.h>               // g_file_test()
 #include <glib/gstdio.h>        // g_chdir()
 #include <stdio.h>
@@ -13,9 +18,16 @@
 #include <shadow.h>             // getspnam()
 #include <unistd.h>             // getpid()
 
-#include "hamd.h"               // hamd_c
-#include "../shared/utils.h"    // startswith(), streq()
-#include "siphash24.h"          // siphash24()
+#include <features.h>           // __GNUC_PREREQ()
+#if __GNUC_PREREQ(8,0) // If GCC >= 8.0
+#   include <filesystem>
+    typedef std::filesystem::path                 path_t;
+#else
+#   include <experimental/filesystem>
+    typedef std::experimental::filesystem::path   path_t;
+#endif // __GNUC_PREREQ(8,0)
+
+//#define EXTRA_DEBUG
 
 typedef struct
 {
@@ -177,30 +189,29 @@ std::string hamd_c::certgen(const std::string  & login) const
     std::string errmsg = "";
 
     // Generate certificates
-    gchar * certdir = g_build_filename("/home", login.c_str(), ".cert", nullptr);
-    if (certdir != nullptr)
-    {
-        // We're going to run the certificate generation with the user's
-        // credentials so that file/dir ownership is reflected properly.
-        credentials_t  original_cred;
-        if (0 == change_credentials_by_name(&original_cred, login.c_str(), login.c_str()))
-        {
-            // Make sure certificate directory exists and set permissions to
-            // 700 so that only "user" (or root) can access the certificates.
-            if (0 == g_mkdir_with_parents(certdir, S_IRWXU)) // 0700
-            {
-                std::string cmd = config_rm.certgen_cmd(login, certdir);
-                LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates [%s]", login.c_str(), cmd.c_str());
+    std::string cmd = config_rm.certgen_cmd(login, certdir.native());
 
-                int  rc          = system(cmd.c_str());
-                bool term_normal = WIFEXITED(rc);
-                int  exit_status = WEXITSTATUS(rc);
-                bool success     = term_normal && (exit_status == 0);
+#ifdef EXTRA_DEBUG
+printf("cmd=%s\n", cmd.c_str());
+#endif
+
+    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates [%s]", login.c_str(), cmd.c_str());
+
+    auto [ rc, std_out, std_err ] = run(cmd);
+
+#ifdef EXTRA_DEBUG
+printf("rc     = %d\n", rc);
+printf("stdout = %s\n", std_out.c_str());
+printf("stderr = %s\n", std_err.c_str());
+#endif
+
+    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates rc=%d, stdout=%s, stderr=%s",
+                    login.c_str(), rc, std_out.c_str(), std_err.c_str());
 
                 LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates [%s]", login.c_str(), success ? "OK" : "ERROR");
 
-                // Restore credentials
-                change_credentials_by_id(original_cred.euid, original_cred.egid);
+    if (rc != 0)
+        return "Failed to generate certificates for " + login + ". " + std_err;
 
                 if (success)
                 {
@@ -264,16 +275,30 @@ std::string hamd_c::certgen(const std::string  & login) const
                       " --create-home"
                       " --user-group"
                       " --shell " + config_rm.shell() +
-                      " --password '" + hashed_pw + "'"
-                      " --groups " + join(roles.cbegin(), roles.cend(), ",", " ") +
-                      login;
+                      " --password '" + hashed_pw + "' ";
+    if (roles.size())
+        cmd += "--groups " + join(roles.cbegin(), roles.cend(), ",", " ");
+
+    cmd += login;
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" [%s]", login.c_str(), cmd.c_str());
 
-    int  rc          = system(cmd.c_str());
-    bool term_normal = WIFEXITED(rc);
+#ifdef EXTRA_DEBUG
+printf("cmd=%s\n", cmd.c_str());
+#endif
 
-    if (term_normal)
+    auto [ rc, std_out, std_err ] = run(cmd);
+
+#ifdef EXTRA_DEBUG
+printf("rc     = %d\n", rc);
+printf("stdout = %s\n", std_out.c_str());
+printf("stderr = %s\n", std_err.c_str());
+#endif
+
+    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" rc=%d, stdout=%s, stderr=%s",
+                    login.c_str(), rc, std_out.c_str(), std_err.c_str());
+
+    if (rc == 0)
     {
         int  exit_status = WEXITSTATUS(rc);
         bool success     = exit_status == 0;
