@@ -341,6 +341,7 @@ var YangToDb_sys_aaa_auth_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
     }
 
 	if !status {
+ 		log.Info("Error in operation:",err_str)
 		return nil, fmt.Errorf("%s",err_str)
 	} else {
 		return nil, nil

@@ -182,6 +182,5 @@ if __name__ == '__main__':
     pipestr().write(sys.argv)
     #pdb.set_trace()
     func = eval(sys.argv[1], globals(), openconfig_system_client.OpenconfigSystemApi.__dict__)
-    print(sys.argv)
     run(func, sys.argv[2:])
 
