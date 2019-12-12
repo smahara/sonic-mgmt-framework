@@ -48,7 +48,7 @@ private:
     static const  gint  sac_uid_max_default_m     = 59999; // range [sac_uid_min_m..sac_uid_max_m]
     static const  bool  tron_default_m            = false;
     const gchar       * conf_file_default_pm      = "/etc/sonic/hamd/config";
-    std::string         certgen_cmd_default_m     = "/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout $CERTDIR/key.pem -subj \"/O=SONiC/OU=CLI/CN=$USERNAME\" | /usr/bin/openssl x509 -req -days 365000 -out $CERTDIR/certificate.pem -CA /root/cli-ca/certificate.pem -CAkey /root/cli-ca/key.pem -CAcreateserial -sha256";
+    std::string         certgen_cmd_default_m     = "/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout $CERTDIR/key.pem -subj \"/O=SONiC/OU=CLI/CN=$USERNAME\" | /usr/bin/openssl x509 -req -days 365000 -out $CERTDIR/certificate.pem -CA /root/cli-ca/.cert/certificate.pem -CAkey /root/cli-ca/.cert/key.pem -CAcreateserial -sha256";
     std::string         shell_default_m           = "/usr/bin/sonic-cli";
 
 public:

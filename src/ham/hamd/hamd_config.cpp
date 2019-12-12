@@ -1,12 +1,12 @@
 // Host Account Management
-#include <glib.h>                       // g_main_loop_new(), g_main_context_default(), g_main_loop_run(), g_main_loop_unref(), g_main_loop_quit(), gboolean, etc...
-#include <stdlib.h>                     // strtoll(), EXIT_SUCCESS
-#include <systemd/sd-journal.h>         // sd_journal_print()
-#include <limits.h>                     // LINE_MAX, LLONG_MIN, LLONG_MAX
-#include <errno.h>                      // errno, EINVAL, ERANGE
+#include <glib.h>               // g_option_context_new(), g_file_test(), etc...
+#include <stdlib.h>             // strtoll(), EXIT_SUCCESS
+#include <syslog.h>             // syslog()
+#include <limits.h>             // LINE_MAX, LLONG_MIN, LLONG_MAX
+#include <errno.h>              // errno, EINVAL, ERANGE
 
-#include "hamd.h"                       // hamd_config_c
-#include "../shared/utils.h"            // true_false()
+#include "hamd.h"               // hamd_config_c
+#include "../shared/utils.h"    // true_false()
 
 
 static long long numberize(const char  * str_p, long long minval, long long maxval, const char ** errstr_pp = nullptr);
@@ -80,7 +80,7 @@ void hamd_config_c::reload()
                 poll_period_sec = (gint)numberize(s, 0, G_MAXINT, &errstr_p);
                 if (errstr_p != nullptr)
                 {
-                    sd_journal_print(LOG_ERR, "Error reading %s: poll_period %s (ignored)", conf_file_pm, errstr_p);
+                    syslog(LOG_ERR, "Error reading %s: poll_period %s (ignored)", conf_file_pm, errstr_p);
                 }
             }
             else if (nullptr != (s = startswith(p, "uid_min")))
@@ -90,7 +90,7 @@ void hamd_config_c::reload()
                 sac_uid_min = (gint)numberize(s, 1000, G_MAXUINT, &errstr_p);
                 if (errstr_p != nullptr)
                 {
-                    sd_journal_print(LOG_ERR, "Error reading %s: uid_min %s (ignored)", conf_file_pm, errstr_p);
+                    syslog(LOG_ERR, "Error reading %s: uid_min %s (ignored)", conf_file_pm, errstr_p);
                 }
             }
             else if (nullptr != (s = startswith(p, "uid_max")))
@@ -100,7 +100,7 @@ void hamd_config_c::reload()
                 sac_uid_max = (gint)numberize(s, 1000, G_MAXUINT, &errstr_p);
                 if (errstr_p != nullptr)
                 {
-                    sd_journal_print(LOG_ERR, "Error reading %s: uid_max %s (ignored)", conf_file_pm, errstr_p);
+                    syslog(LOG_ERR, "Error reading %s: uid_max %s (ignored)", conf_file_pm, errstr_p);
                 }
             }
             else if (nullptr != (s = startswith(p, "certgen")))
@@ -122,11 +122,11 @@ void hamd_config_c::reload()
 
         if (sac_uid_min > sac_uid_max)
         {
-            sd_journal_print(LOG_ERR, "Error reading %s: uid_max is less than uid_min", conf_file_pm);
+            syslog(LOG_ERR, "Error reading %s: uid_max is less than uid_min", conf_file_pm);
         }
         else if ((1 + (sac_uid_max - sac_uid_min)) < 200)
         {
-            sd_journal_print(LOG_ERR, "Error reading %s: uid_min..uid_max range too small (should be >= 200).", conf_file_pm);
+            syslog(LOG_ERR, "Error reading %s: uid_min..uid_max range too small (should be >= 200).", conf_file_pm);
         }
         else
         {
@@ -148,7 +148,7 @@ void hamd_config_c::reload()
             }
             else
             {
-                sd_journal_print(LOG_ERR, "Error reading %s: certgen=%s. Invalid command.", conf_file_pm, certgen_cmd_p);
+                syslog(LOG_ERR, "Error reading %s: certgen=%s. Invalid command.", conf_file_pm, certgen_cmd_p);
             }
         }
 
@@ -161,7 +161,7 @@ void hamd_config_c::reload()
             }
             else
             {
-                sd_journal_print(LOG_ERR, "Error reading %s: shell=%s. File not found.", conf_file_pm, shell_p);
+                syslog(LOG_ERR, "Error reading %s: shell=%s. File not found.", conf_file_pm, shell_p);
             }
         }
     }

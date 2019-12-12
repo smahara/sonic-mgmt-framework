@@ -1,8 +1,8 @@
 // Host Account Management
 #include <glib.h>
-#include <math.h>               // rintf()
-#include <ostream>              // std::ostream
-#include <systemd/sd-journal.h> // sd_journal_print()
+#include <math.h>       // rintf()
+#include <ostream>      // std::ostream
+#include <syslog.h>     // syslog()
 
 #include "timer.h"
 
@@ -20,7 +20,7 @@ gtimer_c::gtimer_c(double           interval_sec,
     user_data_pm(user_data_p),
     priority_m(priority)
 {
-    //sd_journal_print(LOG_INFO, "gtimer_c::gtimer_c() - interval_sec=%f s", interval_sec);
+    //syslog(LOG_INFO, "gtimer_c::gtimer_c() - interval_sec=%f s", interval_sec);
     set_timeout(interval_sec);
 }
 
@@ -60,14 +60,14 @@ gboolean gtimer_c::callback(gpointer user_data_p)
  */
 void gtimer_c::stop()
 {
-    //sd_journal_print(LOG_INFO, "gtimer_c::stop() - ENTER tid_m=%d", tid_m);
+    //syslog(LOG_INFO, "gtimer_c::stop() - ENTER tid_m=%d", tid_m);
     if (0 != tid_m)
     {
         g_source_remove(tid_m);
         source_pm = NULL;
         tid_m     = 0;
     }
-    //sd_journal_print(LOG_INFO, "gtimer_c::stop() - EXIT");
+    //syslog(LOG_INFO, "gtimer_c::stop() - EXIT");
 }
 
 /**
@@ -75,7 +75,7 @@ void gtimer_c::stop()
  */
 void gtimer_c::start(double new_interval_sec, void * user_data_p)
 {
-    //sd_journal_print(LOG_INFO, "gtimer_c::start() - ENTER tid_m=%d", tid_m);
+    //syslog(LOG_INFO, "gtimer_c::start() - ENTER tid_m=%d", tid_m);
 
     if (new_interval_sec > 0)
     {
@@ -89,12 +89,12 @@ void gtimer_c::start(double new_interval_sec, void * user_data_p)
 
     if (active())
     {
-        //sd_journal_print(LOG_INFO, "gtimer_c::start() - Restarting interval_sec_m=%f s");
+        //syslog(LOG_INFO, "gtimer_c::start() - Restarting interval_sec_m=%f s");
         g_source_set_ready_time(source_pm, g_source_get_time(source_pm) + (gint64)(interval_sec_m * 1000000));
     }
     else
     {
-        //sd_journal_print(LOG_INFO, "gtimer_c::start() - Starting new");
+        //syslog(LOG_INFO, "gtimer_c::start() - Starting new");
         source_pm = g_timeout_source_new_funct_pm(interval_m);
 
         if (G_PRIORITY_DEFAULT != priority_m)
@@ -105,7 +105,7 @@ void gtimer_c::start(double new_interval_sec, void * user_data_p)
         g_source_unref(source_pm);
     }
 
-    //sd_journal_print(LOG_INFO, "gtimer_c::start() - EXIT tid_m=%d", tid_m);
+    //syslog(LOG_INFO, "gtimer_c::start() - EXIT tid_m=%d", tid_m);
 }
 
 /**
@@ -124,24 +124,24 @@ void gtimer_c::clear()
  */
 void gtimer_c::set_timeout(double new_interval_sec)
 {
-    //sd_journal_print(LOG_INFO, "gtimer_c::set_timeout() - ENTER new_interval_sec=%f", new_interval_sec);
+    //syslog(LOG_INFO, "gtimer_c::set_timeout() - ENTER new_interval_sec=%f", new_interval_sec);
     if ((new_interval_sec >= 0) && (interval_sec_m != new_interval_sec))
     {
         interval_sec_m = new_interval_sec;
         if (rintf(new_interval_sec) == new_interval_sec)
         {
-            //sd_journal_print(LOG_INFO, "gtimer_c::set_timeout() - use sec");
+            //syslog(LOG_INFO, "gtimer_c::set_timeout() - use sec");
             g_timeout_source_new_funct_pm = g_timeout_source_new_seconds;
             interval_m = (guint)new_interval_sec;
         }
         else
         {
-            //sd_journal_print(LOG_INFO, "gtimer_c::set_timeout() - use msec");
+            //syslog(LOG_INFO, "gtimer_c::set_timeout() - use msec");
             g_timeout_source_new_funct_pm = g_timeout_source_new;
             interval_m = (guint)((new_interval_sec * 1000) + 0.5);
         }
     }
-    //sd_journal_print(LOG_INFO, "gtimer_c::set_timeout() - EXIT - interval_m=%d", interval_m);
+    //syslog(LOG_INFO, "gtimer_c::set_timeout() - EXIT - interval_m=%d", interval_m);
 }
 
 /**
