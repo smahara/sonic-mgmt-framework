@@ -41,10 +41,14 @@ class ApiClient(object):
 
         self.version = "0.0.1"
 
-        certdir = os.path.join(pwd.getpwuid(os.getuid())[5], ".cert")
-        cert = os.path.join(certdir, "certificate.pem")
-        key = os.path.join(certdir, "key.pem")
-        self.clientCert = (cert, key)
+        username = os.getenv('CLI_USER', None)
+        if username is not None:
+            certdir = os.path.join(pwd.getpwnam(username)[5], ".cert")
+            cert = os.path.join(certdir, "certificate.pem")
+            key = os.path.join(certdir, "key.pem")
+            self.clientCert = (cert, key)
+        else:
+            self.clientCert = None
 
     def set_headers(self):
         from requests.structures import CaseInsensitiveDict
