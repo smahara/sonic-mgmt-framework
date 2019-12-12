@@ -185,6 +185,40 @@ std::string hamd_config_c::certgen_cmd(const std::string & user_r,
 }
 
 //******************************************************************************
+std::string hamd_config_c::to_string() const
+{
+    std::ostringstream  oss;
+
+    oss << "Running config:\n"
+        << "  conf_file_pm              = " << conf_file_pm << '\n'
+        << "  certgen_cmd_m             = " << certgen_cmd_m << '\n'
+        << "  poll_period_sec_m         = " << std::to_string(poll_period_sec_m)  << "s\n"
+        << "  sac_uid_min_m             = " << std::to_string(sac_uid_min_m) << '\n'
+        << "  sac_uid_max_m             = " << std::to_string(sac_uid_max_m) << '\n'
+        << "  sac_uid_range_m           = " << std::to_string(sac_uid_range_m)  << '\n'
+        << "  shell_m                   = " << shell_m << '\n'
+        << "  tron_m                    = " << true_false(tron_m) << '\n'
+        << '\n'
+        << "Default config:\n"
+        << "  conf_file_default_pm      = " << conf_file_default_pm << '\n'
+        << "  certgen_cmd_default_m     = " << certgen_cmd_default_m << '\n'
+        << "  poll_period_sec_default_m = " << std::to_string(poll_period_sec_default_m)  << "s\n"
+        << "  sac_uid_min_default_m     = " << std::to_string(sac_uid_min_default_m) << '\n'
+        << "  sac_uid_max_default_m     = " << std::to_string(sac_uid_max_default_m) << '\n'
+        << "  shell_default_m           = " << shell_default_m << '\n'
+        << "  tron_default_m            = " << (tron_default_m ? "true" : "false");
+
+    return oss.str();
+}
+
+//******************************************************************************
+std::ostream & operator<<(std::ostream  & stream_r, const hamd_config_c  & obj_r)
+{
+    stream_r << obj_r.to_string();
+    return stream_r;
+}
+
+//******************************************************************************
 static inline char * _startswith(const char *s, const char *prefix_p, size_t prefix_l)
 {
     if (strneq(s, prefix_p, prefix_l)) return (char *)s + prefix_l - 1;
@@ -317,3 +351,6 @@ static long long numberize(const char  * str_p,
 
     return result != OK ? 0 : number;
 }
+
+
+
