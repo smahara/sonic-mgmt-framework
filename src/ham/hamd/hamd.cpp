@@ -11,6 +11,7 @@
 #include <pwd.h>                // fgetpwent()
 #include <string>               // std::string
 #include <sstream>              // std::ostringstream
+#include <algorithm>            // std::find
 #include <systemd/sd-journal.h> // sd_journal_print()
 #include <pwd.h>                // getpwnam(), getpwuid()
 #include <grp.h>                // getgrnam(), getgrgid()
@@ -205,6 +206,28 @@ printf("stderr = %s\n", std_err.c_str());
     return "";
 }
 
+static std::string roles_as_string(const std::vector< std::string > & roles)
+{
+    std::vector< std::string > new_roles = roles;
+    if (std::find(new_roles.cbegin(), new_roles.cend(), "admin") != new_roles.cend())
+    {
+        if (std::find(new_roles.cbegin(), new_roles.cend(), "sudo") == new_roles.cend())
+            new_roles.push_back("sudo");
+
+        if (std::find(new_roles.cbegin(), new_roles.cend(), "docker") == new_roles.cend())
+            new_roles.push_back("docker");
+    }
+
+    if (std::find(new_roles.cbegin(), new_roles.cend(), "operator") != new_roles.cend())
+    {
+        if (std::find(new_roles.cbegin(), new_roles.cend(), "docker") == new_roles.cend())
+            new_roles.push_back("docker");
+    }
+
+    return join(new_roles.cbegin(), new_roles.cend(), ",");
+}
+
+
 /**
  * @brief Create a new user
  */
@@ -218,15 +241,17 @@ printf("stderr = %s\n", std_err.c_str());
     ret._1 = true; // Let's be optimistic
     ret._2 = "";   // ..and set returned value to success.
 
+    std::string roles_str = roles_as_string(roles);
+
     std::string cmd = "/usr/sbin/useradd"
                       " --create-home"
                       " --user-group"
                       " --shell " + config_rm.shell() +
-                      " --password '" + hashed_pw + "' ";
-    if (roles.size())
-        cmd += "--groups " + join(roles.cbegin(), roles.cend(), ",", " ");
+                      " --password '" + hashed_pw + "'";
+    if (roles_str.length())
+        cmd += " --groups " + roles_str;
 
-    cmd += login;
+    cmd += ' ' + login;
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" [%s]", login.c_str(), cmd.c_str());
 
@@ -320,7 +345,13 @@ printf("stderr = %s\n", std_err.c_str());
  */
 ::DBus::Struct< bool, std::string > hamd_c::set_roles(const std::string& login, const std::vector< std::string >& roles)
 {
-    std::string  cmd = "/usr/sbin/usermod --groups " + join(roles.cbegin(), roles.cend(), ",", " ") + login;
+    std::string roles_str = roles_as_string(roles);
+    std::string cmd;
+
+    if (roles_str.length())
+        cmd = "/usr/sbin/usermod --groups " + roles_str + ' ' + login;
+    else
+        cmd = "/usr/sbin/usermod --groups \"\" " + login;
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::set_roles() - executing command \"%s\"", cmd.c_str());
 
