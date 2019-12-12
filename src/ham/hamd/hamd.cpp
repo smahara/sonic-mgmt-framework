@@ -186,6 +186,11 @@ std::string hamd_c::certgen(const std::string  & login) const
     change_credentials(euid, egid);
     #endif
 
+    #if (1)
+    // Restore credentials
+    change_credentials(euid, egid);
+    #endif
+
     // Generate certificates
     std::string cmd = config_rm.certgen_cmd(login, certdir.native());
 
