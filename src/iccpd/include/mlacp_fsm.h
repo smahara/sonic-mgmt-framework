@@ -30,6 +30,8 @@
 
 #define MLCAP_SYNC_PHY_DEV_SEC     1     /*every 1 sec*/
 
+#define MLACP_LOCAL_IF_DOWN_TIMER 600  // 600 seconds.
+
 #define MLACP(csm_ptr)  (csm_ptr->app_csm.mlacp)
 
 struct CSM;

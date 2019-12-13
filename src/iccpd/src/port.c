@@ -110,6 +110,8 @@ struct LocalInterface* local_if_create(int ifindex, char* ifname, int type, uint
     local_if->type  = type;
     local_if->state = state;
 
+    local_if->po_down_time = 0;
+
     if (local_if->type == IF_T_PORT_CHANNEL)
     {
         int i;
