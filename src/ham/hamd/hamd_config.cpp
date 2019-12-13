@@ -10,7 +10,7 @@
 
 
 static long long numberize(const char  * str_p, long long minval, long long maxval, const char ** errstr_pp = nullptr);
-static std::string expand_certgen_cmd(const char * certgen_cmd_p, const std::string  & user_r, const std::string  & certdir_r);
+static std::string expand_certgen_cmd(const std::string & certgen_cmd_r, const std::string  & user_r, const std::string  & certdir_r);
 
 //******************************************************************************
 hamd_config_c::hamd_config_c(int argc, char **argv)
@@ -55,8 +55,8 @@ void hamd_config_c::reload()
         gint sac_uid_min           = sac_uid_min_default_m;
         gint sac_uid_max           = sac_uid_max_default_m;
         bool tron                  = tron_default_m;
-        const char * certgen_cmd_p = certgen_cmd_default_m.c_str();
-        const char * shell_p       = shell_default_m.c_str();
+        std::string certgen_cmd    = certgen_cmd_default_m;
+        std::string shell          = shell_default_m;
 
         #define WHITESPACE " \t\n\r"
         char    line[LINE_MAX];
@@ -106,12 +106,18 @@ void hamd_config_c::reload()
             else if (nullptr != (s = startswith(p, "certgen")))
             {
                 s += strspn(s, " \t=");            // Skip leading spaces and equal sign (=)
-                certgen_cmd_p = s;
+                certgen_cmd = s;
+
+printf("Found certgen: s=%s\n", s);
+
             }
             else if (nullptr != (s = startswith(p, "shell")))
             {
                 s += strspn(s, " \t=");            // Skip leading spaces and equal sign (=)
-                shell_p = s;
+                shell = s;
+
+printf("Found shell: s=%s\n", s);
+
             }
         }
 
@@ -135,33 +141,38 @@ void hamd_config_c::reload()
             sac_uid_range_m = 1 + (sac_uid_max_m - sac_uid_min_m);
         }
 
-        if (certgen_cmd_m != certgen_cmd_p)
+        if (certgen_cmd_m != certgen_cmd)
         {
+#if (0)
             // Make sure that the program exists and can be executed
-            std::string cmd = expand_certgen_cmd(certgen_cmd_p, "____bozo____", "/tmp");
+            std::string cmd = expand_certgen_cmd(certgen_cmd, "____bozo____", "/tmp");
 
             int  rc          = system(cmd.c_str());
             bool term_normal = WIFEXITED(rc);
             if (term_normal)
             {
-                certgen_cmd_m = certgen_cmd_p;
+#endif
+                certgen_cmd_m = certgen_cmd;
+#if (0)
             }
             else
             {
-                syslog(LOG_ERR, "Error reading %s: certgen=%s. Invalid command.", conf_file_pm, certgen_cmd_p);
+                syslog(LOG_ERR, "Error reading %s: certgen=%s. Invalid command.", conf_file_pm, certgen_cmd.c_str());
             }
+#endif
         }
 
-        if (shell_m != shell_p)
+        if (shell_m != shell)
         {
             // Make sure that the shell exists
-            if (g_file_test(shell_p, G_FILE_TEST_EXISTS))
+            if (g_file_test(shell.c_str(), G_FILE_TEST_EXISTS))
             {
-                shell_m = shell_p;
+printf("setting shell_m: %s\n", shell.c_str());
+                shell_m = shell;
             }
             else
             {
-                syslog(LOG_ERR, "Error reading %s: shell=%s. File not found.", conf_file_pm, shell_p);
+                syslog(LOG_ERR, "Error reading %s: shell=%s. File not found.", conf_file_pm, shell.c_str());
             }
         }
     }
@@ -181,7 +192,7 @@ void hamd_config_c::reload()
 std::string hamd_config_c::certgen_cmd(const std::string & user_r,
                                        const std::string & certdir_r) const
 {
-    return expand_certgen_cmd(certgen_cmd_m.c_str(), user_r, certdir_r);
+    return expand_certgen_cmd(certgen_cmd_m, user_r, certdir_r);
 }
 
 //******************************************************************************
@@ -228,22 +239,22 @@ static inline char * _startswith(const char *s, const char *prefix_p, size_t pre
 //******************************************************************************
 /**
  * @brief Replace variable fields of the certificate generation command
- *        (#certgen_cmd_p) with the values provided (#user_r, #certdir_r)
+ *        (#certgen_cmd_r) with the values provided (#user_r, #certdir_r)
  *
  *        There are two variables recognized:
  *          $CERTDIR  - User's home directory
  *          $USERNAME - User's name
  *
- * @param certgen_cmd_p: Certificate generation command that may contain
- *                       $USERNAME and/or $CERTDIR to be replaced by user_p
+ * @param certgen_cmd_r: Certificate generation command that may contain
+ *                       $USERNAME and/or $CERTDIR to be replaced by user_r
  *                       and/or certdir_r respectively.
  * @param user_r:        User's name
  * @param certdir_r:     Location where to put certificates
  *
- * @return This method will return #certgen_cmd_p with $CERTDIR replaced by
+ * @return This method will return #certgen_cmd_r with $CERTDIR replaced by
  *         certdir_r and $USERNAME by user_r.
  */
-static std::string expand_certgen_cmd(const char         * certgen_cmd_p,
+static std::string expand_certgen_cmd(const std::string  & certgen_cmd_r,
                                       const std::string  & user_r,
                                       const std::string  & certdir_r)
 {
@@ -261,6 +272,7 @@ static std::string expand_certgen_cmd(const char         * certgen_cmd_p,
 
     std::string  output = "";
 
+    const char * certgen_cmd_p = certgen_cmd_r.c_str();
     for (; certgen_cmd_p[0] != '\0'; certgen_cmd_p++)
     {
         if (certgen_cmd_p[0] == '$')
