@@ -361,15 +361,19 @@ class CommandArgument(object):
         self.daemon = daemon
         self.enabled = enabled
         self.value = val
+        self.tolower = False
     def to_str(self):
         if type(self.value) is list or type(self.value) is tuple:
-            return ' '.join([v for v in self.value])
+            ret_val = ' '.join([v for v in self.value])
         elif type(self.value) is dict:
             id_list = self.value.keys()
             id_list.sort()
-            return ' '.join([self.value[i][0] for i in id_list])
+            ret_val = ' '.join([self.value[i][0] for i in id_list])
         else:
-            return str(self.value)
+            ret_val = str(self.value)
+        if self.tolower:
+            ret_val = ret_val.lower()
+        return ret_val
     @staticmethod
     def parse_ext_community(com_str, is_rt = None):
         if com_str.startswith(CommunityList.RT_TYPE_MARK):
@@ -460,6 +464,8 @@ class CommandArgument(object):
                 return self.value[0]
             else:
                 return self.value
+        elif format == 'tolower':
+            self.tolower = True
         return self.to_str()
 
 def hdl_send_com(daemon, cmd_str, op, args, data):
@@ -479,14 +485,14 @@ def hdl_com_set(daemon, cmd_str, op, args, extended):
     if len(args) < 2 or 0 not in args[1] or 1 not in args[1] or 2 not in args[1]:
         return None
     com_name = args[0]
-    set_type = args[1][0][0]
+    set_type = args[1][0][0].lower()
     arg_str = '{} {}'.format(set_type, com_name)
     cmd_list = []
     com_set_list = daemon.comm_set_list if not extended else daemon.extcomm_set_list
     if com_name in com_set_list and com_set_list[com_name].is_configurable():
         cmd_list.append(cmd_str.format(CommandArgument(daemon, True, arg_str), no = CommandArgument(daemon, False)))
     if op != CachedDataWithOp.OP_DELETE:
-        match_action = args[1][1][0]
+        match_action = args[1][1][0].lower()
         member_list = args[1][2][0]
         if match_action == 'all':
             if extended and set_type == 'standard':
@@ -668,7 +674,7 @@ class MatchPrefix:
             self.min_len = self.max_len = None
         self.action = action
     def __str__(self):
-        ret_str = '%s %s' % (self.action, self.ip_prefix)
+        ret_str = '%s %s' % (self.action.lower(), self.ip_prefix)
         if self.min_len is not None:
             ret_str += ' ge %d' % self.min_len
         if self.max_len is not None:
@@ -677,8 +683,7 @@ class MatchPrefix:
     def __eq__(self, other):
         return (self.ip_prefix == other.ip_prefix and
                 self.min_len == other.min_len and
-                self.max_len == other.max_len and
-                self.action == other.action)
+                self.max_len == other.max_len)
 
 class MatchPrefixList(list):
     def __init__(self, af_mode = None):
@@ -709,17 +714,15 @@ class MatchPrefixList(list):
                 raise ValueError
         self.append(MatchPrefix(self.af, ip_pfx, len_range, action))
         return self[-1]
-    def remove_prefix(self, ip_pfx, len_range = None, action = 'permit'):
+    def get_prefix(self, ip_pfx, len_range = None, action = 'permit'):
         if self.af is None:
-            return None
+            return (None, None)
         prefix = MatchPrefix(self.af, ip_pfx, len_range, action)
         try:
             idx = self.index(prefix)
         except ValueError:
-            return None
-        prefix = self[idx]
-        del(self[idx])
-        return prefix
+            return (None, None)
+        return (self[idx], idx)
 
 class BGPConfigDaemon:
     DEFAULT_VRF = 'default'
@@ -853,13 +856,13 @@ class BGPConfigDaemon:
                          ('match_next_hop_set|ipv4',        '{no:no-prefix}match ip next-hop prefix-list {}'),
                          ('match_next_hop_set|ipv6',        '{no:no-prefix}match ip next-hop prefix-list {}'), #match ipv6 next-hop prefix-list not suppported by frr
                          ('match_med',                      '{no:no-prefix}match metric {}'),
-                         ('match_origin',                   '{no:no-prefix}match origin {}'),
+                         ('match_origin',                   '{no:no-prefix}match origin {:tolower}'),
                          ('match_local_pref',               '{no:no-prefix}match local-preference {}'),
                          ('match_community',                '{no:no-prefix}match community {}'),
                          ('match_ext_community',            '{no:no-prefix}match extcommunity {}'),
                          ('match_as_path',                  '{no:no-prefix}match as-path {}'),
                          ('call_route_map',                 '{no:no-prefix}call {:enable-only}'),
-                         ('set_origin',                     '{no:no-prefix}set origin {}'),
+                         ('set_origin',                     '{no:no-prefix}set origin {:tolower}'),
                          ('set_local_pref',                 '{no:no-prefix}set local-preference {}'),
                          ('set_next_hop',                   '{no:no-prefix}set ip next-hop {}'),
                          ('set_med',                        '{no:no-prefix}set metric {}'),
@@ -926,11 +929,50 @@ class BGPConfigDaemon:
                             (vrf, ip, pg_name))
         # map_name ==> seq_no ==> operation
         self.route_map = {}
+        rtmap_table = self.config_db.get_table('ROUTE_MAP')
+        for key, entry in rtmap_table.items():
+            rtmap_name, seq_no = key
+            syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: Route_Map %s Seq_NO %s' % (rtmap_name, seq_no))
+            if 'route_operation' in entry:
+                self.route_map.setdefault(rtmap_name, {})[seq_no] = entry['route_operation']
 
         self.comm_set_list = {}
+        comm_table = self.config_db.get_table('COMMUNITY_SET')
+        for key, entry in comm_table.items():
+            syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: Community %s' % key)
+            self.comm_set_list[key] = CommunityList(key, False)
+            for k, v in entry.items():
+                self.comm_set_list[key].db_data_to_attr(k, v)
         self.extcomm_set_list = {}
+        extcomm_table = self.config_db.get_table('EXTENDED_COMMUNITY_SET')
+        for key, entry in extcomm_table.items():
+            syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: Extended_Community %s' % key)
+            self.extcomm_set_list[key] = CommunityList(key, True)
+            for k, v in entry.items():
+                self.extcomm_set_list[key].db_data_to_attr(k, v)
         self.prefix_set_list = {}
+        pfx_set_table = self.config_db.get_table('PREFIX_SET')
+        for key, entry in pfx_set_table.items():
+            if 'mode' in entry:
+                syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: Prefix_Set %s mode %s' % (key, entry['mode']))
+                self.prefix_set_list[key] = MatchPrefixList(entry['mode'].lower())
+        pfx_table = self.config_db.get_table('PREFIX')
+        for key, entry in pfx_table.items():
+            pfx_set_name, ip_pfx, len_range = key
+            syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: Prefix %s range %s of set %s' % (ip_pfx, len_range, pfx_set_name))
+            if len_range == 'exact':
+                len_range = None
+            if pfx_set_name in self.prefix_set_list and 'action' in entry:
+                try:
+                    self.prefix_set_list[pfx_set_name].add_prefix(ip_pfx, len_range, entry['action'])
+                except ValueError:
+                    pass
         self.as_path_set_list = {}
+        aspath_table = self.config_db.get_table('AS_PATH_SET')
+        for key, entry in aspath_table.items():
+            if 'as_path_set_member' in entry:
+                syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: AS_Path_Set %s member %s' % (key, entry['as_path_set_member']))
+                self.as_path_set_list[key] = entry['as_path_set_member'][:]
         self.tag_set_list = {}
 
         self.table_handler_list = [
@@ -1273,28 +1315,38 @@ class BGPConfigDaemon:
                     if len_range == 'exact':
                         len_range = None
                     pfx_action = data.get('action', None)
-                    if (pfx_action is None or
-                        (pfx_action.op != CachedDataWithOp.OP_ADD and pfx_action.op != CachedDataWithOp.OP_DELETE)):
+                    if pfx_action is None or pfx_action.op == CachedDataWithOp.OP_NONE:
                         continue
-                    if pfx_action.op == CachedDataWithOp.OP_DELETE:
-                        del_table = True
-                    try:
-                        if del_table:
-                            upd_prefix = self.prefix_set_list[pfx_set_name].remove_prefix(ip_pfx, len_range, pfx_action.data)
-                        else:
-                            upd_prefix = self.prefix_set_list[pfx_set_name].add_prefix(ip_pfx, len_range, pfx_action.data)
-                    except ValueError:
-                        syslog.syslog(syslog.LOG_ERR, 'failed to update prefix-set %s in cache with prefix %s range %s' %
-                                                (pfx_set_name, ip_pfx, len_range))
-                        continue
-                    if upd_prefix is not None:
-                        af = self.prefix_set_list[pfx_set_name].af
-                        command = "vtysh -c 'configure terminal' -c '{}{} prefix-list {} {}'".\
-                                    format(('no ' if del_table else ''), ('ip' if af == socket.AF_INET else 'ipv6'),
-                                           pfx_set_name, str(upd_prefix))
+                    af = self.prefix_set_list[pfx_set_name].af
+                    if pfx_action.op == CachedDataWithOp.OP_DELETE or pfx_action.op == CachedDataWithOp.OP_UPDATE:
+                        del_pfx, pfx_idx = self.prefix_set_list[pfx_set_name].get_prefix(ip_pfx, len_range)
+                        if del_pfx is None:
+                            syslog.syslog(syslog.LOG_ERR, 'prefix of {} with range {} not found from prefix-set {}'.\
+                                            format(ip_pfx, len_range, pfx_set_name))
+                            continue
+                        command = "vtysh -c 'configure terminal' -c 'no {} prefix-list {} {}'".\
+                                    format(('ip' if af == socket.AF_INET else 'ipv6'), pfx_set_name, str(del_pfx))
                         if not self.__run_command(command):
-                            syslog.syslog(syslog.LOG_ERR, 'failed to %s prefix %s with range to set %s' %
-                                          (('delete' if del_table else 'add'), ip_pfx, len_range, pfx_set_name))
+                            syslog.syslog(syslog.LOG_ERR, 'failed to delete prefix %s with range %s from set %s' %
+                                          (ip_pfx, len_range, pfx_set_name))
+                            continue
+                        del(self.prefix_set_list[pfx_set_name][pfx_idx])
+                    if pfx_action.op == CachedDataWithOp.OP_ADD or pfx_action.op == CachedDataWithOp.OP_UPDATE:
+                        try:
+                            add_pfx = self.prefix_set_list[pfx_set_name].add_prefix(ip_pfx, len_range, pfx_action.data)
+                        except ValueError:
+                            syslog.syslog(syslog.LOG_ERR, 'failed to update prefix-set %s in cache with prefix %s range %s' %
+                                    (pfx_set_name, ip_pfx, len_range))
+                            continue
+                        command = "vtysh -c 'configure terminal' -c '{} prefix-list {} {}'".\
+                                    format(('ip' if af == socket.AF_INET else 'ipv6'), pfx_set_name, str(add_pfx))
+                        if not self.__run_command(command):
+                            syslog.syslog(syslog.LOG_ERR, 'failed to add prefix %s with range %s to set %s' %
+                                          (ip_pfx, len_range, pfx_set_name))
+                            # revert cached update on failure
+                            del_pfx, pfx_idx = self.prefix_set_list[pfx_set_name].get_prefix(ip_pfx, len_range)
+                            if del_pfx is not None:
+                                del(self.prefix_set_list[pfx_set_name][pfx_idx])
                             continue
                 else:
                     if 'address' not in data or data['address'].op == CachedDataWithOp.OP_NONE:
