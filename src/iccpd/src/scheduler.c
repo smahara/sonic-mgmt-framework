@@ -41,6 +41,7 @@
 #include "../include/iccp_cmd.h"
 #include "../include/mlacp_link_handler.h"
 #include "../include/iccp_netlink.h"
+#include "../include/stp_handler.h"
 
 /******************************************************
 *
@@ -106,6 +107,7 @@ static int scheduler_transit_fsm()
         iccp_csm_transit(csm);
         app_csm_transit(csm);
         mlacp_fsm_transit(csm);
+        stp_fsm_transit(csm);
     }
 
     local_if_change_flag_clear();
@@ -320,6 +322,17 @@ void scheduler_init()
         ICCPD_LOG_DEBUG(__FUNCTION__, "Syncd info socket connect success");
     }
 
+    if (iccp_connect_stp_syncd() < 0)
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__, "%s:%d, stp syncd info socket connect fail",
+                        __FUNCTION__, __LINE__);
+    }
+    else
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__, "%s:%d, stp syncd info socket connect success. FD: %d",
+                        __FUNCTION__, __LINE__, sys->stp_sync_fd);
+    }
+
     if (mclagd_ctl_sock_create() < 0)
     {
         ICCPD_LOG_WARN(__FUNCTION__, "Mclagd ctl info socket connect fail");
@@ -391,6 +404,10 @@ void scheduler_loop()
         if (sys->sync_fd <= 0)
         {
             iccp_connect_syncd();
+        }
+        if (sys->stp_sync_fd < 0)
+        {
+          iccp_connect_stp_syncd();
         }
 
         /*handle socket slelect event ,If no message received, it will block 0.1s*/

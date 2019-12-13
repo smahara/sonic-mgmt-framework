@@ -1704,6 +1704,54 @@ ICCP_DBG_CNTR_MSG_e mlacp_fsm_iccp_to_dbg_msg_type(uint32_t tlv_type)
         case TLV_T_MLACP_IF_UP_ACK:
             return ICCP_DBG_CNTR_MSG_IF_UP_ACK;
 
+        case TLV_T_STP_CONNECT:
+            return  ICCP_DBG_CNTR_MSG_STP_CONNECT;
+
+        case TLV_T_STP_DISCONNECT:
+            return ICCP_DBG_CNTR_MSG_STP_DISCONNECT;
+
+        case TLV_T_STP_SYSTEM_CONFIG:
+            return ICCP_DBG_CNTR_MSG_STP_SYSTEM_CONFIG;
+
+        case TLV_T_STP_REGION_NAME:
+            return ICCP_DBG_CNTR_MSG_STP_REGION_NAME;
+
+        case TLV_T_STP_REVISION_LEVEL:
+            return ICCP_DBG_CNTR_MSG_STP_REVISION_LEVEL;
+
+        case TLV_T_STP_INSTANCE_PRIORITY:
+            return ICCP_DBG_CNTR_MSG_STP_INSTANCE_PRIORITY;
+
+        case TLV_T_STP_CONFIGURATION_DIGEST:
+            return ICCP_DBG_CNTR_MSG_STP_CONFIGURATION_DIGEST;
+
+        case TLV_T_STP_TC_INSTANCES:
+            return ICCP_DBG_CNTR_MSG_STP_TC_INSTANCES;
+
+        case TLV_T_STP_CIST_ROOT_TIME_PARAMETER:
+            return ICCP_DBG_CNTR_MSG_STP_ROOT_TIME_PARAM;
+
+        case TLV_T_STP_MIST_ROOT_TIME_PARAMETER:
+            return ICCP_DBG_CNTR_MSG_STP_MIST_ROOT_TIME_PARAM;
+
+        case TLV_T_STP_SYNC_REQUEST:
+            return ICCP_DBG_CNTR_MSG_STP_SYNC_REQ;
+
+        case TLV_T_STP_SYNC_DATA:
+            return ICCP_DBG_CNTR_MSG_STP_SYNC_DATA;
+
+        case TLV_T_STP_PORTCHANNEL_PORTID_MAP:
+            return ICCP_DBG_CNTR_MSG_STP_PO_PORT_MAP;
+
+        case TLV_T_STP_TX_CNFIG: 
+            return ICCP_DBG_CNTR_MSG_STP_TX_CONFIG;
+
+        case TLV_T_STP_AGE_OUT:         
+            return ICCP_DBG_CNTR_MSG_STP_AGE_OUT;
+      
+        case TLV_T_STP_COMMON_INFO:
+            return ICCP_DBG_CNTR_MSG_STP_COMMON_MSG;
+
         default:
             ICCPD_LOG_DEBUG(__FUNCTION__, "No debug counter for TLV type %u",
                 tlv_type);
