@@ -1,5 +1,5 @@
 diff --git a/relay/dhcrelay.c b/relay/dhcrelay.c
-index 8aac4b3..d5d7c38 100644
+index 8aac4b3..b671d74 100644
 --- a/relay/dhcrelay.c
 +++ b/relay/dhcrelay.c
 @@ -57,9 +57,9 @@ int bogus_agent_drops = 0;	/* Packets dropped because agent option
@@ -120,15 +120,16 @@ index 8aac4b3..d5d7c38 100644
  
  		if (!out) {
  			log_error("Packet to bogus giaddr %s.\n",
-@@ -847,6 +876,7 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
+@@ -847,6 +876,8 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
  
  			++server_packets_relayed;
  		}
 +
++		write_stats_to_file(out);
  		return;
  	}
  
-@@ -857,6 +887,7 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
+@@ -857,6 +888,7 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
  
  	if (!(ip->flags & INTERFACE_DOWNSTREAM)) {
  		log_debug("Dropping request received on %s", ip->name);
@@ -136,7 +137,7 @@ index 8aac4b3..d5d7c38 100644
  		return;
  	}
  
-@@ -864,8 +895,10 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
+@@ -864,8 +896,10 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
  	 * drop the packet.  Note this may set packet->giaddr if RFC3527
  	 * is enabled. */
  	if (!(length = add_relay_agent_options(ip, packet, length,
@@ -148,7 +149,7 @@ index 8aac4b3..d5d7c38 100644
  
  	/* If giaddr is not already set, Set it so the server can
  	   figure out what net it's from and so that we can later
-@@ -1657,6 +1690,7 @@ parse_downstream(char *arg) {
+@@ -1657,6 +1691,7 @@ parse_downstream(char *arg) {
  	if (addr && (inet_pton(AF_INET6, addr, &dp->link.sin6_addr) <= 0))
  		log_fatal("Bad link address '%s'", addr);
  
@@ -156,7 +157,7 @@ index 8aac4b3..d5d7c38 100644
  	return dp;
  }
  
-@@ -1810,6 +1844,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1810,6 +1845,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  	struct dhcpv6_relay_packet *relay;
  	struct option_state *opts;
  	struct stream_list *up;
@@ -164,7 +165,7 @@ index 8aac4b3..d5d7c38 100644
  
  	/* Check if the message should be relayed to the server. */
  	switch (packet->dhcpv6_msg_type) {
-@@ -1840,6 +1875,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1840,6 +1876,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  			 dhcpv6_type_names[packet->dhcpv6_msg_type],
  			 piaddr(packet->client_addr),
  			 ntohs(packet->client_port));
@@ -172,7 +173,7 @@ index 8aac4b3..d5d7c38 100644
  		return;
  
  	      default:
-@@ -1847,6 +1883,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1847,6 +1884,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  			 packet->dhcpv6_msg_type,
  			 piaddr(packet->client_addr),
  			 ntohs(packet->client_port));
@@ -180,7 +181,7 @@ index 8aac4b3..d5d7c38 100644
  		return;
  	}
  
-@@ -1857,6 +1894,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1857,6 +1895,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  	if (packet->dhcpv6_msg_type == DHCPV6_RELAY_FORW) {
  		if (packet->dhcpv6_hop_count >= max_hop_count) {
  			log_info("Hop count exceeded,");
@@ -188,7 +189,7 @@ index 8aac4b3..d5d7c38 100644
  			return;
  		}
  		relay->hop_count = packet->dhcpv6_hop_count + 1;
-@@ -1866,14 +1904,17 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1866,14 +1905,17 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  			/* On smart relay add: && !global. */
  			if (!use_if_id && downstreams->next) {
  				log_info("Shan't get back the interface.");
@@ -207,7 +208,7 @@ index 8aac4b3..d5d7c38 100644
  		memcpy(&relay->link_address, &dp->link.sin6_addr, 16);
  	}
  	memcpy(&relay->peer_address, packet->client_addr.iabuf, 16);
-@@ -1895,6 +1936,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1895,6 +1937,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  		} else {
  			log_info("Don't know the interface.");
  			option_state_dereference(&opts, MDL);
@@ -215,7 +216,7 @@ index 8aac4b3..d5d7c38 100644
  			return;
  		}
  
-@@ -1904,6 +1946,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1904,6 +1947,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  					D6O_INTERFACE_ID, 0)) {
  			log_error("Can't save interface-id.");
  			option_state_dereference(&opts, MDL);
@@ -223,7 +224,7 @@ index 8aac4b3..d5d7c38 100644
  			return;
  		}
  	}
-@@ -1917,6 +1960,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1917,6 +1961,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  					D6O_SUBSCRIBER_ID, 0)) {
  			log_error("Can't save subsriber-id.");
  			option_state_dereference(&opts, MDL);
@@ -231,7 +232,7 @@ index 8aac4b3..d5d7c38 100644
  			return;
  		}
  	}
-@@ -1929,6 +1973,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1929,6 +1974,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  				D6O_RELAY_MSG, 0)) {
  		log_error("Can't save relay-msg.");
  		option_state_dereference(&opts, MDL);
@@ -239,7 +240,7 @@ index 8aac4b3..d5d7c38 100644
  		return;
  	}
  
-@@ -1941,8 +1986,16 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+@@ -1941,8 +1987,16 @@ process_up6(struct packet *packet, struct stream_list *dp) {
  
  	/* Send it to all upstreams. */
  	for (up = upstreams; up; up = up->next) {
@@ -258,7 +259,7 @@ index 8aac4b3..d5d7c38 100644
  	}
  }
  			     
-@@ -1971,6 +2024,7 @@ process_down6(struct packet *packet) {
+@@ -1971,6 +2025,7 @@ process_down6(struct packet *packet) {
  				 packet->dhcpv6_msg_type,
  				 piaddr(packet->client_addr),
  				 ntohs(packet->client_port));
@@ -266,7 +267,7 @@ index 8aac4b3..d5d7c38 100644
  		return;
  	}
  
-@@ -1989,6 +2043,7 @@ process_down6(struct packet *packet) {
+@@ -1989,6 +2044,7 @@ process_down6(struct packet *packet) {
  	oc = lookup_option(&dhcpv6_universe, packet->options, D6O_RELAY_MSG);
  	if (oc == NULL) {
  		log_info("No relay-msg.");
@@ -274,7 +275,7 @@ index 8aac4b3..d5d7c38 100644
  		return;
  	}
  	if (!evaluate_option_cache(&relay_msg, packet, NULL, NULL,
-@@ -1996,6 +2051,7 @@ process_down6(struct packet *packet) {
+@@ -1996,6 +2052,7 @@ process_down6(struct packet *packet) {
  				   &global_scope, oc, MDL) ||
  	    (relay_msg.len < offsetof(struct dhcpv6_packet, options))) {
  		log_error("Can't evaluate relay-msg.");
@@ -282,7 +283,7 @@ index 8aac4b3..d5d7c38 100644
  		return;
  	}
  	msg = (const struct dhcpv6_packet *) relay_msg.data;
-@@ -2086,10 +2142,17 @@ process_down6(struct packet *packet) {
+@@ -2086,10 +2143,17 @@ process_down6(struct packet *packet) {
  	}
  
  	/* Send the message to the downstream. */
@@ -302,7 +303,7 @@ index 8aac4b3..d5d7c38 100644
  	if (relay_msg.data != NULL)
  		data_string_forget(&relay_msg, MDL);
  	if (if_id.data != NULL)
-@@ -2203,6 +2266,7 @@ void request_v4_interface(const char* name, int flags) {
+@@ -2203,6 +2267,7 @@ void request_v4_interface(const char* name, int flags) {
  
          strncpy(tmp->name, name, len);
          interface_snorf(tmp, (INTERFACE_REQUESTED | flags));
@@ -310,7 +311,7 @@ index 8aac4b3..d5d7c38 100644
          interface_dereference(&tmp, MDL);
  }
  
-@@ -2275,3 +2339,138 @@ free_interface_alias_map(void) {
+@@ -2275,3 +2340,138 @@ free_interface_alias_map(void) {
  	free(g_interface_name_alias_map);
  	g_interface_name_alias_map_size = 0;
  }
