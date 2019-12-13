@@ -296,14 +296,17 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
     ret._1 = true; // Let's be optimistic
     ret._2 = "";   // ..and set returned value to success.
 
-    std::string roles_str = roles_as_string(roles);
-
     std::string cmd = "/usr/sbin/useradd"
                       " --create-home"
                       " --user-group"
-                      " --shell " + config_rm.shell() +
                       " --password '" + hashed_pw + "'";
-    if (roles_str.length())
+
+    const std::string & shell_r = config_rm.shell();
+    if (!shell_r.empty())
+        cmd += " --shell " + shell_r;
+
+    std::string roles_str = roles_as_string(roles);
+    if (!roles_str.empty())
         cmd += " --groups " + roles_str;
 
     cmd += ' ' + login;
@@ -318,7 +321,7 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
     if (rc == 0)
     {
         errmsg  = certgen(login);
-        success = 0 == errmsg.length(); // The errmsg should be empty on success
+        success = errmsg.empty(); // The errmsg should be empty on success
 
         if (!success)
         {
@@ -454,7 +457,7 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
     std::string roles_str = roles_as_string(roles);
     std::string cmd;
 
-    if (roles_str.length())
+    if (!roles_str.empty())
         cmd = "/usr/sbin/usermod --groups " + roles_str + ' ' + login;
     else
         cmd = "/usr/sbin/usermod --groups \"\" " + login;
@@ -740,8 +743,11 @@ bool hamd_c::add_unconfirmed_user(const std::string& username, const uint32_t& p
     std::string  base_cmd = "/usr/sbin/useradd"
                             " --create-home"
                             " --user-group"
-                            " --shell " + config_rm.shell() +
                             " --comment \"Unconfirmed system-assigned credentials " + std::to_string(pid) + '"';
+
+    const std::string & shell_r = config_rm.shell();
+    if (!shell_r.empty())
+        base_cmd += " --shell " + shell_r;
 
     for (n_tries = 0; n_tries < 100; n_tries++) /* Give up retrying eventually */
     {
@@ -835,12 +841,12 @@ bool hamd_c::confirm_user(const std::string& username, const std::string& groupn
 {
     std::string  cmd("/usr/sbin/usermod --comment \"Automagic user");
 
-    if (label.length() != 0)
+    if (!label.empty())
         cmd += ' ' + label;
 
     cmd += '"';
 
-    if (groups.length() != 0)
+    if (!groups.empty())
         cmd += " --append --groups " + groups;
 
     cmd += " --gid " + groupname + ' ' + username;
@@ -854,12 +860,8 @@ bool hamd_c::confirm_user(const std::string& username, const std::string& groupn
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": command returned term_normal=%s, exit_status=%d, errno=%d (%s)",
                     username.c_str(), term_normal ? "true" : "false", exit_status, errno, strerror(errno));
 
-    bool ok = term_normal && (0 == exit_status);
-
-    if (ok)
-        ok = generate_certs(username);
-
-    return ok;
+    std::string errmsg = certgen(username);
+    return errmsg.empty();
 }
 
 /**
