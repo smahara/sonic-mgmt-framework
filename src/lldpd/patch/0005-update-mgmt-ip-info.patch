@@ -1,0 +1,35 @@
+diff --git a/src/daemon/netlink.c b/src/daemon/netlink.c
+index 9e9fedd..5962802 100644
+--- a/src/daemon/netlink.c
++++ b/src/daemon/netlink.c
+@@ -337,10 +337,30 @@ netlink_parse_address(struct nlmsghdr *msg,
+ 	struct ifaddrmsg *ifi;
+ 	struct rtattr *attribute;
+ 	int len;
++	char ifname[IFNAMSIZ];
++	static int mgmt_ifaindex = -1;
+ 	ifi = NLMSG_DATA(msg);
+ 	len = msg->nlmsg_len - NLMSG_LENGTH(sizeof(struct ifaddrmsg));
+ 
+ 	ifa->index = ifi->ifa_index;
++    if(mgmt_ifaindex == -1)
++    {
++        if_indextoname(ifi->ifa_index, ifname);
++        if(strncmp(ifname, "eth0", 4) == 0)
++        {
++            mgmt_ifaindex = ifa->index;
++        }
++    }
++
++    if(mgmt_ifaindex != ifa->index)
++    {
++		log_debug("netlink", "non mgmt IP address on if %d (family: %d)",
++		    ifa->index, ifi->ifa_family);
++        return;
++    }
++
++	log_debug("netlink", "mgmt IP address on if %d (family: %d)",
++		    ifa->index, ifi->ifa_family);
+ 	ifa->flags = ifi->ifa_flags;
+ 	switch (ifi->ifa_family) {
+ 	case AF_INET:
