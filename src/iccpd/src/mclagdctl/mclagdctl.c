@@ -27,6 +27,8 @@
 #include <errno.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include "mclagdctl.h"
 #include "../../include/mlacp_fsm.h"
 #include "../../include/system.h"
@@ -294,6 +296,15 @@ int mclagdctl_parse_dump_state(char *msg, int data_len)
     {
         state_info = (struct mclagd_state*)(msg + len * count);
 
+        if (inet_addr(state_info->local_ip) < inet_addr(state_info->peer_ip))
+        {
+            state_info->role = 1;
+        }
+        else
+        {
+            state_info->role = 2;
+        }
+
         fprintf(stdout, "%s: %s\n", "The MCLAG's keepalive is", state_info->keepalive ? "OK" : "ERROR");
         fprintf(stdout, "%s: %s\n", "MCLAG info sync is",
             state_info->info_sync_done ? "completed" : "incomplete");
@@ -314,9 +325,10 @@ int mclagdctl_parse_dump_state(char *msg, int data_len)
                 state_info->peer_link_mac[2], state_info->peer_link_mac[3],
                 state_info->peer_link_mac[4], state_info->peer_link_mac[5]);
 
-        if (state_info->role == 0)
+        /*if (state_info->role == 0)
             fprintf(stdout, "%s: %s\n", "Role", "None");
-        else if (state_info->role == 1)
+        */
+        if (state_info->role == 1)
             fprintf(stdout, "%s: %s\n", "Role", "Active");
         else if (state_info->role == 2)
             fprintf(stdout, "%s: %s\n", "Role", "Standby");
