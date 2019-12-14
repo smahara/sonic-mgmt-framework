@@ -435,24 +435,6 @@ class CommandArgument(object):
                 if self.value[idx][0] == 'true':
                     attr_list.append(attr_tags[idx])
             return ' '.join(attr_list)
-        elif format == 'aggregate' and type(self.value) is dict:
-            if 0 not in self.value:
-                return ''
-            ret_val = self.value[0][0]
-            if 1 in self.value and self.value[1][0] == 'true':
-                ret_val += ' as-set'
-            if 2 in self.value and self.value[2][0] == 'true':
-                ret_val += ' summary-only'
-            return ret_val
-        elif format == 'network' and type(self.value) is dict:
-            if 0 not in self.value:
-                return ''
-            ret_val = self.value[0][0]
-            if 1 in self.value:
-                ret_val += ' route-map %s' % self.value[1][0]
-            if 2 in self.value and self.value[2][0] == 'true':
-                ret_val += ' backdoor'
-            return ret_val
         elif format == 'neighbor-set':
             ret_val = BGPConfigDaemon.get_prefix_set_name(self.value, 'NEIGHBOR_SET')
             return ret_val
@@ -564,6 +546,54 @@ def hdl_rm_private_as(daemon, cmd_str, op, args, data):
             cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, arg_str), no = CommandArgument(daemon, True)))
     return cmd_list
 
+def hdl_af_aggregate(daemon, cmd_str, op, args, data):
+    if len(args) < 4:
+        return None
+    vrf = args[0]
+    af = args[1]
+    ip_prefix = args[2]
+    cmd_list = []
+    aggr_obj = None
+    if vrf in daemon.af_aggr_list and ip_prefix in daemon.af_aggr_list[vrf]:
+        aggr_obj = copy.copy(daemon.af_aggr_list[vrf][ip_prefix])
+    if aggr_obj is not None:
+        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, ip_prefix), no = CommandArgument(daemon, False)))
+    else:
+        aggr_obj = AggregateAddr()
+    for k, v in args[3].items():
+        if k == 0:
+            attr = 'as_set'
+        else:
+            attr = 'summary_only'
+        if v[1] and op == CachedDataWithOp.OP_DELETE:
+            setattr(aggr_obj, attr, False)
+        else:
+            setattr(aggr_obj, attr, True if v[0] == 'true' else False)
+    arg_str = ip_prefix
+    if aggr_obj.as_set:
+        arg_str += ' as-set'
+    if aggr_obj.summary_only:
+        arg_str += ' summary-only'
+    cmd_list.append(cmd_str.format(CommandArgument(daemon, True, arg_str), no = CommandArgument(daemon, True)))
+    return cmd_list
+
+def hdl_af_network(daemon, cmd_str, op, args, data):
+    if len(args) < 4:
+        return None
+    arg_str = ''
+    af = args[1]
+    for k, v in args[3].items():
+        if v[1] and op == CachedDataWithOp.OP_DELETE:
+            continue
+        arg_str += ' '
+        if k == 0:
+            arg_str += 'route-map %s' % v[0]
+        elif af == 'ipv4':
+            # ipv6 doesn't support backdoor
+            arg_str += 'backdoor'
+    arg_str = '%s %s' % (args[2], arg_str)
+    return [cmd_str.format(CommandArgument(daemon, True, arg_str), no = CommandArgument(daemon, True))]
+
 class ExtConfigDBConnector(ConfigDBConnector):
     def __raw_to_typed(self, raw_data):
         if len(raw_data) == 0:
@@ -643,7 +673,7 @@ class MatchPrefix:
     IPV4_MAXLEN = 32
     IPV6_MAXLEN = 128
     @staticmethod
-    def __normalize_ip_prefix(af, ip_prefix):
+    def normalize_ip_prefix(af, ip_prefix):
         ip_mask = ip_prefix.split('/')
         ip_addr = ip_mask[0]
         if len(ip_mask) < 2:
@@ -657,7 +687,7 @@ class MatchPrefix:
             return None
         return '%s/%d' % (normal_ip, mask_len)
     def __init__(self, af, ip_prefix, len_range = None, action = 'permit'):
-        self.ip_prefix = self.__normalize_ip_prefix(af, ip_prefix)
+        self.ip_prefix = self.normalize_ip_prefix(af, ip_prefix)
         if self.ip_prefix is None:
             raise ValueError
         if len_range is not None:
@@ -724,6 +754,11 @@ class MatchPrefixList(list):
             return (None, None)
         return (self[idx], idx)
 
+class AggregateAddr:
+    def __init__(self):
+        self.as_set = False
+        self.summary_only = False
+
 class BGPConfigDaemon:
     DEFAULT_VRF = 'default'
     LOCAL_ROUTE_DISTANCE = 20
@@ -774,9 +809,6 @@ class BGPConfigDaemon:
                          ('max_ebgp_paths',                         '{no:no-prefix}maximum-paths {}'),
                          (('max_ibgp_paths',
                            '+ibgp_equal_cluster_length'),           '{no:no-prefix}maximum-paths ibgp{}', hdl_ibgp_maxpath, ['true', 'false']),
-                         (('aggregate_prefix',
-                           '+aggregate_as_set',
-                           '+aggregate_summary_only'),              '{no:no-prefix}aggregate-address {:aggregate}'),
                          (('network_prefix',
                            '+network_policy', '+network_backdoor'), '{no:no-prefix}network {:network}'),
                          ('route_download_filter',                  '{no:no-prefix}table-map {}')
@@ -882,18 +914,24 @@ class BGPConfigDaemon:
 
     route_redist_key_map = [('route_map', '{no:no-prefix}redistribute {} route-map {}')]
 
-    tbl_to_key_map = {'BGP_GLOBALS':                global_key_map,
-                      'BGP_GLOBALS_AF':             global_af_key_map,
-                      'BGP_GLOBALS_LISTEN_PREFIX':  listen_prefix_key_map,
-                      'BGP_NEIGHBOR':               cmn_key_map[0:2] + nbr_key_map + cmn_key_map[2:],
-                      'BGP_PEER_GROUP':             cmn_key_map,
-                      'BGP_NEIGHBOR_AF':            nbr_af_key_map,
-                      'BGP_PEER_GROUP_AF':          nbr_af_key_map,
-                      'ROUTE_MAP':                  route_map_key_map,
-                      'COMMUNITY_SET':              community_set_key_map,
-                      'EXTENDED_COMMUNITY_SET':     extcommunity_set_key_map,
-                      'AS_PATH_SET':                aspath_set_key_map,
-                      'ROUTE_REDISTRIBUTE':         route_redist_key_map
+    af_aggregate_key_map = [(('+as_set', '+summary_only'),      '{no:no-prefix}aggregate-address {}', hdl_af_aggregate, ['true', 'false'])]
+
+    af_network_key_map = [(('+policy', '+backdoor'),    '{no:no-prefix}network {}', hdl_af_network, ['true', 'false'])]
+
+    tbl_to_key_map = {'BGP_GLOBALS':                    global_key_map,
+                      'BGP_GLOBALS_AF':                 global_af_key_map,
+                      'BGP_GLOBALS_LISTEN_PREFIX':      listen_prefix_key_map,
+                      'BGP_NEIGHBOR':                   cmn_key_map[0:2] + nbr_key_map + cmn_key_map[2:],
+                      'BGP_PEER_GROUP':                 cmn_key_map,
+                      'BGP_NEIGHBOR_AF':                nbr_af_key_map,
+                      'BGP_PEER_GROUP_AF':              nbr_af_key_map,
+                      'ROUTE_MAP':                      route_map_key_map,
+                      'COMMUNITY_SET':                  community_set_key_map,
+                      'EXTENDED_COMMUNITY_SET':         extcommunity_set_key_map,
+                      'AS_PATH_SET':                    aspath_set_key_map,
+                      'ROUTE_REDISTRIBUTE':             route_redist_key_map,
+                      'BGP_GLOBALS_AF_AGGREGATE_ADDR':  af_aggregate_key_map,
+                      'BGP_GLOBALS_AF_NETWORK':         af_network_key_map
     }
 
     def __init__(self):
@@ -975,6 +1013,20 @@ class BGPConfigDaemon:
                 self.as_path_set_list[key] = entry['as_path_set_member'][:]
         self.tag_set_list = {}
 
+        self.af_aggr_list = {}
+        af_aggr_table = self.config_db.get_table('BGP_GLOBALS_AF_AGGREGATE_ADDR')
+        for key, entry in af_aggr_table.items():
+            vrf, af_type, ip_pfx = key
+            af, _ = af_type.lower().split('_')
+            norm_ip_pfx = MatchPrefix.normalize_ip_prefix((socket.AF_INET if af == 'ipv4' else socket.AF_INET6), ip_pfx)
+            if norm_ip_pfx is not None:
+                syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: AF Aggregate Prefix %s of vrf %s AF %s' % (norm_ip_pfx, vrf, af))
+                aggr_obj = AggregateAddr()
+                for k, v in entry.items():
+                    if v == 'true':
+                        setattr(aggr_obj, k, True)
+                self.af_aggr_list.setdefault(vrf, {})[norm_ip_pfx] = aggr_obj
+
         self.table_handler_list = [
             ('DEVICE_METADATA', self.metadata_handler),
             ('BGP_GLOBALS', self.bgp_table_handler_common),
@@ -996,7 +1048,9 @@ class BGPConfigDaemon:
             ('NEIGHBOR_SET', self.bgp_table_handler_common),
             ('TAG_SET', self.bgp_table_handler_common),
             ('AS_PATH_SET', self.bgp_table_handler_common),
-            ('ROUTE_REDISTRIBUTE', self.bgp_table_handler_common)
+            ('ROUTE_REDISTRIBUTE', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_AF_AGGREGATE_ADDR', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_AF_NETWORK', self.bgp_table_handler_common)
         ]
         self.bgp_message = Queue.Queue(0)
         self.table_data_cache = self.config_db.get_table_data([tbl for tbl, _ in self.table_handler_list])
@@ -1115,7 +1169,7 @@ class BGPConfigDaemon:
     def __vrf_based_table(table_name):
         vrf_tables = {'BGP_GLOBALS', 'BGP_GLOBALS_AF', 'BGP_GLOBALS_LISTEN_PREFIX',
                       'BGP_NEIGHBOR', 'BGP_PEER_GROUP', 'BGP_NEIGHBOR_AF', 'BGP_PEER_GROUP_AF',
-                      'ROUTE_REDISTRIBUTE'}
+                      'ROUTE_REDISTRIBUTE', 'BGP_GLOBALS_AF_AGGREGATE_ADDR', 'BGP_GLOBALS_AF_NETWORK'}
         return table_name in vrf_tables
 
     @staticmethod
@@ -1453,6 +1507,40 @@ class BGPConfigDaemon:
                 if not key_map.run_command(self, data, cmd_prefix, src_proto):
                     syslog.syslog(syslog.LOG_ERR, 'failed running BGP route redistribute config command')
                     continue
+            elif table == 'BGP_GLOBALS_AF_AGGREGATE_ADDR' or table == 'BGP_GLOBALS_AF_NETWORK':
+                af_type, ip_prefix = key.split('|')
+                af, ip_type = af_type.lower().split('_')
+                norm_ip_prefix = MatchPrefix.normalize_ip_prefix((socket.AF_INET if af == 'ipv4' else socket.AF_INET6), ip_prefix)
+                if norm_ip_prefix is None:
+                    syslog.syslog(syslog.LOG_ERR, 'invalid IP prefix format %s for af %s' % (ip_prefix, af))
+                    continue
+                syslog.syslog(syslog.LOG_INFO, 'Set address family for IP prefix {} to {} {}'.format(norm_ip_prefix, af, ip_type))
+                if not del_table:
+                    cmd_prefix = ['configure terminal',
+                                  'router bgp {} vrf {}'.format(local_asn, vrf),
+                                  'address-family {} {}'.format(af, ip_type)]
+                    if not key_map.run_command(self, data, cmd_prefix, vrf, af, norm_ip_prefix):
+                        syslog.syslog(syslog.LOG_ERR, 'failed running BGP IP prefix AF config command')
+                        continue
+                    if table == 'BGP_GLOBALS_AF_AGGREGATE_ADDR':
+                        aggr_obj = AggregateAddr()
+                        for attr in ['as_set', 'summary_only']:
+                            if attr in data and data[attr].op != CachedDataWithOp.OP_DELETE and data[attr].data == 'true':
+                                setattr(aggr_obj, attr, True)
+                        self.af_aggr_list.setdefault(vrf, {})[norm_ip_prefix] = aggr_obj
+                else:
+                    attr_name = 'aggregate-address' if table == 'BGP_GLOBALS_AF_AGGREGATE_ADDR' else 'network'
+                    command = "vtysh -c 'configure terminal' -c 'router bgp {} vrf {}' -c 'address-family {} {}' -c 'no {} {}'".\
+                                    format(local_asn, vrf, af, ip_type, attr_name, norm_ip_prefix)
+                    if not self.__run_command(command):
+                        syslog.syslog(syslog.LOG_ERR, 'failed to delete VRF %s %s for ip prefix %s' % (vrf, attr_name, norm_ip_prefix))
+                        continue
+                    for dkey, dval in data.items():
+                       dval.status = CachedDataWithOp.STAT_SUCC
+                       dval.op = CachedDataWithOp.OP_DELETE
+                    if table == 'BGP_GLOBALS_AF_AGGREGATE_ADDR':
+                        if vrf in self.af_aggr_list:
+                            self.af_aggr_list[vrf].pop(norm_ip_prefix, None)
 
     def __add_op_to_data(self, table_key, data, comb_attr_list):
         cached_data = self.table_data_cache.setdefault(table_key, {})
