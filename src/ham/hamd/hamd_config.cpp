@@ -107,17 +107,11 @@ void hamd_config_c::reload()
             {
                 s += strspn(s, " \t=");            // Skip leading spaces and equal sign (=)
                 certgen_cmd = s;
-
-printf("Found certgen: s=%s\n", s);
-
             }
             else if (nullptr != (s = startswith(p, "shell")))
             {
                 s += strspn(s, " \t=");            // Skip leading spaces and equal sign (=)
                 shell = s;
-
-printf("Found shell: s=%s\n", s);
-
             }
         }
 
@@ -167,7 +161,6 @@ printf("Found shell: s=%s\n", s);
             // Make sure that the shell exists
             if (g_file_test(shell.c_str(), G_FILE_TEST_EXISTS))
             {
-printf("setting shell_m: %s\n", shell.c_str());
                 shell_m = shell;
             }
             else
