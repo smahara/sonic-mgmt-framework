@@ -196,7 +196,10 @@ std::string hamd_c::certgen(const std::string  & login) const
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates [%s]", login.c_str(), cmd.c_str());
 
-    auto [ rc, std_out, std_err ] = run(cmd);
+    int rc;
+    std::string std_out;
+    std::string std_err;
+    std::tie(rc, std_out, std_err) = run(cmd);
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::certgen() - Generate user \"%s\" certificates rc=%d, stdout=%s, stderr=%s",
                     login.c_str(), rc, std_out.c_str(), std_err.c_str());
@@ -313,7 +316,10 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" [%s]", login.c_str(), cmd.c_str());
 
-    auto [ rc, std_out, std_err ] = run(cmd);
+    int rc;
+    std::string std_out;
+    std::string std_err;
+    std::tie(rc, std_out, std_err) = run(cmd);
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - Create user \"%s\" rc=%d, stdout=%s, stderr=%s",
                     login.c_str(), rc, std_out.c_str(), std_err.c_str());
@@ -331,7 +337,7 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
 
             LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - executing command \"%s\"", cmd.c_str());
 
-            auto [ rc, std_out, std_err ] = run(cmd);
+            std::tie(rc, std_out, std_err) = run(cmd);
 
             LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::useradd() - command returned rc=%d, stdout=%s, stderr=%s",
                             rc, std_out.c_str(), std_err.c_str());
@@ -370,19 +376,14 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
 
         ret._1 = (exit_status == 0) || (exit_status == 6);
 
-        switch (exit_status)
-        {
-        case 0:  ret._2 = "";                                         break;
-        case 1:  ret._2 = "can't update password file";               break;
-        case 2:  ret._2 = "invalid command syntax";                   break;
-        case 8:  ret._2 = "user currently logged in";                 break;
-        case 10: ret._2 = "can't update group (role) file";           break;
-        case 12: ret._2 = "can't remove home directory";              break;
-        default: ret._2 = "unknown error code " + std::to_string(rc); break;
-        }
+        int rc;
+        std::string std_out;
+        std::string std_err;
+        std::tie(rc, std_out, std_err) = run(cmd);
 
-        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::userdel() - command returned exit_status=%d (%s)",
-                        exit_status, ret._2.c_str());
+        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::userdel() - command returned rc=%d, stdout=%s, stderr=%s",
+                        rc, std_out.c_str(), std_err.c_str());
+
     }
     else
     {
@@ -404,8 +405,13 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::passwd() - executing command \"%s\"", cmd.c_str());
 
-    int  rc          = system(cmd.c_str());
-    bool term_normal = WIFEXITED(rc);
+    int rc;
+    std::string std_out;
+    std::string std_err;
+    std::tie(rc, std_out, std_err) = run(cmd);
+
+    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::passwd() - command returned rc=%d, stdout=%s, stderr=%s",
+                    rc, std_out.c_str(), std_err.c_str());
 
     ::DBus::Struct< bool,       /* success */
                     std::string /* errmsg  */ > ret;
@@ -464,8 +470,13 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::set_roles() - executing command \"%s\"", cmd.c_str());
 
-    int  rc          = system(cmd.c_str());
-    bool term_normal = WIFEXITED(rc);
+    int rc;
+    std::string std_out;
+    std::string std_err;
+    std::tie(rc, std_out, std_err) = run(cmd);
+
+    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::set_roles() - command returned rc=%d, stdout=%s, stderr=%s",
+                    rc, std_out.c_str(), std_err.c_str());
 
     ::DBus::Struct< bool,       /* success */
                     std::string /* errmsg  */ > ret;
@@ -700,8 +711,18 @@ void hamd_c::rm_unconfirmed_users() const
                     // exist either. Let's remove this user which was never
                     // confirmed by PAM authentification.
                     full_cmd = base_cmd + ent->pw_name;
-                    int ret = system(full_cmd.c_str());
-                    if (!WIFEXITED(ret) || (WEXITSTATUS(ret) != 0))
+
+                    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::rm_unconfirmed_users() - executing command \"%s\"", full_cmd.c_str());
+
+                    int rc;
+                    std::string std_out;
+                    std::string std_err;
+                    std::tie(rc, std_out, std_err) = run(full_cmd);
+
+                    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::rm_unconfirmed_users() - command returned rc=%d, stdout=%s, stderr=%s",
+                                    rc, std_out.c_str(), std_err.c_str());
+
+                    if (rc != 0)
                     {
                         syslog(LOG_ERR, "User \"%s\": Failed to removed unconfirmed user UID=%d. %s",
                                ent->pw_name, ent->pw_uid, std_err.c_str());
@@ -771,9 +792,10 @@ bool hamd_c::add_unconfirmed_user(const std::string& username, const uint32_t& p
 
             LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": executing \"%s\"", username.c_str(), full_cmd.c_str());
 
-            int  rc          = system(full_cmd.c_str());
-            bool term_normal = WIFEXITED(rc);
-            int  exit_status = WEXITSTATUS(rc);
+            int rc;
+            std::string std_out;
+            std::string std_err;
+            std::tie(rc, std_out, std_err) = run(full_cmd);
 
             LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": command returned term_normal=%s, exit_status=%d, errno=%d (%s)",
                             username.c_str(), term_normal ? "true" : "false", exit_status, errno, strerror(errno));
@@ -853,9 +875,10 @@ bool hamd_c::confirm_user(const std::string& username, const std::string& groupn
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": executing \"%s\"", username.c_str(), cmd.c_str());
 
-    int  rc          = system(cmd.c_str());
-    bool term_normal = WIFEXITED(rc);
-    int  exit_status = WEXITSTATUS(rc);
+    int rc;
+    std::string std_out;
+    std::string std_err;
+    std::tie(rc, std_out, std_err) = run(cmd);
 
     LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": command returned term_normal=%s, exit_status=%d, errno=%d (%s)",
                     username.c_str(), term_normal ? "true" : "false", exit_status, errno, strerror(errno));
