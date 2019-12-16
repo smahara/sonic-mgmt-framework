@@ -15,8 +15,8 @@ route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
 {% if rm_val.has_key('match_ext_community') %}
  match extcommunity {{rm_val['match_ext_community']}}
 {% endif %}
-{% if rm_val.has_key('match_address_family') and rm_val.has_key('match_prefix_set') %}
- match {{rm_val['match_address_family']}} address prefix-list {{rm_val['match_prefix_set']}}
+{% if rm_val.has_key('match_tag') and rm_val.has_key('match_prefix_set') %}
+ match {{rm_val['match_tag']}} address prefix-list {{rm_val['match_prefix_set']}}
 {% endif %}
 {% if rm_val.has_key('match_local_pref') %}
  match local-preference {{rm_val['match_local_pref']}}

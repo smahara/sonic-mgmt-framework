@@ -1,8 +1,8 @@
 {# ------------------------------------------------------------ #}
 {# this is called with the "vrf" and "address-family matched    #}
 {# ------------------------------------------------------------ #}
-{% if n_af_val.has_key('enabled') %}
-{% if n_af_val['enabled'] == 'true' %}
+{% if n_af_val.has_key('admin_status') %}
+{% if n_af_val['admin_status'] == 'true' %}
   neighbor {{nbr_name}} activate
 {% else %}
   no neighbor {{nbr_name}} activate
@@ -13,7 +13,7 @@
 {% elif n_af_val.has_key('add_path_tx_bestpath') and n_af_val['add_path_tx_bestpath'] == 'true' %}
   neighbor {{nbr_name}} addpath-tx-bestpath-per-AS
 {% endif %}
-{% if n_af_val.has_key('nexthop_self_enabled') and n_af_val['nexthop_self_enabled'] == 'true' %}
+{% if n_af_val.has_key('nhself') and n_af_val['nhself'] == 'true' %}
 {% if n_af_val.has_key('nexthop_self_force') and n_af_val['nexthop_self_force'] == 'true' %}
   neighbor {{nbr_name}} next-hop-self force
 {% else %}
@@ -21,10 +21,22 @@
 {% endif %}
 {% endif %}
 {% if n_af_val.has_key('remove_private_as_enabled') and n_af_val['remove_private_as_enabled'] == 'true' %}
-{% if n_af_val.has_key('replace_private_as') and n_af_val['replace_private_as'] == 'true' %}
+{% if n_af_val.has_key('remove_private_as_all') and n_af_val['remove_private_as_all'] == 'true' %}
+  neighbor {{nbr_name}} remove-private-AS replace-AS all
+{% elif n_af_val.has_key('replace_private_as') and n_af_val['replace_private_as'] == 'true' %}
   neighbor {{nbr_name}} remove-private-AS replace-AS
 {% else %}
   neighbor {{nbr_name}} remove-private-AS
+{% endif %}
+{% endif %}
+{% if n_af_val.has_key('send_community') %}
+{% if n_af_val['send_community'] == 'standard' %}
+  no neighbor {{nbr_name}} send-community extended
+{% elif n_af_val['send_community'] == 'extended' %}
+  no neighbor {{nbr_name}} send-community standard
+{% elif n_af_val['send_community'] == 'none' %}
+  no neighbor {{nbr_name}} send-community standard
+  no neighbor {{nbr_name}} send-community extended
 {% endif %}
 {% endif %}
 {% if n_af_val.has_key('as_override') and n_af_val['as_override'] == 'true' %}
@@ -37,7 +49,7 @@
   neighbor {{nbr_name}} default-originate
 {% endif %}
 {% endif %}
-{% if n_af_val.has_key('route_reflector_client') and n_af_val['route_reflector_client'] == 'true' %}
+{% if n_af_val.has_key('rrclient') and n_af_val['rrclient'] == 'true' %}
   neighbor {{nbr_name}} route-reflector-client
 {% endif %}
 {% if n_af_val.has_key('soft_reconfiguration_in') and n_af_val['soft_reconfiguration_in'] == 'true' %}
@@ -56,6 +68,9 @@
 {% endif %}
 {% endif %}
 {# ------- maximum-prefix end --------------------------- #}
+{% if n_af_val.has_key('route_server_client') and n_af_val['route_server_client'] == 'true' %}
+  neighbor {{nbr_name}} route-server-client {{n_af_val['route_server_client']}}
+{% endif %}
 {# ------- allow-as --------------------------- #}
 {% if n_af_val.has_key('allow_as_in') and n_af_val['allow_as_in'] == 'true' %}
 {% if n_af_val.has_key('allow_as_origin') and n_af_val['allow_as_origin'] == 'true' %}
@@ -67,8 +82,17 @@
 {% endif %}
 {% endif %}
 {# ------- allow-as end --------------------------- #}
+{% if n_af_val.has_key('add_path_tx_all') and n_af_val['add_path_tx_all'] == 'true' %}
+  neighbor {{nbr_name}} addpath-tx-all-paths
+{% endif %}
+{% if n_af_val.has_key('add_path_tx_bestpath') and n_af_val['add_path_tx_bestpath'] == 'true' %}
+  neighbor {{nbr_name}} addpath-tx-bestpath-per-AS
+{% endif %}
+{% if n_af_val.has_key('cap_orf') %}
+  neighbor {{nbr_name}} capability orf prefix-list {{n_af_val['cap_orf']}}
+{% endif %}
 {% if n_af_val.has_key('weight') %}
-  neighbor {{nbr_name}} weight {{n_af_val['weight']}} 
+  neighbor {{nbr_name}} weight {{n_af_val['weight']}}
 {% endif %}
 {% if n_af_val.has_key('prefix_list_name') and n_af_val.has_key('prefix_list_direction') %}
   neighbor {{nbr_name}} prefix-list {{n_af_val['prefix_list_name']}} {{n_af_val['prefix_list_direction']}}
@@ -88,7 +112,7 @@
 {% endif %}
 {# ------- route-map out end --------------------------- #}
 {% if n_af_val.has_key('unsuppress_map_name') %}
-  neighbor {{nbr_name}} unsuppress-map {{n_af_val['unsuppress_map_name']}} 
+  neighbor {{nbr_name}} unsuppress-map {{n_af_val['unsuppress_map_name']}}
 {% endif %}
 {% if n_af_val.has_key('filter_list_name') and n_af_val.has_key('filter_list_direction') %}
   neighbor {{nbr_name}} filter-list {{n_af_val['filter_list_name']}} {{n_af_val['filter_list_direction']}}

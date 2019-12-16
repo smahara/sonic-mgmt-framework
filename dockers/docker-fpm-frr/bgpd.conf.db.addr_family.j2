@@ -4,7 +4,7 @@
 {# -------address-family --------------------------- #}
 {% if (BGP_GLOBALS_AF is defined and BGP_GLOBALS_AF|length > 0) or
       (BGP_NEIGHBOR_AF is defined and BGP_NEIGHBOR_AF|length > 0) %}
-{% set af_str_map = { 'IPV4_UNICAST': 'ipv4', 'IPV6_UNICAST':'ipv6'} %}
+{% set af_str_map = { 'ipv4_unicast': 'ipv4', 'ipv6_unicast':'ipv6'} %}
 {% for af, af_str in af_str_map|dictsort %}
  !
  address-family {{af_str}} unicast
@@ -14,16 +14,28 @@
 {% if af_val.has_key('ebgp_route_distance') and af_val.has_key('ibgp_route_distance') %}
   distance bgp {{af_val['ebgp_route_distance']}} {{af_val['ibgp_route_distance']}} 20
 {% endif %}
+{# ------- network-prefix    --------------------------- #}
+{% if af_val.has_key('network_prefix') %}
+{% set ns = namespace(nw_end = '') %}
+{% if af_val.has_key('network_backdoor') and af_val['network_backdoor'] == 'true' %}
+{% set ns.nw_end = 'backdoor ' %}
+{% endif %}
+{% if af_val.has_key('network_policy') %}
+{% set ns.nw_end = ns.nw_end + 'route-map ' + af_val['network_policy'] %}
+{% endif %}
+  network {{af_val['network_prefix']}} {{ns.nw_end}}
+{% endif %}
+{# ------- network-prefix end   --------------------------- #}
 {# ------- aggregate-prefix  --------------------------- #}
 {% if af_val.has_key('aggregate_prefix') %}
-{% set ag_end = '' %}
+{% set ns = namespace(ag_end = '') %}
 {% if af_val.has_key('aggregate_as_set') and af_val['aggregate_as_set'] == 'true' %}
-{% set ag_end = 'as-set ' %}
+{% set ns.ag_end = 'as-set ' %}
 {% endif %}
 {% if af_val.has_key('aggregate_summary_only') and af_val['aggregate_summary_only'] == 'true' %}
-{% set ag_end = ag_end + 'summary-only' %}
+{% set ns.ag_end = ns.ag_end + 'summary-only' %}
 {% endif %}
-  aggregate-address {{af_val['aggregate_prefix']}} {{ag_end}}
+  aggregate-address {{af_val['aggregate_prefix']}} {{ns.ag_end}}
 {% endif %}
 {# ------- aggregate-prefix end --------------------------- #}
 {% endif %}
@@ -56,7 +68,14 @@
   maximum-paths {{af_val['max_ebgp_paths']}}
 {% endif %}
 {% if af_val.has_key('max_ibgp_paths') %}
-  maximum-paths ibgp {{af_val['max_ibgp_paths']}}
+{% set ns = namespace(max_ibgp = af_val['max_ibgp_paths']) %}
+{% if af_val.has_key('ibgp_equal_cluster_length') and af_val['ibgp_equal_cluster_length'] == 'true' %}
+{% set ns.max_ibgp = ns.max_ibgp + ' equal-cluster-length' %}
+{% endif %}
+  maximum-paths ibgp {{ns.max_ibgp}}
+{% endif %}
+{% if af_val.has_key('route_download_filter') %}
+  table-map {{af_val['route_download_filter']}}
 {% endif %}
 {% endif %}
 {% endfor %}
