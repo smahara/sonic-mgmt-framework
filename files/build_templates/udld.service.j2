@@ -1,4 +1,3 @@
-{# Uncomment this block of code to enable UDLD docker
 [Unit]
 Description=UDLD container
 Requires=updategraph.service swss.service
@@ -13,4 +12,3 @@ ExecStop=/usr/bin/{{docker_container_name}}.sh stop
 
 [Install]
 WantedBy=multi-user.target
-#}
