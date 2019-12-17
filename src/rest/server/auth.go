@@ -118,7 +118,6 @@ func PAMAuthUser(u string, p string) error {
 	return err
 }
 
-
 func PopulateAuthStruct(username string, auth *AuthInfo) error {
 	usr, err := user.Lookup(username)
 	if err != nil {

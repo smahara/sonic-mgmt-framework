@@ -50,7 +50,6 @@ func isUserAuthorizedForSet(user string) bool {
 
 	return false
 }
-
 func isAuthorizedForSet(req SetRequest) bool {
 	// TODO: Allow empty user for now
 	return req.Group == "admin" || req.User == ""

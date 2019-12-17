@@ -246,7 +246,11 @@ func invokeTranslib(r *http.Request, path string, payload []byte) (int, []byte, 
 	var err error
 
 	switch r.Method {
+<<<<<<< HEAD
 	case "GET", "HEAD":
+=======
+	case "GET":
+>>>>>>> 6210f039716a648cef88e1221776de19747a9ba4
 		req := translib.GetRequest{Path: path, User: rc.Auth.User, Group: rc.Auth.Group}
 		resp, err1 := translib.Get(req)
 		if err1 == nil {

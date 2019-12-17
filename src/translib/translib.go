@@ -176,7 +176,6 @@ func Create(req SetRequest) (SetResponse, error) {
 			Format: "User is unauthorized for Create Operation",
 			Path: path,
 		}
-				
 	}
 
 	log.Info("Create request received with path =", path)
@@ -328,7 +327,6 @@ func Replace(req SetRequest) (SetResponse, error) {
 			Path: path,
 		}
 	}
-	
 
 	log.Info("Replace request received with path =", path)
 	log.Info("Replace request received with payload =", string(payload))
@@ -1118,7 +1116,7 @@ func getDBOptions(dbNo db.DBNum, isWriteDisabled bool) db.Options {
 		opt = getDBOptionsWithSeparator(dbNo, "", ":", ":", isWriteDisabled)
 		break
 	case db.FlexCounterDB, db.AsicDB, db.LogLevelDB, db.ConfigDB, db.StateDB, db.ErrorDB, db.UserDB:
-		opt = getDBOptionsWithSeparator(dbNo, "", "|", "|")
+		opt = getDBOptionsWithSeparator(dbNo, "", "|", "|", isWriteDisabled)
 		break
 	}
 

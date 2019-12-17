@@ -232,6 +232,14 @@ func getTLSClientAuthType() tls.ClientAuthType {
 	return tls.RequestClientCert
 }
 
+func getPreferredCurveIDs() []tls.CurveID {
+	return []tls.CurveID{
+		tls.CurveP521,
+		tls.CurveP384,
+		tls.CurveP256,
+	}
+}
+
 func getPreferredCipherSuites() []uint16 {
 	return []uint16{
 		tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
