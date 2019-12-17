@@ -7,7 +7,6 @@
 #include <glib.h>               // g_file_test()
 #include <glib/gstdio.h>        // g_chdir()
 #include <stdio.h>
-#include <stdlib.h>             // system()
 #include <sys/types.h>          // getpwnam(), getpid()
 #include <pwd.h>                // fgetpwent()
 #include <string>               // std::string
@@ -47,43 +46,6 @@ int change_credentials(uid_t uid, gid_t gid)
 
     return rv;
 }
-
-int change_credentials_by_name(credentials_t  * original_cred_p, /* Structure to hold old User and Group IDs */
-                               const char     * user_p,          /* New user name  */
-                               const char     * group_p)         /* New group name */
-{
-    int              rv;
-    struct passwd  * pwd_p;
-    struct group   * grp_p;
-
-    // Save old User and Group IDs. This can later be used with
-    // change_credentials_by_id() to restore the old credentials.
-    original_cred_p->euid = geteuid();
-    original_cred_p->egid = getegid();
-
-    pwd_p = getpwnam(user_p); // Get User ID associated with user name.
-    if (NULL == pwd_p)
-    {
-        sd_journal_print(LOG_EMERG, "change_credentials_by_name() - Error! Unable to getpwnam() for user %s.", user_p);
-        rv = -1;
-    }
-    else
-    {
-        grp_p = getgrnam(group_p); // Get Group ID associated with group name.
-        if (NULL == grp_p)
-        {
-            sd_journal_print(LOG_EMERG, "change_credentials_by_name() - Error! Unable to getgrnam() for user %s.", group_p);
-            rv = -1;
-        }
-        else
-        {
-            rv = change_credentials_by_id(pwd_p->pw_uid, grp_p->gr_gid);
-        }
-    }
-
-    return rv;
-}
-
 
 /**
  * @brief DBus adaptor class constructor
@@ -179,12 +141,25 @@ static struct passwd * fgetpwname(const char * login, const char * fname_p)
 
 std::string hamd_c::certgen(const std::string  & login) const
 {
-    std::string errmsg = "";
+    struct passwd * pwd = ::getpwnam(login.c_str());
+    if (pwd == nullptr)
+        return "No record of uyser " + login + " in Linux user database";
 
-    #if (1)
-    // Restore credentials
-    change_credentials(euid, egid);
-    #endif
+    path_t certdir = path_t(pwd->pw_dir) / ".cert";
+
+    // We're going to run the certificate generation with the user's
+    // credentials so that file/dir ownership is reflected properly.
+    // First let's save current User and Group IDs so it can be restored
+    // later.
+    uid_t  euid = geteuid();
+    gid_t  egid = getegid();
+    if (0 != change_credentials(pwd->pw_uid, pwd->pw_gid))
+        return "Failed to switch to user " + login;
+
+    // Make sure certificate directory exists and set permissions to
+    // 700 so that only "user" (or root) can access the certificates.
+    if (0 != g_mkdir_with_parents(certdir.c_str(), S_IRWXU/*0700*/))
+        return "Failed to create certificate directory: " + certdir.native();
 
     #if (1)
     // Restore credentials
@@ -212,37 +187,13 @@ std::string hamd_c::certgen(const std::string  & login) const
     if (rc != 0)
         return "Failed to generate certificates for " + login + ". " + std_err;
 
-                if (success)
-                {
-                    // Set permissions on newly created certificates
-                    GDir * dir = g_dir_open(certdir, 0, nullptr);
-                    if (dir != nullptr)
-                    {
-                        gchar       * fullname;
-                        const gchar * name;
-                        while ((name = g_dir_read_name(dir)) != nullptr)
-                        {
-                            fullname = g_build_filename(certdir, name, nullptr);
-                            if (fullname != nullptr)
-                            {
-                                g_chmod(fullname, S_IRUSR | S_IWUSR); // 0600
-                                g_free(fullname);
-                            }
-                        }
-                        g_dir_close(dir);
-                    }
-                }
-                else
-                {
-                    errmsg = "Failed to generate certificates for: " + login;
-                }
-            }
-            else
-            {
-                errmsg = "Failed to create certificate directory: " + std::string(certdir);
-            }
-        }
-        else
+    // Set permissions on newly created certificates
+    GDir * dir = g_dir_open(certdir.c_str(), 0, nullptr);
+    if (dir != nullptr)
+    {
+        path_t         fullname;
+        const gchar  * name;
+        while ((name = g_dir_read_name(dir)) != nullptr)
         {
             fullname = certdir / name;
             g_chmod(fullname.c_str(), (S_IRUSR | S_IWUSR)/*0600*/);
@@ -250,15 +201,10 @@ std::string hamd_c::certgen(const std::string  & login) const
                 syslog(LOG_ERR, "failed to change ownership of file %s. errno=%d (%s)",
                        fullname.c_str(), errno, strerror(errno));
         }
-
-        g_free(certdir);
-    }
-    else
-    {
-        errmsg = "Failed to build certificate directory name";
+        g_dir_close(dir);
     }
 
-    return errmsg;
+    return "";
 }
 
 static std::string roles_as_string(const std::vector< std::string > & roles)
@@ -360,21 +306,21 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
  */
 ::DBus::Struct< bool, std::string > hamd_c::userdel(const std::string& login)
 {
-    std::string  cmd = "/usr/sbin/userdel --force --remove " + login;
-
-    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::userdel() - executing command \"%s\"", cmd.c_str());
-
-    int  rc          = system(cmd.c_str());
-    bool term_normal = WIFEXITED(rc);
-
     ::DBus::Struct< bool,       /* success */
                     std::string /* errmsg  */ > ret;
 
-    if (term_normal)
+    struct passwd * pwd = ::getpwnam(login.c_str());
+    if (pwd == nullptr)
     {
-        int  exit_status = WEXITSTATUS(rc);
+        // User doesn't exist...so success!
+        ret._1 = true;
+        ret._2 = "";
+    }
+    else
+    {
+        std::string  cmd = "/usr/sbin/userdel --force --remove " + login;
 
-        ret._1 = (exit_status == 0) || (exit_status == 6);
+        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::userdel() - executing command \"%s\"", cmd.c_str());
 
         int rc;
         std::string std_out;
@@ -384,13 +330,8 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
         LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::userdel() - command returned rc=%d, stdout=%s, stderr=%s",
                         rc, std_out.c_str(), std_err.c_str());
 
-    }
-    else
-    {
-        ret._1 = false;
-        ret._2 = strerror(errno);
-        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::userdel() - Abnornal command termination, errno=%d (%s)",
-                        errno, ret._2.c_str());
+        ret._1 = rc == 0;
+        ret._2 = rc == 0 ? "" : std_err;
     }
 
     return ret;
@@ -416,41 +357,8 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
     ::DBus::Struct< bool,       /* success */
                     std::string /* errmsg  */ > ret;
 
-    if (term_normal)
-    {
-        int  exit_status = WEXITSTATUS(rc);
-
-        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::passwd() - command returned exit_status=%d",
-                        login.c_str(), exit_status);
-
-        ret._1 = exit_status == 0;
-
-        switch (exit_status)
-        {
-        case 0:  ret._2 = "";                                         break;
-        case 1:  ret._2 = "can't update password file";               break;
-        case 2:  ret._2 = "invalid command syntax";                   break;
-        case 3:  ret._2 = "invalid argument to option";               break;
-        case 4:  ret._2 = "UID already in use (and no -o)";           break;
-        case 6:  ret._2 = "specified user/group doesn't exist";       break;
-        case 8:  ret._2 = "user to modify is logged in";              break;
-        case 9:  ret._2 = "username already in use";                  break;
-        case 10: ret._2 = "can't update group file";                  break;
-        case 12: ret._2 = "unable to complete home dir move";         break;
-        case 14: ret._2 = "can't update SELinux user mapping";        break;
-        default: ret._2 = "unknown error code " + std::to_string(rc); break;
-        }
-
-        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::passwd() - command returned exit_status=%d (%s)",
-                        exit_status, ret._2.c_str());
-    }
-    else
-    {
-        ret._1 = false;
-        ret._2 = strerror(errno);
-        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::passwd() - Abnornal command termination, errno=%d (%s)",
-                        errno, ret._2.c_str());
-    }
+    ret._1 = rc == 0;
+    ret._2 = rc == 0 ? "" : std_err;
 
     return ret;
 }
@@ -481,38 +389,8 @@ static std::string roles_as_string(const std::vector< std::string > & roles)
     ::DBus::Struct< bool,       /* success */
                     std::string /* errmsg  */ > ret;
 
-    if (term_normal)
-    {
-        int  exit_status = WEXITSTATUS(rc);
-
-        ret._1 = exit_status == 0;
-
-        switch (exit_status)
-        {
-        case 0:  ret._2 = "";                                         break;
-        case 1:  ret._2 = "can't update password file";               break;
-        case 2:  ret._2 = "invalid command syntax";                   break;
-        case 3:  ret._2 = "invalid argument to option";               break;
-        case 4:  ret._2 = "UID already in use (and no -o)";           break;
-        case 6:  ret._2 = "specified user/group doesn't exist";       break;
-        case 8:  ret._2 = "user to modify is logged in";              break;
-        case 9:  ret._2 = "username already in use";                  break;
-        case 10: ret._2 = "can't update group file";                  break;
-        case 12: ret._2 = "unable to complete home dir move";         break;
-        case 14: ret._2 = "can't update SELinux user mapping";        break;
-        default: ret._2 = "unknown error code " + std::to_string(rc); break;
-        }
-
-        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::set_roles() - command returned exit_status=%d (%s)",
-                        exit_status, ret._2.c_str());
-    }
-    else
-    {
-        ret._1 = false;
-        ret._2 = strerror(errno);
-        LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "hamd_c::set_roles() - Abnornal command termination, errno=%d (%s)",
-                        errno, ret._2.c_str());
-    }
+    ret._1 = rc == 0;
+    ret._2 = rc == 0 ? "" : std_err;
 
     return ret;
 }
@@ -797,10 +675,10 @@ bool hamd_c::add_unconfirmed_user(const std::string& username, const uint32_t& p
             std::string std_err;
             std::tie(rc, std_out, std_err) = run(full_cmd);
 
-            LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": command returned term_normal=%s, exit_status=%d, errno=%d (%s)",
-                            username.c_str(), term_normal ? "true" : "false", exit_status, errno, strerror(errno));
+            LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": command returned rc=%d, stdout=%s, stderr=%s",
+                            username.c_str(), rc, std_out.c_str(), std_err.c_str());
 
-            return term_normal && (0 == exit_status) ? true : false;
+            return rc == 0;
         }
         else
         {
@@ -815,35 +693,6 @@ bool hamd_c::add_unconfirmed_user(const std::string& username, const uint32_t& p
            username.c_str(), n_tries);
 
     return false;
-}
-
-/**
- * @brief  Generate ssh keys
- *
- * @param  username_p   user name
- *
- * @return true if successful, false otherwise.
- */
-static bool generate_certs(const std::string username)
-{
-    static const char * fname_p = "/usr/bin/certgen";
-    if (!g_file_test(fname_p, G_FILE_TEST_EXISTS))
-        return false;
-
-    std::string cmd         = "/bin/sh " + (fname_p + (' ' + username));
-    int         ret         = system(cmd.c_str());
-    bool        term_normal = WIFEXITED(ret);
-    int         exit_status = WEXITSTATUS(ret);
-    bool        ok          = term_normal && (exit_status == 0) ? true : false;
-
-    if (!ok)
-    {
-        sd_journal_print(LOG_ERR, "User %s: Failed to run \"%s\". term_normal=%s, exit_status=%d, errno=%d (%s)",
-                         username.c_str(), cmd.c_str(), term_normal ? "true" : "false", exit_status,
-                         errno, strerror(errno));
-    }
-
-    return ok;
 }
 
 /**
@@ -880,8 +729,10 @@ bool hamd_c::confirm_user(const std::string& username, const std::string& groupn
     std::string std_err;
     std::tie(rc, std_out, std_err) = run(cmd);
 
-    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": command returned term_normal=%s, exit_status=%d, errno=%d (%s)",
-                    username.c_str(), term_normal ? "true" : "false", exit_status, errno, strerror(errno));
+    LOG_CONDITIONAL(is_tron(), LOG_DEBUG, "User \"%s\": command returned rc=%d, stdout=%s, stderr=%s",
+                    username.c_str(), rc, std_out.c_str(), std_err.c_str());
+    if (rc != 0)
+        return false;
 
     std::string errmsg = certgen(username);
     return errmsg.empty();
