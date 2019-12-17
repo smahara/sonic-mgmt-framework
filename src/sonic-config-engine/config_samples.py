@@ -34,9 +34,8 @@ def generate_t1_sample_config(data):
 
     data['HARDWARE'] = {}
     data['HARDWARE']['ACCESS_LIST'] = {}
-    data['HARDWARE']['ACCESS_LIST']['LOOKUP_MODE'] = 'advanced'
+    data['HARDWARE']['ACCESS_LIST']['LOOKUP_MODE'] = 'optimized'
     data['HARDWARE']['ACCESS_LIST']["COUNTER_MODE"] = "per-rule"
-    data['HARDWARE']['ACCESS_LIST']['TCAM_SHARING'] = []
     return data;
 
 def generate_empty_config(data):
@@ -47,8 +46,8 @@ def generate_empty_config(data):
         new_data['DEVICE_METADATA']['localhost']['type'] = 'LeafRouter'
     data['HARDWARE'] = {}
     data['HARDWARE']['ACCESS_LIST'] = {}
-    data['HARDWARE']['ACCESS_LIST']['LOOKUP'] = 'advanced'
-    data['HARDWARE']['ACCESS_LIST']['TCAM_SHARING'] = []
+    data['HARDWARE']['ACCESS_LIST']['LOOKUP_MODE'] = 'optimized'
+    data['HARDWARE']['ACCESS_LIST']["COUNTER_MODE"] = "per-rule"
     return new_data
 
 def generate_l2_config(data):
@@ -64,8 +63,8 @@ def generate_l2_config(data):
         data['VLAN_MEMBER']['Vlan1000|{}'.format(port)] = {'tagging_mode': 'untagged'}
     data['HARDWARE'] = {}
     data['HARDWARE']['ACCESS_LIST'] = {}
-    data['HARDWARE']['ACCESS_LIST']['LOOKUP'] = 'advanced'
-    data['HARDWARE']['ACCESS_LIST']['TCAM_SHARING'] = []
+    data['HARDWARE']['ACCESS_LIST']['LOOKUP_MODE'] = 'optimized'
+    data['HARDWARE']['ACCESS_LIST']["COUNTER_MODE"] = "per-rule"
     return data
 
 _sample_generators = {
