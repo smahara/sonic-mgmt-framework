@@ -119,7 +119,7 @@ void write_log(int level, const char* tag, const char* format, ...)
         level =  NOTICE_LOG_LEVEL;
     }
 
-    if (level < config->log_level)
+    if (level > config->log_level)
         return;
 
     prefix_len = snprintf(buf, LOGBUF_SIZE, "[%s.%s] ", tag, log_level_to_string(level));
