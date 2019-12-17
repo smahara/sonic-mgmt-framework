@@ -2738,7 +2738,22 @@ void mlacp_mlag_link_add_handler(struct CSM *csm, struct LocalInterface *lif)
     if (MLACP(csm).current_state != MLACP_STATE_EXCHANGE)
         return;
 
-    set_peerlink_mlag_port_isolate(csm, lif, 1);
+    //enable peerlink isolation only if the both mclag interfaces are up
+    update_peerlink_isolate_from_lif(csm, lif, lif->po_active);
+
+    //if it is standby node and peer interface is configured, update
+    //standby node mac to active's mac for this lif
+    if (csm->role_type == STP_ROLE_STANDBY)
+    {
+        struct PeerInterface* pif=NULL;
+        pif = peer_if_find_by_name(csm, lif->name);
+
+        if (pif)
+        {
+            update_if_ipmac_on_standby(lif);
+            mlacp_link_set_iccp_system_id(csm->mlag_id, lif->mac_addr);
+        }
+    }
 
     return;
 }
