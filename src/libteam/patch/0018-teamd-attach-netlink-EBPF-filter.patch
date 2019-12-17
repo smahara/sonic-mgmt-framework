@@ -459,8 +459,8 @@ index 24f5e48..4e2d63c 100644
 +		else
 +		{
 +			info(th, "Not interested in the new link event for %s", ifname);
-+			if (event)
-+				rtnl_link_put(link);
++			/*if (event)
++				rtnl_link_put(link);*/
 +			return;
 +		}
 +	}
@@ -488,7 +488,7 @@ index 24f5e48..4e2d63c 100644
  	ifinfo = ifinfo_find(th, ifindex);
  	if (!ifinfo)
 +	{
-+		err(th, "Failed to find the ifinfo for the interface index %d th is %p.", ifindex, th->ifindex, th);
++		err(th, "Failed to find the ifinfo for the interface index %d th->ifindex %d  th is %p.", ifindex, th->ifindex, th);
  		return -ENOENT;
 +	}
  	if (ifinfo->linked)

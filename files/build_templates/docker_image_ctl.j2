@@ -121,7 +121,7 @@ function preStartAction()
         docker cp /tmp/dump.rdb database:/var/lib/redis/
     fi
 {%- elif docker_container_name == "teamd" %}
-    wait_for_port_init_done
+    wait_for_swss_db_flush_done
 {%- elif docker_container_name == "nat" %}
     wait_for_swss_db_flush_done
 {%- elif docker_container_name == "syncd" %}
