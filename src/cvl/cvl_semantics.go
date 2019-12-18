@@ -1269,12 +1269,12 @@ func (c *CVL) findUsedAsLeafRef(tableName, field string) []tblFieldPair {
 	return tblFieldPairArr
 }
 
-//This function returns is true if any entry 
-//in request cache, is using the given entry
+//This function returns true if any entry 
+//in request cache is using the given entry
 //getting deleted. The given entry can be found
 //either in key or in hash-field.
 //Example : If T1|K1 is getting deleted,
-//check if T2*|K1 or T2*|K2:{H1: K1}
+//check if T2*|K1 or T2|*:{H1: K1}
 //was using T1|K1 and getting deleted
 //in same session also.
 func (c *CVL) checkDeleteInRequestCache(cfgData []CVLEditConfigData,
