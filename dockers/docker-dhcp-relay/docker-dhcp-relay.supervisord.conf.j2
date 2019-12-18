@@ -19,14 +19,6 @@ autorestart=false
 stdout_logfile=syslog
 stderr_logfile=syslog
 
-[program:iphelpermgrd]
-command=/usr/bin/iphelpermgrd
-priority=4
-autostart=false
-autorestart=true
-stdout_logfile=syslog
-stderr_logfile=syslog
-
 {# If our configuration has VLANs... #}
 {% set num_relays = { 'count': 0 } %}
 {% if VLAN %}
