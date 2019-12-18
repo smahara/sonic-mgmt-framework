@@ -49,7 +49,7 @@
 #   Use $$ to insert a literal $.
 #
 # type: string
-#certgen=/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout $CERTDIR/key.pem -subj "/O=SONiC/OU=CLI/CN=$USERNAME" | /usr/bin/openssl x509 -req -days 365000 -out $CERTDIR/certificate.pem -CA /root/cli-ca/certificate.pem -CAkey /root/cli-ca/key.pem -CAcreateserial -sha256
+#certgen=/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout $CERTDIR/key.pem -subj "/O=SONiC/OU=CLI/CN=$USERNAME" | /usr/bin/openssl x509 -req -days 365000 -out $CERTDIR/certificate.pem -CA /root/cli-ca/cert.pem -CAkey /root/cli-ca/key.pem -CAcreateserial -sha256
 
 # ==============================================================================
 # Parameter: shell
