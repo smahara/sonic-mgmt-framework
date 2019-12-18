@@ -5,7 +5,7 @@ After=updategraph.service swss.service syncd.service
 
 
 [Service]
-ExecStart=/usr/bin/python /usr/local/bin/mediautil_400G.py RIGHT_PORTS
+ExecStart=/usr/bin/python /usr/local/bin/mediautil_1x400G_right.py 
 
 [Install]
 WantedBy=multi-user.target
