@@ -19,12 +19,253 @@ except ImportError as e:
     raise ImportError("%s - required module not found" % str(e))
 
 alias_to_bcm_map = {
+    "hundredGigE1/1/1":"ce0",
+    "hundredGigE1/1/2":"ce1",
+    "hundredGigE1/1/3":"ce2",
+    "hundredGigE1/1/4":"ce3",
+    "hundredGigE1/2/1":"ce4",
+    "hundredGigE1/2/2":"ce5",
+    "hundredGigE1/2/3":"ce6",
+    "hundredGigE1/2/4":"ce7",
+    "hundredGigE1/3/1":"ce8",
+    "hundredGigE1/3/2":"ce9",
+    "hundredGigE1/3/3":"ce10",
+    "hundredGigE1/3/4":"ce11",
+    "hundredGigE1/4/1":"ce12",
+    "hundredGigE1/4/2":"ce13",
+    "hundredGigE1/4/3":"ce14",
+    "hundredGigE1/4/4":"ce15",
+    "hundredGigE1/5/1":"ce16",
+    "hundredGigE1/5/2":"ce17",
+    "hundredGigE1/5/3":"ce18",
+    "hundredGigE1/5/4":"ce19",
+    "hundredGigE1/6/1":"ce20",
+    "hundredGigE1/6/2":"ce21",
+    "hundredGigE1/6/3":"ce22",
+    "hundredGigE1/6/4":"ce23",
+    "hundredGigE1/7/1":"ce24",
+    "hundredGigE1/7/2":"ce25",
+    "hundredGigE1/7/3":"ce26",
+    "hundredGigE1/7/4":"ce27",
+    "hundredGigE1/8/1":"ce28",
+    "hundredGigE1/8/2":"ce29",
+    "hundredGigE1/8/3":"ce30",
+    "hundredGigE1/8/4":"ce31",
+    "hundredGigE1/9/1":"ce32",
+    "hundredGigE1/9/2":"ce33",
+    "hundredGigE1/9/3":"ce34",
+    "hundredGigE1/9/4":"ce35",
+    "hundredGigE1/10/1":"ce36",
+    "hundredGigE1/10/2":"ce37",
+    "hundredGigE1/10/3":"ce38",
+    "hundredGigE1/10/4":"ce39",
+    "hundredGigE1/11/1":"ce40",
+    "hundredGigE1/11/2":"ce41",
+    "hundredGigE1/11/3":"ce42",
+    "hundredGigE1/11/4":"ce43",
+    "hundredGigE1/12/1":"ce44",
+    "hundredGigE1/12/2":"ce45",
+    "hundredGigE1/12/3":"ce46",
+    "hundredGigE1/12/4":"ce47",
+    "hundredGigE1/13/1":"ce48",
+    "hundredGigE1/13/2":"ce49",
+    "hundredGigE1/13/3":"ce50",
+    "hundredGigE1/13/4":"ce51",
+    "hundredGigE1/14/1":"ce52",
+    "hundredGigE1/14/2":"ce53",
+    "hundredGigE1/14/3":"ce54",
+    "hundredGigE1/14/4":"ce55",
+    "hundredGigE1/15/1":"ce56",
+    "hundredGigE1/15/2":"ce57",
+    "hundredGigE1/15/3":"ce58",
+    "hundredGigE1/15/4":"ce59",
+    "hundredGigE1/16/1":"ce60",
+    "hundredGigE1/16/2":"ce61",
+    "hundredGigE1/16/3":"ce62",
+    "hundredGigE1/16/4":"ce63",
+    "fourhundredGigE1/17":"cd0",
+    "fourhundredGigE1/18":"cd1",
+    "fourhundredGigE1/19":"cd2",
+    "fourhundredGigE1/20":"cd3",
+    "fourhundredGigE1/21":"cd4",
+    "fourhundredGigE1/22":"cd5",
+    "fourhundredGigE1/23":"cd6",
+    "fourhundredGigE1/24":"cd7",
+    "fourhundredGigE1/25":"cd8",
+    "fourhundredGigE1/26":"cd9",
+    "fourhundredGigE1/27":"cd10",
+    "fourhundredGigE1/28":"cd11",
+    "fourhundredGigE1/29":"cd12",
+    "fourhundredGigE1/30":"cd13",
+    "fourhundredGigE1/31":"cd14",
+    "fourhundredGigE1/32":"cd15"
 }
 
 alias_to_if_map = {
+
+    'hundredGigE1/1/1': '0',
+    'hundredGigE1/1/2': '2',
+    'hundredGigE1/1/3': '4',
+    'hundredGigE1/1/4': '6',
+    'hundredGigE1/2/1': '8',
+    'hundredGigE1/2/2': '10',
+    'hundredGigE1/2/3': '12',
+    'hundredGigE1/2/4': '14',
+    'hundredGigE1/3/1': '16',
+    'hundredGigE1/3/2': '18',
+    'hundredGigE1/3/3': '20',
+    'hundredGigE1/3/4': '22',
+    'hundredGigE1/4/1': '24',
+    'hundredGigE1/4/2': '26',
+    'hundredGigE1/4/3': '28',
+    'hundredGigE1/4/4': '30',
+    'hundredGigE1/5/1': '32',
+    'hundredGigE1/5/2': '34',
+    'hundredGigE1/5/3': '36',
+    'hundredGigE1/5/4': '38',
+    'hundredGigE1/6/1': '40',
+    'hundredGigE1/6/2': '42',
+    'hundredGigE1/6/3': '44',
+    'hundredGigE1/6/4': '46',
+    'hundredGigE1/7/1': '48',
+    'hundredGigE1/7/2': '50',
+    'hundredGigE1/7/3': '52',
+    'hundredGigE1/7/4': '54',
+    'hundredGigE1/8/1': '56',
+    'hundredGigE1/8/2': '58',
+    'hundredGigE1/8/3': '60',
+    'hundredGigE1/8/4': '62',
+    'hundredGigE1/9/1': '64',
+    'hundredGigE1/9/2': '66',
+    'hundredGigE1/9/3': '68',
+    'hundredGigE1/9/4': '70',
+    'hundredGigE1/10/1': '72',
+    'hundredGigE1/10/2': '74',
+    'hundredGigE1/10/3': '76',
+    'hundredGigE1/10/4': '78',
+    'hundredGigE1/11/1': '80',
+    'hundredGigE1/11/2': '82',
+    'hundredGigE1/11/3': '84',
+    'hundredGigE1/11/4': '86',
+    'hundredGigE1/12/1': '88',
+    'hundredGigE1/12/2': '90',
+    'hundredGigE1/12/3': '92',
+    'hundredGigE1/12/4': '94',
+    'hundredGigE1/13/1': '96',
+    'hundredGigE1/13/2': '98',
+    'hundredGigE1/13/3': '100',
+    'hundredGigE1/13/4': '102',
+    'hundredGigE1/14/1': '104',
+    'hundredGigE1/14/2': '106',
+    'hundredGigE1/14/3': '108',
+    'hundredGigE1/14/4': '110',
+    'hundredGigE1/15/1': '112',
+    'hundredGigE1/15/2': '114',
+    'hundredGigE1/15/3': '116',
+    'hundredGigE1/15/4': '118',
+    'hundredGigE1/16/1': '120',
+    'hundredGigE1/16/2': '122',
+    'hundredGigE1/16/3': '124',
+    'hundredGigE1/16/4': '126',
+    'fourhundredGigE1/17': '128',
+    'fourhundredGigE1/18': '136',
+    'fourhundredGigE1/19': '144',
+    'fourhundredGigE1/20': '152',
+    'fourhundredGigE1/21': '160',
+    'fourhundredGigE1/22': '168',
+    'fourhundredGigE1/23': '176',
+    'fourhundredGigE1/24': '184',
+    'fourhundredGigE1/25': '192',
+    'fourhundredGigE1/26': '200',
+    'fourhundredGigE1/27': '208',
+    'fourhundredGigE1/28': '216',
+    'fourhundredGigE1/29': '224',
+    'fourhundredGigE1/30': '232',
+    'fourhundredGigE1/31': '240',
+    'fourhundredGigE1/32': '248'
 }
 
 if_to_alias_map = {
+    '0': 'hundredGigE1/1/1',
+    '2': 'hundredGigE1/1/2',
+    '4': 'hundredGigE1/1/3',
+    '6': 'hundredGigE1/1/4',
+    '8': 'hundredGigE1/2/1',
+    '10': 'hundredGigE1/2/2',
+    '12': 'hundredGigE1/2/3',
+    '14': 'hundredGigE1/2/4',
+    '16': 'hundredGigE1/3/1',
+    '18': 'hundredGigE1/3/2',
+    '20': 'hundredGigE1/3/3',
+    '22': 'hundredGigE1/3/4',
+    '24': 'hundredGigE1/4/1',
+    '26': 'hundredGigE1/4/2',
+    '28': 'hundredGigE1/4/3',
+    '30': 'hundredGigE1/4/4',
+    '32': 'hundredGigE1/5/1',
+    '34': 'hundredGigE1/5/2',
+    '36': 'hundredGigE1/5/3',
+    '38': 'hundredGigE1/5/4',
+    '40': 'hundredGigE1/6/1',
+    '42': 'hundredGigE1/6/2',
+    '44': 'hundredGigE1/6/3',
+    '46': 'hundredGigE1/6/4',
+    '48': 'hundredGigE1/7/1',
+    '50': 'hundredGigE1/7/2',
+    '52': 'hundredGigE1/7/3',
+    '54': 'hundredGigE1/7/4',
+    '56': 'hundredGigE1/8/1',
+    '58': 'hundredGigE1/8/2',
+    '60': 'hundredGigE1/8/3',
+    '62': 'hundredGigE1/8/4',
+    '64': 'hundredGigE1/9/1',
+    '66': 'hundredGigE1/9/2',
+    '68': 'hundredGigE1/9/3',
+    '70': 'hundredGigE1/9/4',
+    '72': 'hundredGigE1/10/1',
+    '74': 'hundredGigE1/10/2',
+    '76': 'hundredGigE1/10/3',
+    '78': 'hundredGigE1/10/4',
+    '80': 'hundredGigE1/11/1',
+    '82': 'hundredGigE1/11/2',
+    '84': 'hundredGigE1/11/3',
+    '86': 'hundredGigE1/11/4',
+    '88': 'hundredGigE1/12/1',
+    '90': 'hundredGigE1/12/2',
+    '92': 'hundredGigE1/12/3',
+    '94': 'hundredGigE1/12/4',
+    '96': 'hundredGigE1/13/1',
+    '98': 'hundredGigE1/13/2',
+    '100': 'hundredGigE1/13/3',
+    '102': 'hundredGigE1/13/4',
+    '104': 'hundredGigE1/14/1',
+    '106': 'hundredGigE1/14/2',
+    '108': 'hundredGigE1/14/3',
+    '110': 'hundredGigE1/14/4',
+    '112': 'hundredGigE1/15/1',
+    '114': 'hundredGigE1/15/2',
+    '116': 'hundredGigE1/15/3',
+    '118': 'hundredGigE1/15/4',
+    '120': 'hundredGigE1/16/1',
+    '122': 'hundredGigE1/16/2',
+    '124': 'hundredGigE1/16/3',
+    '126': 'hundredGigE1/16/4',
+    '128': 'fourhundredGigE1/17',
+    '136': 'fourhundredGigE1/18',
+    '144': 'fourhundredGigE1/19',
+    '152': 'fourhundredGigE1/20',
+    '160': 'fourhundredGigE1/21',
+    '168': 'fourhundredGigE1/22',
+    '176': 'fourhundredGigE1/23',
+    '184': 'fourhundredGigE1/24',
+    '192': 'fourhundredGigE1/25',
+    '200': 'fourhundredGigE1/26',
+    '208': 'fourhundredGigE1/27',
+    '216': 'fourhundredGigE1/28',
+    '224': 'fourhundredGigE1/29',
+    '232': 'fourhundredGigE1/30',
+    '240': 'fourhundredGigE1/31',
+    '248': 'fourhundredGigE1/32'
 }
 
 def run_cmd(cmd, supressError=False):
@@ -41,8 +282,8 @@ def run_cmd(cmd, supressError=False):
 
 def construct_interfaces_from_physical_port_num(port):
 
-    #if int(port) & 0x01 == 0:
-    #    return ['fourhundredGigE1/'+str(port)]
+    if int(port) > 16 and int(port) <33 :
+        return ['fourhundredGigE1/'+str(port)]
     return ["hundredGigE1/%s/%u" %(str(port), c) for c in range(1, 5, 1)]
 
 def get_port_ids(port):
@@ -83,7 +324,7 @@ def set_if_speed_100g_by_bcmsh(alias):
 
     err, res = run_cmd(cmd)
 
-DBG = False
+DBG = False 
 
 _port_to_i2c_mapping = {
         1:  10,
@@ -121,18 +362,6 @@ _port_to_i2c_mapping = {
         33: 1,
         34: 2,
         }
-
-# Default to top (odd) ports
-
-def is_port_allowed(port):
-    port = int(port)
-    if script_mode == 'LEFT_PORTS':
-        return (port >= 1) and (port <= 16)
-    if script_mode == 'RIGHT_PORTS':
-        return (port >= 17) and (port <= 32)
-    elif script_mode == 'ODD_PORTS':
-        return port % 2 == 1
-    return False
 
 def dbg_print(st):
     if DBG:
@@ -233,9 +462,6 @@ ports_to_monitor = []
 
 def media_presence_change_handler(port, state):
 
-    if is_port_allowed(port) ==  False:
-        dbg_print("Rejecting " + str(port))
-        return True
     dbg_print (" Enter media_presence_change_handler portnum %d state %s"%(port,state))
 
     # Media removed. Remove entry from poller list
@@ -304,10 +530,10 @@ def remove_port_to_monitor(port):
 
 def link_state_speed_set():
     for port in ports_to_monitor:
-        if is_port_allowed(port) == False:
-            continue
         presence = get_presence(port)
         if presence ==  False:
+            continue
+        if (port > 16): 
             continue
         
         if port in _is_smf and _is_smf[port] is False:
@@ -384,10 +610,6 @@ def get_presence(port_num):
     if port_num < PORT_START or port_num > PORT_END:
         return False
 
-    # No need to check presence for ports not allowed
-    if is_port_allowed(port_num) == False:
-        return False
-
     # Port offset starts with 0x4004
     port_offset = 16388 + ((port_num-1) * 16)
 
@@ -416,9 +638,8 @@ def media_config(port_dict):
         for port_num in range(PORT_START, (PORT_END - 1)):
             presence = get_presence(port_num)
             #dbg_print("Media %d present %s : %s"%(port_num, presence, _global_port_pres_dict[port_num]))
-            #if ((port_num % 2) == 0): continue
-            if is_port_allowed(port_num) == False:
-                continue
+            if (port_num > 16): continue
+
             if(presence and _global_port_pres_dict[port_num] == '0'):
                 _global_port_pres_dict[port_num] = '1'
                 port_dict[port_num] = '1'
@@ -488,64 +709,8 @@ _port_to_eeprom_mapping = {}
 
 _global_port_pres_dict = {}
 
-def create_mappings():
-
-    cmd = 'show interfaces status '
-    err, res = run_cmd(cmd)
-    if err:
-       dbg_print ("Error running %s %s"%(str(ifname), cmd))
-       return
-    #print(res)
-    output = res.splitlines()
-    if len(output) < 3 : return err, False
-    output.pop(0)
-    output.pop(0)
-    for line in output:
-        v = line.split()
-        alias = v[4]
-        if_num = v[0][len('Ethernet'):]
-        if_to_alias_map[if_num] = alias
-        alias_to_if_map[alias] = if_num
-
-
-    # Create NPU mappings 
-
-    ce_counter = 0
-    cd_counter = 0
-    xe_counter = 0
-
-    tmp_if_nums = if_to_alias_map.keys()
-    tmp_if_nums.sort()
-
-    for c in  range(0, len(tmp_if_nums), 1):
-        alias = if_to_alias_map[tmp_if_nums[c]]
-        if 'hundredGigE1' in alias:
-            alias_to_bcm_map[alias] = 'ce' + str(ce_counter)
-            ce_counter = ce_counter+1
-        elif 'fourhundredGigE1' in alias:
-            alias_to_bcm_map[alias] = 'cd' + str(cd_counter)
-            cd_counter = cd_counter+1
-        else:
-            alias_to_bcm_map[alias] = 'xe' + str(xe_counter)
-            xe_counter = xe_counter+1
-
 def main():
     dbg_print ("mediautil: __Init__ ")
-
-    global script_mode
-    # Default 
-    script_mode = 'ODD_PORTS'
-    if len(sys.argv) > 1:
-        c = sys.argv[1]
-        if c == '0' or c == 'LEFT_PORTS':
-            script_mode = 'LEFT_PORTS'
-        elif c == '1' or c == 'RIGHT_PORTS':
-            script_mode = 'RIGHT_PORTS'
-
-
-    create_mappings()
-    #return
-    dbg_print("Operating on %s " % script_mode)
 
     for x in range(PORT_START, PORT_END + 1):
         _port_to_eeprom_mapping[x] = eeprom_path.format(
@@ -560,6 +725,7 @@ def main():
 
     while True:
         get_transceiver_change_event()
+
 
 if __name__ == "__main__":
     main()
