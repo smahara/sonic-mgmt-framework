@@ -13,6 +13,10 @@ elif [ "$CONFIG_TYPE" == "unified" ]; then
     echo "service integrated-vtysh-config" > /etc/frr/vtysh.conf
 fi
 
+[ -s "/etc/frr/frr.conf" ] || {
+    echo "log syslog informational" > /etc/frr/frr.conf
+}
+
 sonic-cfggen -d -t /usr/share/sonic/templates/isolate.j2 > /usr/sbin/bgp-isolate
 chown root:root /usr/sbin/bgp-isolate
 chmod 0755 /usr/sbin/bgp-isolate
@@ -32,6 +36,16 @@ supervisorctl start bgpcfgd
 
 # Start Quagga processes
 supervisorctl start zebra
+
+secs=30
+while ((secs-- > 0))
+do
+    zebra_ready=$(netstat -tulpn | grep LISTEN | grep zebra)
+    [[ ! -z $zebra_ready ]] && break
+    sleep 1
+done
+
+
 supervisorctl start staticd
 supervisorctl start bgpd
 supervisorctl start ospfd

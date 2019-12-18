@@ -64,7 +64,7 @@ def g_run_command(command, use_vtysh_mgr):
         stdout = p.communicate()[0]
         p.wait()
         if p.returncode != 0:
-            syslog.syslog(syslog.LOG_ERR, 'command execution returned {}. Command: "{}", stdout: "{}"'.\
+            syslog.syslog(syslog.LOG_ERR, '[bgp cfgd] command execution returned {}. Command: "{}", stdout: "{}"'.\
                             format(p.returncode, command, stdout))
             return False
     return True
@@ -937,6 +937,10 @@ class BGPConfigDaemon:
 
     af_network_key_map = [(['ip_prefix', '++policy', '+backdoor'], '{no:no-prefix}network {2} {3:network-policy} {4:network-backdoor}')]
 
+    global_evpn_vni_key_map = [('advertise-default-gw',                   '{no:no-prefix}advertise-default-gw', ['true','false']),
+                               ('route-distinguisher',                    '{no:no-prefix}rd {}')
+    ]
+
     tbl_to_key_map = {'BGP_GLOBALS':                    global_key_map,
                       'BGP_GLOBALS_AF':                 global_af_key_map,
                       'BGP_GLOBALS_LISTEN_PREFIX':      listen_prefix_key_map,
@@ -950,12 +954,16 @@ class BGPConfigDaemon:
                       'AS_PATH_SET':                    aspath_set_key_map,
                       'ROUTE_REDISTRIBUTE':             route_redist_key_map,
                       'BGP_GLOBALS_AF_AGGREGATE_ADDR':  af_aggregate_key_map,
-                      'BGP_GLOBALS_AF_NETWORK':         af_network_key_map
+                      'BGP_GLOBALS_AF_NETWORK':         af_network_key_map,
+                      'BGP_GLOBALS_EVPN_VNI':           global_evpn_vni_key_map
     }
 
     def __init__(self):
         self.config_db = ExtConfigDBConnector()
-        self.config_db.connect()
+        try:
+            self.config_db.connect()
+        except Exception as e:
+            syslog.syslog(syslog.LOG_ERR, '[bgp cfgd] Failed connecting to config DB with exception:' + str(e))
         db_entry = self.config_db.get_entry('DEVICE_METADATA', 'localhost')
         if 'bgp_asn' in db_entry:
             self.metadata_asn = db_entry['bgp_asn']
@@ -1069,7 +1077,9 @@ class BGPConfigDaemon:
             ('AS_PATH_SET', self.bgp_table_handler_common),
             ('ROUTE_REDISTRIBUTE', self.bgp_table_handler_common),
             ('BGP_GLOBALS_AF_AGGREGATE_ADDR', self.bgp_table_handler_common),
-            ('BGP_GLOBALS_AF_NETWORK', self.bgp_table_handler_common)
+            ('BGP_GLOBALS_AF_NETWORK', self.bgp_table_handler_common),
+            ('VRF', self.vrf_handler),
+            ('BGP_GLOBALS_EVPN_VNI', self.bgp_table_handler_common)
         ]
         self.bgp_message = Queue.Queue(0)
         self.table_data_cache = self.config_db.get_table_data([tbl for tbl, _ in self.table_handler_list])
@@ -1129,6 +1139,16 @@ class BGPConfigDaemon:
                     command = command + " -c 'no shutdown'"
                 elif param == 'admin_status' and data[param] == 'down':
                     command = command + " -c 'shutdown'"
+            self.__run_command(command)    
+    
+    def vrf_handler(self, table, key, data):
+        syslog.syslog(syslog.LOG_INFO, '[bgp cfgd](vrf) value for {} changed to {}'.format(key, data))
+        #get vrf key
+        key_params = key.split('|')
+        cmd = 'vrf {}'.format(key_params[0])
+        if not data:
+            #VRF is deleted
+            command = "vtysh -c 'configure terminal' -c 'no {}'".format(cmd)
             self.__run_command(command)
 
     def __get_vrf_asn(self, vrf):
@@ -1476,6 +1496,17 @@ class BGPConfigDaemon:
                     self.tag_set_list.pop(tag_set_name, None)
                 for _, dval in data.items():
                     dval.status = CachedDataWithOp.STAT_SUCC
+            elif table == 'BGP_GLOBALS_EVPN_VNI':
+                af_type, vni = key.split('|')
+                af, ip_type = af_type.lower().split('_')
+                syslog.syslog(syslog.LOG_INFO, 'Set address family for VNI {} to {} {}'.format(vni, af, ip_type))
+                cmd_prefix = ['configure terminal',
+                              'router bgp {} vrf {}'.format(local_asn, vrf),
+                              'address-family {} {}'.format(af, ip_type),
+                              'vni {}'.format(vni)]
+                if not key_map.run_command(data, cmd_prefix, vni):
+                    syslog.syslog(syslog.LOG_ERR, 'failed running BGP L2VPN_EVPN VNI config command')
+                    continue
             elif table == 'ROUTE_MAP':
                 map_name = prefix
                 seq_no = key
@@ -1644,7 +1675,6 @@ class BGPConfigDaemon:
     def bgp_neighbor_af_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'filter_list_name', 'filter_list_direction'},
                                                          {'prefix_list_name', 'prefix_list_direction'}])
-
     def start(self):
         try:
             self.subscribe_all()

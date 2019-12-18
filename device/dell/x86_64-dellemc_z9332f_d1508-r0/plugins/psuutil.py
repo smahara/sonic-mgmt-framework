@@ -40,34 +40,6 @@ class PsuUtil(PsuBase):
         else:
             return False
 
-    # Fetch a BMC register
-    def get_pmc_register(self, reg_name):
-
-        status = 1
-        global ipmi_sdr_list
-        ipmi_dev_node = "/dev/pmi0"
-        ipmi_cmd_1 = IPMI_PSU1_DATA
-        ipmi_cmd_2 = IPMI_PSU1_DATA
-        dockerenv = self.isDockerEnv()
-        if dockerenv == True:
-           if index == 1:
-              status, ipmi_sdr_list = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
-           elif index == 2:
-              status, ipmi_sdr_list = commands.getstatusoutput(IPMI_PSU2_DATA_DOCKER)
-        else:
-           if index == 1:
-              status, ipmi_sdr_list = commands.getstatusoutput(IPMI_PSU1_DATA)
-           elif index == 2:
-              status, ipmi_sdr_list = commands.getstatusoutput(IPMI_PSU2_DATA)
-
-        if status:
-            logging.error('Failed to execute ipmitool')
-            sys.exit(0)
-
-        output = ipmi_sdr_list
-
-        return output
-
     def get_num_psus(self):
         """
         Retrieves the number of PSUs available on the device
@@ -85,9 +57,26 @@ class PsuUtil(PsuBase):
         faulty
         """
         # Until psu_status is implemented this is hardcoded temporarily
+        psu_status = 'f'
+        cmd_status = 0
+        global ipmi_sdr_list
+        ipmi_dev_node = "/dev/pmi0"
+        dockerenv = self.isDockerEnv()
+        if dockerenv == True:
+           if index == 1:
+              cmd_status, psu_status = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
+           elif index == 2:
+              cmd_status, psu_status = commands.getstatusoutput(IPMI_PSU2_DATA_DOCKER)
+        else:
+           if index == 1:
+              cmd_status, psu_status = commands.getstatusoutput(IPMI_PSU1_DATA)
+           elif index == 2:
+              cmd_status, psu_status = commands.getstatusoutput(IPMI_PSU2_DATA)
 
-        status = 1
-        return status
+        if cmd_status:
+            logging.error('Failed to execute ipmitool')
+
+        return (not int(psu_status, 16) > 1)
 
     def get_psu_presence(self, index):
         """
@@ -96,31 +85,24 @@ class PsuUtil(PsuBase):
         :param index: An integer, index of the PSU of which to query status
         :return: Boolean, True if PSU is plugged, False if not
         """
-        status = 0
-        ret_status = 1
+        psu_status = '0'
+        cmd_status = 0
         global ipmi_sdr_list
         ipmi_dev_node = "/dev/pmi0"
         dockerenv = self.isDockerEnv()
         if dockerenv == True:
            if index == 1:
-              status, ipmi_sdr_list = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
+              cmd_status, psu_status = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
            elif index == 2:
-              status, ipmi_sdr_list = commands.getstatusoutput(IPMI_PSU2_DATA_DOCKER)
+              cmd_status, psu_status = commands.getstatusoutput(IPMI_PSU2_DATA_DOCKER)
         else:
            if index == 1:
-              status, ipmi_sdr_list = commands.getstatusoutput(IPMI_PSU1_DATA)
+              cmd_status, psu_status = commands.getstatusoutput(IPMI_PSU1_DATA)
            elif index == 2:
-              ret_status, ipmi_sdr_list = commands.getstatusoutput(IPMI_PSU2_DATA)
+              cmd_status, psu_status = commands.getstatusoutput(IPMI_PSU2_DATA)
 
-        #if ret_status:
-         #   print ipmi_sdr_list
-         #   logging.error('Failed to execute ipmitool')
-         #   sys.exit(0)
+        if cmd_status:
+            logging.error('Failed to execute ipmitool')
 
-        psu_status = ipmi_sdr_list
-
-        if psu_status == '1':
-           status = 1
-
-        return status
+        return (int(psu_status, 16) & 1)
 

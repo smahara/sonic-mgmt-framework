@@ -38,7 +38,7 @@ dpkg_apt /debs/{{ deb }}
 # Install up-to-date version of pip
 # Install pyyaml dependency for use by some plugins
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3.6
-RUN python3.6 -m pip install --no-cache-dir hiredis pyyaml smbus
+RUN python3.6 -m pip install --no-cache-dir hiredis pyyaml smbus aioredis==1.3.0
 
 {% if docker_snmp_sv2_whls.strip() -%}
 # Copy locally-built Python wheel dependencies

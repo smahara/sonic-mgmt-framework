@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "PORT6": {
+    "QSFP": {
       "type": "object",
       "properties": {
         "dev_info": {
@@ -77,29 +77,16 @@
           "required": [
             "interface"
           ]
-        },
-        "bmc": {
-          "type": "object",
-          "properties": {
-            "attr_list": {
-              "type": "array",
-              "items": {}
-            }
-          },
-          "required": [
-            "attr_list"
-          ]
         }
       },
       "required": [
         "dev_info",
         "dev_attr",
-        "i2c",
-        "bmc"
+        "i2c"
       ]
     }
   },
   "required": [
-    "PORT6"
+    "QSFP"
   ]
 }

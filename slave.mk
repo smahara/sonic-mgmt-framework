@@ -115,6 +115,10 @@ ifneq ($(SONIC_COVERAGE_ON_PARAM),)
 SONIC_COVERAGE_ON = $(SONIC_COVERAGE_ON_PARAM)
 endif
 
+ifneq ($(SONIC_SANITIZER_ON_PARAM),)
+SONIC_SANITIZER_ON = $(SONIC_SANITIZER_ON_PARAM)
+endif
+
 ifeq ($(SONIC_ENABLE_SFLOW),y)
 ENABLE_SFLOW = y
 endif
@@ -165,6 +169,16 @@ export COV_CFLAGS := -O0 -coverage
 export COV_CFG_FLAGS := --enable-gcov=yes
 export COV_LDFLAGS := -lgcov
 export SONIC_COVERAGE_ON := y
+endif
+
+ifeq ($(SONIC_SANITIZER_ON),y)
+DEB_BUILD_OPTIONS_GENERIC := nostrip 
+export ac_cv_func_malloc_0_nonnull=yes
+export ac_cv_func_realloc_0_nonnull=yes
+export ASAN_CFLAGS := -g -O0 -fsanitize=address -fno-omit-frame-pointer  -g -ggdb -O0  -fsanitize-recover=address 
+export ASAN_LDFLAGS :=  -lasan
+export ASAN_OPTIONS=disable_core=0:detect_leaks=0:halt_on_error=0:abort_on_error=1
+export SONIC_SANITIZER_ON
 endif
 
 ifeq ($(SONIC_BUILD_JOBS),)
@@ -259,6 +273,7 @@ $(info "ENABLE_PDE"                      : "$(ENABLE_PDE)")
 $(info "SONIC_DEBUGGING_ON"              : "$(SONIC_DEBUGGING_ON)")
 $(info "SONIC_PROFILING_ON"              : "$(SONIC_PROFILING_ON)")
 $(info "SONIC_COVERAGE_ON"               : "$(SONIC_COVERAGE_ON)")
+$(info "SONIC_SANITIZER_ON"              : "$(SONIC_SANITIZER_ON)")
 $(info "KERNEL_PROCURE_METHOD"           : "$(KERNEL_PROCURE_METHOD)")
 ifeq ($(KERNEL_PROCURE_METHOD),cache)
 $(info "KERNEL_CACHE_PATH"               : "$(KERNEL_CACHE_PATH)")

@@ -130,23 +130,85 @@ for tray in range(1, Z9332F_MAX_FAN_TRAYS + 1):
         """
         status = 0
         ret_status = 1
+        ipmi_cmd_ret = '0'
 
         if index == 1:
-           status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
+           ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
         elif index == 2:
            ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU2_DATA_DOCKER)
 
-        #if ret_status:
-         #   print ipmi_cmd_ret
-         #   logging.error('Failed to execute ipmitool')
-         #   sys.exit(0)
+        if ret_status:
+            logging.error('Failed to execute ipmitool')
 
         psu_status = ipmi_cmd_ret
 
-        if psu_status == '1':
-           status = 1
+        return (int(psu_status, 16) & 1)
 
-        return status
+    def get_psu_status(index):
+        """
+        Retrieves the presence status of power supply unit (PSU) defined
+                by index <index>
+        :param index: An integer, index of the PSU of which to query status
+        :return: Boolean, True if PSU is plugged, False if not
+        """
+        status = 0
+        ret_status = 1
+        ipmi_cmd_ret = 'f'
+
+        if index == 1:
+           ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
+        elif index == 2:
+           ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU2_DATA_DOCKER)
+
+        if ret_status:
+            logging.error('Failed to execute ipmitool')
+
+        psu_status = ipmi_cmd_ret
+
+        return (not int(psu_status, 16) > 1)
+
+
+
+
+# Print the information for PSU1, PSU2
+def print_psu(psu):
+    Psu_Type = ['Normal', 'Mismatch']
+    Psu_Input_Type = ['AC', 'DC']
+    PSU_STATUS_TYPE_BIT = 4
+    PSU_STATUS_INPUT_TYPE_BIT = 1
+    PSU_FAN_PRESENT_BIT = 2
+    PSU_FAN_STATUS_BIT = 1
+    PSU_FAN_AIR_FLOW_BIT = 0
+    Psu_Fan_Presence = ['Present', 'Absent']
+    Psu_Fan_Status = ['Normal', 'Abnormal']
+    Psu_Fan_Airflow = ['B2F', 'F2B']
+
+    # print '    Input:          ', Psu_Input_Type[psu_input_type]
+    # print '    Type:           ', Psu_Type[psu_type]
+
+    print '    PSU{}:'.format(psu)
+    print '       Inlet Temperature:            ',\
+        get_pmc_register('PSU{}_Temp1'.format(psu))
+    print '       Hotspot Temperature:          ',\
+        get_pmc_register('PSU{}_Temp2'.format(psu))
+    print '       FAN RPM:                      ',\
+        get_pmc_register('PSU{}_Fan'.format(psu))
+    # print '    FAN Status:      ', Psu_Fan_Status[psu1_fan_status]
+
+    # PSU input & output monitors
+    print '       Input Voltage:                ',\
+        get_pmc_register('PSU{}_VIn'.format(psu))
+    print '       Output Voltage:               ',\
+        get_pmc_register('PSU{}_VOut'.format(psu))
+    print '       Input Power:                  ',\
+        get_pmc_register('PSU{}_PIn'.format(psu))
+    print '       Output Power:                 ',\
+        get_pmc_register('PSU{}_POut'.format(psu))
+    print '       Input Current:                ',\
+        get_pmc_register('PSU{}_CIn'.format(psu))
+    print '       Output Current:               ',\
+        get_pmc_register('PSU{}_COut'.format(psu))
+
 
 
 # Print the information for PSU1, PSU2
@@ -192,7 +254,9 @@ def print_psu(psu):
 print('\nPSUs:')
 for psu in range(1, Z9332F_MAX_PSUS + 1):
     #psu_presence = PSU_PRESENCE.format(psu)
-    if (get_psu_presence(psu)):
+    if not get_psu_presence(psu) :
+        print '\n    PSU{}: Not Present'.format(psu)
+    elif not get_psu_status(psu) :
+        print '\n    PSU{}: Not OK'.format(psu)
+    else :
         print_psu(psu)
-    else:
-        print '\n  PSU ', psu, 'Not present'

@@ -1,0 +1,3 @@
+# This series applies on GIT commit f2d1b4645c0ee28a696bed23fd0698eea2f11709
+0001-VRRP-IPv6-Global-Disable.patch
+0002-VRRP-VRF-support.patch

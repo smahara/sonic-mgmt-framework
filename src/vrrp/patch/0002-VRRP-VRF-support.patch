@@ -1,0 +1,462 @@
+VRRP VRF support
+
+From: Vijay Kumar Vasantha <vijay.vasantha@broadcom.com>
+
+
+---
+ keepalived/core/keepalived_netlink.c |   93 ++++++++++++++++++++++++++++++++++
+ keepalived/include/vrrp.h            |    2 -
+ keepalived/include/vrrp_data.h       |    1 
+ keepalived/include/vrrp_if.h         |    7 ++-
+ keepalived/include/vrrp_vmac.h       |    1 
+ keepalived/vrrp/vrrp.c               |   28 +++++++++-
+ keepalived/vrrp/vrrp_if.c            |   23 ++++++++
+ keepalived/vrrp/vrrp_scheduler.c     |    4 +
+ keepalived/vrrp/vrrp_vmac.c          |   80 +++++++++++++++++++++++++++++
+ lib/list.h                           |    1 
+ 10 files changed, 231 insertions(+), 9 deletions(-)
+
+diff --git a/keepalived/core/keepalived_netlink.c b/keepalived/core/keepalived_netlink.c
+index ad0befb..5f15312 100644
+--- a/keepalived/core/keepalived_netlink.c
++++ b/keepalived/core/keepalived_netlink.c
+@@ -58,6 +58,9 @@
+ #include "old_socket.h"
+ #endif
+ 
++extern uint32_t g_input_index;
++extern uint32_t g_output_index;
++
+ /* Default values */
+ #define IF_DEFAULT_BUFSIZE	(65*1024)
+ 
+@@ -993,6 +996,72 @@ end_int:
+ }
+ #endif
+ 
++
++static int
++netlink_if_link_master_filter(__attribute__((unused)) struct sockaddr_nl *snl, struct nlmsghdr *h)
++{
++	struct ifinfomsg *ifi;
++	struct rtattr *tb[IFLA_MAX + 1];
++	interface_t *ifp;
++	size_t len;
++	int status;
++	char *name;
++
++	ifi = NLMSG_DATA(h);
++
++	if (h->nlmsg_type != RTM_NEWLINK)
++		return 0;
++
++	if (h->nlmsg_len < NLMSG_LENGTH(sizeof (struct ifinfomsg)))
++		return -1;
++	len = h->nlmsg_len - NLMSG_LENGTH(sizeof (struct ifinfomsg));
++
++	/* Interface name lookup */
++	memset(tb, 0, sizeof (tb));
++	parse_rtattr(tb, IFLA_MAX, IFLA_RTA(ifi), len);
++	if (tb[IFLA_IFNAME] == NULL)
++		return -1;
++	name = (char *) RTA_DATA(tb[IFLA_IFNAME]);
++
++	/* Skip it if already exist */
++	ifp = if_get_by_ifname(name);
++	if (!ifp) {
++		return 0;
++	}
++
++	if (g_input_index == ifi->ifi_index) {
++		if (tb[IFLA_MASTER])
++			g_output_index = *(uint32_t*)RTA_DATA(tb[IFLA_MASTER]);
++		else
++			g_output_index = 0;
++	}
++
++	return 0;
++}
++
++
++int
++netlink_interface_master_lookup(void)
++{
++	nl_handle_t nlh;
++	int status = 0;
++
++	if (netlink_socket(&nlh, 0, 0) < 0)
++		return -1;
++
++	/* Interface lookup */
++	if (netlink_request(&nlh, AF_PACKET, RTM_GETLINK) < 0) {
++		status = -1;
++		goto end_int;
++	}
++	status = netlink_parse_info(netlink_if_link_master_filter, &nlh, NULL);
++
++end_int:
++	netlink_close(&nlh);
++	return status;
++}
++
++
+ /* Addresses lookup bootstrap function */
+ static int
+ netlink_address_lookup(void)
+@@ -1032,6 +1101,9 @@ netlink_reflect_filter(__attribute__((unused)) struct sockaddr_nl *snl, struct n
+ 	interface_t *ifp;
+ 	size_t len;
+ 	int status;
++	char *name;
++	uint32_t new_master_index;
++	interface_t *new_master_ifp;	
+ 
+ 	ifi = NLMSG_DATA(h);
+ 	if (!(h->nlmsg_type == RTM_NEWLINK || h->nlmsg_type == RTM_DELLINK))
+@@ -1047,6 +1119,8 @@ netlink_reflect_filter(__attribute__((unused)) struct sockaddr_nl *snl, struct n
+ 	if (tb[IFLA_IFNAME] == NULL)
+ 		return -1;
+ 
++	name = (char *)RTA_DATA(tb[IFLA_IFNAME]);	
++
+ 	/* find the interface_t. If the interface doesn't exist in the interface
+ 	 * list and this is a new interface add it to the interface list.
+ 	 * If an interface with the same name exists overwrite the older
+@@ -1073,6 +1147,25 @@ netlink_reflect_filter(__attribute__((unused)) struct sockaddr_nl *snl, struct n
+ 			return 0;
+ 		}
+ 	}
++	else {
++		if (strcmp(ifp->ifname, name)) {
++		}
++		else if (ifp->ifindex) {
++			/* Now check if the VRF info is changed */
++			if (tb[IFLA_MASTER]) {
++				new_master_index = *(uint32_t *)RTA_DATA(tb[IFLA_MASTER]);
++				new_master_ifp = if_get_by_ifindex(new_master_index);
++			} else
++				new_master_ifp = NULL;
++			if (new_master_ifp != ifp->vrf_master_ifp) {
++				ifp->vrf_master_ifp = new_master_ifp;
++				update_vmac_vrfs(ifp);
++			}
++		}
++		else {
++		}
++
++	}
+ 
+ 	/*
+ 	 * Update flags.
+diff --git a/keepalived/include/vrrp.h b/keepalived/include/vrrp.h
+index 971bf5f..5807918 100644
+--- a/keepalived/include/vrrp.h
++++ b/keepalived/include/vrrp.h
+@@ -337,7 +337,7 @@ extern bool block_ipv6;
+ /* prototypes */
+ extern vrrphdr_t *vrrp_get_header(sa_family_t, char *, unsigned *);
+ extern int open_vrrp_send_socket(sa_family_t, int, ifindex_t, bool);
+-extern int open_vrrp_read_socket(sa_family_t, int, ifindex_t, bool);
++extern int open_vrrp_read_socket(sa_family_t, int, ifindex_t, ifindex_t, bool);
+ extern int new_vrrp_socket(vrrp_t *);
+ extern void vrrp_send_link_update(vrrp_t *, unsigned);
+ extern int vrrp_send_adv(vrrp_t *, uint8_t);
+diff --git a/keepalived/include/vrrp_data.h b/keepalived/include/vrrp_data.h
+index 8ffe2cb..7ff6b1b 100644
+--- a/keepalived/include/vrrp_data.h
++++ b/keepalived/include/vrrp_data.h
+@@ -47,6 +47,7 @@ typedef struct _sock {
+ 	struct sockaddr_storage	saddr;
+ 	int			proto;
+ 	ifindex_t		ifindex;
++	ifindex_t       master_ifindex;
+ 	bool			unicast;
+ 	int			fd_in;
+ 	int			fd_out;
+diff --git a/keepalived/include/vrrp_if.h b/keepalived/include/vrrp_if.h
+index 695f215..fc2c6ab 100644
+--- a/keepalived/include/vrrp_if.h
++++ b/keepalived/include/vrrp_if.h
+@@ -87,6 +87,11 @@ typedef struct _interface {
+ 	bool			vmac;			/* Set if interface is a VMAC interface */
+ 	ifindex_t		base_ifindex;		/* Base interface index (if interface is a VMAC interface),
+ 							   otherwise the physical interface (i.e. ifindex) */
++
++	struct _interface   *base_ifp;	   /* Base interface (if interface is a VMAC interface), */
++							   	
++	ifindex_t		vrf_master_ifindex;	/* Only used at startup if we find i/f before master i/f */
++	struct _interface	*vrf_master_ifp;	/* VRF master interface - pointer to self if VRF master */
+ #endif
+ 	garp_delay_t		*garp_delay;		/* Delays for sending gratuitous ARP/NA */
+ 	bool			gna_router;		/* Router flag for NA messages */
+@@ -151,7 +156,7 @@ extern void init_interface_queue(void);
+ extern void init_interface_linkbeat(void);
+ extern void free_interface_queue(void);
+ extern void free_old_interface_queue(void);
+-extern int if_join_vrrp_group(sa_family_t, int *, interface_t *);
++extern int if_join_vrrp_group(sa_family_t, int *, interface_t *, ifindex_t);
+ extern int if_leave_vrrp_group(sa_family_t, int, interface_t *);
+ extern int if_setsockopt_bindtodevice(int *, interface_t *);
+ extern int if_setsockopt_hdrincl(int *);
+diff --git a/keepalived/include/vrrp_vmac.h b/keepalived/include/vrrp_vmac.h
+index 90fe380..2e9bc49 100644
+--- a/keepalived/include/vrrp_vmac.h
++++ b/keepalived/include/vrrp_vmac.h
+@@ -48,5 +48,6 @@ extern u_char ll_addr[ETH_ALEN];
+ /* prototypes */
+ extern int netlink_link_add_vmac(vrrp_t *);
+ extern int netlink_link_del_vmac(vrrp_t *);
++extern void update_vmac_vrfs(interface_t *);
+ 
+ #endif
+diff --git a/keepalived/vrrp/vrrp.c b/keepalived/vrrp/vrrp.c
+index fc909b7..a7fcd46 100644
+--- a/keepalived/vrrp/vrrp.c
++++ b/keepalived/vrrp/vrrp.c
+@@ -76,6 +76,10 @@
+ bool block_ipv4;
+ bool block_ipv6;
+ 
++uint32_t g_input_index;
++uint32_t g_output_index;
++
++
+ /* add/remove Virtual IP addresses */
+ static bool
+ vrrp_handle_ipaddress(vrrp_t * vrrp, int cmd, int type)
+@@ -1858,7 +1862,7 @@ open_vrrp_send_socket(sa_family_t family, int proto, ifindex_t idx, bool unicast
+ 
+ /* open a VRRP socket and join the multicast group. */
+ int
+-open_vrrp_read_socket(sa_family_t family, int proto, ifindex_t idx, bool unicast)
++open_vrrp_read_socket(sa_family_t family, int proto, ifindex_t idx, ifindex_t master_idx, bool unicast)
+ {
+ 	interface_t *ifp;
+ 	int fd = -1;
+@@ -1881,9 +1885,18 @@ open_vrrp_read_socket(sa_family_t family, int proto, ifindex_t idx, bool unicast
+ 	if (family == AF_INET)
+ 		if_setsockopt_mcast_all(family, &fd);
+ 
++	g_input_index = idx;
++	g_output_index = 0;
++
++	(void)netlink_interface_master_lookup();
++
++	master_idx = g_output_index;
++
++	g_output_index = 0;
++
+ 	if (!unicast) {
+ 		/* Join the VRRP multicast group */
+-		if_join_vrrp_group(family, &fd, ifp);
++		if_join_vrrp_group(family, &fd, ifp, master_idx);
+ 	}
+ 
+ 	/* Need to bind read socket so only process packets for interface we're
+@@ -1892,7 +1905,11 @@ open_vrrp_read_socket(sa_family_t family, int proto, ifindex_t idx, bool unicast
+ 	 * This is applicable for both unicast and multicast operation as well as
+ 	 * IPv4 and IPv6.
+ 	 */
+-	if_setsockopt_bindtodevice(&fd, ifp);
++
++	if (master_idx == 0) 
++	{
++		if_setsockopt_bindtodevice(&fd, ifp);
++	}
+ 
+ 	if (fd < 0)
+ 		return -1;
+@@ -1939,7 +1956,10 @@ new_vrrp_socket(vrrp_t * vrrp)
+ #endif
+ 									    IF_INDEX(vrrp->ifp);
+ 	unicast = !LIST_ISEMPTY(vrrp->unicast_peer);
+-	vrrp->fd_in = open_vrrp_read_socket(vrrp->family, proto, ifindex, unicast);
++
++	vrrp->fd_in = open_vrrp_read_socket(vrrp->family, proto, ifindex, 0, unicast);
++
++	
+ 	vrrp->fd_out = open_vrrp_send_socket(vrrp->family, proto, ifindex, unicast);
+ 	alloc_vrrp_fd_bucket(vrrp);
+ 
+diff --git a/keepalived/vrrp/vrrp_if.c b/keepalived/vrrp/vrrp_if.c
+index 95a7111..40bc92a 100644
+--- a/keepalived/vrrp/vrrp_if.c
++++ b/keepalived/vrrp/vrrp_if.c
+@@ -556,11 +556,12 @@ init_interface_linkbeat(void)
+ }
+ 
+ int
+-if_join_vrrp_group(sa_family_t family, int *sd, interface_t *ifp)
++if_join_vrrp_group(sa_family_t family, int *sd, interface_t *ifp, ifindex_t master_ifindex)
+ {
+ 	struct ip_mreqn imr;
+ 	struct ipv6_mreq imr6;
+ 	int ret = 0;
++	int ret1 = 0;
+ 
+ 	if (*sd < 0)
+ 		return -1;
+@@ -581,15 +582,33 @@ if_join_vrrp_group(sa_family_t family, int *sd, interface_t *ifp)
+ 		 */
+ 		ret = setsockopt(*sd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+ 				 (char *) &imr, (socklen_t)sizeof(struct ip_mreqn));
++
++
++		if (master_ifindex)
++		{
++			imr.imr_ifindex = master_ifindex;
++
++			ret1 = setsockopt(*sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, 
++					 (char *) &imr, (socklen_t)sizeof(struct ip_mreqn));
++		}
++		
+ 	} else {
+ 		memset(&imr6, 0, sizeof(imr6));
+ 		imr6.ipv6mr_multiaddr = ((struct sockaddr_in6 *) &global_data->vrrp_mcast_group6)->sin6_addr;
+ 		imr6.ipv6mr_interface = IF_INDEX(ifp);
+ 		ret = setsockopt(*sd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP,
+ 				 (char *) &imr6, (socklen_t)sizeof(struct ipv6_mreq));
++
++		if (master_ifindex)
++		{
++			imr6.ipv6mr_interface = master_ifindex;
++
++			ret1 = setsockopt(*sd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, 
++					 (char *) &imr6, (socklen_t)sizeof(struct ipv6_mreq));
++		}		
+ 	}
+ 
+-	if (ret < 0) {
++	if (ret < 0 || ret1 < 0) {
+ 		log_message(LOG_INFO, "(%s): cant do IP%s_ADD_MEMBERSHIP errno=%s (%d)",
+ 			    ifp->ifname, (family == AF_INET) ? "" : "V6", strerror(errno), errno);
+ 		close(*sd);
+diff --git a/keepalived/vrrp/vrrp_scheduler.c b/keepalived/vrrp/vrrp_scheduler.c
+index 50b1cae..1994ecf 100644
+--- a/keepalived/vrrp/vrrp_scheduler.c
++++ b/keepalived/vrrp/vrrp_scheduler.c
+@@ -533,6 +533,8 @@ vrrp_create_sockpool(list l)
+ 	}
+ }
+ 
++
++
+ static void
+ vrrp_open_sockpool(list l)
+ {
+@@ -542,7 +544,7 @@ vrrp_open_sockpool(list l)
+ 	for (e = LIST_HEAD(l); e; ELEMENT_NEXT(e)) {
+ 		sock = ELEMENT_DATA(e);
+ 		sock->fd_in = open_vrrp_read_socket(sock->family, sock->proto,
+-					       sock->ifindex, sock->unicast);
++					       sock->ifindex, sock->master_ifindex, sock->unicast);
+ 		if (sock->fd_in == -1)
+ 			sock->fd_out = -1;
+ 		else
+diff --git a/keepalived/vrrp/vrrp_vmac.c b/keepalived/vrrp/vrrp_vmac.c
+index c6d1887..4df61d8 100644
+--- a/keepalived/vrrp/vrrp_vmac.c
++++ b/keepalived/vrrp/vrrp_vmac.c
+@@ -178,6 +178,9 @@ netlink_link_add_vmac(vrrp_t *vrrp)
+ 		addattr_l(&req.n, sizeof(req), IFLA_IFNAME, ifname, strlen(ifname));
+ 		addattr_l(&req.n, sizeof(req), IFLA_ADDRESS, ll_addr, ETH_ALEN);
+ 
++		if (vrrp->ifp && vrrp->ifp->vrf_master_ifp)
++			addattr32(&req.n, sizeof(req), IFLA_MASTER, IF_INDEX(vrrp->ifp->vrf_master_ifp));
++
+ 		if (netlink_talk(&nl_cmd, &req.n) < 0) {
+ 			log_message(LOG_INFO, "vmac: Error creating VMAC interface %s for vrrp_instance %s!!!"
+ 					    , ifname, vrrp->iname);
+@@ -347,3 +350,80 @@ netlink_link_del_vmac(vrrp_t *vrrp)
+ 
+ 	return status;
+ }
++static void
++netlink_update_vrf(vrrp_t *vrrp)
++{
++	int ifindex = 0;
++	struct {
++		struct nlmsghdr n;
++		struct ifinfomsg ifi;
++		char buf[256];
++	} req;
++
++	if (!vrrp->ifp)
++		return;
++
++
++	/* Don't update the VMAC if it isn't an interface we created */
++	if (!vrrp->ifp->vmac) {
++		log_message(LOG_INFO, "BUG - Attempt to update VRF on VMAC interface %s which we didn't create", vrrp->ifp->ifname);
++		return;
++	}
++
++	memset(&req, 0, sizeof (req));
++
++	req.n.nlmsg_len = NLMSG_LENGTH(sizeof (struct ifinfomsg));
++	req.n.nlmsg_flags = NLM_F_REQUEST;
++	req.n.nlmsg_type = RTM_NEWLINK;
++	req.ifi.ifi_family = AF_INET;
++	req.ifi.ifi_index = (int)vrrp->ifp->ifindex;
++
++	if (vrrp->ifp->vrf_master_ifp)
++		ifindex = vrrp->ifp->vrf_master_ifp->ifindex;
++
++	addattr32(&req.n, sizeof(req), IFLA_MASTER, ifindex);
++
++	if (netlink_talk(&nl_cmd, &req.n) < 0) {
++		log_message(LOG_INFO, "vmac: Error changing VRF of VMAC interface %s for vrrp_instance %s!!!", vrrp->ifp->ifname, vrrp->iname);
++		return;
++	}
++
++	log_message(LOG_INFO, "vmac: Success changing VRF of VMAC interface %s for vrrp_instance %s", vrrp->ifp->ifname, vrrp->iname);
++
++	kernel_netlink_poll();
++
++	return;
++}
++
++
++void
++update_vmac_vrfs(interface_t *ifp)
++{
++	vrrp_t *vrrp;
++    element e;
++
++	if (!vrrp_data)
++		return;
++
++	if (LIST_ISEMPTY(vrrp_data->vrrp))
++		return;	
++
++    LIST_FOREACH(vrrp_data->vrrp, vrrp, e) {
++
++    /* We only need to look for vmacs we created that
++	 * are configured on the interface which has changed
++	 * VRF */
++
++	if (!vrrp->ifp->vmac)
++		continue;
++
++	if (vrrp->ifp->base_ifindex != ifp->ifindex)
++		continue;
++
++	vrrp->ifp->vrf_master_ifp = ifp->vrf_master_ifp;
++
++	if (vrrp->ifp->ifindex)
++		netlink_update_vrf(vrrp);
++	}
++}
++
+diff --git a/lib/list.h b/lib/list.h
+index d5299b1..1efb4b6 100644
+--- a/lib/list.h
++++ b/lib/list.h
+@@ -51,6 +51,7 @@ struct _list {
+ #define LIST_ISEMPTY(L)		((L) == NULL || ((L)->head == NULL && (L)->tail == NULL))
+ #define LIST_EXISTS(L)		((L) != NULL)
+ #define LIST_SIZE(V)		((V)->count)
++#define LIST_FOREACH(L,V,E)	for ((E) = ((L) ? LIST_HEAD(L) : NULL); (E) && ((V) = ELEMENT_DATA(E), 1); ELEMENT_NEXT(E))
+ 
+ /* Prototypes */
+ extern list alloc_list(void (*free_func) (void *), void (*dump_func) (void *));

@@ -148,6 +148,20 @@ static struct command_type command_types[] =
         .enca_msg = mclagdctl_enca_dump_dbg_counters,
         .parse_msg = mclagdctl_parse_dump_dbg_counters,
     },
+    {
+        .id = ID_CMDTYPE_C,
+        .name = "config",
+        .enca_msg = NULL,
+        .parse_msg = NULL,
+    },
+    {
+        .id = ID_CMDTYPE_C_L,
+        .parent_id = ID_CMDTYPE_C,
+        .info_type = INFO_TYPE_CONFIG_LOGLEVEL,
+        .name = "loglevel",
+        .enca_msg = mclagdctl_enca_config_loglevel,
+        .parse_msg = mclagdctl_parse_config_loglevel,
+    },    
 };
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
@@ -309,6 +323,7 @@ int mclagdctl_parse_dump_state(char *msg, int data_len)
 
         fprintf(stdout, "%s: %s\n", "MCLAG Interface", state_info->enabled_po);
 
+        fprintf(stdout, "%s: %s\n", "Loglevel", state_info->loglevel);
     }
 
     return 0;
@@ -604,9 +619,9 @@ int mclagdctl_parse_dump_local_portlist(char *msg, int data_len)
             fprintf(stdout, "%s: %s\n", "IsL3Interface", lif_info->l3_mode ? "Yes" : "No");
             /*fprintf(stdout, "%s: %s\n", "IsPeerlink", lif_info->is_peer_link ? "Yes" : "No");*/
             fprintf(stdout, "%s: %s\n", "MemberPorts", lif_info->portchannel_member_buf);
-            /*fprintf(stdout,"%s: %d\n" ,"PortchannelId", lif_info->po_id);
-               fprintf(stdout,"%s: %d\n" ,"PortchannelIsUp", lif_info->po_active);
-               fprintf(stdout,"%s: %s\n", "MlacpState", lif_info->mlacp_state);*/
+            /*fprintf(stdout,"%s: %d\n" ,"PortchannelId", lif_info->po_id);*/
+            fprintf(stdout,"%s: %d\n" ,"PortchannelIsUp", lif_info->po_active);
+            /*fprintf(stdout,"%s: %s\n", "MlacpState", lif_info->mlacp_state);*/
             fprintf(stdout, "%s: %s\n", "IsIsolateWithPeerlink", lif_info->isolate_to_peer_link ? "Yes" : "No");
             fprintf(stdout,"%s: %s\n" ,"IsTrafficDisable", lif_info->is_traffic_disable ? "Yes":"No");
             fprintf(stdout, "%s: %s\n", "VlanList", lif_info->vlanlist);
@@ -918,6 +933,31 @@ int mclagdctl_parse_dump_dbg_counters(char *msg, int data_len)
     return 0;
 }
 
+int mclagdctl_enca_config_loglevel(char *msg, int log_level,  int argc, char **argv)
+{
+    struct mclagdctl_req_hdr req;
+
+    memset(&req, 0, sizeof(struct mclagdctl_req_hdr));
+    req.info_type = INFO_TYPE_CONFIG_LOGLEVEL;
+    req.mclag_id = log_level;
+    memcpy((struct mclagdctl_req_hdr *)msg, &req, sizeof(struct mclagdctl_req_hdr));
+
+    return 1;
+}
+
+int mclagdctl_parse_config_loglevel(char *msg, int data_len)
+{
+
+    int ret = *(int*)msg;
+
+    if (ret == 0)
+        fprintf(stdout, "%s\n", "Config loglevel success!");
+    else
+        fprintf(stdout, "%s\n", "Config loglevel failed!");
+
+    return 0;
+}
+
 static bool __mclagdctl_cmd_executable(struct command_type *cmd_type)
 {
     if (!cmd_type->enca_msg || !cmd_type->parse_msg)
@@ -1034,7 +1074,8 @@ static void mclagdctl_print_help(const char *argv0)
 
     fprintf(stdout, "%s [options] command [command args]\n"
             "    -h --help                Show this help\n"
-            "    -i --mclag-id             Specify one mclag id\n",
+            "    -i --mclag-id            Specify one mclag id\n"
+            "    -l --level               Specify log level     critical,err,warn,notice,info,debug\n",
             argv0);
     fprintf(stdout, "Commands:\n");
 
@@ -1060,20 +1101,22 @@ int main(int argc, char **argv)
     char *rcv_buf = NULL;
     static const struct option long_options[] =
     {
-        { "help",     no_argument,             NULL,        'h' },
-        { "mclag id", required_argument,       NULL,        'i' },
-        { NULL,       0,                       NULL,        0   }
+        { "help",      no_argument,             NULL,        'h' },
+        { "mclag id",  required_argument,       NULL,        'i' },
+        { "log level", required_argument,       NULL,        'l' },
+        { NULL,        0,                       NULL,        0   }
     };
     int opt;
     int err;
     struct command_type *cmd_type;
     int ret;
-    unsigned mclag_id = 0;
+    unsigned para_int = 0;
+
     int len = 0;
     char *data;
     struct mclagd_reply_hdr *reply;
 
-    while ((opt = getopt_long(argc, argv, "hi:", long_options, NULL)) >= 0)
+    while ((opt = getopt_long(argc, argv, "hi:l:", long_options, NULL)) >= 0)
     {
         switch (opt)
         {
@@ -1081,9 +1124,43 @@ int main(int argc, char **argv)
                 mclagdctl_print_help(argv0);
                 return EXIT_SUCCESS;
 
-            case 'i':
-                mclag_id = atoi(optarg);
-                break;
+        case 'i':
+            para_int = atoi(optarg);
+            break;
+
+        case 'l':
+            switch (tolower(optarg[0]))
+            {
+                case 'c':
+                    para_int = CRITICAL;
+                    break;
+
+                case 'e':
+                    para_int = ERR;
+                    break;
+
+                case 'w':
+                    para_int = WARN;
+                    break;
+
+                case 'n':
+                    para_int = NOTICE;
+                    break;
+
+                case 'i':
+                    para_int = INFO;
+                    break;
+
+                case 'd':
+                    para_int = DEBUG;
+                    break;
+
+                default:
+                    fprintf(stderr, "unknown option \"%c\".\n", opt);
+                    mclagdctl_print_help(argv0);
+                    return EXIT_FAILURE;
+            }
+            break;
 
             case '?':
                 fprintf(stderr, "unknown option.\n");
@@ -1121,7 +1198,7 @@ int main(int argc, char **argv)
             return EXIT_FAILURE;
     }
 
-    if (cmd_type->enca_msg(buf, mclag_id, argc, argv) < 0)
+    if (cmd_type->enca_msg(buf, para_int, argc, argv) < 0)
     {
         ret = EXIT_FAILURE;
         goto mclagdctl_disconnect;
@@ -1188,7 +1265,7 @@ int main(int argc, char **argv)
 
     if (reply->exec_result == EXEC_TYPE_NO_EXIST_MCLAGID)
     {
-        fprintf(stderr, "Mclag-id %d hasn't been configured in iccpd!\n", mclag_id);
+        fprintf(stderr, "Mclag-id %d hasn't been configured in iccpd!\n", para_int);
         ret = EXIT_FAILURE;
         goto mclagdctl_disconnect;
     }

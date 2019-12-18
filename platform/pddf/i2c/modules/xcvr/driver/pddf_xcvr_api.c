@@ -589,7 +589,7 @@ ssize_t get_module_lpmode(struct device *dev, struct device_attribute *da, char 
             if (status!=0)
                 printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
         }
-
+        mutex_unlock(&data->update_lock);
         return sprintf(buf, "%d\n", data->lpmode);
     }
     else
@@ -685,6 +685,7 @@ ssize_t get_module_rxlos(struct device *dev, struct device_attribute *da,
             if (status!=0)
                 printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
         }
+        mutex_unlock(&data->update_lock);
         return sprintf(buf, "%d\n", data->rxlos);
     }
     else
@@ -712,11 +713,11 @@ ssize_t get_module_txdisable(struct device *dev, struct device_attribute *da,
 
         mutex_lock(&data->update_lock);
         if (attr_ops->pre_get != NULL)
-    {
+        {
             status = (attr_ops->pre_get)(client, attr_data, data);
             if (status!=0)
                 printk(KERN_ERR "%s: pre_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
-    }
+        }
         if (attr_ops->do_get != NULL)
         {
             status = (attr_ops->do_get)(client, attr_data, data);
@@ -730,6 +731,7 @@ ssize_t get_module_txdisable(struct device *dev, struct device_attribute *da,
             if (status!=0)
                 printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
         }
+        mutex_unlock(&data->update_lock);
         return sprintf(buf, "%d\n", data->txdisable);
     }
     else
@@ -825,6 +827,7 @@ ssize_t get_module_txfault(struct device *dev, struct device_attribute *da,
             if (status!=0)
                 printk(KERN_ERR "%s: post_get function fails for %s attribute\n", __FUNCTION__, attr_data->aname);
         }
+        mutex_unlock(&data->update_lock);
         return sprintf(buf, "%d\n", data->txfault);
     }
     return sprintf(buf,"%s","");

@@ -11,3 +11,5 @@ supervisorctl start tsmgrd
 supervisorctl start dropmgrd
 
 supervisorctl start ifamgrd
+
+supervisorctl start snapshotmgr

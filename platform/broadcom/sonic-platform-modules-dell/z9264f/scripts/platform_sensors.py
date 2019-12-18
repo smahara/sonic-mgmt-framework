@@ -49,6 +49,7 @@ def ipmi_sensor_dump():
 
 def get_pmc_register(reg_name):
 
+    output = ""
     for item in ipmi_sdr_list.split("\n"):
         if reg_name in item:
             output = item.strip()
@@ -85,9 +86,9 @@ def print_temperature_sensors():
     print '  CPU Near Temp:                  ',\
         (get_pmc_register('CPU_temp'))
     print '  PSU FAN AirFlow Temperature 1:  ',\
-        (get_pmc_register('PSU1AF_temp'))
+        (get_pmc_register('PSU1_AF_temp'))
     print '  PSU FAN AirFlow Temperature 2:  ',\
-        (get_pmc_register('PSU2AF_temp'))
+        (get_pmc_register('PSU2_AF_temp'))
 
 ipmi_sensor_dump()
 
@@ -210,23 +211,39 @@ for tray in range(1, Z9264F_MAX_FAN_TRAYS + 1):
         """
         status = 0
         ret_status = 1
+	ipmi_cmd_ret = '0'
 
         if index == 1:
-           status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
+           ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
         elif index == 2:
            ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU2_DATA_DOCKER)
 
-        #if ret_status:
-         #   print ipmi_cmd_ret
-         #   logging.error('Failed to execute ipmitool')
-         #   sys.exit(0)
+        psu_status = ipmi_cmd_ret
+
+        return (int(psu_status, 16)& 1)
+
+    def get_psu_status(index):
+        """
+        Retrieves the presence status of power supply unit (PSU) defined
+                by index <index>
+        :param index: An integer, index of the PSU of which to query status
+        :return: Boolean, True if PSU is plugged, False if not
+        """
+        status = 0
+        ret_status = 1
+        ipmi_cmd_ret = 'f'
+
+        if index == 1:
+           ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU1_DATA_DOCKER)
+        elif index == 2:
+           ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_PSU2_DATA_DOCKER)
+
+        if ret_status:
+            logging.error('Failed to execute ipmitool')
 
         psu_status = ipmi_cmd_ret
 
-        if psu_status == '1':
-           status = 1
-
-        return status
+        return (not int(psu_status, 16) > 1)
 
 
 # Print the information for PSU1, PSU2
@@ -236,12 +253,8 @@ def print_psu(psu):
     if (psu == 1):
 
         print '    PSU1:'
-        print '       FAN Normal Temperature:       ',\
-            get_pmc_register('PSU1_Normal_temp')
-        print '       Chassis Temperature:          ',\
-            get_pmc_register('PSU1_Chass_temp')
-        print '       System  Temperature:          ',\
-            get_pmc_register('PSU1_Sys_temp')
+        print '       FAN Temperature:              ',\
+            get_pmc_register('PSU1_temp')
         print '       FAN RPM:                      ',\
             get_pmc_register('PSU1_rpm')
         print '       Input Voltage:                ',\
@@ -260,12 +273,8 @@ def print_psu(psu):
     else:
 
         print '    PSU2:'
-        print '       FAN Normal Temperature:       ',\
-            get_pmc_register('PSU2_Normal_temp')
-        print '       Chassis Temperature:          ',\
-            get_pmc_register('PSU2_Chass_temp')
-        print '       System  Temperature:          ',\
-            get_pmc_register('PSU2_Sys_temp')
+        print '       FAN Temperature:              ',\
+            get_pmc_register('PSU2_temp')
         print '       FAN RPM:                      ',\
             get_pmc_register('PSU2_rpm')
         print '       Input Voltage:                ',\
@@ -284,11 +293,12 @@ def print_psu(psu):
 
 print('\nPSUs:')
 for psu in range(1, Z9264F_MAX_PSUS + 1):
-    #psu_presence = PSU_PRESENCE.format(psu)
-    if (get_psu_presence(psu)):
-        print_psu(psu)
+    if not get_psu_presence(psu):
+        print '\n    PSU{}: Not present'.format(psu)
+    elif not get_psu_status(psu):
+	print '\n    PSU{}: Not OK'.format(psu)
     else:
-        print '\n  PSU ', psu, 'Not present'
+        print_psu(psu)
 
-print '\n    Total Power:                     ',\
+print '    Total Power:                     ',\
     get_pmc_register('PSU_Total_watt')
