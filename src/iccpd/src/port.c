@@ -325,8 +325,13 @@ void local_if_destroy(char *ifname)
     {
         /*if the peerlink interface is not created, peer connection can not establish*/
         scheduler_session_disconnect_handler(csm);
+
+        // The function above calls iccp_csm_status_reset, which sets csm->Peer_link_if to NULL,
+        // accessing the peer_link_if cause crash due to null pointer access.
+#if 0
         csm->peer_link_if->is_peer_link = 0;
         csm->peer_link_if = NULL;
+#endif
     }
 
     if (csm && MLACP(csm).current_state == MLACP_STATE_EXCHANGE)
