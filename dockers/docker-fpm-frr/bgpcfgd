@@ -403,24 +403,6 @@ def hdl_send_com(cmd_str, op, args, data):
         cmd_list.append(cmd_str.format(CommandArgument(True, args[0]), CommandArgument(True, 'extended'), no = CommandArgument(True)))
     return cmd_list
 
-def hdl_ibgp_maxpath(daemon, cmd_str, op, args, data):
-    if len(args) == 0 or 0 not in args[0]:
-        return None
-    cmd_list = [cmd_str.format(CommandArgument(daemon, True, ''), no = CommandArgument(daemon, False))]
-    if op != CachedDataWithOp.OP_DELETE or not args[0][0][1]:
-        if op == CachedDataWithOp.OP_DELETE:
-            cluster_len = False
-        else:
-            if 1 not in args[0] or args[0][1][0] == data[1]:
-                cluster_len = False
-            else:
-                cluster_len = True
-        arg_str = ' ' + args[0][0][0]
-        if cluster_len:
-            arg_str += ' equal-cluster-length'
-        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, arg_str), no = CommandArgument(daemon, True)))
-    return cmd_list
-
 class ExtConfigDBConnector(ConfigDBConnector):
     def __raw_to_typed(self, raw_data):
         if len(raw_data) == 0:
