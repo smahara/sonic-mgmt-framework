@@ -10,11 +10,11 @@
 !
 agentx
 !
+{% if DEVICE_METADATA['localhost'].has_key('bgp_asn') %}
 {% if DEVICE_METADATA['localhost']['type'] == "SpineChassisFrontendRouter" %}
 {%  include "bgpd.conf.spine_chassis_frontend_router.j2" %}
 {% endif %}
 !
-{% if DEVICE_METADATA['localhost'].has_key('bgp_asn') %}
 {% include "bgpd.conf.default.j2" %}
 {% else %}
 {% include "bgpd.conf.db.j2" %}
