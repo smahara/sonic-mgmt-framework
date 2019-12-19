@@ -3,3 +3,4 @@ staticd
 bgpd
 fpmsyncd
 rsyslogd
+pimd
