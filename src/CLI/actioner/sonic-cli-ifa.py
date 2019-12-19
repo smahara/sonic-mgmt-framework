@@ -135,6 +135,10 @@ def get_tam_ifa_flow_stats(args):
     api_response = {}
     api = cc.ApiClient()
 
+    # connect to COUNTERS_DB
+    counters_db = ConfigDBConnector()
+    counters_db.db_connect('COUNTERS_DB')
+
     if len(args) == 0:
        path = cc.Path('/restconf/data/sonic-ifa:sonic-ifa/TAM_INT_IFA_FLOW_TABLE')
     else:
@@ -148,26 +152,13 @@ def get_tam_ifa_flow_stats(args):
                 api_response = response.content['sonic-ifa:TAM_INT_IFA_FLOW_TABLE']['TAM_INT_IFA_FLOW_TABLE_LIST']
             else:
                 api_response = response.content['sonic-ifa:TAM_INT_IFA_FLOW_TABLE_LIST']
-
             for i in range(len(api_response)):
                 api_response[i]['Packets'] = 0
                 api_response[i]['Bytes'] = 0
-
-                path = cc.Path('/restconf/data/openconfig-acl:acl/acl-sets')
-                acl_info = api.get(path)
-                if acl_info.ok():
-                    if acl_info.content:
-                        acl_list = acl_info.content["openconfig-acl:acl-sets"]["acl-set"]
-                        for acl in acl_list:
-                            if acl['name'] == api_response[i]['acl-table-name']:
-                                rule = api_response[i]['acl-rule-name']
-                                # tokenize the rulename with '_' and fetch last number
-                                tmpseq = (rule.split("_", 1))[-1]
-                                acl_entry_list = acl["acl-entries"]["acl-entry"]
-                                for entry in acl_entry_list:
-                                    if int(tmpseq) == int(entry["sequence-id"]):
-                                        api_response[i]['Packets'] = entry["state"]["matched-packets"]
-                                        api_response[i]['Bytes'] = entry["state"]["matched-octets"]
+                acl_counter_key = 'COUNTERS:' + api_response[i]['acl-table-name'] + ':' + api_response[i]['acl-rule-name']
+                flow_stats = counters_db.get_all(counters_db.COUNTERS_DB, acl_counter_key)
+                api_response[i]['Packets'] = flow_stats['Packets']
+                api_response[i]['Bytes'] = flow_stats['Bytes']
 
     show_cli_output("show_tam_ifa_flow_stats.j2", api_response)
 
