@@ -1,0 +1,98 @@
+diff --git a/libteam/ifinfo.c b/libteam/ifinfo.c
+index f42a887..59cdeb5 100644
+--- a/libteam/ifinfo.c
++++ b/libteam/ifinfo.c
+@@ -42,6 +42,9 @@
+ #include <team.h>
+ #include <private/list.h>
+ #include <private/misc.h>
++#include <unistd.h>
++#include <dirent.h>
++#include <string.h>
+ #include "team_private.h"
+ 
+ /* \cond HIDDEN_SYMBOLS */
+@@ -85,6 +88,7 @@ struct team_ifinfo {
+ #define TEAM_PORTCHANNEL_NAME_LEN 11
+ #define TEAM_MEMBER_PORT_NAME "Ethernet"
+ #define TEAM_MEMBER_PORT_NAME_LEN 8
++#define VIRTUAL_NET_DEVICES_DIR "/sys/devices/virtual/net"
+ 
+ static void set_changed(struct team_ifinfo *ifinfo, int bit)
+ {
+@@ -412,32 +416,50 @@ int get_ifinfo_list(struct team_handle *th)
+ 	list_for_each_node_entry(ifinfo, &th->ifinfo_list, list)
+ 		set_changed(ifinfo, CHANGED_REFRESHING);
+ 
+-	while (retry) {
+-		retry = 0;
+-		ret = nl_send_simple(th->nl_cli.sock, RTM_GETLINK, NLM_F_DUMP,
+-				     &rt_hdr, sizeof(rt_hdr));
+-		if (ret < 0) {
+-			err(th, "get_ifinfo_list: nl_send_simple failed");
+-			return -nl2syserr(ret);
+-		}
+-		orig_cb = nl_socket_get_cb(th->nl_cli.sock);
+-		cb = nl_cb_clone(orig_cb);
+-		nl_cb_put(orig_cb);
+-		if (!cb) {
+-			err(th, "get_ifinfo_list: nl_cb_clone failed");
+-			return -ENOMEM;
+-		}
+-
+-		nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, valid_handler, th);
+-
+-		ret = nl_recvmsgs(th->nl_cli.sock, cb);
+-		nl_cb_put(cb);
+-		if (ret < 0) {
+-			err(th, "get_ifinfo_list: nl_recvmsgs failed");
+-			if (ret != -NLE_DUMP_INTR)
+-				return -nl2syserr(ret);
+-			retry = 1;
++	DIR *pdir = opendir(VIRTUAL_NET_DEVICES_DIR);
++	if (pdir)
++	{
++		struct dirent *dirent;
++		const char port_channel[] = TEAM_PORTCHANNEL_NAME;
++		const char ethernet[] = TEAM_MEMBER_PORT_NAME;
++		const size_t portch_len = strlen(port_channel);
++		const size_t eth_len = strlen(ethernet);
++		int err;
++
++		while ((dirent = readdir(pdir)) != NULL)
++		{
++			if ((dirent->d_type == DT_DIR) &&
++				((strlen(dirent->d_name) >= portch_len) || (strlen(dirent->d_name) >= eth_len)))
++			{
++				if ((!strncasecmp(dirent->d_name, port_channel, portch_len)) || (!strncasecmp(dirent->d_name, ethernet, eth_len)))
++				{
++					info(th, "Got the interface name %s.", dirent->d_name);
++
++					struct rtnl_link *link;
++					link = rtnl_link_alloc();
++					if (!link)
++						return -ENOMEM;
++
++					err = rtnl_link_get_kernel(th->nl_cli.sock, 0, dirent->d_name, &link);
++					if (err)
++						return;
++
++					info(th, "Got the interface name %s with index %d.", dirent->d_name, rtnl_link_get_ifindex(link));
++
++					ifinfo = ifinfo_find_create(th, rtnl_link_get_ifindex(link));
++					if (!ifinfo)
++						return;
++
++					clear_changed(ifinfo);
++					ifinfo_update(ifinfo, link);
++					rtnl_link_put(link);
++
++					if (ifinfo->changed)
++						set_call_change_handlers(th, TEAM_IFINFO_CHANGE);
++				}
++			}
+ 		}
++		closedir(pdir);
+ 	}
+ 
+ 	list_for_each_node_entry(ifinfo, &th->ifinfo_list, list) {
