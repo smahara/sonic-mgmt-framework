@@ -210,3 +210,4 @@ func authMiddleware(inner http.Handler) http.Handler {
 		}
 	})
 }
+

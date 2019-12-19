@@ -28,6 +28,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
+
 	"github.com/msteinert/pam"
 )
 
@@ -39,6 +40,7 @@ type UserAuth map[string]bool
 
 var ClientAuth = UserAuth{"password": false, "cert": false, "jwt": false, "cliuser": false}
 
+
 func (i UserAuth) String() string {
 	b := new(bytes.Buffer)
 	for key, value := range i {
@@ -48,6 +50,7 @@ func (i UserAuth) String() string {
 	}
 	return b.String()
 }
+
 func (i UserAuth) Any() bool {
 	for _, value := range i {
 		if value {
@@ -56,12 +59,14 @@ func (i UserAuth) Any() bool {
 	}
 	return false
 }
+
 func (i UserAuth) Enabled(mode string) bool {
 	if value, exist := i[mode]; exist && value {
 		return true
 	}
 	return false
 }
+
 func (i UserAuth) Set(mode string) error {
 	modes := strings.Split(mode, ",")
 	for _, m := range modes {
@@ -73,6 +78,7 @@ func (i UserAuth) Set(mode string) error {
 	}
 	return nil
 }
+
 func (i UserAuth) Unset(mode string) error {
 	modes := strings.Split(mode, ",")
 	for _, m := range modes {
@@ -180,3 +186,4 @@ func isWriteOperation(r *http.Request) bool {
 	m := r.Method
 	return m == "POST" || m == "PUT" || m == "PATCH" || m == "DELETE"
 }
+
