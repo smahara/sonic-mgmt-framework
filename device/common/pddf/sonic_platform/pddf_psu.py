@@ -185,7 +185,7 @@ class PddfPsu(PsuBase):
 		
         v_out = output['status']
 
-        return float(v_out)
+        return float(v_out)/1000
 
     def get_current(self):
         """
@@ -203,7 +203,7 @@ class PddfPsu(PsuBase):
         i_out = output['status']
 
         # current in mA
-        return float(i_out)
+        return float(i_out)/1000
 
     def get_power(self):
         """
@@ -221,7 +221,7 @@ class PddfPsu(PsuBase):
         p_out = output['status']
 
         # power is returned in micro watts
-        return float(p_out)
+        return float(p_out)/1000000
 
     def get_powergood_status(self):
         """

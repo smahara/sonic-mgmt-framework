@@ -187,7 +187,7 @@ class PsuUtil(PsuBase):
             attr_file = 'in54_input'
         else:
             logging.error("Invalid PSU number:", index)
-            return 0
+            return 0.0
 
         voltage = self.get_attr_value(self.HWMON_PATH + attr_file)
         voltage = voltage.rstrip()        
@@ -196,9 +196,9 @@ class PsuUtil(PsuBase):
             voltage, dummy = voltage.split('.', 1)
             voltage = float(voltage)
         else:
-            return 0
+            return 0.0
 
-        return int(voltage)
+        return float(voltage)/1000
 
     def get_output_current(self, index):
         if (index == 1):
@@ -207,31 +207,31 @@ class PsuUtil(PsuBase):
             attr_file = 'curr46_input'
         else:
             logging.error("Invalid PSU number:", index)
-            return 0
+            return 0.0
 
         current = self.get_attr_value(self.HWMON_PATH + attr_file)
         current = current.rstrip()
         if (current != 'ERR'):
             current = float(current)
         else:
-            return 0
+            return 0.0
 
-        return int(current)
+        return float(current)/1000
 
     def get_output_power(self, index):
         attr_filename = self.get_attr_filename(index, 'input')
         if attr_filename == '':
-            return 0
+           return 0.0
 
         attr_path = self.HWMON_PATH + attr_filename
         attr_value = self.get_attr_value(attr_path)
 
         if (attr_value != 'ERR'):
-            attr_value = float(attr_value)*1000
+            attr_value = float(attr_value)
         else:
-            return 0
+            return 0.0
 
-        return int(attr_value)
+        return float(attr_value/1000)
 
     def get_fan_rpm(self, index, fan_idx):
         if (index == 1):
