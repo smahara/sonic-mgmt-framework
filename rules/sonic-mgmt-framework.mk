@@ -9,3 +9,9 @@ SONIC_DPKG_DEBS += $(SONIC_MGMT_FRAMEWORK)
 
 SONIC_HOST_SERVICE = sonic-host-service_$(MGMT_FRAMEWORK_VERSION)_amd64.deb
 $(eval $(call add_derived_package,$(SONIC_MGMT_FRAMEWORK),$(SONIC_HOST_SERVICE)))
+
+SONIC_HAMD = sonic-hamd_$(MGMT_FRAMEWORK_VERSION)_amd64.deb
+$(eval $(call add_derived_package,$(SONIC_MGMT_FRAMEWORK),$(SONIC_HAMD)))
+
+SONIC_LIBNSS_HAM = sonic-libnss-ham_$(MGMT_FRAMEWORK_VERSION)_amd64.deb
+$(eval $(call add_derived_package,$(SONIC_MGMT_FRAMEWORK),$(SONIC_LIBNSS_HAM)))
