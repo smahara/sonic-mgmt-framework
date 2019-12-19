@@ -452,7 +452,8 @@ class CommandArgument(object):
                        'uchg-med': 'med',
                        'uchg-nh': 'next-hop',
                        'rm-as-all': 'all',
-                       'rm-as-repl': 'replace-AS'
+                       'rm-as-repl': 'replace-AS',
+                       'mp-as-set': ('as-set', 'no-as-set')
         }
         if format == 'no-prefix':
             return 'no ' if not self.enabled else ''
@@ -502,10 +503,18 @@ class CommandArgument(object):
             else:
                 return self.value
         elif format in bool_format:
+            false_val = ''
+            if type(bool_format[format]) is tuple:
+                if len(bool_format[format]) == 2:
+                    true_val, false_val = bool_format[format]
+                else:
+                    true_val = bool_format[format][0]
+            else:
+                true_val = bool_format[format]
             if self.value == 'true':
-                self.value = bool_format[format]
+                self.value = true_val
             elif self.value == 'false':
-                self.value = ''
+                self.value = false_val
         elif format == 'restart':
             if self.value == 'true':
                 self.value = 'warning-only'
@@ -791,13 +800,14 @@ class BGPConfigDaemon:
     LOCAL_ROUTE_DISTANCE = 20
 
     global_key_map = [('router_id',                                     '{no:no-prefix}bgp router-id {}'),
-                      ('load_balance_mp_relax',                         '{no:no-prefix}bgp bestpath as-path multipath-relax', ['true', 'false']),
+                      (['load_balance_mp_relax', '+as_path_mp_as_set'], '{no:no-prefix}bgp bestpath as-path multipath-relax {:mp-as-set}', ['true', 'false']),
                       ('always_compare_med',                            '{no:no-prefix}bgp always-compare-med', ['true', 'false']),
                       ('external_compare_router_id',                    '{no:no-prefix}bgp bestpath compare-routerid', ['true', 'false']),
                       ('ignore_as_path_length',                         '{no:no-prefix}bgp bestpath as-path ignore', ['true', 'false']),
                       ('graceful_restart_enable',                       '{no:no-prefix}bgp graceful-restart', ['true', 'false']),
                       ('gr_restart_time',                               '{no:no-prefix}bgp graceful-restart restart-time {}'),
                       ('gr_stale_routes_time',                          '{no:no-prefix}bgp graceful-restart stalepath-time {}'),
+                      ('gr_preserve_fw_state',                          '{no:no-prefix}bgp graceful-restart preserve-fw-state', ['true', 'false']),
                       ('log_nbr_state_changes',                         '{no:no-prefix}bgp log-neighbor-changes', ['true', 'false']),
                       ('rr_cluster_id',                                 '{no:no-prefix}bgp cluster-id {}'),
                       ('rr_allow_out_policy',                           '{no:no-prefix}bgp route-reflector allow-outbound-policy', ['true', 'false']),
@@ -818,9 +828,8 @@ class BGPConfigDaemon:
                       ('route_map_process_delay',                       '{no:no-prefix}bgp route-map delay-timer {}'),
                       ('deterministic_med',                             '{no:no-prefix}bgp deterministic-med', ['true', 'false']),
                       ('med_confed',                                    '{no:no-prefix}bgp bestpath med confed', ['true', 'false']),
-                      ('med_missing_as_worst',                          '{no:no-prefix}bgp bestpath med confed missing-as-worst', ['true', 'false']),
+                      ('med_missing_as_worst',                          '{no:no-prefix}bgp bestpath med missing-as-worst', ['true', 'false']),
                       ('compare_confed_as_path',                        '{no:no-prefix}bgp bestpath as-path confed', ['true', 'false']),
-                      ('as_path_mp_as_set',                             '{no:no-prefix}bgp bestpath as-path multipath-relax as-set', ['true', 'false', True]),
                       ('default_ipv4_unicast',                          '{no:no-prefix}bgp default ipv4-unicast', ['true', 'false']),
                       ('default_local_preference',                      '{no:no-prefix}bgp default local-preference {}'),
                       ('default_show_hostname',                         '{no:no-prefix}bgp default show-hostname', ['true', 'false']),
