@@ -183,7 +183,6 @@ RB_GENERATE(l2mc_rb_tree, L2MCMsg, l2mc_entry_rb, L2MCMsg_compare);
 char *mlacp_state(struct CSM* csm);
 static void mlacp_resync_arp(struct CSM* csm);
 static void mlacp_resync_ndisc(struct CSM *csm);
-static void mlacp_resync_mac(struct CSM* csm);
 /* Sync Sender APIs*/
 static void mlacp_sync_send_sysConf(struct CSM* csm);
 static void mlacp_sync_send_aggConf(struct CSM* csm);
@@ -239,7 +238,7 @@ static void mlacp_sync_send_sysConf(struct CSM* csm)
     if (msg_len > 0)
         iccp_csm_send(csm, g_csm_buf, msg_len);
     else
-        ICCPD_LOG_WARN("mlacp_fsm", "    Invalid sysconf packet.");
+        ICCPD_LOG_WARN(__FUNCTION__, "Invalid sysconf packet.");
 
     /*ICCPD_LOG_DEBUG("mlacp_fsm", "  [SYNC_Send] SysConf, len=[%d]", msg_len);*/
 
@@ -300,9 +299,11 @@ static void mlacp_sync_send_syncMacInfo(struct CSM* csm)
 {
     int msg_len = 0;
     struct MACMsg* mac_msg = NULL;
+    struct MACMsg mac_find;
     int count = 0;
 
     memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
+    memset(&mac_find, 0, sizeof(struct MACMsg));
 
     while (!TAILQ_EMPTY(&(MLACP(csm).mac_msg_list)))
     {
@@ -315,8 +316,15 @@ static void mlacp_sync_send_syncMacInfo(struct CSM* csm)
         //free mac_msg if marked for delete.
         if (mac_msg->op_type == MAC_SYNC_DEL)
         {
-            assert(!(mac_msg->mac_entry_rb.rbt_parent));
-            free(mac_msg);
+            if (!(mac_msg->mac_entry_rb.rbt_parent))
+            {
+                //If the entry is parent then the parent pointer would be null
+                //search to confirm if the MAC is present in RB tree. if not then free.
+                mac_find.vid = mac_msg->vid ;
+                memcpy(mac_find.mac_addr, mac_msg->mac_addr, ETHER_ADDR_LEN);
+                if (!RB_FIND(mac_rb_tree, &MLACP(csm).mac_rb ,&mac_find))
+                    free(mac_msg);
+            }
         }
 
         if (count >= MAX_MAC_ENTRY_NUM)
@@ -402,6 +410,7 @@ static void mlacp_sync_send_syncL2mcInfo(struct CSM* csm)
 {
     int msg_len = 0;
     struct L2MCMsg* l2mc_msg = NULL;
+    struct L2MCMsg l2mc_find;
     int count = 0;
 
     memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
@@ -417,8 +426,14 @@ static void mlacp_sync_send_syncL2mcInfo(struct CSM* csm)
         //free l2mc_msg if marked for delete.
         if (l2mc_msg->op_type == L2MC_SYNC_DEL)
         {
-            assert(!(l2mc_msg->l2mc_entry_rb.rbt_parent));
-            free(l2mc_msg);
+            if (!(l2mc_msg->l2mc_entry_rb.rbt_parent)) {
+                l2mc_find.vid = l2mc_msg->vid;
+                memcpy(l2mc_find.saddr,l2mc_msg->saddr, INET_ADDRSTRLEN);
+                memcpy(l2mc_find.gaddr,l2mc_msg->gaddr, INET_ADDRSTRLEN);
+                memcpy(l2mc_find.ifname, l2mc_msg->ifname, MAX_L_PORT_NAME);
+                if (!RB_FIND(l2mc_rb_tree, &MLACP(csm).l2mc_rb ,&l2mc_find))
+                    free(l2mc_msg);
+            }
         }
 
         if (count >= MAX_L2MC_ENTRY_NUM)
@@ -897,7 +912,7 @@ void mlacp_fsm_transit(struct CSM* csm)
         if ((time(NULL) - csm->warm_reboot_disconn_time) >= WARM_REBOOT_TIMEOUT)
         {
             csm->warm_reboot_disconn_time = 0;
-            ICCPD_LOG_DEBUG(__FUNCTION__, "Peer warm reboot, reconnection timeout, recover to normal reboot!");
+            ICCPD_LOG_NOTICE(__FUNCTION__, "Peer warm reboot, reconnection timeout, recover to normal reboot!");
             mlacp_peer_disconn_handler(csm);
         }
     }
@@ -1059,7 +1074,7 @@ void mlacp_sync_mac(struct CSM* csm)
                 TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
             }
 
-            ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list enqueue interface %s, "
+            ICCPD_LOG_DEBUG("ICCP_FDB", "Sync MAC: MAC-msg-list enqueue interface %s, "
                     "MAC %s vlan %d, age_flag %d", mac_msg->ifname,
                     mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
         }
@@ -1068,7 +1083,7 @@ void mlacp_sync_mac(struct CSM* csm)
             /*If MAC with local age flag and is point to MCLAG enabled port, reomove local age flag*/
             if (strcmp(mac_msg->ifname, csm->peer_itf_name) != 0)
             {
-                ICCPD_LOG_DEBUG(__FUNCTION__, "MAC-msg-list not enqueue for local age flag: %s, mac %s vlan-id %d, age_flag %d, remove local age flag",
+                ICCPD_LOG_DEBUG("ICCP_FDB", "Sync MAC: MAC-msg-list not enqueue for local age flag: %s, mac %s vlan-id %d, age_flag %d, remove local age flag",
                         mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
                 mac_msg->age_flag &= ~MAC_AGE_LOCAL;
             }
@@ -1076,22 +1091,6 @@ void mlacp_sync_mac(struct CSM* csm)
     }
     return;
 }
-
-
-/******************************************
-* When peerlink ready, prepare the MACMsg
-*
-******************************************/
-static void mlacp_resync_mac(struct CSM* csm)
-{
-    if (!csm)
-        return;
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Re-sync MAC addresses to peer ");
-    mlacp_sync_mac(csm);
-
-    return;
-}
-
 
 void mlacp_sync_l2mc(struct CSM* csm)
 {
@@ -1185,7 +1184,7 @@ static void mlacp_sync_send_nak_handler(struct CSM* csm,  struct Msg* msg)
 
     icc_hdr = (ICCHdr*)msg->buf;
 
-    ICCPD_LOG_WARN("mlacp_fsm", "  ### Send NAK ###");
+    ICCPD_LOG_WARN(__FUNCTION__, "Send NAK");
 
     memset(g_csm_buf, 0, CSM_BUFFER_SIZE);
     csm->app_csm.invalid_msg_id = ntohl(icc_hdr->ldp_hdr.msg_id);
@@ -1199,7 +1198,7 @@ static void mlacp_sync_recv_nak_handler(struct CSM* csm,  struct Msg* msg)
     uint16_t tlvType = -1;
     int i;
 
-    ICCPD_LOG_WARN("mlacp_fsm", "  ### Receive NAK ###");
+    ICCPD_LOG_WARN(__FUNCTION__, "Receive NAK ");
 
     /* Dequeuq NAK*/
     naktlv = (NAKTLV*)&msg->buf[sizeof(ICCHdr)];
@@ -1221,18 +1220,18 @@ static void mlacp_sync_recv_nak_handler(struct CSM* csm,  struct Msg* msg)
             case TLV_T_MLACP_SYSTEM_CONFIG:
                 MLACP(csm).node_id--;
                 MLACP(csm).system_config_changed = 1;
-                ICCPD_LOG_WARN("mlacp_fsm", "    [%X] change NodeID as %d", tlvType & 0x00FF, MLACP(csm).node_id);
+                ICCPD_LOG_WARN(__FUNCTION__, "[%X] change NodeID as %d", tlvType & 0x00FF, MLACP(csm).node_id);
                 break;
 
             default:
-                ICCPD_LOG_WARN("mlacp_fsm", "    [%X]", tlvType & 0x00FF);
+                ICCPD_LOG_WARN(__FUNCTION__, "    [%X]", tlvType & 0x00FF);
                 MLACP(csm).need_to_sync = 1;
                 break;
         }
     }
     else
     {
-        ICCPD_LOG_WARN("mlacp_fsm", "    Unknow NAK");
+        ICCPD_LOG_WARN(__FUNCTION__, "Unknow NAK");
         MLACP(csm).need_to_sync = 1;
     }
 
@@ -1615,7 +1614,7 @@ static void mlacp_exchange_handler(struct CSM* csm, struct Msg* msg)
         if ((time(NULL) - csm->peer_warm_reboot_time) >= WARM_REBOOT_TIMEOUT)
         {
             csm->peer_warm_reboot_time = 0;
-            ICCPD_LOG_DEBUG(__FUNCTION__, "Peer warm reboot timeout, recover to normal reboot!");
+            ICCPD_LOG_NOTICE(__FUNCTION__, "Peer warm reboot timeout, recover to normal reboot!");
         }
     }
 

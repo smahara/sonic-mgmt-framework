@@ -1,0 +1,451 @@
+diff --git a/relay/dhcrelay.c b/relay/dhcrelay.c
+index 8aac4b3..d5d7c38 100644
+--- a/relay/dhcrelay.c
++++ b/relay/dhcrelay.c
+@@ -57,9 +57,9 @@ int bogus_agent_drops = 0;	/* Packets dropped because agent option
+ int bogus_giaddr_drops = 0;	/* Packets sent to us to relay back to a
+ 				   client, but with a bogus giaddr. */
+ int client_packets_relayed = 0;	/* Packets relayed from client to server. */
+-int server_packet_errors = 0;	/* Errors sending packets to servers. */
++int server_packet_errors = 0;	/* Errors relaying packets from servers. */
+ int server_packets_relayed = 0;	/* Packets relayed from server to client. */
+-int client_packet_errors = 0;	/* Errors sending packets to clients. */
++int client_packet_errors = 0;	/* Errors relaying packets from clients. */
+ 
+ int add_agent_options = 0;	/* If nonzero, add relay agent options. */
+ int add_rfc3527_suboption = 0;	/* If nonzero, add RFC3527 link selection sub-option. */
+@@ -76,6 +76,14 @@ int bad_circuit_id = 0;		/* Circuit ID option in matching RAI option
+ 				   did not match any known circuit ID. */
+ int missing_circuit_id = 0;	/* Circuit ID option in matching RAI option
+ 				   was missing. */
++int invalid_header_lengths = 0;	/* Number of packets dropped because
++				   of invalid header length. */
++int dropped_no_ip_address  = 0; /* Number of packets dropped because
++                                   of no IP address assigned. */
++int wrong_type_on_downstream = 0; /* Number of packets dropped on downstream
++				     because of wrong message type */
++int wrong_type_on_upstream = 0; /* Number of packets dropped on upstream
++				   because of wrong message type */
+ const char *agent_circuit_id_fmt = NULL; /* Circuit ID custom format string. */
+ const char *agent_remote_id_fmt = NULL;  /* Remote ID custom format string. */
+ int max_hop_count = 10;		/* Maximum hop count */
+@@ -117,6 +125,8 @@ struct stream_list {
+ static struct stream_list *parse_downstream(char *);
+ static struct stream_list *parse_upstream(char *);
+ static void setup_streams(void);
++static void write_stats_to_file(struct interface_info *ip);
++
+ 
+ /*
+  * A pointer to a subscriber id to add to the message we forward.
+@@ -153,6 +163,13 @@ static int load_interface_alias_map(const char *port_alias_map_file_path);
+ static int get_interface_alias_by_name(const char *if_name, char *if_alias_out);
+ static void free_interface_alias_map(void);
+ 
++static void process_relay4(struct interface_info *, struct dhcp_packet *,
++			   unsigned int, unsigned int, struct iaddr,
++			   struct hardware *);
++static void process_relay6(struct interface_info *, const char *,
++			   int, int, const struct iaddr *, isc_boolean_t);
++static void write_v6_stats_to_file(struct interface_info *ip);
++
+ static const char copyright[] =
+ "Copyright 2004-2016 Internet Systems Consortium.";
+ static const char arr[] = "All rights reserved.";
+@@ -244,6 +261,9 @@ usage(const char *sfmt, const char *sarg) {
+ 		  isc_file_basename(progname));
+ }
+ 
++void dhcp_relay_usr1_signal_handler(int s);
++void dhcp_relay_usr2_signal_handler(int s);
++
+ int 
+ main(int argc, char **argv) {
+ 	isc_result_t status;
+@@ -729,10 +749,10 @@ main(int argc, char **argv) {
+ 
+ 	/* Set up the packet handler... */
+ 	if (local_family == AF_INET)
+-		bootp_packet_handler = do_relay4;
++		bootp_packet_handler = process_relay4;
+ #ifdef DHCPv6
+ 	else
+-		dhcpv6_packet_handler = do_packet6;
++		dhcpv6_packet_handler = process_relay6;
+ #endif
+ 
+ #if defined(ENABLE_GENTLE_SHUTDOWN)
+@@ -741,6 +761,10 @@ main(int argc, char **argv) {
+ 	signal(SIGINT, dhcp_signal_handler);   /* control-c */
+ 	signal(SIGTERM, dhcp_signal_handler);  /* kill */
+ #endif
++	/* Using SIGUSR1(user defined signal) to toggle the log level */
++	signal(SIGUSR1, dhcp_relay_usr1_signal_handler);
++	/* Using SIGUSR2(user defined signal) to clear the statistics */
++	signal(SIGUSR2, dhcp_relay_usr2_signal_handler);
+ 
+ 	/* Start dispatching packets and timeouts... */
+ 	dispatch();
+@@ -762,11 +786,13 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
+ 	if (packet->hlen > sizeof packet->chaddr) {
+ 		log_info("Discarding packet with invalid hlen, received on "
+ 			 "%s interface.", ip->name);
++                invalid_header_lengths++;
+ 		return;
+ 	}
+ 	if (ip->address_count < 1 || ip->addresses == NULL) {
+ 		log_info("Discarding packet received on %s interface that "
+ 			 "has no IPv4 address assigned.", ip->name);
++                dropped_no_ip_address++;
+ 		return;
+ 	}
+ 
+@@ -795,6 +821,7 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
+ 	if (packet->op == BOOTREPLY) {
+ 		if (!(ip->flags & INTERFACE_UPSTREAM)) {
+ 			log_debug("Dropping reply received on %s", ip->name);
++                        wrong_type_on_downstream++;
+ 			return;
+ 		}
+ 
+@@ -826,8 +853,10 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
+ 		   option that we put on the request to which the server is
+ 		   replying. */
+ 		if (!(length =
+-		      strip_relay_agent_options(ip, &out, packet, length)))
++		      strip_relay_agent_options(ip, &out, packet, length))) {
++			log_error("Failed to process agent options %u\n", length);
+ 			return;
++                }
+ 
+ 		if (!out) {
+ 			log_error("Packet to bogus giaddr %s.\n",
+@@ -847,6 +876,7 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
+ 
+ 			++server_packets_relayed;
+ 		}
++
+ 		return;
+ 	}
+ 
+@@ -857,6 +887,7 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
+ 
+ 	if (!(ip->flags & INTERFACE_DOWNSTREAM)) {
+ 		log_debug("Dropping request received on %s", ip->name);
++                wrong_type_on_upstream++;
+ 		return;
+ 	}
+ 
+@@ -864,8 +895,10 @@ do_relay4(struct interface_info *ip, struct dhcp_packet *packet,
+ 	 * drop the packet.  Note this may set packet->giaddr if RFC3527
+ 	 * is enabled. */
+ 	if (!(length = add_relay_agent_options(ip, packet, length,
+-					       ip->addresses[0])))
++					       ip->addresses[0]))) {
++		log_info("Failed to add relay agent options on %s", ip->name);
+ 		return;
++        }
+ 
+ 	/* If giaddr is not already set, Set it so the server can
+ 	   figure out what net it's from and so that we can later
+@@ -1657,6 +1690,7 @@ parse_downstream(char *arg) {
+ 	if (addr && (inet_pton(AF_INET6, addr, &dp->link.sin6_addr) <= 0))
+ 		log_fatal("Bad link address '%s'", addr);
+ 
++	write_v6_stats_to_file (ifp);
+ 	return dp;
+ }
+ 
+@@ -1810,6 +1844,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 	struct dhcpv6_relay_packet *relay;
+ 	struct option_state *opts;
+ 	struct stream_list *up;
++	isc_boolean_t sent = ISC_FALSE;
+ 
+ 	/* Check if the message should be relayed to the server. */
+ 	switch (packet->dhcpv6_msg_type) {
+@@ -1840,6 +1875,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 			 dhcpv6_type_names[packet->dhcpv6_msg_type],
+ 			 piaddr(packet->client_addr),
+ 			 ntohs(packet->client_port));
++		++wrong_type_on_downstream;
+ 		return;
+ 
+ 	      default:
+@@ -1847,6 +1883,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 			 packet->dhcpv6_msg_type,
+ 			 piaddr(packet->client_addr),
+ 			 ntohs(packet->client_port));
++		++wrong_type_on_downstream;
+ 		return;
+ 	}
+ 
+@@ -1857,6 +1894,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 	if (packet->dhcpv6_msg_type == DHCPV6_RELAY_FORW) {
+ 		if (packet->dhcpv6_hop_count >= max_hop_count) {
+ 			log_info("Hop count exceeded,");
++			++client_packet_errors;
+ 			return;
+ 		}
+ 		relay->hop_count = packet->dhcpv6_hop_count + 1;
+@@ -1866,14 +1904,17 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 			/* On smart relay add: && !global. */
+ 			if (!use_if_id && downstreams->next) {
+ 				log_info("Shan't get back the interface.");
++				++client_packet_errors;
+ 				return;
+ 			}
+ 			memset(&relay->link_address, 0, 16);
+ 		}
+ 	} else {
+ 		relay->hop_count = 0;
+-		if (!dp)
++		if (!dp) {
++			++client_packet_errors;
+ 			return;
++		}
+ 		memcpy(&relay->link_address, &dp->link.sin6_addr, 16);
+ 	}
+ 	memcpy(&relay->peer_address, packet->client_addr.iabuf, 16);
+@@ -1895,6 +1936,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 		} else {
+ 			log_info("Don't know the interface.");
+ 			option_state_dereference(&opts, MDL);
++			++client_packet_errors;
+ 			return;
+ 		}
+ 
+@@ -1904,6 +1946,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 					D6O_INTERFACE_ID, 0)) {
+ 			log_error("Can't save interface-id.");
+ 			option_state_dereference(&opts, MDL);
++			++client_packet_errors;
+ 			return;
+ 		}
+ 	}
+@@ -1917,6 +1960,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 					D6O_SUBSCRIBER_ID, 0)) {
+ 			log_error("Can't save subsriber-id.");
+ 			option_state_dereference(&opts, MDL);
++			++client_packet_errors;
+ 			return;
+ 		}
+ 	}
+@@ -1929,6 +1973,7 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 				D6O_RELAY_MSG, 0)) {
+ 		log_error("Can't save relay-msg.");
+ 		option_state_dereference(&opts, MDL);
++		++client_packet_errors;
+ 		return;
+ 	}
+ 
+@@ -1941,8 +1986,16 @@ process_up6(struct packet *packet, struct stream_list *dp) {
+ 
+ 	/* Send it to all upstreams. */
+ 	for (up = upstreams; up; up = up->next) {
+-		send_packet6(up->ifp, (unsigned char *) forw_data,
+-			     (size_t) cursor, &up->link);
++		if (send_packet6(up->ifp, (unsigned char *) forw_data,
++			         (size_t) cursor, &up->link) > 0) {
++			sent = ISC_TRUE;
++		}
++	}
++	if (sent == ISC_TRUE) {
++		++client_packets_relayed;
++	}
++	else {
++		++client_packet_errors;
+ 	}
+ }
+ 			     
+@@ -1971,6 +2024,7 @@ process_down6(struct packet *packet) {
+ 				 packet->dhcpv6_msg_type,
+ 				 piaddr(packet->client_addr),
+ 				 ntohs(packet->client_port));
++		++wrong_type_on_upstream;
+ 		return;
+ 	}
+ 
+@@ -1989,6 +2043,7 @@ process_down6(struct packet *packet) {
+ 	oc = lookup_option(&dhcpv6_universe, packet->options, D6O_RELAY_MSG);
+ 	if (oc == NULL) {
+ 		log_info("No relay-msg.");
++		++server_packet_errors;
+ 		return;
+ 	}
+ 	if (!evaluate_option_cache(&relay_msg, packet, NULL, NULL,
+@@ -1996,6 +2051,7 @@ process_down6(struct packet *packet) {
+ 				   &global_scope, oc, MDL) ||
+ 	    (relay_msg.len < offsetof(struct dhcpv6_packet, options))) {
+ 		log_error("Can't evaluate relay-msg.");
++		++server_packet_errors;
+ 		return;
+ 	}
+ 	msg = (const struct dhcpv6_packet *) relay_msg.data;
+@@ -2086,10 +2142,17 @@ process_down6(struct packet *packet) {
+ 	}
+ 
+ 	/* Send the message to the downstream. */
+-	send_packet6(dp->ifp, (unsigned char *) relay_msg.data,
+-		     (size_t) relay_msg.len, &to);
++	if (send_packet6(dp->ifp, (unsigned char *) relay_msg.data,
++		         (size_t) relay_msg.len, &to) > 0) {
++		++server_packets_relayed;
++	}
++	else {
++		++server_packet_errors;
++	}
++	write_v6_stats_to_file (dp->ifp);
+ 
+       cleanup:
++	++server_packet_errors;
+ 	if (relay_msg.data != NULL)
+ 		data_string_forget(&relay_msg, MDL);
+ 	if (if_id.data != NULL)
+@@ -2203,6 +2266,7 @@ void request_v4_interface(const char* name, int flags) {
+ 
+         strncpy(tmp->name, name, len);
+         interface_snorf(tmp, (INTERFACE_REQUESTED | flags));
++        write_stats_to_file(tmp);
+         interface_dereference(&tmp, MDL);
+ }
+ 
+@@ -2275,3 +2339,138 @@ free_interface_alias_map(void) {
+ 	free(g_interface_name_alias_map);
+ 	g_interface_name_alias_map_size = 0;
+ }
++
++static void
++process_relay4(struct interface_info *ip, struct dhcp_packet *packet,
++               unsigned int length, unsigned int from_port, struct iaddr from,
++               struct hardware *hfrom) {
++        do_relay4(ip, packet, length, from_port, from, hfrom);
++        write_stats_to_file(ip);
++}
++
++static void
++process_relay6(struct interface_info *interface, const char *packet,
++				int len, int from_port, const struct iaddr *from,
++				isc_boolean_t was_unicast) {
++		do_packet6(interface, packet, len, from_port, from, was_unicast);
++		write_v6_stats_to_file(interface);
++}
++
++/* Write statistics to a file */
++static void write_stats_to_file(struct interface_info *ip)
++{
++	FILE *pf;
++	int pfdesc;
++	char filename[128] = "/tmp/dhcprelaystats/dhcp-relay-ipv4-stats-";
++
++	/* Stats file is per downstream interface */
++	if (!(ip->flags & INTERFACE_DOWNSTREAM)) {
++		return;
++	}
++
++	/* Append the interface name */
++	strcat(filename, ip->name);
++
++	pfdesc = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0644);
++	if (pfdesc < 0) {
++		log_error("Can't create %s: %m", filename);
++	} else {
++		pf = fdopen(pfdesc, "w");
++		if (!pf)
++			log_error("Can't fdopen %s: %m", filename);
++		else {
++			fprintf(pf, "Packets relayed from client to server:     %d\n",client_packets_relayed);
++			fprintf(pf, "Packets relayed from server to client:     %d\n",server_packets_relayed);
++			fprintf(pf, "Errors relaying packets from clients:      %d\n",client_packet_errors);
++			fprintf(pf, "Errors relaying packets from servers:      %d\n",server_packet_errors);
++			fprintf(pf, "Packets dropped with bogus GIADDR:         %d\n",bogus_giaddr_drops);
++			fprintf(pf, "Packets dropped due to bad relay info:     %d\n",corrupt_agent_options);
++			fprintf(pf, "Packets dropped due to missing relay info: %d\n",missing_agent_option);
++			fprintf(pf, "Packets dropped due to invalid hdr length: %d\n",invalid_header_lengths);
++			fprintf(pf, "Packets dropped on interface with no IP:   %d\n",dropped_no_ip_address);
++			fprintf(pf, "Replies dropped on downstream interface:   %d\n",wrong_type_on_downstream);
++			fprintf(pf, "Requests dropped on upstream interface:    %d\n",wrong_type_on_upstream);
++
++			fclose(pf);
++		}
++	}
++}
++
++/* Write statistics to a file */
++static void write_v6_stats_to_file(struct interface_info *ip)
++{
++	FILE *pf;
++	int pfdesc;
++	char filename[128] = "/tmp/dhcprelaystats/dhcp-relay-ipv6-stats-";
++
++	/* Stats file is per downstream interface */
++	if (!(ip->flags & INTERFACE_DOWNSTREAM)) {
++		return;
++	}
++
++	/* Append the interface name */
++	strcat(filename, ip->name);
++
++	pfdesc = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0644);
++	if (pfdesc < 0) {
++		log_error("Can't create %s: %m", filename);
++	} else {
++		pf = fdopen(pfdesc, "w");
++		if (!pf)
++			log_error("Can't fdopen %s: %m", filename);
++		else {
++			fprintf(pf, "Packets relayed from client to server:                            %d\n",client_packets_relayed);
++			fprintf(pf, "Packets relayed from server to client:                            %d\n",server_packets_relayed);
++			fprintf(pf, "Errors relaying packets from clients:                             %d\n",client_packet_errors);
++			fprintf(pf, "Errors relaying packets from servers:                             %d\n",server_packet_errors);
++			fprintf(pf, "Packets with wrong message type dropped on downstream interface:  %d\n",wrong_type_on_downstream);
++			fprintf(pf, "Packets with wrong message type dropped on upstream interface:    %d\n",wrong_type_on_upstream);
++
++			fclose(pf);
++		}
++	}
++}
++
++void dhcp_relay_usr1_signal_handler(int s)
++{
++	static isc_boolean_t dbg_lvl = ISC_FALSE;
++	if (dbg_lvl == ISC_FALSE)
++	{
++		log_info("Received USR1 signal. Setting log level to debug.");
++		setlogmask(LOG_UPTO(LOG_DEBUG));
++		dbg_lvl = ISC_TRUE;
++	}
++	else
++	{
++		log_info("Received USR1 signal. Resetting log level.");
++		setlogmask(LOG_UPTO(LOG_INFO));
++		dbg_lvl = ISC_FALSE;
++	}
++}
++
++void dhcp_relay_usr2_signal_handler(int s)
++{
++	struct interface_info *ifp;
++
++	client_packets_relayed = 0;
++	server_packets_relayed = 0;
++	client_packet_errors = 0;
++	server_packet_errors = 0;
++	bogus_giaddr_drops = 0;
++	corrupt_agent_options = 0;
++	missing_agent_option = 0;
++	invalid_header_lengths = 0;
++	dropped_no_ip_address = 0;
++	wrong_type_on_downstream = 0;
++	wrong_type_on_upstream = 0;
++
++	for (ifp = interfaces; ifp; ifp = ifp->next) {
++		if (ifp->flags & INTERFACE_DOWNSTREAM){
++			log_info("Received USR2 signal. Clearing the relay statistics on interface %s.", ifp->name);
++			if (local_family == AF_INET6)
++				write_v6_stats_to_file (ifp);
++			else
++				write_stats_to_file (ifp);
++		}
++	}
++}

@@ -12,6 +12,10 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	git clone https://github.com/formorer/pkg-keepalived.git keepalived 
 	pushd ./keepalived
 
+	# Apply patches
+	stg init
+	stg import -s ../patch/series
+
 	# Build source and Debian packages
 	dpkg-buildpackage -rfakeroot -b -us -uc -j$(SONIC_CONFIG_MAKE_JOBS)
 	ls -lrt 

@@ -178,6 +178,10 @@ sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/linux-image-${LINUX_KERNEL_VERSI
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install acl
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install dmidecode
 
+## Install sonic-host-service systemd service for docker/host communication
+sudo dpkg --root=$FILESYSTEM_ROOT -i src/sonic-host-service*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
+
 ## Update initramfs for booting with squashfs+overlay
 cat files/initramfs-tools/modules | sudo tee -a $FILESYSTEM_ROOT/etc/initramfs-tools/modules > /dev/null
 
@@ -271,6 +275,7 @@ sudo LANG=C chroot $FILESYSTEM_ROOT apt-get -y install      \
 ## Note: don't install python-apt by pip, older than Debian repo one
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install      \
     file                    \
+    ifmetric                \
     iproute2                \
     bridge-utils            \
     isc-dhcp-client         \
@@ -321,7 +326,11 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     python-ipaddr           \
     conntrack               \
     mcelog                  \
-    makedumpfile
+    ipmitool                \
+    makedumpfile            \
+    python-dbus             \
+    python-gobject          \
+    python-systemd
 
 # Needed to install kdump-tools
 sudo LANG=C chroot $FILESYSTEM_ROOT /bin/bash -c "mkdir -p /etc/initramfs-tools/conf.d"
@@ -400,6 +409,7 @@ sudo augtool --autosave "
 
 set /files/etc/sysctl.conf/kernel.softlockup_panic 1
 set /files/etc/sysctl.conf/kernel.panic 10
+set /files/etc/sysctl.conf/kernel.sysrq 1
 set /files/etc/sysctl.conf/vm.panic_on_oom 2
 set /files/etc/sysctl.conf/fs.suid_dumpable 2
 
@@ -436,7 +446,7 @@ set /files/etc/sysctl.conf/net.ipv6.conf.default.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.all.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.keep_addr_on_down 1
 
-set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 0
+set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 1
 set /files/etc/sysctl.conf/net.ipv4.udp_l3mdev_accept 1
 
 set /files/etc/sysctl.conf/net.ipv6.ip_nonlocal_bind 1
@@ -446,7 +456,7 @@ set /files/etc/sysctl.conf/net.core.wmem_max 16777216
 
 set /files/etc/sysctl.conf/net.core.somaxconn 512
 
-set /files/etc/sysctl.conf/net.ipv6.conf.default.disable_ipv6 1
+set /files/etc/sysctl.conf/net.ipv6.conf.default.disable_ipv6 1 
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.disable_ipv6 0
 set /files/etc/sysctl.conf/net.ipv6.conf.lo.disable_ipv6 0
 set /files/etc/sysctl.conf/net.ipv6.conf.docker0.disable_ipv6 0
@@ -494,6 +504,9 @@ sudo cp files/dhcp/graphserviceurl $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks
 sudo cp files/dhcp/snmpcommunity $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
 sudo cp files/dhcp/vrf $FILESYSTEM_ROOT/etc/dhcp/dhclient-exit-hooks.d/
 sudo cp files/dhcp/dhclient.conf $FILESYSTEM_ROOT/etc/dhcp/
+if [ -f files/image_config/ntp/ntp ]; then
+    sudo cp ./files/image_config/ntp/ntp $FILESYSTEM_ROOT/etc/init.d/
+fi
 
 ## Configure application core dump handler
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get install -y systemd-coredump liblz4-tool

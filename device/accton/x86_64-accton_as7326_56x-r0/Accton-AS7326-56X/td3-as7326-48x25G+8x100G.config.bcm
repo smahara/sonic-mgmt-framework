@@ -11,16 +11,9 @@ bcm_num_cos=10
 default_cpu_tx_queue=9
 core_clock_frequency=1525
 dpp_clock_ratio=2:3
-l2_mem_entries=40960
-l3_mem_entries=40960
 fpem_mem_entries=0
 l2xmsg_mode=1
 oversubscribe_mode=1
-
-#Evpn-Vxlan parameters
-use_all_splithorizon_groups=1
-flow_init_mode=1
-sai_tunnel_support=1
 
 #RIOT Enable
 riot_enable=1
@@ -38,7 +31,6 @@ pbmp_xport_xe=0x7F878787F87878FFDFE1E1E1FE1E1E3FE
 port_flex_enable=1
 ipv6_lpm_128b_enable=0x1
 l3_max_ecmp_mode=1
-l3_alpm_enable=2
 lpm_scaling_enable=0
 pfc_deadlock_seq_control=1
 skip_L2_USER_ENTRY=0
@@ -488,3 +480,10 @@ dport_map_port_130=82
 dport_map_port_66=81
 portmap_130=128:10:m
 portmap_66=129:10:m
+
+flow_init_mode=1
+l2_mem_entries=40960
+l3_mem_entries=40960
+l3_alpm_enable=2
+use_all_splithorizon_groups=1
+sai_tunnel_support=1

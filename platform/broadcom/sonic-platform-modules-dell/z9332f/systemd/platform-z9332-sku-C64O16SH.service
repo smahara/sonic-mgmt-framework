@@ -1,0 +1,11 @@
+[Unit]
+Description=Dell Z9332f C64O16SH SKU media util service
+Requires=updategraph.service swss.service
+After=updategraph.service swss.service syncd.service
+
+
+[Service]
+ExecStart=/usr/bin/python /usr/local/bin/mediautil_1x400G_left.py 
+
+[Install]
+WantedBy=multi-user.target

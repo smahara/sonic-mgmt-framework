@@ -28,7 +28,7 @@ fi
 # Create temporary server certificate if they not configured in ConfigDB
 if [ -z $SERVER_CRT ] && [ -z $SERVER_KEY ]; then
     echo "Generating temporary TLS server certificate ..."
-    (cd /tmp && /usr/sbin/generate_cert --host="localhost,127.0.0.1")
+    (cd /tmp && /usr/sbin/generate_cert --host="localhost,127.0.0.1" --ecdsa-curve=P256)
     SERVER_CRT=/tmp/cert.pem
     SERVER_KEY=/tmp/key.pem
 fi

@@ -69,6 +69,22 @@ class PsuFan(FanBase):
             return 0
         return ((rpm * 100) / self.psu_fan_rpm_max)
 
+    def get_speed_rpm(self):
+        """
+        Retrieves the speed of fan in revolutions per monute 
+
+        Returns:
+            An integer, speed of a fan in RPM
+        """
+        rpm = 0
+        node = self.psu_path + self.psu_mapping_diag[self.index] + self.psu_fan_rpm
+        try:
+            with open(node, 'r') as speed_rpm:
+                rpm = int(speed_rpm.read())
+        except IOError:
+            return 0
+        return (rpm)
+
 class Psu(PsuBase):
     """Platform-specific PSU class"""
 
@@ -83,6 +99,7 @@ class Psu(PsuBase):
         self.psu_oper_status = "/psu_power_good"
         self.psu_model_name = "/psu_model_name"
         self.psu_serial_num = "/psu_serial_num"
+        self.psu_mfr_id = "/psu_mfr_id"
         self.psu_v_out = "/psu_v_out"
         self.psu_i_out = "/psu_i_out"
         self.psu_p_out = "/psu_p_out"
@@ -152,6 +169,22 @@ class Psu(PsuBase):
             return None
         return model.rstrip()
 
+    def get_mfr_id(self):
+        """
+        Retrieves the manufacturer's name (or id) of the device
+
+        Returns:
+            string: Manufacturer's id of device
+        """
+        mfr = ""
+        node = self.psu_path + self.psu_mapping_diag[self.index] + self.psu_mfr_id
+        try:
+            with open(node, 'r') as mfr_id:
+                mfr = mfr_id.read()
+        except IOError:
+            return None
+        return mfr.rstrip()
+
     def get_serial(self):
         """
         Retrieves the serial number of the device
@@ -183,7 +216,7 @@ class Psu(PsuBase):
                 vout = int(v_out.read())
         except IOError:
             return 0
-        return (vout / 1000)
+        return float(vout)
 
     def get_current(self):
         """
@@ -199,7 +232,7 @@ class Psu(PsuBase):
                 iout = int(i_out.read())
         except IOError:
             return 0
-        return (iout / 1000)
+        return float(iout)
 
     def get_power(self):
         """
@@ -215,7 +248,7 @@ class Psu(PsuBase):
                 pout = int(p_out.read())
         except IOError:
             return 0
-        return (pout / 1000)
+        return float(pout*1000) #return power value in micro watts
 
     def get_powergood_status(self):
         """

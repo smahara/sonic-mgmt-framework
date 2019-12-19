@@ -7,6 +7,11 @@ z9332f/scripts/qsfp_irq_enable.py usr/bin
 z9332f/cfg/z9332f-modules.conf etc/modules-load.d
 z9332f/systemd/platform-modules-z9332f.service etc/systemd/system
 z9332f/systemd/platform-z9332-sku-O16C64.service etc/systemd/system
-z9332f/scripts/mediautil_400G.py usr/local/bin
+z9332f/systemd/platform-z9332-sku-O16C64SH.service etc/systemd/system
+z9332f/systemd/platform-z9332-sku-C64O16SH.service etc/systemd/system
+z9332f/scripts/mediautil_1x400G_odd.py usr/local/bin
+z9332f/scripts/mediautil_1x400G_right.py usr/local/bin
+z9332f/scripts/mediautil_1x400G_left.py usr/local/bin
 common/platform_reboot usr/share/sonic/device/x86_64-dellemc_z9332f_d1508-r0
 common/fw-updater usr/local/bin
+common/onie_mode_set usr/local/bin

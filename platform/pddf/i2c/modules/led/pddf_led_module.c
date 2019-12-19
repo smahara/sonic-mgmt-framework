@@ -17,7 +17,7 @@
 #include <linux/mutex.h>
 #include <linux/slab.h>
 
-#define DEBUG 1
+#define DEBUG 0
 LED_OPS_DATA sys_led_ops_data[1]={0};
 LED_OPS_DATA* psu_led_ops_data=NULL;
 LED_OPS_DATA diag_led_ops_data[1]= {0};
@@ -100,7 +100,7 @@ static LED_OPS_DATA* find_led_ops_data(struct device_attribute *da)
                 printk(KERN_ERR "PDDF_LED ERROR %s invalid index: %d for type:%s\n", __func__, ptr->index, ptr->device_name);
                 return(NULL);
         }
-#if DEBUG
+#if DEBUG > 1
         pddf_dbg(LED, "find_led_ops_data: name:%s; index=%d tempAddr:%p actualAddr:%p\n",
                                 ptr->device_name, ptr->index, ptr, dev_list[led_type]+ptr->index);
 #endif
@@ -177,12 +177,10 @@ ssize_t get_status_led(struct device_attribute *da)
 			}
 		}
 	}
-#if DEBUG
         pddf_dbg(LED, KERN_ERR "Get : %s:%d addr/offset:0x%x; 0x%x value=0x%x [%s:%s]\n",
 		ops_ptr->device_name, ops_ptr->index, 
                 ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset, sys_val, 
 		temp_data.cur_state.color, temp_data.cur_state.color_state);
-#endif
 	return(ret);	
 }
 
@@ -198,19 +196,17 @@ ssize_t set_status_led(struct device_attribute *da)
 	int blink=0;
 
 	if (!ops_ptr) { 
-		printk(KERN_ERR "PDDF_LED ERROR %s: Cannot find LED Ptr", __func__);
+		pddf_dbg(LED, KERN_ERR "PDDF_LED ERROR %s: Cannot find LED Ptr", __func__);
 		return (-1);
 	}
 	if (ops_ptr->swpld_addr == 0x0) {
-		printk(KERN_ERR "PDDF_LED ERROR %s: device: %s %d not configured\n",
+		pddf_dbg(LED, KERN_ERR "PDDF_LED ERROR %s: device: %s %d not configured\n",
 			__func__, ops_ptr->device_name, ops_ptr->index);
 		return (-1);
 	}
-#if DEBUG
 	pddf_dbg(LED, KERN_ERR "%s: Set [%s;%d] color[%s;%s]\n", __func__,
 		temp_data_ptr->device_name, temp_data_ptr->index,
 		temp_data_ptr->cur_state.color, temp_data_ptr->cur_state.color_state);
-#endif
         if(strcasecmp(_buf, "on")==0) {
                 cur_state = ON;
         } else if(strcasecmp(_buf, "off")==0) {
@@ -218,7 +214,7 @@ ssize_t set_status_led(struct device_attribute *da)
         } else if(strcasecmp(_buf, "faulty")==0) {
                 cur_state=FAULTY;
         } else {
-                printk(KERN_ERR "PDDF_LED ERROR %s: not supported: %s\n", _buf, __func__);
+                pddf_dbg(LED, KERN_ERR "PDDF_LED ERROR %s: not supported: %s\n", _buf, __func__);
                 return (-1);
         }
 	if(ops_ptr->data[cur_state].swpld_addr != 0x0) {
@@ -241,24 +237,22 @@ ssize_t set_status_led(struct device_attribute *da)
 				}
 			}
 	} else {
-		printk(KERN_ERR "PDDF_LED ERROR %s: %s %d state %d; %s not configured\n",__func__, 
+		pddf_dbg(LED, KERN_ERR "PDDF_LED ERROR %s: %s %d state %d; %s not configured\n",__func__, 
 			ops_ptr->device_name, ops_ptr->index, cur_state, _buf);
 		return (-1);
 	}
 
         board_i2c_cpld_write(ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset, new_val);
-#if DEBUG
-        pddf_dbg(LED, "Set state:%s;%s;%s 0x%x:0x%x sys_val:0x%x new_val:0x%x read:0x%x\n",
+        pddf_dbg(LED, KERN_INFO "Set state:%s;%s;%s 0x%x:0x%x sys_val:0x%x new_val:0x%x read:0x%x\n",
 		LED_TYPE_STR[cur_state], ops_ptr->data[cur_state].color, blink? "Blink":"Solid",
                 ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset,
                 sys_val, new_val,
 		ret = board_i2c_cpld_read(ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset));
 		if (ret < 0)
 		{
-			printk(KERN_ERR "PDDF_LED ERROR %s: Error %d in reading from cpld(0x%x) offset 0x%x\n", __FUNCTION__, ret, ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset);
+			pddf_dbg(LED, KERN_ERR "PDDF_LED ERROR %s: Error %d in reading from cpld(0x%x) offset 0x%x\n", __FUNCTION__, ret, ops_ptr->swpld_addr, ops_ptr->swpld_addr_offset);
 			return ret;
 		}
-#endif
 	return(ret);
 }
 
@@ -288,7 +282,7 @@ ssize_t show_pddf_data(struct device *dev, struct device_attribute *da,
                 default:
                         break;
         }
-#if DEBUG 
+#if DEBUG > 1
         pddf_dbg(LED, "[ READ ] DATA ATTR PTR [%s] TYPE:%d, Value:[%s]\n", 
 		ptr->dev_attr.attr.name, ptr->type, buf);
 #endif
@@ -358,17 +352,18 @@ static int load_led_ops_data(struct device_attribute *da, LED_STATUS state)
 	LED_OPS_DATA* ptr=(LED_OPS_DATA*)_ptr->addr;
 	LED_TYPE led_type;
 	LED_OPS_DATA* ops_ptr=NULL;
-	if(!ptr || strlen(ptr->device_name)==0 ) return(-1); 
-#if DEBUG
-	if(ptr->device_name) pddf_dbg(LED, "SYSTEM_LED: load_led_ops_data: name:%s; index=%d ADDR=%p\n", 
+	if(!ptr || strlen(ptr->device_name)==0 ) {
+		pddf_dbg(LED, KERN_INFO "SYSTEM_LED: load_led_ops_data return -1 device_name:%s\n", ptr? ptr->device_name:"NULL");
+		return(-1); 
+	}
+	if(ptr->device_name) pddf_dbg(LED, KERN_INFO "SYSTEM_LED: load_led_ops_data: name:%s; index=%d ADDR=%p\n", 
 						ptr->device_name, ptr->index, ptr); 
-#endif
 	if((led_type=get_dev_type(ptr->device_name))==LED_TYPE_MAX) {
-		printk(KERN_ERR "PDDF_LED ERROR *%s Unsupported Led Type\n", __func__);
+		pddf_dbg(LED, KERN_ERR "PDDF_LED ERROR *%s Unsupported Led Type\n", __func__);
 		return(-1);
 	}
 	if(dev_index_check(led_type, ptr->index)==-1) {
-		printk(KERN_ERR "PDDF_LED ERROR %s invalid index: %d for type:%d\n", __func__, ptr->index, led_type);
+		pddf_dbg(LED, KERN_ERR "PDDF_LED ERROR %s invalid index: %d for type:%d\n", __func__, ptr->index, led_type);
 		return(-1);
 	}
 	ops_ptr = dev_list[led_type]+ptr->index;
@@ -380,10 +375,9 @@ static int load_led_ops_data(struct device_attribute *da, LED_STATUS state)
 	ops_ptr->data[state].swpld_addr_offset = ptr->swpld_addr_offset;
 	ops_ptr->swpld_addr = ptr->swpld_addr;
 	ops_ptr->swpld_addr_offset = ptr->swpld_addr_offset;
-#if DEBUG
-	print_led_data(ptr);
+
 	print_led_data(dev_list[led_type]+ptr->index);
-#endif
+
 	memset(ptr, 0, sizeof(LED_OPS_DATA));
 	return (0);
 }
@@ -410,6 +404,7 @@ static int verify_led_ops_data(struct device_attribute *da)
 
 ssize_t dev_operation(struct device *dev, struct device_attribute *da, const char *buf, size_t count)
 {
+	pddf_dbg(LED, KERN_INFO "dev_operation [%s]\n", buf);
 	if(strncmp(buf, "create_on", strlen("create_on"))==0 ) {
 		load_led_ops_data(da, ON);
 	}

@@ -57,7 +57,7 @@ class LedUtil:
         except IOError:
 		    status="ERROR :" + color_f + " open failed"
                     return (status) 
-	status = "%s-%s:\t%s %s\n"%(device_name, index, color, color_state)
+	status = "%s-%s:\t%s %s\n"%(led_device_name, index, color, color_state)
 	return (status)
 
 

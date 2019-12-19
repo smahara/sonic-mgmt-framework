@@ -29,10 +29,14 @@
           "properties": {
             "dev_idx": {
               "type": "string"
+            },
+            "num_psu_fans": {
+              "type": "string"
             }
           },
           "required": [
-            "dev_idx"
+            "dev_idx",
+            "num_psu_fans"
           ]
         },
         "i2c": {
@@ -62,71 +66,12 @@
           "required": [
             "interface"
           ]
-        },
-        "bmc": {
-          "type": "object",
-          "properties": {
-            "attr_list": {
-              "type": "array",
-              "items": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "attr_name": {
-                      "type": "string"
-                    },
-                    "bmc_cmd": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "attr_name",
-                    "bmc_cmd"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "attr_name": {
-                      "type": "string"
-                    },
-                    "bmc_cmd": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "attr_name",
-                    "bmc_cmd"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "attr_name": {
-                      "type": "string"
-                    },
-                    "bmc_cmd": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "attr_name",
-                    "bmc_cmd"
-                  ]
-                }
-              ]
-            }
-          },
-          "required": [
-            "attr_list"
-          ]
         }
       },
       "required": [
         "dev_info",
         "dev_attr",
-        "i2c",
-        "bmc"
+        "i2c"
       ]
     }
   },
