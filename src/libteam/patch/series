@@ -13,3 +13,4 @@
 0018-teamd-attach-netlink-EBPF-filter.patch
 0019-teamd-add-carrier-handler-to-loadbalance-runner.patch
 0020-libteam-replace-NL-DUMP-query-with-virtual-devices-directory-read.patch
+0021-teamd-configure-mtu-admin-status-on-init.patch
