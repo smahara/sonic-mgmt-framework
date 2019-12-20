@@ -15,32 +15,53 @@
   distance bgp {{af_val['ebgp_route_distance']}} {{af_val['ibgp_route_distance']}} 20
 {% endif %}
 {# ------- network-prefix    --------------------------- #}
-{% if af_val.has_key('network_prefix') %}
-{% set ns = namespace(nw_end = '') %}
-{% if af_val.has_key('network_backdoor') and af_val['network_backdoor'] == 'true' %}
-{% set ns.nw_end = 'backdoor ' %}
+{% if BGP_GLOBALS_AF_NETWORK is defined and BGP_GLOBALS_AF_NETWORK|length > 0 %}
+{% for af_nw_key, af_nw_val in BGP_GLOBALS_AF_NETWORK.iteritems() %}
+{% if vrf == af_nw_key[0] and af == af_nw_key[1] %}
+{% set af_nw_ns = namespace(nw_end = '') %}
+{% if af_nw_val.has_key('backdoor') and af_nw_val['backdoor'] == 'true' %}
+{% set af_nw_ns.nw_end = 'backdoor ' %}
 {% endif %}
-{% if af_val.has_key('network_policy') %}
-{% set ns.nw_end = ns.nw_end + 'route-map ' + af_val['network_policy'] %}
+{% if af_nw_val.has_key('policy') %}
+{% set af_nw_ns.nw_end = af_nw_ns.nw_end + 'route-map ' + af_nw_val['policy'] %}
 {% endif %}
-  network {{af_val['network_prefix']}} {{ns.nw_end}}
-{% endif %}
-{# ------- network-prefix end   --------------------------- #}
-{# ------- aggregate-prefix  --------------------------- #}
-{% if af_val.has_key('aggregate_prefix') %}
-{% set ns = namespace(ag_end = '') %}
-{% if af_val.has_key('aggregate_as_set') and af_val['aggregate_as_set'] == 'true' %}
-{% set ns.ag_end = 'as-set ' %}
-{% endif %}
-{% if af_val.has_key('aggregate_summary_only') and af_val['aggregate_summary_only'] == 'true' %}
-{% set ns.ag_end = ns.ag_end + 'summary-only' %}
-{% endif %}
-  aggregate-address {{af_val['aggregate_prefix']}} {{ns.ag_end}}
-{% endif %}
-{# ------- aggregate-prefix end --------------------------- #}
+  network {{af_nw_key[2]}} {{af_nw_ns.nw_end}}
 {% endif %}
 {% endfor %}
 {% endif %}
+{# ------- network-prefix end   --------------------------- #}
+{# ------- aggregate-prefix -Start--------------------------- #}
+{% if BGP_GLOBALS_AF_AGGREGATE_ADDR is defined and BGP_GLOBALS_AF_AGGREGATE_ADDR|length > 0 %}
+{% for af_ag_key, af_ag_val in BGP_GLOBALS_AF_AGGREGATE_ADDR.iteritems() %}
+{% set af_ag_ns = namespace(ag_end = '') %}
+{% if vrf == af_ag_key[0] and af == af_ag_key[1] %}
+{% if af_ag_val.has_key('as_set') and af_ag_val['as_set'] == 'true' %}
+{% set af_ag_ns.ag_end = 'as-set ' %}
+{% endif %}
+{% if af_ag_val.has_key('summary_only') and af_ag_val['summary_only'] == 'true' %}
+{% set af_ag_ns.ag_end = af_ag_ns.ag_end + 'summary-only' %}
+{% endif %}
+  aggregate-address {{af_ag_key[2]}} {{af_ag_ns.ag_end}}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# ------- aggregate-prefix - End --------------------------- #}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# ------- redistribute - Start --------------------------- #}
+{% if ROUTE_REDISTRIBUTE is defined and ROUTE_REDISTRIBUTE|length > 0 %}
+{% for rr_key, rr_val in ROUTE_REDISTRIBUTE.items() %}
+{% if vrf == rr_key[0] and af_str == rr_key[3] %}
+{% if rr_val.has_key('route_map') %}
+  redistribute {{rr_key[1]}} {{rr_val['route_map'][0]}}
+{% else %}
+  redistribute {{rr_key[1]}}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{# ------- redistribute - End ----------------------------- #}
 {# ------- peer-group af--------------------------- #}
 {% if BGP_PEER_GROUP_AF is defined and BGP_PEER_GROUP_AF|length > 0 %}
 {% for n_af_key, n_af_val in BGP_PEER_GROUP_AF.items() %}
