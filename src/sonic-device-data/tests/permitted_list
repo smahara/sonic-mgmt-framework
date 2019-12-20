@@ -191,3 +191,9 @@ sai_eapp_config_file
 use_all_splithorizon_groups
 sai_tunnel_support
 port_fec
+flowtracker_enable
+flowtracker_max_flows
+flowtracker_drop_monitor_enable
+flowtracker_export_interval_usecs
+flowtracker_max_export_pkt_length
+flowtracker_fsp_reinject_max_length
