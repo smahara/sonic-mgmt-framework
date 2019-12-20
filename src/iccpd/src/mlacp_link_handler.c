@@ -2392,6 +2392,7 @@ void mlacp_peer_conn_handler(struct CSM* csm)
     if (csm->peer_link_if)
     {
         set_peerlink_mlag_port_learn(csm->peer_link_if, 0);
+        set_peerlink_learn_kernel(csm->peer_link_if, 0);
     }
 
     ICCPD_LOG_DEBUG("ICCP_FSM", "ICCP session up: warm reboot %s, role %s",
@@ -4740,3 +4741,26 @@ int sync_unique_ip()
 
     return 0;
 }
+
+void set_peerlink_learn_kernel(
+    struct LocalInterface *peer_link_if,
+    int enable)
+{
+    if (!peer_link_if)
+        return;
+
+    char cmd[256] = { 0 };
+    int ret = 0;
+
+    if (enable == 0) {
+        sprintf(cmd, "bridge link set dev %s learning off", peer_link_if->name);
+    } else {
+        sprintf(cmd, "bridge link set dev %s learning on", peer_link_if->name);
+    }
+
+    ret = system(cmd);
+    ICCPD_LOG_DEBUG(__FUNCTION__, " cmd  %s  ret = %d", cmd, ret);
+
+    return;
+}
+
