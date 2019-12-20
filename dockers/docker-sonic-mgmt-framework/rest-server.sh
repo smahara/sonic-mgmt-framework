@@ -36,6 +36,7 @@ fi
 # Create the CLI CA certificate if it is not already created
 CLI_CRT=/root/cli-ca/cert.pem
 CLI_KEY=/root/cli-ca/key.pem
+mkdir -p /root/cli-ca
 if [ ! -e "$CLI_CRT" ] || [ ! -e "$CLI_KEY" ]; then
     echo "Generating CLI CA certificate"
     (cd /root/cli-ca && /usr/sbin/mk-root-ca.sh)
