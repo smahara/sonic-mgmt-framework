@@ -1131,14 +1131,20 @@ void mlacp_local_lif_clear_pending_mac(struct CSM* csm, struct LocalInterface *l
                 del_mac_from_chip(mac_msg);
             }
 
-            //TBD do we need to send delete notification to peer .?
-            MAC_RB_REMOVE(mac_rb_tree, &MLACP(csm).mac_rb, mac_msg);
-
-            mac_msg->op_type = MAC_SYNC_DEL;
-            if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
+            // if static dont delete mac
+            if (mac_msg->fdb_type != MAC_TYPE_STATIC)
             {
-                free(mac_msg);
+                //TBD do we need to send delete notification to peer .?
+                MAC_RB_REMOVE(mac_rb_tree, &MLACP(csm).mac_rb, mac_msg);
+
+                mac_msg->op_type = MAC_SYNC_DEL;
+                if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
+                {
+                    free(mac_msg);
+                }
             }
+
+            mac_msg->pending_local_del = 0;
         }
     }
     return;

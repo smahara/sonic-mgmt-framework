@@ -109,6 +109,10 @@ class LldpManager(object):
         self.pending_cmds = {}
         self.hostname = "None"
         self.mgmt_ip = "None"
+        
+        self.device_table = swsscommon.Table(self.config_db, swsscommon.CFG_DEVICE_METADATA_TABLE_NAME)
+        self.port_table = swsscommon.Table(self.config_db, swsscommon.CFG_PORT_TABLE_NAME)
+        self.mgmt_table = swsscommon.Table(self.config_db, swsscommon.CFG_MGMT_INTERFACE_TABLE_NAME)
 
     def update_hostname(self, hostname):
         cmd = "lldpcli configure system hostname {0}".format(hostname)
@@ -140,8 +144,7 @@ class LldpManager(object):
         then form the appropriate lldpcli configuration command and run it.
         """
         # Retrieve all entires for this port from the Port table
-        port_table = swsscommon.Table(self.config_db, swsscommon.CFG_PORT_TABLE_NAME)
-        (status, fvp) = port_table.get(port_name)
+        (status, fvp) = self.port_table.get(port_name)
         if status:
             # Convert list of tuples to a dictionary
             port_table_dict = dict(fvp)
@@ -203,8 +206,7 @@ class LldpManager(object):
 
 
     def lldp_check_mgmt_info_change(self):
-        device_table = swsscommon.Table(self.config_db, swsscommon.CFG_DEVICE_METADATA_TABLE_NAME)
-        (status, fvp) = device_table.get("localhost")
+        (status, fvp) = self.device_table.get("localhost")
         if status:
             # Convert list of tuples to a dictionary
             device_table_dict = dict(fvp)
@@ -215,8 +217,7 @@ class LldpManager(object):
                 self.hostname = hostname
                 self.update_hostname(hostname)
 
-        mgmt_table = swsscommon.Table(self.config_db, swsscommon.CFG_MGMT_INTERFACE_TABLE_NAME)
-        mgmt_intf_keys = mgmt_table.getKeys()        
+        mgmt_intf_keys = self.mgmt_table.getKeys()        
         if not mgmt_intf_keys:
             if not self.mgmt_ip == "None":
                 self.update_mgmt_addr("None")
