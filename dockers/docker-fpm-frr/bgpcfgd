@@ -219,8 +219,11 @@ def hdl_set_extcomm(daemon, cmd_str, op, st_idx, args, data):
     return cmd_list
 
 def hdl_set_asn(daemon, cmd_str, op, st_idx, args, data):
-    if op == CachedDataWithOp.OP_DELETE:
-        args[0][1] = (0, True)
+    if 0 not in args[0]:
+        return None
+    if op == CachedDataWithOp.OP_DELETE and not args[0][0][1]:
+        args[0].pop(1, None)
+        op = CachedDataWithOp.OP_UPDATE
     return get_command_cmn(daemon, cmd_str, op, st_idx, args, data)
 
 class BGPKeyMapInfo:
@@ -1112,11 +1115,10 @@ class BGPConfigDaemon:
             ('DEVICE_METADATA', self.metadata_handler),
             ('BGP_GLOBALS', self.bgp_global_handler),
             ('BGP_GLOBALS_AF', self.bgp_af_handler),
-            ('ASPATH_SET', self.bgp_table_handler_common),
             ('PREFIX_SET', self.bgp_table_handler_common),
             ('PREFIX', self.bgp_table_handler_common),
-            ('COMMUNITY_SET', self.bgp_table_handler_common),
-            ('EXTENDED_COMMUNITY_SET', self.bgp_table_handler_common),
+            ('COMMUNITY_SET', self.comm_set_handler),
+            ('EXTENDED_COMMUNITY_SET', self.comm_set_handler),
             ('ROUTE_MAP', self.bgp_table_handler_common),
             ('BGP_PEER_GROUP', self.bgp_neighbor_handler),
             ('BGP_NEIGHBOR', self.bgp_neighbor_handler),
@@ -1755,6 +1757,9 @@ class BGPConfigDaemon:
     def bgp_neighbor_af_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'filter_list_name', 'filter_list_direction'},
                                                          {'prefix_list_name', 'prefix_list_direction'}])
+    def comm_set_handler(self, table, key, data):
+        self.bgp_table_handler_common(table, key, data, [{'set_type', 'match_action', 'community_member'}])
+
     def start(self):
         try:
             self.subscribe_all()
