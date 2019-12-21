@@ -173,6 +173,7 @@ struct LocalInterface* local_if_create(int ifindex, char* ifname, int type, uint
         {
             local_if->is_peer_link = 1;
             csm->peer_link_if = local_if;
+            set_peerlink_learn_kernel(local_if, 0);
             break;
         }
         /*check the intf is bind with csm*/
