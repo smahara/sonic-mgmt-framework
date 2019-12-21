@@ -4664,6 +4664,11 @@ int syn_local_neigh_mac_info_to_peer(struct LocalInterface *local_if,
         return MCLAG_ERROR;
 
     ICCPD_LOG_DEBUG(__FUNCTION__,"add %d, v4 %d, v6 %d, mac %d ack %d", sync_add, is_v4, is_v6, sync_mac, ack);
+
+    if (csm->peer_link_if)
+    {
+        set_peerlink_learn_kernel(csm->peer_link_if, 0);
+    }
     if (sync_mac) {
         syn_local_mac_info_to_peer(csm, local_if, sync_add);
     }
