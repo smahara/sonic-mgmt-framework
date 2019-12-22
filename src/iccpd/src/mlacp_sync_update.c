@@ -709,10 +709,12 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
     struct Msg* msg = NULL;
     struct ARPMsg *arp_msg = NULL, arp_data;
     struct LocalInterface* local_if;
+    struct LocalInterface* vlan_if = NULL;
     struct LocalInterface *peer_link_if = NULL;
     struct VLAN_ID *vlan_id_list = NULL;
     int set_arp_flag = 0;
     int my_ip_arp_flag = 0;
+    int vlan_count = 0;
     char mac_str[18] = "";
 
     if (!csm || !arp_entry)
@@ -740,6 +742,7 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
             /* Is peer-linlk itf belong to a vlan the same as peer?*/
             RB_FOREACH(vlan_id_list, vlan_rb_tree, &(peer_link_if->vlan_tree))
             {
+                vlan_count++;
                 if (!vlan_id_list->vlan_itf)
                     continue;
                 if (strcmp(vlan_id_list->vlan_itf->name, arp_entry->ifname) != 0)
@@ -758,6 +761,18 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
                 set_arp_flag = 1;
 
                 break;
+            }
+
+            if (vlan_count == 0)
+            {
+                vlan_if = local_if_find_by_name(arp_entry->ifname);
+                if (vlan_if && vlan_if->is_l3_proto_enabled)
+                {
+                    if (arp_entry->ipv4_addr == vlan_if->ipv4_addr) {
+                        my_ip_arp_flag = 1;
+                    }
+                    set_arp_flag = 1;
+                }
             }
         }
     }
@@ -945,11 +960,13 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
     struct Msg *msg = NULL;
     struct NDISCMsg *ndisc_msg = NULL, ndisc_data;
     struct LocalInterface *local_if;
+    struct LocalInterface* vlan_if = NULL;
     struct LocalInterface *peer_link_if = NULL;
     struct VLAN_ID *vlan_id_list = NULL;
     int set_ndisc_flag = 0;
     char mac_str[18] = "";
     int my_ip_nd_flag = 0;
+    int vlan_count = 0;
 
     if (!csm || !ndisc_entry)
         return MCLAG_ERROR;
@@ -969,6 +986,7 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
             /* Is peer-linlk itf belong to a vlan the same as peer? */
             RB_FOREACH(vlan_id_list, vlan_rb_tree, &(peer_link_if->vlan_tree))
             {
+                vlan_count++;
                 if (!vlan_id_list->vlan_itf)
                     continue;
                 if (strcmp(vlan_id_list->vlan_itf->name, ndisc_entry->ifname) != 0)
@@ -983,8 +1001,9 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
                         my_ip_nd_flag = 1;
                     }
 
-                    if (memcmp(show_ipv6_str((char *)ndisc_entry->ipv6_addr), "FE80", 4) == 0
-                            || memcmp(show_ipv6_str((char *)ndisc_entry->ipv6_addr), "fe80", 4) == 0)
+                    if ((my_ip_nd_flag == 0) &&
+                            ((memcmp(show_ipv6_str((char *)ndisc_entry->ipv6_addr), "FE80", 4) == 0)
+                            || (memcmp(show_ipv6_str((char *)ndisc_entry->ipv6_addr), "fe80", 4) == 0)))
                     {
                         if (iccp_check_if_addr_from_netlink(AF_INET6, &(ndisc_entry->ipv6_addr), vlan_id_list->vlan_itf))
                         {
@@ -1000,6 +1019,29 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
                 set_ndisc_flag = 1;
 
                 break;
+            }
+
+            if (vlan_count == 0)
+            {
+                vlan_if = local_if_find_by_name(ndisc_entry->ifname);
+                if (vlan_if && vlan_if->is_l3_proto_enabled)
+                {
+                    if (memcmp((char *)ndisc_entry->ipv6_addr, (char *)vlan_if->ipv6_addr, 16) == 0)
+                    {
+                        my_ip_nd_flag = 1;
+                    }
+
+                    if ((my_ip_nd_flag == 0) &&
+                            (memcmp(show_ipv6_str((char *)ndisc_entry->ipv6_addr), "FE80", 4) == 0
+                            || memcmp(show_ipv6_str((char *)ndisc_entry->ipv6_addr), "fe80", 4) == 0))
+                    {
+                        if (iccp_check_if_addr_from_netlink(AF_INET6, &(ndisc_entry->ipv6_addr), vlan_if))
+                        {
+                            my_ip_nd_flag = 1;
+                        }
+                    }
+                    set_ndisc_flag = 1;
+                }
             }
         }
     }
