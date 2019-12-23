@@ -1,4 +1,15 @@
 #!/bin/bash
+
+EXTPLUGIN=/usr/bin/ext/service/{{ docker_container_name }}.sh
+if [ -f ${EXTPLUGIN} ]; then
+    . ${EXTPLUGIN}
+fi
+function CALL()
+{
+    FUN=$1; shift;
+    type ${FUN} &>/dev/null && ${FUN} $@
+}
+
 DEBUGLOG="/tmp/{{ docker_container_name }}_debug.log"
 
 function debug()
@@ -382,6 +393,10 @@ wait() {
 }
 
 stop() {
+
+    # Call stop function of module extention
+    CALL {{ docker_container_name }}ServicePreStop
+
 {%- if docker_container_name == "iccpd" %}
     iccpPreStopAction
 {%- endif %}
