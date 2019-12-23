@@ -12,7 +12,6 @@ bcm56340_4x10
 bcm56340_2x10
 bcm56340_config
 bfd_thread_pri
-bfd_cosq
 cdma_timeout_usec
 core_clock_frequency
 ctr_evict_enable
@@ -73,9 +72,6 @@ multicast_l2_range
 multicast_l3_range
 no_leds_proc
 num_ipv6_lpm_128b_entries
-num_queues_pci
-num_queues_uc0
-num_queues_uc1
 os
 oversubscribe_mode
 parity_correction
@@ -83,7 +79,6 @@ parity_enable
 pbmp_oversubscribe
 pbmp_xport
 pci2eb_overrid
-pci_cmcs_num
 pfc_deadlock_seq_control
 bcm_sdk_diag_run
 phy_84328
