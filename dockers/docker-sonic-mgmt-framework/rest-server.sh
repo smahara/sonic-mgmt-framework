@@ -33,18 +33,28 @@ if [ -z $SERVER_CRT ] && [ -z $SERVER_KEY ]; then
     SERVER_KEY=/tmp/key.pem
 fi
 
+# Create the CLI CA certificate if it is not already created
+CLI_CRT=/root/cli-ca/cert.pem
+CLI_KEY=/root/cli-ca/key.pem
+mkdir -p /root/cli-ca
+if [ ! -e "$CLI_CRT" ] || [ ! -e "$CLI_KEY" ]; then
+    echo "Generating CLI CA certificate"
+    (cd /root/cli-ca && /usr/sbin/mk-root-ca.sh)
+fi
+
 REST_SERVER_ARGS=
 if [ -f "/usr/sbin/.test" ]; then
 	REST_SERVER_ARGS="-test.coverprofile=coverage.out "
 fi
 
-REST_SERVER_ARGS+="-ui /rest_ui -logtostderr"
+REST_SERVER_ARGS+="-ui /rest_ui -logtostderr -clicacert $CLI_CRT"
 [ ! -z $SERVER_PORT ] && REST_SERVER_ARGS+=" -port $SERVER_PORT"
 [ ! -z $LOG_LEVEL   ] && REST_SERVER_ARGS+=" -v $LOG_LEVEL"
 [ ! -z $CLIENT_AUTH ] && REST_SERVER_ARGS+=" -client_auth $CLIENT_AUTH"
 [ ! -z $SERVER_CRT  ] && REST_SERVER_ARGS+=" -cert $SERVER_CRT"
 [ ! -z $SERVER_KEY  ] && REST_SERVER_ARGS+=" -key $SERVER_KEY"
 [ ! -z $CA_CRT      ] && REST_SERVER_ARGS+=" -cacert $CA_CRT"
+
 
 echo "REST_SERVER_ARGS = $REST_SERVER_ARGS"
 
