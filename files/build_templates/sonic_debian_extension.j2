@@ -237,6 +237,9 @@ sudo LANG=C cp $IMAGE_CONFIGS/systemd/sysmonitor.service $FILESYSTEM_ROOT/etc/sy
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable sysmonitor.service
 
 
+# Copy the module specific plugin extension file
+sudo LANG=C cp -r $SCRIPTS_DIR/ext   $FILESYSTEM_ROOT/usr/bin/
+
 # Copy rsyslog configuration files and templates
 sudo cp $IMAGE_CONFIGS/rsyslog/rsyslog-config.service  $FILESYSTEM_ROOT/etc/systemd/system/
 sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable rsyslog-config.service
