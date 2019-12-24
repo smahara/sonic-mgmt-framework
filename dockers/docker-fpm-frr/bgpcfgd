@@ -1085,6 +1085,8 @@ class BGPConfigDaemon:
             ('BFD_PEER', self.bfd_handler),
             ('VRF', self.vrf_handler),
             ('BGP_GLOBALS_EVPN_VNI', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_EVPN_RT', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_EVPN_VNI_RT', self.bgp_table_handler_common),
             ('PREFIX_SET', self.bgp_table_handler_common),
             ('PREFIX', self.bgp_table_handler_common),
             ('NEIGHBOR_SET', self.bgp_table_handler_common),
@@ -1228,7 +1230,8 @@ class BGPConfigDaemon:
     def __vrf_based_table(table_name):
         vrf_tables = {'BGP_GLOBALS', 'BGP_GLOBALS_AF', 'BGP_GLOBALS_LISTEN_PREFIX',
                       'BGP_NEIGHBOR', 'BGP_PEER_GROUP', 'BGP_NEIGHBOR_AF', 'BGP_PEER_GROUP_AF',
-                      'ROUTE_REDISTRIBUTE', 'BGP_GLOBALS_AF_AGGREGATE_ADDR', 'BGP_GLOBALS_AF_NETWORK'}
+                      'ROUTE_REDISTRIBUTE', 'BGP_GLOBALS_AF_AGGREGATE_ADDR', 'BGP_GLOBALS_AF_NETWORK',
+                      'BGP_GLOBALS_EVPN_RT', 'BGP_GLOBALS_EVPN_VNI', 'BGP_GLOBALS_EVPN_VNI_RT'}
         return table_name in vrf_tables
 
     @staticmethod
@@ -1526,6 +1529,29 @@ class BGPConfigDaemon:
                               'vni {}'.format(vni)]
                 if not key_map.run_command(data, cmd_prefix, vni):
                     syslog.syslog(syslog.LOG_ERR, 'failed running BGP L2VPN_EVPN VNI config command')
+                    continue
+            elif table == 'BGP_GLOBALS_EVPN_RT':
+                af_type, rt = key.split('|')
+                af, ip_type = af_type.lower().split('_')
+                syslog.syslog(syslog.LOG_INFO, 'Set address family for RT {} to {} {}'.format(rt, af, ip_type))
+                cmd = "vtysh -c 'configure terminal'"
+                cmd += " -c 'router bgp {} vrf {}'".format(local_asn, vrf)
+                cmd += " -c 'address-family {} {}'".format(af, ip_type)
+                cmd += " -c 'route-target {} {}'".format(data['route-target-type'].data, rt)
+                if not self.__run_command(cmd):
+                    syslog.syslog(syslog.LOG_ERR, 'failed running BGP L2VPN_EVPN RT config command')
+                    continue
+            elif table == 'BGP_GLOBALS_EVPN_VNI_RT':
+                af_type, vni, rt = key.split('|')
+                af, ip_type = af_type.lower().split('_')
+                syslog.syslog(syslog.LOG_INFO, 'Set address family for VNI {} RT {} to {} {}'.format(vni, rt, af, ip_type))
+                cmd = "vtysh -c 'configure terminal'"
+                cmd += " -c 'router bgp {} vrf {}'".format(local_asn, vrf)
+                cmd += " -c 'address-family {} {}'".format(af, ip_type)
+                cmd += " -c 'vni {}'".format(vni)
+                cmd += " -c 'route-target {} {}'".format(data['route-target-type'].data, rt)
+                if not self.__run_command(cmd):
+                    syslog.syslog(syslog.LOG_ERR, 'failed running BGP L2VPN_EVPN VNI RT config command')
                     continue
             elif table == 'ROUTE_MAP':
                 map_name = prefix
