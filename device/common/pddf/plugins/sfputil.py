@@ -154,6 +154,12 @@ class SfpUtil(SfpUtilBase):
             try:
                 eeprom = None
                 eeprom = open(self.port_to_eeprom_mapping[port_num], "rb")
+                # check for valid connector type
+                eeprom.seek(2)
+                ctype = eeprom.read(1)
+                if ctype in ['21','23']
+                    return False
+
                 eeprom.seek(93)
                 lpmode = ord(eeprom.read(1))
                 
@@ -190,13 +196,19 @@ class SfpUtil(SfpUtilBase):
                 return False # Read from eeprom only for QSFP ports
             try:
                 eeprom = None
+                eeprom = open(self.port_to_eeprom_mapping[port_num], "r+b")
+                # check for valid connector type
+                eeprom.seek(2)
+                ctype = eeprom.read(1)
+                if ctype in ['21','23']
+                    return False
+
                 # Fill in write buffer
                 regval = 0x3 if lpmode else 0x1 # 0x3:Low Power Mode, 0x1:High Power Mode
                 buffer = create_string_buffer(1)
                 buffer[0] = chr(regval)
                 
                 # Write to eeprom
-                eeprom = open(self.port_to_eeprom_mapping[port_num], "r+b")
                 eeprom.seek(93)
                 eeprom.write(buffer[0])
                 return True
