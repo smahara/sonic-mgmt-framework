@@ -205,22 +205,23 @@ int stpiccp_send_common_info_to_peer(struct System *sys, struct stpiccp_common_i
   strncpy(data->designated_bridge_id, info->desig_bridge_id, BRIDGE_ID_STR_LEN);
   data->designated_port = htons(info->desig_port);
   
+
+  data->nrpv_valid = info->nrpv_valid;
+  data->port_id = htonl(info->port_id);
+  data->port_path_cost = htonl(info->port_path_cost);
+  data->max_age = info->max_age;
+  data->message_age = htonl(info->message_age);
+  data->hello_time = htonl(info->hello_time);
+  data->fwd_delay = htonl(info->fwd_delay);
   data->root_port_req_resp_field = info->root_port_req_resp_field;
-  
+  data->seq_no = htonl(info->seq_no);
   data->state= info->state;
   data->tc_ack = info->tc_ack;
-  data->config_pending = info->config_pending;
   data->change_detection_enabled = info->change_detection_enabled;
   data->self_loop = info->self_loop;
   data->auto_config = info->auto_config;
   data->oper_edge = info->oper_edge;
-  data->kernel_state = info->kernel_state;
-  data->path_cost = htons(info->path_cost);
   data->desig_cost = htonl(info->desig_cost);
-  data->message_age_timer = htons(info->message_age_timer);
-  data->forward_delay = info->forward_delay;
-  data->hold_time = info->hold_time;
-  data->root_protect_timer = htons(info->root_protect_timer);
 
   data->master_node_req_resp_field = info->master_node_req_resp_field;
   data->rpvst_req_proposal_ack_flag = info->rpvst_req_proposal_ack_flag;
@@ -389,7 +390,7 @@ int stpiccp_receive_stp_common_info(struct System *sys, char *msg_buf)
     {
         info = (struct stpiccp_common_info *)&msg_buf[sizeof(stpiccp_msg_hdr_t)+ i * sizeof(struct stpiccp_common_info)];
         ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info to peer (1)-- vlan_id %u port:%s tc_type:%d root_bridge %s root path cst %u desig bridge %s desig port %u root_port_req_resp: %d ", info->vid, info->port_name, info->vlan_port_tc_type, info->root_bridge_id, info->root_path_cost, info->desig_bridge_id, info->desig_port, info->root_port_req_resp_field);  
-        ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info to peer (2)-- state:%d tc_ack:%d config_pending:%d change_detection_enabled:%d self_loop:%d auto_config:%d oper_edge:%d kernel_state:%d path_cost:%d desig_cost:%d message_age_timer:%d forward_delay:%d hold_time:%d root_protect_timer:%d ", info->state, info->tc_ack, info->config_pending, info->change_detection_enabled, info->self_loop, info->auto_config, info->oper_edge, info->kernel_state, info->path_cost, info->desig_cost, info->message_age_timer, info->forward_delay, info->hold_time, info->root_protect_timer);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info to peer (2)-- state:%d tc_ack:%d change_detection_enabled:%d self_loop:%d auto_config:%d oper_edge:%d path_cost:%d desig_cost:%d forward_delay:%d ", info->state, info->tc_ack, info->change_detection_enabled, info->self_loop, info->auto_config, info->oper_edge, info->port_path_cost, info->desig_cost, info->fwd_delay);
         ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info to peer (3)-- master_node_req_resp %d rpvst_req_prop_ack_flag %d message_type: %d", info->master_node_req_resp_field, info->rpvst_req_proposal_ack_flag, info->message_type);
 
         stpiccp_send_common_info_to_peer(sys, info);
