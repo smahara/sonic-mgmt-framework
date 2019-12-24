@@ -22,9 +22,9 @@ module_64ports=0
 sai_eapp_config_file=/etc/broadcom/eapps_cfg.json
 
 #PTP
-num_queues_pci=32
+num_queues_pci=24
 num_queues_uc0=1
-num_queues_uc1=1
+num_queues_uc1=19
 
 #SFI
 serdes_if_type=9

@@ -234,7 +234,7 @@ int iccp_csm_send(struct CSM* csm, char* buf, int msg_len)
     else
         param = (struct ICCParameter*)&buf[sizeof(ICCHdr)];
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Send(%d): len=[%d] msg_type=[%s (0x%X, 0x%X)]", csm->sock_fd, msg_len, get_tlv_type_string(param->type), ldp_hdr->msg_type, param->type);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Send(%d): len=[%d] msg_type=[%s (0x%X, 0x%X)]", csm->sock_fd, msg_len, get_tlv_type_string(ntohs(param->type)), ldp_hdr->msg_type, ntohs(param->type));
     csm->msg_log.msg[csm->msg_log.end_index].msg_id = ntohl(ldp_hdr->msg_id);
     csm->msg_log.msg[csm->msg_log.end_index].type = ntohs(ldp_hdr->msg_type);
     csm->msg_log.msg[csm->msg_log.end_index].tlv = ntohs(param->type);
@@ -275,14 +275,11 @@ void iccp_csm_transit(struct CSM* csm)
     /* No connection, but have state change? reset it...*/
     if (csm->current_state != ICCP_NONEXISTENT && csm->sock_fd <= 0)
     {
-        ICCPD_LOG_INFO(__FUNCTION__, "csm %d change state from %s to NONEXISTENT.", csm->mlag_id, state_str[csm->current_state]);
+        ICCPD_LOG_NOTICE(__FUNCTION__, "csm %d change state from %s to NONEXISTENT.", csm->mlag_id, state_str[csm->current_state]);
         csm->current_state = ICCP_NONEXISTENT;
         iccp_csm_enter_state_nonexistent(csm);
         return;
     }
-
-    /*if (csm->current_state != ICCP_NONEXISTENT)
-        ICCPD_LOG_DEBUG(__FUNCTION__, "#Begin# id:%d, fd:%d, ICCP CSM State:%d", csm->mlag_id, csm->sock_fd, csm->current_state);*/
 
     msg = iccp_csm_dequeue_msg(csm);
 
@@ -355,7 +352,7 @@ void iccp_csm_transit(struct CSM* csm)
     if (prev_state != csm->current_state || (csm->current_state && msg != NULL))
     {
         if (prev_state != csm->current_state)
-            ICCPD_LOG_INFO(__FUNCTION__, "csm %d change state from %s to %s.", csm->mlag_id, state_str[prev_state], state_str[csm->current_state]);
+            ICCPD_LOG_NOTICE(__FUNCTION__, "csm %d change state from %s to %s.", csm->mlag_id, state_str[prev_state], state_str[csm->current_state]);
 
         switch (csm->current_state)
         {
@@ -387,8 +384,6 @@ void iccp_csm_transit(struct CSM* csm)
                 break;
         }
     }
-    /*if (csm->current_state != ICCP_NONEXISTENT && prev_state != csm->current_state)
-        ICCPD_LOG_DEBUG(__FUNCTION__, "#End# id:%d, fd:%d, ICCP CSM State:%d", csm->mlag_id, csm->sock_fd, csm->current_state);*/
 }
 
 /* Set up ICCP message */

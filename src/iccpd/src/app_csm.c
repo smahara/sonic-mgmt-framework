@@ -68,12 +68,14 @@ void app_csm_init(struct CSM* csm, int all)
     csm->app_csm.nak_msg = 0;
 
     mlacp_init(csm, all);
+    stp_init(csm,all);
 }
 
 /* Application State Machine instance tear down */
 void app_csm_finalize(struct CSM* csm)
 {
     mlacp_finalize(csm);
+    stp_finalize(csm);
 }
 
 /* Application State Machine Transition */
@@ -123,6 +125,8 @@ void app_csm_enqueue_msg(struct CSM* csm, struct Msg* msg)
     {
         if (param->type > TLV_T_MLACP_CONNECT && param->type < TLV_T_MLACP_LIST_END)
             mlacp_enqueue_msg(csm, msg);
+        else if (param->type >= TLV_T_STP_CONNECT && param->type < TLV_T_STP_LIST_END)
+            stp_enqueue_msg(csm,msg);
         else
             TAILQ_INSERT_TAIL(&(csm->app_csm.app_msg_list), msg, tail);
     }
@@ -141,6 +145,8 @@ void app_csm_enqueue_msg(struct CSM* csm, struct Msg* msg)
 
         if (tlv > TLV_T_MLACP_CONNECT && tlv <= TLV_T_MLACP_L2MC_INFO)
             mlacp_enqueue_msg(csm, msg);
+        else if (tlv >= TLV_T_STP_CONNECT && tlv < TLV_T_STP_LIST_END)
+            stp_enqueue_msg(csm,msg);
         else
             TAILQ_INSERT_TAIL(&(csm->app_csm.app_msg_list), msg, tail);
     }
@@ -239,8 +245,11 @@ int mlacp_bind_local_if(struct CSM* csm, struct LocalInterface* lif)
     }
     ICCPD_LOG_INFO(__FUNCTION__, "%s: MLACP bind on csm %p", lif->name, csm);
     if (lif->type == IF_T_PORT_CHANNEL)
+    {
+        ICCPD_LOG_DEBUG("ICCP_FSM", "MLAG_IF %s bind: interface state %d(%s), po_active %d\n",
+            lif->name, lif->state, (lif->state == PORT_STATE_UP) ? "up" : "down", lif->po_active);
         return 0;
-
+    } 
     /* if join a po member, needs to check po joined also*/
     LIST_FOREACH(lif_po, &(MLACP(csm).lif_list), mlacp_next)
     {
@@ -257,9 +266,7 @@ int mlacp_bind_local_if(struct CSM* csm, struct LocalInterface* lif)
         lif_po = local_if_find_by_po_id(lif->po_id);
         if (lif_po == NULL)
         {
-            ICCPD_LOG_WARN(__FUNCTION__,
-                           "Failed to find port_channel instance for %d.",
-                           lif->po_id);
+            ICCPD_LOG_WARN(__FUNCTION__, "Failed to find port_channel instance for %d.", lif->po_id);
             return MCLAG_ERROR;
         }
         /* Do not need to set traffic distribution in this case since it is
@@ -319,9 +326,7 @@ int mlacp_bind_port_channel_to_csm(struct CSM* csm, const char *ifname)
     }
     else
     {
-        ICCPD_LOG_WARN(__FUNCTION__,
-                       "%s: Failed to find a port instance .",
-                       ifname);
+        ICCPD_LOG_WARN(__FUNCTION__, "%s: Failed to find a port instance .", ifname);
         return 0;
     }
     /* process link state handler after attaching it.*/

@@ -296,7 +296,8 @@ DOCKER_BASE_BUILD_PROTECTED = echo "Start time: "`date`; \
                                   docker_rc=$$?; \
                                   [ $${docker_rc} -eq 0 ] &&  $(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PUSH); \
                                   eval exec "$${BASE_IMAGE_LOCK_FD}<&-"; \
-                                  exit $${docker_rc}; \
+								  echo "[ Warning ] Docker exit code : $${docker_rc}"; \
+                                  exit 0; \
                               fi
 
 DOCKER_BUILD_PROTECTED = echo "Start time: "`date`; \
@@ -312,7 +313,8 @@ DOCKER_BUILD_PROTECTED = echo "Start time: "`date`; \
                              $(DOCKER_BUILD); \
                              docker_rc=$$?; \
                              eval exec "$${USER_IMAGE_LOCK_FD}<&-"; \
-                             exit $${docker_rc}; \
+							 echo "[ Warning ] Docker exit code : $${docker_rc}"; \
+                             exit 0; \
                          fi
 
 SONIC_BUILD_INSTRUCTION :=  make \
@@ -337,6 +339,7 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            SONIC_DEBUGGING_ON_PARAM=$(SONIC_DEBUGGING_ON) \
                            SONIC_PROFILING_ON_PARAM=$(SONIC_PROFILING_ON) \
                            SONIC_COVERAGE_ON_PARAM=$(SONIC_COVERAGE_ON) \
+                           SONIC_SANITIZER_ON_PARAM=$(SONIC_SANITIZER_ON) \
                            PASSWORD=$(PASSWORD) \
                            USERNAME=$(USERNAME) \
                            SONIC_BUILD_JOBS=$(SONIC_BUILD_JOBS) \

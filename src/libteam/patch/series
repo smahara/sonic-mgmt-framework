@@ -11,3 +11,5 @@
 0016-teamd-stop-processing-key-mismatch-dont-select-if-not-aggregable.patch
 0017-libteam-change-loglevel-to-info-if-netlink-msg-is-unparsable.patch
 0018-team-config-port-if-ifname-succeeds.patch
+0019-teamd-attach-netlink-EBPF-filter.patch
+0020-teamd-add-carrier-handler-to-loadbalance-runner.patch

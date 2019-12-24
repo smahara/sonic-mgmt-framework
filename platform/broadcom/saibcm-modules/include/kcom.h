@@ -1,22 +1,7 @@
 /*
- * Copyright 2017 Broadcom
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2, as
- * published by the Free Software Foundation (the "GPL").
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License version 2 (GPLv2) for more details.
- *
- * You should have received a copy of the GNU General Public License
- * version 2 (GPLv2) along with this source code.
- */
-/*
  * $Id: kcom.h,v 1.9 Broadcom SDK $
- * $Copyright: (c) 2005 Broadcom Corp.
- * All Rights Reserved.$
+ * $Copyright: (c) 2019 Broadcom.
+ * Broadcom Proprietary and Confidential. All rights reserved.$
  *
  * File:    kcom.h
  * Purpose: User/Kernel message definitions
@@ -59,8 +44,9 @@
 #define KCOM_M_DBGPKT_SET       41 /* Enbale debug packet function */
 #define KCOM_M_DBGPKT_GET       42 /* Get debug packet function info */
 #define KCOM_M_WB_CLEANUP       51 /* Clean up for warmbooting */
+#define KCOM_M_CLOCK_CMD        52 /* Clock Commands */
 
-#define KCOM_VERSION            10 /* Protocol version */
+#define KCOM_VERSION            12 /* Protocol version */
 
 /*
  * Message status codes
@@ -340,6 +326,19 @@ typedef struct kcom_msg_version_s {
 } kcom_msg_version_t;
 
 /*
+ * Request KCOM interface clock info.
+ */
+#define KSYNC_M_HW_INIT            0
+#define KSYNC_M_HW_DEINIT          1
+#define KSYNC_M_VERSION            2
+#define KSYNC_M_HW_TS_DISABLE      3
+
+typedef struct kcom_clock_info_s {
+    uint8 cmd;
+    int32 data[8];
+} kcom_clock_info_t;
+
+/*
  * Send literal string to/from kernel module.
  * Mainly for debugging purposes.
  */
@@ -359,7 +358,7 @@ typedef struct kcom_msg_string_s {
 /*
  * Indicate that eth hardware has been properly initialized
  * for DMA operation to commence.
- */
+ */ 
 typedef struct kcom_msg_eth_hw_config_s {
     kcom_msg_hdr_t hdr;
     kcom_eth_hw_config_t config;
@@ -447,6 +446,14 @@ typedef struct kcom_msg_netif_destroy_s {
 } kcom_msg_netif_destroy_t;
 
 /*
+ * Destroy system network interface.
+ */
+typedef struct kcom_msg_clock_s{
+    kcom_msg_hdr_t hdr;
+    kcom_clock_info_t clock_info;
+} kcom_msg_clock_cmd_t;
+
+/*
  * Get list of currently defined system network interfaces.
  */
 #ifndef KCOM_NETIF_MAX
@@ -487,8 +494,7 @@ typedef struct kcom_msg_filter_destroy_s {
  * Get list of currently defined packet filters.
  */
 #ifndef KCOM_FILTER_MAX
-/* SAI_FIXUP - Increased the filters to 1024 from 128 */
-#define KCOM_FILTER_MAX          1024
+#define KCOM_FILTER_MAX         128
 #endif
 
 typedef struct kcom_msg_filter_list_s {
@@ -537,6 +543,7 @@ typedef union kcom_msg_s {
     kcom_msg_dbg_pkt_set_t dbg_pkt_set;
     kcom_msg_dbg_pkt_get_t dbg_pkt_get;
     kcom_msg_wb_cleanup_t wb_cleanup;
+    kcom_msg_clock_cmd_t clock_cmd;
 } kcom_msg_t;
 
 /*

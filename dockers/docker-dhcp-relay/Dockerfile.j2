@@ -27,5 +27,6 @@ RUN apt-get clean -y         && \
 COPY ["docker_init.sh", "start.sh", "files/supervisor-proc-exit-listener", "/usr/bin/"]
 COPY ["docker-dhcp-relay.supervisord.conf.j2", "wait_for_intf.sh.j2", "/usr/share/sonic/templates/"]
 COPY ["critical_processes", "/etc/supervisor"]
+COPY ["no-docker-restart.supervisord.conf.j2", "/usr/share/sonic/templates/"]
 
 ENTRYPOINT ["/usr/bin/docker_init.sh"]

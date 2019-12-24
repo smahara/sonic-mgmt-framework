@@ -141,6 +141,8 @@ struct LocalInterface
     int mlacp_state;    /* Record mlacp state */
     uint8_t isolate_to_peer_link;
 
+    time_t po_down_time;
+
     struct CSM* csm;
 
     uint8_t changed;
@@ -168,9 +170,7 @@ int local_if_is_l3_mode(struct LocalInterface* local_if);
 
 void local_if_init(struct LocalInterface*);
 void local_if_finalize(struct LocalInterface*);
-#if 0
-void ether_mac_set_addr_with_if_name(char* name, uint8_t* mac);
-#endif
+
 struct PeerInterface* peer_if_create(struct CSM* csm, int peer_if_number, int type);
 struct PeerInterface* peer_if_find_by_name(struct CSM* csm, char* name);
 

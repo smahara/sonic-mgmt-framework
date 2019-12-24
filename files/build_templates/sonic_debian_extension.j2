@@ -356,6 +356,10 @@ done
 sudo cp $IMAGE_CONFIGS/snmp/snmp.yml $FILESYSTEM_ROOT/etc/sonic/
 sudo cp $IMAGE_CONFIGS/snmp/snmp_wait.sh $FILESYSTEM_ROOT/usr/bin
 
+#Copy agent_config.cfg file
+sudo cp $IMAGE_CONFIGS/broadview/agent_config.cfg $FILESYSTEM_ROOT/etc/sonic/
+
+
 # Copy ASN configuration files
 sudo cp $IMAGE_CONFIGS/constants/constants.yml $FILESYSTEM_ROOT/etc/sonic/
 

@@ -23,7 +23,8 @@ RUN apt-get update   && \
         libjson-c3      \
         logrotate       \
         libunwind8      \
-        traceroute
+        traceroute      \
+        net-tools
 
 RUN groupadd -g ${frr_user_gid} frr \
  && useradd -u ${frr_user_uid} -g ${frr_user_gid} -M -s /bin/false frr
@@ -44,10 +45,11 @@ RUN apt-get clean -y      && \
     apt-get autoremove -y && \
     rm -rf /debs ~/.cache
 
-COPY ["bgpcfgd", "start.sh", "/usr/bin/"]
+COPY ["bgpcfgd", "start.sh", "files/supervisor-proc-exit-listener", "/usr/bin/"]
 COPY ["*.j2", "/usr/share/sonic/templates/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 COPY ["snmp.conf", "/etc/snmp/frr.conf"]
+COPY ["critical_processes", "/etc/supervisor"]
 COPY ["TSA", "/usr/bin/TSA"]
 COPY ["TSB", "/usr/bin/TSB"]
 COPY ["TSC", "/usr/bin/TSC"]

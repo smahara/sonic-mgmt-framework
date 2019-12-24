@@ -32,15 +32,26 @@ function create_devices()
 #                                 level logs
 function load_kernel_modules()
 {
+    onie_platfrom=`grep onie_platform /host/machine.conf`
+    export $onie_platfrom
+    echo "Here in opennsl-module init in $onie_platform ..."
+    if [ -f /usr/share/sonic/device/$onie_platform/idt_init.sh ]; then
+        echo "Running idt_init.sh ..."
+        chmod +x /usr/share/sonic/device/$onie_platform/idt_init.sh
+        /usr/share/sonic/device/$onie_platform/idt_init.sh
+    fi
+
     modprobe linux-kernel-bde dmasize=32M maxpayload=128 debug=4 dma_debug=1
     modprobe linux-user-bde
     modprobe linux-bcm-knet use_rx_skb=1 rx_buffer_size=9238 debug=0x5020 rx_rate=30000,30000,30000,30000,30000,30000,30000
     modprobe psample
     modprobe linux-knet-cb
+    modprobe linux-bcm-ptp-clock
 }
 
 function remove_kernel_modules()
 {
+    rmmod linux-bcm-ptp-clock
     rmmod linux-knet-cb
     rmmod psample
     rmmod linux-bcm-knet

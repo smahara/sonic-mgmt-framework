@@ -28,7 +28,7 @@ fi
 # Create temporary server certificate if they not configured in ConfigDB
 if [ -z $SERVER_CRT ] && [ -z $SERVER_KEY ]; then
     echo "Generating temporary TLS server certificate ..."
-    (cd /tmp && /usr/sbin/generate_cert --host="localhost,127.0.0.1")
+    (cd /tmp && /usr/sbin/generate_cert --host="localhost,127.0.0.1" --ecdsa-curve=P256)
     SERVER_CRT=/tmp/cert.pem
     SERVER_KEY=/tmp/key.pem
 fi
@@ -50,7 +50,7 @@ echo "REST_SERVER_ARGS = $REST_SERVER_ARGS"
 
 
 export CVL_SCHEMA_PATH=/usr/sbin/schema
-export LIBYANG_EXTENSIONS_PLUGINS_DIR=/usr/lib/x86_64-linux-gnu/libyang/extensions
-export LIBYANG_USER_TYPES_PLUGINS_DIR=/usr/lib/x86_64-linux-gnu/libyang/user_types
+export LIBYANG_EXTENSIONS_PLUGINS_DIR=/usr/lib/libyang/extensions
+export LIBYANG_USER_TYPES_PLUGINS_DIR=/usr/lib/libyang/user_types
 
 exec /usr/sbin/rest_server ${REST_SERVER_ARGS}

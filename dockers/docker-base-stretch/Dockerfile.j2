@@ -45,6 +45,14 @@ RUN apt-get update &&        \
         python               \
         rsyslog              \
         vim-tiny             \
+{% if CONFIGURED_ARCH == "armhf" %}
+        libasan3:armhf       \
+{% elif CONFIGURED_ARCH == "arm64" %}
+        libasan3:arm64       \
+{% else %}
+        libasan3:amd64       \
+{% endif %}
+        libasan3             \
 # Install dependencies of supervisor
         python-pkg-resources \
         python-meld3
@@ -57,6 +65,11 @@ RUN apt-get -y install       \
 {% endif %}
 
 RUN mkdir -p /etc/supervisor /var/log/supervisor
+
+{% if SONIC_SANITIZER_ON is defined %}
+RUN mkdir /etc/supervisor/conf.d/
+COPY ["etc/supervisor/asan.conf", "/etc/supervisor/conf.d/asan.conf"]
+{% endif %}
 
 RUN apt-get -y purge   \
     exim4              \
@@ -71,6 +84,10 @@ RUN apt-get -y purge   \
 # Install built Debian packages and implicitly install their dependencies
 {{ install_debian_packages(docker_base_stretch_debs.split(' ')) }}
 {%- endif %}
+
+# Base packages for bpf
+RUN apt-get install -f -y libbpf-dev libelf-dev
+
 
 # Clean up apt
 # Remove /var/lib/apt/lists/*, could be obsoleted for derived images

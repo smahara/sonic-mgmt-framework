@@ -174,7 +174,7 @@ def config_pddf_utils():
     #  Check if the new 2.0 platform APIs exists and pddf 2.0 implementation also exist
     if os.path.isdir(device_path+'/sonic_platform') and os.path.isdir(PLATFORM_ROOT_PATH+'/pddf/sonic_platform'):
         device_plugin_path = "/".join([device_path,"sonic_platform"])
-        pddf_path = "/".join([PLATFORM_ROOT_PATH, "pddf/sonic_platform"])
+        pddf_path = "/".join([device_path, "pddf/pddf_sonic_platform"])
     else:
         device_plugin_path = "/".join([device_path, "plugins"])
     
@@ -197,6 +197,16 @@ def config_pddf_utils():
     if os.path.exists(device_path+"/pddf/fancontrol") and not os.path.exists(device_path+"/fancontrol"):
         shutil.copy(device_path+"/pddf/fancontrol",device_path+"/fancontrol")
         #print "*** Copied the pddf fancontrol file "
+
+    # BMC support
+    f_sensors="/usr/bin/sensors"
+    f_sensors_org="/usr/bin/sensors.org"
+    f_pddf_sensors="/usr/local/bin/pddf_sensors"
+    if os.path.exists(f_pddf_sensors) is True:
+        if os.path.exists(f_sensors_org) is False:
+            shutil.copy(f_sensors, f_sensors_org)
+        shutil.copy(f_pddf_sensors, f_sensors)
+
 
     return 0
 
@@ -228,6 +238,12 @@ def cleanup_pddf_utils():
         log_os_system("mv "+device_path+"/fancontrol.bak"+" "+device_path+"/fancontrol", 0)
         #print "***Moved fancotnrol.bak to fancontrol"
 
+    # BMC support
+    f_sensors="/usr/bin/sensors"
+    f_sensors_org="/usr/bin/sensors.org"
+    if os.path.exists(f_sensors_org) is True:
+        shutil.copy(f_sensors_org, f_sensors)
+
     return 0
 
 def create_pddf_log_files():
@@ -249,6 +265,7 @@ def driver_install():
     for i in range(0,len(kos)):
         status, output = log_os_system(kos[i], 1)
         if status:
+            print "driver_install() failed with error %d"%status
             if FORCE == 0:        
                 return status       
 
@@ -262,10 +279,14 @@ def driver_uninstall():
     status = cleanup_pddf_utils()
 
     for i in range(0,len(kos)):
+        if 'i2c-i801' in kos[-(i+1)]:
+            continue
+
         rm = kos[-(i+1)].replace("modprobe", "modprobe -rq")
         rm = rm.replace("insmod", "rmmod")        
         status, output = log_os_system(rm, 1)
         if status:
+            print "driver_uninstall() failed with error %d"%status
             if FORCE == 0:        
                 return status              
     return 0
@@ -275,6 +296,7 @@ def device_install():
     # trigger the pddf_obj script for FAN, PSU, CPLD, MUX, etc
     status = pddf_obj.create_pddf_devices()
     if status:
+        print "Error: create_pddf_devices() failed with error %d"%status
         if FORCE == 0:
             return status
     return
@@ -284,6 +306,7 @@ def device_uninstall():
     # Trigger the paloparse script for deletion of FAN, PSU, OPTICS, CPLD clients
     status = pddf_obj.delete_pddf_devices()
     if status:
+        print "Error: delete_pddf_devices() failed with error %d"%status
         if FORCE == 0:
             return status
     return 
@@ -297,7 +320,7 @@ def do_install():
     if driver_check()== False :
         print PROJECT_NAME.upper() +" has no PDDF driver installed...."
         create_pddf_log_files()
-        print "Installing...."    
+        print "Installing ..."    
         status = driver_install()
         if status:
             return  status
@@ -353,6 +376,7 @@ def do_switch_pddf():
         print "Stopping the pmon service ..."
         status, output = log_os_system("systemctl stop pmon.service", 1)
         if status:
+            print "Pmon stop failed"
             if FORCE==0:
                 return status
 
@@ -389,6 +413,7 @@ def do_switch_pddf():
         print "Restart the pmon service ..."
         status, output = log_os_system("systemctl start pmon.service", 1)
         if status:
+            print "Pmon restart failed"
             if FORCE==0:
                 return status
 
@@ -402,6 +427,7 @@ def do_switch_nonpddf():
         print "Stopping the pmon service ..."
         status, output = log_os_system("systemctl stop pmon.service", 1)
         if status:
+            print "Stopping pmon service failed"
             if FORCE==0:
                 return status
 
@@ -438,6 +464,7 @@ def do_switch_nonpddf():
         print "Restart the pmon service ..."
         status, output = log_os_system("systemctl start pmon.service", 1)
         if status:
+            print "Restarting pmon service failed"
             if FORCE==0:
                 return status
 

@@ -622,12 +622,12 @@ menuentry '$demo_grub_entry' {
         if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
         insmod part_msdos
         insmod ext2
-        linux   /$image_dir/boot/vmlinuz-4.9.0-9-2-amd64 root=$grub_cfg_root rw $GRUB_CMDLINE_LINUX  \
+        linux   /$image_dir/boot/vmlinuz-4.9.0-11-2-amd64 root=$grub_cfg_root rw $GRUB_CMDLINE_LINUX  \
                 net.ifnames=0 biosdevname=0 \
                 loop=$image_dir/$FILESYSTEM_SQUASHFS loopfstype=squashfs                       \
                 apparmor=1 security=apparmor varlog_size=$VAR_LOG_SIZE usbcore.autosuspend=-1 $ONIE_PLATFORM_EXTRA_CMDLINE_LINUX
         echo    'Loading $NOS_NAME $demo_type initial ramdisk ...'
-        initrd  /$image_dir/boot/initrd.img-4.9.0-9-2-amd64
+        initrd  /$image_dir/boot/initrd.img-4.9.0-11-2-amd64
 }
 EOF
 
@@ -641,6 +641,12 @@ cat <<EOF >> $grub_cfg
 $old_sonic_menuentry
 $onie_menuentry
 EOF
+fi
+
+# correct machine.conf in case of onie-discovery-install
+if [ "$install_env" = "onie" ] && [ -f $demo_mnt/machine.conf ]; then
+    #echo "********** INSTALL_ENV is $install_env. Correcting machine.conf **********"
+    sed -i '/.*=[^"].* .*/s/\(.*\)=\(.*\)/\1="\2"/g' $demo_mnt/machine.conf
 fi
 
 if [ "$install_env" = "build" ]; then

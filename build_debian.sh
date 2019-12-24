@@ -72,7 +72,7 @@ if [[ $CONFIGURED_ARCH == armhf || $CONFIGURED_ARCH == arm64 ]]; then
 else
     DOCKER_VERSION=5:19.03.0~2.3.rc3-0~debian-stretch
 fi
-LINUX_KERNEL_VERSION=4.9.0-9-2
+LINUX_KERNEL_VERSION=4.9.0-11-2
 
 ## Working directory to prepare the file system
 FILESYSTEM_BASE=/sonic/build
@@ -195,6 +195,10 @@ sudo dpkg --root=$FILESYSTEM_ROOT -i $debs_path/linux-image-${LINUX_KERNEL_VERSI
     sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install acl
 [[ $CONFIGURED_ARCH == amd64 ]] && sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install dmidecode
+
+## Install sonic-host-service systemd service for docker/host communication
+sudo dpkg --root=$FILESYSTEM_ROOT -i src/sonic-host-service*.deb || \
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install -f
 
 ## Update initramfs for booting with squashfs+overlay
 cat files/initramfs-tools/modules | sudo tee -a $FILESYSTEM_ROOT/etc/initramfs-tools/modules > /dev/null
@@ -346,7 +350,10 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
     mcelog                  \
     ipmitool                \
     ndisc6                  \
-    makedumpfile
+    makedumpfile            \
+    python-dbus             \
+    python-gobject          \
+    python-systemd
 
 
 if [[ $CONFIGURED_ARCH == amd64 ]]; then
@@ -437,6 +444,7 @@ sudo augtool --autosave "
 
 set /files/etc/sysctl.conf/kernel.softlockup_panic 1
 set /files/etc/sysctl.conf/kernel.panic 10
+set /files/etc/sysctl.conf/kernel.sysrq 1
 set /files/etc/sysctl.conf/vm.panic_on_oom 2
 set /files/etc/sysctl.conf/fs.suid_dumpable 2
 
@@ -473,7 +481,7 @@ set /files/etc/sysctl.conf/net.ipv6.conf.default.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.all.keep_addr_on_down 1
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.keep_addr_on_down 1
 
-set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 0
+set /files/etc/sysctl.conf/net.ipv4.tcp_l3mdev_accept 1
 set /files/etc/sysctl.conf/net.ipv4.udp_l3mdev_accept 1
 
 set /files/etc/sysctl.conf/net.ipv6.ip_nonlocal_bind 1
@@ -483,7 +491,7 @@ set /files/etc/sysctl.conf/net.core.wmem_max 16777216
 
 set /files/etc/sysctl.conf/net.core.somaxconn 512
 
-set /files/etc/sysctl.conf/net.ipv6.conf.default.disable_ipv6 1
+set /files/etc/sysctl.conf/net.ipv6.conf.default.disable_ipv6 1 
 set /files/etc/sysctl.conf/net.ipv6.conf.eth0.disable_ipv6 0
 set /files/etc/sysctl.conf/net.ipv6.conf.lo.disable_ipv6 0
 set /files/etc/sysctl.conf/net.ipv6.conf.docker0.disable_ipv6 0

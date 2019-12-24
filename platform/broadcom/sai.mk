@@ -1,6 +1,8 @@
-BRCM_SAI = libsaibcm_3.255.6.4_amd64.deb
-BRCM_SAI_DEV = libsaibcm-dev_3.255.6.4_amd64.deb
-BRCM_SAI_DIAG = libsaibcm-diag_3.255.6.4_amd64.deb
+BRCM_SAI_VER = 3.8.0.1
+BRCM_SAI = libsaibcm_$(BRCM_SAI_VER)_amd64.deb
+BRCM_SAI_DEV = libsaibcm-dev_$(BRCM_SAI_VER)_amd64.deb
+BRCM_SAI_DIAG = libsaibcm-diag_$(BRCM_SAI_VER)_amd64.deb
+BRCM_SAI_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/$(BRCM_SAI_VER)"
 SAI_LIBS_MOUNT_POINT = /sai_libs
 
 ifneq  ($(LOCAL_SAI_DEBS_PATH),)
@@ -13,7 +15,7 @@ endif
 #BRCM_SAI
 ifeq ($(LOCAL_SAI_DEBS_PATH),)
 #$(BRCM_SAI)_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/LATEST_INT_OCP_SAI_3.X/build/$(BRCM_SAI)"
-$(BRCM_SAI)_URL = "http://10.59.132.240:9009/projects/csg_sonic/rk407563/merge/ocp_sai/output/x86-xgs5-deb80/$(BRCM_SAI)"
+$(BRCM_SAI)_URL = "http://10.59.132.240:9009/projects/csg_sonic/rk407563/sai/ocp_sai/output/x86-xgs5-deb80/$(BRCM_SAI)"
 SONIC_ONLINE_DEBS += $(BRCM_SAI)
 else
 $(BRCM_SAI)_PATH = $(SAI_LIBS_MOUNT_POINT)
@@ -24,7 +26,7 @@ endif
 $(eval $(call add_derived_package,$(BRCM_SAI),$(BRCM_SAI_DEV)))
 ifeq ($(LOCAL_SAI_DEBS_PATH),)
 #$(BRCM_SAI_DEV)_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/LATEST_INT_OCP_SAI_3.X/build/$(BRCM_SAI_DEV)"
-$(BRCM_SAI_DEV)_URL = "http://10.59.132.240:9009/projects/csg_sonic/rk407563/merge/ocp_sai/output/x86-xgs5-deb80/$(BRCM_SAI_DEV)"
+$(BRCM_SAI_DEV)_URL = "http://10.59.132.240:9009/projects/csg_sonic/rk407563/sai/ocp_sai/output/x86-xgs5-deb80/$(BRCM_SAI_DEV)"
 else
 $(BRCM_SAI_DEV)_PATH = $(SAI_LIBS_MOUNT_POINT)
 endif
@@ -34,7 +36,7 @@ $(BRCM_SAI_DEV)_DEPENDS += $(BRCM_SAI)
 #BRCM_SAI_DIAG
 ifeq ($(LOCAL_SAI_DEBS_PATH),)
 #$(BRCM_SAI_DIAG)_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/LATEST_INT_OCP_SAI_3.X/build/$(BRCM_SAI_DIAG)"
-$(BRCM_SAI_DIAG)_URL = "http://10.59.132.240:9009/projects/csg_sonic/rk407563/merge/ocp_sai/output/x86-xgs5-deb80/$(BRCM_SAI_DIAG)"
+$(BRCM_SAI_DIAG)_URL = "http://10.59.132.240:9009/projects/csg_sonic/rk407563/sai/ocp_sai/output/x86-xgs5-deb80/$(BRCM_SAI_DIAG)"
 SONIC_ONLINE_DEBS += $(BRCM_SAI_DIAG)
 else
 $(BRCM_SAI_DIAG)_PATH = $(SAI_LIBS_MOUNT_POINT)

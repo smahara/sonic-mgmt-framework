@@ -41,6 +41,7 @@ $(DOCKER_PDE)_RUN_OPT += -v /lib/modules:/lib/modules:ro
 $(DOCKER_PDE)_RUN_OPT += -v /boot:/boot:ro
 
 $(DOCKER_PDE)_BASE_IMAGE_FILES += port_breakout.py:/usr/local/bin/port_breakout.py
-$(DOCKER_PDE)_BASE_IMAGE_FILES += pde-test-harness:/usr/local/bin/pde-test-harness
+$(DOCKER_PDE)_BASE_IMAGE_FILES += pde-test:/usr/local/bin/pde-test
+$(DOCKER_PDE)_BASE_IMAGE_FILES += pde-bench:/usr/local/bin/pde-bench
 
 endif

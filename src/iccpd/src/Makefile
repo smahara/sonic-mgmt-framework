@@ -8,7 +8,8 @@ port.c scheduler.c system.c iccp_consistency_check.c \
 mlacp_link_handler.c \
 mlacp_sync_prepare.c mlacp_sync_update.c \
 mlacp_fsm.c \
-iccp_netlink.c openbsd_tree.c 
+iccp_netlink.c openbsd_tree.c \
+stp_fsm.c stp_handler.c
 
 OBJECTS = app_csm.o cmd_option.o iccp_cli.o iccp_cmd_show.o iccp_cmd.o \
 iccp_csm.o iccp_ifm.o iccp_main.o logger.o \
@@ -16,7 +17,8 @@ port.o scheduler.o system.o  iccp_consistency_check.o\
 mlacp_link_handler.o \
 mlacp_sync_prepare.o mlacp_sync_update.o \
 mlacp_fsm.o \
-iccp_netlink.o openbsd_tree.o
+iccp_netlink.o openbsd_tree.o \
+stp_fsm.o stp_handler.o
 
 HEADERS = ../include/app_csm.h ../include/cmd_option.h ../include/iccp_cli.h \
 ../include/iccp_cmd_show.h \
@@ -25,7 +27,9 @@ HEADERS = ../include/app_csm.h ../include/cmd_option.h ../include/iccp_cli.h \
 ../include/mlacp_tlv.h ../include/msg_format.h ../include/port.h \
 ../include/scheduler.h ../include/system.h \
 ../include/iccp_consistency_check.h ../include/route_info.h  \
-../include/iccp_netlink.h ../include/openbsd_tree.h
+../include/iccp_netlink.h ../include/openbsd_tree.h \
+../include/stp_fsm.h ../include/stp_handler.h ../include/stpiccp.h \
+../include/stpiccplink.h ../include/stp_tlv.h
 
 //CFLAGS  = -g -O2 -fstack-protector-strong -Wformat -Werror=format-security  $(LIBNL_CFLAGS) -I../include/ 
 CFLAGS  = -g -O2 -fstack-protector-strong -Wformat -Werror=format-security  -I../include/ $(LIBNL_CFLAGS) 

@@ -76,3 +76,38 @@ done
 # Diag LED: Boot successfully (SOLID GREEN)
 i2cset -f -y 19 0x60 0x64 4
 
+# 10G Merlin Ports
+SetModeXFI()
+{
+    echo "Set Mux(retimer) to 2x10G XFI."
+    i2cset -f -y 22 0x18 0x7 0x3
+    i2cset -f -y 22 0x19 0x7 0x3
+    i2cset -f -y 22 0x1a 0x7 0x3
+    i2cset -f -y 22 0x1b 0x7 0x3
+}
+
+SetVOD()
+{
+    #set channel B
+    i2cset -f -y 22 0x18 0xff 0x05
+    i2cset -f -y 22 0x19 0xff 0x05
+    #write output voltage to 800mV
+    i2cset -f -y 22 0x18 0x2d 0x82
+    i2cset -f -y 22 0x19 0x2d 0x82
+    #write de-emphasis to -3.5dB
+    i2cset -f -y 22 0x18 0x15 0x12
+    i2cset -f -y 22 0x19 0x15 0x12
+    #read output voltage
+    #i2cget -f -y 22 0x18 0x2d
+    #i2cget -f -y 22 0x19 0x2d
+    #read de-emphasis
+    #i2cget -f -y 22 0x18 0x15
+    #i2cget -f -y 22 0x19 0x15
+    #clr channel B
+    i2cset -f -y 22 0x18 0xff 0x00
+    i2cset -f -y 22 0x19 0xff 0x00
+}
+
+SetModeXFI
+SetVOD
+

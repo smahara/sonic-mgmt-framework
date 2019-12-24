@@ -41,6 +41,7 @@
 #include "../include/iccp_cmd.h"
 #include "../include/mlacp_link_handler.h"
 #include "../include/iccp_netlink.h"
+#include "../include/stp_handler.h"
 
 /******************************************************
 *
@@ -74,7 +75,7 @@ static void heartbeat_check(struct CSM *csm)
     if ( (time(NULL) - csm->heartbeat_update_time) > csm->session_timeout)
     {
         /* hearbeat timeout*/
-        ICCPD_LOG_INFO(__FUNCTION__, "iccpd connection timeout (heartbeat)");
+        ICCPD_LOG_WARN(__FUNCTION__, "iccpd connection timeout (heartbeat)");
         scheduler_session_disconnect_handler(csm);
     }
 
@@ -106,6 +107,7 @@ static int scheduler_transit_fsm()
         iccp_csm_transit(csm);
         app_csm_transit(csm);
         mlacp_fsm_transit(csm);
+        stp_fsm_transit(csm);
     }
 
     local_if_change_flag_clear();
@@ -143,7 +145,7 @@ int scheduler_csm_read_callback(struct CSM* csm)
         }
         else if (len == 0)
         {
-            ICCPD_LOG_INFO(__FUNCTION__, "Peer disconnect");
+            ICCPD_LOG_WARN(__FUNCTION__, "Peer disconnect for receive error");
             goto recv_err;
         }
         recv_len += len;
@@ -163,7 +165,7 @@ int scheduler_csm_read_callback(struct CSM* csm)
         }
         else if (recv_len == 0)
         {
-            ICCPD_LOG_INFO(__FUNCTION__, "Peer disconnect");
+            ICCPD_LOG_WARN(__FUNCTION__, "Peer disconnect for read error");
             goto recv_err;
         }
         data_len -= recv_len;
@@ -277,7 +279,7 @@ void iccp_get_start_type(struct System* sys)
     fp = fopen("/proc/cmdline", "r");
     if (!fp)
     {
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Error: Can't open file /proc/cmdline!");
+        ICCPD_LOG_WARN(__FUNCTION__, "Error: Can't open file /proc/cmdline!");
         return;
     }
 
@@ -313,19 +315,27 @@ void scheduler_init()
 
     if (iccp_connect_syncd() < 0)
     {
-        ICCPD_LOG_DEBUG(__FUNCTION__, "%s:%d, syncd info socket connect fail",
+        ICCPD_LOG_WARN(__FUNCTION__, "Syncd info socket connect fail");
+    }
+    else
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Syncd info socket connect success");
+    }
+
+    if (iccp_connect_stp_syncd() < 0)
+    {
+        ICCPD_LOG_DEBUG(__FUNCTION__, "%s:%d, stp syncd info socket connect fail",
                         __FUNCTION__, __LINE__);
     }
     else
     {
-        ICCPD_LOG_DEBUG(__FUNCTION__, "%s:%d, syncd info socket connect success",
-                        __FUNCTION__, __LINE__);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "%s:%d, stp syncd info socket connect success. FD: %d",
+                        __FUNCTION__, __LINE__, sys->stp_sync_fd);
     }
 
     if (mclagd_ctl_sock_create() < 0)
     {
-        ICCPD_LOG_DEBUG(__FUNCTION__, "%s:%d, mclagd ctl info socket connect fail",
-                        __FUNCTION__, __LINE__);
+        ICCPD_LOG_WARN(__FUNCTION__, "Mclagd ctl info socket connect fail");
     }
 
     return;
@@ -395,6 +405,10 @@ void scheduler_loop()
         {
             iccp_connect_syncd();
         }
+        if (sys->stp_sync_fd < 0)
+        {
+          iccp_connect_stp_syncd();
+        }
 
         /*handle socket slelect event ,If no message received, it will block 0.1s*/
         iccp_handle_events(sys);
@@ -403,7 +417,7 @@ void scheduler_loop()
 
         if (sys->warmboot_exit == WARM_REBOOT)
         {
-            ICCPD_LOG_DEBUG(__FUNCTION__, "EXIT ......");
+            ICCPD_LOG_DEBUG(__FUNCTION__, "Warm reboot exit ......");
             return;
         }
     }
@@ -423,7 +437,6 @@ int mlacp_sync_with_kernel_callback()
 
     if ((sys = system_get_instance()) == NULL)
     {
-        ICCPD_LOG_WARN(__FUNCTION__, "Failed to obtain System instance.");
         goto out;
     }
 
@@ -604,9 +617,7 @@ int scheduler_prepare_session(struct CSM* csm)
     }
     else if (local_ip == peer_ip)
     {
-        ICCPD_LOG_WARN("connect",
-                       "Sender IP is as the same as the peer IP. "
-                       "This must be fixed before connection is built.");
+        ICCPD_LOG_WARN(__FUNCTION__, "Local IP must not be the same as the peer IP.");
         goto time_update;
     }
 

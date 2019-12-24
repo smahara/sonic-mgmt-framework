@@ -35,8 +35,12 @@ from swsssdk import SonicV2Connector
 
 SYSLOG_IDENTIFIER="system#state"
 SYSTEM_STATE="DOWN"
+REDIS_HOSTNAME = "127.0.0.1"
+REDIS_PORT = 6379
+REDIS_TIMEOUT_MS = 0
 logger = None
 
+SYSTEM_READY_TABLE = 'SYSTEM_READY'
 
 #Logger class  for syslog
 class Logger(object):
@@ -152,6 +156,13 @@ def show_system_status(state, msg):
         with open('/dev/console', 'a') as console:
             console.write("\n\n{} System is not ready - {} \n\n ".format(datetime.datetime.now().strftime("%b %d %H:%M:%S.%f"), msg))
 
+def post_system_status(state):
+    state_db = swsscommon.DBConnector(swsscommon.STATE_DB, REDIS_HOSTNAME, REDIS_PORT, REDIS_TIMEOUT_MS)
+    #sys_tbl = swsscommon.Table(state_db, swsscommon.SYSTEM_READY_TABLE)
+    sys_tbl = swsscommon.Table(state_db, SYSTEM_READY_TABLE)
+
+    fvs = swsscommon.FieldValuePairs([("Status", state)])
+    sys_tbl.set("SYSTEM_STATE", fvs)
 
 #Checks the currest system status
 def check_system_status(event):
@@ -160,6 +171,7 @@ def check_system_status(event):
     if SYSTEM_STATE != cstate:
         SYSTEM_STATE=cstate
         show_system_status(SYSTEM_STATE, msg)
+        post_system_status(SYSTEM_STATE)
 
 
 
@@ -171,9 +183,6 @@ def subscribe_appdb(queue):
     while True:
         try:
             logger.log_debug( "Listerning for AppDB event...")
-            REDIS_HOSTNAME = "127.0.0.1"
-            REDIS_PORT = 6379
-            REDIS_TIMEOUT_MS = 0
             SELECT_TIMEOUT_MS = 1000 * 2
 
             db = swsscommon.DBConnector(swsscommon.APPL_DB, REDIS_HOSTNAME, REDIS_PORT, REDIS_TIMEOUT_MS)
