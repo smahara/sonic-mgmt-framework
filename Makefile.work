@@ -297,7 +297,9 @@ DOCKER_BASE_BUILD_PROTECTED = echo "Start time: "`date`; \
                                   [ $${docker_rc} -eq 0 ] &&  $(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PUSH); \
                                   eval exec "$${BASE_IMAGE_LOCK_FD}<&-"; \
 								  echo "[ Warning ] Docker exit code : $${docker_rc}"; \
-                                  exit 0; \
+								  if [ $${docker_rc} -ne 0 ]; then \
+								  	exit $${docker_rc}; \
+							   	  fi; \
                               fi
 
 DOCKER_BUILD_PROTECTED = echo "Start time: "`date`; \
@@ -314,7 +316,9 @@ DOCKER_BUILD_PROTECTED = echo "Start time: "`date`; \
                              docker_rc=$$?; \
                              eval exec "$${USER_IMAGE_LOCK_FD}<&-"; \
 							 echo "[ Warning ] Docker exit code : $${docker_rc}"; \
-                             exit 0; \
+							 if [ $${docker_rc} -ne 0 ]; then \
+								exit $${docker_rc}; \
+							 fi; \
                          fi
 
 SONIC_BUILD_INSTRUCTION :=  make \
