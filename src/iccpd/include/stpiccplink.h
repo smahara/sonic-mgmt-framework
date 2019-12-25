@@ -47,9 +47,10 @@ typedef enum
 typedef enum 
 {
   STP_ICCP_VLAN_PORT_TC_NONE = 0,
-  STP_ICCP_VLAN_PORT_TC_UPDATE,
-  STP_ICCP_VLAN_PORT_TC_ACK_UPDATE,
-  STP_ICCP_VLAN_PORT_TCN_UPDATE
+  STP_ICCP_RCVD_TCN,
+  STP_ICCP_DET_TC,
+  STP_ICCP_DET_TC_1,
+  STP_ICCP_SYNC_TC
 } VLAN_PORT_TC_TYPE_t;
 
 typedef enum 
@@ -148,27 +149,29 @@ struct stpiccp_common_info
 
     VLAN_PORT_TC_TYPE_t vlan_port_tc_type; /* "TC Update Message" / "TC ACK Update Message" / "TCN Update Message" */
 
-    char root_bridge_id[BRIDGE_ID_STR_LEN];
-    uint32_t root_path_cost;
-    char desig_bridge_id[BRIDGE_ID_STR_LEN];
-    uint16_t desig_port;
+    char		root_bridge_id[BRIDGE_ID_STR_LEN];
+    uint32_t	root_path_cost;
+    char		desig_bridge_id[BRIDGE_ID_STR_LEN];
+    uint16_t	desig_port;
+	bool		nrpv_valid;
+    uint32_t    port_id;
+    uint32_t    port_path_cost;
+    uint8_t     max_age;
+    uint32_t    message_age;
+    uint32_t    hello_time;
+    uint32_t    fwd_delay;
 
     ROOT_PORT_REQUEST_t root_port_req_resp_field; /* request or response */
+	uint32_t    seq_no;
 
-    uint8_t state;
-    uint8_t tc_ack;
-    uint8_t config_pending;
-    uint8_t change_detection_enabled;
-    uint8_t self_loop;
-    uint8_t auto_config;
-    uint8_t oper_edge;
-    uint8_t kernel_state;
-    uint16_t path_cost;
-    uint32_t desig_cost;
-    uint16_t message_age_timer;
-    uint8_t forward_delay;
-    uint8_t hold_time;
-    uint16_t root_protect_timer;
+    uint16_t    stp_port_id;//will be removed
+    uint8_t		state;
+    uint8_t		tc_ack;
+    uint8_t		change_detection_enabled;
+    uint8_t		self_loop;
+    uint8_t		auto_config;
+    uint8_t		oper_edge;
+    uint32_t	desig_cost;
 
     MASTER_NODE_REQUEST_t master_node_req_resp_field; /* request or response */
 
@@ -176,5 +179,6 @@ struct stpiccp_common_info
 
     uint8_t message_type;
 };
+
 
 #endif

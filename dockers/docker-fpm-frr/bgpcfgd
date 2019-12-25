@@ -308,6 +308,26 @@ class BGPKeyMapList(list):
                 cmd_data.append('')
                 idx += 1
             return (tuple(cmd_data), op)
+    @staticmethod
+    def is_cmd_covered(src_cmd, dst_cmd):
+        src_tks = src_cmd.split()
+        dst_tks = dst_cmd.split()
+        if len(src_tks) >= len(dst_tks):
+            return False
+        for idx in range(len(src_tks)):
+            if src_tks[idx] != dst_tks[idx]:
+                return False
+        return True
+    @staticmethod
+    def is_cmd_list_covered(src_list, dst_list):
+        if len(src_list) == 0:
+            return True
+        if len(src_list) > len(dst_list):
+            return False
+        for idx in range(len(src_list)):
+            if not BGPKeyMapList.is_cmd_covered(src_list[idx], dst_list[idx]):
+                return False
+        return True
     def run_command(self, daemon, data, prefix_list, *upper_vals):
         start_idx = len(upper_vals)
         for db_field, key_map in self:
@@ -365,6 +385,7 @@ class BGPKeyMapList(list):
             if not run_cmd:
                 continue
 
+            cmd_list_list = []
             for key_list in key_list_list:
                 upd_id_list = set()
                 del_id_list = set()
@@ -396,14 +417,21 @@ class BGPKeyMapList(list):
                         if cmd is not None:
                             cmd_list += cmd
                         else:
-                            syslog.syslog(syslog.LOG_ERR, 'failed to get upd cmd from value: %s' % data_val_op[0])
-                cmd_prefix = 'vtysh '
-                for pfx in prefix_list:
-                    cmd_prefix += "-c '%s' " % pfx
-                for cmd in cmd_list:
-                    if not g_run_command(cmd_prefix + "-c '%s'" % cmd, True):
-                        syslog.syslog(syslog.LOG_ERR, 'failed running FRR command: %s' % cmd)
-                        return False
+                            syslog.syslog(syslog.LOG_ERR, 'failed to get upd cmd from value: %s' % str(data_val_op[0]))
+                if len(cmd_list) > 0:
+                    cmd_list_list.append(cmd_list)
+            cmd_list = []
+            for chk_list in cmd_list_list:
+               if self.is_cmd_list_covered(cmd_list, chk_list):
+                   cmd_list = chk_list
+            cmd_prefix = 'vtysh '
+            for pfx in prefix_list:
+                cmd_prefix += "-c '%s' " % pfx
+            for cmd in cmd_list:
+                if not g_run_command(cmd_prefix + "-c '%s'" % cmd, True):
+                    syslog.syslog(syslog.LOG_ERR, 'failed running FRR command: %s' % cmd)
+                    return False
+            for key_list in key_list_list:
                 for dkey in key_list:
                     if dkey in data:
                         data[dkey].status = CachedDataWithOp.STAT_SUCC
@@ -452,7 +480,8 @@ class CommandArgument(object):
                        'uchg-med': 'med',
                        'uchg-nh': 'next-hop',
                        'rm-as-all': 'all',
-                       'rm-as-repl': 'replace-AS'
+                       'rm-as-repl': 'replace-AS',
+                       'mp-as-set': ('as-set', 'no-as-set')
         }
         if format == 'no-prefix':
             return 'no ' if not self.enabled else ''
@@ -502,10 +531,18 @@ class CommandArgument(object):
             else:
                 return self.value
         elif format in bool_format:
+            false_val = ''
+            if type(bool_format[format]) is tuple:
+                if len(bool_format[format]) == 2:
+                    true_val, false_val = bool_format[format]
+                else:
+                    true_val = bool_format[format][0]
+            else:
+                true_val = bool_format[format]
             if self.value == 'true':
-                self.value = bool_format[format]
+                self.value = true_val
             elif self.value == 'false':
-                self.value = ''
+                self.value = false_val
         elif format == 'restart':
             if self.value == 'true':
                 self.value = 'warning-only'
@@ -788,16 +825,16 @@ class AggregateAddr:
 
 class BGPConfigDaemon:
     DEFAULT_VRF = 'default'
-    LOCAL_ROUTE_DISTANCE = 20
 
     global_key_map = [('router_id',                                     '{no:no-prefix}bgp router-id {}'),
-                      ('load_balance_mp_relax',                         '{no:no-prefix}bgp bestpath as-path multipath-relax', ['true', 'false']),
+                      (['load_balance_mp_relax', '+as_path_mp_as_set'], '{no:no-prefix}bgp bestpath as-path multipath-relax {:mp-as-set}', ['true', 'false']),
                       ('always_compare_med',                            '{no:no-prefix}bgp always-compare-med', ['true', 'false']),
                       ('external_compare_router_id',                    '{no:no-prefix}bgp bestpath compare-routerid', ['true', 'false']),
                       ('ignore_as_path_length',                         '{no:no-prefix}bgp bestpath as-path ignore', ['true', 'false']),
                       ('graceful_restart_enable',                       '{no:no-prefix}bgp graceful-restart', ['true', 'false']),
                       ('gr_restart_time',                               '{no:no-prefix}bgp graceful-restart restart-time {}'),
                       ('gr_stale_routes_time',                          '{no:no-prefix}bgp graceful-restart stalepath-time {}'),
+                      ('gr_preserve_fw_state',                          '{no:no-prefix}bgp graceful-restart preserve-fw-state', ['true', 'false']),
                       ('log_nbr_state_changes',                         '{no:no-prefix}bgp log-neighbor-changes', ['true', 'false']),
                       ('rr_cluster_id',                                 '{no:no-prefix}bgp cluster-id {}'),
                       ('rr_allow_out_policy',                           '{no:no-prefix}bgp route-reflector allow-outbound-policy', ['true', 'false']),
@@ -818,9 +855,8 @@ class BGPConfigDaemon:
                       ('route_map_process_delay',                       '{no:no-prefix}bgp route-map delay-timer {}'),
                       ('deterministic_med',                             '{no:no-prefix}bgp deterministic-med', ['true', 'false']),
                       ('med_confed',                                    '{no:no-prefix}bgp bestpath med confed', ['true', 'false']),
-                      ('med_missing_as_worst',                          '{no:no-prefix}bgp bestpath med confed missing-as-worst', ['true', 'false']),
+                      ('med_missing_as_worst',                          '{no:no-prefix}bgp bestpath med missing-as-worst', ['true', 'false']),
                       ('compare_confed_as_path',                        '{no:no-prefix}bgp bestpath as-path confed', ['true', 'false']),
-                      ('as_path_mp_as_set',                             '{no:no-prefix}bgp bestpath as-path multipath-relax as-set', ['true', 'false', True]),
                       ('default_ipv4_unicast',                          '{no:no-prefix}bgp default ipv4-unicast', ['true', 'false']),
                       ('default_local_preference',                      '{no:no-prefix}bgp default local-preference {}'),
                       ('default_show_hostname',                         '{no:no-prefix}bgp default show-hostname', ['true', 'false']),
@@ -831,7 +867,8 @@ class BGPConfigDaemon:
     ]
 
     global_af_key_map = [(['ebgp_route_distance',
-                           'ibgp_route_distance'],                  '{{no:no-prefix}}distance bgp {{}} {{}} {}'.format(LOCAL_ROUTE_DISTANCE)),
+                           'ibgp_route_distance',
+                           'local_route_distance'],                     '{no:no-prefix}distance bgp {} {} {}'),
                          ('max_ebgp_paths',                         '{no:no-prefix}maximum-paths {}'),
                          (('max_ibgp_paths',
                            '+ibgp_equal_cluster_length'),           '{no:no-prefix}maximum-paths ibgp{}', hdl_ibgp_maxpath, ['true', 'false']),
@@ -854,8 +891,7 @@ class BGPConfigDaemon:
                    ('local_asn',                            '{no:no-prefix}neighbor {} local-as {}'),
                    ('local_addr',                           '{no:no-prefix}neighbor {} update-source {}'),
                    ('name',                                 '{no:no-prefix}neighbor {} description {}'),
-                   ('ebgp_multihop',                        '{no:no-prefix}neighbor {} ebgp-multihop', ['true', 'false']),
-                   ('ebgp_multihop_ttl',                    '{no:no-prefix}neighbor {} ebgp-multihop {}'),
+                   (['ebgp_multihop', '+ebgp_multihop_ttl'],'{no:no-prefix}neighbor {} ebgp-multihop {}', ['true', 'false']),
                    ('auth_password',                        '{no:no-prefix}neighbor {} password {}'),
                    (['keepalive', 'holdtime'],              '{no:no-prefix}neighbor {} timers {} {}'),
                    ('conn_retry',                           '{no:no-prefix}neighbor {} timers connect {}'),
@@ -886,7 +922,7 @@ class BGPConfigDaemon:
                       ('send_default_route',                                '{no:no-prefix}neighbor {} default-originate', ['true', 'false']),
                       ('default_rmap',                                      '{no:no-prefix}neighbor {} default-originate route-map {}'),
                       (['max_prefix_limit', '++max_prefix_warning_threshold',
-                        '+max_prefix_restart_timer&max_prefix_warning_only'], '{no:no-prefix}neighbor {} maximum-prefix {} {} {:restart}'),
+                        '+max_prefix_restart_interval&max_prefix_warning_only'], '{no:no-prefix}neighbor {} maximum-prefix {} {} {:restart}'),
                       ('route_map_in',                                      '{no:no-prefix}neighbor {} route-map {} in'),
                       ('route_map_out',                                     '{no:no-prefix}neighbor {} route-map {} out'),
                       ('soft_reconfiguration_in',                           '{no:no-prefix}neighbor {} soft-reconfiguration inbound', ['true', 'false']),
@@ -971,6 +1007,20 @@ class BGPConfigDaemon:
                       'BGP_GLOBALS_AF_NETWORK':         af_network_key_map
     }
 
+    @staticmethod
+    def __peer_is_ip(peer):
+        try:
+            socket.inet_pton(socket.AF_INET, peer)
+            return True
+        except socket.error:
+            pass
+        try:
+            socket.inet_pton(socket.AF_INET6, peer)
+            return True
+        except socket.error:
+            pass
+        return False
+
     def __init__(self):
         self.config_db = ExtConfigDBConnector()
         try:
@@ -991,6 +1041,8 @@ class BGPConfigDaemon:
                 syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: VRF %s Local_ASN %s' % (vrf, self.bgp_asn[vrf]))
         # VRF ==> grp_name ==> peer_group
         self.bgp_peer_group = {}
+        # VRF ==> set of interface neighbor
+        self.bgp_intf_nbr = {}
         nbr_table = self.config_db.get_table('BGP_NEIGHBOR')
         pg_table = self.config_db.get_table('BGP_PEER_GROUP')
         for key, entry in pg_table.items():
@@ -998,13 +1050,15 @@ class BGPConfigDaemon:
             self.bgp_peer_group.setdefault(vrf, {})[pg] = BGPPeerGroup(vrf)
             syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: VRF %s Peer_Group %s' % (vrf, pg))
         for key, entry in nbr_table.items():
-            vrf, ip = key
+            vrf, peer = key
             if 'peer_group_name' in entry:
                 pg_name = entry['peer_group_name']
                 if vrf in self.bgp_peer_group and pg_name in self.bgp_peer_group[vrf]:
-                    self.bgp_peer_group[vrf][pg_name].ref_nbrs.add(ip)
+                    self.bgp_peer_group[vrf][pg_name].ref_nbrs.add(peer)
                     syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: VRF %s Neighbor %s Peer_Group %s' %
-                            (vrf, ip, pg_name))
+                            (vrf, peer, pg_name))
+            if not self.__peer_is_ip(peer):
+                self.bgp_intf_nbr.setdefault(vrf, set()).add(peer)
         # map_name ==> seq_no ==> operation
         self.route_map = {}
         rtmap_table = self.config_db.get_table('ROUTE_MAP')
@@ -1213,6 +1267,8 @@ class BGPConfigDaemon:
                 for _, peer_grp in self.bgp_peer_group[vrf].items():
                     if peer in peer_grp.ref_nbrs:
                         peer_grp.ref_nbrs.remove(peer)
+            if not self.__peer_is_ip(peer) and vrf in self.bgp_intf_nbr and peer in self.bgp_intf_nbr[vrf]:
+                self.bgp_intf_nbr[vrf].remove(peer)
         for dkey, dval in data.items():
             # force delete all neighbor attributes in cache
             dval.status = CachedDataWithOp.STAT_SUCC
@@ -1242,6 +1298,18 @@ class BGPConfigDaemon:
         elif table_name == 'NEXTHOP_SET':
             new_name += '_nexthop'
         return new_name
+
+    def __apply_nbr_af_attr(self, *table_key):
+        table_name = 'BGP_NEIGHBOR_AF'
+        table_data = self.config_db.get_entry(table_name, table_key)
+        if len(table_data) == 0:
+            syslog.syslog(syslog.LOG_DEBUG, 'no data in table')
+            return
+        syslog.syslog(syslog.LOG_DEBUG, 'add apply request for table {} key {}'.format(table_name, table_key))
+        upd_data = {}
+        for upd_key, upd_val in table_data.items():
+            upd_data[upd_key] = CachedDataWithOp(upd_val, CachedDataWithOp.OP_ADD)
+        self.bgp_message.put((self.config_db.serialize_key(table_key), False, table_name, upd_data))
 
     def __update_bgp(self):
         while not self.bgp_message.empty():
@@ -1337,6 +1405,14 @@ class BGPConfigDaemon:
                                 syslog.syslog(syslog.LOG_ERR, 'failed to create peer-group %s for VRF %s' % (key, vrf))
                                 continue
                             self.bgp_peer_group[vrf][key] = BGPPeerGroup(vrf)
+                    elif not self.__peer_is_ip(key):
+                        if key not in self.bgp_intf_nbr.setdefault(vrf, set()):
+                            command = "vtysh -c 'configure terminal' -c 'router bgp {} vrf {}' ".format(local_asn, vrf)
+                            command += "-c 'neighbor {} interface'".format(key)
+                            if not self.__run_command(command):
+                                syslog.syslog(syslog.LOG_ERR, 'failed to create neighbor of interface %s for VRF %s' % (key, vrf))
+                                continue
+                            self.bgp_intf_nbr[vrf].add(key)
                     cmd_prefix = ['configure terminal', 'router bgp {} vrf {}'.format(local_asn, vrf)]
                     if not key_map.run_command(self, data, cmd_prefix, key):
                         syslog.syslog(syslog.LOG_ERR, 'failed running BGP neighbor config command')
@@ -1355,6 +1431,10 @@ class BGPConfigDaemon:
                              ('peer_group_name' in data and data['peer_group_name'].op == CachedDataWithOp.OP_DELETE))):
                         # delete asn or peer_group will delete all neighbor
                         self.__delete_vrf_neighbor(vrf, key, data, False)
+                    if table == 'BGP_NEIGHBOR' and ('asn' in data and data['asn'].op == CachedDataWithOp.OP_ADD):
+                        for af in ['ipv4_unicast', 'ipv6_unicast']:
+                            syslog.syslog(syslog.LOG_DEBUG, 'apply attributes to FRR for vrf %s neighbor %s af %s' % (vrf, key, af))
+                            self.__apply_nbr_af_attr(vrf, key, af)
                 else:
                     # Neighbor is deleted
                     if table == 'BGP_PEER_GROUP':
@@ -1713,7 +1793,7 @@ class BGPConfigDaemon:
         self.bgp_table_handler_common(table, key, data, [{'route_flap_dampen_reuse_threshold', 'route_flap_dampen_suppress_threshold', 'route_flap_dampen_max_suppress'}])
 
     def bgp_af_handler(self, table, key, data):
-        self.bgp_table_handler_common(table, key, data, [{'ebgp_route_distance', 'ibgp_route_distance'}])
+        self.bgp_table_handler_common(table, key, data, [{'ebgp_route_distance', 'ibgp_route_distance', 'local_route_distance'}])
 
     def bgp_neighbor_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'keepalive', 'holdtime'}])

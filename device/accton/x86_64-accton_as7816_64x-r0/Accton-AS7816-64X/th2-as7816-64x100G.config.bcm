@@ -1,9 +1,3 @@
-#BFD HW-Assist
-pci_cmcs_num=3
-num_queues_pci=32
-num_queues_uc0=1
-bfd_cosq=32
-
 # accton_as7816_64x 64x100G SDK config
 os=unix
 schan_intr_enable=0
