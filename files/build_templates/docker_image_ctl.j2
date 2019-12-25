@@ -162,6 +162,13 @@ function preStartAction()
         echo "Stopping SWSS before starting PDE"
         systemctl stop swss
     fi
+{%- elif docker_container_name == "mgmt-framework" %}
+    # Create a self signed certificate for authenticating CLI users
+    if [[ ! -e "/root/cli-ca/cert.pem" ]]
+    then
+        openssl req -newkey rsa:2048 -nodes -keyout /root/cli-ca/key.pem \
+            -x509 -out /root/cli-ca/cert.pem -subj "/O=SONiC/CN=CLI User Certificate Authority"
+    fi
 {%- elif docker_container_name == "snmp" %}
     docker exec -i database redis-cli -n 6 HSET 'DEVICE_METADATA|localhost' chassis_serial_number $(decode-syseeprom -s)
     vrfenabled=`/usr/bin/redis-cli -n 4 hget "MGMT_VRF_CONFIG|vrf_global" mgmtVrfEnabled`

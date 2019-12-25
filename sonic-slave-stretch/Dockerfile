@@ -250,6 +250,8 @@ RUN apt-get update && apt-get install -y \
         python3-colorama \
 # For initramfs
         bash-completion \
+# For mgmt-framework build
+        libdbus-c++-dev \
 # For sonic vs image build
         dosfstools \
         qemu-kvm \
