@@ -216,7 +216,7 @@ class Psu(PsuBase):
                 vout = int(v_out.read())
         except IOError:
             return 0
-        return float(vout)
+        return float(vout / 1000)
 
     def get_current(self):
         """
@@ -232,7 +232,7 @@ class Psu(PsuBase):
                 iout = int(i_out.read())
         except IOError:
             return 0
-        return float(iout)
+        return float(iout / 1000)
 
     def get_power(self):
         """
@@ -248,7 +248,7 @@ class Psu(PsuBase):
                 pout = int(p_out.read())
         except IOError:
             return 0
-        return float(pout*1000) #return power value in micro watts
+        return float(pout / 1000)
 
     def get_powergood_status(self):
         """
