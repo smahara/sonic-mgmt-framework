@@ -26,6 +26,7 @@ COPY ["files/dsserve", "files/bcmcmd", "start.sh", "bcmsh", "files/supervisor-pr
 RUN chmod +x /usr/bin/dsserve /usr/bin/bcmcmd
 
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
+COPY ["files/supervisor-proc-exit-listener", "/usr/bin"]
 COPY ["critical_processes", "/etc/supervisor/"]
 COPY ["diag_files/bcmdiag.soc", "/etc/sai.d/"]
 COPY ["diag_files/rc.soc", "/"]
