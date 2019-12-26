@@ -3,7 +3,7 @@ SHELL = /bin/bash
 .SHELLFLAGS += -e
 
 MAIN_TARGET = isc-dhcp-relay_$(ISC_DHCP_VERSION)_$(CONFIGURED_ARCH).deb
-DERIVED_TARGETS = isc-dhcp-relay-dbgsym_$(ISC_DHCP_VERSION)_$(CONFIGURED_ARCH).deb
+#DERIVED_TARGETS = isc-dhcp-relay-dbgsym_$(ISC_DHCP_VERSION)_$(CONFIGURED_ARCH).deb
 
 # For non-optimizing builds, use -O1 optimization instead of the default -O0.
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
@@ -36,4 +36,4 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	#mv $(DERIVED_TARGETS) $* $(DEST)/
 	mv $* $(DEST)/
 
-$(addprefix $(DEST)/, $(DERIVED_TARGETS)): $(DEST)/% : $(DEST)/$(MAIN_TARGET)
+#$(addprefix $(DEST)/, $(DERIVED_TARGETS)): $(DEST)/% : $(DEST)/$(MAIN_TARGET)
