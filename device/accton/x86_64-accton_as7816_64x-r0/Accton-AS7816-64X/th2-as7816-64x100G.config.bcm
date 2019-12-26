@@ -7,6 +7,7 @@ l3_mem_entries=40960
 parity_correction=0
 parity_enable=1
 mmu_lossless=1
+#port_flex_enable=1
 
 pbmp_xport_xe=0x1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 pbmp_oversubscribe=0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff

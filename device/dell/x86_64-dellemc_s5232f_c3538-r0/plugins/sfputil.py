@@ -230,3 +230,4 @@ class SfpUtil(SfpUtilBase):
                     return True, port_dict
 
             time.sleep(0.5)
+
