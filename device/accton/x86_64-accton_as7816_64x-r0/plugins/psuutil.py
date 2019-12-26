@@ -42,46 +42,7 @@ class PsuUtil(PsuBase):
             1: "10-005b",
             2: "9-0058",
         }
-
-
-    def get_psu_mapping_info(self, index):
-        if index is None:
-            return False
-
-        for id in self.psu_mapping_info:
-            psu_name = str()
-            node = self.psu_path + self.psu_mapping_info[id] + "/name"
-
-            try:
-                with open(node, 'r') as psu_name_fd:
-                    psu_name = psu_name_fd.read()
-            except IOError:
-                    return False
-
-            if psu_name.find("as7816_64x_psu" + str(index)) != -1:
-               return self.psu_mapping_info[id]
-
-        return str()
-
-    def get_psu_mapping_diag(self, index):
-        if index is None:
-           return False
-
-        for id in self.psu_mapping_diag:
-            psu_name = str()
-            node = self.psu_path + self.psu_mapping_info[id] + "/name"
-
-            try:
-                with open(node, 'r') as psu_name_fd:
-                    psu_name = psu_name_fd.read()
-            except IOError:
-                    return False
-
-            if psu_name.find("as7816_64x_psu" + str(index)) != -1:
-               return self.psu_mapping_diag[id]
-
-        return str()
-
+  
 
     def get_num_psus(self):
         return len(self.psu_mapping_info)
@@ -91,7 +52,7 @@ class PsuUtil(PsuBase):
             return False
 
         status = 0
-        node = self.psu_path + self.get_psu_mapping_info(index)+self.psu_oper_status
+        node = self.psu_path + self.psu_mapping_info[index]+self.psu_oper_status
         try:
             with open(node, 'r') as power_status:
                 status = int(power_status.read())
@@ -105,7 +66,7 @@ class PsuUtil(PsuBase):
             return False
 
         status = 0
-        node = self.psu_path + self.get_psu_mapping_info(index) + self.psu_presence
+        node = self.psu_path + self.psu_mapping_info[index] + self.psu_presence
         try:
             with open(node, 'r') as presence_status:
                 status = int(presence_status.read())
@@ -119,7 +80,7 @@ class PsuUtil(PsuBase):
             return False
 
         status = 0
-        node = self.psu_path + self.get_psu_mapping_info(index) + self.psu_oper_status
+        node = self.psu_path + self.psu_mapping_info[index] + self.psu_oper_status
         try:
             with open(node, 'r') as powergood_status:
                 status = int(powergood_status.read())
@@ -134,7 +95,7 @@ class PsuUtil(PsuBase):
             return None
 
         model = ""
-        node = self.psu_path + self.get_psu_mapping_info(index) + self.psu_model_name
+        node = self.psu_path + self.psu_mapping_info[index] + self.psu_model_name
         try:
             with open(node, 'r') as model_name:
                 model = model_name.read()
@@ -148,7 +109,7 @@ class PsuUtil(PsuBase):
             return None
 
         mfr = ""
-        node = self.psu_path + self.get_psu_mapping_diag(index) + self.psu_mfr_id
+        node = self.psu_path + self.psu_mapping_diag[index] + self.psu_mfr_id
         try:
             with open(node, 'r') as mfr_id:
                 mfr = mfr_id.read()
@@ -163,7 +124,7 @@ class PsuUtil(PsuBase):
             return None
 
         serial = ""
-        node = self.psu_path + self.get_psu_mapping_diag(index) + self.psu_serial_num
+        node = self.psu_path + self.psu_mapping_diag[index] + self.psu_serial_num
 
         try:
             with open(node, 'r') as serial_num:
@@ -178,7 +139,7 @@ class PsuUtil(PsuBase):
             return None
 
         direction = ""
-        node = self.psu_path + self.get_psu_mapping_info(index) + self.psu_fan_dir
+        node = self.psu_path + self.psu_mapping_info[index] + self.psu_fan_dir
         try:
             with open(node, 'r') as fan_dir:
                 direction = fan_dir.read()
@@ -197,7 +158,7 @@ class PsuUtil(PsuBase):
             return 0.0
 
         vout = 0.0
-        node = self.psu_path + self.get_psu_mapping_diag(index) + self.psu_v_out
+        node = self.psu_path + self.psu_mapping_diag[index] + self.psu_v_out
         try:
             with open(node, 'r') as v_out:
                 vout = float(v_out.read())
@@ -212,7 +173,7 @@ class PsuUtil(PsuBase):
             return 0.0
 
         iout = 0.0
-        node = self.psu_path + self.get_psu_mapping_diag(index) + self.psu_i_out
+        node = self.psu_path + self.psu_mapping_diag[index] + self.psu_i_out
         try:
             with open(node, 'r') as i_out:
                 iout = float(i_out.read())
@@ -227,7 +188,7 @@ class PsuUtil(PsuBase):
             return 0.0
 
         pout = 0.0
-        node = self.psu_path + self.get_psu_mapping_diag(index) + self.psu_p_out
+        node = self.psu_path + self.psu_mapping_diag[index] + self.psu_p_out
         try:
             with open(node, 'r') as p_out:
                 pout = float(p_out.read())
@@ -244,7 +205,7 @@ class PsuUtil(PsuBase):
             return 0
 
         rpm = 0
-        node = self.psu_path + self.get_psu_mapping_diag(index) + self.psu_fan1_speed_rpm
+        node = self.psu_path + self.psu_mapping_diag[index] + self.psu_fan1_speed_rpm
 
         try:
             with open(node, 'r') as speed_rpm:
