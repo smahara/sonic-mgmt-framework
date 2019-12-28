@@ -11,7 +11,7 @@ index 73eb8a9..91e5e2a 100644
  			if (status != ISC_R_SUCCESS) {
  				log_fatal("Error allocating interface %s: %s",
 diff --git a/common/socket.c b/common/socket.c
-index e8851b4..1cdb6a6 100644
+index e8851b4..d72f7ce 100644
 --- a/common/socket.c
 +++ b/common/socket.c
 @@ -87,6 +87,8 @@ static int global_v4_socket = -1;
@@ -58,8 +58,53 @@ index e8851b4..1cdb6a6 100644
  	}
  #endif
  
+@@ -766,6 +786,8 @@ ssize_t send_packet6(struct interface_info *interface,
+ 	struct in6_pktinfo *pktinfo;
+ 	struct cmsghdr *cmsg;
+ 	unsigned int ifindex;
++	struct in6_addr *addr6 = NULL;
++	int count = 0;
+ 
+ 	/*
+ 	 * If necessary allocate space for the control message header.
+@@ -797,6 +819,12 @@ ssize_t send_packet6(struct interface_info *interface,
+ 	if (no_global_v6_socket)
+ 		dst.sin6_scope_id = ifindex;
+ 
++	if ((strcmp(local_vrf, "") != 0) &&
++	    (dst.sin6_port == remote_port) &&
++	    (IN6_IS_ADDR_LINKLOCAL(&(dst.sin6_addr)))) {
++		dst.sin6_scope_id = ifindex;
++	}
++
+ 	/*
+ 	 * Set the data buffer we're sending. (Using this wacky 
+ 	 * "scatter-gather" stuff... we only have a single chunk 
+@@ -824,7 +852,21 @@ ssize_t send_packet6(struct interface_info *interface,
+ 	cmsg->cmsg_len = CMSG_LEN(sizeof(*pktinfo));
+ 	pktinfo = (struct in6_pktinfo *)CMSG_DATA(cmsg);
+ 	memset(pktinfo, 0, sizeof(*pktinfo));
+-	pktinfo->ipi6_ifindex = ifindex;
++	if (strcmp(local_vrf, "") == 0)
++		pktinfo->ipi6_ifindex = ifindex;
++	else {
++		for (count = 0; count < interface->v6address_count; count++) {
++			addr6 = &interface->v6addresses[count];
++			if (!(IN6_IS_ADDR_LINKLOCAL(addr6)))
++				break;
++		}
++
++		if (addr6) {
++			memcpy(&pktinfo->ipi6_addr,
++				addr6,
++				sizeof(pktinfo->ipi6_addr));
++		}
++	}
+ 
+ 	result = sendmsg(interface->wfdesc, &m, 0);
+ 	if (result < 0) {
 diff --git a/relay/dhcrelay.c b/relay/dhcrelay.c
-index b671d74..5e6507d 100644
+index b671d74..31937a6 100644
 --- a/relay/dhcrelay.c
 +++ b/relay/dhcrelay.c
 @@ -106,6 +106,8 @@ enum { forward_and_append,	/* Forward and append our own relay option. */
