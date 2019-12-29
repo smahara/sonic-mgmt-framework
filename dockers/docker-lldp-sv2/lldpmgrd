@@ -90,15 +90,13 @@ class LldpManager(object):
     def __init__(self):
         # Open a handle to the Config database
         self.config_db = swsscommon.DBConnector(swsscommon.CONFIG_DB,
-                                                self.REDIS_HOSTNAME,
-                                                self.REDIS_PORT,
+                                                swsscommon.DBConnector.DEFAULT_UNIXSOCKET,
                                                 self.REDIS_TIMEOUT_MS)
 
-        # Open a handle to the Application database
+        # Open a handle to the Config database
         self.appl_db = swsscommon.DBConnector(swsscommon.APPL_DB,
-                                                self.REDIS_HOSTNAME,
-                                                self.REDIS_PORT,
-                                                self.REDIS_TIMEOUT_MS)
+                                               swsscommon.DBConnector.DEFAULT_UNIXSOCKET,
+                                               self.REDIS_TIMEOUT_MS)
 
         self.pending_cmds = {}
         self.hostname = "None"
@@ -107,6 +105,7 @@ class LldpManager(object):
         self.device_table = swsscommon.Table(self.config_db, swsscommon.CFG_DEVICE_METADATA_TABLE_NAME)
         self.port_table = swsscommon.Table(self.config_db, swsscommon.CFG_PORT_TABLE_NAME)
         self.mgmt_table = swsscommon.Table(self.config_db, swsscommon.CFG_MGMT_INTERFACE_TABLE_NAME)
+        self.app_port_table = swsscommon.Table(self.appl_db, swsscommon.APP_PORT_TABLE_NAME)
 
     def update_hostname(self, hostname):
         cmd = "lldpcli configure system hostname {0}".format(hostname)
@@ -138,8 +137,7 @@ class LldpManager(object):
         PORT TABLE in the Application DB
         """
         # Retrieve all entires for this port from the Port table
-        port_table = swsscommon.Table(self.appl_db, swsscommon.APP_PORT_TABLE_NAME)
-        (status, fvp) = port_table.get(port_name)
+        (status, fvp) = self.app_port_table.get(port_name)
         if status:
             # Convert list of tuples to a dictionary
             port_table_dict = dict(fvp)
