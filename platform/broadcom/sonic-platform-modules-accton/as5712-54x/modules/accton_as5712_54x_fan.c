@@ -33,7 +33,6 @@
 #include <linux/device.h>
 #include <linux/platform_device.h>
 
-#define DRVNAME "as5712_54x_fan"
 
 #define FAN_MAX_NUMBER                   5
 #define FAN_SPEED_CPLD_TO_RPM_STEP       150
@@ -68,7 +67,7 @@
 #define PROJECT_NAME
 
 #define LOCAL_DEBUG                       0
-#define DRVNAME "accton_as5712_54x_fan"
+#define DRVNAME "as5712_54x_fan"
 
 static struct accton_as5712_54x_fan  *fan_data = NULL;
 
