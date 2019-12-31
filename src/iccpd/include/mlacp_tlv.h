@@ -528,6 +528,7 @@ struct MACMsg
     char     origin_ifname[MAX_L_PORT_NAME];
     uint8_t age_flag;/*local or peer is age?*/
     uint8_t pending_local_del;
+    uint8_t add_to_syncd;
 
     TAILQ_ENTRY(MACMsg) tail;     // entry into mac_msg_list
 };
