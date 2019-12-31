@@ -1648,6 +1648,11 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type, uin
         ICCPD_LOG_ERR(__FUNCTION__, "Invalid sync_fd Failed to write, fd %d", sys->sync_fd);
     }
 
+    if (oper == MAC_SYNC_DEL)
+        mac_msg->add_to_syncd = 0;
+    else
+        mac_msg->add_to_syncd = 1;
+
     return;
 }
 
@@ -1878,43 +1883,30 @@ static void update_l2_mac_state(struct CSM *csm,
         if (po_state == 0)
         {
             // MAC is locally learned do not delete MAC, Move to peer_link
-            if ((mac_msg->age_flag == MAC_AGE_PEER))
+            if ((mac_msg->age_flag == MAC_AGE_PEER) && pif && (pif->state == PORT_STATE_UP))
             {
-                if (strlen(csm->peer_itf_name) != 0)
+                if ((strlen(csm->peer_itf_name) != 0) && csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
                 {
                     memcpy(mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
-                    if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
-                    {
-                        ICCPD_LOG_DEBUG("ICCP_FDB", "Intf down, MAC learn local only, age flag %d, "
-                           "redirect MAC to peer-link: %s, MAC %s vlan-id %d",
-                           mac_msg->age_flag, mac_msg->ifname,
-                           mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
-                        add_mac_to_chip(mac_msg, mac_msg->fdb_type);
-                    }
+
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "Intf down, MAC learn local only, age flag %d, "
+                       "redirect MAC to peer-link: %s, MAC %s vlan-id %d",
+                       mac_msg->age_flag, mac_msg->ifname,
+                       mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
+
+                    add_mac_to_chip(mac_msg, mac_msg->fdb_type);
+                }
+                else
+                {
+                    del_mac_from_chip(mac_msg);
+                    memcpy(mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
+                    ICCPD_LOG_DEBUG("ICCP_FDB", "Intf down,  MAC learn local only, age flag %d, "
+                       "can not redirect, del MAC as peer-link %s not available or down, "
+                       "MAC %s vlan-id %d", mac_msg->age_flag, mac_msg->ifname,
+                       mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
                 }
 
                 mac_msg->pending_local_del = 1;
-
-                // if peer MCLAG interface is down delete the MAC entry.
-                // The delete to syncd should follow the Add done above,
-                // this is convert the MAC to remote and then delte , else FdbOrch ignores delete.
-                if (pif && (pif->state != PORT_STATE_UP))
-                {
-                    if (mac_msg->fdb_type != MAC_TYPE_STATIC)
-                        del_mac_from_chip(mac_msg);
-
-                    ICCPD_LOG_DEBUG("ICCP_FDB", "Intf down, peer MCLAG if down as well, del MAC %s, vlan-id %d,"
-                            " Interface: %s,", mac_addr_to_str(mac_msg->mac_addr),
-                           mac_msg->vid, mac_msg->ifname);
-
-                    mac_msg->op_type = MAC_SYNC_DEL;
-                    MAC_RB_REMOVE(mac_rb_tree, &MLACP(csm).mac_rb, mac_msg);
-
-                    if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
-                    {
-                        free(mac_msg);
-                    }
-                }
 
                 continue;
             }
@@ -2085,7 +2077,7 @@ mlacp_clear_remote_mac(struct CSM *csm, char *po_name)
 
         mac_msg->age_flag |= MAC_AGE_PEER;
         ICCPD_LOG_DEBUG("ICCP_FDB", "Clear remote mac on Origin Interface: interface %s, "
-                "interface %S, MAC %s vlan-id %d", mac_msg->origin_ifname,
+                "interface %s, MAC %s vlan-id %d", mac_msg->origin_ifname,
                 mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
         /* local and peer both aged, to be deleted*/
@@ -3036,7 +3028,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
 
                 // if from mclag intf update mac to point to peer_link.
                 //else ignore mac.
-                if (from_mclag_intf)
+                if (from_mclag_intf  && pif && (pif->state == PORT_STATE_UP))
                 {
                     ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: MAC add received, "
                         "MAC exists interface %s down, point to peer link MAC %s, vlan %d, is pending local del : %s ",
@@ -3058,25 +3050,6 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                         // need to update the ifname and update to syncd.
                         memcpy(&mac_info->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
                         add_mac_to_chip(mac_info, mac_msg->fdb_type);
-                    }
-
-                    // further delete is required to send as the PortChannel is down on peer.
-                    // The delete to syncd should follow the Add done above,
-                    // this is convert the MAC to remote and then delte , else FdbOrch ignores delete.
-                    if (pif && (pif->state != PORT_STATE_UP))
-                    {
-                        del_mac_from_chip(mac_info);
-
-                        mac_info->op_type = MAC_SYNC_DEL;
-
-                        MAC_RB_REMOVE(mac_rb_tree, &MLACP(csm).mac_rb, mac_info);
-
-                        // free only if not in change list to be send to peer node,
-                        // else free is taken care after sending the update to peer
-                        if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_info, tail))
-                        {
-                            free(mac_info);
-                        }
                     }
 
                     return;
@@ -3165,7 +3138,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                 // MAC learned on orphan port save MAC, when Orphan port is UP sync MAC
                 if (mac_lif->state == PORT_STATE_DOWN)
                 {
-                    if (from_mclag_intf)
+                    if (from_mclag_intf && pif && (pif->state == PORT_STATE_UP))
                     {
                         mac_msg->pending_local_del = 1;
                         memcpy(&mac_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
@@ -3173,19 +3146,6 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                         ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: mclag interface %s down, MAC %s,"
                            " vlan %d point to peer link %s", ifname, mac_addr_to_str(mac_msg->mac_addr),
                            mac_msg->vid, mac_msg->ifname);
-
-                        // The delete to syncd should follow the Add done above,
-                        // this is convert the MAC to remote and then delete ,else FdbOrch ignores delete.
-                        if (pif && (pif->state != PORT_STATE_UP))
-                        {
-                            del_mac_from_chip(mac_msg);
-
-                            ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: mclag interface %s down, MAC %s,"
-                               " vlan %d pointing to peer link %s, del as Peer MCLAG interface is down",
-                               ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->ifname);
-                            MAC_RB_REMOVE(mac_rb_tree, &MLACP(csm).mac_rb, new_mac_msg);
-                            free(new_mac_msg);
-                        }
                     }
                     return;
                 }
@@ -3212,7 +3172,7 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
             /*orphan port mac or origin from_mclag_intf but state is down*/
             if (strcmp(mac_info->ifname, csm->peer_itf_name) == 0)
             {
-                if(mac_info->pending_local_del)
+                if (mac_info->pending_local_del)
                 {
                     //do not delete the MAC.
                     ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: do not del pending MAC on %s(peer-link), "
@@ -3228,6 +3188,11 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                     ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: Recv MAC del interface %s(peer-link), "
                         "MAC %s vlan-id %d", mac_info->ifname,
                         mac_addr_to_str(mac_info->mac_addr), mac_info->vid);
+
+                    if (mac_info->add_to_syncd)
+                    {
+                        del_mac_from_chip(mac_info);
+                    }
 
                     /*If peer link is down, del the mac*/
                     MAC_RB_REMOVE(mac_rb_tree, &MLACP(csm).mac_rb, mac_info);
@@ -3261,6 +3226,11 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
                     "MAC %s vlan-id %d", mac_info->ifname,
                     mac_addr_to_str(mac_info->mac_addr), mac_info->vid);
 
+                //before removing the MAC send del to syncd if added before.
+                if (mac_info->add_to_syncd)
+                {
+                    del_mac_from_chip(mac_info);
+                }
                 /*If local and peer both aged, del the mac (local orphan mac is here)*/
                 MAC_RB_REMOVE(mac_rb_tree, &MLACP(csm).mac_rb, mac_info);
 
