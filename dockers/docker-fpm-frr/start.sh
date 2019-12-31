@@ -13,10 +13,7 @@ elif [ "$CONFIG_TYPE" == "unified" ]; then
     echo "service integrated-vtysh-config" > /etc/frr/vtysh.conf
 fi
 
-[ -s "/etc/frr/frr.conf" ] || {
-    echo "log syslog informational" > /etc/frr/frr.conf
-}
-
+chown -R frr:frr /etc/frr/
 sonic-cfggen -d -t /usr/share/sonic/templates/isolate.j2 > /usr/sbin/bgp-isolate
 chown root:root /usr/sbin/bgp-isolate
 chmod 0755 /usr/sbin/bgp-isolate

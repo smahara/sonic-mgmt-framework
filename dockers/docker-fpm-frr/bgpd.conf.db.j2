@@ -1,6 +1,9 @@
 {# ------------------------------------------------------------------------------------ #}
 {% include "bgpd.conf.db.pref_list.j2" %}
 {# ------------------------------------------------------------------------------------ #}
+{# ------------------------------------------------------------------------------------ #}
+{% include "bgpd.conf.db.route_map.j2" %}
+{# ------------------------------------------------------------------------------------ #}
 {% if AS_PATH_SET is defined and AS_PATH_SET|length > 0 %}
 !
 {% for key, val in AS_PATH_SET.items() %}
@@ -84,7 +87,7 @@ router bgp {{ bgp_sess['local_asn']}} vrf {{ vrf }}
  read-quanta {{bgp_sess['read_quanta']}}
 {% endif %}
 {% if bgp_sess.has_key('write_quanta') %}
- read-quanta {{bgp_sess['write_quanta']}}
+ write-quanta {{bgp_sess['write_quanta']}}
 {% endif %}
 {% if bgp_sess.has_key('coalesce_time') %}
  coalesce-time {{bgp_sess['coalesce_time']}}
@@ -199,6 +202,3 @@ router bgp {{ bgp_sess['local_asn']}} vrf {{ vrf }}
 {% endif %}
 {% endfor %}
 {% endif %}
-{# ------------------------------------------------------------------------------------ #}
-{% include "bgpd.conf.db.route_map.j2" %}
-{# ------------------------------------------------------------------------------------ #}

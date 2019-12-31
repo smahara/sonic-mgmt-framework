@@ -3,8 +3,13 @@
 {# nbr_or_peer contains the information for the neighbor or peer #}
 {# name_or_ip will be the IP or the name of the neighbor or peer #}
 {# ------------------------------------------------------------- #}
+{% set ns_intf = namespace(intf_arg = '') %}
 {% if nbr_or_peer_type == 'peer-group' %}
  neighbor {{name_or_ip}} peer-group
+{% else %}
+{% if not (name_or_ip | ipv4 or name_or_ip | ipv6) %}
+{% set ns_intf.intf_arg = 'interface ' %}
+{% endif %}
 {% endif %}
 {% set remote_as = '' %}
 {% if nbr_or_peer.has_key('asn') %}
@@ -14,7 +19,10 @@
 {% set remote_as = nbr_or_peer['peer_type'] %}
 {% endif %}
 {% if remote_as != '' %}
- neighbor {{name_or_ip}} remote-as {{remote_as}}
+ neighbor {{name_or_ip}} {{ns_intf.intf_arg}}remote-as {{remote_as}}
+{% endif %}
+{% if nbr_or_peer.has_key('peer_group_name') %}
+ neighbor {{name_or_ip}} {{ns_intf.intf_arg}}peer-group {{nbr_or_peer['peer_group_name']}}
 {% endif %}
 {% if nbr_or_peer.has_key('local_asn') %}
  neighbor {{name_or_ip}} local-as {{nbr_or_peer['local_asn']}}

@@ -23,6 +23,7 @@ route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
 {% endif %}
 {# ---------------match ip/ipv6-Start-------------------------- #}
 {% set ip_str = {'ipv4':'ip', 'ipv6':'ipv6' } %}
+{% if PREFIX_SET is defined and PREFIX_SET|length > 0 %}
 {% if rm_val.has_key('match_prefix_set') %}
 {% for pfx_key, pfx_val in PREFIX_SET.items() %}
 {% if rm_val['match_prefix_set'] == pfx_key %}
@@ -36,6 +37,7 @@ route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
  match {{ip_str[pfx_val['mode']]}} next-hop prefix-list {{rm_val['match_next_hop_set']}}
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endif %}
 {# ---------------match ip/ipv6-  End-------------------------- #}
 {% if rm_val.has_key('match_local_pref') %}
@@ -80,14 +82,22 @@ route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
 {% endif %}
 {# ---------------set extcommunity - Start--------------------- #}
 {% if rm_val.has_key('set_ext_community_inline') %}
-{% set type_str = {'route-target':'rt', 'route-origin':'soo' } %}
-{% set ec = namespace(comm='', str='') %}
+{% set ec_ns = namespace(rt_str='', soo_str='') %}
 {% for ext_comm in rm_val['set_ext_community_inline'] %}
 {% set comm  = ext_comm.split(':') %}
-{% set ec.str = type_str[comm[0]] %}
-{% set ec.comm = ec.comm + ' ' + comm[1]+':'+comm[2] %}
+{% if comm[0] == 'route-target' %}
+{% set ec_ns.rt_str = ec_ns.rt_str+' '+comm[1]+':'+comm[2] %}
+{% endif %}
+{% if comm[0] == 'route-origin' %}
+{% set ec_ns.soo_str = ec_ns.soo_str+' '+comm[1]+':'+comm[2] %}
+{% endif %}
 {% endfor %}
- set extcommunity {{ec.str}}{{ec.comm}}
+{% if ec_ns.rt_str != '' %}
+ set extcommunity rt{{ec_ns.rt_str}}
+{% endif %}
+{% if ec_ns.soo_str != '' %}
+ set extcommunity soo{{ec_ns.rt_str}}
+{% endif %}
 {% endif %}
 {# ---------------set extcommunity - End----------------------- #}
 {% if rm_val.has_key('set_ext_community_ref') %}
