@@ -15,3 +15,7 @@ $(eval $(call add_derived_package,$(SONIC_MGMT_FRAMEWORK),$(SONIC_HAMD)))
 
 SONIC_LIBNSS_HAM = sonic-libnss-ham_$(MGMT_FRAMEWORK_VERSION)_amd64.deb
 $(eval $(call add_derived_package,$(SONIC_MGMT_FRAMEWORK),$(SONIC_LIBNSS_HAM)))
+
+SONIC_CERTFIX = sonic-certfix_$(MGMT_FRAMEWORK_VERSION)_amd64.deb
+$(eval $(call add_derived_package,$(SONIC_MGMT_FRAMEWORK),$(SONIC_CERTFIX)))
+
