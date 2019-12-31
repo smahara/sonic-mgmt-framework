@@ -24,9 +24,10 @@ $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += --net=host --privileged -t
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /etc/sonic:/etc/sonic:ro
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /var/run/docker.sock:/var/run/docker.sock
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /usr/bin/docker:/usr/bin/docker:ro
-$(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /var/run/dbus:/var/run/dbus:rw
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /home:/home:ro
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /root/cli-ca:/root/cli-ca:rw
+$(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /etc:/host_etc:ro
+$(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += -v /var/run/dbus:/var/run/dbus:rw
 $(DOCKER_MGMT_FRAMEWORK)_RUN_OPT += --mount type=bind,source="/var/platform/",target="/mnt/platform/"
 
 $(DOCKER_MGMT_FRAMEWORK)_BASE_IMAGE_FILES += sonic-cli:/usr/bin/sonic-cli

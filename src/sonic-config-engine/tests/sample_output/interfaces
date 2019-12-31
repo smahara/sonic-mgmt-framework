@@ -12,6 +12,7 @@ auto eth0
 iface eth0 inet static
     address 10.0.0.100
     netmask 255.255.255.0
+    broadcast 10.0.0.255
     ########## management network policy routing rules
     # management port up rules
     up ip -4 route add default via 10.0.0.1 dev eth0 table default metric 201
