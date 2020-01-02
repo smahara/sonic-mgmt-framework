@@ -472,7 +472,6 @@ int stpiccp_receive_stp_connect_request(void)
     if(STP(csm).csm_state == STP_CONNREC)
     {
       data->a_bit = 1;
-      stpiccp_send_connect_to_syncd(sys, csm, STP_ICCP_OPER_STATUS_UP);
     }
     else
     {
@@ -480,6 +479,7 @@ int stpiccp_receive_stp_connect_request(void)
       data->a_bit = 0;
     }
 
+    stpiccp_send_connect_to_syncd(sys, csm, STP_ICCP_OPER_STATUS_UP);
     iccp_csm_send(csm, g_csm_buf, msg_len);
   }
 
@@ -607,6 +607,7 @@ conn_fail:
     return MCLAG_ERROR;
 }
 
+/* Handle messages from stpiccpsyncd */
 int iccp_stpiccpsyncd_msg_handler(struct System *sys)
 {
     int num_bytes_rxed = 0;

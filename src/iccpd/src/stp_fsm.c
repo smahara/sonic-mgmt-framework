@@ -192,12 +192,13 @@ static void stp_process_peer_connect(struct CSM* csm, struct Msg* msg)
     if (STP(csm).csm_state == STP_CONNSENT)
     {
       STP(csm).csm_state = STP_CONNECTING;
-      stpiccp_send_connect_to_syncd(sys, csm, STP_ICCP_OPER_STATUS_UP);
     }
     else
     {
       STP(csm).csm_state = STP_CONNREC;
     }
+
+    stpiccp_send_connect_to_syncd(sys, csm, STP_ICCP_OPER_STATUS_UP);
 
     return;
 }
