@@ -318,6 +318,8 @@ class HostConfigDaemon:
         radius_server = self.config_db.get_table('RADIUS_SERVER')
         self.aaacfg = AaaCfg()
         self.aaacfg.load(aaa, tacacs_global, tacacs_server, radius_global, radius_server)
+        ssh_server_vrf = self.config_db.get_table('SSH_SERVER_VRF')
+        self.load_ssh_server_vrf(ssh_server_vrf)
         self.hostname_cache=""
         lpbk_table = self.config_db.get_table('LOOPBACK_INTERFACE')
         self.iptables = Iptables()
@@ -325,6 +327,18 @@ class HostConfigDaemon:
 
     def aaa_handler(self, key, data):
         self.aaacfg.aaa_update(key, data)
+
+    def load_ssh_server_vrf(self, ssh_server_conf):
+        cmd = 'iptables -I INPUT -i Vrf+ -p tcp --dport 22 -j REJECT'
+        cmd1 = 'ip6tables -I INPUT -i Vrf+ -p tcp --dport 22 -j REJECT'
+        cmd = cmd + ";" + cmd1
+        os.system(cmd)
+        cmd = 'iptables -I INPUT -i mgmt+ -p tcp --dport 22 -j REJECT'
+        cmd1 = 'ip6tables -I INPUT -i mgmt+ -p tcp --dport 22 -j REJECT'
+        cmd = cmd + ";" + cmd1
+        os.system(cmd)
+        for row in ssh_server_conf:
+            self.ssh_server_handler(row, ssh_server_conf[row])
 
     def tacacs_server_handler(self, key, data):
         self.aaacfg.tacacs_server_update(key, data)
@@ -353,6 +367,19 @@ class HostConfigDaemon:
         if log_data.has_key('passkey'):
             log_data['passkey'] = obfuscate(log_data['passkey'])
         syslog.syslog(syslog.LOG_INFO, 'value of {} changed to {}'.format(key, log_data))
+
+    def ssh_server_handler(self, key, data):
+        
+        if data == {}:
+            cmd = 'iptables -D INPUT -i {} -p tcp --dport 22 -j ACCEPT'.format(key)
+            cmd1 = 'ip6tables -D INPUT -i {} -p tcp --dport 22 -j ACCEPT'.format(key)
+        else:
+            cmd = 'iptables -I INPUT -i {} -p tcp --dport 22 -j ACCEPT'.format(key)
+            cmd1 = 'ip6tables -I INPUT -i {} -p tcp --dport 22 -j ACCEPT'.format(key)
+        cmd = cmd + ";" + cmd1
+        os.system(cmd)
+        syslog.syslog(syslog.LOG_INFO, 'ssh_server_handler cmd:{}'.format(cmd))
+        syslog.syslog(syslog.LOG_INFO, 'ssh_server_handler value of {} changed to {}'.format(key, data))
 
     def hostname_handler(self, key, data):
         if key != "localhost":
@@ -412,6 +439,7 @@ class HostConfigDaemon:
         self.config_db.subscribe('RADIUS', lambda table, key, data: self.radius_global_handler(key, data))
         self.config_db.subscribe('DEVICE_METADATA', lambda table, key, data: self.hostname_handler(key, data))
         self.config_db.subscribe('LOOPBACK_INTERFACE', lambda table, key, data: self.lpbk_handler(key, data))
+        self.config_db.subscribe('SSH_SERVER_VRF', lambda table, key, data: self.ssh_server_handler(key, data))
         self.config_db.listen()
 
 
