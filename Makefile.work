@@ -371,6 +371,7 @@ PDESUBMODULES = src/sonic-linux-kernel \
                 src/sonic-utilities \
                 src/sonic-platform-common \
                 src/sonic-swss-common \
+                src/sonic-swss \
                 src/sonic-py-swsssdk \
                 src/redis-dump-load \
                 src/sonic-sairedis \
