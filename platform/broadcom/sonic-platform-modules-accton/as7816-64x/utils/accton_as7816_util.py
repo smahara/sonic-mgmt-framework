@@ -121,29 +121,29 @@ def  show_set_help():
     print  cmd +" [led|sfp|fan]"
     print  "    use \""+ cmd + " led 0-4 \"  to set led color"
     print  "    use \""+ cmd + " fan 0-100\" to set fan duty percetage"    
-    print  "    use \""+ cmd + " sfp 1-64 {0|1}\" to set sfp# tx_disable"
+    print  "    use \""+ cmd + " sfp 1-32 {0|1}\" to set sfp# tx_disable" 
     sys.exit(0)  
     
-def dis_i2c_ir3570a(addr):
+def diss_i2c_ir3507a(addr):
     cmd = "i2cset -y 0 0x%x 0xE5 0x01" % addr
     status, output = commands.getstatusoutput(cmd)
     cmd = "i2cset -y 0 0x%x 0x12 0x02" % addr
     status, output = commands.getstatusoutput(cmd)
     return status
 
-def ir3570_check():
+def ir3507_check():
     cmd = "i2cdump -y 0 0x42 s 0x9a"
     try:
         status, output = commands.getstatusoutput(cmd)
         lines = output.split('\n')
         hn = re.findall(r'\w+', lines[-1])
         version = int(hn[1], 16)
-        if version == 0x24:  #only for ir3570a
-            ret = dis_i2c_ir3570a(4)
+        if version == 0x24:  #only for ir3507a
+            ret = diss_i2c_ir3507a(4)
         else:
             ret = 0
     except Exception as e:
-        print "Error on ir3570_check() e:" + str(e)
+        print "Error on ir3507_check() e:" + str(e)
         return -1
     return ret
     
@@ -151,7 +151,7 @@ def ir3570_check():
 
 def  show_eeprom_help():
     cmd =  sys.argv[0].split("/")[-1]+ " "  + args[0]
-    print  "    use \""+ cmd + " 1-64 \" to dump sfp# eeprom"
+    print  "    use \""+ cmd + " 1-32 \" to dump sfp# eeprom" 
     sys.exit(0)           
             
 def my_log(txt):
@@ -182,11 +182,10 @@ def driver_check():
 kos = [
 'modprobe i2c_dev',
 'modprobe i2c_mux_pca954x force_deselect_on_exit=1',
-'modprobe optoe',
 'modprobe accton_i2c_cpld'  ,
 'modprobe ym2651y'                  ,
 'modprobe x86-64-accton-as7816-64x-fan'     ,
-#'modprobe x86-64-accton-as7816-64x-sfp'      ,
+'modprobe x86-64-accton-as7816-64x-sfp'      ,
 'modprobe x86-64-accton-as7816-64x-leds'      ,
 'modprobe x86-64-accton-as7816-64x-psu' ]
 
@@ -231,8 +230,8 @@ i2c_bus = {'fan': ['17-0068']                 ,
            'sfp': ['-0050']}
 i2c_nodes = {'fan': ['present', 'front_speed_rpm', 'rear_speed_rpm'] ,
            'thermal': ['hwmon/hwmon*/temp1_input'] ,
-           'psu': ['psu_present', 'psu_power_good']    ,
-           'sfp': ['module_present']}
+           'psu': ['psu_present ', 'psu_power_good']    ,
+           'sfp': ['sfp_is_present ', 'sfp_tx_disable']}
                    
 sfp_map =  [37,38,39,40,42,41,44,43,33,34,35,36,45,46,47,48,49,50,51,52,
            61,62,63,64,53,54,55,56,57,58,59,60,69,70,71,72,77,78,79,80,65,
@@ -287,8 +286,7 @@ def device_install():
                 
     
     for i in range(0,len(sfp_map)):
-        path = "/sys/bus/i2c/devices/i2c-"+str(sfp_map[i])+"/new_device"
-        status, output =log_os_system("echo optoe1 0x50 > " + path, 1)
+        status, output =log_os_system("echo as7816_64x_port"+str(i+1)+" 0x50 > /sys/bus/i2c/devices/i2c-"+str(sfp_map[i])+"/new_device", 1)
         if status:
             print output
             if FORCE == 0:            
@@ -341,7 +339,7 @@ def do_install():
     else:
         print PROJECT_NAME.upper()+" drivers detected...."                      
 
-    ir3570_check()
+    ir3507_check()
 
     if not device_exist():
         print "No device, installing...."     
@@ -398,9 +396,7 @@ def devices_info():
                 elif  'sfp' == key:
                     for k in range(0,DEVICE_NO[key]):
                         node = key+str(k+1)
-                        fmt = i2c_prefix+"19-0060/{0}_{1}"
-                        path =  fmt.format(nodes[j], k+1)
-
+                        path = i2c_prefix+ str(sfp_map[k])+ buses[i]+"/"+ nodes[j]                
                         my_log(node+": "+ path)
                         ALL_DEVICE[key][node].append(path)                                        
                 else:
@@ -435,8 +431,10 @@ def show_eeprom(index):
         print("Please install first!")
         return 
               
-    i = int(index)-1
-    node = i2c_prefix+ str(sfp_map[i])+ i2c_bus['sfp'][0]+"/"+ 'eeprom'
+    if len(ALL_DEVICE)==0:
+        devices_info()        
+    node = ALL_DEVICE['sfp'] ['sfp'+str(index)][0]
+    node = node.replace(node.split("/")[-1], 'sfp_eeprom')
     # check if got hexdump command in current environment
     ret, log = log_os_system("which hexdump", 0)
     ret, log2 = log_os_system("which busybox hexdump", 0)    
@@ -451,7 +449,7 @@ def show_eeprom(index):
         return 1                                 
             
     print node + ":"
-    ret, log = log_os_system(hex_cmd +" -C "+node, 1)
+    ret, log = log_os_system("cat "+node+"| "+hex_cmd+" -C", 1)
     if ret==0:                                      
         print  log 
     else:
