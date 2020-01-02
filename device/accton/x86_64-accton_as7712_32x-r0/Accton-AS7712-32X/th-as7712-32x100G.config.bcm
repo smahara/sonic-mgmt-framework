@@ -1,4 +1,6 @@
 #PTP
+num_queues_pci=24
+num_queues_uc0=1
 num_queues_uc1=1
 
 # accton_as7712_32x
