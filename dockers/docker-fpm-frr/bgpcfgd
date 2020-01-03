@@ -555,10 +555,10 @@ class CommandArgument(object):
                 self.value = 'restart %s' % self.value
         elif format == 'redist-route-map':
             if len(self.value) > 0:
-                self.value = 'route-map %s' % self.value
+                self.value = 'route-map %s' % self.to_str()
         elif format == 'network-policy':
             if len(self.value) > 0:
-                self.value = 'route-map %s' % self.value
+                self.value = 'route-map %s' % self.to_str()
         elif format == 'src-proto':
             if self.value == 'ospf3':
                 self.value = 'ospf6'
@@ -577,6 +577,15 @@ def hdl_send_com(daemon, cmd_str, op, st_idx, args, data):
         cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'standard'), no = CommandArgument(daemon, True)))
     elif args[1] == 'extended':
         cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'extended'), no = CommandArgument(daemon, True)))
+    return cmd_list
+
+def hdl_capa_orf_pfxlist(daemon, cmd_str, op, st_idx, args, data):
+    if len(args) < 2:
+        return None
+    cmd_list = []
+    cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'both'), no = CommandArgument(daemon, False)))
+    if op != CachedDataWithOp.OP_DELETE:
+        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, args[1]), no = CommandArgument(daemon, True)))
     return cmd_list
 
 def hdl_com_set(daemon, cmd_str, op, st_idx, args, extended):
@@ -933,7 +942,7 @@ class BGPConfigDaemon:
                       (['remove_private_as_enabled',
                         '++remove_private_as_all',
                         '+replace_private_as'],                             '{no:no-prefix}neighbor {} remove-private-AS {:rm-as-all} {:rm-as-repl}', ['true', 'false']),
-                      ('cap_orf',                                           '{no:no-prefix}neighbor {} capability orf prefix-list {}'),
+                      ('cap_orf',                                           '{no:no-prefix}neighbor {} capability orf prefix-list {}', hdl_capa_orf_pfxlist),
                       ('route_server_client',                               '{no:no-prefix}neighbor {} route-server-client', ['true', 'false']),
     ]
 
