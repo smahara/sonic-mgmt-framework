@@ -1052,6 +1052,7 @@ void iccp_parse_if_vlan_info_from_netlink(struct nlmsghdr *n)
                 struct rtattr *i, *list = tb[IFLA_AF_SPEC];
                 int rem = RTA_PAYLOAD(list);
                 struct VLAN_ID *vlan = NULL;
+                struct VLAN_ID *vlan_temp = NULL;
 
                 /*set vlan flag is removed*/
                 RB_FOREACH (vlan, vlan_rb_tree, &(lif->vlan_tree))
@@ -1072,7 +1073,7 @@ void iccp_parse_if_vlan_info_from_netlink(struct nlmsghdr *n)
                 }
 
                 /*After update vlan list, remove unused item*/
-                RB_FOREACH (vlan, vlan_rb_tree, &(lif->vlan_tree))
+                RB_FOREACH_SAFE (vlan, vlan_rb_tree, &(lif->vlan_tree), vlan_temp)
                 {
                     if (vlan->vlan_removed == 1)
                     {

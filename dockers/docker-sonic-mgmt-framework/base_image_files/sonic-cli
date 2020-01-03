@@ -4,8 +4,8 @@ if [[ "$1" =~ "prompt=" ]]
 then
    SYSTEM_NAME=`echo $1 | cut -d"=" -f2`
    shift
- docker exec -e SYSTEM_NAME=$SYSTEM_NAME -it mgmt-framework /usr/sbin/cli/clish_start "$@"
+ docker exec -e SYSTEM_NAME=$SYSTEM_NAME -e CLI_USER="$USER" -it mgmt-framework /usr/sbin/cli/clish_start "$@"
 else
- docker exec -it mgmt-framework /usr/sbin/cli/clish_start "$@"
+ docker exec -e CLI_USER="$USER" -it mgmt-framework /usr/sbin/cli/clish_start "$@"
 fi
 

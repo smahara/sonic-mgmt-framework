@@ -141,6 +141,8 @@ struct LocalInterface
     int mlacp_state;    /* Record mlacp state */
     uint8_t isolate_to_peer_link;
 
+    time_t po_down_time;
+
     struct CSM* csm;
 
     uint8_t changed;

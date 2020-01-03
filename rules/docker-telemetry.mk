@@ -6,7 +6,7 @@ DOCKER_TELEMETRY_DBG = $(DOCKER_TELEMETRY_STEM)-$(DBG_IMAGE_MARK).gz
 
 $(DOCKER_TELEMETRY)_PATH = $(DOCKERS_PATH)/$(DOCKER_TELEMETRY_STEM)
 
-$(DOCKER_TELEMETRY)_DEPENDS += $(REDIS_TOOLS) $(SONIC_TELEMETRY)
+$(DOCKER_TELEMETRY)_DEPENDS += $(REDIS_TOOLS) $(SONIC_TELEMETRY) $(SONIC_LIBNSS_HAM)
 $(DOCKER_TELEMETRY)_DBG_DEPENDS = $($(DOCKER_CONFIG_ENGINE_STRETCH)_DBG_DEPENDS)
 
 $(DOCKER_TELEMETRY)_LOAD_DOCKERS += $(DOCKER_CONFIG_ENGINE_STRETCH)
@@ -31,4 +31,3 @@ $(DOCKER_TELEMETRY)_RUN_OPT += -v /var/run/dbus:/var/run/dbus:rw
 $(DOCKER_TELEMETRY)_RUN_OPT += -v /var/run/docker.sock:/var/run/docker.sock
 $(DOCKER_TELEMETRY)_RUN_OPT += -v /usr/bin/docker:/usr/bin/docker:ro
 $(DOCKER_TELEMETRY)_RUN_OPT += --mount type=bind,source="/var/platform/",target="/mnt/platform/"
-$(DOCKER_TELEMETRY)_RUN_OPT += --mount type=bind,source="/var/run/redis/",target="/var/run/redis/"

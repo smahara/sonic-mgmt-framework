@@ -2014,6 +2014,12 @@ int iccp_handle_events(struct System * sys)
             continue;
         }
 
+        if (events[i].data.fd == sys->stp_sync_fd)
+        {
+          iccp_stpiccpsyncd_msg_handler(sys);
+          continue;
+        }
+
         if (events[i].data.fd == sys->sig_pipe_r)
         {
             iccp_receive_signal_handler(sys);

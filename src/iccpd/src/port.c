@@ -110,6 +110,8 @@ struct LocalInterface* local_if_create(int ifindex, char* ifname, int type, uint
     local_if->type  = type;
     local_if->state = state;
 
+    local_if->po_down_time = 0;
+
     if (local_if->type == IF_T_PORT_CHANNEL)
     {
         int i;
@@ -323,8 +325,13 @@ void local_if_destroy(char *ifname)
     {
         /*if the peerlink interface is not created, peer connection can not establish*/
         scheduler_session_disconnect_handler(csm);
+
+        // The function above calls iccp_csm_status_reset, which sets csm->Peer_link_if to NULL,
+        // accessing the peer_link_if cause crash due to null pointer access.
+#if 0
         csm->peer_link_if->is_peer_link = 0;
         csm->peer_link_if = NULL;
+#endif
     }
 
     if (csm && MLACP(csm).current_state == MLACP_STATE_EXCHANGE)

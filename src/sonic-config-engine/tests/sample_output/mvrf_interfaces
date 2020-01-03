@@ -21,6 +21,7 @@ auto eth0
 iface eth0 inet static
     address 10.0.0.100
     netmask 255.255.255.0
+    broadcast 10.0.0.255
     vrf mgmt
     ########## management network policy routing rules
     # management port up rules
