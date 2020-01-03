@@ -11,6 +11,7 @@ try:
 except ImportError as e:
     raise ImportError("%s - required module not found" % str(e))
 
+XCVR_EEPROM_TYPE_SFP = 1
 
 #from xcvrd
 SFP_STATUS_INSERTED = '1'
@@ -336,6 +337,14 @@ class SfpUtil(SfpUtilBase):
         return False, {}
 
 
+    def is_media_type_set_required(self, port_num):
+        etype = self.get_eeprom_type(port_num)
+        # Set for SFP ports only
+        if etype == XCVR_EEPROM_TYPE_SFP:
+            return True
+        else:
+            return False
+
     def __init__(self):
         eeprom_path = self.BASE_OOM_PATH + "eeprom"
 
@@ -345,7 +354,4 @@ class SfpUtil(SfpUtilBase):
                 )
 
         SfpUtilBase.__init__(self)
-
-
-
 
