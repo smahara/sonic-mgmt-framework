@@ -20,9 +20,8 @@ class SfpUtil(SfpUtilBase):
     """Platform-specific SfpUtil class"""
     
     PORT_START = 1
-    PORT_END = 32  #34 cages actually, but last 2 are not at port_config.ini.
-    PORTS_IN_BLOCK = 32
-    
+    PORT_END = 34
+
     BASE_OOM_PATH = "/sys/bus/i2c/devices/{0}-0050/"
     BASE_CPLD_PATH = "/sys/bus/i2c/devices/11-0060/"
     
@@ -77,7 +76,7 @@ class SfpUtil(SfpUtilBase):
    
     @property
     def qsfp_ports(self):
-        return range(self.PORT_START, self.PORTS_IN_BLOCK - 2)
+        return range(self.PORT_START, self.PORT_END - 1)
 
     @property
     def port_to_eeprom_mapping(self):
@@ -196,62 +195,10 @@ class SfpUtil(SfpUtilBase):
         
         return True
 
-    @property
-    def get_transceiver_status(self):
-        nodes = []
-
-        cpld_path = self.BASE_CPLD_PATH
-        nodes.append(cpld_path + "module_present_all")
-
-        bitmap = ""
-        for node in nodes:
-            try:
-                reg_file = open(node)
-
-            except IOError as e:
-                print "Error: unable to open file: %s" % str(e)
-                return False
-            bitmap += reg_file.readline().rstrip() + " "
-            reg_file.close()
-
-        rev = bitmap.split(" ")
-        rev = "".join(rev[::-1])
-        return int(rev,16)
-
-    data = {'valid':0, 'last':0, 'present':0}
     def get_transceiver_change_event(self, timeout=2000):
-        now = time.time()
-        port_dict = {}
-        port = 0
-
-        if timeout < 1000:
-            timeout = 1000
-        timeout = (timeout) / float(1000) # Convert to secs
-
-
-        if now < (self.data['last'] + timeout) and self.data['valid']:
-            return True, {}
-
-        reg_value = self.get_transceiver_status
-        changed_ports = self.data['present'] ^ reg_value
-        if changed_ports:
-            for port in range (self.port_start, self.port_end+1):
-                # Mask off the bit corresponding to our port
-                fp_port = port
-                mask = (1 << (fp_port - 1))
-                if changed_ports & mask:
-                    if (reg_value & mask) == 0:
-                        port_dict[port] = SFP_STATUS_REMOVED
-                    else:
-                        port_dict[port] = SFP_STATUS_INSERTED
-
-            # Update cache
-            self.data['present'] = reg_value
-            self.data['last'] = now
-            self.data['valid'] = 1
-
-            return True, port_dict
-        else:
-            return True, {}
-        return False, {}
-
+        """
+        TODO: This function need to be implemented
+        when decide to support monitoring SFP(Xcvrd)
+        on this platform.
+        """
+        raise NotImplementedError

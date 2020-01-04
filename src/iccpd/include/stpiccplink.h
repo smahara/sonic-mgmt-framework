@@ -154,6 +154,7 @@ struct stpiccp_common_info
     char		desig_bridge_id[BRIDGE_ID_STR_LEN];
     uint16_t	desig_port;
 	bool		nrpv_valid;
+	bool		peer_nrpv_valid;
     uint32_t    port_id;
     uint32_t    port_path_cost;
     uint8_t     max_age;
