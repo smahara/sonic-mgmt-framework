@@ -229,6 +229,7 @@ SYNCD_TX_DBG_CNTR_MSG_e system_syncdtx_to_dbg_msg_type(uint32_t msg_type)
             return SYNCD_TX_DBG_CNTR_MSG_PORT_ISOLATE;
 
         case MCLAG_MSG_TYPE_PORT_MAC_LEARN_MODE:
+        case MCLAG_MSG_TYPE_PORT_MAC_LEARN_NLAPI:
             return SYNCD_TX_DBG_CNTR_MSG_PORT_MAC_LEARN_MODE;
 
         case MCLAG_MSG_TYPE_FLUSH_FDB:

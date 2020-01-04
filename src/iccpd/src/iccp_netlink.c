@@ -308,7 +308,7 @@ int iccp_get_portchannel_member_list_handler(struct nl_msg *msg, void * arg)
                     {
                         /*link add to portchannel, must be disabled mac learn*/
                         set_peerlink_mlag_port_learn(local_if, 0);
-                        set_peerlink_learn_kernel(csm->peer_link_if, 0);
+                        //set_peerlink_learn_kernel(csm->peer_link_if, 0);
                     }
                 }
             }

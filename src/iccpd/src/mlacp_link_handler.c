@@ -4763,15 +4763,16 @@ int sync_unique_ip()
 }
 
 void set_peerlink_learn_kernel(
-    struct LocalInterface *peer_link_if,
+    struct LocalInterface *lif,
     int enable)
 {
-    if (!peer_link_if)
+    if (!lif)
         return;
 
+    ICCPD_LOG_DEBUG(__FUNCTION__,"ifname %s, enable %d", __LINE__, lif->name, enable);
+#if 0 /*system command returns error in some scenario, replacing with NLAPI*/
     char cmd[256] = { 0 };
     int ret = 0;
-
     if (enable == 0) {
         sprintf(cmd, "bridge link set dev %s learning off", peer_link_if->name);
     } else {
@@ -4779,7 +4780,63 @@ void set_peerlink_learn_kernel(
     }
 
     ret = system(cmd);
-    ICCPD_LOG_DEBUG(__FUNCTION__, " cmd  %s  ret = %d", cmd, ret);
+    ICCPD_LOG_NOTICE(__FUNCTION__, " cmd  %s  ret = %d", cmd, ret);
+#endif
+    struct IccpSyncdHDr * msg_hdr;
+    mclag_sub_option_hdr_t * sub_msg;
+    char *msg_buf = g_iccp_mlagsyncd_send_buf;
+    int msg_len;
+    struct System *sys;
+    ssize_t rc;
+    int ret = 0;
+
+    sys = system_get_instance();
+    if (sys == NULL)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return;
+    }
+
+    memset(msg_buf, 0, ICCP_MLAGSYNCD_SEND_MSG_BUFFER_SIZE);
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+    msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
+    msg_hdr->type = MCLAG_MSG_TYPE_PORT_MAC_LEARN_NLAPI;
+
+    msg_hdr->len = sizeof(struct IccpSyncdHDr);
+
+    sub_msg = (mclag_sub_option_hdr_t*)&msg_buf[msg_hdr->len];
+    sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MAC_LEARN_DISABLE;
+
+    if (enable)
+        sub_msg->op_type = MCLAG_SUB_OPTION_TYPE_MAC_LEARN_ENABLE;
+
+    msg_len = strlen(lif->name);
+    memcpy(sub_msg->data, lif->name, msg_len);
+
+    sub_msg->op_len = msg_len;
+    msg_hdr->len += sizeof(mclag_sub_option_hdr_t);
+    msg_hdr->len += sub_msg->op_len;
+
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Send %s port MAC learn msg to mclagsyncd for %s",
+                    sub_msg->op_type == MCLAG_SUB_OPTION_TYPE_MAC_LEARN_DISABLE ? "DISABLE":"ENABLE", lif->name);
+
+    /*send msg*/
+    if (sys->sync_fd)
+    {
+        rc = write(sys->sync_fd,msg_buf, msg_hdr->len);
+        if ((rc <= 0) || (rc != msg_hdr->len))
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_ERR);
+            ICCPD_LOG_ERR(__FUNCTION__, "Failed to write for %s, rc %d",
+                lif->name, rc);
+        }
+        else
+        {
+            SYSTEM_SET_SYNCD_TX_DBG_COUNTER(
+                sys, msg_hdr->type, ICCP_DBG_CNTR_STS_OK);
+        }
+    }
 
     return;
 }
