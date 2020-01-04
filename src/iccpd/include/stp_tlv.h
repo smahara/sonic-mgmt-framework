@@ -150,6 +150,7 @@ struct stpCommonInfoTLV
   uint16_t     designated_port;
 
   uint8_t	   nrpv_valid;
+  uint8_t	   peer_nrpv_valid;
   uint32_t     port_id;
   uint32_t     port_path_cost;
   uint8_t      max_age;

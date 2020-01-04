@@ -207,6 +207,7 @@ int stpiccp_send_common_info_to_peer(struct System *sys, struct stpiccp_common_i
   
 
   data->nrpv_valid = info->nrpv_valid;
+  data->peer_nrpv_valid = info->peer_nrpv_valid;
   data->port_id = htonl(info->port_id);
   data->port_path_cost = htonl(info->port_path_cost);
   data->max_age = info->max_age;
