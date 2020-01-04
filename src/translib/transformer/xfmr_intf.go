@@ -447,12 +447,20 @@ var intf_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error)
     } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/addresses/address/config") ||
         strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/addresses/address/config") ||
         strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/addresses/address/config") ||
-        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/addresses/address/config") {
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/addresses/address/config") ||
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/config") ||
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/config") ||
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/config") ||
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/config") {
         tblList = append(tblList, intTbl.cfgDb.intfTN)
     } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/addresses/address/state") ||
         strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/addresses/address/state") ||
         strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/addresses/address/state") ||
-        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/addresses/address/state") {
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/addresses/address/state") ||
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/state") ||
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/state") ||
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/state") ||
+        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/state") {
         tblList = append(tblList, intTbl.appDb.intfTN)
     } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/addresses") ||
         strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/addresses") ||
@@ -758,6 +766,36 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
     subIntfmap := make(map[string]map[string]db.Value)
     intfIpMap := make(map[string]db.Value)
 
+    intfType, _, _ := getIntfTypeByName(ifName)
+
+    if intfType == IntfTypeMgmt {
+        if ((subIntf.Ipv4 != nil && subIntf.Ipv4.Config != nil) || (subIntf.Ipv6 != nil && subIntf.Ipv6.Config != nil)) {
+            if _, ok := subIntfmap[tblName]; !ok {
+                subIntfmap[tblName] = make (map[string]db.Value)
+            }
+            ifdb := make(map[string]string)
+            value := db.Value{Field: ifdb}
+
+            if subIntf.Ipv4 != nil && subIntf.Ipv4.Config != nil {
+                if subIntf.Ipv4.Config.DefaultGwaddr != nil {
+                    value.Set("ipv4_default_gwaddr", "")
+                }
+                if subIntf.Ipv4.Config.DhcpClient != nil {
+                    value.Set("ipv4_dhcp_client", "")
+                }
+            }
+            if subIntf.Ipv6 != nil && subIntf.Ipv6.Config != nil {
+                if subIntf.Ipv6.Config.DefaultGwaddr != nil {
+                    value.Set("ipv6_default_gwaddr", "")
+                }
+                if subIntf.Ipv6.Config.DhcpClient != nil {
+                    value.Set("ipv6_dhcp_client", "")
+                }
+            }
+            subIntfmap[tblName][ifName] = value
+        }
+    }
+
     if subIntf.Ipv4 != nil && subIntf.Ipv4.Addresses != nil {
         if len(subIntf.Ipv4.Addresses.Address) < 1 {
             ipMap, _:= getIntfIpByName(d, tblName, ifName, true, false, "")
@@ -818,7 +856,9 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
             IntfMap := IntfMapObj.Field
             if len(IntfMap) == 1 {
                 if _, ok := IntfMap["NULL"]; ok {
-                    subIntfmap[tblName][ifName] = data
+                    if _, ok := subIntfmap[tblName][ifName]; !ok {
+                        subIntfmap[tblName][ifName] = data
+                    }
                 }
             }
         }
@@ -937,7 +977,65 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
 
     }
 
+    if intfType == IntfTypeMgmt && ((subIntfObj.Ipv4 != nil && subIntfObj.Ipv4.Config != nil) || (subIntfObj.Ipv6 != nil && subIntfObj.Ipv6.Config != nil)) {
+        if _, ok := subIntfmap[tblName][ifName]; !ok {
+            ifdb := make(map[string]string)
+            value := db.Value{Field: ifdb}
+            if _, ok := subIntfmap[tblName]; !ok {
+                subIntfmap[tblName] = make(map[string]db.Value)
+            }
+            subIntfmap[tblName][ifName] = value
+        }
+
+        value := subIntfmap[tblName][ifName]
+        if subIntfObj.Ipv4 != nil && subIntfObj.Ipv4.Config != nil {
+            ipv4Cfg := subIntfObj.Ipv4.Config
+            if ipv4Cfg.DefaultGwaddr != nil {
+                value.Set("ipv4_default_gwaddr", *ipv4Cfg.DefaultGwaddr)
+            }
+            if ipv4Cfg.DhcpClient != nil {
+                if *ipv4Cfg.DhcpClient == true {
+                    ipMap, _ := getIntfIpByName(inParams.d, tblName, ifName, true, false, "")
+                    if (ipMap != nil && len(ipMap) > 0) || (subIntfObj.Ipv4.Addresses != nil && len(subIntfObj.Ipv4.Addresses.Address) > 0) {
+                        errStr := "DHCPClient for IPV4 can't be enabled when static IP's are configured."
+                        log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr + " ", ipMap)
+                        return subIntfmap, errors.New(errStr)
+                    }
+                    value.Set("ipv4_dhcp_client", "true")
+                } else {
+                    value.Set("ipv4_dhcp_client", "false")
+                }
+            }
+        }
+
+        if subIntfObj.Ipv6 != nil && subIntfObj.Ipv6.Config != nil {
+            ipv6Cfg := subIntfObj.Ipv6.Config
+            if ipv6Cfg.DefaultGwaddr != nil {
+                value.Set("ipv6_default_gwaddr", *ipv6Cfg.DefaultGwaddr)
+            }
+            if ipv6Cfg.DhcpClient != nil {
+                if *ipv6Cfg.DhcpClient == true {
+                    ipMap, _ := getIntfIpByName(inParams.d, tblName, ifName, false, true, "")
+                    if (ipMap != nil && len(ipMap) > 0) || (subIntfObj.Ipv6.Addresses != nil && len(subIntfObj.Ipv6.Addresses.Address) > 0) {
+                        errStr := "DHCPClient for IPV6 can't be enabled when static IP's are configured."
+                        log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr + " ", ipMap)
+                        return subIntfmap, errors.New(errStr)
+                    }
+                    value.Set("ipv6_dhcp_client", "true")
+                } else {
+                    value.Set("ipv6_dhcp_client", "false")
+                }
+            }
+        }
+        subIntfmap[tblName][ifName] = value
+    }
+
     if subIntfObj.Ipv4 != nil && subIntfObj.Ipv4.Addresses != nil {
+        if intfType == IntfTypeMgmt && len(subIntfObj.Ipv4.Addresses.Address) > 0 && ((subIntfObj.Ipv4.Config != nil &&  *subIntfObj.Ipv4.Config.DhcpClient == true) || (entry.IsPopulated() && entry.Has("ipv4_dhcp_client") && entry.Get("ipv4_dhcp_client") == "true")) {
+            errStr := "Static IPV4 address can't be configured when IPV4 DHCP client is enabled on the interface " + ifName
+            log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr)
+            return subIntfmap, errors.New(errStr)
+        }
         for ip, _ := range subIntfObj.Ipv4.Addresses.Address {
             addr := subIntfObj.Ipv4.Addresses.Address[ip]
             if addr.Config != nil {
@@ -986,6 +1084,11 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
         }
     }
     if subIntfObj.Ipv6 != nil && subIntfObj.Ipv6.Addresses != nil {
+        if intfType == IntfTypeMgmt && len(subIntfObj.Ipv6.Addresses.Address) > 0 && ((subIntfObj.Ipv6.Config != nil &&  *subIntfObj.Ipv6.Config.DhcpClient == true) || (entry.IsPopulated() && entry.Has("ipv6_dhcp_client") && entry.Get("ipv6_dhcp_client") == "true")) {
+            errStr := "Static IPV6 address can't be configured when IPV6 DHCP client is enabled on the interface " + ifName
+            log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr)
+            return subIntfmap, errors.New(errStr)
+        }
         for ip, _ := range subIntfObj.Ipv6.Addresses.Address {
             addr := subIntfObj.Ipv6.Addresses.Address[ip]
             if addr.Config != nil {
@@ -1203,7 +1306,7 @@ func getIntfIpByName(dbCl *db.DB, tblName string, ifName string, ipv4 bool, ipv6
         if all == false {
             ipB, _, _ := net.ParseCIDR(key.Get(1))
             if ((validIPv4(ipB.String()) && (ipv4 == false)) ||
-                (validIPv6(ipB.String()) && (ipv6 == false))) {
+            (validIPv6(ipB.String()) && (ipv6 == false))) {
                 continue
             }
             if ip != "" {
@@ -1232,43 +1335,122 @@ func handleIntfIPGetByTargetURI (inParams XfmrParams, targetUriPath string, ifNa
         return errors.New(errStr)
     }
     intTbl := IntfTypeTblMap[intfType]
+    var subIntf *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Subinterfaces_Subinterface
+    if _, ok := intfObj.Subinterfaces.Subinterface[0]; !ok {
+        subIntf, err = intfObj.Subinterfaces.NewSubinterface(0)
+        if err != nil {
+            log.Error("Creation of subinterface subtree failed!")
+            return err
+        }
+    }
+    subIntf = intfObj.Subinterfaces.Subinterface[0]
+    ygot.BuildEmptyTree(subIntf)
 
     if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/addresses/address/config") ||
-       strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/addresses/address/config") {
-           ipMap, err = getIntfIpByName(inParams.dbs[db.ConfigDB], intTbl.cfgDb.intfTN, ifName, true, false, ipAddr)
-           log.Info("handleIntfIPGetByTargetURI : ipv4 config ipMap - : ", ipMap)
-           convertIpMapToOC(ipMap, intfObj, false)
-    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/addresses/address/config") ||
-        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/addresses/address/config") {
-           ipMap, err = getIntfIpByName(inParams.dbs[db.ConfigDB], intTbl.cfgDb.intfTN, ifName, false, true, ipAddr)
-           log.Info("handleIntfIPGetByTargetURI : ipv6 config ipMap - : ", ipMap)
-           convertIpMapToOC(ipMap, intfObj, false)
-    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/addresses/address/state") ||
-         strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/addresses/address/state") {
-           ipMap, err = getIntfIpByName(inParams.dbs[db.ApplDB], intTbl.appDb.intfTN, ifName, true, false, ipAddr)
-           log.Info("handleIntfIPGetByTargetURI : ipv4 state ipMap - : ", ipMap)
-           convertIpMapToOC(ipMap, intfObj, true)
-    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/addresses/address/state") ||
-         strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/addresses/address/state") {
-           ipMap, err = getIntfIpByName(inParams.dbs[db.ApplDB], intTbl.appDb.intfTN, ifName, false, true, ipAddr)
-           log.Info("handleIntfIPGetByTargetURI : ipv6 state ipMap - : ", ipMap)
-           convertIpMapToOC(ipMap, intfObj, true)
-    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/addresses") ||
-        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/addresses") {
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/addresses/address/config") {
         ipMap, err = getIntfIpByName(inParams.dbs[db.ConfigDB], intTbl.cfgDb.intfTN, ifName, true, false, ipAddr)
-           log.Info("handleIntfIPGetByTargetURI : ipv4 config ipMap - : ", ipMap)
+        log.Info("handleIntfIPGetByTargetURI : ipv4 config ipMap - : ", ipMap)
+        convertIpMapToOC(ipMap, intfObj, false)
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/addresses/address/config") ||
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/addresses/address/config") {
+        ipMap, err = getIntfIpByName(inParams.dbs[db.ConfigDB], intTbl.cfgDb.intfTN, ifName, false, true, ipAddr)
+        log.Info("handleIntfIPGetByTargetURI : ipv6 config ipMap - : ", ipMap)
+        convertIpMapToOC(ipMap, intfObj, false)
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/addresses/address/state") ||
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/addresses/address/state") {
+        ipMap, err = getIntfIpByName(inParams.dbs[db.ApplDB], intTbl.appDb.intfTN, ifName, true, false, ipAddr)
+        log.Info("handleIntfIPGetByTargetURI : ipv4 state ipMap - : ", ipMap)
+        convertIpMapToOC(ipMap, intfObj, true)
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/addresses/address/state") ||
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/addresses/address/state") {
+        ipMap, err = getIntfIpByName(inParams.dbs[db.ApplDB], intTbl.appDb.intfTN, ifName, false, true, ipAddr)
+        log.Info("handleIntfIPGetByTargetURI : ipv6 state ipMap - : ", ipMap)
+        convertIpMapToOC(ipMap, intfObj, true)
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/addresses") ||
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/addresses") {
+        ipMap, err = getIntfIpByName(inParams.dbs[db.ConfigDB], intTbl.cfgDb.intfTN, ifName, true, false, ipAddr)
+        log.Info("handleIntfIPGetByTargetURI : ipv4 config ipMap - : ", ipMap)
         convertIpMapToOC(ipMap, intfObj, false)
         ipMap, err = getIntfIpByName(inParams.dbs[db.ApplDB], intTbl.appDb.intfTN, ifName, true, false, ipAddr)
-           log.Info("handleIntfIPGetByTargetURI : ipv4 state ipMap - : ", ipMap)
+        log.Info("handleIntfIPGetByTargetURI : ipv4 state ipMap - : ", ipMap)
         convertIpMapToOC(ipMap, intfObj, true)
     } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/addresses") ||
-        strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/addresses") {
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/addresses") {
         ipMap, err = getIntfIpByName(inParams.dbs[db.ConfigDB], intTbl.cfgDb.intfTN, ifName, false, true, ipAddr)
-           log.Info("handleIntfIPGetByTargetURI : ipv6 config ipMap - : ", ipMap)
+        log.Info("handleIntfIPGetByTargetURI : ipv6 config ipMap - : ", ipMap)
         convertIpMapToOC(ipMap, intfObj, false)
         ipMap, err = getIntfIpByName(inParams.dbs[db.ApplDB], intTbl.appDb.intfTN, ifName, false, true, ipAddr)
-           log.Info("handleIntfIPGetByTargetURI : ipv6 state ipMap - : ", ipMap)
+        log.Info("handleIntfIPGetByTargetURI : ipv6 state ipMap - : ", ipMap)
         convertIpMapToOC(ipMap, intfObj, true)
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/config") ||
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/config") {
+        entry, dbErr := inParams.dbs[db.ConfigDB].GetEntry(&db.TableSpec{Name:intTbl.cfgDb.intfTN}, db.Key{Comp: []string{ifName}})
+        if dbErr == nil {
+            if entry.Has("ipv4_default_gwaddr") {
+                subIntf.Ipv4.Config.DefaultGwaddr = new(string)
+                *subIntf.Ipv4.Config.DefaultGwaddr = entry.Get("ipv4_default_gwaddr")
+            }
+            if entry.Has("ipv4_dhcp_client") {
+                subIntf.Ipv4.Config.DhcpClient = new(bool)
+                if entry.Get("ipv4_dhcp_client") == "true" {
+                    *subIntf.Ipv4.Config.DhcpClient = true
+                } else {
+                    *subIntf.Ipv4.Config.DhcpClient = false
+                }
+            }
+        }
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/config") ||
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/config") {
+        entry, dbErr := inParams.dbs[db.ConfigDB].GetEntry(&db.TableSpec{Name:intTbl.cfgDb.intfTN}, db.Key{Comp: []string{ifName}})
+        if dbErr == nil {
+            if entry.Has("ipv6_default_gwaddr") {
+                subIntf.Ipv6.Config.DefaultGwaddr = new(string)
+                *subIntf.Ipv6.Config.DefaultGwaddr = entry.Get("ipv6_default_gwaddr")
+            }
+            if entry.Has("ipv6_dhcp_client") {
+                subIntf.Ipv6.Config.DhcpClient = new(bool)
+                if entry.Get("ipv6_dhcp_client") == "true" {
+                    *subIntf.Ipv6.Config.DhcpClient = true
+                } else {
+                    *subIntf.Ipv6.Config.DhcpClient = false
+                }
+            }
+        }
+
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv4/state") ||
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/state") {
+        entry, dbErr := inParams.dbs[db.ApplDB].GetEntry(&db.TableSpec{Name:intTbl.appDb.intfTN}, db.Key{Comp: []string{ifName}})
+        if dbErr == nil {
+            if entry.Has("ipv4_default_gwaddr") {
+                subIntf.Ipv4.State.DefaultGwaddr = new(string)
+                *subIntf.Ipv4.State.DefaultGwaddr = entry.Get("ipv4_default_gwaddr")
+            }
+            if entry.Has("ipv4_dhcp_client") {
+                subIntf.Ipv4.State.DhcpClient = new(bool)
+                if entry.Get("ipv4_dhcp_client") == "true" {
+                    *subIntf.Ipv4.State.DhcpClient = true
+                } else {
+                    *subIntf.Ipv4.State.DhcpClient = false
+                }
+            }
+        }
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/ipv6/state") ||
+    strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/state") {
+        entry, dbErr := inParams.dbs[db.ApplDB].GetEntry(&db.TableSpec{Name:intTbl.appDb.intfTN}, db.Key{Comp: []string{ifName}})
+        if dbErr == nil {
+            if entry.Has("ipv6_default_gwaddr") {
+                subIntf.Ipv6.State.DefaultGwaddr = new(string)
+                *subIntf.Ipv6.State.DefaultGwaddr = entry.Get("ipv6_default_gwaddr")
+            }
+            if entry.Has("ipv6_dhcp_client") {
+                subIntf.Ipv6.State.DhcpClient = new(bool)
+                if entry.Get("ipv6_dhcp_client") == "true" {
+                    *subIntf.Ipv6.State.DhcpClient = true 
+                } else {
+                    *subIntf.Ipv6.State.DhcpClient = false
+                }
+            }
+        }
     }
     return err
 }
@@ -1729,9 +1911,9 @@ var DbToYang_intf_get_counters_xfmr SubTreeXfmrDbToYang = func(inParams XfmrPara
     }
     intTbl := IntfTypeTblMap[intfType]
     if intTbl.CountersHdl.PopulateCounters == nil {
-         log.Infof("Counters for Interface: %s not supported!", intfName)
-		 return nil
- 	}
+        log.Infof("Counters for Interface: %s not supported!", intfName)
+        return nil
+    }
     var state_counters * ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters
 
     if intfsObj != nil && intfsObj.Interface != nil && len(intfsObj.Interface) > 0 {
@@ -1793,58 +1975,58 @@ var YangToDb_intf_eth_port_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrP
         tblName, _ := getMemTableNameByDBId(intTbl, inParams.curDb)
         var lagStr string
         switch inParams.oper {
-            case CREATE:
-            case UPDATE:
-                log.Info("Add member port")
-                lagId := intfObj.Ethernet.Config.AggregateId
-                lagStr = "PortChannel" + (*lagId)
-                /* Check if PortChannel exists */
-                err = validateLagExists(inParams.d, &intTbl.cfgDb.portTN, &lagStr)
-                if err != nil {
-                    errStr := "Invalid PortChannel: " + lagStr
-                    err = tlerr.InvalidArgsError{Format: errStr}
-                    return nil, err
-                }
-                /* Check if given iface already part of a PortChannel */
-                lagKeys, err := inParams.d.GetKeys(&db.TableSpec{Name:tblName})
-                if err == nil {
-                    for i, _ := range lagKeys {
-                        if ifName == lagKeys[i].Get(1) {
-                            errStr := "Given interface already part of " + lagKeys[i].Get(0)
-                            err = tlerr.InvalidArgsError{Format: errStr}
-                            return nil, err
-                        }
-                    }
-                }
-                /* Check if L3 configs present on given physical interface */
-                err = validateL3ConfigExists(inParams.d, &ifName)
-                if err != nil {
-                    return nil, err
-                }
-
-            case DELETE:
-                log.Info("Delete member port")
-                lagKeys, err := inParams.d.GetKeys(&db.TableSpec{Name:tblName})
-                /* Find the port-channel the given ifname is part of */
-                if err != nil {
-                    log.Info("No entries in PORTCHANNEL_MEMBER TABLE")
-                    return nil, errors.New("No entries in PORTCHANNEL_MEMBER TABLE")
-                }
-                var flag bool = false
+        case CREATE:
+        case UPDATE:
+            log.Info("Add member port")
+            lagId := intfObj.Ethernet.Config.AggregateId
+            lagStr = "PortChannel" + (*lagId)
+            /* Check if PortChannel exists */
+            err = validateLagExists(inParams.d, &intTbl.cfgDb.portTN, &lagStr)
+            if err != nil {
+                errStr := "Invalid PortChannel: " + lagStr
+                err = tlerr.InvalidArgsError{Format: errStr}
+                return nil, err
+            }
+            /* Check if given iface already part of a PortChannel */
+            lagKeys, err := inParams.d.GetKeys(&db.TableSpec{Name:tblName})
+            if err == nil {
                 for i, _ := range lagKeys {
                     if ifName == lagKeys[i].Get(1) {
-                        log.Info("Found Entry in PORTCHANNEL_MEMBER TABLE")
-                        flag = true
-                        lagStr = lagKeys[i].Get(0)
-                        log.Info("Given interface part of PortChannel", lagStr)
-                        break
+                        errStr := "Given interface already part of " + lagKeys[i].Get(0)
+                        err = tlerr.InvalidArgsError{Format: errStr}
+                        return nil, err
                     }
                 }
-                if flag == false {
-                    log.Info("Given Interface not part of any PortChannel")
-                    err = errors.New("Given Interface not part of any PortChannel")
-                    return nil, err
+            }
+            /* Check if L3 configs present on given physical interface */
+            err = validateL3ConfigExists(inParams.d, &ifName)
+            if err != nil {
+                return nil, err
+            }
+
+        case DELETE:
+            log.Info("Delete member port")
+            lagKeys, err := inParams.d.GetKeys(&db.TableSpec{Name:tblName})
+            /* Find the port-channel the given ifname is part of */
+            if err != nil {
+                log.Info("No entries in PORTCHANNEL_MEMBER TABLE")
+                return nil, errors.New("No entries in PORTCHANNEL_MEMBER TABLE")
+            }
+            var flag bool = false
+            for i, _ := range lagKeys {
+                if ifName == lagKeys[i].Get(1) {
+                    log.Info("Found Entry in PORTCHANNEL_MEMBER TABLE")
+                    flag = true
+                    lagStr = lagKeys[i].Get(0)
+                    log.Info("Given interface part of PortChannel", lagStr)
+                    break
                 }
+            }
+            if flag == false {
+                log.Info("Given Interface not part of any PortChannel")
+                err = errors.New("Given Interface not part of any PortChannel")
+                return nil, err
+            }
         }/* End of switch case */
         m := make(map[string]string)
         value := db.Value{Field: m}
@@ -1990,15 +2172,15 @@ var DbToYang_neigh_tbl_get_all_ipv4_xfmr SubTreeXfmrDbToYang = func (inParams Xf
         }
 
         /*The transformer returns complete table regardless of the interface.
-          First check if the interface and IP of this redis entry matches one
-          available in the received URI
+        First check if the interface and IP of this redis entry matches one
+        available in the received URI
         */
         if (strings.Contains(targetUriPath, "ipv4") && addrFamily != "IPv4") ||
-            intfName != intfNameRcvd ||
-            (ipAddrRcvd != "" && ipAddrRcvd != ipAddr) {
-                log.Info("Skipping entry: ", entry, "for interface: ", intfName, " and IP:", ipAddr,
-                         "interface received: ", intfNameRcvd, " IP received: ", ipAddrRcvd)
-                continue
+        intfName != intfNameRcvd ||
+        (ipAddrRcvd != "" && ipAddrRcvd != ipAddr) {
+            log.Info("Skipping entry: ", entry, "for interface: ", intfName, " and IP:", ipAddr,
+            "interface received: ", intfNameRcvd, " IP received: ", ipAddrRcvd)
+            continue
         } else if strings.HasPrefix(targetUriPath, NEIGH_IPv4_PREFIX_STATE_LL) {
             if neighObj, ok = subIntfObj.Ipv4.Neighbors.Neighbor[ipAddr]; !ok {
                 neighObj, err = subIntfObj.Ipv4.Neighbors.NewNeighbor(ipAddr)
@@ -2109,11 +2291,11 @@ var DbToYang_neigh_tbl_get_all_ipv6_xfmr SubTreeXfmrDbToYang = func (inParams Xf
         }
 
         if (strings.Contains(targetUriPath, "ipv6") && addrFamily != "IPv6") ||
-            intfName != intfNameRcvd ||
-            (ipAddrRcvd != "" && ipAddrRcvd != ipAddr) {
-                log.Info("Skipping entry: ", entry, "for interface: ", intfName, " and IP:", ipAddr,
-                         "interface received: ", intfNameRcvd, " IP received: ", ipAddrRcvd)
-                continue
+        intfName != intfNameRcvd ||
+        (ipAddrRcvd != "" && ipAddrRcvd != ipAddr) {
+            log.Info("Skipping entry: ", entry, "for interface: ", intfName, " and IP:", ipAddr,
+            "interface received: ", intfNameRcvd, " IP received: ", ipAddrRcvd)
+            continue
         }else if strings.HasPrefix(targetUriPath, NEIGH_IPv6_PREFIX_STATE_LL) {
             if neighObj, ok = subIntfObj.Ipv6.Neighbors.Neighbor[ipAddr]; !ok {
                 neighObj, err = subIntfObj.Ipv6.Neighbors.NewNeighbor(ipAddr)

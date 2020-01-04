@@ -45,6 +45,24 @@ module sonic-mgmt-interface {
                     }
                 }
 
+                leaf ipv4_default_gwaddr {
+                    type inet:ipv4-address;
+                }
+
+                leaf ipv6_default_gwaddr {
+                    type inet:ipv6-address;
+                }
+
+                leaf ipv4_dhcp_client {
+                    type boolean;
+                    default false;
+                }
+
+                leaf ipv6_dhcp_client {
+                    type boolean;
+                    default false;
+                }
+
                 leaf vrf-name {
                     type leafref {
                         path "/mvrf:sonic-mgmt-vrf/mvrf:MGMT_VRF_CONFIG/mvrf:MGMT_VRF_CONFIG_LIST/mvrf:vrf_global_name";

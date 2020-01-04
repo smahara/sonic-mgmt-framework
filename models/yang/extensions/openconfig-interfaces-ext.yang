@@ -38,6 +38,31 @@ module openconfig-interfaces-ext {
         }
     }
 
+    augment "/oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv4/oc-ip:config" {
+        leaf default-gwaddr {
+            type oc-inet:ipv4-address;
+            description "IPv4 Default Gateway address";
+        }
+    }
+    augment "/oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv4/oc-ip:state" {
+        leaf default-gwaddr {
+            type oc-inet:ipv4-address;
+            description "IPv4 Default Gateway address";
+        }
+    }
+    augment "/oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv6/oc-ip:config" {
+        leaf default-gwaddr {
+            type oc-inet:ipv6-address;
+            description "IPv6 Default Gateway address";
+        }
+    }
+    augment "/oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv6/oc-ip:state" {
+        leaf default-gwaddr {
+            type oc-inet:ipv6-address;
+            description "IPv6 Default Gateway address";
+        }
+    }
+
     augment "/oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:config" {
         leaf gw-addr {
             type oc-inet:ipv4-address;
@@ -111,12 +136,6 @@ module openconfig-interfaces-ext {
     deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv4/oc-ip:unnumbered {
         deviate not-supported;
     }
-    deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv4/oc-ip:config {
-        deviate not-supported;
-    }
-    deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv4/oc-ip:state {
-        deviate not-supported;
-    }
 
     deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp {
         deviate not-supported;
@@ -125,12 +144,6 @@ module openconfig-interfaces-ext {
         deviate not-supported;
     }
     deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv6/oc-ip:unnumbered {
-        deviate not-supported;
-    }
-    deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv6/oc-ip:config {
-        deviate not-supported;
-    }
-    deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv6/oc-ip:state {
         deviate not-supported;
     }
     deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:subinterfaces/oc-intf:subinterface/oc-ip:ipv6/oc-ip-ext:autoconf {
