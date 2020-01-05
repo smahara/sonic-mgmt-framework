@@ -1,0 +1,208 @@
+module openconfig-qos-ext {
+
+    yang-version "1";
+
+    // namespace
+    namespace "http://openconfig.net/yang/qos/extension";
+
+    prefix "oc-qos-ext";
+
+    import openconfig-qos { prefix oc-qos; }
+    import openconfig-qos-types { prefix oc-qos-types; }
+    import openconfig-yang-types { prefix oc-yang; }
+
+    grouping qos-queue-state-ext {
+        leaf traffic-type {
+            type string;
+            description
+               "Type of traffic (Unicast/Multicast/Anycast) to be queued";
+        }
+            
+        leaf dropped-octets {
+            type oc-yang:counter64;
+            description
+                "Number of octets dropped by the queue due to overrun";
+        }
+    
+        leaf watermark {
+            type oc-yang:counter64;
+            description
+                "occupancy watermark in bytes since last watermark clearance";
+        }
+
+        leaf persistent-watermark {
+            type oc-yang:counter64;
+            description
+                "occupancy watermark in bytes since system up";
+        }
+
+    }
+
+    augment /oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:queues/oc-qos:queue/oc-qos:state {
+        uses qos-queue-state-ext;
+    }
+
+    grouping qos-interface-priority-group-config {
+        description
+            "Configuration data for the priority group associated with the 
+            interface";
+    
+        leaf name {
+            type string;
+            description 
+                "Name of the priority group";
+        }
+    }
+
+    grouping qos-interface-priority-group-state {
+        description
+            "Operational state data for the priority group associated with the
+            interface";
+
+        leaf headroom-watermark {
+            type oc-yang:counter64;
+            description
+                "occupancy watermark in the headroom in bytes since last watermark clearance";
+        }
+
+        leaf headroom-persistent-watermark {
+            type oc-yang:counter64;
+            description
+                "occupancy watermark in bytes since system up";
+        }
+
+        leaf shared-watermark {
+            type oc-yang:counter64;
+            description
+                "occupancy watermark in shared buffer in bytes since last watermark clearance";
+        }
+
+        leaf shared-persistent-watermark {
+            type oc-yang:counter64;
+            description
+                "occupancy watermark in shared buffer in bytes since system up";
+        }
+    }
+    
+    grouping qos-interface-priority-group-top {
+        description
+        "Top-level grouping for the priority group associated with the
+        interface";
+
+        container priority-groups {
+            description
+            "Surrounding container for a list of priority groups that are
+            instantiated on an interface.";
+
+            list priority-group {
+                key "name";
+
+                description
+                  "Top-level container for the priority group associated with this
+                  interface";
+
+                leaf name {
+                  type leafref {
+                    path "../config/name";
+                  }
+                  description
+                    "Reference to the name of the priority group
+                    instantiated on the interface.";
+                }
+
+                container config {
+                  description
+                    "Configuration data for the priority group associated with the
+                    interface";
+
+                  uses qos-interface-priority-group-config;
+                }
+
+                container state {
+                  config false;
+                  description
+                    "Operational state data for the priority group associated with the
+                    interface";
+
+                  uses qos-interface-priority-group-config;
+                  uses qos-interface-priority-group-state;
+                }
+            }
+        }
+    }
+        
+    augment /oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:input {
+        uses qos-interface-priority-group-top;
+    }
+    
+    grouping qos-threshold-breach-top {
+        description 
+            "Top-level grouping for QoS threshold breach information";
+
+        container threshold-breaches {
+            description
+                "Enclosing container for the list of threshold breaches";
+
+            list breach {
+                key "id";
+
+                description
+                    "List of threshold breaches";
+
+                leaf id {
+                    type string;
+                    description
+                        "Index uniquely identifying a breach entry";
+                }
+
+                leaf buffer {
+                    type string;
+                    description
+                        "Queue buffer breach or Priority Group buffer breach";
+                }
+
+                leaf type {
+                    type string;
+                    description
+                        "For Queue breach, the type of queue: unicast or multicast;
+                         for Priority Group breach, the shared buffer or headroom buffer";
+                } 
+
+                leaf port {
+                    type string;
+                    description
+                        "The name of the port whose buffer is breached";
+                }
+
+                leaf index {
+                    type uint32;
+                    description
+                        "Queue index or Priority Group index within a port";
+                }
+
+                leaf breach-value {
+                    type uint32;
+                    description
+                        "Counter value in term of percentage at breach";
+                }
+
+                leaf counter {
+                    type oc-yang:counter64;
+                    description
+                        "Counter value at breach";
+                }
+
+                leaf time-stamp {
+                    type string;
+                    description
+                        "Time-stamp (%y-%m-%d - %H:%M:%S) when the threshold breach occurred";
+                }
+            }
+        }
+    }
+
+    augment /oc-qos:qos {
+        uses qos-threshold-breach-top;
+    }
+}
+
