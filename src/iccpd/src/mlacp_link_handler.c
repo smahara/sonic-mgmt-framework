@@ -3873,6 +3873,10 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
  {
      int    rc;
 
+     /* Update traffic distribution only if local interface is still bound to MLAG */ 
+     if (!lif || !lif->csm)
+         return;
+ 
      /* Expecting ACK from peer only after reaching EXCHANGE state */
      if (MLACP(lif->csm).current_state != MLACP_STATE_EXCHANGE)
          return;
@@ -3902,6 +3906,10 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
  void mlacp_link_enable_traffic_distribution(struct LocalInterface *lif)
  {
     int     rc;
+
+     /* Update traffic distribution only if local interface is still bound to MLAG */
+     if (!lif || !lif->csm)
+         return;
 
     if ((lif->type == IF_T_PORT_CHANNEL) && lif->is_traffic_disable)
     {
