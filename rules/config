@@ -68,8 +68,8 @@ ENABLE_PDE = y
 # ENABLE_PFCWD_ON_START = y
 
 # INSTALL_DEBUG_TOOLS - installs debugging tools in baseline docker
-# Uncomment next line to enable:
-# INSTALL_DEBUG_TOOLS = y
+# comment next line to disable:
+INSTALL_DEBUG_TOOLS = y
 
 # SONIC_USE_PDDF_FRAMEWORK - Use PDDF generic drivers and plugins
 # Uncomment next line to enable:
