@@ -25,3 +25,7 @@ openconfig-system-ext.yang
 openconfig-system-annot.yang
 openconfig-nat.yang
 openconfig-nat-annot.yang
+openconfig-qos.yang
+openconfig-qos-ext.yang
+openconfig-qos-annot.yang
+
