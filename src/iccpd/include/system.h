@@ -221,6 +221,7 @@ struct System
 
 struct CSM* system_create_csm();
 struct CSM* system_get_csm_by_peer_ip(const char*);
+struct CSM* system_get_csm_by_peer_ifname(char *ifname);
 struct CSM* system_get_csm_by_mlacp_id(int id);
 struct System* system_get_instance();
 void system_finalize();

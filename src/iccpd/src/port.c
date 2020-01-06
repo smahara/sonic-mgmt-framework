@@ -303,6 +303,7 @@ void local_if_destroy(char *ifname)
 {
     struct LocalInterface* lif = NULL;
     struct CSM *csm = NULL;
+    struct CSM *peer_ifname_csm = NULL;
     struct System *sys = NULL;
 
     if (!(sys = system_get_instance()))
@@ -321,11 +322,11 @@ void local_if_destroy(char *ifname)
     else
         local_if_remove(lif);
 
-    csm = lif->csm;
-    if (csm && csm->peer_link_if && strcmp(csm->peer_link_if->name, ifname) == 0)
+    //handle peer_link del case
+    if ( (peer_ifname_csm = system_get_csm_by_peer_ifname(ifname)) != NULL )
     {
         /*if the peerlink interface is not created, peer connection can not establish*/
-        scheduler_session_disconnect_handler(csm);
+        scheduler_session_disconnect_handler(peer_ifname_csm);
 
         // The function above calls iccp_csm_status_reset, which sets csm->Peer_link_if to NULL,
         // accessing the peer_link_if cause crash due to null pointer access.
@@ -335,6 +336,7 @@ void local_if_destroy(char *ifname)
 #endif
     }
 
+    csm = lif->csm;
     if (csm && MLACP(csm).current_state == MLACP_STATE_EXCHANGE)
         goto to_mlacp_purge;
     else
