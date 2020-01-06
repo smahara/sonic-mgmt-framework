@@ -511,6 +511,7 @@ enum MAC_TYPE
 {
     MAC_TYPE_STATIC     = 1,
     MAC_TYPE_DYNAMIC    = 2,
+    MAC_TYPE_DYNAMIC_LOCAL = 3,  /* Used while sending MAC to Syncd to program with aging enabled. */
 };
 
 struct MACMsg

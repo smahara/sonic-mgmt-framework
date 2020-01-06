@@ -179,7 +179,9 @@ int mlacp_fsm_update_Aggport_state(struct CSM* csm, mLACPAggPortStateTLV* tlv)
          */
         if (MLACP(csm).current_state == MLACP_STATE_EXCHANGE)
         {
-            mlacp_clear_remote_mac(csm, peer_if->name);
+            if (tlv->agg_state == PORT_STATE_DOWN)
+                mlacp_convert_remote_mac_to_local(csm, peer_if->name);
+
             mlacp_link_set_remote_if_state(
                 csm->mlag_id, peer_if->name,
                 (tlv->agg_state == PORT_STATE_UP)? true : false);
