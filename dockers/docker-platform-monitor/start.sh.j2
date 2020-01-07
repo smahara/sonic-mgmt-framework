@@ -52,3 +52,7 @@ supervisorctl start psud
 {% if not skip_fand %}
 supervisorctl start fand
 {% endif %}
+
+{% if start_ipmievd %}
+supervisorctl start ipmievd
+{% endif %}
