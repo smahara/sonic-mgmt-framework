@@ -292,7 +292,14 @@ class BGPKeyMapList(list):
                 cmd_data[idx] = (data[key].data, False)
             return ((cmd_data,), op)
         else:
-            op = CachedDataWithOp.OP_DELETE if is_del and 0 in chg_list else CachedDataWithOp.OP_UPDATE
+            min_id = lambda id_set: None if len(id_set) == 0 else sorted(list(id_set))[0]
+            min_chg_id = min_id(chg_list)
+            if min_chg_id is None:
+                min_id_chged = False
+            else:
+                min_unchg_id = min_id(no_chg_list)
+                min_id_chged = min_unchg_id is None or min_chg_id < min_unchg_id
+            op = CachedDataWithOp.OP_DELETE if is_del and min_id_chged else CachedDataWithOp.OP_UPDATE
             cmd_data = []
             for idx in range(len(key_list)):
                 if (((not is_del or op == CachedDataWithOp.OP_DELETE) and (idx in chg_list or idx in no_chg_list)) or
@@ -533,6 +540,11 @@ class CommandArgument(object):
                 return self.value[0]
             else:
                 return self.value
+        elif format == 'tx-add-paths':
+            if self.value == 'tx_all_paths':
+                return 'addpath-tx-all-paths'
+            elif self.value == 'tx_best_path_per_as':
+                return 'addpath-tx-bestpath-per-AS'
         elif format in bool_format:
             false_val = ''
             if type(bool_format[format]) is tuple:
@@ -931,14 +943,15 @@ class BGPConfigDaemon:
                       ('weight',                                            '{no:no-prefix}neighbor {} weight {}'),
                       ('as_override',                                       '{no:no-prefix}neighbor {} as-override', ['true', 'false']),
                       ('send_community',                                    '{no:no-prefix}neighbor {} send-community {}', hdl_send_com),
-                      ('add_path_tx_all',                                   '{no:no-prefix}neighbor {} addpath-tx-all-paths', ['true', 'false']),
-                      ('add_path_tx_bestpath',                              '{no:no-prefix}neighbor {} addpath-tx-bestpath-per-AS', ['true', 'false']),
+                      ('tx_add_paths',                                      '{no:no-prefix}neighbor {} {:tx-add-paths}'),
                       (['++unchanged_as_path',
-                        '++unchanged_med', '+unchanged_nexthop'],            '{no:no-prefix}neighbor {} attribute-unchanged {:uchg-as-path} {:uchg-med} {:uchg-nh}'),
-                      (['filter_list_name', 'filter_list_direction'],       '{no:no-prefix}neighbor {} filter-list {} {}'),
+                        '++unchanged_med', '+unchanged_nexthop'],           '{no:no-prefix}neighbor {} attribute-unchanged {:uchg-as-path} {:uchg-med} {:uchg-nh}'),
+                      ('filter_list_in',                                    '{no:no-prefix}neighbor {} filter-list {} in'),
+                      ('filter_list_out',                                   '{no:no-prefix}neighbor {} filter-list {} out'),
                       ('nhself',                                            '{no:no-prefix}neighbor {} next-hop-self', ['true', 'false']),
                       ('nexthop_self_force',                                '{no:no-prefix}neighbor {} next-hop-self force', ['true', 'false']),
-                      (['prefix_list_name', 'prefix_list_direction'],       '{no:no-prefix}neighbor {} prefix-list {} {}'),
+                      ('prefix_list_in',                                    '{no:no-prefix}neighbor {} prefix-list {} in'),
+                      ('prefix_list_out',                                   '{no:no-prefix}neighbor {} prefix-list {} out'),
                       (['remove_private_as_enabled',
                         '++remove_private_as_all',
                         '+replace_private_as'],                             '{no:no-prefix}neighbor {} remove-private-AS {:rm-as-all} {:rm-as-repl}', ['true', 'false']),
@@ -1131,8 +1144,8 @@ class BGPConfigDaemon:
             ('ROUTE_MAP', self.bgp_table_handler_common),
             ('BGP_PEER_GROUP', self.bgp_neighbor_handler),
             ('BGP_NEIGHBOR', self.bgp_neighbor_handler),
-            ('BGP_PEER_GROUP_AF', self.bgp_neighbor_af_handler),
-            ('BGP_NEIGHBOR_AF', self.bgp_neighbor_af_handler),
+            ('BGP_PEER_GROUP_AF', self.bgp_table_handler_common),
+            ('BGP_NEIGHBOR_AF', self.bgp_table_handler_common),
             ('BGP_GLOBALS_LISTEN_PREFIX', self.bgp_table_handler_common),
             ('BFD_PEER', self.bfd_handler),
             ('PREFIX_SET', self.bgp_table_handler_common),
@@ -1763,9 +1776,6 @@ class BGPConfigDaemon:
     def bgp_neighbor_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'keepalive', 'holdtime'}])
 
-    def bgp_neighbor_af_handler(self, table, key, data):
-        self.bgp_table_handler_common(table, key, data, [{'filter_list_name', 'filter_list_direction'},
-                                                         {'prefix_list_name', 'prefix_list_direction'}])
     def comm_set_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'set_type', 'match_action', 'community_member'}])
 
