@@ -34,12 +34,12 @@ if [ -z $SERVER_CRT ] && [ -z $SERVER_KEY ]; then
 fi
 
 # Create the CLI CA certificate if it is not already created
-CLI_CRT=/root/cli-ca/cert.pem
-CLI_KEY=/root/cli-ca/key.pem
-mkdir -p /root/cli-ca
+CLI_CRT=/host/cli-ca/cert.pem
+CLI_KEY=/host/cli-ca/key.pem
+mkdir -p /host/cli-ca
 if [ ! -e "$CLI_CRT" ] || [ ! -e "$CLI_KEY" ]; then
     echo "Generating CLI CA certificate"
-    (cd /root/cli-ca && /usr/sbin/mk-root-ca.sh)
+    (cd /host/cli-ca && /usr/sbin/mk-root-ca.sh)
 fi
 
 REST_SERVER_ARGS=
