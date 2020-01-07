@@ -535,7 +535,8 @@ typedef enum mclag_msg_type_e_
     MCLAG_MSG_TYPE_DEL_ICCP_INFO            = 12,
     MCLAG_MSG_TYPE_SET_REMOTE_IF_STATE      = 13,
     MCLAG_MSG_TYPE_DEL_REMOTE_IF_INFO       = 14,
-    MCLAG_MSG_TYPE_SET_L2MC                 = 15
+    MCLAG_MSG_TYPE_SET_L2MC                 = 15,
+    MCLAG_MSG_TYPE_PORT_MAC_LEARN_NLAPI     = 16
 }mclag_msg_type_e;
 
 
