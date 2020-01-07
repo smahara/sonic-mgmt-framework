@@ -1622,8 +1622,8 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type, uin
     mac_info->op_type = oper;
     msg_hdr->len = sizeof(struct IccpSyncdHDr) + sizeof(struct mclag_fdb_info);
 
-    ICCPD_LOG_DEBUG("ICCP_FDB", "Send fdb to syncd: write mac msg vid : %d ; ifname %s ; mac %s fdb type %s ; op type %s",
-        mac_info->vid, mac_info->port_name, mac_addr_to_str(mac_info->mac), mac_info->type == MAC_TYPE_STATIC ? "static" : "dynamic",
+    ICCPD_LOG_DEBUG("ICCP_FDB", "Send fdb to syncd: write mac msg vid : %d ; ifname %s ; mac %s fdb type %d ; op type %s",
+        mac_info->vid, mac_info->port_name, mac_addr_to_str(mac_info->mac), mac_info->type,
         oper == MAC_SYNC_ADD ? "add" : "del");
 
     /*send msg*/
@@ -2061,7 +2061,7 @@ void update_orphan_port_mac(struct CSM *csm,
 }
 
 
-mlacp_clear_remote_mac(struct CSM *csm, char *po_name)
+void mlacp_convert_remote_mac_to_local(struct CSM *csm, char *po_name)
 {
     struct MACMsg* mac_msg = NULL, *mac_temp = NULL;
     struct LocalInterface* lif = NULL;
@@ -2070,13 +2070,20 @@ mlacp_clear_remote_mac(struct CSM *csm, char *po_name)
     if (!csm || !lif)
         return;
 
+    if (lif->state == PORT_STATE_DOWN)
+    {
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Do not Convert remote mac as Local interface %s is down "
+            "interface %s, MAC %s vlan-id %d", po_name);
+        return;
+    }
+
     RB_FOREACH_SAFE (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb, mac_temp)
     {
         if (strcmp(mac_msg->origin_ifname, po_name) != 0)
             continue;
 
         mac_msg->age_flag |= MAC_AGE_PEER;
-        ICCPD_LOG_DEBUG("ICCP_FDB", "Clear remote mac on Origin Interface: interface %s, "
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Convert remote mac on Origin Interface: interface %s, "
                 "interface %s, MAC %s vlan-id %d", mac_msg->origin_ifname,
                 mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
@@ -2084,18 +2091,17 @@ mlacp_clear_remote_mac(struct CSM *csm, char *po_name)
         if (mac_msg->age_flag != (MAC_AGE_LOCAL | MAC_AGE_PEER))
             continue;
 
-        ICCPD_LOG_DEBUG("ICCP_FDB", "Clear remote mac on Interface: %s, "
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Convert remote to local mac on Interface: %s, "
             "MAC %s vlan-id %d", mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
 
-        /*Send mac del message to mclagsyncd*/
-        del_mac_from_chip(mac_msg);
+        /*Send mac add message to mclagsyncd with aging enabled*/
+        add_mac_to_chip(mac_msg, MAC_TYPE_DYNAMIC_LOCAL);
 
-        MAC_RB_REMOVE(mac_rb_tree, &MLACP(csm).mac_rb, mac_msg);
-        // free only if not in change list to be send to peer node,
-        // else free is taken care after sending the update to peer
+        mac_msg->op_type = MAC_SYNC_ADD;
+
         if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
         {
-            free(mac_msg);
+            TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
         }
     }
 }
