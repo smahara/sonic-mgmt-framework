@@ -14,10 +14,18 @@ fail="FAIL"
 verify_asic_diag() {
    #docker exec -it syncd bash
 
+   # check if ASIC is detected
+   lspci | grep "Ethernet controller: Broadcom Limited Device b" &> /dev/null
+   if [[ "$?" != "0" ]]
+   then
+       echo $fail
+       exit
+   fi
+
    docker ps | grep "syncd" &> /dev/null
    if [[ "$?" != "0" ]]
    then
-	LOG "Syncd Error"
+	echo "Syncd Error"
 	exit
    fi
 
@@ -34,7 +42,7 @@ verify_asic_diag() {
        exit
    fi
    echo $fail
-   LOG 'missing log file'
+   echo "(error reading diagnostic log)"
 }
 
 LOG()
@@ -43,8 +51,7 @@ LOG()
 }
 
 main() {
-    LOG "Broadcom SONiC ASIC Diagnostic Test: "
-	verify_asic_diag
+    verify_asic_diag
 }
 
 main

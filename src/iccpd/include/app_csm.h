@@ -27,6 +27,7 @@
 #include <sys/queue.h>
 
 #include "../include/mlacp_fsm.h"
+#include "../include/stp_fsm.h"
 
 struct CSM;
 
@@ -45,6 +46,7 @@ typedef enum APP_CONNECTION_STATE APP_CONNECTION_STATE_E;
 struct AppCSM
 {
     struct mLACP mlacp;
+    struct stp   stp;
     APP_CONNECTION_STATE_E current_state;
 
     uint32_t rx_connect_msg_id;

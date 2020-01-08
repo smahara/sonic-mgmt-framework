@@ -59,6 +59,7 @@ void system_init(struct System* sys)
     memset(sys, 0, sizeof(struct System));
     sys->server_fd = -1;
     sys->sync_fd = -1;
+    sys->stp_sync_fd = -1;
     sys->sync_ctrl_fd = -1;
     sys->arp_receive_fd = -1;
     sys->ndisc_receive_fd = -1;

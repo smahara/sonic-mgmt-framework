@@ -20,5 +20,3 @@ if [ $(supervisorctl status | grep -c "^isc-dhcp-relay:") -gt 0 ]; then
     supervisorctl start isc-dhcp-relay:*
 fi
 
-# Start iphelpermgr
-supervisorctl start iphelpermgrd

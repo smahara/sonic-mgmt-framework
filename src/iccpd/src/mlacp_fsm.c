@@ -218,6 +218,8 @@ static void mlacp_stage_sync_request_handler(struct CSM* csm, struct Msg* msg);
 static void mlacp_stage_handler(struct CSM* csm, struct Msg* msg);
 static void mlacp_exchange_handler(struct CSM* csm, struct Msg* msg);
 
+void mlacp_local_lif_state_mac_handler(struct CSM* csm);
+
 /* Interface up ack */
 static void mlacp_fsm_send_if_up_ack(
     struct CSM       *csm,
@@ -800,6 +802,24 @@ static void mlacp_fsm_recv_if_up_ack(struct CSM* csm, struct Msg* msg)
     }
 }
 
+void mlacp_local_lif_state_mac_handler(struct CSM* csm)
+{
+    struct LocalInterface* local_if = NULL;
+
+    LIST_FOREACH(local_if, &(MLACP(csm).lif_list), mlacp_next)
+    {
+        if ((local_if->state == PORT_STATE_DOWN) && (local_if->type == IF_T_PORT_CHANNEL))
+        {
+            // clear the pending macs if timer is expired.
+            if (local_if->po_down_time && ((time(NULL) - local_if->po_down_time) > MLACP_LOCAL_IF_DOWN_TIMER))
+            {
+                mlacp_local_lif_clear_pending_mac(csm, local_if);
+                local_if->po_down_time = 0;
+            }
+        }
+    }
+}
+
 /*****************************************
 * MLACP Init
 *
@@ -918,6 +938,8 @@ void mlacp_fsm_transit(struct CSM* csm)
     }
 
     mlacp_sync_send_heartbeat(csm);
+
+    mlacp_local_lif_state_mac_handler(csm);
 
     /* Dequeue msg if any*/
     while (have_msg)
@@ -1086,6 +1108,36 @@ void mlacp_sync_mac(struct CSM* csm)
                 ICCPD_LOG_DEBUG("ICCP_FDB", "Sync MAC: MAC-msg-list not enqueue for local age flag: %s, mac %s vlan-id %d, age_flag %d, remove local age flag",
                         mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
                 mac_msg->age_flag &= ~MAC_AGE_LOCAL;
+            }
+        }
+    }
+    return;
+}
+
+void mlacp_local_lif_clear_pending_mac(struct CSM* csm, struct LocalInterface *local_lif)
+{
+    ICCPD_LOG_DEBUG("ICCP_FDB", "mlacp_local_lif_clear_pending_mac If: %s ", local_lif->name );
+    struct MACMsg* mac_msg = NULL, *mac_temp = NULL;
+    RB_FOREACH_SAFE (mac_msg, mac_rb_tree, &MLACP(csm).mac_rb, mac_temp)
+    {
+        if (mac_msg->pending_local_del && strcmp(mac_msg->origin_ifname, local_lif->name) == 0)
+        {
+            ICCPD_LOG_DEBUG("ICCP_FDB", "Clear pending MAC: MAC-msg-list not enqueue for local age flag: %s, mac %s vlan-id %d, age_flag %d, remove local age flag",
+                    mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+
+            //pending mac pointing to peer_intf del from chip.? mostly not required
+            if (strcmp(mac_msg->ifname, csm->peer_itf_name) == 0)
+            {
+                del_mac_from_chip(mac_msg);
+            }
+
+            //TBD do we need to send delete notification to peer .?
+            MAC_RB_REMOVE(mac_rb_tree, &MLACP(csm).mac_rb, mac_msg);
+
+            mac_msg->op_type = MAC_SYNC_DEL;
+            if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
+            {
+                free(mac_msg);
             }
         }
     }
@@ -1703,6 +1755,54 @@ ICCP_DBG_CNTR_MSG_e mlacp_fsm_iccp_to_dbg_msg_type(uint32_t tlv_type)
 
         case TLV_T_MLACP_IF_UP_ACK:
             return ICCP_DBG_CNTR_MSG_IF_UP_ACK;
+
+        case TLV_T_STP_CONNECT:
+            return  ICCP_DBG_CNTR_MSG_STP_CONNECT;
+
+        case TLV_T_STP_DISCONNECT:
+            return ICCP_DBG_CNTR_MSG_STP_DISCONNECT;
+
+        case TLV_T_STP_SYSTEM_CONFIG:
+            return ICCP_DBG_CNTR_MSG_STP_SYSTEM_CONFIG;
+
+        case TLV_T_STP_REGION_NAME:
+            return ICCP_DBG_CNTR_MSG_STP_REGION_NAME;
+
+        case TLV_T_STP_REVISION_LEVEL:
+            return ICCP_DBG_CNTR_MSG_STP_REVISION_LEVEL;
+
+        case TLV_T_STP_INSTANCE_PRIORITY:
+            return ICCP_DBG_CNTR_MSG_STP_INSTANCE_PRIORITY;
+
+        case TLV_T_STP_CONFIGURATION_DIGEST:
+            return ICCP_DBG_CNTR_MSG_STP_CONFIGURATION_DIGEST;
+
+        case TLV_T_STP_TC_INSTANCES:
+            return ICCP_DBG_CNTR_MSG_STP_TC_INSTANCES;
+
+        case TLV_T_STP_CIST_ROOT_TIME_PARAMETER:
+            return ICCP_DBG_CNTR_MSG_STP_ROOT_TIME_PARAM;
+
+        case TLV_T_STP_MIST_ROOT_TIME_PARAMETER:
+            return ICCP_DBG_CNTR_MSG_STP_MIST_ROOT_TIME_PARAM;
+
+        case TLV_T_STP_SYNC_REQUEST:
+            return ICCP_DBG_CNTR_MSG_STP_SYNC_REQ;
+
+        case TLV_T_STP_SYNC_DATA:
+            return ICCP_DBG_CNTR_MSG_STP_SYNC_DATA;
+
+        case TLV_T_STP_PORTCHANNEL_PORTID_MAP:
+            return ICCP_DBG_CNTR_MSG_STP_PO_PORT_MAP;
+
+        case TLV_T_STP_TX_CNFIG: 
+            return ICCP_DBG_CNTR_MSG_STP_TX_CONFIG;
+
+        case TLV_T_STP_AGE_OUT:         
+            return ICCP_DBG_CNTR_MSG_STP_AGE_OUT;
+      
+        case TLV_T_STP_COMMON_INFO:
+            return ICCP_DBG_CNTR_MSG_STP_COMMON_MSG;
 
         default:
             ICCPD_LOG_DEBUG(__FUNCTION__, "No debug counter for TLV type %u",

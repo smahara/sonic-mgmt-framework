@@ -15,3 +15,4 @@ if [ -d  ${CONFIG_PROFILES_BASE} ]; then
         sudo cat ${CONFIG_FILE_ACTIVE_PROFILE_DIR}/config >> ${CONFIG_FILE_DIR}/*config.bcm
     fi
 fi
+

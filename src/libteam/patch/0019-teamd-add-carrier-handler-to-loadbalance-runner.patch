@@ -1,0 +1,207 @@
+diff --git a/teamd/teamd_runner_loadbalance.c b/teamd/teamd_runner_loadbalance.c
+index a581472..d385beb 100644
+--- a/teamd/teamd_runner_loadbalance.c
++++ b/teamd/teamd_runner_loadbalance.c
+@@ -17,16 +17,65 @@
+  *   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ 
++#include <limits.h>
+ #include <sys/socket.h>
+ #include <linux/netdevice.h>
+ #include <team.h>
+ 
+ #include "teamd.h"
++#include "teamd_config.h"
+ 
+ struct lb {
++	bool carrier_up;
++	struct {
++		int min_ports;
++#define		LB_CFG_DFLT_MIN_PORTS 1
++	} cfg;
+ 	struct teamd_balancer *tb;
+ };
+ 
++static int lb_set_carrier(struct teamd_context *ctx, struct lb *lb, bool carrier_up)
++{
++	int err;
++
++	if (lb->carrier_up != carrier_up) {
++		lb->carrier_up = carrier_up;
++		err = team_carrier_set(ctx->th, carrier_up);
++		if (err)
++			return err == -EOPNOTSUPP ? 0 : err;
++		teamd_log_info("carrier changed to %s",
++			carrier_up ? "UP" : "DOWN" );
++	}
++
++	return 0;
++}
++
++static int lb_update_carrier(struct teamd_context *ctx, struct lb *lb)
++{
++	struct teamd_port *tdport;
++	int ports_enabled;
++	int err;
++
++	ports_enabled = 0;
++	teamd_for_each_tdport(tdport, ctx) {
++		bool state;
++		err = teamd_port_enabled(ctx, tdport, &state);
++		if (err)
++			return err;
++
++		if (state)
++			++ports_enabled;
++	}
++
++	if (ports_enabled >= lb->cfg.min_ports) {
++		teamd_log_dbg("Enable carrier. Number of enabled ports %d >= configured min_ports %d",
++				ports_enabled, lb->cfg.min_ports);
++		return lb_set_carrier(ctx, lb, true);
++	}
++
++	return lb_set_carrier(ctx, lb, false);
++}
++
+ static int lb_event_watch_port_added(struct teamd_context *ctx,
+ 				     struct teamd_port *tdport, void *priv)
+ {
+@@ -49,7 +98,21 @@ static int lb_event_watch_port_added(struct teamd_context *ctx,
+ 			return TEAMD_ENOENT(err) ? 0 : err;
+ 		}
+ 	}
+-	return teamd_balancer_port_added(lb->tb, tdport);
++
++	err = teamd_balancer_port_added(lb->tb, tdport);
++	if (err) {
++		teamd_log_err("Failed to add port \"%s\" to load balancer pool. ",
++			tdport->ifname);
++		return err;
++	}
++
++	if (lb_update_carrier(ctx, lb)) {
++		teamd_log_err("Failed to update carrier state for %s. ",
++			ctx->team_devname);
++		return err;
++	}
++
++	return 0;
+ }
+ 
+ static void lb_event_watch_port_removed(struct teamd_context *ctx,
+@@ -58,15 +121,31 @@ static void lb_event_watch_port_removed(struct teamd_context *ctx,
+ 	struct lb *lb = priv;
+ 
+ 	teamd_balancer_port_removed(lb->tb, tdport);
++	lb_update_carrier(ctx, lb);
+ }
+ 
+ static int lb_event_watch_port_link_changed(struct teamd_context *ctx,
+ 					    struct teamd_port *tdport,
+ 					    void *priv)
+ {
++	struct lb *lb = priv;
+ 	bool port_up = teamd_link_watch_port_up(ctx, tdport);
++	int err;
+ 
+-	return teamd_port_check_enable(ctx, tdport, port_up, !port_up);
++	err = teamd_port_check_enable(ctx, tdport, port_up, !port_up);
++	if (err) {
++		teamd_log_err("Failed to enable/disable port \"%s\". ",
++			tdport->ifname);
++		return err;
++	}
++
++	if (lb_update_carrier(ctx, lb)) {
++		teamd_log_err("Failed to update carrier state for %s.",
++			ctx->team_devname);
++		return err;
++	}
++
++	return 0;
+ }
+ 
+ static int lb_event_watch_hwaddr_changed(struct teamd_context *ctx, void *priv)
+@@ -132,6 +211,55 @@ static const struct teamd_event_watch_ops lb_port_watch_ops = {
+ 	.option_changed_match_name = "enabled",
+ };
+ 
++static int lb_carrier_init(struct teamd_context *ctx, struct lb *lb)
++{
++	int err;
++
++	lb->carrier_up = false;
++
++	err = team_carrier_set(ctx->th, lb->carrier_up);
++	if (err && err != -EOPNOTSUPP) {
++		teamd_log_err("Failed to set carrier");
++		return err;
++	}
++
++	return 0;
++}
++
++static int lb_carrier_fini(struct teamd_context *ctx, struct lb *lb)
++{
++	int err;
++
++	err = team_carrier_set(ctx->th, false);
++	if (err && err != -EOPNOTSUPP) {
++		teamd_log_err("Failed to set carrier down.");
++		return err;
++	}
++
++	lb->carrier_up = false;
++
++	return 0;
++}
++
++static int lb_load_config(struct teamd_context *ctx, struct lb *lb)
++{
++	int err;
++	int tmp;
++
++	err = teamd_config_int_get(ctx, &tmp, "$.runner.min_ports");
++	if (err) {
++		lb->cfg.min_ports = LB_CFG_DFLT_MIN_PORTS;
++	} else if (tmp < 1 || tmp > UCHAR_MAX) {
++		teamd_log_err("\"min_ports\" value is out of its limits.");
++		return -EINVAL;
++	} else {
++		lb->cfg.min_ports = tmp;
++	}
++	teamd_log_dbg("Using min_ports \"%d\".", lb->cfg.min_ports);
++
++	return 0;
++}
++
+ static int lb_init(struct teamd_context *ctx, void *priv)
+ {
+ 	struct lb *lb = priv;
+@@ -140,6 +268,16 @@ static int lb_init(struct teamd_context *ctx, void *priv)
+ 	err = teamd_hash_func_set(ctx);
+ 	if (err)
+ 		return err;
++	err = lb_load_config(ctx, lb);
++	if (err) {
++		teamd_log_err("Failed to load config values.");
++		return err;
++	}
++	err = lb_carrier_init(ctx, lb);
++	if (err) {
++		teamd_log_err("Failed to initialize carrier.");
++		return err;
++	}
+ 	err = teamd_event_watch_register(ctx, &lb_port_watch_ops, lb);
+ 	if (err) {
+ 		teamd_log_err("Failed to register event watch.");
+@@ -162,6 +300,7 @@ static void lb_fini(struct teamd_context *ctx, void *priv)
+ 
+ 	teamd_balancer_fini(lb->tb);
+ 	teamd_event_watch_unregister(ctx, &lb_port_watch_ops, lb);
++	lb_carrier_fini(ctx, lb);
+ }
+ 
+ const struct teamd_runner teamd_runner_loadbalance = {

@@ -246,6 +246,10 @@ do_config_intialization()
 
     if  ztp_is_enabled ; then
         echo "No configuration detected, initiating zero touch provisioning..."
+        # Generate and load factory default configuration
+        generate_config factory ${CONFIG_DB_JSON}
+        # Remove any default configuration that was created so that ZTP can be performed
+        rm -f ${CONFIG_DB_JSON}
         generate_config ztp ${TMP_ZTP_CONFIG_DB_JSON}
         load_config ${TMP_ZTP_CONFIG_DB_JSON}
         rm -f ${TMP_ZTP_CONFIG_DB_JSON}

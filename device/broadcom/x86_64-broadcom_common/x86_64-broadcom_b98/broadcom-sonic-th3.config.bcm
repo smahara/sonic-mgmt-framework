@@ -1,0 +1,15 @@
+parity_correction=1
+parity_enable=1
+phy_null=1
+pll_bypass=1
+core_clock_frequency=1325
+dpr_clock_frequency=1000
+device_clock_frequency=1325
+port_flex_enable=1
+l2xmsg_mode.0=1
+mmu_port_num_mc_queue.0=1
+module_64ports.0=1
+multicast_l2_range.0=511
+oversubscribe_mode=1
+bcm_num_cos=8
+default_cpu_tx_queue=7

@@ -19,9 +19,15 @@
 #define BPF_TR(_fmt,...) {};
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int attach_ebpf_filter(int nl_fd, char *);
+ int attach_ebpf_filter(int nl_fd, char *);
 
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

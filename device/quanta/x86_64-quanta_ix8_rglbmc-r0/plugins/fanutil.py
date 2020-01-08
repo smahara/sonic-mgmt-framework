@@ -15,6 +15,7 @@ class FanUtil(FanBase):
     """Platform-specific FANutil class"""
 
     SYS_FAN_NUM = 6
+    NUM_FANS_PERTRAY = 2
     HWMON_PATH = '/sys/class/hwmon/hwmon1/'
     FAN_INDEX_START = 21
 
@@ -22,6 +23,7 @@ class FanUtil(FanBase):
 
     def __init__(self, log_level=logging.DEBUG):
         FanBase.__init__(self)
+        self.num_fans = (self.SYS_FAN_NUM * self.NUM_FANS_PERTRAY) 
 
     # Get sysfs attribute
     def get_attr_value(self, attr_path):
@@ -43,26 +45,23 @@ class FanUtil(FanBase):
         if index is None:
             return False
 
-        if index < 1 or index > self.SYS_FAN_NUM:
+        if index < 1 or index > self.num_fans:
             logging.error("Invalid Fan index:", index)
             return False
 
         return True
 
     def get_num_fans(self):
-        return self.SYS_FAN_NUM
+        return self.num_fans
 
     def get_status(self, index):
         if self.check_fan_index(index) == False:
            return False
 
-        front_speed_file = 'fan' + str(self.FAN_INDEX_START+2*(index-1)) + '_input'
-        rear_speed_file = 'fan' + str(self.FAN_INDEX_START+2*(index-1)+1) + '_input'
+        fantray_speed_file = 'fan' + str(self.FAN_INDEX_START+(index-1)) + '_input'
+        fantray_speed = self.get_attr_value(self.HWMON_PATH + fantray_speed_file)
 
-        front_speed = self.get_attr_value(self.HWMON_PATH + front_speed_file)
-        rear_speed = self.get_attr_value(self.HWMON_PATH + rear_speed_file)
-
-        if front_speed == '0.0' or rear_speed == '0.0':
+        if fantray_speed == '0.0' :
            return False
 
         return True
@@ -71,14 +70,11 @@ class FanUtil(FanBase):
         if self.check_fan_index(index) == False:
            return False
 
-        front_present_file = 'fan' + str(self.FAN_INDEX_START+2*(index-1)) + '_present'
-        rear_present_file = 'fan' + str(self.FAN_INDEX_START+2*(index-1)+1) + '_present'
+        fantray_present_file = 'fan' + str(self.FAN_INDEX_START+(index-1)) + '_present'
+        fantray_present = self.get_attr_value(self.HWMON_PATH + fantray_present_file)
 
-        front_present = self.get_attr_value(self.HWMON_PATH + front_present_file)
-        rear_present = self.get_attr_value(self.HWMON_PATH + rear_present_file)
-
-        if front_present == '1' or rear_present == '1':
-            return True
+        if fantray_present == '1' :
+           return True
 
         return False
 
@@ -86,14 +82,14 @@ class FanUtil(FanBase):
         if self.check_fan_index(index) == False:
            return None
 
-        direction_file = 'fan' + str(self.FAN_INDEX_START+2*(index-1)) + '_direction'
-        direction = self.get_attr_value(self.HWMON_PATH + direction_file)
+        fantray_direction_file = 'fan' + str(self.FAN_INDEX_START+(index-1)) + '_direction'
+        fantray_direction = self.get_attr_value(self.HWMON_PATH + fantray_direction_file)
 
         """
         1: FB 2: BF
         Since the fan is at rear of the switch, FB means Exhaust; BF means Intake
         """
-        if direction == '2':
+        if fantray_direction == '2':
             return "INTAKE"
         else:
             return "EXHAUST"
@@ -102,19 +98,11 @@ class FanUtil(FanBase):
         if self.check_fan_index(index) == False:
            return 0
 
-        speed_file = 'fan' + str(self.FAN_INDEX_START+2*(index-1)) + '_input'
-        speed = self.get_attr_value(self.HWMON_PATH + speed_file)
+        fantray_speed_file = 'fan' + str(self.FAN_INDEX_START+(index-1)) + '_input'
+        fantray_speed = self.get_attr_value(self.HWMON_PATH + fantray_speed_file)
 
-        return int(float(speed))
+        return int(float(fantray_speed))
 
-    def get_speed_rear(self, index):
-        if self.check_fan_index(index) == False:
-           return 0
-
-        speed_file = 'fan' + str(self.FAN_INDEX_START+2*(index-1)+1) + '_input'
-        speed = self.get_attr_value(self.HWMON_PATH + speed_file)
-
-        return int(float(speed))
 
     def set_speed(self, val):
         logging.error("Not allowed to set fan speed!")

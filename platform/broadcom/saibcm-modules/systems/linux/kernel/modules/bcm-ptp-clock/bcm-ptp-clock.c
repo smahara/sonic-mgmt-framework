@@ -56,10 +56,15 @@ LKM_MOD_PARAM(debug, "i", int, 0);
 MODULE_PARM_DESC(debug,
         "Debug level (default 0)");
 
+static int pci_cos;
+LKM_MOD_PARAM(pci_cos, "i", int, 0);
+MODULE_PARM_DESC(pci_cos,
+        "PCI COS (default 0)");
+
 static int network_transport;
 LKM_MOD_PARAM(network_transport, "i", int, 0);
 MODULE_PARM_DESC(network_transport,
-        "Transport Type (default 2 - Raw)");
+        "Transport Type (default - Detect from packet)");
 
 static char *base_dev_name = "ptp0";
 LKM_MOD_PARAM(base_dev_name, "s", charp, 0);
@@ -214,6 +219,7 @@ struct bksync_ptp_priv {
 
 static struct bksync_ptp_priv *ptp_priv;
 volatile bksync_uc_linux_ipc_t *linuxPTPMemory = (bksync_uc_linux_ipc_t*)(0);
+static volatile int module_initialized;
 static int retry_count = 10000;   /* Default retry for 1000uSec */
 
 #if defined(CMIC_SOFT_BYTE_SWAP)
@@ -507,6 +513,45 @@ exit:
     return ret;
 }
 
+int bksync_ptp_transport_get(uint8_t *pkt)
+{
+    int         transport = 0;
+    uint16_t    ethertype;
+    uint16_t    tpid;
+    int         tpid_offset, ethype_offset;
+
+    /* Need to check VLAN tag if packet is tagged */
+    tpid_offset = 12;
+    tpid = pkt[tpid_offset] << 8 | pkt[tpid_offset + 1];
+    if (tpid == 0x8100) {
+        ethype_offset = tpid_offset + 4;
+    } else {
+        ethype_offset = tpid_offset;
+    }
+
+    ethertype = pkt[ethype_offset] << 8 | pkt[ethype_offset+1];
+
+    switch (ethertype) {
+        case 0x88f7:    /* ETHERTYPE_PTPV2 */
+            transport = 2;
+            break;
+
+        case 0x0800:    /* ETHERTYPE_IPV4 */
+            transport = 4;
+            break;
+
+        case 0x86DD:    /* ETHERTYPE_IPV6 */
+            transport = 6;
+            break;
+
+        default:
+            transport = 0;
+    }
+
+    return transport;
+}
+
+
 /**
  * bksync_ptp_hw_tstamp_tx_time_get
  *
@@ -528,6 +573,7 @@ int bksync_ptp_hw_tstamp_tx_time_get(int dev_no, int port, uint8_t *pkt, uint64_
     uint16_t tpid = 0;
     int retry_cnt = retry_count;
     int seq_id_offset, tpid_offset;
+    int transport = network_transport;
 
     if (!ptp_priv || !pkt || !ts || port < 1 || port > 255) {
         return -1;
@@ -537,7 +583,12 @@ int bksync_ptp_hw_tstamp_tx_time_get(int dev_no, int port, uint8_t *pkt, uint64_
 
     tpid_offset = 12;
 
-    switch(network_transport)
+    /* Parse for nw transport */
+    if (transport == 0) {
+        transport = bksync_ptp_transport_get(pkt);
+    }
+
+    switch(transport)
     {
         case 2:
             seq_id_offset = 0x2c;
@@ -582,14 +633,15 @@ int bksync_ptp_hw_tstamp_tx_time_get(int dev_no, int port, uint8_t *pkt, uint64_
             if (seq_id == pktseq_id) {
                 *ts = timestamp;
                 ptp_priv->ts_match[port] += 1;
-#if 0
-                if (seq_id == 1) {
-                    DBG_ERR(("Port: %d Skb_SeqID %d FW_SeqId %d and TS:%llx\n", port, pktseq_id, seq_id, timestamp));
-                }
-#endif
+
+                DBG_VERB(("Port: %d Skb_SeqID %d FW_SeqId %d and TS:%llx\n",
+                          port, pktseq_id, seq_id, timestamp));
+
                 break;
             } else {
-                DBG_ERR(("discard timestamp on port %d Skb_SeqID %d FW_SeqId %d\n", port, pktseq_id, seq_id));
+                DBG_ERR(("discard timestamp on port %d Skb_SeqID %d FW_SeqId %d\n",
+                          port, pktseq_id, seq_id));
+
                 ptp_priv->ts_discard[port] += 1;
                 continue;
             }
@@ -601,7 +653,7 @@ int bksync_ptp_hw_tstamp_tx_time_get(int dev_no, int port, uint8_t *pkt, uint64_
     ptp_priv->pkt_txctr[port] += 1;
     if (retry_cnt == 0) {
         ptp_priv->ts_timeout[port] += 1;
-        DBG_ERR(("FW Response timeout: Tx TS on phy port:%d\n", port));
+        DBG_ERR(("FW Response timeout: Tx TS on phy port:%d Skb_SeqID: %d\n", port, seq_id));
     }
 
     return 0;
@@ -751,10 +803,21 @@ if (!(seq_id % 100)) {
  * Description: this is a callback function to retrieve 64b equivalent of
  *   rx timestamp
  */
-int bksync_ptp_hw_tstamp_rx_time_upscale(int dev_no, int port, struct sk_buff *skb, uint64_t *ts)
+int bksync_ptp_hw_tstamp_rx_time_upscale(int dev_no, int port, struct sk_buff *skb, uint32_t *meta, uint64_t *ts)
 {
     int ret = 0;
     int custom_encap_len = 0;
+
+    switch (KNET_SKB_CB(skb)->dcb_type) {
+        case 26:
+        case 32:
+            if (pci_cos != (meta[4] & 0x3F)) {
+                return -1;
+            }
+            break;
+        default:
+            return -1;
+    }
 
     /* parse custom encap header in pkt for ptp rxtime */
     custom_encap_len = bksync_pkt_custom_encap_ptprx_get((skb->data), ts);
@@ -775,12 +838,20 @@ int bksync_ptp_hw_tstamp_tx_meta_get(int dev_no, struct sk_buff *skb,
 {
     uint16_t tpid = 0;
     int offset = 0;
+    int transport = network_transport;
+
     /* Need to check VLAN tag if packet is tagged */
     tpid = (skb->data[12] << 8) | skb->data[13];
     if (tpid == 0x8100) {
         offset = 4;
     }
-    switch(network_transport)
+
+    /* Parse for nw transport */
+    if (transport == 0) {
+        transport = bksync_ptp_transport_get(skb->data);
+    }
+
+    switch(transport)
     {
         case 2: /* IEEE 802.3 */
             if (KNET_SKB_CB(skb)->dcb_type == 32) {
@@ -992,6 +1063,66 @@ bksync_proc_cleanup(void)
     remove_proc_entry("stats", bksync_proc_root);
     return 0;
 }
+/**
+ * bksync_ptp_register
+ * @priv: driver private structure
+ * Description: this function will register the ptp clock driver
+ * to kernel. It also does some house keeping work.
+ */
+
+static int
+bksync_ioctl_cmd_handler(kcom_msg_clock_cmd_t *kmsg, int len)
+{
+    int endianess;
+    kmsg->hdr.type = KCOM_MSG_TYPE_RSP;
+
+    if (!module_initialized) {
+        kmsg->hdr.status = KCOM_E_NOT_FOUND;
+        return sizeof(kcom_msg_hdr_t);
+    }
+
+    switch(kmsg->clock_info.cmd) {
+        case KSYNC_M_HW_INIT:
+            if (ptp_priv->shared_addr != NULL) {
+                /* Reset memory */
+                memset((void *)ptp_priv->shared_addr, 0, ptp_priv->dma_mem_size);
+                DBG_VERB(("KNETSync F/W Loaded on Core %d with CoSQ %d\n",kmsg->clock_info.data[1], kmsg->clock_info.data[0]));
+
+                pci_cos = kmsg->clock_info.data[0];
+                /* Supported Core is 0 or 1 */
+                if (kmsg->clock_info.data[1] == 0 || kmsg->clock_info.data[1] == 1)
+                    fw_core = kmsg->clock_info.data[1];
+#ifdef __LITTLE_ENDIAN
+                endianess = 0;
+#else
+                endianess = 1;
+#endif
+                DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_12r(CMIC_CMC_BASE),
+                            ((pci_cos << 16) | endianess));
+
+                DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_10r(CMIC_CMC_BASE),
+                            (ptp_priv->dma_mem & 0xffffffff));
+                DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_11r(CMIC_CMC_BASE),
+                            (ptp_priv->dma_mem >> 32) & 0xffffffff);
+            }
+            break;
+        case KSYNC_M_HW_DEINIT:
+            bksync_ptp_deinit(&(ptp_priv->ptp_caps));
+            break;
+        case KSYNC_M_HW_TS_DISABLE:
+            bksync_ptp_hw_tstamp_disable(0, kmsg->clock_info.data[0]);
+            break;
+        case KSYNC_M_VERSION:
+            break;
+        default:
+            kmsg->hdr.status = KCOM_E_NOT_FOUND;
+            return sizeof(kcom_msg_hdr_t);
+    }
+
+    return sizeof(*kmsg);
+}
+
+
 
 
 /**
@@ -1003,6 +1134,7 @@ bksync_proc_cleanup(void)
 static int bksync_ptp_register(void)
 {
     int err = -ENODEV;
+    int endianess;
     dma_addr_t dma_mem = 0;
 
     /* Support on core-0 or core-1 */
@@ -1017,7 +1149,7 @@ static int bksync_ptp_register(void)
         case 6: /* UDP IPv6   */
             break;
         default:
-            network_transport = 2;
+            network_transport = 0;
     }
 
     ptp_priv = kzalloc(sizeof(*ptp_priv), GFP_KERNEL);
@@ -1047,10 +1179,12 @@ static int bksync_ptp_register(void)
         DBG_ERR(("Shared memory allocation (%d bytes) successful at 0x%016lx.\n",
                 ptp_priv->dma_mem_size, (long unsigned int)ptp_priv->dma_mem));
 #ifdef __LITTLE_ENDIAN
-        DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_12r(CMIC_CMC_BASE), 0);
+        endianess = 0;
 #else
-        DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_12r(CMIC_CMC_BASE), 1);
+        endianess = 1;
 #endif
+        DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_12r(CMIC_CMC_BASE), ((pci_cos << 16) | endianess));
+
         DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_10r(CMIC_CMC_BASE),
                     (ptp_priv->dma_mem & 0xffffffff));
         DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_11r(CMIC_CMC_BASE),
@@ -1082,12 +1216,14 @@ static int bksync_ptp_register(void)
         bkn_hw_tstamp_tx_meta_get_cb_register(bksync_ptp_hw_tstamp_tx_meta_get);
         bkn_hw_tstamp_rx_time_upscale_cb_register(bksync_ptp_hw_tstamp_rx_time_upscale);
         bkn_hw_tstamp_ptp_clock_index_cb_register(bksync_ptp_hw_tstamp_ptp_clock_index_get);
+        bkn_hw_tstamp_ioctl_cmd_cb_register(bksync_ioctl_cmd_handler);
+
     }
 
      /* Initialize proc files */
      bksync_proc_root = proc_mkdir("bcm/ksync", NULL);
      bksync_proc_init();
-
+     module_initialized = 1;
 exit:
     return err;
 }
@@ -1107,6 +1243,7 @@ static int bksync_ptp_remove(void)
     bkn_hw_tstamp_tx_meta_get_cb_unregister(bksync_ptp_hw_tstamp_tx_meta_get);
     bkn_hw_tstamp_rx_time_upscale_cb_unregister(bksync_ptp_hw_tstamp_rx_time_upscale);
     bkn_hw_tstamp_ptp_clock_index_cb_unregister(bksync_ptp_hw_tstamp_ptp_clock_index_get);
+    bkn_hw_tstamp_ioctl_cmd_cb_unregister(bksync_ioctl_cmd_handler);
 
     DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_10r(CMIC_CMC_BASE), 0);
     DEV_WRITE32(ptp_priv, CMIC_CMC_SCHAN_MESSAGE_11r(CMIC_CMC_BASE), 0);

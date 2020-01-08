@@ -67,6 +67,18 @@ def is_ipv6(value):
             return False
     return addr.version == 6
 
+def broadcast(value):
+    if not value:
+        return False
+    if isinstance(value, netaddr.IPNetwork):
+        addr = value
+    else:
+        try:
+            addr = netaddr.IPNetwork(str(value))
+        except:
+            return False
+    return addr.broadcast
+
 def prefix_attr(attr, value):
     if not value:
         return None
@@ -252,6 +264,7 @@ def main():
         env.filters['is_intf_exists'] = is_intf_exists
         env.filters['ipv4'] = is_ipv4
         env.filters['ipv6'] = is_ipv6
+        env.filters['broadcast'] = broadcast
         env.filters['unique_name'] = unique_name
         env.filters['pfx_filter'] = pfx_filter
         for attr in ['ip', 'network', 'prefixlen', 'netmask']:

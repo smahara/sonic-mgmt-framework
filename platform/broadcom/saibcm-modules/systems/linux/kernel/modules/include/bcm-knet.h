@@ -1,22 +1,7 @@
 /*
- * Copyright 2017 Broadcom
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2, as
- * published by the Free Software Foundation (the "GPL").
- * 
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License version 2 (GPLv2) for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * version 2 (GPLv2) along with this source code.
- */
-/*
  * $Id: bcm-knet.h,v 1.4 Broadcom SDK $
- * $Copyright: (c) 2005 Broadcom Corp.
- * All Rights Reserved.$
+ * $Copyright: (c) 2019 Broadcom.
+ * Broadcom Proprietary and Confidential. All rights reserved.$
  */
 #ifndef __LINUX_BCM_KNET_H__
 #define __LINUX_BCM_KNET_H__
@@ -71,7 +56,10 @@ typedef int
 (*knet_hw_tstamp_ptp_clock_index_cb_f)(int dev_no);
 
 typedef int
-(*knet_hw_tstamp_rx_time_upscale_cb_f)(int dev_no, int phys_port, struct sk_buff *skb, uint64_t *ts);
+(*knet_hw_tstamp_rx_time_upscale_cb_f)(int dev_no, int phys_port, struct sk_buff *skb, uint32_t *meta, uint64_t *ts);
+
+typedef int
+(*knet_hw_tstamp_ioctl_cmd_cb_f)(kcom_msg_clock_cmd_t *kmsg, int len);
 
 extern int
 bkn_rx_skb_cb_register(knet_skb_cb_f rx_cb);
@@ -127,6 +115,11 @@ bkn_hw_tstamp_rx_time_upscale_cb_register(knet_hw_tstamp_rx_time_upscale_cb_f hw
 extern int
 bkn_hw_tstamp_rx_time_upscale_cb_unregister(knet_hw_tstamp_rx_time_upscale_cb_f hw_tstamp_rx_time_upscale_cb);
 
+extern int
+bkn_hw_tstamp_ioctl_cmd_cb_register(knet_hw_tstamp_ioctl_cmd_cb_f hw_tstamp_ioctl_cmd_cb);
+
+extern int
+bkn_hw_tstamp_ioctl_cmd_cb_unregister(knet_hw_tstamp_ioctl_cmd_cb_f hw_tstamp_ioctl_cmd_cb);
 
 typedef struct {
     uint8 cmic_type;

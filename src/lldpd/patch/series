@@ -3,3 +3,4 @@
 0002-Let-linux-kernel-to-find-appropriate-nl_pid-automa.patch
 0003-update-ip-interface-netlink-log-message.patch
 0004-update-tx-interval-immediately.patch
+0005-update-mgmt-ip-info.patch

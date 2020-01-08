@@ -108,6 +108,27 @@
 #define TLV_T_MLACP_IF_UP_ACK           0x103C
 #define TLV_T_MLACP_LIST_END            0x104a //list end
 
+/*STP TLVs as defined in RFC 7727*/
+#define TLV_T_STP_CONNECT                  0x2000 
+#define TLV_T_STP_DISCONNECT               0x2001
+#define TLV_T_STP_DISCONNECT_CAUSE         0x200C 
+#define TLV_T_STP_SYSTEM_CONFIG            0x2002
+#define TLV_T_STP_REGION_NAME              0x2003  
+#define TLV_T_STP_REVISION_LEVEL           0x2004 
+#define TLV_T_STP_INSTANCE_PRIORITY        0x2005
+#define TLV_T_STP_CONFIGURATION_DIGEST     0x2006   
+#define TLV_T_STP_TC_INSTANCES             0x2007  
+#define TLV_T_STP_CIST_ROOT_TIME_PARAMETER 0x2008 
+#define TLV_T_STP_MIST_ROOT_TIME_PARAMETER 0x2009
+#define TLV_T_STP_SYNC_REQUEST             0x200A 
+#define TLV_T_STP_SYNC_DATA                0x200B 
+/*Self defined STP TLVs*/
+#define TLV_T_STP_PORTCHANNEL_PORTID_MAP   0x200D
+#define TLV_T_STP_TX_CNFIG                 0x200E  
+#define TLV_T_STP_AGE_OUT                  0x200F 
+#define TLV_T_STP_COMMON_INFO              0x2010
+#define TLV_T_STP_LIST_END                 0x2011
+
 /* Debug */
 static char* get_tlv_type_string(int type)
 {
@@ -191,6 +212,57 @@ static char* get_tlv_type_string(int type)
 
         case TLV_T_MLACP_IF_UP_ACK:
             return "TLV_T_MLACP_IF_UP_ACK";
+
+        case TLV_T_STP_CONNECT:
+            return "TLV_T_STP_CONNECT";
+
+        case TLV_T_STP_DISCONNECT:
+            return "TLV_T_STP_DISCONNECT";
+
+        case TLV_T_STP_DISCONNECT_CAUSE:
+            return "TLV_T_STP_DISCONNECT_CAUSE";
+
+        case TLV_T_STP_SYSTEM_CONFIG:
+            return "TLV_T_STP_SYSTEM_CONFIG";
+
+        case TLV_T_STP_REGION_NAME:
+            return "TLV_T_STP_REGION_NAME";
+
+        case TLV_T_STP_REVISION_LEVEL:
+            return "TLV_T_STP_REVISION_LEVEL";
+
+        case TLV_T_STP_INSTANCE_PRIORITY:
+            return "TLV_T_STP_INSTANCE_PRIORITY";
+
+        case TLV_T_STP_CONFIGURATION_DIGEST:
+            return "TLV_T_STP_CONFIGURATION_DIGEST";
+
+        case TLV_T_STP_TC_INSTANCES:
+            return "TLV_T_STP_TC_INSTANCES";
+
+        case TLV_T_STP_CIST_ROOT_TIME_PARAMETER:
+            return "TLV_T_STP_CIST_ROOT_TIME_PARAMETER";
+
+        case TLV_T_STP_MIST_ROOT_TIME_PARAMETER:
+            return "TLV_T_STP_MIST_ROOT_TIME_PARAMETER";
+
+        case TLV_T_STP_SYNC_REQUEST:
+            return "TLV_T_STP_SYNC_REQUEST";
+
+        case TLV_T_STP_SYNC_DATA:
+            return "TLV_T_STP_SYNC_DATA";
+
+        case TLV_T_STP_PORTCHANNEL_PORTID_MAP:
+            return "TLV_T_STP_PORTCHANNEL_PORTID_MAP";
+
+        case TLV_T_STP_TX_CNFIG:
+            return "TLV_T_STP_TX_CNFIG";
+
+        case TLV_T_STP_AGE_OUT:
+            return "TLV_T_STP_AGE_OUT";
+
+        case TLV_T_STP_COMMON_INFO:
+            return "TLV_T_STP_COMMON_INFO";
     }
 
     return "UNKNOWN";

@@ -1,4 +1,4 @@
-export KVERSION ?= 4.9.0-9-2-amd64
+export KVERSION ?= 4.9.0-11-2-amd64
 KBUILD_PATH ?= /lib/modules/$(KVERSION)/build
 KBUILD_SRC_PATH ?= /lib/modules/$(KVERSION)/source
 LLC ?= llc-6.0
@@ -10,7 +10,8 @@ EXTRA_CFLAGS ?= -O2 -g -Wall -emit-llvm
 # In case up-to-date headers are not installed locally in /usr/include,
 # use source build.
 
-LINUXINCLUDE =	-I../../libutil/ \
+LINUXINCLUDE =	\
+		-I../../libutil/ \
 		-I$(KBUILD_PATH)/include \
 		-I$(KBUILD_PATH)/arch/x86/include \
 		-I$(KBUILD_SRC_PATH)/include \
@@ -22,15 +23,17 @@ LINUXINCLUDE =	-I../../libutil/ \
 		-I$(KBUILD_PATH)/arch/x86/include/uapi \
 		-I$(KBUILD_PATH)/arch/x86/include/generated/ \
 		-I$(KBUILD_PATH)/arch/x86/include/generated/uapi \
+		-I/usr/include \
 
 
-KERNELOBJS =	ebpftest.o 
-KERNELOBJDUMPS = $(KERNELOBJS:%.o=%.objdump)
+KERNELBPF =	ebpftest.bpf 
+KERNELOBJ = $(KERNELBPF:%.bpf=%.obj)
+KERNELOBJDUMPS = $(KERNELBPF:%.bpf=%.objdump)
 
 prefix ?= $(DESTDIR)
-INSTALLPATH = $(prefix)/lib/bpf
+INSTALLPATH = $(prefix)/lib/ebpf
 
-all: $(KERNELOBJS)
+all: $(KERNELBPF)
 
 debug: DEBUG_FLAGS = -DBPFDEBUG
 debug: all
@@ -38,7 +41,7 @@ debug: all
 .PHONY: clean
 
 clean:
-	rm -f $(KERNELOBJS) $(KERNELOBJDUMPS)
+	rm -f $(KERNELBPF) $(KERNELOBJ) $(KERNELOBJDUMPS)
 
 distclean: clean
 
@@ -48,7 +51,9 @@ test:
 install_PROGRAM = install
 install_DIR = install -dv
 
-$(KERNELOBJS):  %.o:%.c
+
+$(KERNELOBJ):  %.obj:%.c
+
 	$(CLANG) $(INC_FLAGS) \
                 -D__KERNEL__ -D__ASM_SYSREG_H \
 		$(DEBUG_FLAGS) \
@@ -58,18 +63,23 @@ $(KERNELOBJS):  %.o:%.c
                 -Wno-address-of-packed-member -Wno-tautological-compare \
                 -Wno-unknown-warning-option \
 		-I../include $(LINUXINCLUDE) \
-		$(EXTRA_CFLAGS) -c $< -o -| $(LLC) -march=bpf -filetype=obj -o $@
+		$(EXTRA_CFLAGS) -c $< -o $@
+
+$(KERNELBPF):  %.bpf:%.obj
+	cat $^ | $(LLC) -march=bpf -filetype=obj -o $@
 
 
-$(KERNELOBJDUMPS): %.objdump:%.o
+$(KERNELOBJDUMPS): %.objdump:%.bpf
 	$(LLVM_OBJDUMP) -S -no-show-raw-insn $< > $@
 
 objdump: $(KERNELOBJDUMPS)
 	
-install: $(KERNELOBJS)
+install: $(KERNELBPF)
 	$(install_DIR) -d $(INSTALLPATH) ; \
 	$(install_PROGRAM) $^ -t $(INSTALLPATH)
+	#Comment the below line if the filter has to be disabled
+	touch $(INSTALLPATH)/$^.enable
 
 
-uninstall: $(KERNELOBJS)
+uninstall: $(KERNELBPF)
 	rm -rf $(INSTALLPATH)

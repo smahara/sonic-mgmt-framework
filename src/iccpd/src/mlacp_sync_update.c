@@ -179,6 +179,7 @@ int mlacp_fsm_update_Aggport_state(struct CSM* csm, mLACPAggPortStateTLV* tlv)
          */
         if (MLACP(csm).current_state == MLACP_STATE_EXCHANGE)
         {
+            mlacp_clear_remote_mac(csm, peer_if->name);
             mlacp_link_set_remote_if_state(
                 csm->mlag_id, peer_if->name,
                 (tlv->agg_state == PORT_STATE_UP)? true : false);
@@ -228,6 +229,14 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
         if (MacData->type == MAC_SYNC_ADD)
         {
             mac_msg->age_flag &= ~MAC_AGE_PEER;
+
+            if (from_mclag_intf && mac_msg->pending_local_del)
+            {
+                mac_msg->pending_local_del = 0;
+
+                mac_msg->age_flag = MAC_AGE_LOCAL;
+            }
+
             ICCPD_LOG_DEBUG("ICCP_FDB", "Recv ADD, Remove peer age flag:%d interface %s, "
                 "MAC %s vlan-id %d, op_type %s", mac_msg->age_flag, mac_msg->ifname,
                 mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
@@ -253,7 +262,7 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
                 }
 
                 /*If the MAC is learned from orphan port, or from MCLAG port but the local port is down*/
-                if (from_mclag_intf == 0 || (local_if->state == PORT_STATE_DOWN && strcmp(mac_msg->ifname, csm->peer_itf_name) != 0))
+                if (from_mclag_intf == 0 || local_if->state == PORT_STATE_DOWN )
                 {
                     /*Set MAC_AGE_LOCAL flag*/
                     mac_msg->age_flag = set_mac_local_age_flag(csm, mac_msg, 1, 1);

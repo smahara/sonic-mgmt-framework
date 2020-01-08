@@ -68,12 +68,14 @@ void app_csm_init(struct CSM* csm, int all)
     csm->app_csm.nak_msg = 0;
 
     mlacp_init(csm, all);
+    stp_init(csm,all);
 }
 
 /* Application State Machine instance tear down */
 void app_csm_finalize(struct CSM* csm)
 {
     mlacp_finalize(csm);
+    stp_finalize(csm);
 }
 
 /* Application State Machine Transition */
@@ -123,6 +125,8 @@ void app_csm_enqueue_msg(struct CSM* csm, struct Msg* msg)
     {
         if (param->type > TLV_T_MLACP_CONNECT && param->type < TLV_T_MLACP_LIST_END)
             mlacp_enqueue_msg(csm, msg);
+        else if (param->type >= TLV_T_STP_CONNECT && param->type < TLV_T_STP_LIST_END)
+            stp_enqueue_msg(csm,msg);
         else
             TAILQ_INSERT_TAIL(&(csm->app_csm.app_msg_list), msg, tail);
     }
@@ -141,6 +145,8 @@ void app_csm_enqueue_msg(struct CSM* csm, struct Msg* msg)
 
         if (tlv > TLV_T_MLACP_CONNECT && tlv <= TLV_T_MLACP_L2MC_INFO)
             mlacp_enqueue_msg(csm, msg);
+        else if (tlv >= TLV_T_STP_CONNECT && tlv < TLV_T_STP_LIST_END)
+            stp_enqueue_msg(csm,msg);
         else
             TAILQ_INSERT_TAIL(&(csm->app_csm.app_msg_list), msg, tail);
     }

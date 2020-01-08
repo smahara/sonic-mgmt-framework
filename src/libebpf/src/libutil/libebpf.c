@@ -32,6 +32,13 @@
 
 __attribute__ ((visibility("default"))) int attach_ebpf_filter(int nl_fd, char *filename)
 {
+	char filectl[128]="";
+	sprintf(filectl, "%s.enable",filename);
+	if( access( filectl, F_OK ) == -1 )
+	{
+		printf("Filter %s is disabled\n", filename);
+		return 0;
+	}
 
 	if (load_bpf_file(filename)) {
 		printf("%s", bpf_log_buf);
