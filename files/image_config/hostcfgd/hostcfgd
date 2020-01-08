@@ -8,13 +8,8 @@ import subprocess
 import syslog
 import copy
 import jinja2
-<<<<<<< HEAD
 import ipaddress
 import netaddr
-||||||| merged common ancestors
-=======
-import ipaddr as ipaddress
->>>>>>> origin/broadcom_sonic_share
 from swsssdk import ConfigDBConnector
 
 # FILE
@@ -706,16 +701,12 @@ class HostConfigDaemon:
         ssh_server_vrf = self.config_db.get_table('SSH_SERVER_VRF')
         self.load_ssh_server_vrf(ssh_server_vrf)
         self.hostname_cache=""
-<<<<<<< HEAD
         self.mgmtvrfcfg = MgmtVrfCfg(self.config_db)
         self.mgmtcfg = MgmtIntfCfg(self.mgmtvrfcfg)
         self.mgmtcfg.mgmt_intf_handle_default_cfg(self.config_db)
-||||||| merged common ancestors
-=======
         lpbk_table = self.config_db.get_table('LOOPBACK_INTERFACE')
         self.iptables = Iptables()
         self.iptables.load(lpbk_table)
->>>>>>> origin/broadcom_sonic_share
 
     def aaa_handler(self, key, data):
         self.aaacfg.aaa_update(key, data)
@@ -812,7 +803,6 @@ class HostConfigDaemon:
 
         self.hostname_cache = hostname
 
-<<<<<<< HEAD
     def mgmt_vrf_handler(self, key, data):
         self.mgmtvrfcfg.handle_mgmt_vrf_cfg(key, data)
 
@@ -834,8 +824,6 @@ class HostConfigDaemon:
 
         self.mgmtcfg.handle_mgmt_intf_cfg(key, data, op)
 
-||||||| merged common ancestors
-=======
     def lpbk_handler(self, key, data):
         key = ConfigDBConnector.deserialize_key(key)
         #Check if delete operation by fetch existing keys
@@ -847,7 +835,6 @@ class HostConfigDaemon:
 
         self.iptables.iptables_handler(key, data, add)
 
->>>>>>> origin/broadcom_sonic_share
     def start(self):
         self.config_db.subscribe('AAA', lambda table, key, data: self.aaa_handler(key, data))
         self.config_db.subscribe('TACPLUS_SERVER', lambda table, key, data: self.tacacs_server_handler(key, data))
@@ -855,15 +842,11 @@ class HostConfigDaemon:
         self.config_db.subscribe('RADIUS_SERVER', lambda table, key, data: self.radius_server_handler(key, data))
         self.config_db.subscribe('RADIUS', lambda table, key, data: self.radius_global_handler(key, data))
         self.config_db.subscribe('DEVICE_METADATA', lambda table, key, data: self.hostname_handler(key, data))
-<<<<<<< HEAD
         self.config_db.subscribe(CFG_MGMT_VRF, lambda table, key, data: self.mgmt_vrf_handler(key, data))
         self.config_db.subscribe(CFG_MGMT_PORT_TABLE, lambda table, key, data: self.mgmt_port_handler(key, data))
         self.config_db.subscribe(CFG_MGMT_INTF_TABLE, lambda table, key, data: self.mgmt_intf_handler(key, data))
-||||||| merged common ancestors
-=======
         self.config_db.subscribe('LOOPBACK_INTERFACE', lambda table, key, data: self.lpbk_handler(key, data))
         self.config_db.subscribe('SSH_SERVER_VRF', lambda table, key, data: self.ssh_server_handler(key, data))
->>>>>>> origin/broadcom_sonic_share
         self.config_db.listen()
 
 
