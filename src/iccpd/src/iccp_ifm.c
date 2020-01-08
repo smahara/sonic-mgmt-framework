@@ -99,9 +99,12 @@ int iccp_sys_local_if_list_get_init()
         nl_cb_put(cb);
         if (ret < 0)
         {
-            ICCPD_LOG_ERR(__FUNCTION__, "receive netlink msg error. ret = %d  errno = %d ", ret, errno);
             if (ret != -NLE_DUMP_INTR)
+            {
+                ICCPD_LOG_ERR(__FUNCTION__, "No retry, receive netlink msg error. ret = %d  errno = %d ", ret, errno);
                 return ret;
+            }
+            ICCPD_LOG_NOTICE(__FUNCTION__, "Retry: receive netlink msg error. ret = %d  errno = %d ", ret, errno);
             retry = 1;
         }
     }
