@@ -223,7 +223,7 @@ limitations under the License.
             help="IP address with mask"
             ptype="IP_ADDR_MASK" />
         <PARAM name="gwaddr"
-            help="Default Gateway address"
+            help="Gateway address"
             ptype="SUBCOMMAND"
             mode="subcommand"
             optional="true" >
@@ -250,9 +250,51 @@ limitations under the License.
 	    name="addr"
             help="IP address"
 	    ptype="IP_ADDR" />
-    <ACTION>
-        python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_config_prefix_length ${iface} ${addr}
-    </ACTION>
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_addresses_address_config_prefix_length ${iface} ${addr}
+        </ACTION>
+    </COMMAND>
+
+    <COMMAND
+        name="ip default-gateway"
+        help="Default gateway address">
+        <PARAM
+            name="default-gwaddr"
+            help="Default Gateway address"
+            ptype="IP_ADDR"
+            />
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-if.py patch_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_config_default_gwaddr ${iface} ${default-gwaddr}
+        </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no ip default-gateway"
+        help="Remove default gateway"
+        >
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_config_default_gwaddr ${iface}
+        </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="ip dhcp"
+        help="Enable DHCP client">
+        <PARAM
+            name="enable"
+            help="Enable dhclient"
+            ptype="SUBCOMMAND"
+            mode="subcommand"
+            />
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-if.py patch_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_config_dhcp_client ${iface} true
+        </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no ip dhcp"
+        help="Disable DHCP client"
+        >
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_config_dhcp_client ${iface}
+        </ACTION>
     </COMMAND>
 </VIEW>
 

@@ -95,6 +95,47 @@ limitations under the License.
             ptype="IPV6_ADDR" />
         <ACTION>python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_config_prefix_length ${iface} ${addr} </ACTION>
     </COMMAND>
+    <COMMAND
+        name="ipv6 default-gateway"
+        help="Default IPv6 gateway address">
+        <PARAM
+            name="default-gwaddr"
+            help="Default IPv6 Gateway address"
+            ptype="IPV6_ADDR"
+            />
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-if.py patch_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_config_default_gwaddr ${iface} ${default-gwaddr}
+        </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no ipv6 default-gateway"
+        help="Remove default IPv6 gateway"
+        >
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_config_default_gwaddr ${iface}
+        </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="ipv6 dhcp"
+        help="Enable IPv6 DHCP client">
+        <PARAM
+            name="enable"
+            help="Enable IPv6 dhclient"
+            ptype="SUBCOMMAND"
+            mode="subcommand"
+            />
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-if.py patch_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_config_dhcp_client ${iface} true
+        </ACTION>
+    </COMMAND>
+    <COMMAND
+        name="no ipv6 dhcp"
+        help="Disable IPv6 DHCP client"
+        >
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-if.py delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_config_dhcp_client ${iface}
+        </ACTION>
+    </COMMAND>
 </VIEW>
 
 <VIEW name="configure-lag-view">

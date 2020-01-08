@@ -783,6 +783,9 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
                 if subIntf.Ipv4.Config.DhcpClient != nil {
                     value.Set("ipv4_dhcp_client", "")
                 }
+            } else {
+                value.Set("ipv4_default_gwaddr", "")
+                value.Set("ipv4_dhcp_client", "")
             }
             if subIntf.Ipv6 != nil && subIntf.Ipv6.Config != nil {
                 if subIntf.Ipv6.Config.DefaultGwaddr != nil {
@@ -791,6 +794,9 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
                 if subIntf.Ipv6.Config.DhcpClient != nil {
                     value.Set("ipv6_dhcp_client", "")
                 }
+            } else {
+                value.Set("ipv6_default_gwaddr", "")
+                value.Set("ipv6_dhcp_client", "")
             }
             subIntfmap[tblName][ifName] = value
         }
@@ -856,9 +862,7 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
             IntfMap := IntfMapObj.Field
             if len(IntfMap) == 1 {
                 if _, ok := IntfMap["NULL"]; ok {
-                    if _, ok := subIntfmap[tblName][ifName]; !ok {
-                        subIntfmap[tblName][ifName] = data
-                    }
+                    subIntfmap[tblName][ifName] = data
                 }
             }
         }

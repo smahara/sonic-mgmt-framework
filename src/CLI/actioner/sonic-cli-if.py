@@ -95,8 +95,50 @@ def invoke_api(func, args=[]):
             body = { "openconfig-if-ip:config":  {"ip" : sp[0], "prefix-length" : int(sp[1]), "openconfig-interfaces-ext:gw-addr": args[2]} }
         else:
             body = { "openconfig-if-ip:config":  {"ip" : sp[0], "prefix-length" : int(sp[1])} }
-        return api.patch(path, body)    
-    
+        return api.patch(path, body)
+
+    elif func == 'patch_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_config_default_gwaddr':
+        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/config', name=args[0], index="0")
+        body = { "openconfig-if-ip:config": {"openconfig-interfaces-ext:default-gwaddr": args[1]}}
+        return api.patch(path, body)
+
+    elif func == 'delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_config_default_gwaddr':
+        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/config/openconfig-interfaces-ext:default-gwaddr', name=args[0], index="0")
+        return api.delete(path)
+        
+    elif func == 'patch_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_config_dhcp_client':
+        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/config', name=args[0], index="0")
+        if args[1] == "true":
+            body = { "openconfig-if-ip:config": {"openconfig-interfaces-ext:dhcp-client": True }}
+        else :
+            body = { "openconfig-if-ip:config": {"openconfig-interfaces-ext:dhcp-client": False }}
+        return api.patch(path, body)
+
+    elif func == 'delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_config_dhcp_client':
+        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/config/dhcp-client', name=args[0], index="0")
+        return api.delete(path)
+        
+    elif func == 'patch_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_config_dhcp_client':
+        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/config', name=args[0], index="0")
+        if args[1] == "true":
+            body = { "openconfig-if-ip:config": {"openconfig-interfaces-ext:dhcp-client": True }}
+        else :
+            body = { "openconfig-if-ip:config": {"openconfig-interfaces-ext:dhcp-client": False }}
+        return api.patch(path, body)
+
+    elif func == 'delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_config_dhcp_client':
+        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/config/dhcp-client', name=args[0], index="0")
+        return api.delete(path)
+        
+    elif func == 'patch_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_config_default_gwaddr':
+        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/config', name=args[0], index="0")
+        body = { "openconfig-if-ip:config": {"openconfig-interfaces-ext:default-gwaddr": args[1]}}
+        return api.patch(path, body)
+
+    elif func == 'delete_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_config_default_gwaddr':
+        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/config/openconfig-interfaces-ext:default-gwaddr', name=args[0], index="0")
+        return api.delete(path)
+        
     elif func == 'patch_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_addresses_address_config':
         sp = args[1].split('/')
     
