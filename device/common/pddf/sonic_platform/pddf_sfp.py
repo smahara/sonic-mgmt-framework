@@ -879,8 +879,11 @@ class PddfSfp(SfpBase):
             elif self.is_qsfp_port:
                 try:
                     eeprom = None
-                    eeprom = open(self.eeprom_path, "rb")
+                    ctype = self.get_connector_type()
+                    if ctype in ['Copper pigtail', 'No separable connector']:
+                        return False
 
+                    eeprom = open(self.eeprom_path, "rb")
                     eeprom.seek(93)
                     status = ord(eeprom.read(1))
 
@@ -1206,6 +1209,10 @@ class PddfSfp(SfpBase):
             elif self.is_qsfp_port:
                 try:
                     eeprom_f = None
+                    ctype = self.get_connector_type()
+                    if ctype in ['Copper pigtail', 'No separable connector']:
+                        return False
+
                     # Fill in write buffer
                     regval = 0x3 if lpmode else 0x1 # 0x3:Low Power Mode, 0x1:High Power Mode
                     buffer = create_string_buffer(1)
@@ -1366,6 +1373,18 @@ class PddfSfp(SfpBase):
             A boolean value, True if device is operating properly, False if not
         """
         return self.get_presence() and self.get_transceiver_bulk_status()
+
+    def get_connector_type(self):
+        """
+        Retrieves the device connector type
+        Returns:
+            enum: connector_code
+        """
+        transceiver_dom_info_dict = self.get_transceiver_info()
+        if transceiver_dom_info_dict is not None:
+            return transceiver_dom_info_dict.get("Connector", "N/A")
+        else:
+            return None
 
     def get_transceiver_change_event(self):
         """

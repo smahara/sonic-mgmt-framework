@@ -5,6 +5,8 @@ import copy
 import Queue
 import redis
 import subprocess
+import datetime
+import time
 import syslog
 import os
 from swsssdk import ConfigDBConnector
@@ -867,12 +869,54 @@ class BGPConfigDaemon:
     ]
 
     global_af_key_map = [(['ebgp_route_distance',
+<<<<<<< HEAD
                            'ibgp_route_distance',
                            'local_route_distance'],                     '{no:no-prefix}distance bgp {} {} {}'),
                          ('max_ebgp_paths',                             '{no:no-prefix}maximum-paths {}'),
                          (['max_ibgp_paths',
                            '+ibgp_equal_cluster_length'],               '{no:no-prefix}maximum-paths ibgp {} {:match-clust-len}', hdl_ibgp_maxpath),
                          ('route_download_filter',                      '{no:no-prefix}table-map {}')
+||||||| merged common ancestors
+                           'ibgp_route_distance'],                  '{{no:no-prefix}}distance bgp {{}} {{}} {}'.format(LOCAL_ROUTE_DISTANCE)),
+                         ('max_ebgp_paths',                         '{no:no-prefix}maximum-paths {}'),
+                         (('max_ibgp_paths',
+                           '+ibgp_equal_cluster_length'),           '{no:no-prefix}maximum-paths ibgp{}', hdl_ibgp_maxpath, ['true', 'false']),
+                         (('aggregate_prefix',
+                           '+aggregate_as_set',
+                           '+aggregate_summary_only'),              '{no:no-prefix}aggregate-address {:aggregate}'),
+                         (('network_prefix',
+                           '+network_policy', '+network_backdoor'), '{no:no-prefix}network {:network}'),
+                         ('route_download_filter',                  '{no:no-prefix}table-map {}'),
+                         ('advertise-all-vni',                      '{no:no-prefix}advertise-all-vni', ['true','false']),
+                         ('advertise-default-gw',                   '{no:no-prefix}advertise-default-gw', ['true','false']),
+                         ('advertise-ipv4-unicast',                      '{no:no-prefix}advertise ipv4 unicast', ['true','false']),
+                         ('advertise-ipv6-unicast',                      '{no:no-prefix}advertise ipv6 unicast', ['true','false']),
+                         ('default-originate-ipv4',                      '{no:no-prefix}default-originate ipv4', ['true','false']),
+                         ('default-originate-ipv6',                      '{no:no-prefix}default-originate ipv6', ['true','false']),
+                         ('autort',                                      '{no:no-prefix}autort {}'),
+                         ('flooding',                                    '{no:no-prefix}flooding {}'),
+                         ('dad-enabled',                                 '{no:no-prefix}dup-addr-detection', ['true','false']),
+                         ('route-distinguisher',                         '{no:no-prefix}rd {}')
+=======
+                           'ibgp_route_distance',
+                           'local_route_distance'],                     '{no:no-prefix}distance bgp {} {} {}'),
+                         ('max_ebgp_paths',                         '{no:no-prefix}maximum-paths {}'),
+                         (('max_ibgp_paths',
+                           '+ibgp_equal_cluster_length'),           '{no:no-prefix}maximum-paths ibgp{}', hdl_ibgp_maxpath, ['true', 'false']),
+                         (('network_prefix',
+                           '+network_policy', '+network_backdoor'), '{no:no-prefix}network {:network}'),
+                         ('route_download_filter',                  '{no:no-prefix}table-map {}'),
+                         ('advertise-all-vni',                      '{no:no-prefix}advertise-all-vni', ['true','false']),
+                         ('advertise-default-gw',                   '{no:no-prefix}advertise-default-gw', ['true','false']),
+                         ('advertise-ipv4-unicast',                      '{no:no-prefix}advertise ipv4 unicast', ['true','false']),
+                         ('advertise-ipv6-unicast',                      '{no:no-prefix}advertise ipv6 unicast', ['true','false']),
+                         ('default-originate-ipv4',                      '{no:no-prefix}default-originate ipv4', ['true','false']),
+                         ('default-originate-ipv6',                      '{no:no-prefix}default-originate ipv6', ['true','false']),
+                         ('autort',                                      '{no:no-prefix}autort {}'),
+                         ('flooding',                                    '{no:no-prefix}flooding {}'),
+                         ('dad-enabled',                                 '{no:no-prefix}dup-addr-detection', ['true','false']),
+                         ('route-distinguisher',                         '{no:no-prefix}rd {}')
+>>>>>>> origin/broadcom_sonic_share
     ]
 
     cmn_key_map = [('asn&peer_type',                        '{no:no-prefix}neighbor {} remote-as {}'),
@@ -907,6 +951,7 @@ class BGPConfigDaemon:
     nbr_af_key_map = [(['allow_as_in', '+allow_as_count&allow_as_origin'],  '{no:no-prefix}neighbor {} allowas-in {:allow-as-in}', ['true', 'false']),
                       ('admin_status|ipv4',                                 '{no:no-prefix}neighbor {} activate', ['true', 'false']),
                       ('admin_status|ipv6',                                 '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
+                      ('admin_status|l2vpn',                                '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
                       ('send_default_route',                                '{no:no-prefix}neighbor {} default-originate', ['true', 'false']),
                       ('default_rmap',                                      '{no:no-prefix}neighbor {} default-originate route-map {}'),
                       (['max_prefix_limit', '++max_prefix_warning_threshold',
@@ -974,6 +1019,7 @@ class BGPConfigDaemon:
     af_network_key_map = [(['ip_prefix', '++policy', '+backdoor'], '{no:no-prefix}network {2} {3:network-policy} {4:network-backdoor}')]
 
     global_evpn_vni_key_map = [('advertise-default-gw',                   '{no:no-prefix}advertise-default-gw', ['true','false']),
+<<<<<<< HEAD
                                ('route-distinguisher',                    '{no:no-prefix}rd {}')
     ]
 
@@ -992,6 +1038,49 @@ class BGPConfigDaemon:
                       'BGP_GLOBALS_AF_AGGREGATE_ADDR':  af_aggregate_key_map,
                       'BGP_GLOBALS_AF_NETWORK':         af_network_key_map,
                       'BGP_GLOBALS_EVPN_VNI':           global_evpn_vni_key_map
+||||||| merged common ancestors
+                         ('route-distinguisher',                         '{no:no-prefix}rd {}')]
+    route_redist_key_map = [('route_map', '{no:no-prefix}redistribute {} route-map {}')]
+
+    tbl_to_key_map = {'BGP_GLOBALS':                global_key_map,
+                      'BGP_GLOBALS_AF':             global_af_key_map,
+                      'BGP_GLOBALS_LISTEN_PREFIX':  listen_prefix_key_map,
+                      'BGP_NEIGHBOR':               cmn_key_map[0:2] + nbr_key_map + cmn_key_map[2:],
+                      'BGP_PEER_GROUP':             cmn_key_map,
+                      'BGP_NEIGHBOR_AF':            nbr_af_key_map,
+                      'BGP_PEER_GROUP_AF':          nbr_af_key_map,
+                      'ROUTE_MAP':                  route_map_key_map,
+                      'COMMUNITY_SET':              community_set_key_map,
+                      'EXTENDED_COMMUNITY_SET':     extcommunity_set_key_map,
+                      'AS_PATH_SET':                aspath_set_key_map,
+                      'PREFIX':                     prefix_key_map,
+                      'BGP_GLOBALS_EVPN_VNI':       global_evpn_vni_key_map,
+                      'ROUTE_REDISTRIBUTE':         route_redist_key_map
+=======
+                         ('route-distinguisher',                         '{no:no-prefix}rd {}')]
+    route_redist_key_map = [(['protocol', '+route_map'], '{no:no-prefix}redistribute {} {:redist-route-map}', hdl_route_redist_set)]
+
+    af_aggregate_key_map = [(['ip_prefix', '++as_set', '+summary_only'], '{no:no-prefix}aggregate-address {2} {3:as-set} {4:summary-only}', hdl_af_aggregate)]
+
+    af_network_key_map = [(['ip_prefix', '++policy', '+backdoor'], '{no:no-prefix}network {2} {3:network-policy} {4:network-backdoor}')]
+
+    tbl_to_key_map = {'BGP_GLOBALS':                    global_key_map,
+                      'BGP_GLOBALS_AF':                 global_af_key_map,
+                      'BGP_GLOBALS_LISTEN_PREFIX':      listen_prefix_key_map,
+                      'BGP_NEIGHBOR':                   cmn_key_map[0:2] + nbr_key_map + cmn_key_map[2:],
+                      'BGP_PEER_GROUP':                 cmn_key_map,
+                      'BGP_NEIGHBOR_AF':                nbr_af_key_map,
+                      'BGP_PEER_GROUP_AF':              nbr_af_key_map,
+                      'ROUTE_MAP':                      route_map_key_map,
+                      'COMMUNITY_SET':                  community_set_key_map,
+                      'EXTENDED_COMMUNITY_SET':         extcommunity_set_key_map,
+                      'AS_PATH_SET':                    aspath_set_key_map,
+                      'PREFIX':                         prefix_key_map,
+                      'BGP_GLOBALS_EVPN_VNI':           global_evpn_vni_key_map,
+                      'ROUTE_REDISTRIBUTE':             route_redist_key_map,
+                      'BGP_GLOBALS_AF_AGGREGATE_ADDR':  af_aggregate_key_map,
+                      'BGP_GLOBALS_AF_NETWORK':         af_network_key_map
+>>>>>>> origin/broadcom_sonic_share
     }
 
     @staticmethod
@@ -1124,22 +1213,41 @@ class BGPConfigDaemon:
             ('BGP_NEIGHBOR_AF', self.bgp_neighbor_af_handler),
             ('BGP_GLOBALS_LISTEN_PREFIX', self.bgp_table_handler_common),
             ('BFD_PEER', self.bfd_handler),
+<<<<<<< HEAD
+||||||| merged common ancestors
+            ('VRF', self.vrf_handler),
+            ('BGP_GLOBALS_EVPN_VNI', self.bgp_table_handler_common),
+=======
+            ('VRF', self.vrf_handler),
+            ('BGP_GLOBALS_EVPN_VNI', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_EVPN_RT', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_EVPN_VNI_RT', self.bgp_table_handler_common),
+>>>>>>> origin/broadcom_sonic_share
             ('PREFIX_SET', self.bgp_table_handler_common),
             ('PREFIX', self.bgp_table_handler_common),
             ('NEIGHBOR_SET', self.bgp_table_handler_common),
             ('TAG_SET', self.bgp_table_handler_common),
             ('AS_PATH_SET', self.bgp_table_handler_common),
+<<<<<<< HEAD
             ('ROUTE_REDISTRIBUTE', self.bgp_table_handler_common),
             ('BGP_GLOBALS_AF_AGGREGATE_ADDR', self.bgp_table_handler_common),
             ('BGP_GLOBALS_AF_NETWORK', self.bgp_table_handler_common),
             ('VRF', self.vrf_handler),
             ('BGP_GLOBALS_EVPN_VNI', self.bgp_table_handler_common)
+||||||| merged common ancestors
+            ('ROUTE_REDISTRIBUTE', self.bgp_table_handler_common)
+=======
+            ('ROUTE_REDISTRIBUTE', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_AF_AGGREGATE_ADDR', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_AF_NETWORK', self.bgp_table_handler_common)
+>>>>>>> origin/broadcom_sonic_share
         ]
         self.bgp_message = Queue.Queue(0)
         self.table_data_cache = self.config_db.get_table_data([tbl for tbl, _ in self.table_handler_list])
         syslog.syslog(syslog.LOG_DEBUG, 'Init Cached DB data')
         for key, entry in self.table_data_cache.items():
             syslog.syslog(syslog.LOG_DEBUG, '  %-20s : %s' % (key, entry))
+        self.vrf_vni_map = {}
 
     def subscribe_all(self):
         for table, hdlr in self.table_handler_list:
@@ -1208,8 +1316,13 @@ class BGPConfigDaemon:
             #create/update case
             command = "vtysh -c 'configure terminal' -c '{}'".format(cmd)
             for param in data:
-                if param == 'vni' and data[param] != '0':
-                    command = command + " -c 'vni {}'".format(data[param])
+                if param == 'vni':
+                    if data[param] != '0':
+                        command = command + " -c 'vni {}'".format(data[param])
+                        self.vrf_vni_map[key_params[0]] = data[param]
+                    elif key_params[0] in self.vrf_vni_map:
+                        command = command + "-c 'no vni {}'".format(self.vrf_vni_map[key_params[0]])
+                        del self.vrf_vni_map[key_params[0]]
             self.__run_command(command)
 
     def __get_vrf_asn(self, vrf):
@@ -1271,7 +1384,14 @@ class BGPConfigDaemon:
     def __vrf_based_table(table_name):
         vrf_tables = {'BGP_GLOBALS', 'BGP_GLOBALS_AF', 'BGP_GLOBALS_LISTEN_PREFIX',
                       'BGP_NEIGHBOR', 'BGP_PEER_GROUP', 'BGP_NEIGHBOR_AF', 'BGP_PEER_GROUP_AF',
+<<<<<<< HEAD
                       'ROUTE_REDISTRIBUTE', 'BGP_GLOBALS_AF_AGGREGATE_ADDR', 'BGP_GLOBALS_AF_NETWORK'}
+||||||| merged common ancestors
+                      'ROUTE_REDISTRIBUTE'}
+=======
+                      'ROUTE_REDISTRIBUTE', 'BGP_GLOBALS_AF_AGGREGATE_ADDR', 'BGP_GLOBALS_AF_NETWORK',
+                      'BGP_GLOBALS_EVPN_RT', 'BGP_GLOBALS_EVPN_VNI', 'BGP_GLOBALS_EVPN_VNI_RT'}
+>>>>>>> origin/broadcom_sonic_share
         return table_name in vrf_tables
 
     @staticmethod
@@ -1591,8 +1711,31 @@ class BGPConfigDaemon:
                               'router bgp {} vrf {}'.format(local_asn, vrf),
                               'address-family {} {}'.format(af, ip_type),
                               'vni {}'.format(vni)]
-                if not key_map.run_command(data, cmd_prefix, vni):
+                if not key_map.run_command(self, data, cmd_prefix):
                     syslog.syslog(syslog.LOG_ERR, 'failed running BGP L2VPN_EVPN VNI config command')
+                    continue
+            elif table == 'BGP_GLOBALS_EVPN_RT':
+                af_type, rt = key.split('|')
+                af, ip_type = af_type.lower().split('_')
+                syslog.syslog(syslog.LOG_INFO, 'Set address family for RT {} to {} {}'.format(rt, af, ip_type))
+                cmd = "vtysh -c 'configure terminal'"
+                cmd += " -c 'router bgp {} vrf {}'".format(local_asn, vrf)
+                cmd += " -c 'address-family {} {}'".format(af, ip_type)
+                cmd += " -c 'route-target {} {}'".format(data['route-target-type'].data, rt)
+                if not self.__run_command(cmd):
+                    syslog.syslog(syslog.LOG_ERR, 'failed running BGP L2VPN_EVPN RT config command')
+                    continue
+            elif table == 'BGP_GLOBALS_EVPN_VNI_RT':
+                af_type, vni, rt = key.split('|')
+                af, ip_type = af_type.lower().split('_')
+                syslog.syslog(syslog.LOG_INFO, 'Set address family for VNI {} RT {} to {} {}'.format(vni, rt, af, ip_type))
+                cmd = "vtysh -c 'configure terminal'"
+                cmd += " -c 'router bgp {} vrf {}'".format(local_asn, vrf)
+                cmd += " -c 'address-family {} {}'".format(af, ip_type)
+                cmd += " -c 'vni {}'".format(vni)
+                cmd += " -c 'route-target {} {}'".format(data['route-target-type'].data, rt)
+                if not self.__run_command(cmd):
+                    syslog.syslog(syslog.LOG_ERR, 'failed running BGP L2VPN_EVPN VNI RT config command')
                     continue
             elif table == 'ROUTE_MAP':
                 map_name = prefix
@@ -1789,4 +1932,4 @@ def main():
     daemon.start()
 
 if __name__ == "__main__":
-    main()
+	main()

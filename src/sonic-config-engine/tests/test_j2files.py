@@ -24,15 +24,17 @@ class TestJ2Files(TestCase):
     def run_script(self, argument):
         print 'CMD: sonic-cfggen ' + argument
         return subprocess.check_output(self.script_file + ' ' + argument, shell=True)
-    
+
     def run_diff(self, file1, file2):
         return subprocess.check_output('diff -u {} {} || true'.format(file1, file2), shell=True)
 
     def test_interfaces(self):
+        tmp="interfaces.output"		
         interfaces_template = os.path.join(self.test_dir, '..', '..', '..', 'files', 'image_config', 'interfaces', 'interfaces.j2')
-        argument = '-m ' + self.t0_minigraph + ' -a \'{\"hwaddr\":\"e4:1d:2d:a5:f3:ad\"}\' -t ' + interfaces_template + ' > ' + self.output_file
+        argument = '-m ' + self.t0_minigraph + ' -a \'{\"hwaddr\":\"e4:1d:2d:a5:f3:ad\"}\' -t ' + interfaces_template + ' > ' + tmp
         self.run_script(argument)
-        self.assertTrue(filecmp.cmp(os.path.join(self.test_dir, 'sample_output', 'interfaces'), self.output_file))
+        print("========{} ========={}".format(os.path.join(self.test_dir, 'sample_output', 'interfaces'), tmp))
+        self.assertTrue(filecmp.cmp(os.path.join(self.test_dir, 'sample_output', 'interfaces'), tmp))
 
         argument = '-m ' + self.t0_mvrf_minigraph + ' -a \'{\"hwaddr\":\"e4:1d:2d:a5:f3:ad\"}\' -t ' + interfaces_template + ' > ' + self.output_file
         self.run_script(argument)
@@ -98,7 +100,7 @@ class TestJ2Files(TestCase):
         sample_output_file = os.path.join(self.test_dir, 'sample_output', 'ipinip.json')
         assert filecmp.cmp(sample_output_file, self.output_file)
 
-    def test_sku_render_template(self):
+    def test_l2switch_template(self):
         argument = '-k Mellanox-SN2700 -t ' + os.path.join(self.test_dir, '../data/l2switch.j2') + ' -p ' + self.t0_port_config + ' > ' + self.output_file
         self.run_script(argument)
 
@@ -134,15 +136,18 @@ class TestJ2Files(TestCase):
         buffers_config_file = os.path.join(self.test_dir, '..', '..', '..', 'files', 'build_templates', 'buffers_config.j2')
         shutil.copy2(buffers_config_file, dell_dir_path)
 
-        argument = '-m ' + self.dell6100_t0_minigraph + ' -p ' + port_config_ini_file + ' -t ' + buffers_file + ' > ' + self.output_file
+        tmp="buffers-dell6100.json.output"
+        argument = '-m ' + self.dell6100_t0_minigraph + ' -p ' + port_config_ini_file + ' -t ' + buffers_file + ' > ' + tmp
         self.run_script(argument)
-        
+
         # cleanup
         buffers_config_file_new = os.path.join(dell_dir_path, 'buffers_config.j2')
         os.remove(buffers_config_file_new)
 
         sample_output_file = os.path.join(self.test_dir, 'sample_output', 'buffers-dell6100.json')
-        assert filecmp.cmp(sample_output_file, self.output_file)
+        print ("===================={}===={}".format(sample_output_file,tmp))
+
+        assert filecmp.cmp(sample_output_file, tmp)
 
     def tearDown(self):
         try:

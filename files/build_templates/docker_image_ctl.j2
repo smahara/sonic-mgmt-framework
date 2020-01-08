@@ -1,4 +1,15 @@
 #!/bin/bash
+
+EXTPLUGIN=/usr/bin/ext/service/{{ docker_container_name }}.sh
+if [ -f ${EXTPLUGIN} ]; then
+    . ${EXTPLUGIN}
+fi
+function CALL()
+{
+    FUN=$1; shift;
+    type ${FUN} &>/dev/null && ${FUN} $@
+}
+
 DEBUGLOG="/tmp/{{ docker_container_name }}_debug.log"
 
 function debug()
@@ -151,6 +162,7 @@ function preStartAction()
         echo "Stopping SWSS before starting PDE"
         systemctl stop swss
     fi
+<<<<<<< HEAD
 {%- elif docker_container_name == "mgmt-framework" %}
     # Create a self signed certificate for authenticating CLI users
     if [[ ! -e "/host/cli-ca/cert.pem" ]]
@@ -158,6 +170,16 @@ function preStartAction()
         openssl req -newkey rsa:2048 -nodes -keyout /host/cli-ca/key.pem \
             -x509 -out /host/cli-ca/cert.pem -subj "/O=SONiC/CN=CLI User Certificate Authority"
     fi
+||||||| merged common ancestors
+=======
+{%- elif docker_container_name == "mgmt-framework" %}
+    # Create a self signed certificate for authenticating CLI users
+    if [[ ! -e "/root/cli-ca/cert.pem" ]]
+    then
+        openssl req -newkey rsa:2048 -nodes -keyout /root/cli-ca/key.pem \
+            -x509 -out /root/cli-ca/cert.pem -subj "/O=SONiC/CN=CLI User Certificate Authority"
+    fi
+>>>>>>> origin/broadcom_sonic_share
 {%- elif docker_container_name == "snmp" %}
     docker exec -i database redis-cli -n 6 HSET 'DEVICE_METADATA|localhost' chassis_serial_number $(decode-syseeprom -s)
     vrfenabled=`/usr/bin/redis-cli -n 4 hget "MGMT_VRF_CONFIG|vrf_global" mgmtVrfEnabled`
@@ -236,10 +258,7 @@ function postStartAction()
 {
 {%- if docker_container_name == "database" %}
     # Wait until redis starts
-    REDIS_SOCK="/var/run/redis/redis.sock"
-    until [[ $(/usr/bin/docker exec database redis-cli -s $REDIS_SOCK ping | grep -c PONG) -gt 0 ]]; do
-        sleep 1;
-    done
+    /usr/bin/docker exec database ping_pong_db_insts
     if [[ ("$BOOT_TYPE" == "warm" || "$BOOT_TYPE" == "fastfast") && -f $WARM_DIR/dump.rdb ]]; then
         rm -f $WARM_DIR/dump.rdb
     else
@@ -317,7 +336,10 @@ start() {
             {%- endif %}
             preStartAction
             docker start {{docker_container_name}}
-            updateHostName "$HOSTNAME"
+            CURRENT_HOSTNAME="$(docker exec {{docker_container_name}} hostname)"
+            if [ x"$HOSTNAME" != x"$CURRENT_HOSTNAME" ]; then
+                updateHostName "$HOSTNAME"
+            fi
             postStartAction
             exit $?
         fi
@@ -329,6 +351,11 @@ start() {
 
 {%- if docker_container_name == "database" %}
     echo "Creating new {{docker_container_name}} container"
+    # if database_config exists in old_config, use it; otherwise use the default one in new image
+    if [ -f /etc/sonic/old_config/database_config.json ]; then
+        echo "Use database_config.json from old system..."
+        mv /etc/sonic/old_config/database_config.json /etc/sonic/
+    fi
 {%- else %}
     echo "Creating new {{docker_container_name}} container with HWSKU $HWSKU"
 {%- endif %}
@@ -336,6 +363,9 @@ start() {
     # TODO: Mellanox will remove the --tmpfs exception after SDK socket path changed in new SDK version
 {%- endif %}
     docker create {{docker_image_run_opt}} \
+{%- if install_debug_image == "y" %}
+        -v /src:/src:ro -v /debug:/debug:rw \
+{%- endif %}
 {%- if '--log-driver=json-file' in docker_image_run_opt or '--log-driver' not in docker_image_run_opt %}
         --log-opt max-size=2M --log-opt max-file=5 \
 {%- endif %}
@@ -389,6 +419,10 @@ wait() {
 }
 
 stop() {
+
+    # Call stop function of module extention
+    CALL {{ docker_container_name }}ServicePreStop
+
 {%- if docker_container_name == "iccpd" %}
     iccpPreStopAction
 {%- endif %}

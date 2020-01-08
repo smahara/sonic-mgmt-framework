@@ -33,6 +33,7 @@ if [ -z $SERVER_CRT ] && [ -z $SERVER_KEY ]; then
     SERVER_KEY=/tmp/key.pem
 fi
 
+<<<<<<< HEAD
 # Create the CLI CA certificate if it is not already created
 CLI_CRT=/host/cli-ca/cert.pem
 CLI_KEY=/host/cli-ca/key.pem
@@ -42,6 +43,18 @@ if [ ! -e "$CLI_CRT" ] || [ ! -e "$CLI_KEY" ]; then
     (cd /host/cli-ca && /usr/sbin/mk-root-ca.sh)
 fi
 
+||||||| merged common ancestors
+=======
+# Create the CLI CA certificate if it is not already created
+CLI_CRT=/root/cli-ca/cert.pem
+CLI_KEY=/root/cli-ca/key.pem
+mkdir -p /root/cli-ca
+if [ ! -e "$CLI_CRT" ] || [ ! -e "$CLI_KEY" ]; then
+    echo "Generating CLI CA certificate"
+    (cd /root/cli-ca && /usr/sbin/mk-root-ca.sh)
+fi
+
+>>>>>>> origin/broadcom_sonic_share
 REST_SERVER_ARGS=
 if [ -f "/usr/sbin/.test" ]; then
 	REST_SERVER_ARGS="-test.coverprofile=coverage.out "
@@ -60,7 +73,7 @@ echo "REST_SERVER_ARGS = $REST_SERVER_ARGS"
 
 
 export CVL_SCHEMA_PATH=/usr/sbin/schema
-export LIBYANG_EXTENSIONS_PLUGINS_DIR=/usr/lib/x86_64-linux-gnu/libyang/extensions
-export LIBYANG_USER_TYPES_PLUGINS_DIR=/usr/lib/x86_64-linux-gnu/libyang/user_types
+export LIBYANG_EXTENSIONS_PLUGINS_DIR=/usr/lib/libyang/extensions
+export LIBYANG_USER_TYPES_PLUGINS_DIR=/usr/lib/libyang/user_types
 
 exec /usr/sbin/rest_server ${REST_SERVER_ARGS}

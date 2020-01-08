@@ -33,6 +33,7 @@
 #include <linux/device.h>
 #include <linux/platform_device.h>
 
+
 #define FAN_MAX_NUMBER                   5
 #define FAN_SPEED_CPLD_TO_RPM_STEP       150
 #define FAN_SPEED_PRECENT_TO_CPLD_STEP   5
@@ -66,7 +67,7 @@
 #define PROJECT_NAME
 
 #define LOCAL_DEBUG                       0
-#define DRVNAME "accton_as5712_54x_fan"
+#define DRVNAME "as5712_54x_fan"
 
 static struct accton_as5712_54x_fan  *fan_data = NULL;
 
@@ -131,7 +132,8 @@ static ssize_t fan_set_duty_cycle(struct device *dev,
                     struct device_attribute *da,const char *buf, size_t count);
 static ssize_t fan_show_value(struct device *dev,
                     struct device_attribute *da, char *buf);
-
+static ssize_t show_name(struct device *dev, struct device_attribute *da,
+                         char *buf);
 extern int as5712_54x_cpld_read(unsigned short cpld_addr, u8 reg);
 extern int as5712_54x_cpld_write(unsigned short cpld_addr, u8 reg, u8 value);
 static ssize_t show_name(struct device *dev, struct device_attribute *da,
@@ -398,7 +400,7 @@ static int accton_as5712_54x_fan_remove(struct platform_device *pdev)
     return 0;
 }
 
-#define DRVNAME "as5712_54x_fan"
+
 
 static struct platform_driver accton_as5712_54x_fan_driver = {
     .probe      = accton_as5712_54x_fan_probe,

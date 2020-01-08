@@ -1,4 +1,4 @@
-BRCM_SAI_VER = 3.8.0.1
+BRCM_SAI_VER = 3.8.1.1
 BRCM_SAI = libsaibcm_$(BRCM_SAI_VER)_amd64.deb
 BRCM_SAI_DEV = libsaibcm-dev_$(BRCM_SAI_VER)_amd64.deb
 BRCM_SAI_DIAG = libsaibcm-diag_$(BRCM_SAI_VER)_amd64.deb

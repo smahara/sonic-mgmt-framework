@@ -6,9 +6,12 @@
 0006-teamd-Administratively-shutdown-port-channel-has-mem.patch
 0007-Send-LACP-PDU-immediately-if-our-state-changed.patch
 0008-libteam-Add-warm_reboot-mode.patch
-0009-teamd-ignore-lacp-state-if-fallback.patch
-0015-team-config-port-if-ifname-succeeds.patch
+0009-Fix-ifinfo_link_with_port-race-condition-with-newlink.patch
+0010-When-read-of-timerfd-returned-0-don-t-consider-this-.patch
 0016-teamd-stop-processing-key-mismatch-dont-select-if-not-aggregable.patch
 0017-libteam-change-loglevel-to-info-if-netlink-msg-is-unparsable.patch
+0018-team-config-port-if-ifname-succeeds.patch
 0018-teamd-attach-netlink-EBPF-filter.patch
 0019-teamd-add-carrier-handler-to-loadbalance-runner.patch
+0020-libteam-replace-NL-DUMP-query-with-virtual-devices-directory-read.patch
+0021-teamd-configure-mtu-admin-status-on-init.patch

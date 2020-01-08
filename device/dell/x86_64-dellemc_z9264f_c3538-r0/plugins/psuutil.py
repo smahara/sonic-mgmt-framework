@@ -105,4 +105,9 @@ class PsuUtil(PsuBase):
         if cmd_status:
             logging.error('Failed to execute ipmitool')
 
+<<<<<<< HEAD
         return (int(psu_status, 16) & 1)
+||||||| merged common ancestors
+=======
+
+>>>>>>> origin/broadcom_sonic_share

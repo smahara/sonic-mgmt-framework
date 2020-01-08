@@ -1,7 +1,3 @@
-pci_cmcs_num=3
-num_queues_pci=32
-num_queues_uc0=1
-bfd_cosq=32
 schan_intr_enable=0
 l2xmsg_mode=1
 parity_correction=1

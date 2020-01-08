@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 {
     "skip_ledd":     true,
     "start_ipmievd": true
 }
+||||||| merged common ancestors
+=======
+{
+    "skip_ledd": true,
+    "skip_fand": true
+}
+>>>>>>> origin/broadcom_sonic_share

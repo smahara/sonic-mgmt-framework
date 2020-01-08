@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright (C) 2017 Accton Technology Corporation
 #
 # This program is free software: you can redistribute it and/or modify
@@ -133,3 +131,4 @@ def main():
 #
 if __name__ == '__main__':
     main()
+

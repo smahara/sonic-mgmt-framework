@@ -259,6 +259,7 @@ class SfpUtil(SfpUtilBase):
                     return True, port_dict
 
             time.sleep(0.5)
+<<<<<<< HEAD
 
     def get_transceiver_dom_info_dict(self, port_num):
         transceiver_dom_info_dict = {}
@@ -544,3 +545,7 @@ class SfpUtil(SfpUtilBase):
             transceiver_dom_threshold_info_dict['rxpowerlowwarning'] = dom_module_threshold_data['data']['RXPowerLowWarning']['value']
             
         return transceiver_dom_threshold_info_dict
+||||||| merged common ancestors
+=======
+
+>>>>>>> origin/broadcom_sonic_share
