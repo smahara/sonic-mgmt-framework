@@ -197,8 +197,7 @@ static void stp_process_peer_connect(struct CSM* csm, struct Msg* msg)
     {
       STP(csm).csm_state = STP_CONNREC;
     }
-
-    stpiccp_send_connect_to_syncd(sys, csm, STP_ICCP_OPER_STATUS_UP);
+	stpiccp_send_connect_to_syncd(sys, csm, STP_ICCP_OPER_STATUS_UP);
 
     return;
 }
@@ -469,13 +468,14 @@ static void stp_process_peer_common_info(struct CSM* csm, struct Msg* msg)
 
     info->master_node_req_resp_field = data->master_node_req_resp_field;
     info->rpvst_req_proposal_ack_flag = data->rpvst_req_proposal_ack_flag;
+    info->nrpv_req_resp_field = data->nrpv_req_resp_field;
 
     info->message_type =  data->message_type;
 
     ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (1)-- vlan_id %u port:%s tc_type:%d root_bridge %s root path cst %u desig bridge %s desig port %u root_port_req_resp: %d ", info->vid, info->port_name, info->vlan_port_tc_type, info->root_bridge_id, info->root_path_cost, info->desig_bridge_id, info->desig_port, info->root_port_req_resp_field);  
     ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (2)-- nrpv:%d peer_nrpv:%d port_id:%d path_cost:%d max_age:%d msg_age:%d hello:%d fwd_del:%d ", info->nrpv_valid, info->peer_nrpv_valid, info->port_id, info->port_path_cost, info->max_age, info->message_age, info->hello_time, info->fwd_delay);
     ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (3)-- state:%d tc_ack:%d change_detection_enabled:%d self_loop:%d auto_config:%d oper_edge:%d desig_cost:%d ", info->state, info->tc_ack, info->change_detection_enabled, info->self_loop, info->auto_config, info->oper_edge, info->desig_cost);
-    ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (4)-- master_node_req_resp %d rpvst_req_prop_ack_flag %d message_type: %u", info->master_node_req_resp_field, info->rpvst_req_proposal_ack_flag, info->message_type);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (4)-- master_node_req_resp %d rpvst_req_prop_ack_flag %d nrpv_req_resp_field %d message_type: %u", info->master_node_req_resp_field, info->rpvst_req_proposal_ack_flag, info->nrpv_req_resp_field, info->message_type);
 
     stp_sync_send_msg(sys, msg_buf, msg_hdr->msg_len);
     ICCPD_LOG_DEBUG(__FUNCTION__,"Fwd'ed Common Info to Sync");

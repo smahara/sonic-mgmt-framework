@@ -226,6 +226,7 @@ int stpiccp_send_common_info_to_peer(struct System *sys, struct stpiccp_common_i
 
   data->master_node_req_resp_field = info->master_node_req_resp_field;
   data->rpvst_req_proposal_ack_flag = info->rpvst_req_proposal_ack_flag;
+  data->nrpv_req_resp_field = info->nrpv_req_resp_field;
   data->message_type = info->message_type;
 
   stp_iccp_csm_send(sys, g_csm_buf, msg_len);
@@ -392,7 +393,7 @@ int stpiccp_receive_stp_common_info(struct System *sys, char *msg_buf)
         info = (struct stpiccp_common_info *)&msg_buf[sizeof(stpiccp_msg_hdr_t)+ i * sizeof(struct stpiccp_common_info)];
         ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info to peer (1)-- vlan_id %u port:%s tc_type:%d root_bridge %s root path cst %u desig bridge %s desig port %u root_port_req_resp: %d ", info->vid, info->port_name, info->vlan_port_tc_type, info->root_bridge_id, info->root_path_cost, info->desig_bridge_id, info->desig_port, info->root_port_req_resp_field);  
         ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info to peer (2)-- state:%d tc_ack:%d change_detection_enabled:%d self_loop:%d auto_config:%d oper_edge:%d path_cost:%d desig_cost:%d forward_delay:%d ", info->state, info->tc_ack, info->change_detection_enabled, info->self_loop, info->auto_config, info->oper_edge, info->port_path_cost, info->desig_cost, info->fwd_delay);
-        ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info to peer (3)-- master_node_req_resp %d rpvst_req_prop_ack_flag %d message_type: %d", info->master_node_req_resp_field, info->rpvst_req_proposal_ack_flag, info->message_type);
+        ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info to peer (3)-- master_node_req_resp %d rpvst_req_prop_ack_flag %d nrpv_req_resp_field: %d message_type: %d", info->master_node_req_resp_field, info->rpvst_req_proposal_ack_flag, info->nrpv_req_resp_field,info->message_type);
 
         stpiccp_send_common_info_to_peer(sys, info);
     } 
@@ -480,7 +481,7 @@ int stpiccp_receive_stp_connect_request(void)
       data->a_bit = 0;
     }
 
-    stpiccp_send_connect_to_syncd(sys, csm, STP_ICCP_OPER_STATUS_UP);
+	stpiccp_send_connect_to_syncd(sys, csm, STP_ICCP_OPER_STATUS_UP);
     iccp_csm_send(csm, g_csm_buf, msg_len);
   }
 
