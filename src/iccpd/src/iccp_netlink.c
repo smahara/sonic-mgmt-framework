@@ -753,6 +753,12 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
         iccp_netlink_if_startup_set(lif_po->ifindex);
         */
         iccp_netlink_set_portchannel_iff_flag(lif_po, true, 2);
+    
+        /* Set the interface MAC address back to its local address so that subsequent vlan member
+         * add processing (local_if_add_vlan) will not use the old MAC address for 
+         * update_if_ipmac_on_standby()
+         */ 
+        memcpy(lif_po->mac_addr, MLACP(csm).system_id, ETHER_ADDR_LEN);
     }
 
     /*Set portchannel ip mac */
