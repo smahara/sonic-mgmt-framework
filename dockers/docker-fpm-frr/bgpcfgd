@@ -219,8 +219,11 @@ def hdl_set_extcomm(daemon, cmd_str, op, st_idx, args, data):
     return cmd_list
 
 def hdl_set_asn(daemon, cmd_str, op, st_idx, args, data):
-    if op == CachedDataWithOp.OP_DELETE:
-        args[0][1] = (0, True)
+    if 0 not in args[0]:
+        return None
+    if op == CachedDataWithOp.OP_DELETE and not args[0][0][1]:
+        args[0].pop(1, None)
+        op = CachedDataWithOp.OP_UPDATE
     return get_command_cmn(daemon, cmd_str, op, st_idx, args, data)
 
 class BGPKeyMapInfo:
@@ -289,7 +292,17 @@ class BGPKeyMapList(list):
                 cmd_data[idx] = (data[key].data, False)
             return ((cmd_data,), op)
         else:
-            op = CachedDataWithOp.OP_DELETE if is_del and 0 in chg_list else CachedDataWithOp.OP_UPDATE
+            min_id = lambda id_set: None if len(id_set) == 0 else sorted(list(id_set))[0]
+            min_chg_id = min_id(chg_list)
+            if min_chg_id is None:
+                min_id_chged = False
+            else:
+                if min_chg_id in opt_idx_list:
+                    min_id_chged = len(no_chg_list) == 0
+                else:
+                    min_unchg_id = min_id(no_chg_list)
+                    min_id_chged = min_unchg_id is None or min_chg_id < min_unchg_id
+            op = CachedDataWithOp.OP_DELETE if is_del and min_id_chged else CachedDataWithOp.OP_UPDATE
             cmd_data = []
             for idx in range(len(key_list)):
                 if (((not is_del or op == CachedDataWithOp.OP_DELETE) and (idx in chg_list or idx in no_chg_list)) or
@@ -530,6 +543,17 @@ class CommandArgument(object):
                 return self.value[0]
             else:
                 return self.value
+        elif format == 'tx-add-paths':
+            if self.value == 'tx_all_paths':
+                return 'addpath-tx-all-paths'
+            elif self.value == 'tx_best_path_per_as':
+                return 'addpath-tx-bestpath-per-AS'
+        elif format == 'shutdown-msg':
+            if len(self.value) > 0:
+                self.value = 'message %s' % self.value
+        elif format == 'default-rmap':
+            if len(self.value) > 0:
+                self.value = 'route-map %s' % self.value
         elif format in bool_format:
             false_val = ''
             if type(bool_format[format]) is tuple:
@@ -552,10 +576,10 @@ class CommandArgument(object):
                 self.value = 'restart %s' % self.value
         elif format == 'redist-route-map':
             if len(self.value) > 0:
-                self.value = 'route-map %s' % self.value
+                self.value = 'route-map %s' % self.to_str()
         elif format == 'network-policy':
             if len(self.value) > 0:
-                self.value = 'route-map %s' % self.value
+                self.value = 'route-map %s' % self.to_str()
         elif format == 'src-proto':
             if self.value == 'ospf3':
                 self.value = 'ospf6'
@@ -574,6 +598,15 @@ def hdl_send_com(daemon, cmd_str, op, st_idx, args, data):
         cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'standard'), no = CommandArgument(daemon, True)))
     elif args[1] == 'extended':
         cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'extended'), no = CommandArgument(daemon, True)))
+    return cmd_list
+
+def hdl_capa_orf_pfxlist(daemon, cmd_str, op, st_idx, args, data):
+    if len(args) < 2:
+        return None
+    cmd_list = []
+    cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'both'), no = CommandArgument(daemon, False)))
+    if op != CachedDataWithOp.OP_DELETE:
+        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, args[1]), no = CommandArgument(daemon, True)))
     return cmd_list
 
 def hdl_com_set(daemon, cmd_str, op, st_idx, args, extended):
@@ -657,6 +690,20 @@ def hdl_route_redist_set(daemon, cmd_str, op, st_idx, args, data):
     if upd_cmd_list is None:
         return None
     return cmd_list + upd_cmd_list
+
+def hdl_attr_unchanged(daemon, cmd_str, op, st_idx, args, data):
+    # blindly run no command first
+    cmd_list = [cmd_str.format(CommandArgument(daemon, True, args[0]),
+                               CommandArgument(daemon, True, ''),
+                               CommandArgument(daemon, True, ''),
+                               CommandArgument(daemon, True, ''),
+                               no = CommandArgument(daemon, False))]
+    if op != CachedDataWithOp.OP_DELETE:
+        upd_cmd_list = get_command_cmn(daemon, cmd_str, op, st_idx, args, data)
+        if upd_cmd_list is None:
+            return None
+        cmd_list += upd_cmd_list
+    return cmd_list
 
 class ExtConfigDBConnector(ConfigDBConnector):
     def __raw_to_typed(self, raw_data):
@@ -842,11 +889,6 @@ class BGPConfigDaemon:
                       ('fast_external_failover',                        '{no:no-prefix}bgp fast-external-failover', ['true', 'false', True]),
                       ('network_import_check',                          '{no:no-prefix}bgp network import-check', ['true', 'false']),
                       ('graceful_shutdown',                             '{no:no-prefix}bgp graceful-shutdown', ['true', 'false']),
-                      (['route_flap_dampen',
-                        '+route_flap_dampen_half_life',
-                        '+route_flap_dampen_reuse_threshold',
-                        '+route_flap_dampen_suppress_threshold',
-                        '+route_flap_dampen_max_suppress'],             '{no:no-prefix}bgp dampening {} {} {} {}', ['true', 'false']),
                       ('rr_clnt_to_clnt_reflection',                    '{no:no-prefix}bgp client-to-client reflection', ['true', 'false', True]),
                       ('max_dynamic_neighbors',                         '{no:no-prefix}bgp listen limit {}'),
                       ('read_quanta',                                   '{no:no-prefix}read-quanta {}'),
@@ -872,11 +914,17 @@ class BGPConfigDaemon:
                          ('max_ebgp_paths',                             '{no:no-prefix}maximum-paths {}'),
                          (['max_ibgp_paths',
                            '+ibgp_equal_cluster_length'],               '{no:no-prefix}maximum-paths ibgp {} {:match-clust-len}', hdl_ibgp_maxpath),
-                         ('route_download_filter',                      '{no:no-prefix}table-map {}')
+                         ('route_download_filter',                      '{no:no-prefix}table-map {}'),
+                         (['route_flap_dampen',
+                           '+route_flap_dampen_half_life',
+                           '+route_flap_dampen_reuse_threshold',
+                           '+route_flap_dampen_suppress_threshold',
+                           '+route_flap_dampen_max_suppress'],          '{no:no-prefix}bgp dampening {} {} {} {}', ['true', 'false'])
     ]
 
     cmn_key_map = [('asn&peer_type',                        '{no:no-prefix}neighbor {} remote-as {}'),
                    ('local_asn',                            '{no:no-prefix}neighbor {} local-as {}'),
+                   (['admin_status', '+shutdown_message'],  '{no:no-prefix}neighbor {} shutdown {:shutdown-msg}', ['false', 'true']),
                    ('local_addr',                           '{no:no-prefix}neighbor {} update-source {}'),
                    ('name',                                 '{no:no-prefix}neighbor {} description {}'),
                    (['ebgp_multihop', '+ebgp_multihop_ttl'],'{no:no-prefix}neighbor {} ebgp-multihop {}', ['true', 'false']),
@@ -896,18 +944,15 @@ class BGPConfigDaemon:
                    ('enforce_multihop',                     '{no:no-prefix}neighbor {} enforce-multihop', ['true', 'false']),
                    ('override_capability',                  '{no:no-prefix}neighbor {} override-capability', ['true', 'false']),
                    ('peer_port',                            '{no:no-prefix}neighbor {} port {}'),
-                   ('shutdown_message',                     '{no:no-prefix}neighbor {} shutdown message {}'),
                    ('strict_capability_match',              '{no:no-prefix}neighbor {} strict-capability-match', ['true', 'false'])
     ]
 
-    nbr_key_map = [('peer_group_name',  '{no:no-prefix}neighbor {} peer-group {}'),
-                   ('admin_status',     '{no:no-prefix}neighbor {} shutdown', ['false', 'true'])
-    ]
+    nbr_key_map = [('peer_group_name',  '{no:no-prefix}neighbor {} peer-group {}')]
 
     nbr_af_key_map = [(['allow_as_in', '+allow_as_count&allow_as_origin'],  '{no:no-prefix}neighbor {} allowas-in {:allow-as-in}', ['true', 'false']),
                       ('admin_status|ipv4',                                 '{no:no-prefix}neighbor {} activate', ['true', 'false']),
                       ('admin_status|ipv6',                                 '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
-                      ('send_default_route',                                '{no:no-prefix}neighbor {} default-originate', ['true', 'false']),
+                      (['send_default_route', '+default_rmap'],             '{no:no-prefix}neighbor {} default-originate {:default-rmap}', ['true', 'false']),
                       ('default_rmap',                                      '{no:no-prefix}neighbor {} default-originate route-map {}'),
                       (['max_prefix_limit', '++max_prefix_warning_threshold',
                         '+max_prefix_restart_interval&max_prefix_warning_only'], '{no:no-prefix}neighbor {} maximum-prefix {} {} {:restart}'),
@@ -919,18 +964,19 @@ class BGPConfigDaemon:
                       ('weight',                                            '{no:no-prefix}neighbor {} weight {}'),
                       ('as_override',                                       '{no:no-prefix}neighbor {} as-override', ['true', 'false']),
                       ('send_community',                                    '{no:no-prefix}neighbor {} send-community {}', hdl_send_com),
-                      ('add_path_tx_all',                                   '{no:no-prefix}neighbor {} addpath-tx-all-paths', ['true', 'false']),
-                      ('add_path_tx_bestpath',                              '{no:no-prefix}neighbor {} addpath-tx-bestpath-per-AS', ['true', 'false']),
+                      ('tx_add_paths',                                      '{no:no-prefix}neighbor {} {:tx-add-paths}'),
                       (['++unchanged_as_path',
-                        '++unchanged_med', '+unchanged_nexthop'],            '{no:no-prefix}neighbor {} attribute-unchanged {:uchg-as-path} {:uchg-med} {:uchg-nh}'),
-                      (['filter_list_name', 'filter_list_direction'],       '{no:no-prefix}neighbor {} filter-list {} {}'),
+                        '++unchanged_med', '++unchanged_nexthop'],          '{no:no-prefix}neighbor {} attribute-unchanged {:uchg-as-path} {:uchg-med} {:uchg-nh}', hdl_attr_unchanged),
+                      ('filter_list_in',                                    '{no:no-prefix}neighbor {} filter-list {} in'),
+                      ('filter_list_out',                                   '{no:no-prefix}neighbor {} filter-list {} out'),
                       ('nhself',                                            '{no:no-prefix}neighbor {} next-hop-self', ['true', 'false']),
                       ('nexthop_self_force',                                '{no:no-prefix}neighbor {} next-hop-self force', ['true', 'false']),
-                      (['prefix_list_name', 'prefix_list_direction'],       '{no:no-prefix}neighbor {} prefix-list {} {}'),
+                      ('prefix_list_in',                                    '{no:no-prefix}neighbor {} prefix-list {} in'),
+                      ('prefix_list_out',                                   '{no:no-prefix}neighbor {} prefix-list {} out'),
                       (['remove_private_as_enabled',
                         '++remove_private_as_all',
                         '+replace_private_as'],                             '{no:no-prefix}neighbor {} remove-private-AS {:rm-as-all} {:rm-as-repl}', ['true', 'false']),
-                      ('cap_orf',                                           '{no:no-prefix}neighbor {} capability orf prefix-list {}'),
+                      ('cap_orf',                                           '{no:no-prefix}neighbor {} capability orf prefix-list {}', hdl_capa_orf_pfxlist),
                       ('route_server_client',                               '{no:no-prefix}neighbor {} route-server-client', ['true', 'false']),
     ]
 
@@ -1110,18 +1156,17 @@ class BGPConfigDaemon:
 
         self.table_handler_list = [
             ('DEVICE_METADATA', self.metadata_handler),
-            ('BGP_GLOBALS', self.bgp_global_handler),
+            ('BGP_GLOBALS', self.bgp_table_handler_common),
             ('BGP_GLOBALS_AF', self.bgp_af_handler),
-            ('ASPATH_SET', self.bgp_table_handler_common),
             ('PREFIX_SET', self.bgp_table_handler_common),
             ('PREFIX', self.bgp_table_handler_common),
-            ('COMMUNITY_SET', self.bgp_table_handler_common),
-            ('EXTENDED_COMMUNITY_SET', self.bgp_table_handler_common),
+            ('COMMUNITY_SET', self.comm_set_handler),
+            ('EXTENDED_COMMUNITY_SET', self.comm_set_handler),
             ('ROUTE_MAP', self.bgp_table_handler_common),
             ('BGP_PEER_GROUP', self.bgp_neighbor_handler),
             ('BGP_NEIGHBOR', self.bgp_neighbor_handler),
-            ('BGP_PEER_GROUP_AF', self.bgp_neighbor_af_handler),
-            ('BGP_NEIGHBOR_AF', self.bgp_neighbor_af_handler),
+            ('BGP_PEER_GROUP_AF', self.bgp_table_handler_common),
+            ('BGP_NEIGHBOR_AF', self.bgp_table_handler_common),
             ('BGP_GLOBALS_LISTEN_PREFIX', self.bgp_table_handler_common),
             ('BFD_PEER', self.bfd_handler),
             ('PREFIX_SET', self.bgp_table_handler_common),
@@ -1295,9 +1340,25 @@ class BGPConfigDaemon:
             upd_data[upd_key] = CachedDataWithOp(upd_val, CachedDataWithOp.OP_ADD)
         self.bgp_message.put((self.config_db.serialize_key(table_key), False, table_name, upd_data))
 
-    def __update_bgp(self):
+    def __apply_pg_attr(self, vrf, peer_group):
+        table_name = 'BGP_GLOBALS_LISTEN_PREFIX'
+        entry_list = self.config_db.get_table(table_name)
+        if len(entry_list) == 0:
+            syslog.syslog(syslog.LOG_DEBUG, 'no table found')
+            return
+        for table_key, table_data in entry_list.items():
+            pg_name = table_data.get('peer_group', None)
+            if pg_name == peer_group:
+                syslog.syslog(syslog.LOG_DEBUG, 'add apply request for table {} key {}'.format(table_name, table_key))
+                upd_data = {}
+                for upd_key, upd_val in table_data.items():
+                    upd_data[upd_key] = CachedDataWithOp(upd_val, CachedDataWithOp.OP_ADD)
+                self.bgp_message.put((self.config_db.serialize_key(table_key), False, table_name, upd_data))
+
+    def __update_bgp(self, data_list):
         while not self.bgp_message.empty():
             key, del_table, table, data = self.bgp_message.get()
+            data_list.append((table, key, data))
             key_list = key.split('|', 1)
             if len(key_list) > 1:
                 key = key_list[1]
@@ -1415,10 +1476,15 @@ class BGPConfigDaemon:
                              ('peer_group_name' in data and data['peer_group_name'].op == CachedDataWithOp.OP_DELETE))):
                         # delete asn or peer_group will delete all neighbor
                         self.__delete_vrf_neighbor(vrf, key, data, False)
-                    if table == 'BGP_NEIGHBOR' and ('asn' in data and data['asn'].op == CachedDataWithOp.OP_ADD):
-                        for af in ['ipv4_unicast', 'ipv6_unicast']:
-                            syslog.syslog(syslog.LOG_DEBUG, 'apply attributes to FRR for vrf %s neighbor %s af %s' % (vrf, key, af))
-                            self.__apply_nbr_af_attr(vrf, key, af)
+                    if (('asn' in data and data['asn'].op == CachedDataWithOp.OP_ADD) or
+                        ('peer_type' in data and data['peer_type'].op == CachedDataWithOp.OP_ADD)):
+                        if table == 'BGP_NEIGHBOR':
+                            for af in ['ipv4_unicast', 'ipv6_unicast']:
+                                syslog.syslog(syslog.LOG_DEBUG, 'apply attributes to FRR for vrf %s neighbor %s af %s' % (vrf, key, af))
+                                self.__apply_nbr_af_attr(vrf, key, af)
+                        else:
+                            syslog.syslog(syslog.LOG_DEBUG, 'apply attributes to FRR for vrf %s peer_group %s' % (vrf, key))
+                            self.__apply_pg_attr(vrf, key)
                 else:
                     # Neighbor is deleted
                     if table == 'BGP_PEER_GROUP':
@@ -1710,10 +1776,7 @@ class BGPConfigDaemon:
                     data.pop(key, None)
 
     def __update_cache_data(self, table_key, data):
-        if table_key not in self.table_data_cache:
-            syslog.syslog(syslog.LOG_DEBUG, 'data of table %s was not cached' % table_key)
-            return
-        cached_data = self.table_data_cache[table_key]
+        cached_data = self.table_data_cache.setdefault(table_key, {})
         for key, val in data.items():
             if not isinstance(val, CachedDataWithOp) or val.op == CachedDataWithOp.OP_NONE or val.status == CachedDataWithOp.STAT_FAIL:
                 syslog.syslog(syslog.LOG_DEBUG, 'ignore cache update for %s because of %s%s%s' %
@@ -1747,21 +1810,22 @@ class BGPConfigDaemon:
         table_key = ExtConfigDBConnector.get_table_key(table, key)
         self.__add_op_to_data(table_key, data, comb_attr_list)
         self.bgp_message.put((key, del_table, table, data))
-        self.__update_bgp()
-        self.__update_cache_data(table_key, data)
-
-    def bgp_global_handler(self, table, key, data):
-        self.bgp_table_handler_common(table, key, data, [{'route_flap_dampen_reuse_threshold', 'route_flap_dampen_suppress_threshold', 'route_flap_dampen_max_suppress'}])
+        upd_data_list = []
+        self.__update_bgp(upd_data_list)
+        for table, key, data in upd_data_list:
+            table_key = ExtConfigDBConnector.get_table_key(table, key)
+            self.__update_cache_data(table_key, data)
 
     def bgp_af_handler(self, table, key, data):
-        self.bgp_table_handler_common(table, key, data, [{'ebgp_route_distance', 'ibgp_route_distance', 'local_route_distance'}])
+        self.bgp_table_handler_common(table, key, data, [{'ebgp_route_distance', 'ibgp_route_distance', 'local_route_distance'},
+                                        {'route_flap_dampen_reuse_threshold', 'route_flap_dampen_suppress_threshold', 'route_flap_dampen_max_suppress'}])
 
     def bgp_neighbor_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'keepalive', 'holdtime'}])
 
-    def bgp_neighbor_af_handler(self, table, key, data):
-        self.bgp_table_handler_common(table, key, data, [{'filter_list_name', 'filter_list_direction'},
-                                                         {'prefix_list_name', 'prefix_list_direction'}])
+    def comm_set_handler(self, table, key, data):
+        self.bgp_table_handler_common(table, key, data, [{'set_type', 'match_action', 'community_member'}])
+
     def start(self):
         try:
             self.subscribe_all()
