@@ -252,6 +252,7 @@ RUN apt-get update && apt-get install -y \
         bash-completion \
 # For mgmt-framework build
         libdbus-c++-dev \
+        libcurl3-gnutls \
 # For sonic vs image build
         dosfstools \
         qemu-kvm \
