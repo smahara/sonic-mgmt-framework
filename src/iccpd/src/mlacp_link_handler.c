@@ -1982,8 +1982,11 @@ static void update_l2_mac_state(struct CSM *csm,
             if (strcmp(mac_msg->ifname, csm->peer_itf_name) == 0)
             {
                 ICCPD_LOG_DEBUG("ICCP_FDB", "Intf up, redirect MAC to Interface: %s,"
-                " MAC %s vlan-id %d", mac_msg->ifname,
-                mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
+                " MAC %s vlan-id %d, age flag: %d ", mac_msg->ifname,
+                mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+
+                if (mac_msg->pending_local_del)
+                    mac_msg->pending_local_del = 0;
 
                 /*Remove MAC_AGE_LOCAL flag*/
                 // commenting this code to fix an issue, when interface comes back up dont delete age flag
@@ -1994,7 +1997,11 @@ static void update_l2_mac_state(struct CSM *csm,
                 memcpy(mac_msg->ifname, mac_msg->origin_ifname, MAX_L_PORT_NAME);
 
                 /*Send dynamic or static mac add message to mclagsyncd*/
-                add_mac_to_chip(mac_msg, mac_msg->fdb_type);
+
+                if (mac_msg->age_flag == MAC_AGE_LOCAL)
+                    add_mac_to_chip(mac_msg, mac_msg->fdb_type);
+                else
+                    add_mac_to_chip(mac_msg, MAC_TYPE_DYNAMIC_LOCAL);
             }
             else
             {
@@ -2934,7 +2941,8 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
     mac_msg->age_flag = 0;
     mac_msg->pending_local_del = 0;
 
-    ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: vid %d mac %s port %s optype %s ", vid,mac_addr_to_str(mac_addr), ifname, op_type == MAC_SYNC_ADD ? "add" : "del");
+    ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: vid %d mac %s port %s type: %d optype %s  ",
+            vid, mac_addr_to_str(mac_addr), ifname, fdb_type, op_type == MAC_SYNC_ADD ? "add" : "del");
     /*Debug*/
     #if 0
     /* dump receive MAC info*/
@@ -2993,8 +3001,8 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
     {
         mac_exist = 1;
         ICCPD_LOG_DEBUG("ICCP_FDB", "MAC update from mclagsyncd: RB_FIND success for the MAC entry : %s, "
-            " vid: %d , ifname %s", mac_addr_to_str(mac_info->mac_addr),
-            mac_info->vid, mac_info->ifname );
+            " vid: %d , ifname %s, type: %d, age flag: %d", mac_addr_to_str(mac_info->mac_addr),
+            mac_info->vid, mac_info->ifname, mac_info->fdb_type, mac_info->age_flag );
     }
 
     /*handle mac add*/

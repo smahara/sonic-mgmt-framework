@@ -1125,11 +1125,7 @@ void mlacp_local_lif_clear_pending_mac(struct CSM* csm, struct LocalInterface *l
             ICCPD_LOG_DEBUG("ICCP_FDB", "Clear pending MAC: MAC-msg-list not enqueue for local age flag: %s, mac %s vlan-id %d, age_flag %d, remove local age flag",
                     mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
 
-            //pending mac pointing to peer_intf del from chip.? mostly not required
-            if (strcmp(mac_msg->ifname, csm->peer_itf_name) == 0)
-            {
-                del_mac_from_chip(mac_msg);
-            }
+            del_mac_from_chip(mac_msg);
 
             // if static dont delete mac
             if (mac_msg->fdb_type != MAC_TYPE_STATIC)
