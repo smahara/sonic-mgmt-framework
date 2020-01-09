@@ -63,16 +63,8 @@ function getBootType()
     *SONIC_BOOT_TYPE=fastfast*)
         TYPE='fastfast'
         ;;
-<<<<<<< HEAD
-    *SONIC_BOOT_TYPE=fast*|*fast-reboot*)
-        TYPE='fast'
-||||||| merged common ancestors
-    fast*)
-        TYPE='fast'
-=======
     *SONIC_BOOT_TYPE=fast*|*fast-reboot*)
         TYPE=$(awk '{ if ($1 <= 180) print "fast"; else print "cold" }' /proc/uptime)
->>>>>>> origin/broadcom_sonic_share
         ;;
     *)
         TYPE='cold'

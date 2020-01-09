@@ -34,7 +34,7 @@ RUN apt-get clean -y      && \
     apt-get autoremove -y && \
     rm -rf /debs
 
-COPY ["start.sh", "telemetry.sh", "dialout.sh", "files/supervisor-proc-exit-listener", "/usr/bin/"]
+COPY ["start.sh", "telemetry.sh", "files/supervisor-proc-exit-listener", "/usr/bin/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 COPY ["critical_processes", "/etc/supervisor"]
 
