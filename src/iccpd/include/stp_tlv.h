@@ -171,6 +171,7 @@ struct stpCommonInfoTLV
   uint8_t      master_node_req_resp_field;
 
   uint8_t      rpvst_req_proposal_ack_flag;
+  uint8_t      nrpv_req_resp_field;
 
   uint8_t      message_type;
 } __attribute__ ((packed));
