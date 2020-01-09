@@ -21,41 +21,41 @@ bgp error-handling enable
 {% endif %}
 {% endif %}
 {% endblock bgp_error_handling_init %}
-{% block bfd_peers %}
-{% if BFD_PEER %}
+{% block bfd_shop_peers %}
+{% if BFD_PEER_SINGLE_HOP %}
 bfd
-{% for (peer_key, peer_info) in BFD_PEER.iteritems() %}
-{% set opt_args = '' %}
-{% if peer_key|length == 4 and peer_key[3] == 'multihop' %}
-{% set opt_args = opt_args~' '~'multihop' %}
+{% for (peer_key, peer_info) in BFD_PEER_SINGLE_HOP.iteritems() %}
+{% set peer_args = '' %}
+{% if peer_key[0] != 'null' %}
+{% set peer_args = peer_args~' '~'peer'~' '~peer_key[0] %}
 {% endif %}
 {% if peer_key[1] != 'null' %}
-{% set opt_args = opt_args~' '~'local-address'~' '~peer_key[1] %}
+{% set peer_args = peer_args~' '~'interface'~' '~peer_key[1] %}
 {% endif %}
 {% if peer_key[2] != 'null' %}
-{% set opt_args = opt_args~' '~'interface'~' '~peer_key[2] %}
+{% set peer_args = peer_args~' '~'vrf'~' '~peer_key[2] %}
 {% endif %}
-  peer {{ peer_key[0] }}{{ opt_args }} 
+{% if peer_key[3] != 'null' %}
+{% set peer_args = peer_args~' '~'local-address'~' '~peer_key[3] %}
+{% endif %}
+  peer {{ peer_args }} 
 {# set the bfd peer timers #}
-{% if  (peer_info['transmit_interval'] is defined and peer_info['transmit_interval'] | int != 300) %}
-    transmit-interval {{ peer_info['transmit_interval'] }} 
+{% if  (peer_info['desired-minimum-tx-interval'] is defined and peer_info['desired-minimum-tx-interval'] | int != 300) %}
+    transmit-interval {{ peer_info['desired-minimum-tx-interval'] }} 
 {% endif %}
-{% if  (peer_info['receive_interval'] is defined and peer_info['receive_interval'] | int != 300) %}
-    receive-interval {{ peer_info['receive_interval'] }}
+{% if  (peer_info['required-minimum-receive'] is defined and peer_info['required-minimum-receive'] | int != 300) %}
+    receive-interval {{ peer_info['required-minimum-receive'] }}
 {% endif %}
-{% if  (peer_info['multiplier'] is defined and peer_info['multiplier'] | int != 3) %}
-    detect-multiplier {{ peer_info['multiplier'] }}
+{% if  (peer_info['detection-multiplier'] is defined and peer_info['detection-multiplier'] | int != 3) %}
+    detect-multiplier {{ peer_info['detection-multiplier'] }}
 {% endif %}
-{% if  (peer_info['echo_mode'] is defined and peer_info['echo_mode'] != 'false') %}
+{% if  (peer_info['echo-active'] is defined and peer_info['echo-active'] != 'false') %}
     echo-mode
 {% endif %}
-{% if  (peer_info['echo_interval'] is defined and peer_info['echo_interval'] | int != 50) %}
-    echo-interval {{ peer_info['echo_interval'] }}
+{% if  (peer_info['desired-minimum-echo-receive'] is defined and peer_info['desired-minimum-echo-receive'] | int != 50) %}
+    echo-interval {{ peer_info['desired-minimum-echo-receive'] }}
 {% endif %}
-{% if  (peer_info['label'] is defined and peer_info['label'] != '') %}
-    label {{ peer_info['label'] }}
-{% endif %}
-{% if  (peer_info['admin_status'] is defined and peer_info['admin_status'] == 'up') %}
+{% if  (peer_info['enabled'] is defined and peer_info['enabled'] == 'true') %}
     no shutdown
 {% else %}
     shutdown
@@ -64,5 +64,40 @@ bfd
 {% endfor %}
 !
 {% endif %}
-{% endblock bfd_peers%}
-
+{% endblock bfd_shop_peers%}
+{% block bfd_mhop_peers %}
+{% if BFD_PEER_MULTI_HOP %}
+bfd
+{% for (peer_key, peer_info) in BFD_PEER_MULTI_HOP.iteritems() %}
+{% set peer_args = '' %}
+{% if peer_key[0] != 'null' %}
+{% set peer_args = peer_args~' '~'peer'~' '~peer_key[0] %}
+{% endif %}
+{% if peer_key[1] != 'null' %}
+{% set peer_args = peer_args~' '~'vrf'~' '~peer_key[1] %}
+{% endif %}
+{% if peer_key[2] != 'null' %}
+{% set peer_args = peer_args~' '~'local-address'~' '~peer_key[2] %}
+{% endif %}
+{% set peer_args = peer_args~' '~'multihop' %}
+  peer {{ peer_args }}
+{# set the bfd peer timers #}
+{% if  (peer_info['desired-minimum-tx-interval'] is defined and peer_info['desired-minimum-tx-interval'] | int != 300) %}
+    transmit-interval {{ peer_info['desired-minimum-tx-interval'] }}
+{% endif %}
+{% if  (peer_info['required-minimum-receive'] is defined and peer_info['required-minimum-receive'] | int != 300) %}
+    receive-interval {{ peer_info['required-minimum-receive'] }}
+{% endif %}
+{% if  (peer_info['detection-multiplier'] is defined and peer_info['detection-multiplier'] | int != 3) %}
+    detect-multiplier {{ peer_info['detection-multiplier'] }}
+{% endif %}
+{% if  (peer_info['enabled'] is defined and peer_info['enabled'] == 'true') %}
+    no shutdown
+{% else %}
+    shutdown
+{% endif %}
+  !
+{% endfor %}
+!
+{% endif %}
+{% endblock bfd_mhop_peers%}
