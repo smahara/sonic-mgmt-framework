@@ -118,7 +118,6 @@ module sonic-acl {
 				}
 
 				leaf IP_TYPE {
-					mandatory true;
 					type enumeration {
 						enum ANY;
 						enum IP;
@@ -147,7 +146,6 @@ module sonic-acl {
 
 				choice ip_src_dst {
 					case ipv4_src_dst {
-						when "boolean(IP_TYPE[.='ANY' or .='IP' or .='IPV4' or .='IPV4ANY'])";
 						leaf SRC_IP {
 							mandatory true;
 							type inet:ipv4-prefix;
@@ -158,7 +156,6 @@ module sonic-acl {
 						}
 					}
 					case ipv6_src_dst {
-						when "boolean(IP_TYPE[.='ANY' or .='IP' or .='IPV6' or .='IPV6ANY'])";
 						leaf SRC_IPV6 {
 							mandatory true;
 							type inet:ipv6-prefix;    
