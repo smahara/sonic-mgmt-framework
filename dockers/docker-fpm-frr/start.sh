@@ -7,15 +7,15 @@ CONFIG_TYPE=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["docker_routing_co
 if [ -z "$CONFIG_TYPE" ] || [ "$CONFIG_TYPE" == "separated" ]; then
     sonic-cfggen -d -y /etc/sonic/deployment_id_asn_map.yml -t /usr/share/sonic/templates/bgpd.conf.j2 > /etc/frr/bgpd.conf
     sonic-cfggen -d -t /usr/share/sonic/templates/zebra.conf.j2 > /etc/frr/zebra.conf
-    touch /etc/frr/vtysh.conf
+    echo "no service integrated-vtysh-config" > /etc/frr/vtysh.conf
+    rm -f /etc/frr/frr.conf
 elif [ "$CONFIG_TYPE" == "unified" ]; then
     sonic-cfggen -d -y /etc/sonic/deployment_id_asn_map.yml -t /usr/share/sonic/templates/frr.conf.j2 >/etc/frr/frr.conf
     echo "service integrated-vtysh-config" > /etc/frr/vtysh.conf
+    rm -f /etc/frr/bgpd.conf /etc/frr/zebra.conf    
 fi
 
-[ -s "/etc/frr/frr.conf" ] || {
-    echo "log syslog informational" > /etc/frr/frr.conf
-}
+chown -R frr:frr /etc/frr/
 
 sonic-cfggen -d -t /usr/share/sonic/templates/isolate.j2 > /usr/sbin/bgp-isolate
 chown root:root /usr/sbin/bgp-isolate
