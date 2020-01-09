@@ -40,7 +40,7 @@ STRETCH_FILES_PATH = $(TARGET_PATH)/files/stretch
 DBG_IMAGE_MARK = dbg
 DBG_SRC_ARCHIVE_FILE = $(TARGET_PATH)/sonic_src.tar.gz
 
-CONFIGURED_PLATFORM := $(shell [ -f .platform ] && cat .platform || echo generic)
+CONFIGURED_PLATFORM := $(shell cat .platform 2>/dev/null || echo generic)
 PLATFORM_PATH = platform/$(CONFIGURED_PLATFORM)
 CONFIGURED_ARCH := $(shell [ -f .arch ] && cat .arch || echo amd64)
 ifeq ($(PLATFORM_ARCH),)
@@ -69,14 +69,12 @@ ifneq ($(CONFIGURED_PLATFORM),generic)
 endif
 
 configure :
-	@mkdir -p target/debs
-	@mkdir -p target/debs/stretch
-	@mkdir -p target/files
-	@mkdir -p target/files/stretch
-	@mkdir -p target/python-debs
-	@mkdir -p target/python-wheels
-	@echo $(PLATFORM) > .platform
-	@echo $(PLATFORM_ARCH) > .arch
+	mkdir -p target/debs/stretch
+	mkdir -p target/files/stretch
+	mkdir -p target/python-debs
+	mkdir -p target/python-wheels
+	echo $(PLATFORM) > .platform
+	echo $(PLATFORM_ARCH) > .arch
 
 distclean : .platform clean
 	@rm -f .platform
@@ -425,14 +423,12 @@ endef
 define SAVE_CACHE
 	$(eval MOD_SRC_PATH=$($(1)_SRC_PATH))
 	$(eval MOD_CACHE_FILE=$($(1)_MOD_CACHE_FILE))
-	$(call MOD_LOCK,$(1),$(SONIC_DPKG_CACHE_DIR),$(MOD_CACHE_LOCK_SUFFIX),$(MOD_CACHE_LOCK_TIMEOUT))
 	$(if $($(1)_FILES_MODIFIED),
 		echo "Target $(1) dependencies are modifed - save cache skipped";
 	    ,
 		tar -czvf $(SONIC_DPKG_CACHE_DIR)/$(MOD_CACHE_FILE) $(2) $(addprefix $(DEBS_PATH)/,$($(1)_DERIVED_DEBS));
 		echo "File $(SONIC_DPKG_CACHE_DIR)/$(MOD_CACHE_FILE) saved in cache ";
 	 )
-	$(call MOD_UNLOCK,$(1))
 	echo ""
 endef
 
@@ -441,7 +437,6 @@ ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
 # $(call docker-image-save,from,to)
 define docker-image-save
     @echo "Attempting docker image lock for $(1) save" $(LOG)
-    $(call MOD_LOCK,$(1),$(DOCKER_LOCKDIR),$(DOCKER_LOCKFILE_SUFFIX),$(DOCKER_LOCKFILE_TIMEOUT))
     @echo "Obtained docker image lock for $(1) save" $(LOG)
     @echo "Tagging docker image $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) as $(1):latest" $(LOG)
     docker tag $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(1):latest $(LOG)
@@ -449,7 +444,6 @@ define docker-image-save
     docker save $(1):latest | gzip -c > $(2)
     @echo "Removing docker image $(1):latest" $(LOG)
     docker rmi -f $(1):latest $(LOG)
-    $(call MOD_UNLOCK,$(1))
     @echo "Released docker image lock for $(1) save" $(LOG)
     @echo "Removing docker image $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG)" $(LOG)
     docker rmi -f $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
@@ -457,7 +451,6 @@ endef
 # $(call docker-image-load,from)
 define docker-image-load
     @echo "Attempting docker image lock for $(1) load" $(LOG)
-    $(call MOD_LOCK,$(1),$(DOCKER_LOCKDIR),$(DOCKER_LOCKFILE_SUFFIX),$(DOCKER_LOCKFILE_TIMEOUT))
     @echo "Obtained docker image lock for $(1) load" $(LOG)
     @echo "Loading docker image $(TARGET_PATH)/$(1).gz" $(LOG)
     docker load -i $(TARGET_PATH)/$(1).gz $(LOG)
@@ -465,7 +458,6 @@ define docker-image-load
     docker tag $(1):latest $(1)$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
     @echo "Removing docker image $(1):latest" $(LOG)
     docker rmi -f $(1):latest $(LOG)
-    $(call MOD_UNLOCK,$(1))
     @echo "Released docker image lock for $(1) load" $(LOG)
 endef
 else
@@ -543,7 +535,7 @@ SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_ONLINE_FILES))
 # This file contains the values of target environment flags and gets updated only when there is a change in the flags value.
 # This file is added as a dependency to the target, so that any change in the file will trigger the target recompilation.
 # For Eg:
-#       target/debs/stretch/linux-headers-4.9.0-11-2-common_4.9.189-3+deb9u2_all.deb.dep
+#       target/debs/stretch/linux-headers-4.9.0-9-2-common_4.9.168-1+deb9u3_all.deb.dep
 #
 $(addsuffix .dep,$(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS) $(SONIC_DPKG_DEBS))) : \
 	$(DEBS_PATH)/%.dep : $$(eval $$*_DEP_FLAGS_FILE:=$$@)
@@ -565,12 +557,10 @@ $(addsuffix .dep,$(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS) $(SONIC_DPKG_DEBS
 #     SONIC_MAKE_FILES += $(SOME_NEW_FILE)
 $(addprefix $(FILES_PATH)/, $(SONIC_MAKE_FILES)) : $(FILES_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS)))
 	$(HEADER)
-	# Remove target to force rebuild
-	rm -f $(addprefix $(FILES_PATH)/, $*)
 	# Apply series of patches if exist
 	if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && QUILT_PATCHES=../$(notdir $($*_SRC_PATH)).patch quilt push -a; popd; fi
 	# Build project and take package
-	make DEST=$(shell pwd)/$(FILES_PATH) -C $($*_SRC_PATH) $(shell pwd)/$(FILES_PATH)/$* $(LOG)
+	${MAKE} DEST=$(shell pwd)/$(FILES_PATH) -C $($*_SRC_PATH) $(shell pwd)/$(FILES_PATH)/$* $(LOG)
 	# Clean up
 	if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && quilt pop -a -f; popd; fi
 	$(FOOTER)
@@ -599,12 +589,11 @@ $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS)) : $(DEBS_PATH)/% : .platform $$(a
 	# Skip building the target if it is already loaded from cache
 	if [ -z '$($*_CACHE_LOADED)' ] ; then
 
-		# Remove target to force rebuild
-		rm -f $(addprefix $(DEBS_PATH)/, $* $($*_DERIVED_DEBS) $($*_EXTRA_DEBS))
 		# Apply series of patches if exist
 		if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && QUILT_PATCHES=../$(notdir $($*_SRC_PATH)).patch quilt push -a; popd; fi
 		# Build project and take package
-		DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS_GENERIC}" make DEST=$(shell pwd)/$(DEBS_PATH) -C $($*_SRC_PATH) $(shell pwd)/$(DEBS_PATH)/$* $(LOG)
+		DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS_GENERIC}" ${MAKE} DEST=$(shell pwd)/$(DEBS_PATH) -C $($*_SRC_PATH) $(shell pwd)/$(DEBS_PATH)/$* $(LOG) ||
+		DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS_GENERIC}" ${MAKE} -j1 DEST=$(shell pwd)/$(DEBS_PATH) -C $($*_SRC_PATH) $(shell pwd)/$(DEBS_PATH)/$* $(LOG)
 		# Clean up
 		if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && quilt pop -a -f; popd; fi
 
@@ -640,10 +629,9 @@ $(addprefix $(DEBS_PATH)/, $(SONIC_DPKG_DEBS)) : $(DEBS_PATH)/% : .platform $$(a
 		# Build project
 		pushd $($*_SRC_PATH) $(LOG)
 		[ ! -f ./autogen.sh ] || ./autogen.sh $(LOG)
-		$(if $($*_DPKG_TARGET),
-			DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS_GENERIC} ${$*_DEB_BUILD_OPTIONS}" dpkg-buildpackage -rfakeroot -b -us -uc -j$(SONIC_CONFIG_MAKE_JOBS) --as-root -T$($*_DPKG_TARGET) $(LOG),
-			DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS_GENERIC} ${$*_DEB_BUILD_OPTIONS}" dpkg-buildpackage -rfakeroot -b -us -uc -j$(SONIC_CONFIG_MAKE_JOBS) $(LOG)
-		)
+		[ "$($*_DPKG_TARGET)" ] && AS_ROOT="--as-root -T$($*_DPKG_TARGET)"
+		DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS_GENERIC} ${$*_DEB_BUILD_OPTIONS}" dpkg-buildpackage -rfakeroot -b -us -uc $${AS_ROOT} -j$(SONIC_CONFIG_MAKE_JOBS) $(LOG) ||
+		DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS_GENERIC} ${$*_DEB_BUILD_OPTIONS}" dpkg-buildpackage -rfakeroot -b -us -uc $${AS_ROOT}                             $(LOG)
 		popd $(LOG)
 		# Clean up
 		if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && quilt pop -a -f; popd; fi
@@ -701,11 +689,9 @@ $(SONIC_INSTALL_TARGETS) : $(DEBS_PATH)/%-install : .platform $$(addsuffix -inst
 	$(HEADER)
 	[ -f $(DEBS_PATH)/$* ] || { echo $(DEBS_PATH)/$* does not exist $(LOG) && false $(LOG) }
 	# put a lock here because dpkg does not allow installing packages in parallel
-	while true; do
-	if mkdir $(DEBS_PATH)/dpkg_lock &> /dev/null; then
-	{ sudo dpkg -i $($*_DPKGFLAGS) $(DEBS_PATH)/$* $(LOG) && rm -d $(DEBS_PATH)/dpkg_lock && break; } || { rm -d $(DEBS_PATH)/dpkg_lock && exit 1 ; }
-	fi
-	done
+	pwd
+	./dpkgd-listener "$($*_DPKGFLAGS) $(DEBS_PATH)/$*"
+	touch $@
 	$(FOOTER)
 
 ###############################################################################
@@ -790,7 +776,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_SIMPLE_DOCKER_IMAGES)) : $(TARGET_PATH)/%.g
 	# Apply series of patches if exist
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && QUILT_PATCHES=../$(notdir $($*.gz_PATH)).patch quilt push -a; popd; fi
 	docker info $(LOG)
-	docker build --squash --no-cache \
+	docker build \
 		--build-arg http_proxy=$(HTTP_PROXY) \
 		--build-arg https_proxy=$(HTTPS_PROXY) \
 		--build-arg user=$(USER) \
@@ -846,7 +832,7 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_load_image=$(shell printf "$(call docker-load-image-get,$(subst $(SPACE),\n,$(patsubst %.gz,%,$(call expand,$($*.gz_LOAD_DOCKERS)))))\n" | awk '!a[$$0]++'))
 	j2 $($*.gz_PATH)/Dockerfile.j2 > $($*.gz_PATH)/Dockerfile
 	docker info $(LOG)
-	docker build --squash --no-cache \
+	docker build \
 		--build-arg http_proxy=$(HTTP_PROXY) \
 		--build-arg https_proxy=$(HTTPS_PROXY) \
 		--build-arg user=$(USER) \
@@ -878,7 +864,6 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAG
 	j2 $($*.gz_PATH)/Dockerfile-dbg.j2 > $($*.gz_PATH)/Dockerfile-dbg
 	docker info $(LOG)
 	docker build \
-		$(if $($*.gz_DBG_DEPENDS), --squash --no-cache, --no-cache) \
 		--build-arg http_proxy=$(HTTP_PROXY) \
 		--build-arg https_proxy=$(HTTPS_PROXY) \
 		--build-arg docker_container_name=$($*.gz_CONTAINER_NAME) \
@@ -1107,4 +1092,4 @@ jessie : $$(addprefix $(TARGET_PATH)/,$$(SONIC_JESSIE_DOCKERS_FOR_INSTALLERS))
 
 .PHONY : $(SONIC_CLEAN_DEBS) $(SONIC_CLEAN_FILES) $(SONIC_CLEAN_TARGETS) $(SONIC_CLEAN_STDEB_DEBS) $(SONIC_CLEAN_WHEELS) $(SONIC_PHONY_TARGETS) clean distclean configure noop
 
-.INTERMEDIATE : $(SONIC_INSTALL_TARGETS) $(SONIC_INSTALL_WHEELS) $(DOCKER_LOAD_TARGETS) docker-start .platform
+.INTERMEDIATE: $(SONIC_INSTALL_TARGETS) $(SONIC_INSTALL_WHEELS) $(DOCKER_LOAD_TARGETS) docker-start .platform

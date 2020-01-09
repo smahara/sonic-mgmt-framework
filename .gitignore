@@ -5,6 +5,7 @@
 .arch
 .platform
 .screen
+env.properties
 
 # Build artifacts
 fsroot/
@@ -19,6 +20,7 @@ target/
 *-dbg
 *dbg.j2
 *.img
+.log
 
 # Subdirectories in src
 src/bash/*

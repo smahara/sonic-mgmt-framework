@@ -1,0 +1,16 @@
+#!/bin/sh
+
+QUEUE="$1"
+
+while true
+do
+	LIST=`ls -1 $QUEUE`
+	for i in $LIST
+	do
+		QUEUE_ENTRY=$QUEUE/$i
+		ARGS=`cat $QUEUE_ENTRY`
+		sudo dpkg -i $ARGS || echo " *** dpkg $ARGS failed" >&2
+		rm $QUEUE_ENTRY
+	done
+	sleep 9
+done

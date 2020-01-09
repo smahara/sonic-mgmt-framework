@@ -54,9 +54,10 @@ PWD := $(shell pwd)
 BASE_IMAGE_LOCK_TIMEOUT_SECS = 3600
 USER_IMAGE_LOCK_TIMEOUT_SECS = 900
 LOCK_DIR = /tmp/docker_images_locks
+LOCAL_SAI_DEBS_PATH=target/files/stretch/private_sonic-binaries
 
 ifeq ($(USER), root)
-$(error Add your user account to docker group and use your user account to make. root or sudo are not supported!)
+$(error Add your user account to docker group and use your user account to build. Neither root nor sudo are supported!)
 endif
 
 # Check for j2cli availability
@@ -72,13 +73,11 @@ docker_min_ver := $(shell echo "$(docker_min)" | awk -F. '{printf("%d%03d%03d\n"
 docker_ver := $(shell docker info 2>/dev/null | grep -i "server version" | rev | cut -d' ' -f1 | rev | awk -F. '{printf("%d%03d%03d\n",$$1,$$2,$$3);}' 2>/dev/null)
 docker_is_valid := $(shell if [[ "$(docker_ver)" -lt $(docker_min_ver) ]] ; then echo "0"; else echo "1"; fi)
 ifeq (0,$(docker_is_valid))
-$(error SONiC requires Docker version $(docker_min) or later)
+$(warning SONiC requires Docker version $(docker_min) or later)
 endif
 
 # Remove lock file in case previous run was forcefully stopped
 $(shell rm -f .screen)
-
-MAKEFLAGS += -B
 
 CONFIGURED_ARCH := $(shell [ -f .arch ] && cat .arch || echo $(PLATFORM_ARCH))
 ifeq ($(CONFIGURED_ARCH),)
@@ -92,11 +91,14 @@ CFG_PLATFORM = $(if $(PLATFORM),$(PLATFORM),$(shell cat .platform 2>/dev/null))
 
 ifeq ($(BLDENV), stretch)
 SLAVE_DIR = sonic-slave-stretch
+# For building docker service images
+IBUILD_DIR = sonic-ibuild-stretch
 else
 SLAVE_DIR = sonic-slave
 endif
-SLAVE_BASE_TAG = $(shell CONFIGURED_ARCH=$(CONFIGURED_ARCH) j2 $(SLAVE_DIR)/Dockerfile.j2 > $(SLAVE_DIR)/Dockerfile && cat $(SLAVE_DIR)/Dockerfile .git/HEAD | sha1sum | awk '{print substr($$1,0,11);}')
-SLAVE_TAG = $(shell (cat $(SLAVE_DIR)/Dockerfile.user $(SLAVE_DIR)/Dockerfile .git/HEAD && echo $(USER)/$(PWD)/$(CFG_PLATFORM)) | sha1sum | awk '{print substr($$1,0,11);}')
+SLAVE_BASE_TAG = $(shell CONFIGURED_ARCH=$(CONFIGURED_ARCH) j2 $(SLAVE_DIR)/Dockerfile.j2 > $(SLAVE_DIR)/Dockerfile && cat $(SLAVE_DIR)/Dockerfile | sha1sum | awk '{print substr($$1,0,11);}')
+SLAVE_TAG = $(shell (cat $(SLAVE_DIR)/Dockerfile.user $(SLAVE_DIR)/Dockerfile && echo $(USER)/$(PWD)/$(CFG_PLATFORM)) | sha1sum | awk '{print substr($$1,0,11);}')
+
 SLAVE_BASE_IMAGE = $(SLAVE_DIR)-base
 SLAVE_IMAGE = $(SLAVE_BASE_IMAGE)-$(USER)
 
@@ -105,6 +107,10 @@ OVERLAY_MODULE_CHECK := \
     zgrep -q 'CONFIG_OVERLAY_FS=y' /proc/config.gz &>/dev/null || \
     grep -q 'CONFIG_OVERLAY_FS=y' /boot/config-$(shell uname -r) &>/dev/null || \
     (echo "ERROR: Module 'overlay' not loaded. Try running 'sudo modprobe overlay'."; exit 1)
+IBUILD_BASE_TAG = ${SLAVE_TAG}
+IBUILD_BASE_IMAGE = ${SLAVE_IMAGE}
+IBUILD_TAG = $(shell (cat $(SLAVE_DIR)/Dockerfile.vfs ${SLAVE_DIR}/Dockerfile.user ${SLAVE_DIR}/Dockerfile) | sha1sum | awk '{print substr($$1,0,11);}')
+IBUILD_IMAGE = ${IBUILD_DIR}-${USER}
 
 BUILD_TIMESTAMP := $(shell date +%Y%m%d\.%H%M%S)
 
@@ -168,14 +174,6 @@ ifneq ($(SONIC_DPKG_CACHE_SOURCE),)
 endif
 
 
-ifneq  ($(LOCAL_SAI_DEBS_PATH),)
-override LOCAL_SAI_DEBS_PATH := $(patsubst %/,%,$(strip $(LOCAL_SAI_DEBS_PATH)))
-endif
-
-ifneq ($(LOCAL_SAI_DEBS_PATH),)
-    DOCKER_RUN += -v "$(LOCAL_SAI_DEBS_PATH):/sai_libs"
-endif
-
 # If SONIC_CONFIG_NATIVE_DOCKERD_SHARED is enabled, force
 # SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD enabled as well.
 ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
@@ -218,7 +216,6 @@ ifneq (,$(filter $(CONFIGURED_ARCH), armhf arm64))
     DOCKER_RUN += -v /var/run/march/docker.sock:/var/run/docker.sock
     DOCKER_RUN += -v /var/run/march/docker.pid:/var/run/docker.pid
     DOCKER_RUN += -v /var/run/march/docker:/var/run/docker
-    DOCKER_RUN += -v /var/lib/march/docker:/var/lib/docker
     SONIC_USERFACL_DOCKERD_FOR_MUTLIARCH := setfacl -m user:$(USER):rw /var/run/march/docker.sock
 
     #Override Native config to prevent docker service
@@ -238,8 +235,16 @@ ifneq (,$(filter $(CONFIGURED_ARCH), armhf arm64))
 
 endif
 
+DGRP=$(shell grep docker: /etc/group    | sed -e 's/:[^:]*:/ /' -e 's/:/ /g'|awk '{print $$2}')
+$(warning DGRP==!${DGRP}!)
+ifeq (${DGRP},)
+DGRP=$(shell ypcat group | grep docker: | sed -e 's/:[^:]*:/ /' -e 's/:/ /g'|awk '{print $$2}')
+endif
+$(warning DGRP==!${DGRP}!)
+
 DOCKER_BASE_BUILD = docker build --no-cache \
                     -t $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) \
+                    --build-arg DGRP=${DGRP} \
                     --build-arg http_proxy=$(http_proxy) \
                     --build-arg https_proxy=$(https_proxy) \
                     --build-arg debian_archive_mirror=$(DEBIAN_ARCHIVE_MIRROR) \
@@ -256,6 +261,12 @@ DOCKER_BUILD = docker build --no-cache \
                -f $(SLAVE_DIR)/Dockerfile.user \
                $(SLAVE_DIR)
 
+DOCKER_IBUILD = docker build --no-cache \
+               --build-arg slave_tag_ref=$(SLAVE_TAG) \
+               --build-arg slave_image=$(SLAVE_IMAGE) \
+               -t $(IBUILD_IMAGE):$(IBUILD_TAG) \
+               -f $(SLAVE_DIR)/Dockerfile.vfs\
+               $(SLAVE_DIR)
 
 DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL = \
                         docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null ||   \
@@ -319,7 +330,26 @@ DOCKER_BUILD_PROTECTED = echo "Start time: "`date`; \
 							 fi; \
                          fi
 
-SONIC_BUILD_INSTRUCTION :=  make \
+DOCKER_IBUILD_PROTECTED = echo "Start time: "`date`; \
+                         echo "Attempting to acquire user image lock (waiting up to $(USER_IMAGE_LOCK_TIMEOUT_SECS) seconds)..."; \
+                         [ -d $(LOCK_DIR) ] || (mkdir -p $(LOCK_DIR) && chmod 0777 $(LOCK_DIR)); \
+                         touch $(USER_IMAGE_LOCK_FILE_NAME) && \
+                         exec {USER_IMAGE_LOCK_FD}<$(USER_IMAGE_LOCK_FILE_NAME) ; \
+                         if ! flock -x -w $(USER_IMAGE_LOCK_TIMEOUT_SECS) $${USER_IMAGE_LOCK_FD}; then  \
+                             echo "ERROR: Could not acquire user image lock. Try resubmitting your build."; \
+                             exit 1; \
+                         else \
+                             echo "User image lock acquired. Continuing..."; \
+                             $(DOCKER_IBUILD); \
+                             docker_rc=$$?; \
+                             eval exec "$${USER_IMAGE_LOCK_FD}<&-"; \
+								  echo "[ Warning ] Docker exit code : $${docker_rc}"; \
+								  if [ $${docker_rc} -ne 0 ]; then \
+								  	exit $${docker_rc}; \
+							   	  fi; \
+                         fi
+
+SONIC_BUILD_INSTRUCTION := ${MAKE} \
                            -f slave.mk \
                            BLDENV=$(BLDENV) \
                            PLATFORM=$(PLATFORM) \
@@ -360,8 +390,8 @@ SONIC_BUILD_INSTRUCTION :=  make \
                            DOCKER_LOCKFILE_SAVE=$(DOCKER_LOCKFILE_SAVE) \
                            SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD=$(SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD) \
                            SONIC_CONFIG_NATIVE_DOCKERD_SHARED=$(SONIC_CONFIG_NATIVE_DOCKERD_SHARED) \
-                           SONIC_ENABLE_SYSTEM_TELEMETRY=$(ENABLE_SYSTEM_TELEMETRY) \
                            LOCAL_SAI_DEBS_PATH=$(LOCAL_SAI_DEBS_PATH) \
+                           SONIC_ENABLE_SYSTEM_TELEMETRY=$(ENABLE_SYSTEM_TELEMETRY) \
                            EXTRA_JESSIE_TARGETS=$(EXTRA_JESSIE_TARGETS) \
                            $(SONIC_OVERRIDE_BUILD_VARS)
 
@@ -389,42 +419,82 @@ ifneq ($(BLDENV), )
 	@$(DOCKER_SERVICE_DOCKERFS_CHECK)
 endif
 endif
-	@$(OVERLAY_MODULE_CHECK)
-	@$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
-	@docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
+	$(OVERLAY_MODULE_CHECK)
+	$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
+	docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) not found. Building... ; \
 	    $(DOCKER_BASE_BUILD_PROTECTED) ; } || exit 1
-	@docker inspect --type image $(SLAVE_IMAGE):$(SLAVE_TAG) &> /dev/null || \
+	docker inspect --type image $(SLAVE_IMAGE):$(SLAVE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_IMAGE):$(SLAVE_TAG) not found. Building... ; \
 	    $(DOCKER_BUILD_PROTECTED) ; } || exit 1
+	docker inspect --type image $(IBUILD_IMAGE):$(IBUILD_TAG)&> /dev/null || \
+	    { echo Image $(IBUILD_IMAGE):$(IBUILD_TAG) not found. Building... ; \
+	    $(DOCKER_IBUILD_PROTECTED) ; } || exit 1
+	docker ps
+	env
+	echo "KEEP_SLAVE_ON=!$(KEEP_SLAVE_ON)!"
+	rm -f target/debs/*/*.deb-install
 ifeq "$(KEEP_SLAVE_ON)" "yes"
     ifdef SOURCE_FOLDER
-		@$(DOCKER_RUN) -v $(SOURCE_FOLDER):/var/$(USER)/src $(SLAVE_IMAGE):$(SLAVE_TAG) bash -c "$(SONIC_BUILD_INSTRUCTION) $@; /bin/bash"
+		$(DOCKER_RUN) -v $(SOURCE_FOLDER):/var/$(USER)/src $(SLAVE_IMAGE):$(SLAVE_TAG) bash -c "$(SONIC_BUILD_INSTRUCTION) $@; /bin/bash"
     else
-		@$(DOCKER_RUN) $(SLAVE_IMAGE):$(SLAVE_TAG) bash -c "$(SONIC_BUILD_INSTRUCTION) $@; /bin/bash"
+		$(DOCKER_RUN) $(SLAVE_IMAGE):$(SLAVE_TAG) bash -c "$(SONIC_BUILD_INSTRUCTION) $@; /bin/bash"
     endif
 else
-	@$(DOCKER_RUN) $(SLAVE_IMAGE):$(SLAVE_TAG) $(SONIC_BUILD_INSTRUCTION) $@
+	$(DOCKER_RUN) $(SLAVE_IMAGE):$(SLAVE_TAG) $(SONIC_BUILD_INSTRUCTION) $@
+endif
+
+target/sonic-broadcom.bin::
+	echo "!!!USING VFS for $@"
+	$(OVERLAY_MODULE_CHECK)
+	$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
+	docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
+	    { echo Image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) not found. Building... ; \
+	    $(DOCKER_BASE_BUILD_PROTECTED) ; } || exit 1
+	docker inspect --type image $(SLAVE_IMAGE):$(SLAVE_TAG) &> /dev/null || \
+	    { echo Image $(SLAVE_IMAGE):$(SLAVE_TAG) not found. Building... ; \
+	    $(DOCKER_BUILD_PROTECTED) ; } || exit 1
+	docker inspect --type image $(IBUILD_IMAGE):$(IBUILD_TAG)&> /dev/null || \
+	    { echo Image $(IBUILD_IMAGE):$(IBUILD_TAG) not found. Building... ; \
+	    $(DOCKER_IBUILD_PROTECTED) ; } || exit 1
+	docker ps
+	env
+	echo "GZ/BIN: KEEP_SLAVE_ON=!$(KEEP_SLAVE_ON)!"
+	rm -f target/debs/*/*.deb-install
+ifeq "$(KEEP_SLAVE_ON)" "yes"
+    ifdef SOURCE_FOLDER
+		$(DOCKER_RUN) -v $(SOURCE_FOLDER):/var/$(USER)/src $(IBUILD_IMAGE):$(IBUILD_TAG) bash -c "$(SONIC_BUILD_INSTRUCTION) $@; /bin/bash"
+    else
+		$(DOCKER_RUN) $(IBUILD_IMAGE):$(IBUILD_TAG) bash -c "$(SONIC_BUILD_INSTRUCTION) $@; /bin/bash"
+    endif
+else
+	$(DOCKER_RUN) $(IBUILD_IMAGE):$(IBUILD_TAG) $(SONIC_BUILD_INSTRUCTION) $@
 endif
 
 docker-cleanup:
 	$(docker-image-cleanup)
 
 sonic-slave-build :
-	@$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
-	@$(DOCKER_BASE_BUILD_PROTECTED) || exit 1
-	@$(DOCKER_BUILD_PROTECTED) || exit 1
+	$(OVERLAY_MODULE_CHECK)
+	$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
+	$(DOCKER_BASE_BUILD_PROTECTED) || exit 1
+	$(DOCKER_BUILD_PROTECTED) || exit 1
+	$(DOCKER_IBUILD_PROTECTED) || exit 1
 
 sonic-slave-bash :
-	@$(OVERLAY_MODULE_CHECK)
-	@$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
-	@docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
+	$(OVERLAY_MODULE_CHECK)
+	$(DOCKER_BASE_BUILD_PROTECTED_REGISTRY_PULL)
+	docker inspect --type image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) not found. Building... ; \
 	    $(DOCKER_BASE_BUILD_PROTECTED) ; } || exit 1
-	@docker inspect --type image $(SLAVE_IMAGE):$(SLAVE_TAG) &> /dev/null || \
+	docker inspect --type image $(SLAVE_IMAGE):$(SLAVE_TAG) &> /dev/null || \
 	    { echo Image $(SLAVE_IMAGE):$(SLAVE_TAG) not found. Building... ; \
 	    $(DOCKER_BUILD_PROTECTED) ; } || exit 1
-	@$(DOCKER_RUN) -t $(SLAVE_IMAGE):$(SLAVE_TAG) bash
+	docker inspect --type image $(IBUILD_IMAGE):$(IBUILD_TAG)&> /dev/null || \
+	    { echo Image $(IBUILD_IMAGE):$(IBUILD_TAG) not found. Building... ; \
+	    $(DOCKER_IBUILD_PROTECTED) ; } || exit 1
+	rm -f target/debs/*/*.deb-install
+	$(DOCKER_RUN) -t $(SLAVE_IMAGE):$(SLAVE_TAG) bash
 
 showtag:
 	@echo $(SLAVE_IMAGE):$(SLAVE_TAG)
@@ -443,9 +513,8 @@ initpde:
 	@git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
 
 init :
-	@git submodule update --init --recursive
-	@git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
-	@git submodule foreach --recursive 'git checkout dell_sonic || git checkout master'
+	git submodule update --init --recursive
+	git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
 
 .ONESHELL : reset
 reset :

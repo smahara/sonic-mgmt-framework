@@ -25,6 +25,7 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	git init
 	git add -f *
 	git commit -m "unmodified libnl source"
+	mkdir -p debian/build/main debian/build/udeb
 
 	# Apply patches
 	stg init

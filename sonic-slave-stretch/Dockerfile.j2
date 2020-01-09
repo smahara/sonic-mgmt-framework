@@ -8,29 +8,26 @@ FROM debian:stretch
 
 ARG debian_archive_mirror
 ARG debian_org_mirror
-
+ARG DGRP
 
 MAINTAINER gulv@microsoft.com
 
-
-RUN     test "x${debian_archive_mirror}" != "x" && test "x${debian_org_mirror}" != "x"  && \
+RUN     test "${debian_archive_mirror}" && test "${debian_org_mirror}" && \
         echo "deb http://${debian_org_mirror}/debian stretch main " > /etc/apt/sources.mirror.list && \
-        echo "deb http://${debian_org_mirror}/debian-security stretch/updates main " >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_org_mirror}/debian_security stretch/updates main " >> /etc/apt/sources.mirror.list && \
         echo "deb http://${debian_org_mirror}/debian stretch-updates main" >> /etc/apt/sources.mirror.list && \
         echo "deb http://${debian_archive_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.mirror.list && \
         echo "deb-src http://${debian_archive_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.mirror.list && \
-        echo "deb http://${debian_archive_mirror}/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.mirror.list && \
-        echo "deb-src http://${debian_archive_mirror}/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.mirror.list && \
+        echo "deb http://${debian_archive_mirror}/debian_security/ stretch/updates main contrib non-free" >> /etc/apt/sources.mirror.list && \
         echo "deb http://${debian_archive_mirror}/debian stretch-backports main" >> /etc/apt/sources.mirror.list && \
         cat /etc/apt/sources.list >> /etc/apt/sources.mirror.list && \
         cat /etc/apt/sources.mirror.list > /etc/apt/sources.list || echo
 
 
-RUN echo "deb [arch=amd64] http://debian-archive.trafficmanager.net/debian/ stretch main contrib non-free" >> /etc/apt/sources.list && \
-        echo "deb-src [arch=amd64] http://debian-archive.trafficmanager.net/debian/ stretch main contrib non-free" >> /etc/apt/sources.list && \
-        echo "deb [arch=amd64] http://debian-archive.trafficmanager.net/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
-        echo "deb-src [arch=amd64] http://debian-archive.trafficmanager.net/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
-        echo "deb [arch=amd64] http://debian-archive.trafficmanager.net/debian stretch-backports main" >> /etc/apt/sources.list
+RUN echo "deb  http://${debian_org_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.list && \
+        echo "deb-src http://${debian_org_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.list && \
+        echo "deb http://${debian_org_mirror}/debian-security/ stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
+        echo "deb http://${debian_org_mirror}/debian stretch-backports main" >> /etc/apt/sources.list
 
 {%- if CONFIGURED_ARCH == "armhf" %}
 RUN echo "deb [arch=armhf] http://deb.debian.org/debian stretch main contrib non-free" > /etc/apt/sources.list && \
@@ -50,10 +47,33 @@ RUN echo "deb [arch=arm64] http://deb.debian.org/debian stretch main contrib non
         echo 'deb [arch=arm64] http://ftp.debian.org/debian stretch-backports main' >> /etc/apt/sources.list
 {%- endif %}
 
+RUN cat /etc/apt/sources.list
+
 ## Make apt-get non-interactive
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+# Install docker engine 17.03.2~ce-0 inside docker and enable experimental feature
+RUN apt-get update || true
+RUN apt-get install -y \
+           apt-transport-https \
+           ca-certificates \
+           curl \
+           gnupg2 \
+           sudo \
+           software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+RUN add-apt-repository \
+           "deb [arch={{ CONFIGURED_ARCH }}] https://download.docker.com/linux/debian \
+           $(lsb_release -cs) \
+           stable"
+{%- if CONFIGURED_ARCH == "amd64" %}
+RUN apt-get update || true
+RUN apt-get install -y docker-ce || apt-get install -y docker-ce=5:18.09.5~3-0~debian-stretch || apt-get install -y docker-ce=5:19.03.5~3-0~debian-stretch
+{%- else %}
+RUN apt-get install -y docker-ce=18.06.3~ce~3-0~debian
+{%- endif %}
+
+RUN apt-get install -y \
         apt-utils \
         default-jre-headless \
         openssh-server \
@@ -64,7 +84,6 @@ RUN apt-get update && apt-get install -y \
         build-essential \
         libtool \
         lintian \
-        sudo \
         dh-make \
         dh-exec \
         kmod \
@@ -344,13 +363,13 @@ RUN apt-get -y build-dep linux
 # For gobgp and telemetry build
 RUN export VERSION=1.11.5 \
 {%- if CONFIGURED_ARCH == "armhf" %}
- && wget https://storage.googleapis.com/golang/go$VERSION.linux-armv6l.tar.gz \
+ && wget --no-verbose https://storage.googleapis.com/golang/go$VERSION.linux-armv6l.tar.gz \
  && tar -C /usr/local -xzf go$VERSION.linux-armv6l.tar.gz \
 {%- elif CONFIGURED_ARCH == "arm64" %}
- && wget https://storage.googleapis.com/golang/go$VERSION.linux-arm64.tar.gz \
+ && wget --no-verbose https://storage.googleapis.com/golang/go$VERSION.linux-arm64.tar.gz \
  && tar -C /usr/local -xzf go$VERSION.linux-arm64.tar.gz \
 {%- else %}
- && wget https://storage.googleapis.com/golang/go$VERSION.linux-amd64.tar.gz \
+ && wget --no-verbose https://storage.googleapis.com/golang/go$VERSION.linux-amd64.tar.gz \
  && tar -C /usr/local -xzf go$VERSION.linux-amd64.tar.gz \
 {%- endif %}
  && echo 'export GOROOT=/usr/local/go' >> /etc/bash.bashrc \
@@ -416,23 +435,8 @@ EXPOSE 22
 RUN git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /usr/share/depot_tools
 ENV PATH /usr/share/depot_tools:$PATH
 
-# Install docker engine 17.03.2~ce-0 inside docker and enable experimental feature
-RUN apt-get update
-RUN apt-get install -y \
-           apt-transport-https \
-           ca-certificates \
-           curl \
-           gnupg2 \
-           software-properties-common
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-RUN add-apt-repository \
-           "deb [arch={{ CONFIGURED_ARCH }}] https://download.docker.com/linux/debian \
-           $(lsb_release -cs) \
-           stable"
-RUN apt-get update
-{%- if CONFIGURED_ARCH == "amd64" %}
-RUN apt-get install -y docker-ce=5:18.09.5~3-0~debian-stretch
-{%- else %}
-RUN apt-get install -y docker-ce=18.06.3~ce~3-0~debian
-{%- endif %}
-RUN echo "DOCKER_OPTS=\"--experimental --storage-driver=vfs\"" >> /etc/default/docker
+#RUN apt-get -y autoremove || true
+
+# Use host docker group
+RUN groupmod -o -g ${DGRP} docker
+RUN sed -i -e "/docker/s/:999:/:${DGRP}:/" /etc/group

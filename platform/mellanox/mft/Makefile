@@ -15,11 +15,11 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	tar xzf $(MFT_TGZ)
 	pushd $(MFT_NAME)/SDEBS
 
-	# put a lock here because dpkg does not allow installing packages in parallel
-	while true; do
-	if mkdir $(DEST)/dpkg_lock &> /dev/null; then
-	{ sudo dpkg -i $(SRC_DEB) && rm -d $(DEST)/dpkg_lock && break; } || { rm -d $(DEST)/dpkg_lock && exit 1 ; }
-	fi
+	i=9
+	while [ i -gt 0 ]; do
+		sudo dpkg -i $(SRC_DEB) || sudo apt-get install -f && break
+		sleep 7	# a prime number
+		i=`expr $i + 1`
 	done
 
 	tar xvf `sudo dkms mkdriverdisk kernel-mft-dkms/$(MFT_VERSION) -a all -d ubuntu -k $(KVERSION) --media tar | grep "Disk image location" | cut -d':' -f2`
