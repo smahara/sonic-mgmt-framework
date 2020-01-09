@@ -56,8 +56,8 @@ sonic_get_version() {
         echo "${BUILD_VERSION}"
         return
     fi
-    local describe=$(git describe --tags)
-    local latest_tag=$(git describe --tags --abbrev=0)
+    local describe=$(git describe --always --tags)
+    local latest_tag=$(git describe --always --tags --abbrev=0)
     local branch_name=$(git rev-parse --abbrev-ref HEAD)
     local build_product=${BUILD_PRODUCT:+-${BUILD_PRODUCT}}
     if [ -n "$(git status --untracked-files=no -s --ignore-submodules)" ]; then
