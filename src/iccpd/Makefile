@@ -21,7 +21,7 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	cp iccpd $(DEB_PATH)/usr/bin/iccpd
 	cp src/mclagdctl/mclagdctl $(DEB_PATH)/usr/bin/mclagdctl
 	#Adjust permissions of DEBIAN control directory
-	chmod 0775 $(DEB_PATH)/DEBIAN
+	chmod 00775 $(DEB_PATH)/DEBIAN
 	chmod +x $(DEB_PATH)/usr/bin/iccpd
 	chmod +x $(DEB_PATH)/usr/bin/mclagdctl
 	md5sum $(DEB_PATH)/usr/bin/iccpd > $(DEB_PATH)/DEBIAN/md5sums
