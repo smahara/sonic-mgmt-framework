@@ -87,6 +87,10 @@ int mlacp_fsm_update_Agg_conf(struct CSM* csm, mLACPAggConfigTLV* portconf)
     struct PeerInterface* pif = NULL;
     uint8_t po_active;
     uint8_t new_create = 0;
+    struct LocalInterface *lif;
+
+    if (!csm)
+        return MCLAG_ERROR;
 
     ICCPD_LOG_DEBUG("ICCP_FSM", "RX aggrport_config: name %s, po_id %d, flag 0x%x, MAC %s",
         portconf->agg_name, ntohs(portconf->agg_id), portconf->flags,
@@ -137,6 +141,17 @@ int mlacp_fsm_update_Agg_conf(struct CSM* csm, mLACPAggConfigTLV* portconf)
     update_peerlink_isolate_from_pif(csm, pif, po_active, new_create);
     pif->po_active = po_active;
 
+    /* When peer MLAG interface does not exist on active, standby does not set
+     * its MLAG interface MAC address to the active system MAC address.
+     * Peer MLAG interface is added now, update the standby MLAG interface
+     * MAC address
+     */
+    if (new_create && (csm->role_type == STP_ROLE_STANDBY))
+    {
+        lif = local_if_find_by_name(portconf->agg_name);
+        if (lif)
+            update_if_ipmac_on_standby(lif);
+    }
     return 0;
 }
 

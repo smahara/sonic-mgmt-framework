@@ -574,15 +574,26 @@ static int iccp_netlink_set_portchannel_iff_flag(
     int rv, ret_rv = 0;
     char* token;
     struct LocalInterface* member_if;
+    char *tmp_member_buf = NULL;
 
     if (!lif_po)
         return MCLAG_ERROR;
 
-    ICCPD_LOG_NOTICE(__FUNCTION__, "Bring %s %s members",
-       is_iff_up ? "up" : "down", lif_po->name);
-
+    tmp_member_buf = strdup(lif_po->portchannel_member_buf);
+    if (!tmp_member_buf)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Fail to allocate memory to bring %s %s",
+           is_iff_up ? "up" : "down", lif_po->name);
+        return MCLAG_ERROR;
+    }
+    else
+    {
+        ICCPD_LOG_NOTICE(__FUNCTION__, "Bring %s %s, members %s",
+            is_iff_up ? "up" : "down", lif_po->name,
+            lif_po->portchannel_member_buf);
+    }
     /* Port-channel members are stored as comma separated strings */
-    token = strtok(lif_po->portchannel_member_buf, ",");
+    token = strtok(tmp_member_buf, ",");
     while (token != NULL)
     {
         member_if = local_if_find_by_name(token);
@@ -608,6 +619,8 @@ static int iccp_netlink_set_portchannel_iff_flag(
         }
         token = strtok(NULL, ",");
     }
+    if (tmp_member_buf)
+        free(tmp_member_buf);
     return ret_rv;
 }
 
@@ -621,6 +634,7 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
     struct LocalInterface* lif_Bri;
     char macaddr[64];
     int ret = 0;
+    struct PeerInterface* pif = NULL;
 
     if (!csm)
         return;
@@ -636,8 +650,10 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
     if (memcmp(MLACP(csm).remote_system.system_id, null_mac, ETHER_ADDR_LEN) == 0)
         return;
 
-    /*Set new mac*/
-    if (memcmp( lif_po->mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN) != 0)
+    pif = peer_if_find_by_name(csm, lif_po->name);
+    
+    /*Set new mac only if remote MLAG interface also exists */
+    if (pif && (memcmp( lif_po->mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN) != 0))
     {
         /*Backup old sysmac*/
         memcpy(lif_po->mac_addr_ori, lif_po->mac_addr, ETHER_ADDR_LEN);
@@ -648,6 +664,13 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
                         lif_po->name,  lif_po->mac_addr[0], lif_po->mac_addr[1], lif_po->mac_addr[2], lif_po->mac_addr[3], lif_po->mac_addr[4], lif_po->mac_addr[5],
                         MLACP(csm).remote_system.system_id[0], MLACP(csm).remote_system.system_id[1], MLACP(csm).remote_system.system_id[2], MLACP(csm).remote_system.system_id[3], MLACP(csm).remote_system.system_id[4], MLACP(csm).remote_system.system_id[5]);
 
+        /* Shutdown the LAG members first before changing the system ID to force
+         * LAG to go down. It helps trigger Teamd to send new LACP packet with
+         * new system ID when LAG is enabled again. Otherwise, it can take up
+         * to 30 seconds for Teamd to send the updated LACP packet
+         */
+        iccp_netlink_set_portchannel_iff_flag(lif_po, false, 3);
+
         ret =  iccp_netlink_if_hwaddr_set(lif_po->ifindex,  MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
         if (ret != 0)
         {
@@ -655,8 +678,12 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
         }
 
         /* Refresh link local address according the new MAC */
+        /* Move the shutdown call before setting MAC address. Setting must be done
+         * on all members of the port-channel for it to take effect right away
         iccp_netlink_if_shutdown_set(lif_po->ifindex);
         iccp_netlink_if_startup_set(lif_po->ifindex);
+        */
+        iccp_netlink_set_portchannel_iff_flag(lif_po, true, 4);
     }
 
     /*Set portchannel ip mac */
