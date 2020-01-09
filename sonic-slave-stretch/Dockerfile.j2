@@ -297,6 +297,7 @@ RUN apt-get update && apt-get install -y \
         bash-completion \
 # For mgmt-framework build
         libdbus-c++-dev \
+        libcurl3-gnutls \
 {%- if CONFIGURED_ARCH == "amd64" %}
 # For sonic vs image build
         dosfstools \

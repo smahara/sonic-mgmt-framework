@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Disallow CLI for the root user, since we don't have auth certs for root
+if [[ "$(id -u)" == 0 ]]
+then
+    echo "FATAL: root cannot launch CLI" >&2
+    exit 1
+fi
+
 if [[ "$1" =~ "prompt=" ]]
 then
    SYSTEM_NAME=`echo $1 | cut -d"=" -f2`
