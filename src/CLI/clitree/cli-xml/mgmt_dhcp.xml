@@ -49,7 +49,7 @@ renew dhcp-lease interface management <id>
                         </PARAM>
                  </PARAM>
             <ACTION>
-                python $SONIC_CLI_ROOT/sonic-cli-mgmt-dhcp.py rpc_sonic_mgmt_interface_renew_dhcp_lease ${mgmt-if-id}&#xA;
+                python $SONIC_CLI_ROOT/sonic-cli-mgmt-dhcp.py rpc_sonic_mgmt_interface_renew_dhcp_lease eth${mgmt-if-id}&#xA;
             </ACTION>
         </COMMAND>
     </VIEW>

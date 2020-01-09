@@ -8,41 +8,38 @@ class RENEW_DHCP_LEASE(host_service.HostModule):
     """DBus endpoint that executes RENEW_DHCP_LEASE related commands """
 
     @staticmethod
-    def _run_command(commands, options):
+    def _run_command(options):
         """ Run renew dhcp lease command """
         if len(options) < 2:
             print("RENEW_DHCP_LEASE Invalid options, {}".format(options))
             return 1, "Invalid options"
 
         ifName = options[0]
-        version = "-4"
-        file_ext = "4"
+        version = ""
+        file_ext = ""
+        cmd_opt = ""
         output = ""
+        rc = 0
         try:
             for x in options[1:]:
-                if x == "ipv4":
-                    version = "-4"
-                    file_ext = "4"
-
-                elif x == "ipv6":
+                if x == "ipv6":
                     version = "-6"
                     file_ext = "6"
-                else:
-                    continue
+                    cmd_opt = "-D LL"
 
                 cmd = "/sbin/dhclient {} -r {}".format(version, ifName)
                 print("RENEW_DHCP_LEASE - cmd {}".format(cmd))
-                output = subprocess.check_output(cmd)
+                output = subprocess.check_call(cmd, shell=True)
                 print('RENEW_DHCP_LEASE release Output -> ', output)
 
                 cmd = "[ -f /var/run/dhclient{}.{}.pid ] && kill `cat /var/run/dhclient{}.{}.pid` && rm -f /var/run/dhclient{}.{}.pid".format(file_ext, ifName, file_ext, ifName, file_ext, ifName)
                 print("RENEW_DHCP_LEASE - cmd {}".format(cmd))
-                output = subprocess.check_output(cmd)
+                output = subprocess.check_call(cmd, shell=True)
                 print('RENEW_DHCP_LEASE release Output -> ', output)
 
-                cmd = "/sbin/dhclient {} -pf /run/dhclient{}.{}.pid -lf /var/lib/dhcp/dhclient{}.{}.leases {} -nw -D LL".format(version, file_ext, ifName, file_ext, ifName, ifName)
+                cmd = "/sbin/dhclient {} -pf /run/dhclient{}.{}.pid -lf /var/lib/dhcp/dhclient{}.{}.leases {} -nw {} ".format(version, file_ext, ifName, file_ext, ifName, ifName, cmd_opt)
                 print("RENEW_DHCP_LEASE - cmd {}".format(cmd))
-                output = subprocess.check_output(cmd)
+                output = subprocess.check_call(cmd, shell=True)
                 print('RENEW_DHCP_LEASE Output -> ', output)
 
         except subprocess.CalledProcessError as err:

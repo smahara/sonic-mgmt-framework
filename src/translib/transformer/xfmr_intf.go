@@ -266,7 +266,7 @@ var rpc_renew_dhcp_lease RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) 
         Output struct {
             Status int32 `json:"status"`
             Status_detail string`json:"status-detail"`
-        } `json:"sonic-interface:output"`
+        } `json:"sonic-mgmt-interface:output"`
     }
 
     result.Output.Status = 1
@@ -321,7 +321,7 @@ var rpc_renew_dhcp_lease RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) 
     log.Info("rpc_renew_dhcp_lease: Command:", options)
 
     query_result := hostQuery("renew_dhcp_lease.action", options)
-
+    log.Info("rpc_renew_dhcp_lease ", query_result)
     if query_result.Err != nil {
         result.Output.Status_detail = "ERROR:Internal SONiC Hostservice communication failure."
     } else if query_result.Body[0].(int32) != 0 {
