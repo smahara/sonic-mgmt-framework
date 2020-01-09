@@ -591,13 +591,13 @@ def hdl_send_com(daemon, cmd_str, op, st_idx, args, data):
     if len(args) < 2:
         return None
     cmd_list = []
-    cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'both'), no = CommandArgument(daemon, False)))
-    if op == CachedDataWithOp.OP_DELETE or args[1] == 'both':
-        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'both'), no = CommandArgument(daemon, True)))
-    elif args[1] == 'standard':
-        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'standard'), no = CommandArgument(daemon, True)))
-    elif args[1] == 'extended':
-        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'extended'), no = CommandArgument(daemon, True)))
+    cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, 'all'), no = CommandArgument(daemon, False)))
+    if op == CachedDataWithOp.OP_DELETE:
+        com_type = 'all'
+    else:
+        com_type = args[1]
+    if com_type != 'none':
+        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, args[0]), CommandArgument(daemon, True, com_type), no = CommandArgument(daemon, True)))
     return cmd_list
 
 def hdl_capa_orf_pfxlist(daemon, cmd_str, op, st_idx, args, data):
@@ -703,6 +703,27 @@ def hdl_attr_unchanged(daemon, cmd_str, op, st_idx, args, data):
         if upd_cmd_list is None:
             return None
         cmd_list += upd_cmd_list
+    return cmd_list
+
+def hdl_confed_peers(daemon, cmd_str, op, st_idx, args, data):
+    del_list = []
+    add_list = []
+    if op == CachedDataWithOp.OP_DELETE:
+        del_list = list(daemon.upd_confed_peers)
+        daemon.upd_confed_peers.clear()
+    else:
+        for peer in args[0]:
+            if peer not in daemon.upd_confed_peers:
+                add_list.append(peer)
+            else:
+                daemon.upd_confed_peers.remove(peer)
+        del_list = list(daemon.upd_confed_peers)
+        daemon.upd_confed_peers = set(args[0])
+    cmd_list = []
+    if len(del_list) > 0:
+        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, del_list), no = CommandArgument(daemon, False)))
+    if len(add_list) > 0:
+        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, add_list), no = CommandArgument(daemon, True)))
     return cmd_list
 
 class ExtConfigDBConnector(ConfigDBConnector):
@@ -905,7 +926,10 @@ class BGPConfigDaemon:
                       ('default_shutdown',                              '{no:no-prefix}bgp default shutdown', ['true', 'false']),
                       ('default_subgroup_pkt_queue_max',                '{no:no-prefix}bgp default subgroup-pkt-queue-max {}'),
                       (['max_med_time', '+max_med_val'],                '{no:no-prefix}bgp max-med on-startup {} {}'),
-                      (['max_delay', '+establish_wait'],                '{no:no-prefix}update-delay {} {}')
+                      (['max_delay', '+establish_wait'],                '{no:no-prefix}update-delay {} {}'),
+                      ('confed_id',                                     '{no:no-prefix}bgp confederation identifier {}'),
+                      ('confed_peers',                                  '{no:no-prefix}bgp confederation peers {}', hdl_confed_peers),
+                      (['keepalive', 'holdtime'],                       '{no:no-prefix}timers bgp {} {}')
     ]
 
     global_af_key_map = [(['ebgp_route_distance',
@@ -1067,11 +1091,15 @@ class BGPConfigDaemon:
             self.metadata_asn = None
         # VRF ==> local_as
         self.bgp_asn = {}
+        # VRF ==> confederation peer list
+        self.bgp_confed_peers = {}
         glb_table = self.config_db.get_table('BGP_GLOBALS')
         for vrf, entry in glb_table.items():
             if 'local_asn' in entry:
                 self.bgp_asn[vrf] = entry['local_asn']
                 syslog.syslog(syslog.LOG_DEBUG, 'Init Config DB Data: VRF %s Local_ASN %s' % (vrf, self.bgp_asn[vrf]))
+            if 'confed_peers' in entry:
+                self.bgp_confed_peers[vrf] = set(entry['confed_peers'])
         # VRF ==> grp_name ==> peer_group
         self.bgp_peer_group = {}
         # VRF ==> set of interface neighbor
@@ -1156,7 +1184,7 @@ class BGPConfigDaemon:
 
         self.table_handler_list = [
             ('DEVICE_METADATA', self.metadata_handler),
-            ('BGP_GLOBALS', self.bgp_table_handler_common),
+            ('BGP_GLOBALS', self.bgp_global_handler),
             ('BGP_GLOBALS_AF', self.bgp_af_handler),
             ('PREFIX_SET', self.bgp_table_handler_common),
             ('PREFIX', self.bgp_table_handler_common),
@@ -1169,8 +1197,6 @@ class BGPConfigDaemon:
             ('BGP_NEIGHBOR_AF', self.bgp_table_handler_common),
             ('BGP_GLOBALS_LISTEN_PREFIX', self.bgp_table_handler_common),
             ('BFD_PEER', self.bfd_handler),
-            ('PREFIX_SET', self.bgp_table_handler_common),
-            ('PREFIX', self.bgp_table_handler_common),
             ('NEIGHBOR_SET', self.bgp_table_handler_common),
             ('TAG_SET', self.bgp_table_handler_common),
             ('AS_PATH_SET', self.bgp_table_handler_common),
@@ -1413,6 +1439,8 @@ class BGPConfigDaemon:
                                 syslog.syslog(syslog.LOG_ERR, 'failed to set local_asn %s to VRF %s' % (dval.data, vrf))
                         else:
                             dval.status = CachedDataWithOp.STAT_SUCC
+                    if 'confed_peers' in data:
+                        self.upd_confed_peers = copy.copy(self.bgp_confed_peers.get(vrf, set()))
                     local_asn = self.__get_vrf_asn(vrf)
                     if local_asn is None:
                         syslog.syslog(syslog.LOG_ERR, 'local ASN for VRF %s was not configured' % vrf)
@@ -1421,6 +1449,8 @@ class BGPConfigDaemon:
                     if not key_map.run_command(self, data, cmd_prefix):
                         syslog.syslog(syslog.LOG_ERR, 'failed running BGP global config command')
                         continue
+                    if 'confed_peers' in data:
+                        self.bgp_confed_peers[vrf] = copy.copy(self.upd_confed_peers)
                 else:
                     self.__delete_vrf_asn(vrf, data)
             elif table == 'BGP_GLOBALS_AF':
@@ -1815,6 +1845,9 @@ class BGPConfigDaemon:
         for table, key, data in upd_data_list:
             table_key = ExtConfigDBConnector.get_table_key(table, key)
             self.__update_cache_data(table_key, data)
+
+    def bgp_global_handler(self, table, key, data):
+        self.bgp_table_handler_common(table, key, data, [{'keepalive', 'holdtime'}])
 
     def bgp_af_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'ebgp_route_distance', 'ibgp_route_distance', 'local_route_distance'},
