@@ -94,7 +94,7 @@ class SNMPConfManager(object):
         """
         log_info("SNMP configuration changed. Updating snmpd.conf...")
         self.run_command("sonic-cfggen -d -y /etc/sonic/snmp.yml -t /usr/share/sonic/templates/snmpd.conf.j2 > /etc/snmp/snmpd.conf")
-        self.run_command("[ \"$(supervisorctl pid snmpd)\" != \"0\" ] && supervisorctl restart snmpd")
+        self.run_command("[ \"$(supervisorctl pid snmpd)\" != \"0\" ] && supervisorctl restart snmpd || true")
 
     def check_and_update_snmp_conf(self):
         with self.lock:

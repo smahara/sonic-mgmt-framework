@@ -1,0 +1,151 @@
+{
+  "SNMP_SERVER": {
+    "SYSTEM": {
+        "sysContact": "support@acme.com",
+        "sysLocation": "Rack1-Row-2",
+        "sysName": "testnode-1",
+        "traps": "enable"
+    }
+  },
+  "SNMP_SERVER_COMMUNITY": {
+    "private1": {
+        "group": " group1 "
+    },
+    "public3": {
+        "group": "None"
+    },
+    "public4": {
+        "group": ""
+    },
+    "private5": {
+    }
+  },
+  "SNMP_SERVER_GROUP": {
+    "Group1|Default|any|no-auth-no-priv": {
+        "readView": "view1",
+        "writeView": "View2",
+        "notifyView": "view3"
+    },
+    "Group2|Default|usm|auth-no-priv": {
+        "readView": "view4",
+        "writeView": "view5",
+        "notifyView": "None"
+    },
+    "Group3|Default|usm|auth-priv": {
+        "writeView": "None",
+        "notifyView": "view6"
+    },
+    "Group4|Default|v1|no-auth-no-priv": {
+        "readView": "view8",
+        "writeView": "None",
+        "notifyView": "view7"
+    },
+    "Group5|Default|v2c|no-auth-no-priv": {
+        "readView": "None"
+    },
+    "Group6|Default|v2c|no-auth-no-priv": {
+    }
+  },
+  "SNMP_SERVER_USER": {
+      "User1": {
+          "md5Key" : "01:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef",
+          "aesKey" : "02:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef"
+      },
+      "User2": {
+          "shaKey" : "03:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef",
+          "aesKey" : "04:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef"
+      },
+      "User3": {
+          "shaKey" : "05:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef",
+          "desKey" : "06:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef"
+      },
+      "User4": {
+          "md5Key" : "07:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef",
+          "desKey" : "01:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef"
+      },
+      "User5": {
+          "md5Key" : "08:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00",
+          "desKey" : "01:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef"
+      },
+      "User6": {
+          "md5Key" : "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00",
+          "desKey" : "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00",
+          "shaKey" : "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00",
+          "aesKey" : "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
+      },
+      "User7": {
+          "desKey" : "09:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef"
+      },
+      "User8": {
+          "shaKey" : "0a:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef"
+      },
+      "User9": {
+      }
+  },
+  "SNMP_SERVER_VIEW": {
+    "Default1": {
+        "exclude": [
+            "usmUser",
+            "1.3.6.1.6.3.16"
+        ],
+        "include": [
+            "iso",
+            "1.3.6.1.6.3.20"
+        ]
+    },
+    "Default2": {
+        "exclude": [
+        ],
+        "include": [
+            "iso"
+        ]
+    },
+    "Default3": {
+        "exclude": [
+        ],
+        "include": [
+        ]
+    },
+    "Default4": {
+        "exclude": [
+            "iso"
+        ],
+        "include": [
+        ]
+    }
+  },
+  "SNMP_SERVER_PARAMS": {
+    "1.2.3.4": {
+        "securityNameV1": "public"
+    },
+    "2002::10": {
+        "securityLevel": "auth-priv",
+        "user": "User1"
+    },
+    "3002::10": {
+        "securityNameV2": "private"
+    }
+  },
+  "SNMP_SERVER_TARGET": {
+    "1.2.3.4": {
+        "ip": "1.2.3.4",
+        "port": "162",
+        "retries": "3",
+        "tag": [
+            "trapNotify"
+        ],
+        "targetParams": "1.2.3.4",
+        "timeout": "1500"
+    },
+    "2002::10": {
+        "ip": "2002::10",
+        "port": "2100",
+        "retries": "4",
+        "tag": [
+            "informNotify"
+        ],
+        "targetParams": "2002::10",
+        "timeout": "600"
+    }
+  }
+}
