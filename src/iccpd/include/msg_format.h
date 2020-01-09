@@ -511,12 +511,13 @@ struct AppDisconnectCauseTLV
 /*syncd send msg type to iccpd*/
 typedef enum mclag_syncd_msg_type_e_
 {
-    MCLAG_SYNCD_MSG_TYPE_NONE             = 0,
-    MCLAG_SYNCD_MSG_TYPE_FDB_OPERATION    = 1,
-    MCLAG_SYNCD_MSG_TYPE_L2MC_OPERATION   = 2,
-    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_DOMAIN = 3,
-    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_IFACE  = 4,
-    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_UNIQUE_IP  = 5
+    MCLAG_SYNCD_MSG_TYPE_NONE                   = 0,
+    MCLAG_SYNCD_MSG_TYPE_FDB_OPERATION          = 1,
+    MCLAG_SYNCD_MSG_TYPE_L2MC_OPERATION         = 2,
+    MCLAG_SYNCD_MSG_TYPE_L2MC_MROUTER_OPERATION = 3,
+    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_DOMAIN       = 4,
+    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_IFACE        = 5,
+    MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_UNIQUE_IP    = 6
 }mclag_syncd_msg_type_e;
 
 typedef enum mclag_msg_type_e_
@@ -536,7 +537,8 @@ typedef enum mclag_msg_type_e_
     MCLAG_MSG_TYPE_SET_REMOTE_IF_STATE      = 13,
     MCLAG_MSG_TYPE_DEL_REMOTE_IF_INFO       = 14,
     MCLAG_MSG_TYPE_SET_L2MC                 = 15,
-    MCLAG_MSG_TYPE_PORT_MAC_LEARN_NLAPI     = 16
+    MCLAG_MSG_TYPE_PORT_MAC_LEARN_NLAPI     = 16,
+    MCLAG_MSG_TYPE_SET_L2MC_MROUTER         = 17
 }mclag_msg_type_e;
 
 
