@@ -5,7 +5,7 @@ Requisite=swss.service
 After=updategraph.service swss.service syncd.service
 Before=ntp-config.service
 StartLimitIntervalSec=1200
-StartLimitBurst=3
+StartLimitBurst=20
 
 [Service]
 ExecStartPre=/usr/bin/snmp_wait.sh
