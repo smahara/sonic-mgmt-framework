@@ -33,6 +33,11 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	# libevent installed, thus adding the below for SONiC
 	sed -i 's/--with-locfile=legacy/--with-locfile=legacy --enable-local-libevent/' debian/rules
 
+	# Fix the apparmor profile to avoid the following message
+	# "Failed name lookup - disconnected path"
+	# and go into learning mode.
+	sed -i 's/\/usr\/sbin\/ntpd {/\/usr\/sbin\/ntpd flags=(attach_disconnected complain) {/' debian/apparmor-profile
+
 	# Build source and Debian packages with the symbols
 	dpkg-buildpackage -rfakeroot -b -us -uc -j$(SONIC_CONFIG_MAKE_JOBS)
 
