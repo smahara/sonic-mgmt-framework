@@ -33,8 +33,14 @@ func init () {
     XlateFuncBind("YangToDb_lag_min_links_xfmr", YangToDb_lag_min_links_xfmr)
     XlateFuncBind("YangToDb_lag_fallback_xfmr", YangToDb_lag_fallback_xfmr)
     XlateFuncBind("DbToYang_intf_lag_state_xfmr", DbToYang_intf_lag_state_xfmr)
+    XlateFuncBind("YangToDb_lag_type_xfmr", YangToDb_lag_type_xfmr)
+    XlateFuncBind("DbToYang_lag_type_xfmr", DbToYang_lag_type_xfmr)
 }
 
+const (
+       LAG_TYPE           = "lag_type"
+       PORTCHANNEL_TABLE  = "PORTCHANNEL"
+)
 
 /* Validate whether LAG exists in DB */
 func validateLagExists(d *db.DB, lagTs *string, lagName *string) error {
@@ -303,5 +309,37 @@ func deleteLagIntfAndMembers(inParams *XfmrParams, lagName *string) error {
     log.Info("subOpMap: ", subOpMap)
     inParams.subOpDataMap[DELETE] = &subOpMap
     return nil
+}
+
+var LAG_TYPE_MAP = map[string]string{
+    strconv.FormatInt(int64(ocbinds.OpenconfigIfAggregate_AggregationType_LACP), 10): "false",
+    strconv.FormatInt(int64(ocbinds.OpenconfigIfAggregate_AggregationType_STATIC), 10): "true",
+}
+
+
+var YangToDb_lag_type_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
+    result := make(map[string]string)
+    var err error
+
+    if inParams.param == nil {
+        return result, err
+    }
+
+    t, _ := inParams.param.(ocbinds.E_OpenconfigIfAggregate_AggregationType)
+    log.Info("YangToDb_lag_type_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " type: ", t)
+    result["static"] = findInMap(LAG_TYPE_MAP, strconv.FormatInt(int64(t), 10))
+    return result, err
+
+}
+
+var DbToYang_lag_type_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
+    var err error
+    result := make(map[string]interface{})
+    data := (*inParams.dbDataMap)[inParams.curDb]
+    log.Info("DbToYang_lag_type_xfmr", data, inParams.ygRoot)
+    oc_action := findInMap(LAG_TYPE_MAP, data[PORTCHANNEL_TABLE][inParams.key].Field["static"])
+    n, err := strconv.ParseInt(oc_action, 10, 64)
+    result[LAG_TYPE] = ocbinds.E_OpenconfigIfAggregate_AggregationType(n).ΛMap()["E_OpenconfigIfAggregate_AggregationType"][n].Name
+    return result, err
 }
 

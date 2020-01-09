@@ -28,6 +28,7 @@ from scripts.render_cli import show_cli_output
 import urllib3
 urllib3.disable_warnings()
 
+lag_type_map = {"active" : "LACP", "on": "STATIC"}
 
 def invoke_api(func, args=[]):
     api = cc.ApiClient()
@@ -41,6 +42,30 @@ def invoke_api(func, args=[]):
         body = { "openconfig-interfaces:config": { "name": args[0] }}
         path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/config', name=args[0])
         return api.patch(path, body)
+
+    #Configure PortChannel
+    elif func == 'portchannel_config':
+
+        body ={
+                 "openconfig-interfaces:interface": [{
+                                                      "name": args[0],
+                                                      "config": {"name": args[0]},
+                                                      "openconfig-if-aggregate:aggregation" : {"config": {}}
+                                                    }]
+               }
+
+        if args[1] != "active":
+            body["openconfig-interfaces:interface"][0]["openconfig-if-aggregate:aggregation"]["config"].update( {"lag-type": lag_type_map[args[1]] } )
+
+        if args[2] != "1":
+            body["openconfig-interfaces:interface"][0]["openconfig-if-aggregate:aggregation"]["config"].update( {"min-links": int(args[2])} )
+
+        if args[3] == "true":
+            body["openconfig-interfaces:interface"][0]["openconfig-if-aggregate:aggregation"]["config"].update( {"openconfig-interfaces-ext:fallback": True} )
+
+        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}', name=args[0])
+        return api.patch(path, body)
+
     
     # Delete interface
     elif func == 'delete_openconfig_interfaces_interfaces_interface':
