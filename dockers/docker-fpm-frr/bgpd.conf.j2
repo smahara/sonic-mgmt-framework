@@ -8,11 +8,15 @@
 !
 {% include "daemons.common.conf.j2" %}
 !
+{% if DEVICE_METADATA['localhost'].has_key('bgp_asn') %}
 {% if DEVICE_METADATA['localhost']['type'] == "SpineChassisFrontendRouter" %}
 {%  include "bgpd.conf.spine_chassis_frontend_router.j2" %}
 {% endif %}
 !
 {% include "bgpd.conf.default.j2" %}
+{% else %}
+{% include "bgpd.conf.db.j2" %}
+{% endif %}
 !
 {% block bgp_error_handling_init %}
 {% if BGP_ERROR_CFG_TABLE %}

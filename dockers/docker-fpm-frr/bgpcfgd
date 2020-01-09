@@ -916,8 +916,12 @@ class BGPConfigDaemon:
                          ('max_ebgp_paths',                             '{no:no-prefix}maximum-paths {}'),
                          (['max_ibgp_paths',
                            '+ibgp_equal_cluster_length'],               '{no:no-prefix}maximum-paths ibgp {} {:match-clust-len}', hdl_ibgp_maxpath),
-<<<<<<< HEAD
                          ('route_download_filter',                      '{no:no-prefix}table-map {}'),
+                         (['route_flap_dampen',
+                           '+route_flap_dampen_half_life',
+                           '+route_flap_dampen_reuse_threshold',
+                           '+route_flap_dampen_suppress_threshold',
+                           '+route_flap_dampen_max_suppress'],          '{no:no-prefix}bgp dampening {} {} {} {}', ['true', 'false']),
                          ('advertise-all-vni',                          '{no:no-prefix}advertise-all-vni', ['true','false']),
                          ('advertise-default-gw',                       '{no:no-prefix}advertise-default-gw', ['true','false']),
                          ('advertise-ipv4-unicast',                     '{no:no-prefix}advertise ipv4 unicast', ['true','false']),
@@ -928,16 +932,6 @@ class BGPConfigDaemon:
                          ('flooding',                                   '{no:no-prefix}flooding {}'),
                          ('dad-enabled',                                '{no:no-prefix}dup-addr-detection', ['true','false']),
                          ('route-distinguisher',                        '{no:no-prefix}rd {}')
-||||||| merged common ancestors
-                         ('route_download_filter',                      '{no:no-prefix}table-map {}')
-=======
-                         ('route_download_filter',                      '{no:no-prefix}table-map {}'),
-                         (['route_flap_dampen',
-                           '+route_flap_dampen_half_life',
-                           '+route_flap_dampen_reuse_threshold',
-                           '+route_flap_dampen_suppress_threshold',
-                           '+route_flap_dampen_max_suppress'],          '{no:no-prefix}bgp dampening {} {} {} {}', ['true', 'false'])
->>>>>>> origin/dell_sonic
     ]
 
     cmn_key_map = [('asn&peer_type',                        '{no:no-prefix}neighbor {} remote-as {}'),
@@ -970,14 +964,8 @@ class BGPConfigDaemon:
     nbr_af_key_map = [(['allow_as_in', '+allow_as_count&allow_as_origin'],  '{no:no-prefix}neighbor {} allowas-in {:allow-as-in}', ['true', 'false']),
                       ('admin_status|ipv4',                                 '{no:no-prefix}neighbor {} activate', ['true', 'false']),
                       ('admin_status|ipv6',                                 '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
-<<<<<<< HEAD
                       ('admin_status|l2vpn',                                '{no:no-prefix}neighbor {} activate', ['true', 'false', False]),
-                      ('send_default_route',                                '{no:no-prefix}neighbor {} default-originate', ['true', 'false']),
-||||||| merged common ancestors
-                      ('send_default_route',                                '{no:no-prefix}neighbor {} default-originate', ['true', 'false']),
-=======
                       (['send_default_route', '+default_rmap'],             '{no:no-prefix}neighbor {} default-originate {:default-rmap}', ['true', 'false']),
->>>>>>> origin/dell_sonic
                       ('default_rmap',                                      '{no:no-prefix}neighbor {} default-originate route-map {}'),
                       (['max_prefix_limit', '++max_prefix_warning_threshold',
                         '+max_prefix_restart_interval&max_prefix_warning_only'], '{no:no-prefix}neighbor {} maximum-prefix {} {} {:restart}'),
