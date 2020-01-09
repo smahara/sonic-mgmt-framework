@@ -21,8 +21,6 @@ if [ -f $HWSKU_DIR/sai.profile ]; then
 
 	ln -s $HWSKU_DIR/$SAI_CONFIG /tmp/brcm_sai_config.bcm
 	ln -s $HWSKU_DIR/port_config.ini /tmp/port_config.ini
-
-	parse_port_config.py > /tmp/test_config.ini
 fi
 
 start_bcm

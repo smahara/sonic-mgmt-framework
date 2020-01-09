@@ -20,6 +20,7 @@ mmu_port_num_mc_queue.0=1
 module_64ports.0=1
 multicast_l2_range.0=511
 oversubscribe_mode=1
+bcm_sdk_diag_run=1
 
 #BC0#
 dport_map_port_1=81

@@ -161,6 +161,7 @@ stop() {
 
     if [[ x$sonic_asic_platform != x"mellanox" ]] || [[ x$TYPE != x"cold" ]]; then
         debug "${TYPE} shutdown syncd process ..."
+        docker exec -i syncd supervisorctl stop supervisor-proc-exit-listener > /dev/null
         /usr/bin/docker exec -i syncd /usr/bin/syncd_request_shutdown --${TYPE}
 
         # wait until syncd quits gracefully

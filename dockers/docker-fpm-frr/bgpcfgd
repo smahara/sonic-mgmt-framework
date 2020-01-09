@@ -1221,20 +1221,27 @@ class BGPConfigDaemon:
         cmd = 'vrf {}'.format(key_params[0])
         if not data:
             #VRF is deleted
-            command = "vtysh -c 'configure terminal' -c 'no {}'".format(cmd)
-            self.__run_command(command)
+            command = "vtysh -c 'configure terminal' -c '{}'".format(cmd)
+            if key_params[0] in self.vrf_vni_map:
+                command = command + "-c 'no vni {}'".format(self.vrf_vni_map[key_params[0]])
+                del self.vrf_vni_map[key_params[0]]
+                self.__run_command(command)
         else:
             #create/update case
             command = "vtysh -c 'configure terminal' -c '{}'".format(cmd)
+            positive_execute = False
             for param in data:
                 if param == 'vni':
                     if data[param] != '0':
                         command = command + " -c 'vni {}'".format(data[param])
                         self.vrf_vni_map[key_params[0]] = data[param]
+                        positive_execute = True
                     elif key_params[0] in self.vrf_vni_map:
                         command = command + "-c 'no vni {}'".format(self.vrf_vni_map[key_params[0]])
                         del self.vrf_vni_map[key_params[0]]
-            self.__run_command(command)
+                        positive_execute = True
+            if positive_execute == True:
+                self.__run_command(command)
 
     def __get_vrf_asn(self, vrf):
         if vrf in self.bgp_asn:

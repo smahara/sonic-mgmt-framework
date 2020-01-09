@@ -41,8 +41,11 @@ rm -f /var/run/rsyslogd.pid
 supervisorctl start rsyslogd
 
 # start eoiu pulling, only if configured so
-if [[ $(sonic-cfggen -d -v 'WARM_RESTART.bgp.bgp_eoiu') == 'true' ]]; then
-    supervisorctl start bgp_eoiu_marker
+HAS_EOIU_CONFIG=$(sonic-cfggen -d -v "1 if WARM_RESTART and WARM_RESTART.bgp.bgp_eoiu")
+if [ "$HAS_EOIU_CONFIG" == "1" ]; then
+    if [[ $(sonic-cfggen -d -v 'WARM_RESTART.bgp.bgp_eoiu') == 'true' ]]; then
+        supervisorctl start bgp_eoiu_marker
+    fi
 fi
 
 # Start Quagga processes
@@ -62,6 +65,11 @@ supervisorctl start bgpd
 supervisorctl start ospfd
 supervisorctl start pimd
 supervisorctl start bfdd
+
+sonic-cfggen -d -t /usr/share/sonic/templates/wait_for_vrf.sh.j2 > /usr/bin/wait_for_vrf.sh
+chmod +x /usr/bin/wait_for_vrf.sh
+
+/usr/bin/wait_for_vrf.sh
 
 if [ "$CONFIG_TYPE" == "unified" ] || [ "$CONFIG_TYPE" == "split" ]; then
     supervisorctl start vtysh_b
