@@ -912,9 +912,11 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
         return;
     }
     else
-        lif = local_if_find_by_ifindex(ifindex);
+    {
+        lif = local_if_find_by_name(ifname);
+    }
 
-    if (!lif)
+    if (!lif || lif->ifindex != ifindex)
     {
         const itf_type_t if_whitelist[] = {
             { PORTCHANNEL_PREFIX,      IF_T_PORT_CHANNEL },
@@ -930,6 +932,27 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
             if ((strncmp(ifname,
                          if_whitelist[i].ifname, strlen(if_whitelist[i].ifname)) == 0))
             {
+                
+                /*if the iface exists, but the ifindex changed, then delete old
+                 * interface and add the new interface
+                 * possible scenario is due to many kernel events, there is
+                 * possiblility of losing if deletion event and just
+                 * getting a add of same iface with new ifindex.
+                 * to address this possibility if add event of interface is
+                 * received with new ifindex different from old interace, 
+                 * then delete the old ifindex interface and add new if with new
+                 * ifindex
+                 */
+                if (lif && lif->ifindex != ifindex)
+                {
+                    ICCPD_LOG_NOTICE(__FUNCTION__, "%s ifindex changed from old ifindex:%d to new ifindex:%d ", ifname, lif->ifindex, ifindex);
+                    if ((strncmp(ifname, FRONT_PANEL_PORT_PREFIX, strlen(FRONT_PANEL_PORT_PREFIX)) == 0))
+                    {
+                        ICCPD_LOG_ERR(__FUNCTION__, "Front panel port %s ifindex changed !!! from old ifindex:%d to new ifindex:%d ", ifname, lif->ifindex, ifindex);
+                    }
+                    local_if_destroy(lif->name);
+                }
+
                 /* Provide state info when local_if is created so that po_active
                  * flag can be set correctly instead of assuming it is always
                  * active. This helps address the issue where MLAG interface
@@ -937,7 +960,7 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
                  * is configured as MLAG interface when it is down
                  */
                 lif = local_if_create(ifindex, ifname, if_whitelist[i].type,
-                    (op_state == IF_OPER_UP) ? PORT_STATE_UP : PORT_STATE_DOWN);
+                        (op_state == IF_OPER_UP) ? PORT_STATE_UP : PORT_STATE_DOWN);
 
                 switch (addr_type)
                 {
@@ -946,7 +969,6 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
                     default:
                         break;
                 }
-
                 break;
             }
         }
@@ -984,6 +1006,7 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
 
             iccp_from_netlink_port_state_handler(lif->name, lif->state);
         }
+        
 
         switch (addr_type)
         {
