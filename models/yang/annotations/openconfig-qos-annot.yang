@@ -91,6 +91,10 @@ module openconfig-qos-annot {
       }
     }
 
+    deviation /oc-qos:qos/oc-qos:queues {
+        sonic-ext:subtree-transformer "qos_set_queues_xfmr";
+        sonic-ext:db-name "CONFIG_DB";
+    }
 }
 
 

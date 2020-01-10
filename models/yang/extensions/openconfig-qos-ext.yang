@@ -42,6 +42,23 @@ module openconfig-qos-ext {
         uses qos-queue-state-ext;
     }
 
+
+    augment /oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:wred/oc-qos:config {
+        leaf wred-profile {
+            type string;
+            description
+                "Name of the WRED profile";
+        }
+    }
+
+    augment /oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:wred/oc-qos:state {
+        leaf wred-profile {
+            type string;
+            description
+                "Name of the WRED profile";
+        }
+    }
+
     grouping qos-interface-priority-group-config {
         description
             "Configuration data for the priority group associated with the 
