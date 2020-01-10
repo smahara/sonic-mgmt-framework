@@ -243,6 +243,11 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
     //if (strcmp(mac_msg->mac_str, MacData->mac_str) == 0 && mac_msg->vid == ntohs(MacData->vid))
     if (mac_msg)
     {
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Recv MAC update from peer RB_FIND success, existing MAC age flag:%d interface %s, "
+            "MAC %s vlan-id %d, fdb_type: %d, op_type %s", mac_msg->age_flag, mac_msg->ifname,
+            mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->fdb_type,
+            (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del");
+
         if (MacData->type == MAC_SYNC_ADD)
         {
             mac_msg->age_flag &= ~MAC_AGE_PEER;
@@ -255,9 +260,9 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
             }
 
             ICCPD_LOG_DEBUG("ICCP_FDB", "Recv ADD, Remove peer age flag:%d interface %s, "
-                "MAC %s vlan-id %d, op_type %s", mac_msg->age_flag, mac_msg->ifname,
+                "MAC %s vlan-id %d, op_type %s, from_mclag_intf: %d ", mac_msg->age_flag, mac_msg->ifname,
                 mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid,
-                (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del");
+                (mac_msg->op_type == MAC_SYNC_ADD) ? "add":"del", from_mclag_intf);
 
             /*mac_msg->fdb_type = tlv->fdb_type;*/
             /*The port ifname is different to the local item*/

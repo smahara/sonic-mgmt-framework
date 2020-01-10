@@ -82,7 +82,7 @@ RUN apt-get -y purge     \
     find / | grep -E "__pycache__" | xargs rm -rf && \
     rm -rf /debs /python-wheels ~/.cache
 
-COPY ["start.sh", "files/supervisor-proc-exit-listener", "/usr/bin/"]
+COPY ["start.sh", "snmpconfd", "files/supervisor-proc-exit-listener", "/usr/bin/"]
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 COPY ["*.j2", "/usr/share/sonic/templates/"]
 COPY ["critical_processes", "/etc/supervisor"]

@@ -5,7 +5,7 @@ l2xmsg_mode=1
 l3_mem_entries=40960
 parity_correction=0
 parity_enable=1
-mmu_lossless=1
+mmu_lossless=0
 
 arl_clean_timeout_usec=15000000
 asf_mem_profile=2

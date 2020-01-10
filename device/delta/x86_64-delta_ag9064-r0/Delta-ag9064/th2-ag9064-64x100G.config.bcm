@@ -793,4 +793,4 @@ robust_hash_disable_egress_vlan=1
 robust_hash_disable_mpls=1
 robust_hash_disable_vlan=1
 stable_size=0x5500000
-mmu_lossless=1
+mmu_lossless=0

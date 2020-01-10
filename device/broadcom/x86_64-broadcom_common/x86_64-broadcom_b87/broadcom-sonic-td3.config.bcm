@@ -7,6 +7,7 @@ l3_max_ecmp_mode=1
 lpm_scaling_enable=0
 bcm_num_cos=10
 default_cpu_tx_queue=9
+mmu_lossless=0
 
 # Drop monitor configuration
 flowtracker_enable=2

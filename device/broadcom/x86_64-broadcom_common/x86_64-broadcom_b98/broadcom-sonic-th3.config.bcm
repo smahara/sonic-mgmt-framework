@@ -13,3 +13,4 @@ multicast_l2_range.0=511
 oversubscribe_mode=1
 bcm_num_cos=8
 default_cpu_tx_queue=7
+mmu_lossless=0
