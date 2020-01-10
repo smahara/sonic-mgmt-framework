@@ -45,7 +45,6 @@ def invoke_api(func, args=[]):
 
     #Configure PortChannel
     elif func == 'portchannel_config':
-
         body ={
                  "openconfig-interfaces:interface": [{
                                                       "name": args[0],
@@ -54,13 +53,19 @@ def invoke_api(func, args=[]):
                                                     }]
                }
 
-        if args[1] != "active":
-            body["openconfig-interfaces:interface"][0]["openconfig-if-aggregate:aggregation"]["config"].update( {"lag-type": lag_type_map[args[1]] } )
+        # Configure lag type (active/on)
+        mode = args[1].split("=")[1]
+        if mode != "" :
+            body["openconfig-interfaces:interface"][0]["openconfig-if-aggregate:aggregation"]["config"].update( {"lag-type": lag_type_map[mode] } )
 
-        if args[2] != "1":
-            body["openconfig-interfaces:interface"][0]["openconfig-if-aggregate:aggregation"]["config"].update( {"min-links": int(args[2])} )
+        # Configure Min links
+        links = args[2].split("=")[1]
+        if links != "":
+            body["openconfig-interfaces:interface"][0]["openconfig-if-aggregate:aggregation"]["config"].update( {"min-links": int(links) } )
 
-        if args[3] == "true":
+        # Configure Fallback
+        fallback = args[3].split("=")[1]
+        if fallback != "":
             body["openconfig-interfaces:interface"][0]["openconfig-if-aggregate:aggregation"]["config"].update( {"openconfig-interfaces-ext:fallback": True} )
 
         path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}', name=args[0])
