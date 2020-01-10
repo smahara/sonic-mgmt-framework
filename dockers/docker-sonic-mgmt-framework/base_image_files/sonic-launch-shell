@@ -1,8 +1,7 @@
 #!/bin/sh
 # Based on the primary group, launch the real shell
 # admin -> /bin/bash
-# operator -> /usr/bin/sonic-cli
-# others -> /bin/false
+# operator and all others -> /usr/bin/sonic-cli
 
 GROUP=$(id -gn)
 
@@ -11,12 +10,8 @@ case "$GROUP" in
         LAUNCH_SHELL=/bin/bash
         ;;
 
-    operator)
-        LAUNCH_SHELL=/usr/bin/sonic-cli
-        ;;
-
     *)
-        LAUNCH_SHELL=/bin/false
+        LAUNCH_SHELL=/usr/bin/sonic-cli
         ;;
 esac
 
