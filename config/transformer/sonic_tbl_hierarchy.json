@@ -1,0 +1,80 @@
+[{
+    "oc-module": "openconfig-acl",
+        "tables-groups": [{
+            "tables": [{
+                "name": "ACL_TABLE",
+                "children": [{
+                    "name": "ACL_RULE",
+                    "children": []
+                }]
+            }]
+        }]
+},
+{
+    "oc-module": "openconfig-network-instance",
+        "tables-groups": [{
+            "tables": [{
+                "name": "BGP_GLOBALS",
+                "children": [{
+                    "name": "BGP_GLOBALS_AF",
+                    "children": []
+                },
+                {
+                    "name": "BGP_GLOBALS_LISTEN_PREFIX",
+                    "children": []
+                },
+                {
+                    "name": "BGP_GLOBALS_AF_AGGREGATE_ADDR",
+                    "children": []
+                },
+                {
+                    "name": "BGP_GLOBALS_AF_NETWORK",
+                    "children": []
+                },
+                {
+                    "name": "BGP_GLOBALS_EVPN_RT",
+                    "children": []
+                },
+                {
+                    "name": "BGP_GLOBALS_EVPN_VNI",
+                    "children": []
+                },
+                {
+                    "name": "BGP_GLOBALS_EVPN_VNI_RT",
+                    "children": []
+                }]
+            },
+            {
+                "name": "BGP_PEER_GROUP",
+                "children": [{
+                    "name": "BGP_PEER_GROUP_AF",
+                    "children": []
+                }]
+            },
+            {
+                "name": "BGP_NEIGHBOR",
+                "children": [{
+                    "name": "BGP_NEIGHBOR_AF",
+                    "children": []
+                }]
+            }]
+        },
+        {
+            "tables": [{
+                "name": "CFG_L2MC_TABLE ",
+                "children": []
+            }]
+        }]
+},
+{
+    "oc-module": "openconfig-routing-policy",
+        "tables-groups": [{
+            "tables": [{
+                "name": "PREFIX_SET",
+                "children": [{
+                    "name": "PREFIX",
+                    "children": []
+                }]
+            }]
+        }]
+}]
