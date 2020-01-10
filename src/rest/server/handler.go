@@ -20,13 +20,13 @@
 package server
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"translib"
+
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 )
@@ -58,6 +58,13 @@ func Process(w http.ResponseWriter, r *http.Request) {
 		glog.Errorf("[%s] Translib error %T - %v", reqID, err, err)
 		status, data, rtype = prepareErrorResponse(err, r)
 		goto write_resp
+	}
+
+	// Special handling for HEAD -- ignore the data but set content-length.
+	// HTTP spec says HEAD can return content-length and content-type as if it was a GET.
+	if r.Method == "HEAD" {
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+		data = nil
 	}
 
 	rtype, err = resolveResponseContentType(data, r, rc)
@@ -202,10 +209,10 @@ func escapeKeyValue(val string) string {
 
 // trimRestconfPrefix removes "/restconf/data" prefix from the path.
 func trimRestconfPrefix(path string) string {
-	pattern := "/restconf/data/"
+	pattern := restconfDataPathPrefix
 	k := strings.Index(path, pattern)
 	if k < 0 {
-		pattern = "/restconf/operations/"
+		pattern = restconfOperPathPrefix
 		k = strings.Index(path, pattern)
 	}
 	if k >= 0 {
@@ -218,7 +225,7 @@ func trimRestconfPrefix(path string) string {
 // isOperationsRequest checks if a request is a RESTCONF operations
 // request (rpc or action)
 func isOperationsRequest(r *http.Request) bool {
-	k := strings.Index(r.URL.Path, "/restconf/operations/")
+	k := strings.Index(r.URL.Path, restconfOperPathPrefix)
 	return k >= 0
 	//FIXME URI pattern will not help identifying yang action APIs.
 	//Use swagger generated API name instead???
@@ -233,13 +240,14 @@ func getRequestID(r *http.Request) string {
 // invokeTranslib calls appropriate TransLib API for the given HTTP
 // method. Returns response status code and content.
 func invokeTranslib(r *http.Request, path string, payload []byte) (int, []byte, error) {
+	rc, r := GetContext(r)
 	var status = 400
 	var content []byte
 	var err error
 
 	switch r.Method {
-	case "GET":
-		req := translib.GetRequest{Path: path}
+	case "GET", "HEAD":
+		req := translib.GetRequest{Path: path, User: rc.Auth.User, Group: rc.Auth.Group}
 		resp, err1 := translib.Get(req)
 		if err1 == nil {
 			status = 200
@@ -250,7 +258,7 @@ func invokeTranslib(r *http.Request, path string, payload []byte) (int, []byte, 
 
 	case "POST":
 		if isOperationsRequest(r) {
-			req := translib.ActionRequest{Path: path, Payload: payload}
+			req := translib.ActionRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
 			res, err1 := translib.Action(req)
 			if err1 == nil {
 				status = 200
@@ -260,24 +268,24 @@ func invokeTranslib(r *http.Request, path string, payload []byte) (int, []byte, 
 			}
 		} else {
 			status = 201
-			req := translib.SetRequest{Path: path, Payload: payload}
+			req := translib.SetRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
 			_, err = translib.Create(req)
 		}
 
 	case "PUT":
 		//TODO send 201 if PUT resulted in creation
 		status = 204
-		req := translib.SetRequest{Path: path, Payload: payload}
+		req := translib.SetRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
 		_, err = translib.Replace(req)
 
 	case "PATCH":
 		status = 204
-		req := translib.SetRequest{Path: path, Payload: payload}
+		req := translib.SetRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
 		_, err = translib.Update(req)
 
 	case "DELETE":
 		status = 204
-		req := translib.SetRequest{Path: path}
+		req := translib.SetRequest{Path: path, User: rc.Auth.User, Group: rc.Auth.Group}
 		_, err = translib.Delete(req)
 
 	default:
@@ -287,17 +295,3 @@ func invokeTranslib(r *http.Request, path string, payload []byte) (int, []byte, 
 
 	return status, content, err
 }
-
-// hostMetadataHandler function handles "GET /.well-known/host-meta"
-// request as per RFC6415. RESTCONF specification requires this for
-// advertising the RESTCONF root path ("/restconf" in our case).
-func hostMetadataHandler(w http.ResponseWriter, r *http.Request) {
-	var data bytes.Buffer
-	data.WriteString("<XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>")
-	data.WriteString("<Link rel='restconf' href='/restconf'/>")
-	data.WriteString("</XRD>")
-
-	w.Header().Set("Content-Type", "application/xrd+xml")
-	w.Write(data.Bytes())
-}
-

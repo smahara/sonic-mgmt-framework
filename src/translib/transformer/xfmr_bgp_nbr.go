@@ -27,12 +27,10 @@ func init () {
     XlateFuncBind("DbToYang_bgp_nbrs_nbr_af_state_xfmr", DbToYang_bgp_nbrs_nbr_af_state_xfmr)
     XlateFuncBind("YangToDb_bgp_nbr_community_type_fld_xfmr", YangToDb_bgp_nbr_community_type_fld_xfmr)
     XlateFuncBind("DbToYang_bgp_nbr_community_type_fld_xfmr", DbToYang_bgp_nbr_community_type_fld_xfmr)
-    XlateFuncBind("YangToDb_bgp_nbr_plist_direction_fld_xfmr", YangToDb_bgp_nbr_plist_direction_fld_xfmr)
-    XlateFuncBind("DbToYang_bgp_nbr_plist_direction_fld_xfmr", DbToYang_bgp_nbr_plist_direction_fld_xfmr)
-    XlateFuncBind("YangToDb_bgp_nbr_flist_direction_fld_xfmr", YangToDb_bgp_nbr_flist_direction_fld_xfmr)
-    XlateFuncBind("DbToYang_bgp_nbr_flist_direction_fld_xfmr", DbToYang_bgp_nbr_flist_direction_fld_xfmr)
     XlateFuncBind("YangToDb_bgp_nbr_orf_type_fld_xfmr", YangToDb_bgp_nbr_orf_type_fld_xfmr)
     XlateFuncBind("DbToYang_bgp_nbr_orf_type_fld_xfmr", DbToYang_bgp_nbr_orf_type_fld_xfmr)
+    XlateFuncBind("YangToDb_bgp_nbr_tx_add_paths_fld_xfmr", YangToDb_bgp_nbr_tx_add_paths_fld_xfmr)
+    XlateFuncBind("DbToYang_bgp_nbr_tx_add_paths_fld_xfmr", DbToYang_bgp_nbr_tx_add_paths_fld_xfmr)
 }
 
 var YangToDb_bgp_nbr_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
@@ -108,6 +106,12 @@ var YangToDb_bgp_nbr_peer_type_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrPa
         err = errors.New("No Params");
         return res_map, err
     }
+
+    if inParams.oper == DELETE {
+        res_map["peer_type"] = ""
+        return res_map, nil
+    }
+
     peer_type, _ := inParams.param.(ocbinds.E_OpenconfigBgp_PeerType)
     log.Info("YangToDb_bgp_nbr_peer_type_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " peer-type: ", peer_type)
 
@@ -152,6 +156,63 @@ var DbToYang_bgp_nbr_peer_type_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrPa
     return result, err
 }
 
+var YangToDb_bgp_nbr_tx_add_paths_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
+    res_map := make(map[string]string)
+
+    var err error
+    if inParams.param == nil {
+        err = errors.New("No Params");
+        return res_map, err
+    }
+
+    if inParams.oper == DELETE {
+        res_map["tx_add_paths"] = ""
+        return res_map, nil
+    }
+
+    tx_add_paths_type, _ := inParams.param.(ocbinds.E_OpenconfigBgpExt_TxAddPathsType)
+    log.Info("YangToDb_bgp_nbr_tx_add_paths_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " add-paths-type: ", tx_add_paths_type)
+
+    if (tx_add_paths_type == ocbinds.OpenconfigBgpExt_TxAddPathsType_TX_ALL_PATHS) {
+        res_map["tx_add_paths"] = "tx_all_paths"
+    }  else if (tx_add_paths_type == ocbinds.OpenconfigBgpExt_TxAddPathsType_TX_BEST_PATH_PER_AS) {
+        res_map["tx_add_paths"] = "tx_best_path_per_as"
+    } else {
+        err = errors.New("Invalid add Paths type Missing");
+        return res_map, err
+    }
+
+    return res_map, nil
+
+}
+
+var DbToYang_bgp_nbr_tx_add_paths_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
+
+    var err error
+    result := make(map[string]interface{})
+
+    data := (*inParams.dbDataMap)[inParams.curDb]
+    log.Info("DbToYang_bgp_nbr_tx_add_paths_fld_xfmr: ", data, "inParams : ", inParams)
+
+    pTbl := data["BGP_NEIGHBOR_AF"]
+    if _, ok := pTbl[inParams.key]; !ok {
+        log.Info("DbToYang_bgp_nbr_tx_add_paths_fld_xfmr BGP neighbor not found : ", inParams.key)
+        return result, errors.New("BGP neighbor not found : " + inParams.key)
+    }
+    pNbrKey := pTbl[inParams.key]
+    tx_add_paths_type, ok := pNbrKey.Field["tx_add_paths"]
+
+    if ok {
+        if (tx_add_paths_type == "tx_all_paths") {
+            result["tx-add-paths"] = "TX_ALL_PATHS"
+        } else if (tx_add_paths_type == "tx_best_path_per_as") {
+            result["tx-add-paths"] = "TX_BEST_PATH_PER_AS"
+        }
+    } else {
+        log.Info("Tx add Paths field not found in DB")
+    }
+    return result, err
+}
 
 var YangToDb_bgp_nbr_address_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
@@ -184,21 +245,22 @@ var YangToDb_bgp_nbr_afi_safi_name_fld_xfmr FieldXfmrYangToDb = func(inParams Xf
 var DbToYang_bgp_nbr_afi_safi_name_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
 
     var err error
+    var nbrAfName string
     result := make(map[string]interface{})
 
     entry_key := inParams.key
     nbrAfKey := strings.Split(entry_key, "|")
-	nbrAfName := ""
 
-	switch nbrAfKey[2] {
-	case "ipv4_unicast":
-		nbrAfName = "IPV4_UNICAST"
-	case "ipv6_unicast":
-		nbrAfName = "IPV6_UNICAST"
-	case "l2vpn_evpn":
-		nbrAfName = "L2VPN_EVPN"
-	}
-
+    switch nbrAfKey[2] {
+        case "ipv4_unicast":
+            nbrAfName = "IPV4_UNICAST"
+        case "ipv6_unicast":
+            nbrAfName = "IPV6_UNICAST"
+        case "l2vpn_evpn":
+            nbrAfName = "L2VPN_EVPN"
+       default:
+            return result, nil
+    }
     result["afi-safi-name"] = nbrAfName
 
     return result, err
@@ -278,21 +340,23 @@ var YangToDb_bgp_af_nbr_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams)
 }
 
 var DbToYang_bgp_af_nbr_tbl_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
+    var afName string
     rmap := make(map[string]interface{})
     entry_key := inParams.key
     log.Info("DbToYang_bgp_af_nbr_tbl_key: ", entry_key)
 
     nbrAfKey := strings.Split(entry_key, "|")
-	afName := ""
 
-	switch nbrAfKey[2] {
-	case "ipv4_unicast":
-		afName = "IPV4_UNICAST"
-	case "ipv6_unicast":
-		afName = "IPV6_UNICAST"
-	case "l2vpn_evpn":
-		afName = "L2VPN_EVPN"
-	}
+    switch nbrAfKey[2] {
+        case "ipv4_unicast":
+            afName = "IPV4_UNICAST"
+        case "ipv6_unicast":
+            afName = "IPV6_UNICAST"
+        case "l2vpn_evpn":
+            afName = "L2VPN_EVPN"
+       default:
+            return rmap, nil
+    }
 
     rmap["afi-safi-name"]   = afName
 
@@ -388,21 +452,23 @@ var YangToDb_bgp_af_nbr_proto_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrP
 }
 
 var DbToYang_bgp_af_nbr_proto_tbl_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
+   var afName string
     rmap := make(map[string]interface{})
     entry_key := inParams.key
     log.Info("DbToYang_bgp_af_nbr_proto_tbl_key_xfmr: ", entry_key)
 
     nbrAfKey := strings.Split(entry_key, "|")
-    afName := ""
 
-	switch nbrAfKey[2] {
-	case "ipv4_unicast":
-		afName = "IPV4_UNICAST"
-	case "ipv6_unicast":
-		afName = "IPV6_UNICAST"
-	case "l2vpn_evpn":
-		afName = "L2VPN_EVPN"
-	}
+    switch nbrAfKey[2] {
+        case "ipv4_unicast":
+            afName = "IPV4_UNICAST"
+        case "ipv6_unicast":
+            afName = "IPV6_UNICAST"
+        case "l2vpn_evpn":
+            afName = "L2VPN_EVPN"
+       default:
+            return rmap, nil
+    }
 
     rmap["afi-safi-name"]   = afName
 
@@ -770,6 +836,8 @@ func get_afi_safi_name_enum_dbstr_for_ocstr (afiSafiNameStr string) (ocbinds.E_O
             return ocbinds.OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV4_UNICAST, "ipv4_unicast", true
         case "IPV6_UNICAST":
             return ocbinds.OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV6_UNICAST, "ipv6_unicast", true
+        case "L2VPN_EVPN":
+            return ocbinds.OpenconfigBgpTypes_AFI_SAFI_TYPE_L2VPN_EVPN, "l2vpn_evpn", true
         default:
             return ocbinds.OpenconfigBgpTypes_AFI_SAFI_TYPE_UNSET, "", false
     }
@@ -820,18 +888,22 @@ func validate_nbr_af_state_get (inParams XfmrParams, dbg_log string) (*ocbinds.O
         log.Errorf("%s failed !! Error: Neighbors AfiSafis container missing", dbg_log)
         return nil, nbr_af_key, oper_err
     }
+    ygot.BuildEmptyTree(afiSafis_obj)
 
     afiSafi_obj, ok := afiSafis_obj.AfiSafi[nbr_af_key.afiSafiNameEnum]
     if !ok {
-        log.Errorf("%s failed !! Error: Neighbor AfiSafi object missing", dbg_log)
-        return nil, nbr_af_key, oper_err
+        log.Errorf("%s Neighbor AfiSafi object missing, allocate new", dbg_log)
+        afiSafi_obj, _ = afiSafis_obj.NewAfiSafi(nbr_af_key.afiSafiNameEnum)
     }
+
+    ygot.BuildEmptyTree(afiSafi_obj)
 
     afiSafiState_obj := afiSafi_obj.State
     if afiSafiState_obj == nil {
         log.Errorf("%s failed !! Error: Neighbor AfiSafi State object missing", dbg_log)
         return nil, nbr_af_key, oper_err
     }
+    ygot.BuildEmptyTree(afiSafiState_obj)
 
     return afiSafiState_obj, nbr_af_key, err
 }
@@ -915,13 +987,17 @@ var DbToYang_bgp_nbrs_nbr_af_state_xfmr SubTreeXfmrDbToYang = func(inParams Xfmr
         if value, ok := cfgDbEntry["send_community"] ; ok {
             switch value {
                 case "standard":
-                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_CommunityType_STANDARD
+                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_BgpExtCommunityType_STANDARD
                 case "extended":
-                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_CommunityType_EXTENDED
+                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_BgpExtCommunityType_EXTENDED
                 case "both":
-                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_CommunityType_BOTH
+                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_BgpExtCommunityType_BOTH
                 case "none":
-                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_CommunityType_NONE
+                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_BgpExtCommunityType_NONE
+                case "large":
+                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_BgpExtCommunityType_LARGE
+                case "all":
+                    nbrs_af_state_obj.SendCommunity = ocbinds.OpenconfigBgpExt_BgpExtCommunityType_ALL
             }
         }
 
@@ -971,15 +1047,38 @@ var YangToDb_bgp_nbr_community_type_fld_xfmr FieldXfmrYangToDb = func(inParams X
         err = errors.New("No Params");
         return res_map, err
     }
-    community_type, _ := inParams.param.(ocbinds.E_OpenconfigBgpExt_CommunityType)
+
+    if inParams.oper == DELETE {
+        subOpMap := make(map[db.DBNum]map[string]map[string]db.Value)
+
+        if _, ok := subOpMap[db.ConfigDB]; !ok {
+            subOpMap[db.ConfigDB] = make(map[string]map[string]db.Value)
+        }
+        if _, ok := subOpMap[db.ConfigDB]["BGP_NEIGHBOR_AF"]; !ok {
+            subOpMap[db.ConfigDB]["BGP_NEIGHBOR_AF"] = make(map[string]db.Value)
+        }
+        subOpMap[db.ConfigDB]["BGP_NEIGHBOR_AF"][inParams.key] = db.Value{Field: make(map[string]string)}
+        subOpMap[db.ConfigDB]["BGP_NEIGHBOR_AF"][inParams.key].Field["send_community"] = "both"
+
+        inParams.subOpDataMap[UPDATE] = &subOpMap
+        return res_map, nil
+    }
+
+    community_type, _ := inParams.param.(ocbinds.E_OpenconfigBgpExt_BgpExtCommunityType)
     log.Info("YangToDb_bgp_nbr_community_type_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " community_type: ", community_type)
 
-    if (community_type == ocbinds.OpenconfigBgpExt_CommunityType_STANDARD) {
+    if (community_type == ocbinds.OpenconfigBgpExt_BgpExtCommunityType_STANDARD) {
         res_map["send_community"] = "standard"
-    }  else if (community_type == ocbinds.OpenconfigBgpExt_CommunityType_EXTENDED) {
+    }  else if (community_type == ocbinds.OpenconfigBgpExt_BgpExtCommunityType_EXTENDED) {
         res_map["send_community"] = "extended"
-    }  else if (community_type == ocbinds.OpenconfigBgpExt_CommunityType_BOTH) {
+    }  else if (community_type == ocbinds.OpenconfigBgpExt_BgpExtCommunityType_BOTH) {
         res_map["send_community"] = "both"
+    }  else if (community_type == ocbinds.OpenconfigBgpExt_BgpExtCommunityType_NONE) {
+        res_map["send_community"] = "none"
+    }  else if (community_type == ocbinds.OpenconfigBgpExt_BgpExtCommunityType_LARGE) {
+        res_map["send_community"] = "large"
+    }  else if (community_type == ocbinds.OpenconfigBgpExt_BgpExtCommunityType_ALL) {
+        res_map["send_community"] = "all"
     } else {
         err = errors.New("send_community  Missing");
         return res_map, err
@@ -1012,113 +1111,11 @@ var DbToYang_bgp_nbr_community_type_fld_xfmr FieldXfmrDbtoYang = func(inParams X
             result["send-community"] = "EXTENDED"
         } else if (community_type == "both") {
             result["send-community"] = "BOTH"
+        } else if (community_type == "none") {
+            result["send-community"] = "NONE"
         }
     } else {
         log.Info("send_community not found in DB")
-    }
-    return result, err
-}
-
-var YangToDb_bgp_nbr_plist_direction_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
-    res_map := make(map[string]string)
-
-    var err error
-    if inParams.param == nil {
-        err = errors.New("No Params");
-        return res_map, err
-    }
-    direction, _ := inParams.param.(ocbinds.E_OpenconfigBgpExt_BgpDirection)
-    log.Info("YangToDb_bgp_nbr_plist_direction_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " direction: ", direction)
-
-    if (direction == ocbinds.OpenconfigBgpExt_BgpDirection_INBOUND) {
-        res_map["prefix_list_direction"] = "inbound"
-    }  else if (direction == ocbinds.OpenconfigBgpExt_BgpDirection_OUTBOUND) {
-        res_map["prefix_list_direction"] = "outbound"
-    } else {
-        err = errors.New("direction Missing");
-        return res_map, err
-    }
-
-    return res_map, nil
-
-}
-
-var DbToYang_bgp_nbr_plist_direction_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
-
-    var err error
-    result := make(map[string]interface{})
-
-    data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_bgp_nbr_plist_direction_fld_xfmr : ", data, "inParams : ", inParams)
-
-    pTbl := data["BGP_NEIGHBOR_AF"]
-    if _, ok := pTbl[inParams.key]; !ok {
-        log.Info("DbToYang_bgp_nbr_peer_type_xfmr BGP neighbor not found : ", inParams.key)
-        return result, errors.New("BGP neighbor not found : " + inParams.key)
-    }
-    pGrpKey := pTbl[inParams.key]
-    direction, ok := pGrpKey.Field["prefix_list_direction"]
-
-    if ok {
-        if (direction == "inbound") {
-            result["direction"] = "INBOUND"
-        } else if (direction == "outbound") {
-            result["direction"] = "OUTBOUND"
-        }
-    } else {
-        log.Info("prefix_list_direction field not found in DB")
-    }
-    return result, err
-}
-
-var YangToDb_bgp_nbr_flist_direction_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
-    res_map := make(map[string]string)
-
-    var err error
-    if inParams.param == nil {
-        err = errors.New("No Params");
-        return res_map, err
-    }
-    direction, _ := inParams.param.(ocbinds.E_OpenconfigBgpExt_BgpDirection)
-    log.Info("YangToDb_bgp_nbr_flist_direction_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " direction: ", direction)
-
-    if (direction == ocbinds.OpenconfigBgpExt_BgpDirection_INBOUND) {
-        res_map["filter_list_direction"] = "inbound"
-    }  else if (direction == ocbinds.OpenconfigBgpExt_BgpDirection_OUTBOUND) {
-        res_map["filter_list_direction"] = "outbound"
-    } else {
-        err = errors.New("direction Missing");
-        return res_map, err
-    }
-
-    return res_map, nil
-
-}
-
-var DbToYang_bgp_nbr_flist_direction_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
-
-    var err error
-    result := make(map[string]interface{})
-
-    data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_bgp_nbr_flist_direction_fld_xfmr : ", data, "inParams : ", inParams)
-
-    pTbl := data["BGP_NEIGHBOR_AF"]
-    if _, ok := pTbl[inParams.key]; !ok {
-        log.Info("DbToYang_bgp_nbr_flist_direction_fld_xfmr BGP neighbor not found : ", inParams.key)
-        return result, errors.New("BGP neighbor not found : " + inParams.key)
-    }
-    pGrpKey := pTbl[inParams.key]
-    direction, ok := pGrpKey.Field["filter_list_direction"]
-
-    if ok {
-        if (direction == "inbound") {
-            result["direction"] = "INBOUND"
-        } else if (direction == "outbound") {
-            result["direction"] = "OUTBOUND"
-        }
-    } else {
-        log.Info("filter_list_direction field not found in DB")
     }
     return result, err
 }
@@ -1131,6 +1128,12 @@ var YangToDb_bgp_nbr_orf_type_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrPar
         err = errors.New("No Params");
         return res_map, err
     }
+
+    if inParams.oper == DELETE {
+        res_map["cap_orf"] = ""
+        return res_map, nil
+    }
+
     orf_type, _ := inParams.param.(ocbinds.E_OpenconfigBgpExt_BgpOrfType)
     log.Info("YangToDb_bgp_nbr_orf_type_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " orf_type: ", orf_type)
 

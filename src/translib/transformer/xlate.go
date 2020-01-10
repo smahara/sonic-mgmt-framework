@@ -37,6 +37,7 @@ const (
 	REPLACE
 	UPDATE
 	DELETE
+    MAXOPER
 )
 
 type KeySpec struct {
@@ -100,6 +101,7 @@ func TraverseDb(dbs [db.MaxDB]*db.DB, spec KeySpec, result *map[db.DBNum]map[str
 		if spec.Ts.Name != XFMR_NONE_STRING { // Do not traverse for NONE table
 			data, err := dbs[spec.dbNum].GetEntry(&spec.Ts, spec.Key)
 			if err != nil {
+				log.Warningf("Failed to get data for tbl(%v), key(%v) in TraverseDb", spec.Ts.Name, spec.Key)
 				return err
 			}
 
@@ -119,6 +121,7 @@ func TraverseDb(dbs [db.MaxDB]*db.DB, spec KeySpec, result *map[db.DBNum]map[str
 		if spec.Ts.Name != XFMR_NONE_STRING { //Do not traverse for NONE table
 			keys, err := dbs[spec.dbNum].GetKeys(&spec.Ts)
 			if err != nil {
+				log.Warningf("Failed to get keys for tbl(%v) in TraverseDb", spec.Ts.Name)
 				return err
 			}
 			log.Infof("keys for table %v in Db %v are %v", spec.Ts.Name, spec.dbNum, keys)
@@ -252,7 +255,7 @@ func fillSonicKeySpec(xpath string , tableName string, keyStr string) ( []KeySpe
 	return retdbFormat
 }
 
-func XlateToDb(path string, opcode int, d *db.DB, yg *ygot.GoStruct, yt *interface{}, jsonPayload []byte, txCache interface{}) (map[int]map[db.DBNum]map[string]map[string]db.Value, error) {
+func XlateToDb(path string, opcode int, d *db.DB, yg *ygot.GoStruct, yt *interface{}, jsonPayload []byte, txCache interface{}, skipOrdTbl *bool) (map[int]map[db.DBNum]map[string]map[string]db.Value, error) {
 
 	var err error
 	requestUri := path
@@ -270,7 +273,9 @@ func XlateToDb(path string, opcode int, d *db.DB, yg *ygot.GoStruct, yt *interfa
 
 	err = json.Unmarshal([]byte(jsonStr), &jsonData)
 	if err != nil {
-		log.Errorf("Error: failed to unmarshal json.")
+		errStr := "Error: failed to unmarshal json."
+		log.Error(errStr)
+		err = tlerr.InternalError{Format: errStr}
 		return nil, err
 	}
 
@@ -300,7 +305,7 @@ func XlateToDb(path string, opcode int, d *db.DB, yg *ygot.GoStruct, yt *interfa
 
 	case DELETE:
 		log.Info("DELETE case")
-		err = dbMapDelete(d, yg, opcode, path, requestUri, jsonData, result, txCache)
+		err = dbMapDelete(d, yg, opcode, path, requestUri, jsonData, result, txCache, skipOrdTbl)
 		if err != nil {
 			log.Errorf("Error: Data translation from yang to db failed for delete request.")
 		}
@@ -324,7 +329,6 @@ func GetAndXlateFromDB(uri string, ygRoot *ygot.GoStruct, dbs [db.MaxDB]*db.DB, 
 		err := TraverseDb(dbs, spec, &dbresult, nil)
 		if err != nil {
 			log.Error("TraverseDb() failure")
-			return payload, err
 		}
 	}
 
@@ -521,5 +525,9 @@ func CallRpcMethod(path string, body []byte, dbs [db.MaxDB]*db.DB) ([]byte, erro
 	}
 
 	return ret, err
+}
+
+func AddModelCpbltInfo() map[string]*mdlInfo {
+	return xMdlCpbltMap
 }
 

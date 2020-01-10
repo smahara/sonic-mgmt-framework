@@ -26,7 +26,7 @@ module sonic-route-map {
     import sonic-vlan-interface {
         prefix svlanint;
     }
- 
+
     organization
         "SONiC";
 
@@ -122,14 +122,14 @@ module sonic-route-map {
                     type inet:ip-address;
                     description
                         "List of IP addresses in the neighbor set";
-			        max-elements 1;
+                    max-elements 1;
                 }
 
                 leaf-list match_tag {
                     type tag-type;
                     description
                         "Value of the tag set member";
-			        max-elements 1;
+                    max-elements 1;
                 }
 
                 leaf match_med{
@@ -176,10 +176,6 @@ module sonic-route-map {
                 }
 
                 leaf set_next_hop{
-                    type string;
-                }
-
-                leaf set_med{
                     type string;
                 }
 

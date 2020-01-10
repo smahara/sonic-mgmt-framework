@@ -29,23 +29,47 @@ import (
 //Checks max-elements defined with (current number of entries
 //getting added + entries already added and present in request
 //cache + entries present in Redis DB)
-func (c *CVL) checkMaxElemConstraint(tableName string) CVLRetCode {
+func (c *CVL) checkMaxElemConstraint(op CVLOperation, tableName string) CVLRetCode {
 	var nokey []string
+
+	if (op != OP_CREATE) && (op != OP_DELETE) {
+		//Nothing to do, just return
+		return CVL_SUCCESS
+	}
 
 	if modelInfo.tableInfo[tableName].redisTableSize == -1 {
 		//No limit for table size
 		return CVL_SUCCESS
 	}
 
-	redisEntries, err := luaScripts["count_entries"].Run(redisClient, nokey, tableName).Result()
-	curSize := int(redisEntries.(int64))
+	curSize, exists := c.maxTableElem[tableName]
 
-	if err != nil {
-		CVL_LOG(WARNING,"Unable to fetch current size of table %s from Redis, err= %v",
-		tableName, err)
-		return CVL_FAILURE
+	if (exists == false) { //fetch from Redis first time in the session
+		redisEntries, err := luaScripts["count_entries"].Run(redisClient, nokey, tableName + "|*").Result()
+		curSize = int(redisEntries.(int64))
+
+		if err != nil {
+			CVL_LOG(WARNING,"Unable to fetch current size of table %s from Redis, err= %v",
+			tableName, err)
+			return CVL_FAILURE
+		}
+
+		//Store the current table size
+		c.maxTableElem[tableName] = curSize
 	}
 
+	if (op == OP_DELETE) {
+		//For delete operation we need to reduce the count.
+		//Because same table can be deleted and added back 
+		//in same session.
+
+		if (curSize > 0) {
+			c.maxTableElem[tableName] = (curSize - 1)
+		}
+		return CVL_SUCCESS
+	}
+
+	//Otherwise CREATE case
 	if curSize >=  modelInfo.tableInfo[tableName].redisTableSize {
 		CVL_LOG(ERROR, "%s table size has already reached to max-elements %d",
 		tableName, modelInfo.tableInfo[tableName].redisTableSize)
@@ -53,25 +77,18 @@ func (c *CVL) checkMaxElemConstraint(tableName string) CVLRetCode {
 		return CVL_SYNTAX_ERROR
 	}
 
-	//Count only the entries getting created
-	for _, cfgDataArr := range c.requestCache[tableName] {
-		for _, cfgReqData := range cfgDataArr {
-			if (cfgReqData.reqData.VOp != OP_CREATE) {
-				continue
-			}
+	curSize = curSize + 1
+	if (curSize >  modelInfo.tableInfo[tableName].redisTableSize) {
+		//Does not meet the constraint
+		CVL_LOG(ERROR, "Max-elements check failed for table '%s'," +
+		" current size = %v, size in schema = %v",
+		tableName, curSize, modelInfo.tableInfo[tableName].redisTableSize)
 
-			curSize = curSize + 1
-			if (curSize >  modelInfo.tableInfo[tableName].redisTableSize) {
-				//Does not meet the constraint
-				CVL_LOG(ERROR, "Max-elements check failed for table '%s'," +
-				" current size = %v, size in schema = %v",
-				tableName, curSize, modelInfo.tableInfo[tableName].redisTableSize)
-
-				return CVL_SYNTAX_ERROR
-			}
-		}
+		return CVL_SYNTAX_ERROR
 	}
 
+	//Update current size
+	c.maxTableElem[tableName] = curSize
 
 	return CVL_SUCCESS
 }
@@ -92,12 +109,13 @@ func (c *CVL) addChildLeaf(config bool, tableName string, parent *yparser.YParse
         }
 
 	//Batch leaf creation
-	c.batchLeaf = c.batchLeaf + name + "#" + value + "#"
+	c.batchLeaf = c.batchLeaf + name + "|" + value + "|"
 	//Check if this leaf has leafref,
 	//If so add the add redis key to its table so that those 
 	// details can be fetched for dependency validation
 
-	c.addLeafRef(config, tableName, name, value)
+	//TBD : not needed as Leafref is not handled by libyang
+	//c.addLeafRef(config, tableName, name, value)
 }
 
 func (c *CVL) generateTableFieldsData(config bool, tableName string, jsonNode *jsonquery.Node,
@@ -191,7 +209,7 @@ func (c *CVL) generateTableData(config bool, jsonNode *jsonquery.Node)(*yparser.
 		//For each field check if is key 
 		//If it is key, create list as child of top container
 		// Get all key name/value pairs
-		if yangListName := getRedisKeyToYangList(tableName, jsonNode.Data); yangListName!= "" {
+		if yangListName := getRedisTblToYangList(tableName, jsonNode.Data); yangListName!= "" {
 			tableName = yangListName
 		}
 		keyValuePair := getRedisToYangKeys(tableName, jsonNode.Data)

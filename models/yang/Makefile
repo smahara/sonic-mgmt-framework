@@ -21,11 +21,13 @@ TOPDIR := ../..
 BUILD_DIR := $(TOPDIR)/build
 
 YANGAPI_DIR                 := $(TOPDIR)/build/yaml
-YANGDIR                     := $(TOPDIR)/models/yang
-YANGDIR_COMMON              := $(TOPDIR)/models/yang/common
-YANGDIR_OPENAPI             := $(TOPDIR)/models/openapi
-YANGDIR_ANNOTATIONS         := $(TOPDIR)/models/yang/annotations
+YANGDIR                     := .
+YANGDIR_COMMON              := $(YANGDIR)/common
+YANGDIR_ANNOTATIONS         := $(YANGDIR)/annotations
+YANGDIR_EXTENSIONS_DIR	    := $(YANGDIR)/extensions
+YANGDIR_SONIC               := $(YANGDIR)/sonic
 YANG_MOD_FILES              := $(shell find $(YANGDIR) -maxdepth 1 -name '*.yang' | sort)
+YANG_MOD_EXTENSION_FILES    := $(shell find $(YANGDIR_EXTENSIONS_DIR) -maxdepth 1 -name '*.yang' | sort)
 YANG_ANNOTATIONS_FILES      := $(shell find $(YANGDIR_ANNOTATIONS) -name '*.yang' | sort)
 YANG_COMMON_FILES           := $(shell find $(YANGDIR_COMMON) -name '*.yang' | sort)
 
@@ -36,29 +38,40 @@ PYANG_BIN        := pyang
 
 .PHONY: all yamlGen annot
 
-all: yamlGen annot allyangs.tree allyangs_tree.html
+all: yamlGen annot allyangs.tree allyangs_tree.html yang_tree.md
 
-yamlGen: $(YANGAPI_DIR)/.done
+yamlGen: $(YANGAPI_DIR)/.done $(YANGAPI_DIR)/api_ignore
 
 annot:
-	$(PYANG_BIN) --strict \
-		-p $(YANGDIR_COMMON):$(YANGDIR) $(YANG_ANNOTATIONS_FILES)
+	$(PYANG_BIN) --strict -f tree \
+		-p $(YANGDIR_COMMON):$(YANGDIR_SONIC):$(YANGDIR_ANNOTATIONS):$(YANGDIR):$(YANGDIR_EXTENSIONS_DIR) \
+		$(YANG_ANNOTATIONS_FILES) > /dev/null
 
-allyangs.tree:  $(YANG_MOD_FILES) $(YANG_COMMON_FILES)
+allyangs.tree:  $(YANG_MOD_FILES) $(YANG_COMMON_FILES) $(YANG_MOD_EXTENSION_FILES)
 	$(PYANG_BIN) \
 		-f tree \
-		-o $(YANGDIR)/$@ \
-		-p $(YANGDIR_COMMON):$(YANGDIR) \
-		$(YANG_MOD_FILES)
+		-o $@ \
+		-p $(YANGDIR_COMMON):$(YANGDIR):$(YANGDIR_EXTENSIONS_DIR) \
+		$(YANG_MOD_FILES) $(YANG_MOD_EXTENSION_FILES)
 	@echo "+++++ Generation of  YANG tree for Yang modules completed +++++"
 
-allyangs_tree.html:  $(YANG_MOD_FILES) $(YANG_COMMON_FILES)
+allyangs_tree.html:  $(YANG_MOD_FILES) $(YANG_COMMON_FILES) $(YANG_MOD_EXTENSION_FILES)
 	$(PYANG_BIN) \
 		-f jstree \
-		-o $(YANGDIR)/$@ \
-		-p $(YANGDIR_COMMON):$(YANGDIR) \
-		$(YANG_MOD_FILES)
+		-o $@ \
+		-p $(YANGDIR_COMMON):$(YANGDIR):$(YANGDIR_EXTENSIONS_DIR) \
+		$(YANG_MOD_FILES) $(YANG_MOD_EXTENSION_FILES)
 	@echo "+++++ Generation of  HTML tree for Yang modules completed +++++"
+
+yang_tree.md:  $(YANG_MOD_FILES) $(YANG_COMMON_FILES) $(YANG_MOD_EXTENSION_FILES)
+	$(PYANG_BIN) \
+		-f doctree \
+		-o $@ \
+		--extdir $(YANGDIR_EXTENSIONS_DIR) \
+		--plugindir $(PYANG_PLUGIN_DIR) \
+		-p $(YANGDIR_COMMON):$(YANGDIR):$(YANGDIR_EXTENSIONS_DIR) \
+		$(YANG_MOD_FILES) $(YANG_MOD_EXTENSION_FILES)
+	@echo "+++++ Generation of  DOC tree for Yang modules completed +++++"
 
 #======================================================================
 # Generate YAML files for Yang modules
@@ -70,10 +83,17 @@ $(YANGAPI_DIR)/.done:  $(YANG_MOD_FILES) $(YANG_COMMON_FILES)
 		-f swaggerapi \
 		--outdir $(YANGAPI_DIR) \
 		--plugindir $(PYANG_PLUGIN_DIR) \
-		-p $(YANGDIR_COMMON):$(YANGDIR) \
-		$(YANG_MOD_FILES)
+		-p $(YANGDIR_COMMON):$(YANGDIR):$(YANGDIR_EXTENSIONS_DIR) \
+		$(YANG_MOD_FILES) $(YANG_MOD_EXTENSION_FILES)
 	@echo "+++++ Generation of  YAML files for Yang modules completed +++++"
 	touch $@
+
+#======================================================================
+# Generate api_ignore file
+#======================================================================
+$(YANGAPI_DIR)/api_ignore: $(YANG_ANNOTATIONS_FILES)
+	echo "# Yangs ignored" > $@
+	(cd $(YANGDIR_ANNOTATIONS) && ls -f *.yang) >> $@
 
 #======================================================================
 # Cleanups
@@ -81,4 +101,4 @@ $(YANGAPI_DIR)/.done:  $(YANG_MOD_FILES) $(YANG_COMMON_FILES)
 
 clean:
 	rm -rf $(YANGAPI_DIR)
-	rm -rf allyangs.tree allyangs_tree.html
+	rm -rf allyangs.tree allyangs_tree.html yang_tree.md

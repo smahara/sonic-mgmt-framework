@@ -113,8 +113,8 @@ func clearStpDataFromConfigDb() error {
 	var err error
 	stpGlobalTbl := db.TableSpec{Name: "STP"}
 	stpVlanTbl := db.TableSpec{Name: "STP_VLAN"}
-	stpVlanIntfTbl := db.TableSpec{Name: "STP_VLAN_INTF"}
-	stpIntfTbl := db.TableSpec{Name: "STP_INTF"}
+	stpVlanIntfTbl := db.TableSpec{Name: "STP_VLAN_PORT"}
+	stpIntfTbl := db.TableSpec{Name: "STP_PORT"}
 
 	d := getConfigDb()
 	if d == nil {
@@ -166,7 +166,7 @@ func clearStpDataFromConfigDb() error {
 
 func processGetRequestToFile(url string, expectedRespJson string, errorCase bool) func(*testing.T) {
 	return func(t *testing.T) {
-		response, err := Get(GetRequest{Path:url})
+		response, err := Get(GetRequest{Path: url, User: "admin", Group: "admin"})
 		if err != nil && !errorCase {
 			t.Errorf("Error %v received for Url: %s", err, url)
 		}

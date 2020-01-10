@@ -31,6 +31,9 @@ import (
     "translib/tlerr"
     "bufio"
     "os"
+    "fmt"
+    "encoding/json"
+    "time"
 )
 
 func init () {
@@ -52,26 +55,8 @@ func init () {
     XlateFuncBind("YangToDb_intf_tbl_key_xfmr", YangToDb_intf_tbl_key_xfmr)
     XlateFuncBind("DbToYang_intf_tbl_key_xfmr", DbToYang_intf_tbl_key_xfmr)
     XlateFuncBind("YangToDb_intf_name_empty_xfmr", YangToDb_intf_name_empty_xfmr)
-    /*--show ip ARP/neighbors changes start--*/
-    XlateFuncBind("DbToYang_neigh_tbl_get_all_ipv4_xfmr", DbToYang_neigh_tbl_get_all_ipv4_xfmr)
-    XlateFuncBind("DbToYang_neigh_tbl_get_all_ipv6_xfmr", DbToYang_neigh_tbl_get_all_ipv6_xfmr)
-    XlateFuncBind("DbToYang_neigh_tbl_key_xfmr", DbToYang_neigh_tbl_key_xfmr)
-    XlateFuncBind("YangToDb_neigh_tbl_key_xfmr", YangToDb_neigh_tbl_key_xfmr)
-    /*--show ip ARP/neighbors changes end--*/
+    XlateFuncBind("rpc_clear_counters", rpc_clear_counters)
 }
-
-/*--show ip ARP/neighbors changes start--*/
-const (
-    NEIGH_IPv4_PREFIX = "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4/neighbors"
-    NEIGH_IPv4_PREFIX_IP = NEIGH_IPv4_PREFIX+"/neighbor"
-    NEIGH_IPv4_PREFIX_STATE_IP = NEIGH_IPv4_PREFIX_IP+"/state/ip"
-    NEIGH_IPv4_PREFIX_STATE_LL = NEIGH_IPv4_PREFIX_IP+"/state/link-layer-address"
-    NEIGH_IPv6_PREFIX = "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/neighbors"
-    NEIGH_IPv6_PREFIX_IP = NEIGH_IPv6_PREFIX+"/neighbor"
-    NEIGH_IPv6_PREFIX_STATE_IP = NEIGH_IPv6_PREFIX_IP+"/state/ip"
-    NEIGH_IPv6_PREFIX_STATE_LL = NEIGH_IPv6_PREFIX_IP+"/state/link-layer-address"
-)
-/*--show ip ARP/neighbors changes end--*/
 
 const (
     PORT_INDEX         = "index"
@@ -209,6 +194,161 @@ func getIntfsRoot (s *ygot.GoStruct) *ocbinds.OpenconfigInterfaces_Interfaces {
     return deviceObj.Interfaces
 }
 
+/* Perform action based on the operation and Interface type wrt Interface name key */
+/* It should handle only Interface name key xfmr operations */
+func performIfNameKeyXfmrOp(inParams *XfmrParams, requestUriPath *string, ifName *string, ifType E_InterfaceType) error {
+    var err error
+
+    switch inParams.oper {
+    case DELETE:
+        if *requestUriPath == "/openconfig-interfaces:interfaces/interface" {
+            switch ifType {
+            case IntfTypeVlan:
+                /* VLAN Interface Delete Handling */
+                /* Update the map for VLAN and VLAN MEMBER table */
+                err := deleteVlanIntfAndMembers(inParams, ifName)
+                if err != nil {
+                    log.Errorf("Deleting VLAN: %s failed! Err:%v", *ifName, err)
+                    return tlerr.InvalidArgsError{Format: err.Error()}
+                }
+            case IntfTypePortChannel:
+                err := deleteLagIntfAndMembers(inParams, ifName)
+                if err != nil {
+                    log.Errorf("Deleting LAG: %s failed! Err:%v", *ifName, err)
+                    return tlerr.InvalidArgsError{Format: err.Error()}
+                }
+            case IntfTypeLoopback:
+                err := deleteLoopbackIntf(inParams, ifName)
+                if err != nil {
+                    log.Errorf("Deleting Loopback: %s failed! Err:%s", *ifName, err.Error())
+                    return tlerr.InvalidArgsError{Format: err.Error()}
+                }
+            default:
+                errStr := "Invalid interface for delete:"+*ifName
+                log.Error(errStr)
+                return tlerr.InvalidArgsError{Format:errStr}
+            }
+        }
+    case CREATE:
+    case UPDATE:
+        if *requestUriPath == "/openconfig-interfaces:interfaces/interface/config" {
+            switch ifType {
+            case IntfTypeVlan:
+                enableStpOnVlanCreation(inParams, ifName)
+            }
+        }
+    }
+    return err
+}
+
+/* RPC for clear counters */
+var rpc_clear_counters RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) ([]byte, error) {
+    var err error
+    var result struct {
+        Output struct {
+            Status int32 `json:"status"`
+            Status_detail string`json:"status-detail"`
+        } `json:"sonic-interface:output"`
+    }
+    result.Output.Status = 1
+    /* Get input data */
+    var mapData map[string]interface{}
+    err = json.Unmarshal(body, &mapData)
+    if err != nil {
+        log.Info("Failed to unmarshall given input data")
+        result.Output.Status_detail = fmt.Sprintf("Error: Failed to unmarshall given input data")
+        return json.Marshal(&result)
+    }
+    input, _ := mapData["sonic-interface:input"]
+    mapData = input.(map[string]interface{})
+    input = mapData["interface-param"]
+    input_str := fmt.Sprintf("%v", input)
+    input_str = strings.ToUpper(string(input_str))
+
+    portOidmapTs := &db.TableSpec{Name: "COUNTERS_PORT_NAME_MAP"}
+    ifCountInfo, err := dbs[db.CountersDB].GetMapAll(portOidmapTs)
+    if err != nil {
+        result.Output.Status_detail = fmt.Sprintf("Error: Port-OID (Counters) get for all the interfaces failed!")
+        return json.Marshal(&result)
+    }
+
+    if input_str == "ALL" {
+        log.Info("rpc_clear_counters : Clear Counters for all interfaces")
+        for  intf, oid := range ifCountInfo.Field {
+            verr, cerr := resetCounters(dbs[db.CountersDB], oid)
+            if verr != nil || cerr != nil {
+                log.Info("Failed to reset counters for ", intf)
+            } else {
+                log.Info("Counters reset for " + intf)
+            }
+        }
+    } else if input_str == "ETHERNET" || input_str == "PORTCHANNEL" {
+        log.Info("rpc_clear_counters : Reset counters for given interface type")
+        for  intf, oid := range ifCountInfo.Field {
+            if strings.HasPrefix(strings.ToUpper(intf), input_str) {
+                verr, cerr := resetCounters(dbs[db.CountersDB], oid)
+                if verr != nil || cerr != nil {
+                    log.Error("Failed to reset counters for: ", intf)
+                } else {
+                    log.Info("Counters reset for " + intf)
+                }
+            }
+        }
+    } else {
+        log.Info("rpc_clear_counters: Clear counters for given interface name")
+        id := getIdFromIntfName(&input_str)
+        if strings.HasPrefix(input_str, "ETHERNET") {
+            input_str = "Ethernet" + id
+        } else if strings.HasPrefix(input_str, "PORTCHANNEL") {
+            input_str = "PortChannel" + id
+        } else {
+            log.Info("Invalid Interface")
+            result.Output.Status_detail = fmt.Sprintf("Error: Clear Counters not supported for %s", input_str)
+            return json.Marshal(&result)
+        }
+        oid, ok := ifCountInfo.Field[input_str]
+        if !ok {
+            result.Output.Status_detail = fmt.Sprintf("Error: OID info not found in COUNTERS_PORT_NAME_MAP for %s", input_str)
+            return json.Marshal(&result)
+        }
+        verr, cerr := resetCounters(dbs[db.CountersDB], oid)
+        if verr != nil {
+            result.Output.Status_detail = fmt.Sprintf("Error: Failed to get counter values from COUNTERS table for %s", input_str)
+            return json.Marshal(&result)
+        }
+        if cerr != nil {
+            log.Info("Failed to reset counters values")
+            result.Output.Status_detail = fmt.Sprintf("Error: Failed to reset counters values for %s.", input_str)
+            return json.Marshal(&result)
+        }
+        log.Info("Counters reset for " + input_str)
+    }
+    result.Output.Status = 0
+    result.Output.Status_detail = "Success: Cleared Counters"
+    return json.Marshal(&result)
+}
+
+/* Reset counter values in COUNTERS_BACKUP table for given OID */
+func resetCounters(d *db.DB, oid string) (error,error) {
+    var verr,cerr error
+    CountrTblTs := db.TableSpec {Name: "COUNTERS"}
+    CountrTblTsCp := db.TableSpec { Name: "COUNTERS_BACKUP" }
+    value, verr := d.GetEntry(&CountrTblTs, db.Key{Comp: []string{oid}})
+    if verr == nil {
+        secs := time.Now().Unix()
+        timeStamp := strconv.FormatInt(secs, 10)
+        value.Field["LAST_CLEAR_TIMESTAMP"] = timeStamp
+        cerr = d.CreateEntry(&CountrTblTsCp, db.Key{Comp: []string{oid}}, value)
+    }
+    return verr, cerr
+}
+
+/* Extract ID from Intf String */
+func getIdFromIntfName(intfName *string) (string) {
+    var re = regexp.MustCompile("[0-9]+")
+    id := re.FindStringSubmatch(*intfName)
+    return id[0]
+}
 
 var YangToDb_intf_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
     log.Info("Entering YangToDb_intf_tbl_key_xfmr")
@@ -226,32 +366,9 @@ var YangToDb_intf_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (stri
     }
     requestUriPath, err := getYangPathFromUri(inParams.requestUri)
     log.Info("inParams.requestUri: ", requestUriPath)
-    if inParams.oper == DELETE && requestUriPath == "/openconfig-interfaces:interfaces/interface" {
-        switch intfType {
-        case IntfTypeVlan:
-            /* VLAN Interface Delete Handling */
-            /* Update the map for VLAN and VLAN MEMBER table */
-            err := deleteVlanIntfAndMembers(&inParams, &ifName)
-            if err != nil {
-                log.Errorf("Deleting VLAN: %s failed!", ifName)
-                return "", err
-            }
-        case IntfTypePortChannel:
-            err := deleteLagIntfAndMembers(&inParams, &ifName)
-            if err != nil {
-                log.Errorf("Deleting LAG: %s failed!", ifName)
-                return "", err
-            }
-        case IntfTypeLoopback:
-            err := deleteLoopbackIntf(&inParams, &ifName)
-            if err != nil {
-                log.Errorf("Deleting Loopback: %s failed!", ifName)
-                return "", err
-            }
-        }
-        log.Errorf("Invalid interface for delete:%s", ifName)
-        return "", err
-
+    err = performIfNameKeyXfmrOp(&inParams, &requestUriPath, &ifName, intfType)
+    if err != nil {
+        return "", tlerr.InvalidArgsError{Format: err.Error()}
     }
     return ifName, err
 }
@@ -262,7 +379,7 @@ var DbToYang_intf_tbl_key_xfmr  KeyXfmrDbToYang = func(inParams XfmrParams) (map
     res_map := make(map[string]interface{})
 
     log.Info("Interface Name = ", inParams.key)
-    res_map["name"] = inParams.key 
+    res_map["name"] = inParams.key
     return res_map, nil
 }
 
@@ -677,9 +794,15 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
         count := 0
         _ = interfaceIPcount(tblName, d, &ifName, &count)
         if (count - len(intfIpMap)) == 1 {
-            _, dbErr := d.GetEntry(&db.TableSpec{Name:tblName}, db.Key{Comp: []string{ifName}})
-            if dbErr == nil {
-                subIntfmap[tblName][ifName] = data
+            IntfMapObj, err := d.GetMapAll(&db.TableSpec{Name:tblName+"|"+ifName})
+            if err != nil {
+                return nil, errors.New("Entry "+tblName+"|"+ifName+" missing from ConfigDB")
+            }
+            IntfMap := IntfMapObj.Field
+            if len(IntfMap) == 1 {
+                if _, ok := IntfMap["NULL"]; ok {
+                    subIntfmap[tblName][ifName] = data
+                }
             }
         }
     }
@@ -687,14 +810,18 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
     return subIntfmap, err
 }
 
-/* Validate IP exists in the INTERFACE table of corresponding Interface type */
-func validateIPExists(tblName string, d *db.DB, ifName *string) error {
-    ipCnt := 0
-    _    = interfaceIPcount(tblName, d, ifName, &ipCnt)
-    if ipCnt > 0 {
+/* Validate interface in L3 mode, if true return error */
+func validateL3ConfigExists(d *db.DB, ifName *string) error {
+    intfType, _, ierr := getIntfTypeByName(*ifName)
+    if intfType == IntfTypeUnset || ierr != nil {
+        return errors.New("Invalid interface type IntfTypeUnset");
+    }
+    intTbl := IntfTypeTblMap[intfType]
+    IntfMap, _ := d.GetMapAll(&db.TableSpec{Name:intTbl.cfgDb.intfTN+"|"+*ifName})
+    if IntfMap.IsPopulated() {
         errStr := "L3 Configuration exists for Interface: " + *ifName
         log.Error(errStr)
-        return errors.New(errStr)
+        return tlerr.InvalidArgsError{Format:errStr}
     }
     return nil
 }
@@ -1019,10 +1146,10 @@ func deleteLoopbackIntf(inParams *XfmrParams, loName *string) error {
         log.Errorf("Retrieving data from LOOPBACK_INTERFACE table for Loopback: %s failed!", *loName)
         return err
     }
-    err = validateIPExists(intTbl.cfgDb.intfTN, inParams.d, loName)
-	if err != nil {
-		return err
-	}
+    err = validateL3ConfigExists(inParams.d, loName)
+    if err != nil {
+        return err
+    }
     resMap[intTbl.cfgDb.intfTN] = loMap
 
     subOpMap[db.ConfigDB] = resMap
@@ -1258,42 +1385,42 @@ func getIntfCountersTblKey (d *db.DB, ifKey string) (string, error) {
     return oid, err
 }
 
-func getSpecificCounterAttr(targetUriPath string, entry *db.Value, counter_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters) (bool, error) {
+func getSpecificCounterAttr(targetUriPath string, entry *db.Value, entry_backup *db.Value, counter_val *ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters) (bool, error) {
 
     var e error
 
     switch targetUriPath {
     case "/openconfig-interfaces:interfaces/interface/state/counters/in-octets":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_IN_OCTETS", &counter_val.InOctets)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_IN_OCTETS", &counter_val.InOctets)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/in-unicast-pkts":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_IN_UCAST_PKTS", &counter_val.InUnicastPkts)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_IN_UCAST_PKTS", &counter_val.InUnicastPkts)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/in-broadcast-pkts":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_IN_BROADCAST_PKTS", &counter_val.InBroadcastPkts)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_IN_BROADCAST_PKTS", &counter_val.InBroadcastPkts)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/in-multicast-pkts":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_IN_MULTICAST_PKTS", &counter_val.InMulticastPkts)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_IN_MULTICAST_PKTS", &counter_val.InMulticastPkts)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/in-errors":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_IN_ERRORS", &counter_val.InErrors)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_IN_ERRORS", &counter_val.InErrors)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/in-discards":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_IN_DISCARDS", &counter_val.InDiscards)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_IN_DISCARDS", &counter_val.InDiscards)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/in-pkts":
         var inNonUCastPkt, inUCastPkt *uint64
         var in_pkts uint64
 
-        e = getCounters(entry, "SAI_PORT_STAT_IF_IN_NON_UCAST_PKTS", &inNonUCastPkt)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_IN_NON_UCAST_PKTS", &inNonUCastPkt)
         if e == nil {
-            e = getCounters(entry, "SAI_PORT_STAT_IF_IN_UCAST_PKTS", &inUCastPkt)
+            e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_IN_UCAST_PKTS", &inUCastPkt)
             if e != nil {
                 return true, e
             }
@@ -1305,36 +1432,42 @@ func getSpecificCounterAttr(targetUriPath string, entry *db.Value, counter_val *
         }
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/out-octets":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_OUT_OCTETS", &counter_val.OutOctets)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_OUT_OCTETS", &counter_val.OutOctets)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/out-unicast-pkts":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_OUT_UCAST_PKTS", &counter_val.OutUnicastPkts)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_OUT_UCAST_PKTS", &counter_val.OutUnicastPkts)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/out-broadcast-pkts":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_OUT_BROADCAST_PKTS", &counter_val.OutBroadcastPkts)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_OUT_BROADCAST_PKTS", &counter_val.OutBroadcastPkts)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/out-multicast-pkts":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_OUT_MULTICAST_PKTS", &counter_val.OutMulticastPkts)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_OUT_MULTICAST_PKTS", &counter_val.OutMulticastPkts)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/out-errors":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_OUT_ERRORS", &counter_val.OutErrors)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_OUT_ERRORS", &counter_val.OutErrors)
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/out-discards":
-        e = getCounters(entry, "SAI_PORT_STAT_IF_OUT_DISCARDS", &counter_val.OutDiscards)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_OUT_DISCARDS", &counter_val.OutDiscards)
+        return true, e
+
+    case "/openconfig-interfaces:interfaces/interface/state/counters/last-clear":
+        timestampStr := (entry_backup.Field["LAST_CLEAR_TIMESTAMP"])
+        timestamp, _ := strconv.ParseUint(timestampStr, 10, 64)
+        counter_val.LastClear = &timestamp
         return true, e
 
     case "/openconfig-interfaces:interfaces/interface/state/counters/out-pkts":
         var outNonUCastPkt, outUCastPkt *uint64
         var out_pkts uint64
 
-        e = getCounters(entry, "SAI_PORT_STAT_IF_OUT_NON_UCAST_PKTS", &outNonUCastPkt)
+        e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_OUT_NON_UCAST_PKTS", &outNonUCastPkt)
         if e == nil {
-            e = getCounters(entry, "SAI_PORT_STAT_IF_OUT_UCAST_PKTS", &outUCastPkt)
+            e = getCounters(entry, entry_backup, "SAI_PORT_STAT_IF_OUT_UCAST_PKTS", &outUCastPkt)
             if e != nil {
                 return true, e
             }
@@ -1352,24 +1485,25 @@ func getSpecificCounterAttr(targetUriPath string, entry *db.Value, counter_val *
     return false, nil
 }
 
-func getCounters(entry *db.Value, attr string, counter_val **uint64 ) error {
+func getCounters(entry *db.Value, entry_backup *db.Value, attr string, counter_val **uint64 ) error {
 
     var ok bool = false
-    var val string
     var err error
-
-    val, ok = entry.Field[attr]
+    val1, ok := entry.Field[attr]
     if !ok {
         return errors.New("Attr " + attr + "doesn't exist in IF table Map!")
     }
+    val2, ok := entry_backup.Field[attr]
+    if !ok {
+        return errors.New("Attr " + attr + "doesn't exist in IF backup table Map!")
+    }
 
-    if len(val) > 0 {
-        v, e := strconv.ParseUint(val, 10, 64)
-        if err == nil {
-            *counter_val = &v
-            return nil
-        }
-        err = e
+    if len(val1) > 0 {
+        v, _ := strconv.ParseUint(val1, 10, 64)
+        v_backup, _ := strconv.ParseUint(val2, 10, 64)
+        val := v-v_backup
+        *counter_val = &val
+        return nil
     }
     return err
 }
@@ -1377,9 +1511,8 @@ func getCounters(entry *db.Value, attr string, counter_val **uint64 ) error {
 var portCntList [] string = []string {"in-octets", "in-unicast-pkts", "in-broadcast-pkts", "in-multicast-pkts",
 "in-errors", "in-discards", "in-pkts", "out-octets", "out-unicast-pkts",
 "out-broadcast-pkts", "out-multicast-pkts", "out-errors", "out-discards",
-"out-pkts"}
+"out-pkts","last-clear"}
 var populatePortCounters PopulateIntfCounters = func (inParams XfmrParams, counter *ocbinds.OpenconfigInterfaces_Interfaces_Interface_State_Counters) (error) {
-
     pathInfo := NewPathInfo(inParams.uri)
     intfName := pathInfo.Var("name")
     targetUriPath, err := getYangPathFromUri(pathInfo.Path)
@@ -1397,18 +1530,31 @@ var populatePortCounters PopulateIntfCounters = func (inParams XfmrParams, count
         return dbErr
     }
     CounterData := entry
+    cntTs_cp := &db.TableSpec { Name: "COUNTERS_BACKUP" }
+    entry_backup, dbErr := inParams.dbs[inParams.curDb].GetEntry(cntTs_cp, db.Key{Comp: []string{oid}})
+    if dbErr != nil {
+        m := make(map[string]string)
+        log.Info("PopulateIntfCounters : not able find the oid entry in DB COUNTERS_BACKUP table")
+        /* Frame backup data with 0 as counter values */
+        for  attr,_ := range entry.Field {
+            m[attr] = "0"
+        }
+        m["LAST_CLEAR_TIMESTAMP"] = "0"
+        entry_backup = db.Value{Field: m}
+    }
+    CounterBackUpData := entry_backup
 
     switch (targetUriPath) {
     case "/openconfig-interfaces:interfaces/interface/state/counters":
         for _, attr := range portCntList {
             uri := targetUriPath + "/" + attr
-            if ok, err := getSpecificCounterAttr(uri, &CounterData, counter); !ok || err != nil {
+            if ok, err := getSpecificCounterAttr(uri, &CounterData, &CounterBackUpData, counter); !ok || err != nil {
                 log.Info("Get Counter URI failed :", uri)
                 err = errors.New("Get Counter URI failed")
             }
         }
     default:
-        _, err = getSpecificCounterAttr(targetUriPath, &CounterData, counter)
+        _, err = getSpecificCounterAttr(targetUriPath, &CounterData, &CounterBackUpData, counter)
     }
 
     return err
@@ -1653,6 +1799,11 @@ var YangToDb_intf_eth_port_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrP
                         }
                     }
                 }
+                /* Check if L3 configs present on given physical interface */
+                err = validateL3ConfigExists(inParams.d, &ifName)
+                if err != nil {
+                    return nil, err
+                }
 
             case DELETE:
                 log.Info("Delete member port")
@@ -1735,270 +1886,3 @@ var YangToDb_intf_eth_port_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrP
     }
     return memMap, err
 }
-
-/*--show ip ARP/neighbors changes start--*/
-var YangToDb_neigh_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
-    var neightbl_key string
-    var err error
-
-    log.Info("YangToDb_neigh_tbl_key_xfmr - inParams: ", inParams)
-    pathInfo := NewPathInfo(inParams.uri)
-    intfName := pathInfo.Var("name")
-    ipAddr := pathInfo.Var("ip")
-
-    neightbl_key = intfName + ":" +  ipAddr
-    log.Info("YangToDb_neigh_tbl_key_xfmr - key returned: ", neightbl_key)
-
-    return neightbl_key, err
-}
-
-var DbToYang_neigh_tbl_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
-    rmap := make(map[string]interface{})
-    var err error
-
-    log.Info("DbToYang_neigh_tbl_key_xfmr - inParams: ", inParams)
-    mykey := strings.Split(inParams.key,":")
-
-    rmap["ip"] =  inParams.key[(len(mykey[0])+1):]
-    return rmap, err
-}
-
-
-var DbToYang_neigh_tbl_get_all_ipv4_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (error) {
-    var err error
-    var ok bool
-
-    data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_neigh_tbl_get_all_ipv4_xfmr - data:", data)
-    pathInfo := NewPathInfo(inParams.uri)
-    targetUriPath, err := getYangPathFromUri(pathInfo.Path)
-    log.Info("DbToYang_neigh_tbl_get_all_ipv4_xfmr - targetUriPath: ", targetUriPath)
-
-    var intfObj *ocbinds.OpenconfigInterfaces_Interfaces_Interface
-    var subIntfObj *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Subinterfaces_Subinterface
-    var neighObj *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Subinterfaces_Subinterface_Ipv4_Neighbors_Neighbor
-
-    intfsObj := getIntfsRoot(inParams.ygRoot)
-
-    intfNameRcvd := pathInfo.Var("name")
-    ipAddrRcvd := pathInfo.Var("ip")
-
-    if intfObj, ok = intfsObj.Interface[intfNameRcvd]; !ok {
-        intfObj, err = intfsObj.NewInterface(intfNameRcvd)
-        if err != nil {
-            log.Error("Creation of interface subtree failed!")
-            return err
-        }
-    }
-    ygot.BuildEmptyTree(intfObj)
-
-    if subIntfObj, ok = intfObj.Subinterfaces.Subinterface[0]; !ok {
-        subIntfObj, err = intfObj.Subinterfaces.NewSubinterface(0)
-        if err != nil {
-            log.Error("Creation of subinterface subtree failed!")
-            return err
-        }
-    }
-    ygot.BuildEmptyTree(subIntfObj)
-
-    for key, entry := range data["NEIGH_TABLE"] {
-        var ipAddr string
-
-        /*separate ip and interface*/
-        tokens := strings.Split(key, ":")
-        intfName := tokens[0]
-        ipAddr = key[len(intfName)+1:]
-
-        linkAddr := data["NEIGH_TABLE"][key].Field["neigh"]
-        if (linkAddr == "") {
-            log.Info("No mac-address found for IP: ", ipAddr)
-            continue;
-        }
-
-        addrFamily := data["NEIGH_TABLE"][key].Field["family"]
-        if (addrFamily == "") {
-            log.Info("No address family found for IP: ", ipAddr)
-            continue;
-        }
-
-        /*The transformer returns complete table regardless of the interface.
-          First check if the interface and IP of this redis entry matches one
-          available in the received URI
-        */
-        if (strings.Contains(targetUriPath, "ipv4") && addrFamily != "IPv4") ||
-            intfName != intfNameRcvd ||
-            (ipAddrRcvd != "" && ipAddrRcvd != ipAddr) {
-                log.Info("Skipping entry: ", entry, "for interface: ", intfName, " and IP:", ipAddr,
-                         "interface received: ", intfNameRcvd, " IP received: ", ipAddrRcvd)
-                continue
-        } else if strings.HasPrefix(targetUriPath, NEIGH_IPv4_PREFIX_STATE_LL) {
-            if neighObj, ok = subIntfObj.Ipv4.Neighbors.Neighbor[ipAddr]; !ok {
-                neighObj, err = subIntfObj.Ipv4.Neighbors.NewNeighbor(ipAddr)
-                if err != nil {
-                    log.Error("Creation of neighbor subtree failed!")
-                    return err
-                }
-            }
-            ygot.BuildEmptyTree(neighObj)
-            neighObj.State.LinkLayerAddress = &linkAddr
-            break
-        } else if strings.HasPrefix(targetUriPath, NEIGH_IPv4_PREFIX_STATE_IP) {
-            if neighObj, ok = subIntfObj.Ipv4.Neighbors.Neighbor[ipAddr]; !ok {
-                neighObj, err = subIntfObj.Ipv4.Neighbors.NewNeighbor(ipAddr)
-                if err != nil {
-                    log.Error("Creation of neighbor subtree failed!")
-                    return err
-                }
-            }
-            ygot.BuildEmptyTree(neighObj)
-            neighObj.State.Ip = &ipAddr
-            break
-        } else if strings.HasPrefix(targetUriPath, NEIGH_IPv4_PREFIX_IP) {
-            if neighObj, ok = subIntfObj.Ipv4.Neighbors.Neighbor[ipAddr]; !ok {
-                neighObj, err = subIntfObj.Ipv4.Neighbors.NewNeighbor(ipAddr)
-                if err != nil {
-                    log.Error("Creation of neighbor subtree failed!")
-                    return err
-                }
-            }
-            ygot.BuildEmptyTree(neighObj)
-            neighObj.State.Ip = &ipAddr
-            neighObj.State.LinkLayerAddress = &linkAddr
-            neighObj.State.Origin = 0
-            break
-        } else if strings.HasPrefix(targetUriPath, NEIGH_IPv4_PREFIX) {
-            if neighObj, ok = subIntfObj.Ipv4.Neighbors.Neighbor[ipAddr]; !ok {
-                neighObj, err = subIntfObj.Ipv4.Neighbors.NewNeighbor(ipAddr)
-                if err != nil {
-                    log.Error("Creation of neighbor subtree failed!")
-                    return err
-                }
-            }
-            ygot.BuildEmptyTree(neighObj)
-            neighObj.State.Ip = &ipAddr
-            neighObj.State.LinkLayerAddress = &linkAddr
-            neighObj.State.Origin = 0
-        }
-    }
-    return err
-}
-
-var DbToYang_neigh_tbl_get_all_ipv6_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (error) {
-    var err error
-    var ok bool
-
-    data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_neigh_tbl_get_all_ipv6_xfmr - data: ", data)
-    pathInfo := NewPathInfo(inParams.uri)
-    targetUriPath, err := getYangPathFromUri(pathInfo.Path)
-    log.Info("DbToYang_neigh_tbl_get_all_ipv6_xfmr - targetUriPath: ", targetUriPath)
-
-    var intfObj *ocbinds.OpenconfigInterfaces_Interfaces_Interface
-    var subIntfObj *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Subinterfaces_Subinterface
-    var neighObj *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Subinterfaces_Subinterface_Ipv6_Neighbors_Neighbor
-
-    intfsObj := getIntfsRoot(inParams.ygRoot)
-
-    intfNameRcvd := pathInfo.Var("name")
-    ipAddrRcvd := pathInfo.Var("ip")
-
-    if intfObj, ok = intfsObj.Interface[intfNameRcvd]; !ok {
-        intfObj, err = intfsObj.NewInterface(intfNameRcvd)
-        if err != nil {
-            log.Error("Creation of interface subtree failed!")
-            return err
-        }
-    }
-    ygot.BuildEmptyTree(intfObj)
-
-    if subIntfObj, ok = intfObj.Subinterfaces.Subinterface[0]; !ok {
-        subIntfObj, err = intfObj.Subinterfaces.NewSubinterface(0)
-        if err != nil {
-            log.Error("Creation of subinterface subtree failed!")
-            return err
-        }
-    }
-    ygot.BuildEmptyTree(subIntfObj)
-
-    for key, entry := range data["NEIGH_TABLE"] {
-        var ipAddr string
-
-        /*separate ip and interface*/
-        tokens := strings.Split(key, ":")
-        intfName := tokens[0]
-        ipAddr = key[len(intfName)+1:]
-
-        linkAddr := data["NEIGH_TABLE"][key].Field["neigh"]
-        if (linkAddr == "") {
-            log.Info("No mac-address found for IP: ", ipAddr)
-            continue;
-        }
-
-        addrFamily := data["NEIGH_TABLE"][key].Field["family"]
-        if (addrFamily == "") {
-            log.Info("No address family found for IP: ", ipAddr)
-            continue;
-        }
-
-        if (strings.Contains(targetUriPath, "ipv6") && addrFamily != "IPv6") ||
-            intfName != intfNameRcvd ||
-            (ipAddrRcvd != "" && ipAddrRcvd != ipAddr) {
-                log.Info("Skipping entry: ", entry, "for interface: ", intfName, " and IP:", ipAddr,
-                         "interface received: ", intfNameRcvd, " IP received: ", ipAddrRcvd)
-                continue
-        }else if strings.HasPrefix(targetUriPath, NEIGH_IPv6_PREFIX_STATE_LL) {
-            if neighObj, ok = subIntfObj.Ipv6.Neighbors.Neighbor[ipAddr]; !ok {
-                neighObj, err = subIntfObj.Ipv6.Neighbors.NewNeighbor(ipAddr)
-                if err != nil {
-                    log.Error("Creation of neighbor subtree failed!")
-                    return err
-                }
-            }
-            ygot.BuildEmptyTree(neighObj)
-            neighObj.State.LinkLayerAddress = &linkAddr
-            break
-        } else if strings.HasPrefix(targetUriPath, NEIGH_IPv6_PREFIX_STATE_IP) {
-            if neighObj, ok = subIntfObj.Ipv6.Neighbors.Neighbor[ipAddr]; !ok {
-                neighObj, err = subIntfObj.Ipv6.Neighbors.NewNeighbor(ipAddr)
-                if err != nil {
-                    log.Error("Creation of neighbor subtree failed!")
-                    return err
-                }
-            }
-            ygot.BuildEmptyTree(neighObj)
-            neighObj.State.Ip = &ipAddr
-            break
-        } else if strings.HasPrefix(targetUriPath, NEIGH_IPv6_PREFIX_IP) {
-            if neighObj, ok = subIntfObj.Ipv6.Neighbors.Neighbor[ipAddr]; !ok {
-                neighObj, err = subIntfObj.Ipv6.Neighbors.NewNeighbor(ipAddr)
-                if err != nil {
-                    log.Error("Creation of neighbor subtree failed!")
-                    return err
-                }
-            }
-            ygot.BuildEmptyTree(neighObj)
-            neighObj.State.Ip = &ipAddr
-            neighObj.State.LinkLayerAddress = &linkAddr
-            neighObj.State.IsRouter = true
-            neighObj.State.NeighborState = 0
-            neighObj.State.Origin = 0
-            break
-        } else if strings.HasPrefix(targetUriPath, NEIGH_IPv6_PREFIX) {
-            if neighObj, ok = subIntfObj.Ipv6.Neighbors.Neighbor[ipAddr]; !ok {
-                neighObj, err = subIntfObj.Ipv6.Neighbors.NewNeighbor(ipAddr)
-                if err != nil {
-                    log.Error("Creation of neighbor subtree failed!")
-                    return err
-                }
-            }
-            ygot.BuildEmptyTree(neighObj)
-            neighObj.State.Ip = &ipAddr
-            neighObj.State.LinkLayerAddress = &linkAddr
-            neighObj.State.IsRouter = true
-            neighObj.State.NeighborState = 0
-            neighObj.State.Origin = 0
-        }
-    }
-    return err
-}
-/*--show ip ARP/neighbors changes end--*/

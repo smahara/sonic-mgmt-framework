@@ -17,7 +17,7 @@
 #                                                                              #
 ################################################################################
 
-.PHONY: all clean cleanall codegen rest-server rest-clean yamlGen cli clitree
+.PHONY: all clean cleanall codegen rest-server rest-clean yamlGen cli clitree ham
 
 TOPDIR := $(abspath .)
 BUILD_DIR := $(TOPDIR)/build
@@ -47,12 +47,14 @@ GO_DEPS_LIST = github.com/gorilla/mux \
                github.com/pkg/profile \
                gopkg.in/go-playground/validator.v9 \
                golang.org/x/crypto/ssh \
+               github.com/antchfx/xpath \
                github.com/antchfx/jsonquery \
                github.com/antchfx/xmlquery \
                github.com/facette/natsort \
                github.com/philopon/go-toposort \
                gopkg.in/godbus/dbus.v5 \
-               github.com/dgrijalva/jwt-go
+               github.com/dgrijalva/jwt-go \
+               github.com/msteinert/pam
 
 
 REST_BIN = $(BUILD_DIR)/rest_server/main
@@ -62,11 +64,10 @@ go-deps = $(BUILD_DIR)/gopkgs/.done
 go-patch = $(BUILD_DIR)/gopkgs/.patch_done
 go-redis-patch = $(BUILD_DIR)/gopkgs/.redis_patch_done
 
-all: build-deps $(go-deps) $(go-redis-patch) $(go-patch) translib rest-server cli
+all: build-deps $(go-deps) $(go-redis-patch) $(go-patch) translib rest-server cli ham
 
 build-deps:
 	mkdir -p $(BUILD_DIR)/gopkgs
-	mkdir -p $(BUILD_DIR)/cvl/schema
 
 $(BUILD_DIR)/gopkgs/.done: $(MAKEFILE_LIST)
 	$(GO) get -v $(GO_DEPS_LIST)
@@ -85,13 +86,11 @@ clitree:
 
 cvl: $(go-deps) $(go-patch) $(go-redis-patch)
 	$(MAKE) -C src/cvl
-	$(MAKE) -C src/cvl/schema
-	$(MAKE) -C src/cvl/testdata/schema
 
 cvl-test:
 	$(MAKE) -C src/cvl gotest
 
-rest-server: translib
+rest-server: build-deps translib
 	$(MAKE) -C src/rest
 
 rest-clean:
@@ -107,6 +106,9 @@ yamlGen:
 	$(MAKE) -C models/yang
 	$(MAKE) -C models/yang/sonic
 
+ham:
+	(cd src/ham; ./build.sh)
+
 $(go-patch): $(go-deps)
 	cd $(BUILD_GOPATH)/src/github.com/openconfig/ygot/; git reset --hard HEAD;git clean -f -d;git checkout 724a6b18a9224343ef04fe49199dfb6020ce132a 2>/dev/null ; true; \
 cd ../; cp $(TOPDIR)/ygot-modified-files/ygot.patch .; \
@@ -116,6 +118,7 @@ $(GO) install -v -gcflags "-N -l" $(BUILD_GOPATH)/src/github.com/openconfig/ygot
 cp $(TOPDIR)/goyang-modified-files/goyang.patch .; \
 patch -p1 < goyang.patch; rm -f goyang.patch; \
 $(GO) install -v -gcflags "-N -l" $(BUILD_GOPATH)/src/github.com/openconfig/goyang
+	
 #Apply CVL related patches
 	$(apply_cvl_dep_patches)
 	touch  $@
@@ -126,6 +129,7 @@ install:
 	$(INSTALL) -D $(CERTGEN_BIN) $(DESTDIR)/usr/sbin/generate_cert
 	$(INSTALL) -d $(DESTDIR)/usr/sbin/schema/
 	$(INSTALL) -d $(DESTDIR)/usr/sbin/lib/
+	$(INSTALL) -d $(DESTDIR)/usr/bin/
 	$(INSTALL) -d $(DESTDIR)/usr/models/yang/
 	$(INSTALL) -D $(TOPDIR)/models/yang/sonic/*.yang $(DESTDIR)/usr/models/yang/
 	$(INSTALL) -D $(TOPDIR)/models/yang/sonic/common/*.yang $(DESTDIR)/usr/models/yang/
@@ -133,6 +137,8 @@ install:
 	$(INSTALL) -D $(TOPDIR)/config/transformer/models_list $(DESTDIR)/usr/models/yang/
 	$(INSTALL) -D $(TOPDIR)/models/yang/common/*.yang $(DESTDIR)/usr/models/yang/
 	$(INSTALL) -D $(TOPDIR)/models/yang/annotations/*.yang $(DESTDIR)/usr/models/yang/
+	$(INSTALL) -D $(TOPDIR)/models/yang/extensions/*.yang $(DESTDIR)/usr/models/yang/
+	$(INSTALL) -D $(TOPDIR)/build/yaml/api_ignore $(DESTDIR)/usr/models/yang/
 	cp -rf $(TOPDIR)/build/rest_server/dist/ui/ $(DESTDIR)/rest_ui/
 	cp -rf $(TOPDIR)/build/cli $(DESTDIR)/usr/sbin/
 	rsync -a --exclude="test" --exclude="docs" build/swagger_client_py $(DESTDIR)/usr/sbin/lib/
@@ -150,6 +156,21 @@ install:
 	$(INSTALL) -d $(DESTDIR)/lib/systemd/system
 	$(INSTALL) -D $(TOPDIR)/scripts/sonic-hostservice.service $(DESTDIR)/lib/systemd/system
 
+	# Scripts for Host Account Management (HAM)
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/etc/dbus-1/system.d/* $(DESTDIR)/etc/dbus-1/system.d/
+	$(INSTALL) -d $(DESTDIR)/etc/sonic/hamd/
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/etc/sonic/hamd/*      $(DESTDIR)/etc/sonic/hamd/
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/lib/systemd/system/*  $(DESTDIR)/lib/systemd/system/
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/usr/bin/*             $(DESTDIR)/usr/bin/
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamd/hamd     $(DESTDIR)/usr/sbin/.
+	$(INSTALL) -D $(TOPDIR)/src/ham/hamctl/hamctl $(DESTDIR)/usr/bin/.
+	$(INSTALL) -d $(DESTDIR)/lib/x86_64-linux-gnu/
+	$(INSTALL) -D $(TOPDIR)/src/ham/libnss_ham/libnss_ham.so.2 $(DESTDIR)/lib/x86_64-linux-gnu/.
+
+	# Scripts for the certificate fixer oneshot service
+	$(INSTALL) -D $(TOPDIR)/src/certfix/usr/sbin/*             $(DESTDIR)/usr/sbin/
+	$(INSTALL) -D $(TOPDIR)/src/certfix/lib/systemd/system/*   $(DESTDIR)/lib/systemd/system/
+
 ifeq ($(SONIC_COVERAGE_ON),y)
 	echo "" > $(DESTDIR)/usr/sbin/.test
 endif
@@ -161,7 +182,6 @@ clean: rest-clean
 	$(MAKE) -C src/translib clean
 	$(MAKE) -C src/cvl clean
 	rm -rf debian/.debhelper
-	rm -rf $(BUILD_GOPATH)/src/github.com/openconfig/goyang/annotate.go
 	(cd build && find .  -maxdepth 1 -name "gopkgs" -prune -o -not -name '.' -exec rm -rf {} +) || true
 
 cleanall:
@@ -171,8 +191,12 @@ cleanall:
 #Function to apply CVL related patches
 define apply_cvl_dep_patches
 
+	cd $(BUILD_GOPATH)/src/github.com/antchfx/xpath; git reset --hard HEAD; \
+	git checkout d9ad276609987dd73ce5cd7d6265fe82189b10b6; git apply $(TOPDIR)/patches/xpath.patch
+
 	cd $(BUILD_GOPATH)/src/github.com/antchfx/jsonquery; git reset --hard HEAD; \
 	git checkout 3b69d31134d889b501e166a035a4d5ecb8c6c367; git apply $(TOPDIR)/patches/jsonquery.patch
+
 	cd $(BUILD_GOPATH)/src/github.com/antchfx/xmlquery; git reset --hard HEAD; \
 	git checkout fe009d4cc63c3011f05e1dfa75a27899acccdf11; git apply $(TOPDIR)/patches/xmlquery.patch
 

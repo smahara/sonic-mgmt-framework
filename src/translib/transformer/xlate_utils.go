@@ -22,8 +22,9 @@ import (
     "fmt"
     "strings"
     "reflect"
-	"regexp"
+    "regexp"
     "translib/db"
+    "translib/tlerr"
     "github.com/openconfig/goyang/pkg/yang"
     "github.com/openconfig/gnmi/proto/gnmi"
     "github.com/openconfig/ygot/ygot"
@@ -60,6 +61,7 @@ func keyCreate(keyPrefix string, xpath string, data interface{}, dbKeySep string
 
 /* Copy redis-db source to destn map */
 func mapCopy(destnMap map[string]map[string]db.Value, srcMap map[string]map[string]db.Value) {
+	mapCopyMutex.Lock()
    for table, tableData := range srcMap {
         _, ok := destnMap[table]
         if !ok {
@@ -75,6 +77,7 @@ func mapCopy(destnMap map[string]map[string]db.Value, srcMap map[string]map[stri
             }
         }
    }
+   mapCopyMutex.Unlock()
 }
 
 func parentXpathGet(xpath string) string {
@@ -87,7 +90,7 @@ func parentXpathGet(xpath string) string {
 }
 
 func isYangResType(ytype string) bool {
-    if ytype == "choose" || ytype == "case" {
+    if ytype == "choice" || ytype == "case" {
         return true
     }
     return false
@@ -403,6 +406,7 @@ func formXfmrInputRequest(d *db.DB, dbs [db.MaxDB]*db.DB, cdb db.DBNum, ygRoot *
 	inParams.subOpDataMap = subOpDataMap
 	inParams.param = param // generic param
 	inParams.txCache = txCache
+	inParams.skipOrdTblChk = new(bool)
 
 	return inParams
 }
@@ -443,7 +447,7 @@ func getDBOptions(dbNo db.DBNum) db.Options {
         case db.ApplDB, db.CountersDB:
                 opt = getDBOptionsWithSeparator(dbNo, "", ":", ":")
                 break
-        case db.FlexCounterDB, db.AsicDB, db.LogLevelDB, db.ConfigDB, db.StateDB, db.ErrorDB:
+        case db.FlexCounterDB, db.AsicDB, db.LogLevelDB, db.ConfigDB, db.StateDB, db.ErrorDB, db.UserDB:
                 opt = getDBOptionsWithSeparator(dbNo, "", "|", "|")
                 break
         }
@@ -726,7 +730,8 @@ func unmarshalJsonToDbData(schema *yang.Entry, fieldName string, value interface
              yang.Yuint8, yang.Yuint16, yang.Yuint32:
                 pv, err := yangFloatIntToGoType(ykind, value.(float64))
                 if err != nil {
-                        return "", fmt.Errorf("error parsing %v for schema %s: %v", value, schema.Name, err)
+			errStr := fmt.Sprintf("error parsing %v for schema %s: %v", value, schema.Name, err)
+			return "", tlerr.InternalError{Format: errStr}
                 }
                 data = fmt.Sprintf("%v", pv)
         default:
@@ -736,3 +741,56 @@ func unmarshalJsonToDbData(schema *yang.Entry, fieldName string, value interface
 
         return data, nil
 }
+
+func checkIpV6AddrNotation(val string) bool {
+        re_std := regexp.MustCompile(`^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$`)
+        re_comp := regexp.MustCompile(`(?:[A-F0-9]{0,4}:){0,7}[A-F0-9]{0,4}`)
+        if re_std.MatchString(val) {
+                return true;
+        } else if re_comp.MatchString(val) {
+                return true;
+        }
+        return false;
+}
+
+func copyYangXpathSpecData(dstNode *yangXpathInfo, srcNode *yangXpathInfo) {
+	if dstNode != nil && srcNode != nil {
+		*dstNode = *srcNode
+	}
+	return
+}
+
+func tblSchemaCopy(dst, src map[string]map[string]db.Value){
+	for tbl, tblData := range src {
+		_, ok := dst[tbl]
+		if !ok {
+			dst[tbl] = make(map[string]db.Value)
+		}
+		for k, data := range tblData {
+			if !ok {
+				dst[tbl][k] = db.Value{Field: make(map[string]string)}
+			}
+			for f, _ := range data.Field {
+				if f != "NULL" {
+					dst[tbl][k].Field[f] = ""
+				}
+			}
+		}
+	}
+	return
+}
+
+func isYangLeaf(uri string) (bool, error) {
+	xpath, err := XfmrRemoveXPATHPredicates(uri)
+	if err == nil {
+		if d, ok := xYangSpecMap[xpath]; ok {
+			if d.yangDataType == YANG_LEAF {
+				return true, nil
+			}
+		} else {
+			err = fmt.Errorf("YangSpecData doest not have data for xpath(%v)\r\n", xpath)
+		}
+	}
+	return false, err
+}
+
