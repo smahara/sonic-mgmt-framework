@@ -60,6 +60,20 @@ var YangToDb_lag_min_links_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (m
     res_map := make(map[string]string)
     var err error
 
+    pathInfo := NewPathInfo(inParams.uri)
+    ifKey := pathInfo.Var("name")
+
+    log.Infof("Received Min links config for path: %s; template: %s vars: %v ifKey: %s", pathInfo.Path, pathInfo.Template, pathInfo.Vars, ifKey)
+
+    intTbl := IntfTypeTblMap[IntfTypePortChannel]
+    err = validateLagExists(inParams.d, &intTbl.cfgDb.portTN, &ifKey)
+    if err == nil {
+        errStr := "Cannot reconfigure min links for an existing PortChannel: " + ifKey
+        err = tlerr.InvalidArgsError{Format: errStr}
+        return res_map, err
+    }
+
+
     minLinks, _ := inParams.param.(*uint16)
     res_map["min_links"] = strconv.Itoa(int(*minLinks))
     return res_map, err
