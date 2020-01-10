@@ -28,4 +28,4 @@ openconfig-nat-annot.yang
 openconfig-qos.yang
 openconfig-qos-ext.yang
 openconfig-qos-annot.yang
-
+openconfig-rib-bgp-ext.yang
