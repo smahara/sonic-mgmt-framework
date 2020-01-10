@@ -1,20 +1,21 @@
 {
-	"BFD_PEER": {
-		"2.2.2.2|null|null": {
-			"transmit_interval":"400", 
-			"receive_interval":"300", 
-			"echo_mode":"true", 
-			"echo_interval":"44", 
-			"multiplier":"5",
-			"label":"mylabel"
+    	"BFD_PEER_MULTI_HOP": {
+        	"10.1.1.1|default|10.1.1.2": {
+            		"desired-minimum-tx-interval": "200",
+            		"enabled": "true",
+            		"required-minimum-receive": "250"
+        	}
+    	},
+	"BFD_PEER_SINGLE_HOP": {
+		"2.2.2.2|Ethernet0|default|null": {
+			"desired-minimum-tx-interval":"400", 
+			"required-minimum-receive":"300", 
+			"echo-active":"true", 
+			"desired-minimum-echo-receive":"44", 
+			"detection-multiplier":"5"
 		}, 
-		"3.3.3.3|1.1.1.1|null": {
-			"admin_status":"down"
-		},
-		"4.4.4.4|null|Ethernet0": {
-		},
-		"5.5.5.5|1.1.1.1|Ethernet0": {
-			"admin_status":"up"
+		"5.5.5.5|Ethernet0|1.1.1.1|null": {
+			"enabled": "false"
 		}
 	}
 }
