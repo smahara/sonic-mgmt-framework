@@ -276,32 +276,31 @@ var rpc_renew_dhcp_lease RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) 
 
     intTbl := IntfTypeTblMap[intfType]
     tblName, _ := getIntfTableNameByDBId(intTbl, db.ConfigDB)
-    entry, dbErr := dbs[db.ConfigDB].GetEntry(&db.TableSpec{Name:tblName}, db.Key{Comp: []string{ifName}})
-    if dbErr != nil || !entry.IsPopulated() {
-        log.Errorf("Interface config not found or not populated: %s failed!", ifName)
-        result.Output.Status_detail = fmt.Sprintf("Error: DHCP client not enabled for interface " + ifName)
-        return json.Marshal(&result)
-    }
+    var entry db.Value
+    entry, err = dbs[db.ConfigDB].GetEntry(&db.TableSpec{Name:tblName}, db.Key{Comp: []string{ifName}})
 
     var options []string
     options = append(options, ifName)
-    ipv4_dhcp := false
-    ipv6_dhcp := false
-    if entry.Has("ipv4_dhcp_client") && entry.Get("ipv4_dhcp_client") == "true" {
-        ipv4_dhcp = true
+
+    if entry.IsPopulated() {
+        if entry.Has("ipv4_dhcp_client") == false || entry.Get("ipv4_dhcp_client") != "false" {
+            options = append(options, "ipv4")
+        }
+        if entry.Has("ipv6_dhcp_client") == false || entry.Get("ipv6_dhcp_client") != "false" {
+            options = append(options, "ipv6")
+        }
+    } else {
         options = append(options, "ipv4")
-    }
-    if entry.Has("ipv6_dhcp_client") && entry.Get("ipv6_dhcp_client") == "true" {
-        ipv6_dhcp = true
         options = append(options, "ipv6")
     }
-    if (ipv4_dhcp == false && ipv6_dhcp == false) || (len(options) < 2) {
+
+    log.Info("rpc_renew_dhcp_lease: Command:", options)
+    if len(options) < 2 {
         log.Errorf("DHCP IPv4 and IPv6 client not enabled for interface " + ifName)
         result.Output.Status_detail = fmt.Sprintf("Error: DHCP client not enabled for interface " + ifName)
         return json.Marshal(&result)
     }
 
-    log.Info("rpc_renew_dhcp_lease: Command:", options)
 
     query_result := hostQuery("renew_dhcp_lease.action", options)
     log.Info("rpc_renew_dhcp_lease ", query_result)
@@ -842,9 +841,6 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
                 if subIntf.Ipv4.Config.DhcpClient != nil {
                     value.Set("ipv4_dhcp_client", "")
                 }
-            } else {
-                value.Set("ipv4_default_gwaddr", "")
-                value.Set("ipv4_dhcp_client", "")
             }
             if subIntf.Ipv6 != nil && subIntf.Ipv6.Config != nil {
                 if subIntf.Ipv6.Config.DefaultGwaddr != nil {
@@ -853,9 +849,6 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
                 if subIntf.Ipv6.Config.DhcpClient != nil {
                     value.Set("ipv6_dhcp_client", "")
                 }
-            } else {
-                value.Set("ipv6_default_gwaddr", "")
-                value.Set("ipv6_dhcp_client", "")
             }
             subIntfmap[tblName][ifName] = value
         }
@@ -1094,7 +1087,7 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
     }
 
     if subIntfObj.Ipv4 != nil && subIntfObj.Ipv4.Addresses != nil {
-        if intfType == IntfTypeMgmt && len(subIntfObj.Ipv4.Addresses.Address) > 0 && ((subIntfObj.Ipv4.Config != nil &&  *subIntfObj.Ipv4.Config.DhcpClient == true) || (entry.IsPopulated() && entry.Has("ipv4_dhcp_client") && entry.Get("ipv4_dhcp_client") == "true")) {
+        if intfType == IntfTypeMgmt && len(subIntfObj.Ipv4.Addresses.Address) > 0 && ((subIntfObj.Ipv4.Config != nil &&  *subIntfObj.Ipv4.Config.DhcpClient == true) || !entry.IsPopulated() || entry.Has("ipv4_dhcp_client") == false || entry.Get("ipv4_dhcp_client") == "true") {
             errStr := "Static IPV4 address can't be configured when IPV4 DHCP client is enabled on the interface " + ifName
             log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr)
             return subIntfmap, errors.New(errStr)
@@ -1147,7 +1140,7 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
         }
     }
     if subIntfObj.Ipv6 != nil && subIntfObj.Ipv6.Addresses != nil {
-        if intfType == IntfTypeMgmt && len(subIntfObj.Ipv6.Addresses.Address) > 0 && ((subIntfObj.Ipv6.Config != nil &&  *subIntfObj.Ipv6.Config.DhcpClient == true) || (entry.IsPopulated() && entry.Has("ipv6_dhcp_client") && entry.Get("ipv6_dhcp_client") == "true")) {
+        if intfType == IntfTypeMgmt && len(subIntfObj.Ipv6.Addresses.Address) > 0 && ((subIntfObj.Ipv6.Config != nil &&  *subIntfObj.Ipv6.Config.DhcpClient == true) || !entry.IsPopulated() || entry.Has("ipv6_dhcp_client") == false || entry.Get("ipv6_dhcp_client") == "true") {
             errStr := "Static IPV6 address can't be configured when IPV6 DHCP client is enabled on the interface " + ifName
             log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr)
             return subIntfmap, errors.New(errStr)
