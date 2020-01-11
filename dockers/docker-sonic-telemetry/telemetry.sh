@@ -35,8 +35,18 @@ PORT=`sonic-cfggen -d -v "TELEMETRY['gnmi']['port']"`
 TELEMETRY_ARGS+=" --port $PORT"
 
 CLIENT_AUTH=`sonic-cfggen -d -v "TELEMETRY['gnmi']['client_auth']"`
-if [ -z $CLIENT_AUTH ] || [ $CLIENT_AUTH == "false" ]; then
-	TELEMETRY_ARGS+=" --allow_no_client_auth"
+if [ ! -z $CLIENT_AUTH ] || [ $CLIENT_AUTH != "false" ]; then
+	TELEMETRY_ARGS+=" -client_auth $CLIENT_AUTH"
+fi
+
+JWT_REFRESH=`sonic-cfggen -d -v "TELEMETRY['gnmi']['jwt_refresh']"`
+if [ ! -z $JWT_REFRESH ]; then
+        TELEMETRY_ARGS+=" -jwt_refresh_int=$JWT_REFRESH"
+fi
+
+JWT_VALID=`sonic-cfggen -d -v "TELEMETRY['gnmi']['jwt_valid']"`
+if [ ! -z $JWT_VALID ]; then
+        TELEMETRY_ARGS+=" -jwt_valid_int=$JWT_VALID"
 fi
 
 LOG_LEVEL=`sonic-cfggen -d -v "TELEMETRY['gnmi']['log_level']"`
