@@ -790,7 +790,8 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_SIMPLE_DOCKER_IMAGES)) : $(TARGET_PATH)/%.g
 	# Apply series of patches if exist
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && QUILT_PATCHES=../$(notdir $($*.gz_PATH)).patch quilt push -a; popd; fi
 	docker info $(LOG)
-	docker build --squash --no-cache \
+	docker build \
+		--squash --no-cache \
 		--build-arg http_proxy=$(HTTP_PROXY) \
 		--build-arg https_proxy=$(HTTPS_PROXY) \
 		--build-arg user=$(USER) \
@@ -846,7 +847,8 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_load_image=$(shell printf "$(call docker-load-image-get,$(subst $(SPACE),\n,$(patsubst %.gz,%,$(call expand,$($*.gz_LOAD_DOCKERS)))))\n" | awk '!a[$$0]++'))
 	j2 $($*.gz_PATH)/Dockerfile.j2 > $($*.gz_PATH)/Dockerfile
 	docker info $(LOG)
-	docker build --squash --no-cache \
+	docker build \
+		--squash --no-cache \
 		--build-arg http_proxy=$(HTTP_PROXY) \
 		--build-arg https_proxy=$(HTTPS_PROXY) \
 		--build-arg user=$(USER) \

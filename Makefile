@@ -16,7 +16,14 @@ ifeq ($(NOJESSIE), 0)
 	make -f Makefile.work jessie
 endif
 
-clean reset init configure docker-cleanup showtag sonic-slave-build sonic-slave-bash :
+ENGOPS_SETUP=git merge --abort 2>/dev/null; git checkout engops_dell_sonic 2>/dev/null && git checkout dell_sonic && git merge --no-commit engops_dell_sonic; git checkout dell_sonic || git checkout master
+init:
+	@echo "+++ Making $@ +++"
+	-BLDENV=stretch ${MAKE} -k -f Makefile.work NOJESSIE=1 PLATFORM=broadcom $@
+	#${ENGOPS_SETUP}
+	git submodule foreach --recursive "${ENGOPS_SETUP}"
+
+clean reset configure docker-cleanup showtag sonic-slave-build sonic-slave-bash:
 	@echo "+++ Making $@ +++"
 ifeq ($(NOJESSIE), 0)
 	make -f Makefile.work $@

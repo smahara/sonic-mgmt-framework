@@ -151,6 +151,7 @@ ENABLE_SFLOW = y
 DOCKER_REGISTRY_SERVER=10.75.139.137:5000
 
 # Debian local mirror site info
-#DEBIAN_ARCHIVE_MIRROR=10.75.18.181:9090
-#DEBIAN_ORG_MIRROR=10.75.18.181:8080
+DEBIAN_ARCHIVE_MIRROR=artifactory.force10networks.com
+DEBIAN_ORG_MIRROR=deb.debian.org
 
+LOCAL_SAI_DEBS_PATH=target/files/stretch/private_sonic-binaries
