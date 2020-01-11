@@ -22,14 +22,20 @@ debs/{{ deb }}{{' '}}
 ## TODO: add kmod into Depends
 RUN apt-get install -yf kmod
 
+RUN true
 COPY ["files/dsserve", "files/bcmcmd", "start.sh", "bcmsh", "files/supervisor-proc-exit-listener", "/usr/bin/"]
 RUN chmod +x /usr/bin/dsserve /usr/bin/bcmcmd
 
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
+RUN true
 COPY ["files/supervisor-proc-exit-listener", "/usr/bin"]
+RUN true
 COPY ["critical_processes", "/etc/supervisor/"]
+RUN true
 COPY ["diag_files/bcmdiag.soc", "/etc/sai.d/"]
+RUN true
 COPY ["diag_files/rc.soc", "/"]
+RUN true
 
 ## Clean up
 RUN apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
