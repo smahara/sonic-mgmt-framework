@@ -131,8 +131,9 @@ class VtyshSubprocessMgr(threading.Thread):
         return ret_val
     def shutdown(self):
         syslog.syslog(syslog.LOG_DEBUG, 'terminate vtysh manager')
-        os.write(self.master_fd, self.QUIT_MARK + '\n')
-        self.join()
+        if self.is_alive():
+            os.write(self.master_fd, self.QUIT_MARK + '\n')
+            self.join()
     def run(self):
         chld_pid, pty_fd = pty.fork()
         if chld_pid == pty.CHILD:
@@ -198,24 +199,34 @@ def get_command_cmn(daemon, cmd_str, op, st_idx, vals, bool_values):
         cmd_args.append(CommandArgument(daemon, cmd_enable, vals[idx]))
     return [cmd_str.format(*cmd_args, no = CommandArgument(daemon, cmd_enable))]
 
-def hdl_set_extcomm(daemon, cmd_str, op, st_idx, args, data):
-    com_set = daemon.extcomm_set_list.get(args[0], None)
-    if com_set is None or not com_set.is_configurable():
-        syslog.syslog(syslog.LOG_ERR, 'extended community set %s not found or configured' % args[0])
-        return None
+def hdl_set_extcomm(daemon, cmd_str, op, st_idx, args, is_inline):
+    if is_inline:
+        if type(args[0]) is list:
+            com_list = args[0]
+        else:
+            com_list = [args[0]]
+    else:
+        com_set = daemon.extcomm_set_list.get(args[0], None)
+        if com_set is None or not com_set.is_configurable():
+            syslog.syslog(syslog.LOG_ERR, 'extended community set %s not found or configured' % args[0])
+            return None
+        com_list = com_set.mbr_list
     rt_cnt = soo_cnt = 0
-    for comm in com_set.mbr_list:
+    for comm in com_list:
         if comm.startswith(CommunityList.RT_TYPE_MARK):
             rt_cnt += 1
         elif comm.startswith(CommunityList.SOO_TYPE_MARK):
             soo_cnt += 1
     cmd_list = []
+    if op != CachedDataWithOp.OP_DELETE:
+        for comm_type in ['rt', 'soo']:
+            cmd_list.append(('no set extcommunity %s' % comm_type, True))
     if rt_cnt > 0:
         new_args = ((args[0], True),) + args[1:]
-        cmd_list += get_command_cmn(daemon, cmd_str, op, st_idx, new_args, data)
+        cmd_list += get_command_cmn(daemon, cmd_str, op, st_idx, new_args, None)
     if soo_cnt > 0:
         new_args = ((args[0], False),) + args[1:]
-        cmd_list += get_command_cmn(daemon, cmd_str, op, st_idx, new_args, data)
+        cmd_list += get_command_cmn(daemon, cmd_str, op, st_idx, new_args, None)
     return cmd_list
 
 def hdl_set_asn(daemon, cmd_str, op, st_idx, args, data):
@@ -441,7 +452,10 @@ class BGPKeyMapList(list):
             for pfx in prefix_list:
                 cmd_prefix += "-c '%s' " % pfx
             for cmd in cmd_list:
-                if not g_run_command(cmd_prefix + "-c '%s'" % cmd, True):
+                ignore_fail = False
+                if type(cmd) is tuple:
+                    cmd, ignore_fail = cmd
+                if not g_run_command(cmd_prefix + "-c '%s'" % cmd, True) and not ignore_fail:
                     syslog.syslog(syslog.LOG_ERR, 'failed running FRR command: %s' % cmd)
                     return False
             for key_list in key_list_list:
@@ -505,16 +519,24 @@ class CommandArgument(object):
             if com_set is not None and com_set.is_configurable():
                 return ' '.join(com_set.mbr_list)
         elif format == 'ext-com-list':
-            if type(self.value) is list:
-                com_list = self.value
+            if type(self.value) is tuple:
+                com_val, is_rt = self.value
             else:
-                com_list = [self.value]
+                com_val = self.value
+                is_rt = None
+            if type(com_val) is list:
+                com_list = com_val
+            else:
+                com_list = [com_val]
             frr_com_list = []
             for comm in com_list:
-                frr_comm = self.parse_ext_community(comm)
+                frr_comm = self.parse_ext_community(comm, is_rt)
                 if frr_comm is not None:
                     frr_com_list.append(frr_comm)
-            return ' '.join(frr_com_list)
+            if is_rt is None:
+                return ' '.join(frr_com_list)
+            else:
+                return ('rt ' if is_rt else 'soo ') + ' '.join(frr_com_list)
         elif format == 'ext-com-ref':
             com_set_name, is_rt = self.value
             com_set = self.daemon.extcomm_set_list.get(com_set_name, None)
@@ -1026,8 +1048,8 @@ class BGPConfigDaemon:
                          (('set_asn', '+set_repeat_asn'),   '{no:no-prefix}set as-path prepend {:repeat}', hdl_set_asn),
                          ('set_community_inline',           '{no:no-prefix}set community {}'),
                          ('set_community_ref',              '{no:no-prefix}set community {:com-ref}'),
-                         ('set_ext_community_inline',       '{no:no-prefix}set extcommunity {:ext-com-list}'),
-                         ('set_ext_community_ref',          '{no:no-prefix}set extcommunity {:ext-com-ref}', hdl_set_extcomm)
+                         ('set_ext_community_inline',       '{no:no-prefix}set extcommunity {:ext-com-list}', hdl_set_extcomm, True),
+                         ('set_ext_community_ref',          '{no:no-prefix}set extcommunity {:ext-com-ref}', hdl_set_extcomm, False)
     ]
 
     listen_prefix_key_map = [('peer_group', '{no:no-prefix}bgp listen range {} peer-group {}')]
@@ -1696,17 +1718,18 @@ class BGPConfigDaemon:
                 if not del_table:
                     if 'route_operation' in data:
                         dval = data['route_operation']
-                        enable = (dval.op != CachedDataWithOp.OP_DELETE)
-                        no_arg = CommandArgument(self, enable)
-                        command = "vtysh -c 'configure terminal' -c '{:no-prefix}route-map {} {} {}'".\
-                                   format(no_arg, map_name, dval.data, seq_no)
-                        if not self.__run_command(command):
-                            syslog.syslog(syslog.LOG_ERR, 'failed to configure route-map {} seq {}'.format(map_name, seq_no))
-                            continue
-                        if dval.op == CachedDataWithOp.OP_DELETE:
-                            self.__delete_route_map(map_name, seq_no, data)
-                            continue
-                        self.route_map.setdefault(map_name, {})[seq_no] = dval.data
+                        if dval.op != CachedDataWithOp.OP_NONE:
+                            enable = (dval.op != CachedDataWithOp.OP_DELETE)
+                            no_arg = CommandArgument(self, enable)
+                            command = "vtysh -c 'configure terminal' -c '{:no-prefix}route-map {} {} {}'".\
+                                       format(no_arg, map_name, dval.data, seq_no)
+                            if not self.__run_command(command):
+                                syslog.syslog(syslog.LOG_ERR, 'failed to configure route-map {} seq {}'.format(map_name, seq_no))
+                                continue
+                            if dval.op == CachedDataWithOp.OP_DELETE:
+                                self.__delete_route_map(map_name, seq_no, data)
+                                continue
+                            self.route_map.setdefault(map_name, {})[seq_no] = dval.data
                         dval.status = CachedDataWithOp.STAT_SUCC
                     if map_name not in self.route_map or seq_no not in self.route_map[map_name]:
                         syslog.syslog(syslog.LOG_ERR, 'route-map {} seq {} not found for update'.format(map_name, seq_no))
