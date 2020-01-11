@@ -730,13 +730,15 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
 {
     struct Msg* msg = NULL;
     struct ARPMsg *arp_msg = NULL, arp_data;
-    struct LocalInterface* local_if;
-    struct LocalInterface* vlan_if = NULL;
+    struct LocalInterface *local_if = NULL;
+    struct LocalInterface *vlan_if = NULL;
+    struct LocalInterface *sag_if = NULL;
     struct LocalInterface *peer_link_if = NULL;
     struct VLAN_ID *vlan_id_list = NULL;
     int set_arp_flag = 0;
     int my_ip_arp_flag = 0;
     int vlan_count = 0;
+    uint16_t sag_vid = 0;
     char mac_str[18] = "";
 
     if (!csm || !arp_entry)
@@ -755,7 +757,12 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
 
     ICCPD_LOG_INFO(__FUNCTION__, "Received ARP Info, intf[%s] IP[%s], MAC[%s]", arp_entry->ifname, show_ip_str(arp_entry->ipv4_addr), mac_str);
 
-    if (strncmp(arp_entry->ifname, "Vlan", 4) == 0)
+    if ((strncmp(arp_entry->ifname, SAG_PREFIX, strlen(SAG_PREFIX)) == 0))
+    {
+        sscanf (arp_entry->ifname, "sag%d.256", &sag_vid);
+    }
+
+    if ((strncmp(arp_entry->ifname, VLAN_PREFIX, 4) == 0) || (sag_vid != 0))
     {
         peer_link_if = local_if_find_by_name(csm->peer_itf_name);
 
@@ -794,6 +801,16 @@ int mlacp_fsm_update_arp_entry(struct CSM* csm, struct ARPMsg *arp_entry)
                         my_ip_arp_flag = 1;
                     }
                     set_arp_flag = 1;
+                }
+            } else if (sag_vid != 0) {
+                sag_if = local_if_find_by_name(arp_entry->ifname);
+                if (sag_if)
+                {
+                    set_arp_flag = 1;
+                } else {
+                    ICCPD_LOG_DEBUG(__FUNCTION__,"ignoring ARP sync for ip %s, no SAG intf %s ",
+                            show_ip_str(arp_entry->ipv4_addr), arp_entry->ifname);
+                    return 0;
                 }
             }
         }
@@ -982,13 +999,15 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
     struct Msg *msg = NULL;
     struct NDISCMsg *ndisc_msg = NULL, ndisc_data;
     struct LocalInterface *local_if;
-    struct LocalInterface* vlan_if = NULL;
+    struct LocalInterface *sag_if = NULL;
+    struct LocalInterface *vlan_if = NULL;
     struct LocalInterface *peer_link_if = NULL;
     struct VLAN_ID *vlan_id_list = NULL;
     int set_ndisc_flag = 0;
     char mac_str[18] = "";
     int my_ip_nd_flag = 0;
     int vlan_count = 0;
+    uint16_t sag_vid = 0;
 
     if (!csm || !ndisc_entry)
         return MCLAG_ERROR;
@@ -999,7 +1018,12 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
     ICCPD_LOG_INFO(__FUNCTION__,
                    "Received ND Info, intf[%s] IP[%s], MAC[%s]", ndisc_entry->ifname, show_ipv6_str((char *)ndisc_entry->ipv6_addr), mac_str);
 
-    if (strncmp(ndisc_entry->ifname, "Vlan", 4) == 0)
+    if ((strncmp(ndisc_entry->ifname, SAG_PREFIX, strlen(SAG_PREFIX)) == 0))
+    {
+        sscanf (ndisc_entry->ifname, "sag%d.256", &sag_vid);
+    }
+
+    if ((strncmp(ndisc_entry->ifname, "Vlan", 4) == 0) || (sag_vid != 0))
     {
         peer_link_if = local_if_find_by_name(csm->peer_itf_name);
 
@@ -1063,6 +1087,16 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
                         }
                     }
                     set_ndisc_flag = 1;
+                }
+            } else if (sag_vid != 0) {
+                sag_if = local_if_find_by_name(ndisc_entry->ifname);
+                if (sag_if)
+                {
+                    set_ndisc_flag = 1;
+                } else {
+                    ICCPD_LOG_DEBUG(__FUNCTION__,"ignoring ND sync for ipv6 %s, no SAG intf %s ",
+                            show_ipv6_str((char *)ndisc_entry->ipv6_addr), ndisc_entry->ifname);
+                    return 0;
                 }
             }
         }
