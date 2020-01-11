@@ -409,4 +409,68 @@ limitations under the License.
       <xi:include href="include/pipe.xml"/>
     </COMMAND>
   </VIEW>
+  <VIEW name="configure-view">
+    <!-- qos -->
+    <COMMAND
+        name="qos"
+        help="QoS Configuration"
+        view="configure-qos-intf-view"
+        viewid="intf_name=${name}"
+        >
+        <PARAM
+        name="interface"
+        help="Interface QoS Configuration"
+        mode="subcommand"
+        ptype="SUBCOMMAND"
+        >
+        <PARAM
+           name="name"
+           help="Interface Name"
+           ptype="STRING_32"
+           >
+        </PARAM>
+        </PARAM>
+        <ACTION>
+        </ACTION>
+    </COMMAND>
+  </VIEW>
+
+  <VIEW name="configure-qos-intf-view"
+        prompt="${SYSTEM_NAME}(conf-qos-${intf_name})# "
+        depth="2"
+        >
+
+    <!-- Inheritance -->
+    <NAMESPACE
+        ref="configure-view"
+        help="false"
+        completion="false"
+        />
+
+        <COMMAND
+            name="queue"
+            help="Queue configuration">
+           <PARAM
+               name="qid"
+               help="queue name"
+               ptype="STRING_32"
+               >
+              <PARAM 
+                name="wred-profile"
+                help="WRED profile" 
+                mode="subcommand"
+                ptype="SUBCOMMAND">
+                <PARAM
+                    name="wred_prof_name"
+                    help="WRED profile name"
+                    ptype="STRING_32"
+                    >
+                </PARAM>
+              </PARAM>
+            </PARAM>
+            <ACTION>
+                python $SONIC_CLI_ROOT/sonic-cli-qos.py patch_openconfig_qos_qos_queues_queue_wred ${intf_name}+":"+${qid} ${wred_prof_name}
+            </ACTION>
+        </COMMAND>
+  </VIEW>
 </CLISH_MODULE>
