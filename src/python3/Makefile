@@ -28,11 +28,11 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	pushd $(PYTHON_PNAME)-$(PYTHON_VER)
 	mk-build-deps
 
-	i=9
-	while [ i -gt 0 ]; do
-		sudo dpkg -i $(PYTHON_PNAME)-build-deps_$(PYTHON_VER)-$(PYTHON_DEB_VER)_amd64.deb || sudo apt-get install -f && break
-		sleep 5	# a prime number
-		i=`expr $i + 1`
+	# put a lock here because dpkg does not allow installing packages in parallel
+	while true; do
+	if mkdir $(DEST)/dpkg_lock &> /dev/null; then
+	{ echo here && (sudo dpkg -i $(PYTHON_PNAME)-build-deps_$(PYTHON_VER)-$(PYTHON_DEB_VER)_$(CONFIGURED_ARCH).deb || sudo apt-get install -f) && rm -d $(DEST)/dpkg_lock && break; } || { rm -d $(DEST)/dpkg_lock && exit 1 ; }
+	fi
 	done
 
 	dpkg-buildpackage -rfakeroot -us -uc -b -j$(SONIC_CONFIG_MAKE_JOBS)

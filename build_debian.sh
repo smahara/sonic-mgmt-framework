@@ -126,7 +126,7 @@ if [[ $CONFIGURED_ARCH == armhf || $CONFIGURED_ARCH == arm64 ]]; then
     sudo cp /usr/bin/qemu*static $FILESYSTEM_ROOT/usr/bin || true
     sudo http_proxy=$http_proxy debootstrap --variant=minbase --arch $CONFIGURED_ARCH stretch $FILESYSTEM_ROOT http://deb.debian.org/debian
 else
-    sudo http_proxy=$http_proxy debootstrap --variant=minbase --arch $CONFIGURED_ARCH stretch $FILESYSTEM_ROOT http://artifactory.force10networks.com/debian
+    sudo http_proxy=$http_proxy debootstrap --variant=minbase --arch $CONFIGURED_ARCH stretch $FILESYSTEM_ROOT http://debian-archive.trafficmanager.net/debian
 fi
 
 ## Config hostname and hosts, otherwise 'sudo ...' will complain 'sudo: unable to resolve host ...'

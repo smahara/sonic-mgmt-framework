@@ -3,7 +3,6 @@
 ## If registry server and port provided, the images will be pushed there.
 
 set -e
-set -x
 
 . ./functions.sh
 
@@ -29,7 +28,6 @@ Example:
 EOF
 }
 
-set -x
 docker_image_name=''
 docker_image_tag=latest
 ## The option-string tells getopts which options to expect and which of them must have an argument
@@ -79,12 +77,8 @@ trap_push "rm -rf $DOCKER_BUILD_DIR/deps"
 cp -r files $DOCKER_BUILD_DIR/files
 docker_try_rmi $docker_image_name
 
-DGRP=$(shell grep docker: /etc/group    | sed -e 's/:[^:]*:/ /' -e 's/:/ /g'|awk '{print $$2}')
-[ "${DGRP}" ] || DGRP=$(shell ypcat group | grep docker: | sed -e 's/:[^:]*:/ /' -e 's/:/ /g'|awk '{print $$2}')
-echo "DGRP==!${DGRP}!"
-
 ## Build the docker image
-docker build --build-arg DGRP=${DGRP} --no-cache -t $docker_image_name $DOCKER_BUILD_DIR
+docker build --no-cache -t $docker_image_name $DOCKER_BUILD_DIR
 ## Get the ID of the built image
 ## Note: inspect output has quotation characters, so sed to remove it as an argument
 image_id=$(docker inspect --format="{{json .Id}}" $docker_image_name | sed -e 's/^"//' -e 's/"$//')
