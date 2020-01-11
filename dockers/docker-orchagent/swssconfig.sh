@@ -55,6 +55,13 @@ fi
 
 SWSSCONFIG_ARGS="00-copp.config.json ipinip.json ports.json switch.json "
 
+#BCMSIM updates
+if [ -f /etc/sonic/bcmsim.cfg ]; then
+    echo "BCMSIM platform modify drop action to forward"
+    cp /etc/swss/config.d/00-copp.config.json /etc/swss/config.d/00-copp.config.json.org
+    sed -i 's/\"red_action\"\:\"drop\"/\"red_action\"\:\"forward\"/g' /etc/swss/config.d/00-copp.config.json
+fi
+
 for file in $SWSSCONFIG_ARGS; do
     swssconfig /etc/swss/config.d/$file
     sleep 1

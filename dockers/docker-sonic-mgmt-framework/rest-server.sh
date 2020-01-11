@@ -44,6 +44,7 @@ if [ ! -e "$CLI_CRT" ] || [ ! -e "$CLI_KEY" ]; then
     (cd /host/cli-ca && /usr/sbin/mk-root-ca.sh)
 fi
 
+
 REST_SERVER_ARGS=
 if [ -f "/usr/sbin/.test" ]; then
 	REST_SERVER_ARGS="-test.coverprofile=coverage.out "
@@ -64,7 +65,7 @@ echo "REST_SERVER_ARGS = $REST_SERVER_ARGS"
 
 
 export CVL_SCHEMA_PATH=/usr/sbin/schema
-export LIBYANG_EXTENSIONS_PLUGINS_DIR=/usr/lib/x86_64-linux-gnu/libyang/extensions
-export LIBYANG_USER_TYPES_PLUGINS_DIR=/usr/lib/x86_64-linux-gnu/libyang/user_types
+export LIBYANG_EXTENSIONS_PLUGINS_DIR=/usr/lib/libyang/extensions
+export LIBYANG_USER_TYPES_PLUGINS_DIR=/usr/lib/libyang/user_types
 
 exec /usr/sbin/rest_server ${REST_SERVER_ARGS}

@@ -6,15 +6,6 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
-# Fix up the file permissions
-if [ $(grep -c 'platform:ro' $(which pde.sh)) -gt 0 ]; then
-    pde.sh stop
-    sleep 1
-    docker rename pde pde.orig
-    sed -i 's#platform:ro#platform#g' $(which pde.sh)
-    sed -i 's#hwsku:ro#hwsku#g' $(which pde.sh)
-fi
-
 # Start PDE if it's deactivated
 if [ $(docker ps | grep -c pde) -eq 0 ]; then
     pde.sh start

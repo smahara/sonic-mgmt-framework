@@ -1,5 +1,0 @@
-#!/bin/bash
-
-DOCKER_EXEC_FLAGS="i"
-
-docker exec -$DOCKER_EXEC_FLAGS pmon smartctl "$@"

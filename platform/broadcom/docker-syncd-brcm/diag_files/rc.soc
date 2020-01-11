@@ -29,7 +29,6 @@ init misc
 # Cancun package files are located in $SDK/rc/flex
 if $?feature_cancun \
    "cancun load cih;"\
-   "cancun load cfh;"\
    "cancun stat;"
 
 # Initialize the StrataSwitch MMU registers

@@ -88,4 +88,5 @@ int syn_local_mac_info_to_peer(struct CSM* csm, struct LocalInterface *local_if,
 int syn_local_arp_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add, int ack);
 int syn_local_nd_info_to_peer(struct CSM* csm, struct LocalInterface *local_if, int sync_add, int ack);
 int is_unique_ip_configured(char *ifname);
+void set_peerlink_learn_kernel(struct LocalInterface *peer_link_if, int enable);
 #endif

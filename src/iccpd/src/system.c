@@ -204,6 +204,34 @@ struct CSM* system_get_csm_by_peer_ip(const char* peer_ip)
     return NULL;
 }
 
+//function to get CSM by peer interface name
+struct CSM* system_get_csm_by_peer_ifname(char *ifname)
+{
+    struct CSM *csm = NULL;
+    struct System* sys = NULL;
+
+    if (!ifname)
+    {
+        return NULL;
+    }
+
+    if ((sys = system_get_instance()) == NULL)
+    {
+        return NULL;
+    }
+
+    /* traverse all CSM and find matching csm with peer ifname */
+    LIST_FOREACH(csm, &(sys->csm_list), next)
+    {
+        //return  matching csm
+        if (strcmp(ifname, csm->peer_itf_name) == 0)
+        {
+            return csm;
+        }
+    }
+    return NULL;
+}
+
 struct CSM* system_get_csm_by_mlacp_id(int id)
 {
     struct System* sys = NULL;

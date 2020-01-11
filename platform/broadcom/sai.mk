@@ -1,9 +1,9 @@
-BRCM_SAI_VER = 3.8.0.1
-BRCM_SAI = libsaibcm_$(BRCM_SAI_VER)_amd64.deb
-BRCM_SAI_DEV = libsaibcm-dev_$(BRCM_SAI_VER)_amd64.deb
-BRCM_SAI_DIAG = libsaibcm-diag_$(BRCM_SAI_VER)_amd64.deb
+BRCM_SAI_VER = 3.8.1.1
+BRCM_SAI = "libsaibcm_$(BRCM_SAI_VER)_amd64.deb"
+BRCM_SAI_DEV = "libsaibcm-dev_$(BRCM_SAI_VER)_amd64.deb"
+BRCM_SAI_DIAG = "libsaibcm-diag_$(BRCM_SAI_VER)_amd64.deb"
 BRCM_SAI_URL = "http://artifactory.force10networks.com/sonic-debs"
-SAI_LIBS_MOUNT_POINT = /sai_libs
+SAI_LIBS_MOUNT_POINT = $(LOCAL_SAI_DEBS_PATH)
 
 ifneq  ($(LOCAL_SAI_DEBS_PATH),)
 override BRCM_SAI = $(shell find $(SAI_LIBS_MOUNT_POINT) -maxdepth 1 -regex '.*libsaibcm_[0-9.]+_amd64\.deb' -printf "%f")
@@ -38,3 +38,5 @@ else
 $(BRCM_SAI_DIAG)_PATH = $(SAI_LIBS_MOUNT_POINT)
 SONIC_COPY_DEBS += $(BRCM_SAI_DIAG)
 endif
+
+#$(error SONIC_ONLINE_DEBS==!${SONIC_ONLINE_DEBS}! SONIC_COPY_DEBS==!${SONIC_COPY_DEBS}!)

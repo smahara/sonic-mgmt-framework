@@ -544,3 +544,4 @@ class SfpUtil(SfpUtilBase):
             transceiver_dom_threshold_info_dict['rxpowerlowwarning'] = dom_module_threshold_data['data']['RXPowerLowWarning']['value']
             
         return transceiver_dom_threshold_info_dict
+

@@ -511,6 +511,7 @@ enum MAC_TYPE
 {
     MAC_TYPE_STATIC     = 1,
     MAC_TYPE_DYNAMIC    = 2,
+    MAC_TYPE_DYNAMIC_LOCAL = 3,  /* Used while sending MAC to Syncd to program with aging enabled. */
 };
 
 struct MACMsg
@@ -528,6 +529,7 @@ struct MACMsg
     char     origin_ifname[MAX_L_PORT_NAME];
     uint8_t age_flag;/*local or peer is age?*/
     uint8_t pending_local_del;
+    uint8_t add_to_syncd;
 
     TAILQ_ENTRY(MACMsg) tail;     // entry into mac_msg_list
 };

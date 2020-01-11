@@ -178,8 +178,10 @@ void iccp_csm_finalize(struct CSM* csm)
     if (sys->warmboot_exit != WARM_REBOOT)
     {
         /*Enable peer link port MAC learning*/
-        if (csm->peer_link_if)
+        if (csm->peer_link_if) {
             set_peerlink_mlag_port_learn(csm->peer_link_if, 1);
+            set_peerlink_learn_kernel(csm->peer_link_if, 1);
+        }
     }
 
     /* Disconnect from peer */

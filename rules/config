@@ -10,15 +10,23 @@
 # SONIC_CONFIG_BUILD_JOBS - set number of jobs for parallel build.
 # Corresponding -j argument will be passed to make command inside docker
 # container.
-SONIC_CONFIG_BUILD_JOBS = 8
+SONIC_CONFIG_BUILD_JOBS = 99
 
 # SONIC_CONFIG_MAKE_JOBS - set number of parallel make jobs per package.
 # Corresponding -j argument will be passed to make/dpkg commands that build separate packages
-SONIC_CONFIG_MAKE_JOBS = 8
+SONIC_CONFIG_MAKE_JOBS = 99
+
+# SONIC_USE_DOCKER_BUILDKIT - use docker buildkit for build.
+# If set to y SONiC build system will set environment variable DOCKER_BUILDKIT=1
+# to enable docker buildkit.
+# This options will speed up docker image build time.
+# NOTE: SONIC_USE_DOCKER_BUILDKIT will produce larger installable SONiC image
+# because of a docker bug (more details: https://github.com/moby/moby/issues/38903)
+# SONIC_USE_DOCKER_BUILDKIT = y
 
 # SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD - use native dockerd for build.
 # If set to y SONiC build container will use native dockerd instead of dind for faster build
-# SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD = y
+SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD = n
 
 # SONIC_CONFIG_NATIVE_DOCKERD_SHARED - native dockerd for build runs on a shared build server.
 # Note: Enabling this option automatically sets SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD=y.
@@ -49,7 +57,7 @@ DEFAULT_PASSWORD = YourPaSsWoRd
 ENABLE_ZTP = y
 
 # ENABLE_PDE - Enable platform development enviroment
-ENABLE_PDE = y
+ENABLE_PDE = n
 
 # SHUTDOWN_BGP_ON_START - if set to y all bgp sessions will be in admin down state when
 # bgp service starts.
@@ -60,8 +68,8 @@ ENABLE_PDE = y
 # ENABLE_PFCWD_ON_START = y
 
 # INSTALL_DEBUG_TOOLS - installs debugging tools in baseline docker
-# Uncomment next line to enable:
-# INSTALL_DEBUG_TOOLS = y
+# comment next line to disable:
+INSTALL_DEBUG_TOOLS = y
 
 # SONIC_USE_PDDF_FRAMEWORK - Use PDDF generic drivers and plugins
 # Uncomment next line to enable:
@@ -109,8 +117,8 @@ ENABLE_SYSTEM_TELEMETRY = y
 #   for the build. This variable is required when the 'cache' procure method is used,
 #   and may be overridden by specifying the KERNEL_CACHE_PATH variable when invoking
 #   the make command.
-DEFAULT_KERNEL_PROCURE_METHOD = build
-DEFAULT_KERNEL_CACHE_PATH = /projects/csg_sonic/kern_debcache
+#DEFAULT_KERNEL_PROCURE_METHOD = cache
+#DEFAULT_KERNEL_CACHE_PATH = /projects/csg_sonic/kern_debcache
 
 # FRR user and group id values. These only take effect when SONIC_ROUTING_STACK is frr.
 # Note: these values match the admin uid/gid of the host's admin account. If these values
@@ -129,8 +137,8 @@ FRR_USER_GID = 300
 #	#url:      cache over remote http server (not supported)
 #	#registry: cache on the docker local/remote registry (not supported)
 # SONIC_DPKG_CACHE_SOURCE - provides the cache location detail
-SONIC_DPKG_CACHE_METHOD=none
-SONIC_DPKG_CACHE_SOURCE=/projects/csg_sonic/dpkg_cache
+#SONIC_DPKG_CACHE_METHOD=none
+#SONIC_DPKG_CACHE_SOURCE=/projects/csg_sonic/dpkg_cache
 
 # Default VS build memory preparation
 DEFAULT_VS_PREPARE_MEM = yes
@@ -140,9 +148,8 @@ ENABLE_SFLOW = y
 
 # Docker local registry server info where
 # Docker base images are pushed and pulled from the local docker registry
-DOCKER_REGISTRY_SERVER=10.75.139.137:5000
+#DOCKER_REGISTRY_SERVER=dockerregistry.force10networks.com
 
 # Debian local mirror site info
-#DEBIAN_ARCHIVE_MIRROR=10.75.18.181:9090
-#DEBIAN_ORG_MIRROR=10.75.18.181:8080
-
+DEBIAN_ARCHIVE_MIRROR=artifactory.force10networks.com
+DEBIAN_ORG_MIRROR=artifactory.force10networks.com

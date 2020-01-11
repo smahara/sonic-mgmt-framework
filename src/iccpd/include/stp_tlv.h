@@ -149,22 +149,24 @@ struct stpCommonInfoTLV
   char         designated_bridge_id[BRIDGE_ID_STR_LEN];
   uint16_t     designated_port;
 
+  uint8_t	   nrpv_valid;
+  uint8_t	   peer_nrpv_valid;
+  uint32_t     port_id;
+  uint32_t     port_path_cost;
+  uint8_t      max_age;
+  uint32_t     message_age;
+  uint32_t     hello_time;
+  uint32_t     fwd_delay;
   uint8_t      root_port_req_resp_field;
 
+  uint32_t     seq_no;
   uint8_t      state;
   uint8_t      tc_ack;
-  uint8_t      config_pending;
   uint8_t      change_detection_enabled;
   uint8_t      self_loop;
   uint8_t      auto_config;
   uint8_t      oper_edge;
-  uint8_t      kernel_state;
-  uint16_t     path_cost;
   uint32_t     desig_cost;
-  uint16_t     message_age_timer;
-  uint8_t      forward_delay;
-  uint8_t      hold_time;
-  uint16_t     root_protect_timer;
 
   uint8_t      master_node_req_resp_field;
 

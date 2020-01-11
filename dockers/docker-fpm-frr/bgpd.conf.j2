@@ -8,8 +8,6 @@
 !
 {% include "daemons.common.conf.j2" %}
 !
-agentx
-!
 {% if DEVICE_METADATA['localhost'].has_key('bgp_asn') %}
 {% if DEVICE_METADATA['localhost']['type'] == "SpineChassisFrontendRouter" %}
 {%  include "bgpd.conf.spine_chassis_frontend_router.j2" %}
@@ -20,3 +18,10 @@ agentx
 {% include "bgpd.conf.db.j2" %}
 {% endif %}
 !
+{% block bgp_error_handling_init %}
+{% if BGP_ERROR_CFG_TABLE %}
+{% if BGP_ERROR_CFG_TABLE['config']['enable'] == 'true' %}
+bgp error-handling enable
+{% endif %}
+{% endif %}
+{% endblock bgp_error_handling_init %}

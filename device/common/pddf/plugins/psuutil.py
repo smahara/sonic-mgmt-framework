@@ -198,63 +198,65 @@ class PsuUtil(PsuBase):
 
     def get_output_voltage(self, idx):
         if idx is None:
-            return 0
+            return 0.0
 
         if idx<1 or idx>self.platform['num_psus']:
             print "Invalid index %d\n"%idx
-            return 0
+            return 0.0
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_v_out")
         if node is None:
-            return 0
+            return 0.0
         try:
             with open(node, 'r') as f:
-                v_out = int(f.read())
+                v_out = float(f.read())
         except IOError:
-            return 0
+            return 0.0
 
-        return v_out
+        # value returned by the psu driver is in mV
+        return float(v_out/1000)
 
     def get_output_current(self, idx):
         if idx is None:
-            return 0
+            return 0.0
 
         if idx<1 or idx>self.platform['num_psus']:
             print "Invalid index %d\n"%idx
-            return 0
+            return 0.0
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_i_out")
         if node is None:
-            return 0
+            return 0.0
         try:
             with open(node, 'r') as f:
-                i_out = int(f.read())
+                i_out = float(f.read())
         except IOError:
-            return 0
-
-        return i_out
+            return 0.0
+        # value returned by the psudriver is in mA
+        return float(i_out/1000)
 
     def get_output_power(self, idx):
         if idx is None:
-            return 0
+            return 0.0
 
         if idx<1 or idx>self.platform['num_psus']:
             print "Invalid index %d\n"%idx
-            return 0
+            return 0.0
 
         device = "PSU"+"%d"%(idx)
         node = pddf_obj.get_path(device, "psu_p_out")
         if node is None:
-            return 0
+            return 0.0
         try:
             with open(node, 'r') as f:
-                p_out = int(f.read())
+                p_out = float(f.read())
         except IOError:
-            return 0
-
-        return p_out
+            return 0.0
+        
+        # value returned by the psu driver is in micro Watt
+        return float(p_out/1000000)
 
     def get_fan_rpm(self, idx, fan_idx):
         if idx is None or fan_idx is None:

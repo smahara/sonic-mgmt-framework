@@ -1,3 +1,4 @@
+{% from "dockers/dockerfile-macros.j2" import install_debian_packages, install_python_wheels, copy_files %}
 FROM {{ docker_dhcp_relay_load_image }}
 
 ARG docker_container_name
@@ -11,24 +12,21 @@ RUN apt-get update
 
 {% if docker_dhcp_relay_debs.strip() -%}
 # Copy built Debian packages
-COPY \
-{% for deb in docker_dhcp_relay_debs.split(' ') -%}
-debs/{{ deb }}{{' '}}
-{%- endfor -%}
-debs/
+{{ copy_files("debs/", docker_dhcp_relay_debs.split(' '), "/debs/") }}
 
 # Install built Debian packages and implicitly install their dependencies
-RUN dpkg_apt() { [ -f $1 ] && { dpkg -i $1 || apt-get -y install -f; } || return 1; }{%- for deb in docker_dhcp_relay_debs.split(' ') %}; \
-dpkg_apt debs/{{ deb }}
-{%- endfor %}
+{{ install_debian_packages(docker_dhcp_relay_debs.split(' ')) }}
 {%- endif %}
 
 # Clean up
-RUN apt-get clean -y; apt-get autoclean -y; apt-get autoremove -y
-RUN rm -rf /debs
+RUN apt-get clean -y         && \
+    apt-get autoclean -y     && \
+    apt-get autoremove -y    && \
+    rm -rf /debs
 
-COPY ["docker_init.sh", "start.sh", "/usr/bin/"]
+COPY ["docker_init.sh", "start.sh", "files/supervisor-proc-exit-listener", "/usr/bin/"]
 COPY ["docker-dhcp-relay.supervisord.conf.j2", "wait_for_intf.sh.j2", "/usr/share/sonic/templates/"]
+COPY ["critical_processes", "/etc/supervisor"]
 COPY ["no-docker-restart.supervisord.conf.j2", "/usr/share/sonic/templates/"]
 
 ENTRYPOINT ["/usr/bin/docker_init.sh"]

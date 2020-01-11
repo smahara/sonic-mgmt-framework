@@ -483,23 +483,6 @@ index 24f5e48..4e2d63c 100644
  	clear_changed(ifinfo);
  	ifinfo_update(ifinfo, link);
  
-@@ -453,9 +487,16 @@ int ifinfo_link_with_port(struct team_handle *th, uint32_t ifindex,
- 
- 	ifinfo = ifinfo_find(th, ifindex);
- 	if (!ifinfo)
-+	{
-+		err(th, "Failed to find the ifinfo for the interface index %d th->ifindex %d  th is %p.", ifindex, th->ifindex, th);
- 		return -ENOENT;
-+	}
- 	if (ifinfo->linked)
-+	{
-+		err(th, "Found ifinfo for the interface index %d with master_ifindex %d.", ifindex, ifinfo->master_ifindex);
- 		return -EBUSY;
-+	}
-+	
- 	ifinfo->port = port;
- 	ifinfo->linked = true;
- 	if (p_ifinfo)
 diff --git a/libteam/libteam.c b/libteam/libteam.c
 index 2cc80ca..18191e0 100644
 --- a/libteam/libteam.c

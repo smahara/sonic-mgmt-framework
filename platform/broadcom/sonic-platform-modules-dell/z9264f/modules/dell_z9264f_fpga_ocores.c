@@ -190,7 +190,7 @@ struct fpgalogic_i2c {
 #define FPGAI2C_REG_STAT_NACK		0x80
 
 /* SR[7:0] - Status register */
-#define FPGAI2C_REG_SR_RXACK	(1 << 7) /* Receive acknowledge from slave ‘1’ = No acknowledge received*/
+#define FPGAI2C_REG_SR_RXACK	(1 << 7) /* Receive acknowledge from slave .1. = No acknowledge received*/
 #define FPGAI2C_REG_SR_BUSY	(1 << 6) /* Busy, I2C bus busy (as defined by start / stop bits) */
 #define FPGAI2C_REG_SR_AL		(1 << 5) /* Arbitration lost - fpga i2c logic lost arbitration */
 #define FPGAI2C_REG_SR_TIP	(1 << 1) /* Transfer in progress */
@@ -1624,3 +1624,4 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("joyce_yu@dell.com");
 MODULE_DESCRIPTION ("Driver for FPGA Logic I2C bus");
 MODULE_SUPPORTED_DEVICE ("FPGA Logic I2C bus");
+

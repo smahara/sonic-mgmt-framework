@@ -7,3 +7,17 @@ l3_max_ecmp_mode=1
 lpm_scaling_enable=0
 bcm_num_cos=10
 default_cpu_tx_queue=9
+
+# Drop monitor configuration
+flowtracker_enable=2
+flowtracker_max_flows=48000
+flowtracker_drop_monitor_enable=1
+flowtracker_export_interval_usecs=1000000
+flowtracker_max_export_pkt_length=9000
+flowtracker_fsp_reinject_max_length=128
+fpem_mem_entries=16384
+flow_init_mode=1
+num_queues_pci=46
+num_queues_uc0=1
+num_queues_uc1=1
+sai_eapp_config_file=/etc/broadcom/eapps_cfg.json

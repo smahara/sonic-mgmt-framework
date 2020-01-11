@@ -972,6 +972,7 @@ void iccp_from_netlink_port_state_handler( char * ifname, int state)
     struct LocalInterface *lif_po = NULL;
     struct System *sys;
     int po_is_active = 0;
+    int is_mclag_intf = 0;
 
     if ((sys = system_get_instance()) == NULL)
     {
@@ -1000,7 +1001,14 @@ void iccp_from_netlink_port_state_handler( char * ifname, int state)
             if (lif_po->type == IF_T_PORT_CHANNEL && strncmp(lif_po->name, ifname, MAX_L_PORT_NAME) == 0)
             {
                 mlacp_portchannel_state_handler(csm, lif_po, po_is_active);
+                is_mclag_intf = 1;
             }
+        }
+
+        if (!is_mclag_intf)
+        {
+            lif_po = local_if_find_by_name(ifname);
+            update_orphan_port_mac(csm, lif_po, po_is_active);
         }
     }
 

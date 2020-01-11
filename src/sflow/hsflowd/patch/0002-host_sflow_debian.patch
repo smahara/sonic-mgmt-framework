@@ -64,8 +64,8 @@ diff -ruN a/DEBIAN_build/rules b/DEBIAN_build/rules
 +binary:
 +	dh_gencontrol
 +	dh_strip -phsflowd --dbg-package=hsflowd-dbg
-+	dpkg-deb --build debian/hsflowd-dbg hsflowd-dbg_$(HSFLOWD_VERSION)-$(HSFLOWD_SUBVERSION)_amd64.deb
-+	dpkg-deb --build debian/hsflowd hsflowd_$(HSFLOWD_VERSION)-$(HSFLOWD_SUBVERSION)_amd64.deb
++	dpkg-deb --build debian/hsflowd-dbg hsflowd-dbg_$(HSFLOWD_VERSION)-$(HSFLOWD_SUBVERSION)_$(CONFIGURED_ARCH).deb
++	dpkg-deb --build debian/hsflowd hsflowd_$(HSFLOWD_VERSION)-$(HSFLOWD_SUBVERSION)_$(CONFIGURED_ARCH).deb
 +
 +override_dh_auto_build:
 +	make sonic-deb FEATURES="SONIC"

@@ -92,6 +92,12 @@ LKM_MOD_PARAM(psample_size, "i", int, 0);
 MODULE_PARM_DESC(psample_size,
 "psample pkt size (default 128 bytes)");
 
+#define PSAMPLE_QLEN_DFLT 1024
+static int psample_qlen = PSAMPLE_QLEN_DFLT;
+LKM_MOD_PARAM(psample_qlen, "i", int, 0);
+MODULE_PARM_DESC(psample_qlen,
+"psample queue length (default 1024 buffers)");
+
 /* driver proc entry root */
 static struct proc_dir_entry *psample_proc_root = NULL;
 
@@ -112,9 +118,12 @@ typedef struct psample_stats_s {
     unsigned long pkts_f_handled;
     unsigned long pkts_f_pass_through;
     unsigned long pkts_f_dst_mc;
+    unsigned long pkts_c_qlen_cur;
+    unsigned long pkts_c_qlen_hi;
+    unsigned long pkts_d_qlen_max;
+    unsigned long pkts_d_no_mem;
     unsigned long pkts_d_no_group;
     unsigned long pkts_d_sampling_disabled;
-    unsigned long pkts_d_no_skb;
     unsigned long pkts_d_not_ready;
     unsigned long pkts_d_metadata;
     unsigned long pkts_d_meta_srcport;
@@ -130,6 +139,19 @@ typedef struct psample_meta_s {
     int sample_rate;
 } psample_meta_t;
 
+typedef struct psample_pkt_s {
+    struct list_head list;
+    struct psample_group *group;
+    psample_meta_t meta;
+    struct sk_buff *skb;
+} psample_pkt_t;
+
+typedef struct psample_work_s {
+    struct list_head pkt_list;
+    struct work_struct wq;
+    spinlock_t lock;
+} psample_work_t;
+static psample_work_t g_psample_work = {0};
 
 static psample_netif_t*
 psample_netif_lookup_by_port(int unit, int port)
@@ -364,13 +386,51 @@ psample_meta_get(int unit, uint8_t *pkt, void *pkt_meta, psample_meta_t *sflow_m
     return (0);
 }
 
+static void
+psample_task(struct work_struct *work)
+{
+    psample_work_t *psample_work = container_of(work, psample_work_t, wq);
+    unsigned long flags;
+    struct list_head *list_ptr, *list_next;
+    psample_pkt_t *pkt;
+
+    spin_lock_irqsave(&psample_work->lock, flags);
+    list_for_each_safe(list_ptr, list_next, &psample_work->pkt_list) {
+        /* dequeue pkt from list */
+        pkt = list_entry(list_ptr, psample_pkt_t, list);
+        list_del(list_ptr);
+        g_psample_stats.pkts_c_qlen_cur--;
+        spin_unlock_irqrestore(&psample_work->lock, flags);
+ 
+        /* send to psample */
+        if (pkt) {
+            PSAMPLE_CB_DBG_PRINT("%s: group 0x%x, trunc_size %d, src_ifdx 0x%x, dst_ifdx 0x%x, sample_rate %d\n",
+                    __func__, pkt->group->group_num, 
+                    pkt->meta.trunc_size, pkt->meta.src_ifindex, 
+                    pkt->meta.dst_ifindex, pkt->meta.sample_rate);
+
+            psample_sample_packet(pkt->group, 
+                                  pkt->skb, 
+                                  pkt->meta.trunc_size,
+                                  pkt->meta.src_ifindex,
+                                  pkt->meta.dst_ifindex,
+                                  pkt->meta.sample_rate);
+            g_psample_stats.pkts_f_psample_mod++;
+ 
+            dev_kfree_skb_any(pkt->skb);
+            kfree(pkt);
+        }
+        spin_lock_irqsave(&psample_work->lock, flags);
+    }
+    spin_unlock_irqrestore(&psample_work->lock, flags);
+}
+
 int 
 psample_filter_cb(uint8_t * pkt, int size, int dev_no, void *pkt_meta,
                   int chan, kcom_filter_t *kf)
 {
     struct psample_group *group;
     psample_meta_t meta;   
-    struct sk_buff skb;
     int rv = 0;
     static int info_get = 0;
 
@@ -421,19 +481,46 @@ psample_filter_cb(uint8_t * pkt, int size, int dev_no, void *pkt_meta,
 
     /* drop if configured sample rate is 0 */
     if (meta.sample_rate > 0) {
+        unsigned long flags;
+        psample_pkt_t *psample_pkt;
+        struct sk_buff *skb;
+
+        if (g_psample_stats.pkts_c_qlen_cur >= psample_qlen) {
+            gprintk("%s: tail drop due to max qlen %d reached\n", __func__, psample_qlen);
+            g_psample_stats.pkts_d_qlen_max++;
+            goto PSAMPLE_FILTER_CB_PKT_HANDLED;
+        }
+
+        if ((psample_pkt = kmalloc(sizeof(psample_pkt_t), GFP_ATOMIC)) == NULL) {
+            gprintk("%s: failed to alloc psample mem for pkt\n", __func__);
+            g_psample_stats.pkts_d_no_mem++;
+            goto PSAMPLE_FILTER_CB_PKT_HANDLED;
+        }
+        memcpy(&psample_pkt->meta, &meta, sizeof(psample_meta_t));
+        psample_pkt->group = group;
+
+        if ((skb = dev_alloc_skb(meta.trunc_size)) == NULL) {
+            gprintk("%s: failed to alloc psample mem for pkt skb\n", __func__);
+            g_psample_stats.pkts_d_no_mem++;
+            goto PSAMPLE_FILTER_CB_PKT_HANDLED;
+        }
+
         /* setup skb to point to pkt */
-        memset(&skb, 0, sizeof(struct sk_buff));
-        skb.len = size;
-        skb.data = pkt; 
+        memcpy(skb->data, pkt, meta.trunc_size);
+        skb_put(skb, meta.trunc_size);
+        skb->len = meta.trunc_size;
+        psample_pkt->skb = skb;
 
-        psample_sample_packet(group, 
-                              &skb, 
-                              meta.trunc_size,
-                              meta.src_ifindex,
-                              meta.dst_ifindex,
-                              meta.sample_rate);
+        spin_lock_irqsave(&g_psample_work.lock, flags);
+        list_add_tail(&psample_pkt->list, &g_psample_work.pkt_list); 
+        
+        g_psample_stats.pkts_c_qlen_cur++;
+        if (g_psample_stats.pkts_c_qlen_cur > g_psample_stats.pkts_c_qlen_hi) {
+            g_psample_stats.pkts_c_qlen_hi = g_psample_stats.pkts_c_qlen_cur;
+        }
 
-        g_psample_stats.pkts_f_psample_mod++;
+        schedule_work(&g_psample_work.wq);
+        spin_unlock_irqrestore(&g_psample_work.lock, flags);
     } else {
         g_psample_stats.pkts_d_sampling_disabled++;
     }
@@ -789,6 +876,7 @@ psample_proc_debug_show(struct seq_file *m, void *v)
     seq_printf(m, "  pkt_hdr_size:    %d\n",   g_psample_info.hw.pkt_hdr_size);
     seq_printf(m, "  cdma_channels:   %d\n",   g_psample_info.hw.cdma_channels);
     seq_printf(m, "  netif_count:     %d\n",   g_psample_info.netif_count);
+    seq_printf(m, "  queue length:    %d\n",   psample_qlen);
 
     return 0;
 }
@@ -854,9 +942,12 @@ psample_proc_stats_show(struct seq_file *m, void *v)
     seq_printf(m, "  pkts handled by psample        %10lu\n", g_psample_stats.pkts_f_handled);
     seq_printf(m, "  pkts pass through              %10lu\n", g_psample_stats.pkts_f_pass_through);
     seq_printf(m, "  pkts with mc destination       %10lu\n", g_psample_stats.pkts_f_dst_mc);
+    seq_printf(m, "  pkts current queue length      %10lu\n", g_psample_stats.pkts_c_qlen_cur);
+    seq_printf(m, "  pkts high queue length         %10lu\n", g_psample_stats.pkts_c_qlen_hi);
+    seq_printf(m, "  pkts drop max queue length     %10lu\n", g_psample_stats.pkts_d_qlen_max);
+    seq_printf(m, "  pkts drop no memory            %10lu\n", g_psample_stats.pkts_d_no_mem);
     seq_printf(m, "  pkts drop no psample group     %10lu\n", g_psample_stats.pkts_d_no_group);
     seq_printf(m, "  pkts drop sampling disabled    %10lu\n", g_psample_stats.pkts_d_sampling_disabled);
-    seq_printf(m, "  pkts drop no skb               %10lu\n", g_psample_stats.pkts_d_no_skb);
     seq_printf(m, "  pkts drop psample not ready    %10lu\n", g_psample_stats.pkts_d_not_ready);
     seq_printf(m, "  pkts drop metadata parse error %10lu\n", g_psample_stats.pkts_d_metadata);
     seq_printf(m, "  pkts with invalid src port     %10lu\n", g_psample_stats.pkts_d_meta_srcport);
@@ -881,7 +972,15 @@ static ssize_t
 psample_proc_stats_write(struct file *file, const char *buf,
                     size_t count, loff_t *loff)
 {
+    int qlen_cur = 0;
+    unsigned long flags;
+
+    spin_lock_irqsave(&g_psample_work.lock, flags);
+    qlen_cur = g_psample_stats.pkts_c_qlen_cur;
     memset(&g_psample_stats, 0, sizeof(psample_stats_t));
+    g_psample_stats.pkts_c_qlen_cur = qlen_cur;
+    spin_unlock_irqrestore(&g_psample_work.lock, flags);
+
     return count;
 }
 struct file_operations psample_proc_stats_file_ops = {
@@ -895,10 +994,12 @@ struct file_operations psample_proc_stats_file_ops = {
 
 int psample_cleanup(void)
 {
+    cancel_work_sync(&g_psample_work.wq);
     remove_proc_entry("stats", psample_proc_root);
     remove_proc_entry("rate",  psample_proc_root);
     remove_proc_entry("size",  psample_proc_root);
     remove_proc_entry("debug", psample_proc_root);
+    remove_proc_entry("map"  , psample_proc_root);
     return 0;
 }
 
@@ -952,10 +1053,16 @@ int psample_init(void)
     /* clear data structs */
     memset(&g_psample_stats, 0, sizeof(psample_stats_t));
     memset(&g_psample_info, 0, sizeof(psample_info_t));
+    memset(&g_psample_work, 0, sizeof(psample_work_t));
 
     /* setup psample_info struct */
     INIT_LIST_HEAD(&g_psample_info.netif_list); 
     spin_lock_init(&g_psample_info.lock);
+
+    /* setup psample work queue */
+    spin_lock_init(&g_psample_work.lock); 
+    INIT_LIST_HEAD(&g_psample_work.pkt_list); 
+    INIT_WORK(&g_psample_work.wq, psample_task);
 
     /* get net namespace */ 
     g_psample_info.netns = get_net_ns_by_pid(current->pid);
@@ -965,6 +1072,7 @@ int psample_init(void)
     }
     PSAMPLE_CB_DBG_PRINT("%s: current->pid %d, netns 0x%p, sample_size %d\n", __func__, 
             current->pid, g_psample_info.netns, psample_size);
-   
+
+
     return 0;
 }

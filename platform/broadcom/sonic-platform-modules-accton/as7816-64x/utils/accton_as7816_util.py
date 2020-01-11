@@ -146,6 +146,8 @@ def ir3507_check():
         print "Error on ir3507_check() e:" + str(e)
         return -1
     return ret
+    
+    
 
 def  show_eeprom_help():
     cmd =  sys.argv[0].split("/")[-1]+ " "  + args[0]
@@ -281,7 +283,8 @@ def device_install():
             print output
             if FORCE == 0:                
                 return status  
-
+                
+    
     for i in range(0,len(sfp_map)):
         status, output =log_os_system("echo as7816_64x_port"+str(i+1)+" 0x50 > /sys/bus/i2c/devices/i2c-"+str(sfp_map[i])+"/new_device", 1)
         if status:

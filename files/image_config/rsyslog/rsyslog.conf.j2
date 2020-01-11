@@ -43,11 +43,11 @@ $ActionFileDefaultTemplate SONiCFileFormat
 #Set remote syslog server
 {% for server in SYSLOG_SERVER %}
 {% if SYSLOG_SERVER[server]['filter_rule'] %}
-{{ SYSLOG_SERVER[server]['filter_rule'] }} @{{ server }}:514;SONiCFileFormat
+{{ SYSLOG_SERVER[server]['filter_rule'] }} @[{{ server }}]:514;SONiCFileFormat
 {% elif SYSLOG_SERVER[server]['priority'] %}
-{{ SYSLOG_SERVER[server]['priority'] }} @{{ server }}:514;SONiCFileFormat
+{{ SYSLOG_SERVER[server]['priority'] }} @[{{ server }}]:514;SONiCFileFormat
 {% else %}
-*.* @{{ server }}:514;SONiCFileFormat
+*.* @[{{ server }}]:514;SONiCFileFormat
 {% endif %}
 {% endfor %}
 

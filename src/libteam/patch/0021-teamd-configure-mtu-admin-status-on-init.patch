@@ -1,0 +1,120 @@
+diff --git a/include/team.h b/include/team.h
+index b31c8d8..cf0954d 100644
+--- a/include/team.h
++++ b/include/team.h
+@@ -37,8 +37,8 @@ extern "C" {
+ struct team_handle;
+ 
+ struct team_handle *team_alloc(void);
+-int team_create(struct team_handle *th, const char *team_name);
+-int team_recreate(struct team_handle *th, const char *team_name);
++int team_create(struct team_handle *th, const char *team_name, int mtu, bool enable);
++int team_recreate(struct team_handle *th, const char *team_name, int mtu, bool enable);
+ int team_destroy(struct team_handle *th);
+ int team_init(struct team_handle *th, uint32_t ifindex);
+ void team_free(struct team_handle *th);
+diff --git a/libteam/libteam.c b/libteam/libteam.c
+index 18191e0..3fdd894 100644
+--- a/libteam/libteam.c
++++ b/libteam/libteam.c
+@@ -459,7 +459,7 @@ err_ifinfo_list_alloc:
+ 	return NULL;
+ }
+ 
+-static int do_create(struct team_handle *th, const char *team_name, bool recreate)
++static int do_create(struct team_handle *th, const char *team_name, bool recreate, int mtu, bool enable)
+ {
+ 	struct rtnl_link *link;
+ 	int err;
+@@ -473,6 +473,16 @@ static int do_create(struct team_handle *th, const char *team_name, bool recreat
+ 			return -ENAMETOOLONG;
+ 
+ 		rtnl_link_set_name(link, team_name);
++		rtnl_link_set_mtu(link, mtu);
++
++        if (enable) 
++        {
++            rtnl_link_set_flags(link, rtnl_link_str2flags("up"));
++        }
++        else
++        {
++            rtnl_link_unset_flags(link, rtnl_link_str2flags("up"));
++        }
+ 
+ 		if (recreate && team_ifname2ifindex(th, team_name)) {
+ 			err = rtnl_link_delete(th->nl_cli.sock, link);
+@@ -503,9 +513,9 @@ errout:
+  * @return Zero on success or negative number in case of an error.
+  **/
+ TEAM_EXPORT
+-int team_create(struct team_handle *th, const char *team_name)
++int team_create(struct team_handle *th, const char *team_name, int mtu, bool enable)
+ {
+-	return do_create(th, team_name, false);
++	return do_create(th, team_name, false, mtu, enable);
+ }
+ 
+ /**
+@@ -518,9 +528,9 @@ int team_create(struct team_handle *th, const char *team_name)
+  * @return Zero on success or negative number in case of an error.
+  **/
+ TEAM_EXPORT
+-int team_recreate(struct team_handle *th, const char *team_name)
++int team_recreate(struct team_handle *th, const char *team_name, int mtu, bool enable)
+ {
+-	return do_create(th, team_name, true);
++	return do_create(th, team_name, true, mtu, enable);
+ }
+ 
+ /**
+diff --git a/teamd/teamd.c b/teamd/teamd.c
+index 96794e8..eab4455 100644
+--- a/teamd/teamd.c
++++ b/teamd/teamd.c
+@@ -1257,6 +1257,9 @@ int teamd_change_debug_level(struct teamd_context *ctx, unsigned int new_debug)
+ static int teamd_init(struct teamd_context *ctx)
+ {
+ 	int err;
++    const char *admin_status;
++    const char *mtu;
++    bool enable = false;
+ 
+ 	ctx->th = team_alloc();
+ 	if (!ctx->th) {
+@@ -1272,10 +1275,34 @@ static int teamd_init(struct teamd_context *ctx)
+ 	if (ctx->ifindex && ctx->take_over)
+ 		goto skip_create;
+ 
++    err = teamd_config_string_get(ctx, &admin_status, "$.admin_status");
++
++    if (err) {
++        teamd_log_err("Failed to fetch admin status for team device.");
++        goto team_free;
++    }
++
++    if ((strcmp(admin_status, "up") != 0) && 
++        (strcmp(admin_status, "down") != 0)) {
++        teamd_log_err("Invalid admin status %s received for team device.", admin_status);
++        goto team_free;
++    }
++
++    if (strcmp(admin_status, "up") == 0) {
++        enable = true;
++    }
++
++    err = teamd_config_string_get(ctx, &mtu, "$.mtu");
++
++    if (err) {
++        teamd_log_err("Failed to fetch mtu for team device.");
++        goto team_free;
++    }
++
+ 	if (ctx->force_recreate)
+-		err = team_recreate(ctx->th, ctx->team_devname);
++		err = team_recreate(ctx->th, ctx->team_devname, atoi(mtu), enable);
+ 	else
+-		err = team_create(ctx->th, ctx->team_devname);
++		err = team_create(ctx->th, ctx->team_devname, atoi(mtu), enable);
+ 	if (err) {
+ 		teamd_log_err("Failed to create team device.");
+ 		goto team_free;

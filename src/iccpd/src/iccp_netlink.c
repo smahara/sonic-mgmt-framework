@@ -308,6 +308,7 @@ int iccp_get_portchannel_member_list_handler(struct nl_msg *msg, void * arg)
                     {
                         /*link add to portchannel, must be disabled mac learn*/
                         set_peerlink_mlag_port_learn(local_if, 0);
+                        set_peerlink_learn_kernel(csm->peer_link_if, 0);
                     }
                 }
             }
@@ -564,6 +565,52 @@ errout:
     return err;
 }
 
+//Set IFF up flag for all member ports of a port-channel
+static int iccp_netlink_set_portchannel_iff_flag(
+    struct LocalInterface* lif_po,
+    bool                   is_iff_up,
+    int                    location)
+{
+    int rv, ret_rv = 0;
+    char* token;
+    struct LocalInterface* member_if;
+
+    if (!lif_po)
+        return MCLAG_ERROR;
+
+    ICCPD_LOG_NOTICE(__FUNCTION__, "Bring %s %s members",
+       is_iff_up ? "up" : "down", lif_po->name);
+
+    /* Port-channel members are stored as comma separated strings */
+    token = strtok(lif_po->portchannel_member_buf, ",");
+    while (token != NULL)
+    {
+        member_if = local_if_find_by_name(token);
+        if (member_if)
+        {
+            if (is_iff_up)
+                rv = iccp_netlink_if_startup_set(member_if->ifindex);
+            else
+                rv = iccp_netlink_if_shutdown_set(member_if->ifindex);
+            if (rv != 0)
+            {
+                ICCPD_LOG_ERR(__FUNCTION__,
+                    "Set %s:%s, if_up(%d), location(%d) failed, rv %d",
+                    lif_po->name, member_if->name, is_iff_up, location, rv);
+                ret_rv = rv;
+            }
+        }
+        else
+        {
+            ICCPD_LOG_ERR(__FUNCTION__,
+                "Can't find member %s:%s, if_up(%d), location %d",
+                lif_po->name, token, is_iff_up, location);
+        }
+        token = strtok(NULL, ",");
+    }
+    return ret_rv;
+}
+
 void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
 {
     struct CSM* csm;
@@ -686,6 +733,13 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
                         lif_po->name,  lif_po->mac_addr[0], lif_po->mac_addr[1], lif_po->mac_addr[2], lif_po->mac_addr[3], lif_po->mac_addr[4], lif_po->mac_addr[5],
                         MLACP(csm).system_id[0], MLACP(csm).system_id[1], MLACP(csm).system_id[2], MLACP(csm).system_id[3], MLACP(csm).system_id[4], MLACP(csm).system_id[5]);
 
+        /* Shutdown the LAG members first before changing the system ID to force
+         * LAG to go down. It helps trigger Teamd to send new LACP packet with
+         * new system ID when LAG is enabled again. Otherwise, it can take up
+         * to 30 seconds for Teamd to send the updated LACP packet
+         */
+        iccp_netlink_set_portchannel_iff_flag(lif_po, false, 1);
+
         ret = iccp_netlink_if_hwaddr_set(lif_po->ifindex,  MLACP(csm).system_id, ETHER_ADDR_LEN);
         if (ret != 0)
         {
@@ -693,8 +747,12 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
         }
 
         /* Refresh link local address according the new MAC */
+        /* Move the shutdown call before setting MAC address. Setting must be done
+         * on all members of the port-channel for it to take effect right away
         iccp_netlink_if_shutdown_set(lif_po->ifindex);
         iccp_netlink_if_startup_set(lif_po->ifindex);
+        */
+        iccp_netlink_set_portchannel_iff_flag(lif_po, true, 2);
     }
 
     /*Set portchannel ip mac */

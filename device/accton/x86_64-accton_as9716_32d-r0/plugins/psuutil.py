@@ -72,6 +72,7 @@ class PsuUtil(PsuBase):
             return False
 
         return status == 1
+
     def get_powergood_status(self, index):
         if index is None:
             return False
@@ -85,7 +86,6 @@ class PsuUtil(PsuBase):
             return False
 
         return status == 1
-
 
     def get_model(self, index):
         if index is None:
@@ -151,48 +151,48 @@ class PsuUtil(PsuBase):
 
     def get_output_voltage(self, index):
         if index is None:
-            return 0
+            return 0.0
 
-        vout = 0
+        vout = 0.0
         node = self.psu_path + self.psu_mapping_diag[index] + self.psu_v_out
         try:
             with open(node, 'r') as v_out:
-                vout = int(v_out.read())
+                vout = float(v_out.read())
         except IOError:
-            return 0
+            return 0.0
 
         # vout is in milli volts
-        return vout
+        return float(vout/1000)
 
     def get_output_current(self, index):
         if index is None:
-            return 0
+            return 0.0
 
-        iout = 0
+        iout = 0.0
         node = self.psu_path + self.psu_mapping_diag[index] + self.psu_i_out
         try:
             with open(node, 'r') as i_out:
-                iout = int(i_out.read())
+                iout = float(i_out.read())
         except IOError:
-            return 0
+            return 0.0
 
         # iout in milli amps
-        return iout
+        return float(iout/1000)
 
     def get_output_power(self, index):
         if index is None:
-            return 0
+            return 0.0
 
-        pout = 0
+        pout = 0.0
         node = self.psu_path + self.psu_mapping_diag[index] + self.psu_p_out
         try:
             with open(node, 'r') as p_out:
-                pout = int(p_out.read())
+                pout = float(p_out.read())
         except IOError:
-            return 0
+            return 0.0
 
-        # pout should be in micro-watts, CLI is written with conversion
-        return (pout*1000)
+        # pout is in milli watts 
+        return float(pout/1000)
 
     def get_fan_rpm(self, index, fan_idx):
         if index is None or fan_idx is None:

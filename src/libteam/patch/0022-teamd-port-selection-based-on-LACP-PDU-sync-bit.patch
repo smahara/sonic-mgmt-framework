@@ -1,0 +1,38 @@
+diff --git a/teamd/teamd_runner_lacp.c b/teamd/teamd_runner_lacp.c
+index 2e07b00..cc03f9a 100644
+--- a/teamd/teamd_runner_lacp.c
++++ b/teamd/teamd_runner_lacp.c
+@@ -567,13 +567,10 @@ static int lacp_port_should_be_enabled(struct lacp_port *lacp_port)
+ 	struct lacp *lacp = lacp_port->lacp;
+ 
+ 	if (lacp_port_selected(lacp_port) &&
+-	    lacp_port->agg_lead == lacp->selected_agg_lead)
+-	{
+-		if (is_lacp_fallback_eligible(lacp_port))
+-			return true;
+-		if (lacp_port->partner.state & INFO_STATE_SYNCHRONIZATION)
++		lacp_port->agg_lead == lacp->selected_agg_lead &&
++		(lacp_port->partner.state & INFO_STATE_SYNCHRONIZATION ||
++		is_lacp_fallback_eligible(lacp_port)))
+ 			return true;
+-	}
+ 	return false;
+ }
+ 
+@@ -582,13 +579,10 @@ static int lacp_port_should_be_disabled(struct lacp_port *lacp_port)
+ 	struct lacp *lacp = lacp_port->lacp;
+ 
+ 	if (!lacp_port_selected(lacp_port) ||
+-	    lacp_port->agg_lead != lacp->selected_agg_lead) 
+-	{
+-		if (is_lacp_fallback_eligible (lacp_port))
+-			return true;
+-	    	if(!(lacp_port->partner.state & INFO_STATE_SYNCHRONIZATION))
++		lacp_port->agg_lead != lacp->selected_agg_lead ||
++		(!(lacp_port->partner.state & INFO_STATE_SYNCHRONIZATION) &&
++		!is_lacp_fallback_eligible(lacp_port)))
+ 			return true;
+-	}
+ 	return false;
+ }
+ 

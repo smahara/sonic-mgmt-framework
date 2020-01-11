@@ -275,3 +275,4 @@ for psu in range(1, S5232F_MAX_PSUS + 1):
 print '\n    Total Power:                     ',\
     get_pmc_register('PSU_Total_watt')
 
+
