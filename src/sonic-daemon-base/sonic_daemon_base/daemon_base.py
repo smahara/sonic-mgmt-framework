@@ -39,8 +39,7 @@ EEPROM_CLASS_NAME = 'board'
 def db_connect(db):
     from swsscommon import swsscommon
     return swsscommon.DBConnector(db,
-                                  REDIS_HOSTNAME,
-                                  REDIS_PORT,
+                                  swsscommon.DBConnector.DEFAULT_UNIXSOCKET,
                                   REDIS_TIMEOUT_MSECS)
 
 #
