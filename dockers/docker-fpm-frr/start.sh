@@ -21,9 +21,6 @@ elif [ "$CONFIG_TYPE" == "unified" ]; then
 fi
 
 chown -R frr:frr /etc/frr/
-[ -s "/etc/frr/frr.conf" ] || {
-    echo "log syslog informational" > /etc/frr/frr.conf
-}
 
 sonic-cfggen -d -t /usr/share/sonic/templates/isolate.j2 > /usr/sbin/bgp-isolate
 chown root:root /usr/sbin/bgp-isolate
@@ -70,6 +67,8 @@ sonic-cfggen -d -t /usr/share/sonic/templates/wait_for_vrf.sh.j2 > /usr/bin/wait
 chmod +x /usr/bin/wait_for_vrf.sh
 
 /usr/bin/wait_for_vrf.sh
+
+/usr/bin/vtysh -c "config" -c "log syslog informational"
 
 if [ "$CONFIG_TYPE" == "unified" ] || [ "$CONFIG_TYPE" == "split" ]; then
     supervisorctl start vtysh_b
