@@ -1,4 +1,4 @@
-# SONiC ${MAKE} file
+# SONiC make file
 
 NOJESSIE ?= 0
 
@@ -16,7 +16,7 @@ ifeq ($(NOJESSIE), 0)
 	${MAKE} -f Makefile.work jessie
 endif
 
-clean reset init configure docker-cleanup showtag sonic-slave-build sonic-slave-bash :
+clean reset init configure docker-cleanup showtag sonic-slave-build sonic-slave-bash:
 	@echo "+++ Making $@ +++"
 ifeq ($(NOJESSIE), 0)
 	${MAKE} -f Makefile.work $@

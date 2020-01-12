@@ -46,6 +46,7 @@
 #  * NOS_NAME : Optional SONiC OS name for the image we wish to build
 #
 ###############################################################################
+KEEP_SLAVE_ON=yes
 
 SHELL = /bin/bash
 
@@ -446,6 +447,17 @@ ifneq (,${LOCAL_SAI_DEBS_PATH})
 	mkdir -p `dirname ${LOCAL_SAI_DEBS_PATH}`
 	git clone --depth=1 git@github.com:project-arlo/private_sonic-binaries.git ${LOCAL_SAI_DEBS_PATH}
 endif
+
+configure:
+	@mkdir -p target/debs
+	@mkdir -p target/debs/stretch
+	@mkdir -p target/files
+	@mkdir -p target/files/stretch
+	@mkdir -p target/python-debs
+	@mkdir -p target/python-wheels
+	@echo $(PLATFORM) > .platform
+	@echo $(PLATFORM_ARCH) > .arch
+	echo CONFIGURED
 
 .ONESHELL : reset
 reset :

@@ -15,7 +15,6 @@ MAINTAINER gulv@microsoft.com
 
 RUN     test "x${debian_archive_mirror}" != "x" && test "x${debian_org_mirror}" != "x"  && \
         echo "deb http://${debian_org_mirror}/debian stretch main " > /etc/apt/sources.mirror.list && \
-        echo "deb http://${debian_org_mirror}/debian-security stretch/updates main " >> /etc/apt/sources.mirror.list && \
         echo "deb http://${debian_org_mirror}/debian stretch-updates main" >> /etc/apt/sources.mirror.list && \
         echo "deb http://${debian_archive_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.mirror.list && \
         echo "deb-src http://${debian_archive_mirror}/debian/ stretch main contrib non-free" >> /etc/apt/sources.mirror.list && \
@@ -49,6 +48,8 @@ RUN echo "deb [arch=arm64] http://deb.debian.org/debian stretch main contrib non
         echo "deb-src [arch=arm64] http://security.debian.org stretch/updates main contrib non-free" >> /etc/apt/sources.list && \
         echo 'deb [arch=arm64] http://ftp.debian.org/debian stretch-backports main' >> /etc/apt/sources.list
 {%- endif %}
+
+RUN cat /etc/apt/sources.list
 
 ## Make apt-get non-interactive
 ENV DEBIAN_FRONTEND=noninteractive

@@ -40,9 +40,13 @@ STRETCH_FILES_PATH = $(TARGET_PATH)/files/stretch
 DBG_IMAGE_MARK = dbg
 DBG_SRC_ARCHIVE_FILE = $(TARGET_PATH)/sonic_src.tar.gz
 
-CONFIGURED_PLATFORM := $(shell [ -f .platform ] && cat .platform || echo generic)
+CONFIGURED_PLATFORM := $(shell cat .platform 2>/dev/null)
+ifeq (,$(CONFIGURED_PLATFORM))
+$(error Build system is not configured, please run:    make configure)
+endif
+
 PLATFORM_PATH = platform/$(CONFIGURED_PLATFORM)
-CONFIGURED_ARCH := $(shell [ -f .arch ] && cat .arch || echo amd64)
+CONFIGURED_ARCH := $(shell cat .arch 2>/dev/null || echo amd64)
 ifeq ($(PLATFORM_ARCH),)
 	override PLATFORM_ARCH = $(CONFIGURED_ARCH)
 endif
@@ -61,12 +65,6 @@ export CONFIGURED_ARCH
 ## Utility rules
 ## Define configuration, help etc.
 ###############################################################################
-
-.platform :
-ifneq ($(CONFIGURED_PLATFORM),generic)
-	@echo Build system is not configured, please run make configure
-	@exit 1
-endif
 
 configure :
 	@mkdir -p target/debs
