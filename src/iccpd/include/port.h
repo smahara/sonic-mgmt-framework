@@ -55,9 +55,10 @@
 #define IF_T_UNKNOW        -1
 #define IF_T_PORT           0
 #define IF_T_PORT_CHANNEL   1
-#define IF_T_VLAN         2
-#define IF_T_VXLAN       3
-#define IF_T_BRIDGE      4
+#define IF_T_VLAN           2
+#define IF_T_VXLAN          3
+#define IF_T_BRIDGE         4
+#define IF_T_SAG            5
 
 typedef struct
 {

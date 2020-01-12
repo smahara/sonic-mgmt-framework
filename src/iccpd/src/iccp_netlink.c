@@ -950,6 +950,7 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
             { VLAN_PREFIX,             IF_T_VLAN         },
             { FRONT_PANEL_PORT_PREFIX, IF_T_PORT         },
             { VXLAN_TUNNEL_PREFIX,     IF_T_VXLAN        },
+            { SAG_PREFIX,              IF_T_SAG          },
             { NULL,                    0                 }
         };
         int i = 0;

@@ -151,6 +151,9 @@ struct LocalInterface* local_if_create(int ifindex, char* ifname, int type, uint
             /* do nothing currently. */
             break;
 
+        case IF_T_SAG:
+            break;
+
         default:
             ICCPD_LOG_WARN(__FUNCTION__, "The type of local interface (%s) is not acceptable", ifname);
             if (local_if)
