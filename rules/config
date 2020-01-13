@@ -14,7 +14,7 @@ SONIC_CONFIG_BUILD_JOBS = 8
 
 # SONIC_CONFIG_MAKE_JOBS - set number of parallel make jobs per package.
 # Corresponding -j argument will be passed to make/dpkg commands that build separate packages
-SONIC_CONFIG_MAKE_JOBS = 99
+SONIC_CONFIG_MAKE_JOBS = 8
 
 # SONIC_USE_DOCKER_BUILDKIT - use docker buildkit for build.
 # If set to y SONiC build system will set environment variable DOCKER_BUILDKIT=1

@@ -453,7 +453,7 @@ init:
 ifneq (,${LOCAL_SAI_DEBS_PATH})
 	rm -rf ${LOCAL_SAI_DEBS_PATH}
 	mkdir -p `dirname ${LOCAL_SAI_DEBS_PATH}`
-	git clone --depth=1 git@github.com:project-arlo/private_sonic-binaries.git ${LOCAL_SAI_DEBS_PATH}
+	git clone --depth=1 git@gitlab.force10networks.com:e-sonic/sonic-binaries.git ${LOCAL_SAI_DEBS_PATH}
 endif
 
 configure:
