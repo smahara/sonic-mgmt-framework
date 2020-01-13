@@ -1,8 +1,6 @@
 ## Debian mirror on Microsoft Azure
-## Ref: http://debian-archive.trafficmanager.net/
+## Ref: http://artifactory.force10networks.com/
 
-deb [arch=amd64] http://debian-archive.trafficmanager.net/debian/ stretch main contrib non-free
-deb-src [arch=amd64] http://debian-archive.trafficmanager.net/debian/ stretch main contrib non-free
-deb [arch=amd64] http://debian-archive.trafficmanager.net/debian-security/ stretch/updates main contrib non-free
-deb-src [arch=amd64] http://debian-archive.trafficmanager.net/debian-security/ stretch/updates main contrib non-free
-deb [arch=amd64] http://debian-archive.trafficmanager.net/debian/ stretch-backports main contrib non-free
+deb http://artifactory.force10networks.com/debian/ stretch main contrib non-free
+deb-src http://artifactory.force10networks.com/debian/ stretch main contrib non-free
+deb http://artifactory.force10networks.com/debian/ stretch-backports main contrib non-free

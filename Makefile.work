@@ -46,7 +46,7 @@
 #  * NOS_NAME : Optional SONiC OS name for the image we wish to build
 #
 ###############################################################################
-KEEP_SLAVE_ON=yes
+#KEEP_SLAVE_ON=yes
 
 SHELL = /bin/bash
 
