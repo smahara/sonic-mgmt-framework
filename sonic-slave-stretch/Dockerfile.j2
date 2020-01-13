@@ -435,6 +435,8 @@ ENV PATH /usr/share/depot_tools:$PATH
 
 #RUN apt-get -y autoremove || true
 
+RUN echo "DOCKER_OPTS=\"--experimental --storage-driver=vfs\"" >> /etc/default/docker
+
 # Use host docker group
 RUN groupmod -o -g ${DGRP} docker
 RUN sed -i -e "/docker/s/:999:/:${DGRP}:/" /etc/group

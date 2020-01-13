@@ -235,8 +235,16 @@ ifneq (,$(filter $(CONFIGURED_ARCH), armhf arm64))
 
 endif
 
+DGRP=$(shell grep docker: /etc/group    | sed -e 's/:[^:]*:/ /' -e 's/:/ /g'|awk '{print $$2}')
+$(warning DGRP==!${DGRP}!)
+ifeq (${DGRP},)
+DGRP=$(shell ypcat group | grep docker: | sed -e 's/:[^:]*:/ /' -e 's/:/ /g'|awk '{print $$2}')
+endif
+$(warning DGRP==!${DGRP}!)
+
 DOCKER_BASE_BUILD = docker build --no-cache \
                     -t $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) \
+                    --build-arg DGRP=${DGRP} \
                     --build-arg http_proxy=$(http_proxy) \
                     --build-arg https_proxy=$(https_proxy) \
                     --build-arg debian_archive_mirror=$(DEBIAN_ARCHIVE_MIRROR) \
