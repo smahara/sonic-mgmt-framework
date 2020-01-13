@@ -100,6 +100,7 @@ MODULE_PARM_DESC(psample_qlen,
 
 /* driver proc entry root */
 static struct proc_dir_entry *psample_proc_root = NULL;
+static struct proc_dir_entry *knet_cb_proc_root = NULL;
 
 /* psample general info */
 typedef struct {
@@ -1000,6 +1001,8 @@ int psample_cleanup(void)
     remove_proc_entry("size",  psample_proc_root);
     remove_proc_entry("debug", psample_proc_root);
     remove_proc_entry("map"  , psample_proc_root);
+    remove_proc_entry("psample", knet_cb_proc_root);
+    remove_proc_entry("bcm/knet-cb", NULL);
     return 0;
 }
 
@@ -1011,7 +1014,7 @@ int psample_init(void)
     
     /* create procfs for psample */
     snprintf(psample_procfs_path, PROCFS_MAX_PATH, "bcm/knet-cb");
-    proc_mkdir(psample_procfs_path, NULL);
+    knet_cb_proc_root = proc_mkdir(psample_procfs_path, NULL);
     snprintf(psample_procfs_path, PROCFS_MAX_PATH, "%s/%s", psample_procfs_path, PSAMPLE_CB_NAME);
     psample_proc_root = proc_mkdir(psample_procfs_path, NULL);
 
