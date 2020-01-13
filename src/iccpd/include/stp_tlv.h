@@ -161,6 +161,7 @@ struct stpCommonInfoTLV
 
   uint32_t     seq_no;
   uint8_t      state;
+  uint8_t      role;
   uint8_t      tc_ack;
   uint8_t      change_detection_enabled;
   uint8_t      self_loop;
