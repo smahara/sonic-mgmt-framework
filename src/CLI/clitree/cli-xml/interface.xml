@@ -22,11 +22,6 @@ limitations under the License.
     xsi:schemaLocation="http://www.dellemc.com/sonic/XMLSchema
     http://www.dellemc.com/sonic/XMLSchema/clish.xsd"
     >
-    <PTYPE
-    name="MODE"
-    method="select"
-    pattern="active on"
-    help="PortChannel Mode"/>
 
     <VIEW name="enable-view">
     <!--show interface -->
@@ -303,7 +298,7 @@ limitations under the License.
                 <PARAM 
                         name="PoMode" 
                         help="" 
-                        ptype="MODE"
+                        ptype="PO_MODE"
                         > 
                 </PARAM>
         </PARAM>
@@ -468,27 +463,6 @@ limitations under the License.
                 help="Specify a PortChannel number"
                 ptype="LAG_ID"
             >
-            <!-- channel-group <number> mode [active] -->
-            <PARAM
-                name="mode"
-                help="Set the LACP actor mode, default: ACTIVE"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                optional="true">
-                <PARAM
-                    name="portchannel-mode-switch"
-                    help="Specify channeling mode"
-                    ptype="SUBCOMMAND"
-                    mode="switch"
-                    >
-                    <PARAM
-                        name="active"
-                        help="Set channeling mode to ACTIVE"
-                        ptype="SUBCOMMAND"
-                        mode="subcommand"
-                        />
-                </PARAM>
-            </PARAM>
         </PARAM>
         <ACTION builtin="clish_restcl">oper=PATCH url=/restconf/data/openconfig-interfaces:interfaces/interface=${iface}/openconfig-if-ethernet:ethernet/config/openconfig-if-aggregate:aggregate-id body={"openconfig-if-aggregate:aggregate-id": "${lag-id}}</ACTION>
         </COMMAND>
