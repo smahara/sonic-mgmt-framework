@@ -167,10 +167,7 @@ agentxsocket    tcp:localhost:3161
 #
 pass -p 10 .1.3.6.1.2.1.1.1 /usr/share/snmp/sysDescr_pass.py
 
-###############################################################################
-# Configuration derived from ConfigDB
-###############################################################################
-
+# Begin Configuration derived from ConfigDB
 ###############################################################################
 #
 # System Group
@@ -260,6 +257,7 @@ targetAddr  {{ target_host }}  {{ '1.3.6.1.2.1.100.1.2' if target_host | ipv6 el
 {% endfor %}
 {% endif %}
 {% endfor %}
+
 #
 # Target Params Table Entries
 #
@@ -289,7 +287,33 @@ targetParams  {{ target_param }}  {{ sec_model }}  {{ sec_name }} {{ sec_level }
 #  username    (MD5|SHA)  authpassphrase  [(DES|AES)  privpassphrase]
 #
 
-# TODO SNMP_SERVER_USER
+{% if  SNMP_SERVER_USER is defined %}
+{% for usm_user in SNMP_SERVER_USER %}
+{% if SNMP_SERVER_USER[usm_user].md5Key is defined %}
+{% set authKey, authType = SNMP_SERVER_USER[usm_user].md5Key | snmp_passkey, "MD5" %}
+{% endif %}
+{% if SNMP_SERVER_USER[usm_user].shaKey is defined %}
+{% set authKey, authType = SNMP_SERVER_USER[usm_user].shaKey | snmp_passkey, "SHA" %}
+{% endif %}
+{% if SNMP_SERVER_USER[usm_user].desKey is defined %}
+{% set privKey, privType = SNMP_SERVER_USER[usm_user].desKey | snmp_passkey, "DES" %}
+{% endif %}
+{% if SNMP_SERVER_USER[usm_user].aesKey is defined %}
+{% set privKey, privType = SNMP_SERVER_USER[usm_user].aesKey | snmp_passkey, "AES" %}
+{% endif %}
+{% if authKey is defined and authKey != "0x00000000000000000000000000000000" %}
+{% set _authStr = " " + authType + " -l " + authKey  %}
+{% else %}
+{% set _authStr = "" %}
+{% endif %}
+{% if privKey is defined and privKey != "0x00000000000000000000000000000000" %}
+{% set _privStr = " " + privType + " -l " + privKey %}
+{% else %}
+{% set _privStr = "" %}
+{% endif %}
+createUser {{ usm_user }}{{ _authStr }}{{ _privStr }}
+{% endfor %}
+{% endif %}
 
 ###############################################################################
 #
@@ -311,3 +335,5 @@ view        {{ viewName }}      included  {{ oid }}
 {% endif %}
 {% endfor %}
 {% endif %}
+
+# End Configuration derived from ConfigDB

@@ -41,6 +41,7 @@
 #define PORTCHANNEL_PREFIX      "PortChannel"
 #define VLAN_PREFIX             "Vlan"
 #define VXLAN_TUNNEL_PREFIX     "VTTNL"
+#define SAG_PREFIX              "sag"
 
 #define WARM_REBOOT 1
 

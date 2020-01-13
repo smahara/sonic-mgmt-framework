@@ -44,6 +44,30 @@ function wait_until_iface_ready
 
 }
 
+function wait_until_fdb_replayed
+{
+    secs=180
+
+    echo "Waiting for  FDB to be ready after warm-reboot..."
+
+    # Wait until  FDB is ready after warm-reboot
+    # (i.e cehck if the system is going under warm-reboot and fdbsyncd restore status is "replayed" or "reconciled" )
+    while ((secs-- > 0)); do
+        RESULT=$(redis-cli -n ${STATE_DB_IDX} HGET "WARM_RESTART_TABLE|fdbsyncd" "state" 2> /dev/null)
+        if [ x"$RESULT" == x"disabled" ] ; then
+            echo "warm-reboot is disabled!"
+            break
+        fi
+        if [ x"$RESULT" == x"replayed" ] || [ x"$RESULT" == x"reconciled" ]; then
+            echo "FDB is ready!"
+            break
+        fi
+
+        sleep 1
+    done
+
+}
+
 
 {% if VRF %}
 {% for (name) in VRF %}
@@ -71,3 +95,4 @@ wait_until_iface_ready {{ name }} {{ prefix }}
 {% endif %}
 {% endfor %}
 {% endif %}
+wait_until_fdb_replayed
