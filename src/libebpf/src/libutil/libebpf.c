@@ -42,10 +42,16 @@ __attribute__ ((visibility("default"))) int attach_ebpf_filter(int nl_fd, char *
 
 	if (load_bpf_file(filename)) {
 		printf("%s", bpf_log_buf);
-		return -1;
+		printf("Filter load is failed for %s socket \n", filename);
+		return 0;
 	}
 
-	assert(setsockopt(nl_fd, SOL_SOCKET, SO_ATTACH_BPF, prog_fd, sizeof(prog_fd[0])) == 0);
+	if(setsockopt(nl_fd, SOL_SOCKET, SO_ATTACH_BPF, prog_fd, sizeof(prog_fd[0])) != 0)
+	{
+		printf("Filter attach is failed for %s socket \n", filename);
+		return 0;
+
+	}
 	return 0;
 }
 

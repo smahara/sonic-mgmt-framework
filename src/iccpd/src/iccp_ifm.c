@@ -99,9 +99,12 @@ int iccp_sys_local_if_list_get_init()
         nl_cb_put(cb);
         if (ret < 0)
         {
-            ICCPD_LOG_ERR(__FUNCTION__, "receive netlink msg error. ret = %d  errno = %d ", ret, errno);
             if (ret != -NLE_DUMP_INTR)
+            {
+                ICCPD_LOG_ERR(__FUNCTION__, "No retry, receive netlink msg error. ret = %d  errno = %d ", ret, errno);
                 return ret;
+            }
+            ICCPD_LOG_NOTICE(__FUNCTION__, "Retry: receive netlink msg error. ret = %d  errno = %d ", ret, errno);
             retry = 1;
         }
     }
@@ -117,6 +120,7 @@ static void do_arp_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], int
     struct ARPMsg *arp_msg = NULL, *arp_info = NULL;
     struct VLAN_ID *vlan_id_list = NULL;
     struct Msg *msg_send = NULL;
+    uint16_t sag_vid = 0;
 
     char buf[MAX_BUFSIZE];
     size_t msg_len = 0;
@@ -166,6 +170,10 @@ static void do_arp_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], int
     fprintf(stderr, "==============================\n");
     #endif
 
+    if ((strncmp(arp_msg->ifname, SAG_PREFIX, strlen(SAG_PREFIX)) == 0))
+    {
+        sscanf (arp_msg->ifname, "sag%d.256", &sag_vid);
+    }
     /* Find MLACP itf, member of port-channel*/
     LIST_FOREACH(csm, &(sys->csm_list), next)
     {
@@ -179,6 +187,11 @@ static void do_arp_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], int
                 /* Is the L2 MLAG itf belong to a vlan?*/
                 RB_FOREACH (vlan_id_list, vlan_rb_tree, &(lif_po->vlan_tree))
                 {
+                    if (vlan_id_list->vid == sag_vid)
+                    {
+                        break;
+                    }
+
                     if ( !(vlan_id_list->vlan_itf
                            && vlan_id_list->vlan_itf->ifindex == ndm->ndm_ifindex))
                         continue;
@@ -340,7 +353,7 @@ static void do_arp_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], int
     return;
 }
 
-static void do_ndisc_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], int msgtype)
+static void do_ndisc_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], int msgtype, int is_sag)
 {
     struct System *sys = NULL;
     struct CSM *csm = NULL;
@@ -348,11 +361,13 @@ static void do_ndisc_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], i
     struct NDISCMsg *ndisc_msg = NULL, *ndisc_info = NULL;
     struct VLAN_ID *vlan_id_list = NULL;
     struct Msg *msg_send = NULL;
+    uint16_t sag_vid = 0;
 
     char buf[MAX_BUFSIZE];
     size_t msg_len = 0;
 
     struct LocalInterface *lif_po = NULL, *ndisc_lif = NULL;
+    struct LocalInterface *sag_if = NULL;
 
     int verify_neigh = 0;
     int neigh_update = 0;
@@ -372,7 +387,7 @@ static void do_ndisc_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], i
     sprintf(ndisc_msg->ifname, "%s", ndisc_lif->name);
     if (tb[NDA_DST])
         memcpy(&ndisc_msg->ipv6_addr, RTA_DATA(tb[NDA_DST]), RTA_PAYLOAD(tb[NDA_DST]));
-    if (tb[NDA_LLADDR])
+    if (!is_sag && tb[NDA_LLADDR])
         memcpy(ndisc_msg->mac_addr, RTA_DATA(tb[NDA_LLADDR]), RTA_PAYLOAD(tb[NDA_LLADDR]));
 
     ICCPD_LOG_DEBUG(__FUNCTION__, "ndisc type %s, state (%04X)(%d), ifindex [%d] (%s), ip %s, mac [%02X:%02X:%02X:%02X:%02X:%02X]",
@@ -382,6 +397,10 @@ static void do_ndisc_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], i
                     ndisc_msg->mac_addr[0], ndisc_msg->mac_addr[1], ndisc_msg->mac_addr[2], ndisc_msg->mac_addr[3], ndisc_msg->mac_addr[4],
                     ndisc_msg->mac_addr[5]);
 
+    if ((strncmp(ndisc_msg->ifname, SAG_PREFIX, strlen(SAG_PREFIX)) == 0))
+    {
+        sscanf (ndisc_msg->ifname, "sag%d.256", &sag_vid);
+    }
     /* Find MLACP itf, member of port-channel */
     LIST_FOREACH(csm, &(sys->csm_list), next)
     {
@@ -395,6 +414,11 @@ static void do_ndisc_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], i
                 /* Is the L2 MLAG itf belong to a vlan? */
                 RB_FOREACH (vlan_id_list, vlan_rb_tree, &(lif_po->vlan_tree))
                 {
+                    if (vlan_id_list->vid == sag_vid)
+                    {
+                        break;
+                    }
+
                     if (!(vlan_id_list->vlan_itf && vlan_id_list->vlan_itf->ifindex == ndm->ndm_ifindex))
                         continue;
                     break;
@@ -427,6 +451,22 @@ static void do_ndisc_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], i
         return;
     if (!verify_neigh)
         return;
+
+    if(sag_vid && (msgtype == RTM_NEWNEIGH))
+    {
+        sag_if = local_if_find_by_name(ndisc_msg->ifname);
+        if (sag_if)
+        {
+            if ((memcmp(show_ipv6_str((char *)ndisc_msg->ipv6_addr), "FE80", 4) == 0)
+                     || (memcmp(show_ipv6_str((char *)ndisc_msg->ipv6_addr), "fe80", 4) == 0))
+            {
+                if (iccp_check_if_addr_from_netlink(AF_INET6, &(ndisc_msg->ipv6_addr), sag_if))
+                {
+                    return;
+                }
+            }
+        }
+    }
 
     /* update lif ND */
     TAILQ_FOREACH(msg, &MLACP(csm).ndisc_list, tail)
@@ -544,11 +584,25 @@ void ifm_parse_rtattr(struct rtattr **tb, int max, struct rtattr *rta, int len)
     }
 }
 
+int is_sag_interface (int ifindex)
+{
+    struct LocalInterface *sag_lif = NULL;
+
+    sag_lif = local_if_find_by_ifindex(ifindex);
+    if (sag_lif && (sag_lif->type == IF_T_SAG))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 int do_one_neigh_request(struct nlmsghdr *n)
 {
     struct ndmsg *ndm = NLMSG_DATA(n);
     int len = n->nlmsg_len;
     struct rtattr *tb[NDA_MAX + 1];
+    int is_sag = 0;
 
     if (n->nlmsg_type == NLMSG_DONE)
     {
@@ -571,7 +625,20 @@ int do_one_neigh_request(struct nlmsghdr *n)
         || ndm->ndm_state == NUD_PERMANENT
         || ndm->ndm_state == NUD_NONE)
     {
-        return(0);
+        /*Work around : SAG interface ND del is sent in state NUD_FAILED. Fix needed in Kernel*/
+        if ((n->nlmsg_type == RTM_DELNEIGH)
+                && (ndm->ndm_state == NUD_FAILED)
+                && (ndm->ndm_family == AF_INET6))
+        {
+            if (is_sag_interface(ndm->ndm_ifindex))
+            {
+                is_sag = 1;
+            }
+        }
+
+        if (!is_sag) {
+            return(0);
+        }
     }
 
     if (!tb[NDA_DST] || ndm->ndm_type != RTN_UNICAST)
@@ -586,7 +653,7 @@ int do_one_neigh_request(struct nlmsghdr *n)
 
     if (ndm->ndm_family == AF_INET6)
     {
-        do_ndisc_learn_from_kernel(ndm, tb, n->nlmsg_type);
+        do_ndisc_learn_from_kernel(ndm, tb, n->nlmsg_type, is_sag);
     }
 
     return (0);

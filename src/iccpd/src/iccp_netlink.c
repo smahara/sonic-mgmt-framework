@@ -308,7 +308,7 @@ int iccp_get_portchannel_member_list_handler(struct nl_msg *msg, void * arg)
                     {
                         /*link add to portchannel, must be disabled mac learn*/
                         set_peerlink_mlag_port_learn(local_if, 0);
-                        set_peerlink_learn_kernel(csm->peer_link_if, 0);
+                        //set_peerlink_learn_kernel(csm->peer_link_if, 0);
                     }
                 }
             }
@@ -574,15 +574,26 @@ static int iccp_netlink_set_portchannel_iff_flag(
     int rv, ret_rv = 0;
     char* token;
     struct LocalInterface* member_if;
+    char *tmp_member_buf = NULL;
 
     if (!lif_po)
         return MCLAG_ERROR;
 
-    ICCPD_LOG_NOTICE(__FUNCTION__, "Bring %s %s members",
-       is_iff_up ? "up" : "down", lif_po->name);
-
+    tmp_member_buf = strdup(lif_po->portchannel_member_buf);
+    if (!tmp_member_buf)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Fail to allocate memory to bring %s %s",
+           is_iff_up ? "up" : "down", lif_po->name);
+        return MCLAG_ERROR;
+    }
+    else
+    {
+        ICCPD_LOG_NOTICE(__FUNCTION__, "Bring %s %s, members %s",
+            is_iff_up ? "up" : "down", lif_po->name,
+            lif_po->portchannel_member_buf);
+    }
     /* Port-channel members are stored as comma separated strings */
-    token = strtok(lif_po->portchannel_member_buf, ",");
+    token = strtok(tmp_member_buf, ",");
     while (token != NULL)
     {
         member_if = local_if_find_by_name(token);
@@ -608,6 +619,8 @@ static int iccp_netlink_set_portchannel_iff_flag(
         }
         token = strtok(NULL, ",");
     }
+    if (tmp_member_buf)
+        free(tmp_member_buf);
     return ret_rv;
 }
 
@@ -621,6 +634,7 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
     struct LocalInterface* lif_Bri;
     char macaddr[64];
     int ret = 0;
+    struct PeerInterface* pif = NULL;
 
     if (!csm)
         return;
@@ -636,8 +650,10 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
     if (memcmp(MLACP(csm).remote_system.system_id, null_mac, ETHER_ADDR_LEN) == 0)
         return;
 
-    /*Set new mac*/
-    if (memcmp( lif_po->mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN) != 0)
+    pif = peer_if_find_by_name(csm, lif_po->name);
+    
+    /*Set new mac only if remote MLAG interface also exists */
+    if (pif && (memcmp( lif_po->mac_addr, MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN) != 0))
     {
         /*Backup old sysmac*/
         memcpy(lif_po->mac_addr_ori, lif_po->mac_addr, ETHER_ADDR_LEN);
@@ -648,6 +664,13 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
                         lif_po->name,  lif_po->mac_addr[0], lif_po->mac_addr[1], lif_po->mac_addr[2], lif_po->mac_addr[3], lif_po->mac_addr[4], lif_po->mac_addr[5],
                         MLACP(csm).remote_system.system_id[0], MLACP(csm).remote_system.system_id[1], MLACP(csm).remote_system.system_id[2], MLACP(csm).remote_system.system_id[3], MLACP(csm).remote_system.system_id[4], MLACP(csm).remote_system.system_id[5]);
 
+        /* Shutdown the LAG members first before changing the system ID to force
+         * LAG to go down. It helps trigger Teamd to send new LACP packet with
+         * new system ID when LAG is enabled again. Otherwise, it can take up
+         * to 30 seconds for Teamd to send the updated LACP packet
+         */
+        iccp_netlink_set_portchannel_iff_flag(lif_po, false, 3);
+
         ret =  iccp_netlink_if_hwaddr_set(lif_po->ifindex,  MLACP(csm).remote_system.system_id, ETHER_ADDR_LEN);
         if (ret != 0)
         {
@@ -655,8 +678,12 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
         }
 
         /* Refresh link local address according the new MAC */
+        /* Move the shutdown call before setting MAC address. Setting must be done
+         * on all members of the port-channel for it to take effect right away
         iccp_netlink_if_shutdown_set(lif_po->ifindex);
         iccp_netlink_if_startup_set(lif_po->ifindex);
+        */
+        iccp_netlink_set_portchannel_iff_flag(lif_po, true, 4);
     }
 
     /*Set portchannel ip mac */
@@ -753,6 +780,12 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
         iccp_netlink_if_startup_set(lif_po->ifindex);
         */
         iccp_netlink_set_portchannel_iff_flag(lif_po, true, 2);
+    
+        /* Set the interface MAC address back to its local address so that subsequent vlan member
+         * add processing (local_if_add_vlan) will not use the old MAC address for 
+         * update_if_ipmac_on_standby()
+         */ 
+        memcpy(lif_po->mac_addr, MLACP(csm).system_id, ETHER_ADDR_LEN);
     }
 
     /*Set portchannel ip mac */
@@ -906,15 +939,18 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
         return;
     }
     else
-        lif = local_if_find_by_ifindex(ifindex);
+    {
+        lif = local_if_find_by_name(ifname);
+    }
 
-    if (!lif)
+    if (!lif || lif->ifindex != ifindex)
     {
         const itf_type_t if_whitelist[] = {
             { PORTCHANNEL_PREFIX,      IF_T_PORT_CHANNEL },
             { VLAN_PREFIX,             IF_T_VLAN         },
             { FRONT_PANEL_PORT_PREFIX, IF_T_PORT         },
             { VXLAN_TUNNEL_PREFIX,     IF_T_VXLAN        },
+            { SAG_PREFIX,              IF_T_SAG          },
             { NULL,                    0                 }
         };
         int i = 0;
@@ -924,6 +960,27 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
             if ((strncmp(ifname,
                          if_whitelist[i].ifname, strlen(if_whitelist[i].ifname)) == 0))
             {
+                
+                /*if the iface exists, but the ifindex changed, then delete old
+                 * interface and add the new interface
+                 * possible scenario is due to many kernel events, there is
+                 * possiblility of losing if deletion event and just
+                 * getting a add of same iface with new ifindex.
+                 * to address this possibility if add event of interface is
+                 * received with new ifindex different from old interace, 
+                 * then delete the old ifindex interface and add new if with new
+                 * ifindex
+                 */
+                if (lif && lif->ifindex != ifindex)
+                {
+                    ICCPD_LOG_NOTICE(__FUNCTION__, "%s ifindex changed from old ifindex:%d to new ifindex:%d ", ifname, lif->ifindex, ifindex);
+                    if ((strncmp(ifname, FRONT_PANEL_PORT_PREFIX, strlen(FRONT_PANEL_PORT_PREFIX)) == 0))
+                    {
+                        ICCPD_LOG_ERR(__FUNCTION__, "Front panel port %s ifindex changed !!! from old ifindex:%d to new ifindex:%d ", ifname, lif->ifindex, ifindex);
+                    }
+                    local_if_destroy(lif->name);
+                }
+
                 /* Provide state info when local_if is created so that po_active
                  * flag can be set correctly instead of assuming it is always
                  * active. This helps address the issue where MLAG interface
@@ -931,7 +988,7 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
                  * is configured as MLAG interface when it is down
                  */
                 lif = local_if_create(ifindex, ifname, if_whitelist[i].type,
-                    (op_state == IF_OPER_UP) ? PORT_STATE_UP : PORT_STATE_DOWN);
+                        (op_state == IF_OPER_UP) ? PORT_STATE_UP : PORT_STATE_DOWN);
 
                 switch (addr_type)
                 {
@@ -940,7 +997,6 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
                     default:
                         break;
                 }
-
                 break;
             }
         }
@@ -978,6 +1034,7 @@ void iccp_event_handler_obj_input_newlink(struct nl_object *obj, void *arg)
 
             iccp_from_netlink_port_state_handler(lif->name, lif->state);
         }
+        
 
         switch (addr_type)
         {

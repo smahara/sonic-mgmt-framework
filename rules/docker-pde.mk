@@ -11,8 +11,9 @@ $(DOCKER_PDE)_PATH = $(DOCKERS_PATH)/$(DOCKER_PDE_STEM)
 
 $(DOCKER_PDE)_DEPENDS += $(PYTHON_NETIFACES)
 ifeq ($(CONFIGURED_PLATFORM),broadcom)
-$(DOCKER_PDE)_DEPENDS += $(BRCM_SAI) $(SONIC_PLATFORM_PDE) $(PYTHON_PDETEST) $(PDE_TEST_HOST) $(LIBPDETEST)
+$(DOCKER_PDE)_DEPENDS += $(SONIC_PLATFORM_PDE) $(BRCM_SAI)
 endif
+
 $(DOCKER_PDE_RDEPENDS += $(PYTHON_NETIFACES)
 
 $(DOCKER_PDE)_PYTHON_DEBS += $(SONIC_UTILS)
@@ -43,5 +44,6 @@ $(DOCKER_PDE)_RUN_OPT += -v /boot:/boot:ro
 $(DOCKER_PDE)_BASE_IMAGE_FILES += port_breakout.py:/usr/local/bin/port_breakout.py
 $(DOCKER_PDE)_BASE_IMAGE_FILES += pde-test:/usr/local/bin/pde-test
 $(DOCKER_PDE)_BASE_IMAGE_FILES += pde-bench:/usr/local/bin/pde-bench
+$(DOCKER_PDE)_BASE_IMAGE_FILES += pde-stress:/usr/local/bin/pde-stress
 
 endif

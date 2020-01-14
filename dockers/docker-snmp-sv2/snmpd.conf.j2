@@ -165,5 +165,175 @@ agentxsocket    tcp:localhost:3161
 #
 #  SysDescription pass-through
 #
-
 pass -p 10 .1.3.6.1.2.1.1.1 /usr/share/snmp/sysDescr_pass.py
+
+# Begin Configuration derived from ConfigDB
+###############################################################################
+#
+# System Group
+#
+{% if SNMP_SERVER is defined and SNMP_SERVER.SYSTEM is defined %}
+{% if SNMP_SERVER.SYSTEM.sysName is defined %}
+sysName {{ SNMP_SERVER.SYSTEM.sysName }}
+{% endif %}
+{% if SNMP_SERVER.SYSTEM.sysLocation is defined %}
+sysLocation {{ SNMP_SERVER.SYSTEM.sysLocation }}
+{% endif %}
+{% if SNMP_SERVER.SYSTEM.sysContact is defined %}
+sysContact {{ SNMP_SERVER.SYSTEM.sysContact }}
+{% endif %}
+{% endif %}
+
+
+###############################################################################
+#
+# SNMP community strings
+#
+
+{% if SNMP_SERVER_COMMUNITY is defined %}
+{% for community in SNMP_SERVER_COMMUNITY %}
+{% if  SNMP_SERVER_COMMUNITY[community].group is defined and SNMP_SERVER_COMMUNITY[community].group != "None" and SNMP_SERVER_COMMUNITY[community].group != "" %}
+com2sec    {{ community }}   default   {{ community }}
+com2sec6   {{ community }}   default   {{ community }}
+group      {{ SNMP_SERVER_COMMUNITY[community].group }}       v1        {{ community }}
+group      {{ SNMP_SERVER_COMMUNITY[community].group }}       v2c       {{ community }}
+{% else %}
+rocommunity  {{ community }}
+rocommunity6 {{ community }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+###############################################################################
+#
+# VACM Access
+#                  name   context   model   level  prefix       read view    write view  notify view
+
+{% if SNMP_SERVER_GROUP is defined %}
+{% for group_def in SNMP_SERVER_GROUP %}
+{% set group_name, secModel, inputSecLevel = group_def[0], group_def[2], group_def[3] %}
+{% if SNMP_SERVER_GROUP[group_def].readView is defined and SNMP_SERVER_GROUP[group_def].readView != "None" %}
+{% set readView = SNMP_SERVER_GROUP[group_def].readView %}
+{% else %}
+{% set readView = "\"\"" %}
+{% endif %}
+{% if SNMP_SERVER_GROUP[group_def].writeView is defined and SNMP_SERVER_GROUP[group_def].writeView != "None" %}
+{% set writeView = SNMP_SERVER_GROUP[group_def].writeView %}
+{% else %}
+{% set writeView = "\"\"" %}
+{% endif %}
+{% if SNMP_SERVER_GROUP[group_def].notifyView is defined and SNMP_SERVER_GROUP[group_def].notifyView != "None" %}
+{% set notifyView = SNMP_SERVER_GROUP[group_def].notifyView %}
+{% else %}
+{% set notifyView = "\"\"" %}
+{% endif %}
+{% if inputSecLevel == "no-auth-no-priv" %}
+{% set secLevel = "noauth" %}
+{% elif inputSecLevel == "auth-no-priv" %}
+{% set secLevel = "auth" %}
+{% elif inputSecLevel == "auth-priv" %}
+{% set secLevel = "priv" %}
+{% endif %}
+access      {{ group_name }}      ""        {{ secModel }}  {{ secLevel }}   exact      {{ readView }}   {{ writeView }}   {{ notifyView }}
+{% endfor %}
+{% endif %}
+
+###############################################################################
+#
+# Notify Table Entries
+#
+snmpNotifyTable  InformNotify  InformNotify  2  5  1
+snmpNotifyTable  TrapNotify    TrapNotify    1  5  1
+
+{% if SNMP_SERVER_TARGET is defined  and SNMP_SERVER_PARAMS is defined %}
+#
+# Target Addr Table Entries
+#
+
+{% for target_host in SNMP_SERVER_TARGET %}
+{% if SNMP_SERVER_PARAMS[SNMP_SERVER_TARGET[target_host].targetParams] is defined %}
+{% for tag in SNMP_SERVER_TARGET[target_host].tag %}
+targetAddr  {{ target_host }}  {{ '1.3.6.1.2.1.100.1.2' if target_host | ipv6 else '1.3.6.1.6.1.1' }}  {{ target_host | snmp_host_str(SNMP_SERVER_TARGET[target_host].port) }}   {{ SNMP_SERVER_TARGET[target_host].timeout }}   {{ SNMP_SERVER_TARGET[target_host].retries }}  {{ tag }}  {{ SNMP_SERVER_TARGET[target_host].targetParams }}   3   1
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+#
+# Target Params Table Entries
+#
+
+{% for target_param in SNMP_SERVER_PARAMS %}
+{% if SNMP_SERVER_PARAMS[target_param].securityNameV1 is defined %}
+{% set sec_name, sec_level, sec_model = SNMP_SERVER_PARAMS[target_param].securityNameV1, "1", "0  1" %}
+{% elif SNMP_SERVER_PARAMS[target_param].securityNameV2 is defined %}
+{% set sec_name, sec_level, sec_model = SNMP_SERVER_PARAMS[target_param].securityNameV2, "1", "1  2" %}
+{% elif SNMP_SERVER_PARAMS[target_param].user is defined %}
+{% set sec_name, sec_model = SNMP_SERVER_PARAMS[target_param].user, "3  3" %}
+{% if SNMP_SERVER_PARAMS[target_param].securityLevel == "no-auth-no-priv" %}
+{% set sec_level = "1" %}
+{% elif SNMP_SERVER_PARAMS[target_param].securityLevel == "auth-no-priv" %}
+{% set sec_level = "2" %}
+{% elif SNMP_SERVER_PARAMS[target_param].securityLevel == "auth-priv" %}
+{% set sec_level = "3" %}
+{% endif %}
+{% endif %}
+targetParams  {{ target_param }}  {{ sec_model }}  {{ sec_name }} {{ sec_level }}  3  1
+{% endfor %}
+{% endif %}
+
+###############################################################################
+#
+# SNMPv3 USM Users
+#  username    (MD5|SHA)  authpassphrase  [(DES|AES)  privpassphrase]
+#
+
+{% if  SNMP_SERVER_USER is defined %}
+{% for usm_user in SNMP_SERVER_USER %}
+{% if SNMP_SERVER_USER[usm_user].md5Key is defined %}
+{% set authKey, authType = SNMP_SERVER_USER[usm_user].md5Key | snmp_passkey, "MD5" %}
+{% endif %}
+{% if SNMP_SERVER_USER[usm_user].shaKey is defined %}
+{% set authKey, authType = SNMP_SERVER_USER[usm_user].shaKey | snmp_passkey, "SHA" %}
+{% endif %}
+{% if SNMP_SERVER_USER[usm_user].desKey is defined %}
+{% set privKey, privType = SNMP_SERVER_USER[usm_user].desKey | snmp_passkey, "DES" %}
+{% endif %}
+{% if SNMP_SERVER_USER[usm_user].aesKey is defined %}
+{% set privKey, privType = SNMP_SERVER_USER[usm_user].aesKey | snmp_passkey, "AES" %}
+{% endif %}
+{% if authKey is defined and authKey != "0x00000000000000000000000000000000" %}
+{% set _authStr = " " + authType + " -l " + authKey  %}
+{% else %}
+{% set _authStr = "" %}
+{% endif %}
+{% if privKey is defined and privKey != "0x00000000000000000000000000000000" %}
+{% set _privStr = " " + privType + " -l " + privKey %}
+{% else %}
+{% set _privStr = "" %}
+{% endif %}
+createUser {{ usm_user }}{{ _authStr }}{{ _privStr }}
+{% endfor %}
+{% endif %}
+
+###############################################################################
+#
+# VACM View
+#                               name      type                  oid  [mask]
+#
+
+{% if SNMP_SERVER_VIEW is defined %}
+{% for viewName in SNMP_SERVER_VIEW %}
+{% if SNMP_SERVER_VIEW[viewName].exclude is defined %}
+{% for oid in SNMP_SERVER_VIEW[viewName].exclude %}
+view        {{ viewName }}  	excluded  {{ oid }}
+{% endfor %}
+{% endif %}
+{% if SNMP_SERVER_VIEW[viewName].include is defined %}
+{% for oid in SNMP_SERVER_VIEW[viewName].include %}
+view        {{ viewName }}      included  {{ oid }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+# End Configuration derived from ConfigDB

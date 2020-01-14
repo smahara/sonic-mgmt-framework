@@ -96,6 +96,12 @@ typedef enum
   STP_ICCP_SYNC_RESPONSE_END
 } SYNC_RESPONSE_t;
 
+typedef enum 
+{
+  STP_ICCP_NRPV_REQUEST_NONE = 0,
+  STP_ICCP_NRPV_REQUEST,
+} NRPV_REQUEST_t;
+
 struct stpiccp_oper_vmac_info
 {
     uint16_t mclag_id;
@@ -177,6 +183,8 @@ struct stpiccp_common_info
     MASTER_NODE_REQUEST_t master_node_req_resp_field; /* request or response */
 
     RPVST_PROPOSAL_t rpvst_req_proposal_ack_flag; /* request or ack */
+    
+    NRPV_REQUEST_t nrpv_req_resp_field; /* request or response */
 
     uint8_t message_type;
 };

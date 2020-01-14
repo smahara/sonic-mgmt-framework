@@ -1,0 +1,22 @@
+diff --git a/agent/mibgroup/ip-mib/data_access/systemstats_linux.c b/agent/mibgroup/ip-mib/data_access/systemstats_linux.c
+index 4a26e41..2d12a32 100644
+--- a/agent/mibgroup/ip-mib/data_access/systemstats_linux.c
++++ b/agent/mibgroup/ip-mib/data_access/systemstats_linux.c
+@@ -15,6 +15,8 @@
+ #include <sys/types.h>
+ #include <dirent.h>
+ #include <ctype.h>
++#include <errno.h>
++#include <stdio.h>
+ 
+ static int _systemstats_v4(netsnmp_container* container, u_int load_flags);
+ static int _additional_systemstats_v4(netsnmp_systemstats_entry* entry,
+@@ -630,7 +632,7 @@ _systemstats_v6_load_ifstats(netsnmp_container* container, u_int load_flags)
+             continue;
+         }
+         if (NULL == (devin = fopen(dev_filename, "r"))) {
+-            snmp_log(LOG_ERR, "Failed to open %s\n", dev_filename);
++            snmp_log(LOG_ERR, "Failed to open %s, %s\n", dev_filename, strerror(errno));
+             continue;
+         }
+     

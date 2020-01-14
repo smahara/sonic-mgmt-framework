@@ -1,0 +1,57 @@
+diff --git a/examples/Makefile.am b/examples/Makefile.am
+index e76df87..3dd164f 100644
+--- a/examples/Makefile.am
++++ b/examples/Makefile.am
+@@ -2,9 +2,9 @@ MAINTAINERCLEANFILES = Makefile.in
+ 
+ ACLOCAL_AMFLAGS = -I m4
+ 
+-AM_CFLAGS = -I${top_srcdir}/include
++AM_CFLAGS = -I${top_srcdir}/include $(ASAN_CFLAGS)
+ 
+-LDADD = $(top_builddir)/libteam/libteam.la  -lbpf  -lebpf -lelf -lgcov
++LDADD = $(top_builddir)/libteam/libteam.la  -lbpf  -lebpf -lelf -lgcov $(ASAN_LDFLAGS)
+ 
+ noinst_PROGRAMS=team_manual_control team_monitor
+ team_manual_control_SOURCES=team_manual_control.c
+diff --git a/teamd/Makefile.am b/teamd/Makefile.am
+index b5a7074..823c882 100644
+--- a/teamd/Makefile.am
++++ b/teamd/Makefile.am
+@@ -2,13 +2,13 @@ MAINTAINERCLEANFILES = Makefile.in
+ 
+ ACLOCAL_AMFLAGS = -I m4
+ 
+-AM_CFLAGS = -I${top_srcdir}/include
++AM_CFLAGS = -I${top_srcdir}/include $(ASAN_CFLAGS)
+ 
+-AM_CPPFLAGS='-DLOCALSTATEDIR="$(localstatedir)"'
++AM_CPPFLAGS='-DLOCALSTATEDIR="$(localstatedir)"' $(ASAN_CFLAGS)
+ 
+-teamd_CFLAGS= $(LIBDAEMON_CFLAGS) $(JANSSON_CFLAGS) $(DBUS_CFLAGS) -I${top_srcdir}/include -D_GNU_SOURCE
++teamd_CFLAGS= $(LIBDAEMON_CFLAGS) $(JANSSON_CFLAGS) $(DBUS_CFLAGS) -I${top_srcdir}/include -D_GNU_SOURCE $(ASAN_CFLAGS)
+ 
+-teamd_LDADD = $(top_builddir)/libteam/libteam.la $(LIBDAEMON_LIBS) $(JANSSON_LIBS) $(DBUS_LIBS) $(ZMQ_LIBS)  -lbpf  -lebpf -lelf -lgcov
++teamd_LDADD = $(top_builddir)/libteam/libteam.la $(LIBDAEMON_LIBS) $(JANSSON_LIBS) $(DBUS_LIBS) $(ZMQ_LIBS)  -lbpf  -lebpf -lelf -lgcov $(ASAN_LDFLAGS)
+ 
+ bin_PROGRAMS=teamd
+ teamd_SOURCES=teamd.c teamd_common.c teamd_json.c teamd_config.c teamd_state.c \
+diff --git a/utils/Makefile.am b/utils/Makefile.am
+index a05157f..e6fb5d3 100644
+--- a/utils/Makefile.am
++++ b/utils/Makefile.am
+@@ -4,10 +4,10 @@ ACLOCAL_AMFLAGS = -I m4
+ 
+ AM_CFLAGS = -I${top_srcdir}/include
+ 
+-teamnl_CFLAGS= -I${top_srcdir}/include -D_GNU_SOURCE
+-teamnl_LDADD = $(top_builddir)/libteam/libteam.la  -lbpf  -lebpf -lelf -lgcov
+-teamdctl_CFLAGS= $(JANSSON_CFLAGS) -I${top_srcdir}/include -D_GNU_SOURCE
+-teamdctl_LDADD = $(top_builddir)/libteamdctl/libteamdctl.la $(JANSSON_LIBS)  -lbpf  -lebpf -lelf -lgcov
++teamnl_CFLAGS= -I${top_srcdir}/include -D_GNU_SOURCE $(ASAN_CFLAGS)
++teamnl_LDADD = $(top_builddir)/libteam/libteam.la  -lbpf  -lebpf -lelf -lgcov $(ASAN_LDFLAGS)
++teamdctl_CFLAGS= $(JANSSON_CFLAGS) -I${top_srcdir}/include -D_GNU_SOURCE  $(ASAN_CFLAGS)
++teamdctl_LDADD = $(top_builddir)/libteamdctl/libteamdctl.la $(JANSSON_LIBS)  -lbpf  -lebpf -lelf -lgcov  $(ASAN_LDFLAGS)
+ 
+ bin_PROGRAMS=teamnl teamdctl
+ teamnl_SOURCES=teamnl.c

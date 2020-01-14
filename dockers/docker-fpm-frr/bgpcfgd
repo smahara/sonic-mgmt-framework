@@ -294,6 +294,7 @@ class BGPKeyMapList(list):
                 cmd_data[idx] = (data[key].data, False)
             return ((cmd_data,), op)
         else:
+<<<<<<< HEAD
             min_id = lambda id_set: None if len(id_set) == 0 else sorted(list(id_set))[0]
             min_chg_id = min_id(chg_list)
             if min_chg_id is None:
@@ -305,6 +306,18 @@ class BGPKeyMapList(list):
                     min_unchg_id = min_id(no_chg_list)
                     min_id_chged = min_unchg_id is None or min_chg_id < min_unchg_id
             op = CachedDataWithOp.OP_DELETE if is_del and min_id_chged else CachedDataWithOp.OP_UPDATE
+||||||| merged common ancestors
+            op = CachedDataWithOp.OP_DELETE if is_del and 0 in chg_list else CachedDataWithOp.OP_UPDATE
+=======
+            min_id = lambda id_set: None if len(id_set) == 0 else sorted(list(id_set))[0]
+            min_chg_id = min_id(chg_list)
+            if min_chg_id is None:
+                min_id_chged = False
+            else:
+                min_unchg_id = min_id(no_chg_list)
+                min_id_chged = min_unchg_id is None or min_chg_id < min_unchg_id
+            op = CachedDataWithOp.OP_DELETE if is_del and min_id_chged else CachedDataWithOp.OP_UPDATE
+>>>>>>> broadcom_sonic_share
             cmd_data = []
             for idx in range(len(key_list)):
                 if (((not is_del or op == CachedDataWithOp.OP_DELETE) and (idx in chg_list or idx in no_chg_list)) or
@@ -343,7 +356,7 @@ class BGPKeyMapList(list):
             if not BGPKeyMapList.is_cmd_covered(src_list[idx], dst_list[idx]):
                 return False
         return True
-    def run_command(self, daemon, data, prefix_list, *upper_vals):
+    def run_command(self, daemon, data, prefix_list=None, *upper_vals):
         start_idx = len(upper_vals)
         for db_field, key_map in self:
             merge_vals = False
@@ -545,6 +558,7 @@ class CommandArgument(object):
                 return self.value[0]
             else:
                 return self.value
+<<<<<<< HEAD
         elif format == 'tx-add-paths':
             if self.value == 'tx_all_paths':
                 return 'addpath-tx-all-paths'
@@ -556,6 +570,14 @@ class CommandArgument(object):
         elif format == 'default-rmap':
             if len(self.value) > 0:
                 self.value = 'route-map %s' % self.value
+||||||| merged common ancestors
+=======
+        elif format == 'tx-add-paths':
+            if self.value == 'tx_all_paths':
+                return 'addpath-tx-all-paths'
+            elif self.value == 'tx_best_path_per_as':
+                return 'addpath-tx-bestpath-per-AS'
+>>>>>>> broadcom_sonic_share
         elif format in bool_format:
             false_val = ''
             if type(bool_format[format]) is tuple:
@@ -979,9 +1001,18 @@ class BGPConfigDaemon:
                       ('send_community',                                    '{no:no-prefix}neighbor {} send-community {}', hdl_send_com),
                       ('tx_add_paths',                                      '{no:no-prefix}neighbor {} {:tx-add-paths}'),
                       (['++unchanged_as_path',
+<<<<<<< HEAD
                         '++unchanged_med', '++unchanged_nexthop'],          '{no:no-prefix}neighbor {} attribute-unchanged {:uchg-as-path} {:uchg-med} {:uchg-nh}', hdl_attr_unchanged),
                       ('filter_list_in',                                    '{no:no-prefix}neighbor {} filter-list {} in'),
                       ('filter_list_out',                                   '{no:no-prefix}neighbor {} filter-list {} out'),
+||||||| merged common ancestors
+                        '++unchanged_med', '+unchanged_nexthop'],            '{no:no-prefix}neighbor {} attribute-unchanged {:uchg-as-path} {:uchg-med} {:uchg-nh}'),
+                      (['filter_list_name', 'filter_list_direction'],       '{no:no-prefix}neighbor {} filter-list {} {}'),
+=======
+                        '++unchanged_med', '+unchanged_nexthop'],           '{no:no-prefix}neighbor {} attribute-unchanged {:uchg-as-path} {:uchg-med} {:uchg-nh}'),
+                      ('filter_list_in',                                    '{no:no-prefix}neighbor {} filter-list {} in'),
+                      ('filter_list_out',                                   '{no:no-prefix}neighbor {} filter-list {} out'),
+>>>>>>> broadcom_sonic_share
                       ('nhself',                                            '{no:no-prefix}neighbor {} next-hop-self', ['true', 'false']),
                       ('nexthop_self_force',                                '{no:no-prefix}neighbor {} next-hop-self force', ['true', 'false']),
                       ('prefix_list_in',                                    '{no:no-prefix}neighbor {} prefix-list {} in'),
@@ -1019,6 +1050,20 @@ class BGPConfigDaemon:
                          ('set_ext_community_ref',          '{no:no-prefix}set extcommunity {:ext-com-ref}', hdl_set_extcomm)
     ]
 
+    bfd_peer_shop_key_map = [('enabled',                        '{no:no-prefix}shutdown', ['false', 'true']),                
+                         ('desired-minimum-tx-interval',        '{no:no-prefix}transmit-interval {}'),      
+                         ('required-minimum-receive',           '{no:no-prefix}receive-interval {}'),       
+                         ('desired-minimum-echo-receive',       '{no:no-prefix}echo-interval {}'),             
+                         ('detection-multiplier',               '{no:no-prefix}detect-multiplier {}'),          
+                         ('echo-active',                        '{no:no-prefix}echo-mode')
+    ]  
+
+    bfd_peer_mhop_key_map = [('enabled',                        '{no:no-prefix}shutdown', ['false', 'true']),                
+                         ('desired-minimum-tx-interval',        '{no:no-prefix}transmit-interval {}'),      
+                         ('required-minimum-receive',           '{no:no-prefix}receive-interval {}'),       
+                         ('detection-multiplier',               '{no:no-prefix}detect-multiplier {}'),          
+    ]
+
     listen_prefix_key_map = [('peer_group', '{no:no-prefix}bgp listen range {} peer-group {}')]
 
     community_set_key_map = [(('set_type', 'match_action', 'community_member'), '{no:no-prefix}bgp community-list {}', hdl_com_set, False)]
@@ -1049,8 +1094,16 @@ class BGPConfigDaemon:
                       'AS_PATH_SET':                    aspath_set_key_map,
                       'ROUTE_REDISTRIBUTE':             route_redist_key_map,
                       'BGP_GLOBALS_AF_AGGREGATE_ADDR':  af_aggregate_key_map,
+<<<<<<< HEAD
                       'BGP_GLOBALS_AF_NETWORK':         af_network_key_map,
                       'BGP_GLOBALS_EVPN_VNI':           global_evpn_vni_key_map
+||||||| merged common ancestors
+                      'BGP_GLOBALS_AF_NETWORK':         af_network_key_map
+=======
+                      'BGP_GLOBALS_AF_NETWORK':         af_network_key_map,
+                      'BFD_PEER_SINGLE_HOP':            bfd_peer_shop_key_map,          
+                      'BFD_PEER_MULTI_HOP':             bfd_peer_mhop_key_map, 
+>>>>>>> broadcom_sonic_share
     }
 
     @staticmethod
@@ -1181,17 +1234,42 @@ class BGPConfigDaemon:
             ('BGP_PEER_GROUP_AF', self.bgp_table_handler_common),
             ('BGP_NEIGHBOR_AF', self.bgp_table_handler_common),
             ('BGP_GLOBALS_LISTEN_PREFIX', self.bgp_table_handler_common),
+<<<<<<< HEAD
             ('BFD_PEER', self.bfd_handler),
+||||||| merged common ancestors
+            ('BFD_PEER', self.bfd_handler),
+            ('VRF', self.vrf_handler),
+            ('BGP_GLOBALS_EVPN_VNI', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_EVPN_RT', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_EVPN_VNI_RT', self.bgp_table_handler_common),
+            ('PREFIX_SET', self.bgp_table_handler_common),
+            ('PREFIX', self.bgp_table_handler_common),
+=======
+            ('VRF', self.vrf_handler),
+            ('BGP_GLOBALS_EVPN_VNI', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_EVPN_RT', self.bgp_table_handler_common),
+            ('BGP_GLOBALS_EVPN_VNI_RT', self.bgp_table_handler_common),
+            ('PREFIX_SET', self.bgp_table_handler_common),
+            ('PREFIX', self.bgp_table_handler_common),
+>>>>>>> broadcom_sonic_share
             ('NEIGHBOR_SET', self.bgp_table_handler_common),
             ('TAG_SET', self.bgp_table_handler_common),
             ('AS_PATH_SET', self.bgp_table_handler_common),
             ('ROUTE_REDISTRIBUTE', self.bgp_table_handler_common),
             ('BGP_GLOBALS_AF_AGGREGATE_ADDR', self.bgp_table_handler_common),
+<<<<<<< HEAD
             ('BGP_GLOBALS_AF_NETWORK', self.bgp_table_handler_common),
             ('VRF', self.vrf_handler),
             ('BGP_GLOBALS_EVPN_VNI', self.bgp_table_handler_common),
             ('BGP_GLOBALS_EVPN_RT', self.bgp_table_handler_common),
             ('BGP_GLOBALS_EVPN_VNI_RT', self.bgp_table_handler_common),
+||||||| merged common ancestors
+            ('BGP_GLOBALS_AF_NETWORK', self.bgp_table_handler_common)
+=======
+            ('BGP_GLOBALS_AF_NETWORK', self.bgp_table_handler_common),
+            ('BFD_PEER_SINGLE_HOP', self.bgp_table_handler_common),               
+            ('BFD_PEER_MULTI_HOP', self.bgp_table_handler_common)  
+>>>>>>> broadcom_sonic_share
         ]
         self.bgp_message = Queue.Queue(0)
         self.table_data_cache = self.config_db.get_table_data([tbl for tbl, _ in self.table_handler_list])
@@ -1217,6 +1295,7 @@ class BGPConfigDaemon:
         else:
             self.metadata_asn = data['bgp_asn']
 
+<<<<<<< HEAD
     def bfd_handler(self, table, key, data):
         syslog.syslog(syslog.LOG_INFO, '[bgp cfgd](bfd) value for {} changed to {}'.format(key, data))
         #get frr bfd session key
@@ -1254,6 +1333,46 @@ class BGPConfigDaemon:
                     command = command + " -c 'shutdown'"
             self.__run_command(command)    
     
+||||||| merged common ancestors
+    def bfd_handler(self, table, key, data):
+        syslog.syslog(syslog.LOG_INFO, '[bgp cfgd](bfd) value for {} changed to {}'.format(key, data))
+        #get frr bfd session key
+        key_params = key.split('|')
+        cmd = 'peer {}'.format(key_params[0])
+        if len(key_params) == 4 and key_params[3] == 'multihop':
+            cmd = cmd + ' multihop '
+       	if key_params[1] != 'null':
+            cmd = cmd + ' local-address ' + key_params[1]
+        if key_params[2] != 'null':
+            cmd = cmd + ' interface ' + key_params[2]
+        if not data:
+            #BFD peer is deleted
+            command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no {}'".format(cmd)
+            self.__run_command(command)
+        else:
+            #create/update case
+            command = "vtysh -c 'configure terminal' -c 'bfd' -c '{}'".format(cmd)
+            for param in data:
+                if param == 'transmit_interval':
+                    command = command + " -c 'transmit-interval {}'".format(data[param])
+                elif param == 'receive_interval':
+                    command = command + " -c 'receive-interval {}'".format(data[param])
+                elif param == 'multiplier':
+                    command = command + " -c 'detect-multiplier {}'".format(data[param])
+                elif param == 'echo_mode' and data[param] == 'true':
+                    command = command + " -c 'echo-mode'"
+                elif param == 'echo_interval':
+                    command = command + " -c 'echo-interval {}'".format(data[param])
+                elif param == 'label':
+                    command = command + " -c 'label {}'".format(data[param])
+                elif param == 'admin_status' and data[param] == 'up':
+                    command = command + " -c 'no shutdown'"
+                elif param == 'admin_status' and data[param] == 'down':
+                    command = command + " -c 'shutdown'"
+            self.__run_command(command)
+
+=======
+>>>>>>> broadcom_sonic_share
     def vrf_handler(self, table, key, data):
         syslog.syslog(syslog.LOG_INFO, '[bgp cfgd](vrf) value for {} changed to {}'.format(key, data))
         #get vrf key
@@ -1261,20 +1380,27 @@ class BGPConfigDaemon:
         cmd = 'vrf {}'.format(key_params[0])
         if not data:
             #VRF is deleted
-            command = "vtysh -c 'configure terminal' -c 'no {}'".format(cmd)
-            self.__run_command(command)
+            command = "vtysh -c 'configure terminal' -c '{}'".format(cmd)
+            if key_params[0] in self.vrf_vni_map:
+                command = command + "-c 'no vni {}'".format(self.vrf_vni_map[key_params[0]])
+                del self.vrf_vni_map[key_params[0]]
+                self.__run_command(command)
         else:
             #create/update case
             command = "vtysh -c 'configure terminal' -c '{}'".format(cmd)
+            positive_execute = False
             for param in data:
                 if param == 'vni':
                     if data[param] != '0':
                         command = command + " -c 'vni {}'".format(data[param])
                         self.vrf_vni_map[key_params[0]] = data[param]
+                        positive_execute = True
                     elif key_params[0] in self.vrf_vni_map:
                         command = command + "-c 'no vni {}'".format(self.vrf_vni_map[key_params[0]])
                         del self.vrf_vni_map[key_params[0]]
-            self.__run_command(command)
+                        positive_execute = True
+            if positive_execute == True:
+                self.__run_command(command)
 
     def __get_vrf_asn(self, vrf):
         if vrf in self.bgp_asn:
@@ -1360,6 +1486,7 @@ class BGPConfigDaemon:
             upd_data[upd_key] = CachedDataWithOp(upd_val, CachedDataWithOp.OP_ADD)
         self.bgp_message.put((self.config_db.serialize_key(table_key), False, table_name, upd_data))
 
+<<<<<<< HEAD
     def __apply_pg_attr(self, vrf, peer_group):
         table_name = 'BGP_GLOBALS_LISTEN_PREFIX'
         entry_list = self.config_db.get_table(table_name)
@@ -1376,6 +1503,36 @@ class BGPConfigDaemon:
                 self.bgp_message.put((self.config_db.serialize_key(table_key), False, table_name, upd_data))
 
     def __update_bgp(self, data_list):
+||||||| merged common ancestors
+    def __update_bgp(self):
+=======
+    def __delete_bfd_peer(self, data):
+        for dkey, dval in data.items():
+            # force delete all peer attributes in cache
+            dval.status = CachedDataWithOp.STAT_SUCC
+            dval.op = CachedDataWithOp.OP_DELETE
+
+    def __bfd_handle_delete (self, data):
+	cmd_suffix = ""
+	if 'desired-minimum-tx-interval' in data:
+            dval = data['desired-minimum-tx-interval']
+            cmd_suffix = "transmit-interval 300"
+	elif 'required-minimum-receive' in data:
+            dval = data['required-minimum-receive']
+            cmd_suffix = "receive-interval 300"
+	elif 'detection-multiplier' in data:
+            dval = data['detection-multiplier']
+            cmd_suffix = "detect-multiplier 3"
+	elif 'desired-minimum-echo-receive' in data:
+            dval = data['desired-minimum-echo-receive']
+            cmd_suffix = "echo-interval 300"
+	if cmd_suffix != "":
+            return cmd_suffix, dval.op
+
+	return cmd_suffix, None
+
+    def __update_bgp(self):
+>>>>>>> broadcom_sonic_share
         while not self.bgp_message.empty():
             key, del_table, table, data = self.bgp_message.get()
             data_list.append((table, key, data))
@@ -1407,7 +1564,7 @@ class BGPConfigDaemon:
                             if pfx_set_name in self.prefix_set_list:
                                 af_mode = self.prefix_set_list[pfx_set_name].af
                                 tbl_key[attr_name] = 'ipv4' if af_mode == socket.AF_INET else 'ipv6'
-                key_map = BGPKeyMapList(self.tbl_to_key_map[table], table, tbl_key)
+		key_map = BGPKeyMapList(self.tbl_to_key_map[table], table, tbl_key)
             else:
                 key_map = None
             if table == 'BGP_GLOBALS':
@@ -1784,6 +1941,89 @@ class BGPConfigDaemon:
                         if vrf in self.af_aggr_list:
                             self.af_aggr_list[vrf].pop(norm_ip_prefix, None)
 
+            elif table == 'BFD_PEER_SINGLE_HOP':
+		key = prefix + '|' + key
+                remoteaddr, interface, vrf, localaddr = key.split('|')
+		if not del_table:
+		    if not 'null' in localaddr:
+                        syslog.syslog(syslog.LOG_INFO, 'Set BFD single hop peer {} {} {} {}'.format(remoteaddr, vrf, interface, localaddr))
+
+                        suffix_cmd, oper = self.__bfd_handle_delete (data)
+                        if suffix_cmd and oper == CachedDataWithOp.OP_DELETE:
+                            command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {} interface {}' -c '{}'".\
+                            format(remoteaddr, localaddr, vrf, interface, suffix_cmd)
+			    
+                            if not self.__run_command(command):
+				syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
+                        	continue
+                        else:
+                            cmd_prefix = ['configure terminal',
+                                          'bfd',
+                                          'peer {} local-address {} vrf {} interface {}'.format(remoteaddr, localaddr, vrf, interface)]
+                            if not key_map.run_command(self, data, cmd_prefix):
+                        	syslog.syslog(syslog.LOG_ERR, 'failed running BFD single-hop config command')
+                        	continue
+
+		    else:
+                        if suffix_cmd and oper == CachedDataWithOp.OP_DELETE:
+                            command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} vrf {} interface {}' -c '{}'".\
+                            format(remoteaddr, vrf, interface, suffix_cmd)
+
+                            if not self.__run_command(command):
+                                syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
+                                continue
+			else:
+			    syslog.syslog(syslog.LOG_INFO, 'Set BFD single hop peer {} {} {}'.format(remoteaddr, vrf, interface))
+                            cmd_prefix = ['configure terminal',
+                                          'bfd',
+                                          'peer {} vrf {} interface {}'.format(remoteaddr, vrf, interface)]
+                            if not key_map.run_command(self, data, cmd_prefix):
+                                syslog.syslog(syslog.LOG_ERR, 'failed running BFD single-hop config command')
+                                continue
+		else:
+		    if 'local-address' in data:
+                        dval = data['local-address']
+                        localaddr = dval.data
+		        syslog.syslog(syslog.LOG_INFO, 'Delete BFD single hop to {} {} {}'.format(remoteaddr, vrf, interface, localaddr))
+                        command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} local-address {} vrf {} interface {}'".\
+                            format(remoteaddr, localaddr, vrf, interface)
+		    else:
+                        syslog.syslog(syslog.LOG_INFO, 'Delete BFD single hop to {} {} {}'.format(remoteaddr, vrf, interface))
+                        command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} interface {}'".\
+                            format(remoteaddr, vrf, interface)
+                    if not self.__run_command(command):
+                        syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
+                        continue
+                    self.__delete_bfd_peer(data)
+            elif table == 'BFD_PEER_MULTI_HOP':
+		key = prefix + '|' + key
+                remoteaddr, vrf, localaddr = key.lower().split('|')
+                if not del_table:
+		    syslog.syslog(syslog.LOG_INFO, 'Set BFD multi hop to {} {} {}'.format(remoteaddr, vrf, localaddr))
+                    suffix_cmd, oper = self.__bfd_handle_delete (data)
+                    if suffix_cmd and oper == CachedDataWithOp.OP_DELETE:
+                        command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {} interface {}' -c '{}'".\
+                        format(remoteaddr, localaddr, vrf, interface, suffix_cmd)
+
+                        if not self.__run_command(command):
+                            syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
+                            continue
+		    else:
+                        cmd_prefix = ['configure terminal',
+                                      'bfd',
+                              	      'peer {} vrf {} multihop local-address {}'.format(remoteaddr, vrf, localaddr)]
+                        if not key_map.run_command(self, data, cmd_prefix):
+                            syslog.syslog(syslog.LOG_ERR, 'failed running BFD multi-hop config command')
+                            continue
+		else:
+                    syslog.syslog(syslog.LOG_INFO, 'Delete BFD multi hop to {} {} {}'.format(remoteaddr, vrf, localaddr))
+                    command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} multihop local-address {}'".\
+                        format(remoteaddr, vrf, localaddr)
+                    if not self.__run_command(command):
+                        syslog.syslog(syslog.LOG_ERR, 'failed to delete multihop peer {}'.format(key))
+                        continue
+		    self.__delete_bfd_peer(data)
+
     def __add_op_to_data(self, table_key, data, comb_attr_list):
         cached_data = self.table_data_cache.setdefault(table_key, {})
         for key in cached_data:
@@ -1866,9 +2106,29 @@ class BGPConfigDaemon:
     def bgp_neighbor_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'keepalive', 'holdtime'}])
 
+<<<<<<< HEAD
     def comm_set_handler(self, table, key, data):
         self.bgp_table_handler_common(table, key, data, [{'set_type', 'match_action', 'community_member'}])
 
+||||||| merged common ancestors
+    def bgp_neighbor_af_handler(self, table, key, data):
+        self.bgp_table_handler_common(table, key, data, [{'filter_list_name', 'filter_list_direction'},
+                                                         {'prefix_list_name', 'prefix_list_direction'}])
+=======
+    def bgp_neighbor_af_handler(self, table, key, data):
+        self.bgp_table_handler_common(table, key, data, [{'filter_list_name', 'filter_list_direction'},
+                                                         {'prefix_list_name', 'prefix_list_direction'}])
+
+    def bfd_shop_handler(self, table, key, data):
+        self.bgp_table_handler_common(table, key, data, [{'remote-address', 'vrf', 'interface'},
+                                                         {'remote-address', 'vrf', 'interface', 'local-address'}])
+
+    def bfd_mhop_handler(self, table, key, data):
+        self.bgp_table_handler_common(table, key, data, [{'remote-address', 'vrf', 'local-address'}])
+    def comm_set_handler(self, table, key, data):
+        self.bgp_table_handler_common(table, key, data, [{'set_type', 'match_action', 'community_member'}])
+
+>>>>>>> broadcom_sonic_share
     def start(self):
         try:
             self.subscribe_all()

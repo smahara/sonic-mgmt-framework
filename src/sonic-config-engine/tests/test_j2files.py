@@ -19,6 +19,7 @@ class TestJ2Files(TestCase):
         self.mlnx_port_config = os.path.join(self.test_dir, 'sample-port-config-mlnx.ini')
         self.dell6100_t0_minigraph = os.path.join(self.test_dir, 'sample-dell-6100-t0-minigraph.xml')
         self.frrbfdjson = os.path.join(self.test_dir, 'frrbfd.json')
+        self.snmp_config = os.path.join(self.test_dir, 'snmp_config.json')
         self.output_file = os.path.join(self.test_dir, 'output')
 
     def run_script(self, argument):
@@ -148,6 +149,18 @@ class TestJ2Files(TestCase):
         print ("===================={}===={}".format(sample_output_file,tmp))
 
         assert filecmp.cmp(sample_output_file, tmp)
+
+    def test_snmpd(self):
+        tmp = "snmpd.conf.output"
+        sample_output_file = os.path.join(self.test_dir, 'sample_output', 'snmpd.conf')
+        conf_template = os.path.join(self.test_dir, '..', '..', '..', 'dockers', 'docker-snmp-sv2', 'snmpd.conf.j2')
+        argument = '-j ' + self.snmp_config + ' -t ' + conf_template + ' | sed "0,/^# Begin Configuration derived from ConfigDB$/d" ' + ' > ' + tmp
+        self.run_script(argument)
+        print ("===================={}===={}".format(sample_output_file, tmp))
+        if filecmp.cmp(sample_output_file, tmp) is False:
+            print ("!!!!Error!!!! Mismatching output, Please check diff between {} and {}".format(tmp, sample_output_file))
+            assert False
+        os.remove(tmp)
 
     def tearDown(self):
         try:

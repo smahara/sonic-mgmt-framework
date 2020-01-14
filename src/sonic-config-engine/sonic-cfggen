@@ -133,6 +133,23 @@ def ip_network(value):
         return "Invalid ip address %s" % value
     return r_v.network
 
+def snmp_host_str(addr, port):
+    """ Encode SNMP host ipv6/ipv6 address and L3 port in hex format
+        that is understandable by the snmpd.
+        (hex bytes of ip address) concatenated to hex bytes of L3 port number
+    """
+    if is_ipv6(addr):
+        return '0x' + str(hex(netaddr.IPAddress(addr))[2:].zfill(32)) + str(hex(int(port))[2:].zfill(4))
+    else:
+        return '0x' + str(hex(netaddr.IPAddress(addr))[2:].zfill(8)) + str(hex(int(port))[2:].zfill(4))
+
+def snmp_passkey(passStr):
+    """ Encode SNMP authentication and privacy passphrase from : seperated to hex format
+        that is understandable by the snmpd.
+        (e.g 01:02:03:04 --> 0x01020304
+    """
+    return '0x' + ''.join(passStr.split(":"))
+
 class FormatConverter:
     """Convert config DB based schema to legacy minigraph based schema for backward capability.
 We will move to DB schema and remove this class when the config templates are modified.
@@ -299,6 +316,8 @@ def main():
         env.filters['unique_name'] = unique_name
         env.filters['pfx_filter'] = pfx_filter
         env.filters['ip_network'] = ip_network
+        env.filters['snmp_host_str'] = snmp_host_str
+        env.filters['snmp_passkey'] = snmp_passkey
         for attr in ['ip', 'network', 'prefixlen', 'netmask']:
             env.filters[attr] = partial(prefix_attr, attr)
         template = env.get_template(template_file)

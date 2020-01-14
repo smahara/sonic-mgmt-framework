@@ -75,3 +75,8 @@ then
 else
   [ -f ${rootmnt}/host/disk-img/var-log.ext4 ] && mount -t ext4 -o loop,rw ${rootmnt}/host/disk-img/var-log.ext4 ${rootmnt}/var/log
 fi
+
+## fscklog file: /tmp will be lost when overlayfs is mounted
+if [ -f /tmp/fsck.log.gz ]; then
+    mv /tmp/fsck.log.gz ${rootmnt}/var/log
+fi
