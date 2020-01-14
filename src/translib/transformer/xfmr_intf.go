@@ -804,9 +804,10 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
             ifKey := ifName + "|" + k
             subIntfmap[tblName][ifKey] = data
         }
-        count := 0
-        _ = interfaceIPcount(tblName, d, &ifName, &count)
-        if (count - len(intfIpMap)) == 1 {
+
+        ipMap, _:= getIntfIpByName(d, tblName, ifName, true, true, "")
+
+        if (len(ipMap) - len(intfIpMap) == 0) && (tblName != LOOPBACK_INTERFACE_TN) {
             IntfMapObj, err := d.GetMapAll(&db.TableSpec{Name:tblName+"|"+ifName})
             if err != nil {
                 return nil, errors.New("Entry "+tblName+"|"+ifName+" missing from ConfigDB")
@@ -819,6 +820,7 @@ func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbind
             }
         }
     }
+
     log.Info("Delete IP address list ", subIntfmap,  " ", err)
     return subIntfmap, err
 }
@@ -848,6 +850,7 @@ func validateIntfExists(d *db.DB, intfTs string, intfName string) error {
     }
     return nil
 }
+
 
 /* Note: This function can be extended for IP validations for all Interface types */
 func validateIpForIntfType(ifType E_InterfaceType, ip *string, prfxLen *uint8, isIpv4 bool) error {
@@ -1220,17 +1223,6 @@ func convertIpMapToOC (intfIpMap map[string]db.Value, ifInfo *ocbinds.Openconfig
     return err
 }
 
-func interfaceIPcount(tblName string, d *db.DB, intfName *string, ipCnt *int) error {
-    intfIPKeys, _ := d.GetKeys(&db.TableSpec{Name:tblName})
-    if len(intfIPKeys) > 0 {
-        for i := range intfIPKeys {
-            if *intfName == intfIPKeys[i].Get(0) {
-                *ipCnt = *ipCnt+1
-            }
-        }
-    }
-    return nil
-}
 
 /* Function to delete Loopback Interface */
 func deleteLoopbackIntf(inParams *XfmrParams, loName *string) error {
@@ -1239,6 +1231,7 @@ func deleteLoopbackIntf(inParams *XfmrParams, loName *string) error {
     subOpMap := make(map[db.DBNum]map[string]map[string]db.Value)
     resMap := make(map[string]map[string]db.Value)
     loMap := make(map[string]db.Value)
+    loL3Map := make(map[string]db.Value)
 
     loMap[*loName] = db.Value{Field:map[string]string{}}
 
@@ -1247,11 +1240,15 @@ func deleteLoopbackIntf(inParams *XfmrParams, loName *string) error {
         log.Errorf("Retrieving data from LOOPBACK_INTERFACE table for Loopback: %s failed!", *loName)
         return err
     }
-    err = validateL3ConfigExists(inParams.d, loName)
-    if err != nil {
-        return err
+
+    ipKeys, err := doGetIntfIpKeys(inParams.d, intTbl.cfgDb.intfTN, *loName)
+    if(len(ipKeys) > 0  && err == nil) {
+        for key, _ := range ipKeys {
+            ipKey := *loName + "|" + ipKeys[key].Get(1)
+            loL3Map[ipKey] = db.Value{Field:map[string]string{}}
+        }
+        resMap[intTbl.cfgDb.intfTN] = loL3Map
     }
-    resMap[intTbl.cfgDb.intfTN] = loMap
 
     subOpMap[db.ConfigDB] = resMap
     inParams.subOpDataMap[DELETE] = &subOpMap

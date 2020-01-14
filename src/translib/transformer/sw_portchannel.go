@@ -464,7 +464,7 @@ var DbToYang_intf_lag_state_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams
     return err
 }
 
-/* Function to delete PortChannel and all its member ports */
+/* Function to delete PortChannel, all its member ports and L3 config */
 func deleteLagIntfAndMembers(inParams *XfmrParams, lagName *string) error {
     log.Info("Inside deleteLagIntfAndMembers")
     var err error
@@ -473,6 +473,7 @@ func deleteLagIntfAndMembers(inParams *XfmrParams, lagName *string) error {
     resMap := make(map[string]map[string]db.Value)
     lagMap := make(map[string]db.Value)
     lagMemberMap := make(map[string]db.Value)
+    lagL3Map := make(map[string]db.Value)
     lagMap[*lagName] = db.Value{Field:map[string]string{}}
 
     intTbl := IntfTypeTblMap[IntfTypePortChannel]
@@ -487,9 +488,17 @@ func deleteLagIntfAndMembers(inParams *XfmrParams, lagName *string) error {
     }
 
     /* Handle PORTCHANNEL_INTERFACE TABLE */
-    err = validateL3ConfigExists(inParams.d, lagName)
-    if err != nil {
-        return err
+    err1 := validateL3ConfigExists(inParams.d, lagName)
+    if err1 != nil {
+        ipKeys, err := doGetIntfIpKeys(inParams.d, intTbl.cfgDb.intfTN, *lagName)
+        if(len(ipKeys) > 0  && err == nil) {
+            for key, _ := range ipKeys {
+                    ipKey := *lagName + "|" + ipKeys[key].Get(1)
+                    lagL3Map[ipKey] = db.Value{Field:map[string]string{}}
+            }
+        }
+        lagL3Map[*lagName] = db.Value{Field:map[string]string{}}
+        resMap[intTbl.cfgDb.intfTN] = lagL3Map
     }
 
     /* Handle PORTCHANNEL_MEMBER TABLE */
@@ -505,11 +514,11 @@ func deleteLagIntfAndMembers(inParams *XfmrParams, lagName *string) error {
             }
         }
         if flag == true {
-            resMap["PORTCHANNEL_MEMBER"] = lagMemberMap
+            resMap[PORTCHANNEL_MEMBER_TN] = lagMemberMap
         }
     }
     /* Handle PORTCHANNEL TABLE */
-    resMap["PORTCHANNEL"] = lagMap
+    resMap[PORTCHANNEL_TN] = lagMap
     subOpMap[db.ConfigDB] = resMap
     log.Info("subOpMap: ", subOpMap)
     inParams.subOpDataMap[DELETE] = &subOpMap

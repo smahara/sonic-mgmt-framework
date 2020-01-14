@@ -1106,6 +1106,7 @@ func deleteVlanIntfAndMembers(inParams *XfmrParams, vlanName *string) error {
     resMap := make(map[string]map[string]db.Value)
     vlanMap := make(map[string]db.Value)
     vlanMemberMap := make(map[string]db.Value)
+    vlanL3Map := make(map[string]db.Value)
 
     vlanMap[*vlanName] = db.Value{Field:map[string]string{}}
     subOpMap[db.ConfigDB] = resMap
@@ -1117,10 +1118,19 @@ func deleteVlanIntfAndMembers(inParams *XfmrParams, vlanName *string) error {
         log.Error(errStr)
         return errors.New(errStr)
     }
+
     /* Handle VLAN_INTERFACE TABLE */
-    err = validateL3ConfigExists(inParams.d, vlanName)
-    if err != nil {
-        return err
+    err1 := validateL3ConfigExists(inParams.d, vlanName)
+    if err1 != nil {
+        ipKeys, err := doGetIntfIpKeys(inParams.d, VLAN_INTERFACE_TN, *vlanName)
+        if(len(ipKeys) > 0  && err == nil) {
+            for key, _ := range ipKeys {
+                ipKey := *vlanName + "|" + ipKeys[key].Get(1)
+                vlanL3Map[ipKey] = db.Value{Field:map[string]string{}}
+            }
+        }
+        vlanL3Map[*vlanName] = db.Value{Field:map[string]string{}}
+        resMap[VLAN_INTERFACE_TN] = vlanL3Map
     }
 
     memberPortsVal, ok := vlanEntry.Field["members@"]
@@ -1143,8 +1153,8 @@ func deleteVlanIntfAndMembers(inParams *XfmrParams, vlanName *string) error {
                 return err
             }
         }
-      resMap[VLAN_MEMBER_TN] = vlanMemberMap
-    removeStpConfigOnVlanDeletion(inParams, vlanName, memberPorts, resMap)
+        resMap[VLAN_MEMBER_TN] = vlanMemberMap
+        removeStpConfigOnVlanDeletion(inParams, vlanName, memberPorts, resMap)
     } else {
         /* need to check STP_VLAN table */
         removeStpConfigOnVlanDeletion(inParams, vlanName, nil, resMap)
@@ -1154,7 +1164,7 @@ func deleteVlanIntfAndMembers(inParams *XfmrParams, vlanName *string) error {
 
     subOpMap[db.ConfigDB] = resMap
     inParams.subOpDataMap[DELETE] = &subOpMap
-    return err
+    return nil
 }
 
 /* Subtree transformer supports CREATE, UPDATE and DELETE operations */
