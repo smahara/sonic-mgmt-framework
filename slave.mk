@@ -37,6 +37,7 @@ PYTHON_WHEELS_PATH = $(TARGET_PATH)/python-wheels
 PROJECT_ROOT = $(shell pwd)
 STRETCH_DEBS_PATH = $(TARGET_PATH)/debs/stretch
 STRETCH_FILES_PATH = $(TARGET_PATH)/files/stretch
+FSROOT_PATH := /sonic
 DBG_IMAGE_MARK = dbg
 DBG_SRC_ARCHIVE_FILE = $(TARGET_PATH)/sonic_src.tar.gz
 
@@ -53,8 +54,6 @@ export CONFIGURED_PLATFORM
 export BUILD_VERSION
 export NOS_NAME
 export PRODUCT_NAME
-
-SONIC_MAKEFILE_LIST=slave.mk rules/functions
 export CONFIGURED_ARCH
 
 ###############################################################################
@@ -146,6 +145,21 @@ ENABLE_SFLOW = y
 endif
 
 include $(RULES_PATH)/functions
+
+ifeq ($(KERNEL_PROCURE_METHOD),)
+override KERNEL_PROCURE_METHOD := $(strip $(DEFAULT_KERNEL_PROCURE_METHOD))
+endif
+
+ifeq ($(KERNEL_CACHE_PATH),)
+override KERNEL_CACHE_PATH := $(strip $(DEFAULT_KERNEL_CACHE_PATH))
+endif
+
+ifeq ($(KERNEL_PROCURE_METHOD),cache)
+ifeq ($(KERNEL_CACHE_PATH),)
+$(error KERNEL_CACHE_PATH must be specified for KERNEL_PROCURE_METHOD=cache)
+endif
+endif
+
 include $(RULES_PATH)/*.mk
 
 ifneq ($(CONFIGURED_PLATFORM), undefined)
@@ -233,19 +247,6 @@ ifeq ($(VS_PREPARE_MEM),)
 override VS_PREPARE_MEM := $(DEFAULT_VS_PREPARE_MEM)
 endif
 
-ifeq ($(KERNEL_PROCURE_METHOD),)
-override KERNEL_PROCURE_METHOD := $(strip $(DEFAULT_KERNEL_PROCURE_METHOD))
-endif
-
-ifeq ($(KERNEL_CACHE_PATH),)
-override KERNEL_CACHE_PATH := $(strip $(DEFAULT_KERNEL_CACHE_PATH))
-endif
-
-ifeq ($(KERNEL_PROCURE_METHOD),cache)
-ifeq ($(KERNEL_CACHE_PATH),)
-$(error KERNEL_CACHE_PATH must be specified for KERNEL_PROCURE_METHOD=cache)
-endif
-endif
 
 MAKEFLAGS += -j $(SONIC_BUILD_JOBS)
 DEB_BUILD_OPTIONS_GENERIC += "parallel=$(SONIC_CONFIG_MAKE_JOBS)"
@@ -301,10 +302,6 @@ $(info "KERNEL_PROCURE_METHOD"           : "$(KERNEL_PROCURE_METHOD)")
 ifeq ($(KERNEL_PROCURE_METHOD),cache)
 $(info "KERNEL_CACHE_PATH"               : "$(KERNEL_CACHE_PATH)")
 endif
-$(info "SONIC_DPKG_CACHE_METHOD"         : "$(SONIC_DPKG_CACHE_METHOD)")
-ifeq ($(SONIC_DPKG_CACHE_METHOD),cache)
-$(info "DPKG_CACHE_PATH"                 : "$(SONIC_DPKG_CACHE_SOURCE)")
-endif
 $(info "BUILD_NUMBER"                    : "$(BUILD_NUMBER)")
 $(info "BUILD_TIMESTAMP"                 : "$(BUILD_TIMESTAMP)")
 $(info "BUILD_VERSION"                   : "$(BUILD_VERSION)")
@@ -316,7 +313,8 @@ $(info "VS_PREPARE_MEM"                  : "$(VS_PREPARE_MEM)")
 $(info "VERSION"                         : "$(SONIC_GET_VERSION)")
 $(info "PDDF_SUPPORT"                    : "$(PDDF_SUPPORT)")
 $(info "ENABLE_SFLOW"                    : "$(ENABLE_SFLOW)")
-$(info )
+
+include Makefile.cache
 
 ifeq ($(SONIC_USE_DOCKER_BUILDKIT),y)
 $(warning "Using SONIC_USE_DOCKER_BUILDKIT will produce larger installable SONiC image because of a docker bug (more details: https://github.com/moby/moby/issues/38903)")
@@ -337,104 +335,6 @@ export vs_build_prepare_mem=$(VS_PREPARE_MEM)
 ## Canned sequences
 ###############################################################################
 
-SONIC_DPKG_CACHE_DIR    := /dpkg_cache
-MOD_CACHE_LOCK_SUFFIX   := cache_accss
-MOD_CACHE_LOCK_TIMEOUT  := 3600
-
-DOCKER_LOCKFILE_SUFFIX  := access
-DOCKER_LOCKFILE_TIMEOUT := 1200
-
-# Lock macro for shared file access
-# Lock is implemented through flock command with a specified timeout value
-# Lock file is created in the specified directory, a separate one for each target file name
-# A designated suffix is appended to each target file name, followed by .lock
-#
-# Parameters:
-#  $(1) - target file name (without path)
-#  $(2) - lock file path (only)
-#  $(3) - designated lock file suffix
-#  $(4) - flock timeout (in seconds)
-#
-# $(call MOD_LOCK,file,path,suffix,timeout)
-define MOD_LOCK
-	if [[ ! -f $(2)/$(1)_$(3).lock ]]; then
-		touch $(2)/$(1)_$(3).lock
-		chmod 777 $(2)/$(1)_$(3).lock;
-	fi
-	$(eval $(1)_lock_fd=$(subst -,_,$(subst +,_,$(subst .,_,$(1)))))
-	exec {$($(1)_lock_fd)}<"$(2)/$(1)_$(3).lock";
-	if ! flock -x -w $(4) "$${$($(1)_lock_fd)}" ; then
-		echo "ERROR: Lock timeout trying to access $(2)/$(1)_$(3).lock";
-		exit 1;
-	fi
-endef
-
-# UnLock macro for shared file access
-#
-# Parameters:
-#  $(1) - target file name (without path)
-#
-# $(call MOD_UNLOCK,file)
-define MOD_UNLOCK
-	eval exec "$${$($(1)_lock_fd)}<&-";
-endef
-
-
-# Loads the deb package from debian cache
-# Cache file prefix is formed using SHA value
-# The SHA value consists of
-#   1.  12 byte SHA value from environmental flags
-#   2.  48 byte SHA value from one of the keyword type - GIT_COMMIT_SHA or GIT_CONTENT_SHA
-#          GIT_COMMIT_SHA   - SHA value of the last git commit id if it is a submodule
-#          GIT_CONTENT_SHA  - SHA value is calculated from the target dependency files content.
-#   Cache is loaded only when corresponding cache file is present in cache direcory and its dependencies are not changed.
-define LOAD_CACHE
-	$(eval MOD_SRC_PATH=$($(1)_SRC_PATH))
-	$(eval DEP_FLAGS_SHA := $(shell git hash-object $($(1)_DEP_FLAGS_FILE)|awk '{print substr($$1,0,11);}'))
-	$(eval MOD_HASH=$(if $(filter GIT_COMMIT_SHA,$($(1)_CACHE_MODE)),$(shell cd $(MOD_SRC_PATH) && git log -1 --format="%H")
-		, $(shell git hash-object $($(1)_DEP_FLAGS_FILE) $($(1)_DEP_SOURCE) $($(1)_SMDEP_SOURCE)|sha1sum|awk '{print $$1}')))
-	$(eval MOD_CACHE_FILE=$(1)-$(DEP_FLAGS_SHA)-$(MOD_HASH).tgz)
-	$(eval $(1)_MOD_CACHE_FILE=$(MOD_CACHE_FILE))
-	$(eval DRV_DEB=$(foreach pkg,$(addprefix $(DEBS_PATH)/,$(1) $($(1)_DERIVED_DEBS)),$(if $(wildcard $(pkg)),,$(pkg))))
-	$(eval $(1)_FILES_MODIFIED  := $(if $($(1)_DEP_SOURCE),$(shell git status -s $($(1)_DEP_SOURCE))) \
-		   $(if $($(1)_SMDEP_SOURCE),$(shell cd $(MOD_SRC_PATH) &&  git status -s $(subst $(MOD_SRC_PATH)/,,$($(1)_SMDEP_SOURCE)))) )
-	#$(filter-out $($(1)_DEP_SOURCE),$($(1)_SMDEP_SOURCE), $?)
-
-	$(if $($(1)_FILES_MODIFIED),
-		echo "Target $(1) dependencies are modifed - load cache skipped";
-		echo "Modified dependencies are : [$($(1)_FILES_MODIFIED)] ";
-	    ,
-		$(if $(wildcard $(SONIC_DPKG_CACHE_DIR)/$(MOD_CACHE_FILE)),
-			$(if $(DRV_DEB), tar -xzvf $(SONIC_DPKG_CACHE_DIR)/$(MOD_CACHE_FILE),echo );
-			echo "File $(SONIC_DPKG_CACHE_DIR)/$(MOD_CACHE_FILE) is loaded from cache";
-			$(eval $(1)_CACHE_LOADED := Yes)
-			,
-			echo "File $(SONIC_DPKG_CACHE_DIR)/$(MOD_CACHE_FILE) is not present in cache !";
-		 )
-	 )
-	echo ""
-endef
-
-# Saves the deb package into debian cache
-# A single tared-zip cache is created for .deb and its derived packages in the cache direcory.
-# It saves the .deb into cache only when its dependencies are not changed
-# The cache save is protected with lock.
-# The SAVE_CACHE macro has dependecy with LOAD_CACHE macro
-# 	 The target specific variables -_SRC_PATH, _MOD_CACHE_FILE and _FILES_MODIFIED are
-# 	 derived from the LOAD_CACHE macro
-define SAVE_CACHE
-	$(eval MOD_SRC_PATH=$($(1)_SRC_PATH))
-	$(eval MOD_CACHE_FILE=$($(1)_MOD_CACHE_FILE))
-	$(call MOD_LOCK,$(1),$(SONIC_DPKG_CACHE_DIR),$(MOD_CACHE_LOCK_SUFFIX),$(MOD_CACHE_LOCK_TIMEOUT))
-	$(if $($(1)_FILES_MODIFIED),
-		echo "Target $(1) dependencies are modifed - save cache skipped";
-	    ,
-		tar -czvf $(SONIC_DPKG_CACHE_DIR)/$(MOD_CACHE_FILE) $(2) $(addprefix $(DEBS_PATH)/,$($(1)_DERIVED_DEBS));
-		echo "File $(SONIC_DPKG_CACHE_DIR)/$(MOD_CACHE_FILE) saved in cache ";
-	 )
-	$(call MOD_UNLOCK,$(1))
-	echo ""
-endef
 
 
 ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
@@ -516,10 +416,23 @@ SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_COPY_FILES))
 #     SOME_NEW_DEB = some_new_deb.deb
 #     $(SOME_NEW_DEB)_URL = https://url/to/this/deb.deb
 #     SONIC_ONLINE_DEBS += $(SOME_NEW_DEB)
-$(addprefix $(DEBS_PATH)/, $(SONIC_ONLINE_DEBS)) : $(DEBS_PATH)/% : .platform
+$(addprefix $(DEBS_PATH)/, $(SONIC_ONLINE_DEBS)) : $(DEBS_PATH)/% : .platform \
+	$(DEBS_PATH)/%.dep
+
 	$(HEADER)
-	$(foreach deb,$* $($*_DERIVED_DEBS), \
-	    { wget --no-use-server-timestamps -O $(DEBS_PATH)/$(deb) $($(deb)_URL) $(LOG) || exit 1 ; } ; )
+	# Load the target deb from DPKG cache
+	$(call LOAD_CACHE,$*,$@)
+
+	# Skip building the target if it is already loaded from cache
+	if [ -z '$($*_CACHE_LOADED)' ] ; then
+
+		$(foreach deb,$* $($*_DERIVED_DEBS), \
+			{ wget --no-use-server-timestamps -O $(DEBS_PATH)/$(deb) $($(deb)_URL) $(LOG) || exit 1 ; } ; )
+		
+		# Save the target deb into DPKG cache
+		$(call SAVE_CACHE,$*,$@)
+	fi
+
 	$(FOOTER)
 
 SONIC_TARGET_LIST += $(addprefix $(DEBS_PATH)/, $(SONIC_ONLINE_DEBS))
@@ -537,19 +450,6 @@ $(addprefix $(FILES_PATH)/, $(SONIC_ONLINE_FILES)) : $(FILES_PATH)/% : .platform
 
 SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_ONLINE_FILES))
 
-# Each target defines a optional variable called '_DEP_FLAGS_FILE' that contains  a list of environment flags for that target and
-# that indicates that target needs to be rebuilt if  one of the dependent flag is changed
-# An environmental dependency flags file is created with the name as ‘<target name>.dep’  for each of the deb targets.
-# This file contains the values of target environment flags and gets updated only when there is a change in the flags value.
-# This file is added as a dependency to the target, so that any change in the file will trigger the target recompilation.
-# For Eg:
-#       target/debs/stretch/linux-headers-4.9.0-11-2-common_4.9.189-3+deb9u2_all.deb.dep
-#
-$(addsuffix .dep,$(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS) $(SONIC_DPKG_DEBS))) : \
-	$(DEBS_PATH)/%.dep : $$(eval $$*_DEP_FLAGS_FILE:=$$@)
-	@echo '$($*_DEP_FLAGS)' | cmp -s - $@ || echo '$($*_DEP_FLAGS)' > $@
-
-
 
 ###############################################################################
 ## Build targets
@@ -563,16 +463,28 @@ $(addsuffix .dep,$(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS) $(SONIC_DPKG_DEBS
 #     $(SOME_NEW_FILE)_SRC_PATH = $(SRC_PATH)/project_name
 #     $(SOME_NEW_FILE)_DEPENDS = $(SOME_OTHER_DEB1) $(SOME_OTHER_DEB2) ...
 #     SONIC_MAKE_FILES += $(SOME_NEW_FILE)
-$(addprefix $(FILES_PATH)/, $(SONIC_MAKE_FILES)) : $(FILES_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS)))
+$(addprefix $(FILES_PATH)/, $(SONIC_MAKE_FILES)) : $(FILES_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS))) \
+			$(FILES_PATH)/%.dep 
 	$(HEADER)
-	# Remove target to force rebuild
-	rm -f $(addprefix $(FILES_PATH)/, $*)
-	# Apply series of patches if exist
-	if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && QUILT_PATCHES=../$(notdir $($*_SRC_PATH)).patch quilt push -a; popd; fi
-	# Build project and take package
-	make DEST=$(shell pwd)/$(FILES_PATH) -C $($*_SRC_PATH) $(shell pwd)/$(FILES_PATH)/$* $(LOG)
-	# Clean up
-	if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && quilt pop -a -f; popd; fi
+
+	# Load the target deb from DPKG cache
+	$(call LOAD_CACHE,$*,$@)
+
+	# Skip building the target if it is already loaded from cache
+	if [ -z '$($*_CACHE_LOADED)' ] ; then
+		# Remove target to force rebuild
+		rm -f $(addprefix $(FILES_PATH)/, $*)
+		# Apply series of patches if exist
+		if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && QUILT_PATCHES=../$(notdir $($*_SRC_PATH)).patch quilt push -a; popd; fi
+		# Build project and take package
+		make DEST=$(shell pwd)/$(FILES_PATH) -C $($*_SRC_PATH) $(shell pwd)/$(FILES_PATH)/$* $(LOG)
+		# Clean up
+		if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && quilt pop -a -f; popd; fi
+
+		# Save the target deb into DPKG cache
+		$(call SAVE_CACHE,$*,$@)
+
+	fi
 	$(FOOTER)
 
 SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_MAKE_FILES))
@@ -590,11 +502,11 @@ SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_MAKE_FILES))
 #     $(SOME_NEW_DEB)_DEPENDS = $(SOME_OTHER_DEB1) $(SOME_OTHER_DEB2) ...
 #     SONIC_MAKE_DEBS += $(SOME_NEW_DEB)
 $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS)) : $(DEBS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS))) \
-	$$($$*_DEP_SOURCE) $$($$*_SMDEP_SOURCE) | $(DEBS_PATH)/%.dep
+			$(DEBS_PATH)/%.dep 
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
-	$(if $(and $(filter-out none,$(SONIC_DPKG_CACHE_METHOD)),$($*_CACHE_MODE)), $(call LOAD_CACHE,$*) )
+	$(call LOAD_CACHE,$*,$@)
 
 	# Skip building the target if it is already loaded from cache
 	if [ -z '$($*_CACHE_LOADED)' ] ; then
@@ -609,7 +521,7 @@ $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS)) : $(DEBS_PATH)/% : .platform $$(a
 		if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && quilt pop -a -f; popd; fi
 
 		# Save the target deb into DPKG cache
-		$(if $(and $(filter-out none,$(SONIC_DPKG_CACHE_METHOD)),$($*_CACHE_MODE)), $(call SAVE_CACHE,$*,$@))
+		$(call SAVE_CACHE,$*,$@)
 
 	fi
 
@@ -624,11 +536,11 @@ SONIC_TARGET_LIST += $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS))
 #     $(SOME_NEW_DEB)_DEPENDS = $(SOME_OTHER_DEB1) $(SOME_OTHER_DEB2) ...
 #     SONIC_DPKG_DEBS += $(SOME_NEW_DEB)
 $(addprefix $(DEBS_PATH)/, $(SONIC_DPKG_DEBS)) : $(DEBS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS))) \
-	$$($$*_DEP_SOURCE) $$($$*_SMDEP_SOURCE) | $(DEBS_PATH)/%.dep
+			$(DEBS_PATH)/%.dep 
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
-	$(if $(and $(filter-out none,$(SONIC_DPKG_CACHE_METHOD)),$($*_CACHE_MODE)), $(call LOAD_CACHE,$*) )
+	$(call LOAD_CACHE,$*,$@)
 
 	# Skip building the target if it is already loaded from cache
 	if [ -z '$($*_CACHE_LOADED)' ] ; then
@@ -651,7 +563,7 @@ $(addprefix $(DEBS_PATH)/, $(SONIC_DPKG_DEBS)) : $(DEBS_PATH)/% : .platform $$(a
 		mv $(addprefix $($*_SRC_PATH)/../, $* $($*_DERIVED_DEBS) $($*_EXTRA_DEBS)) $(DEBS_PATH) $(LOG)
 
 		# Save the target deb into DPKG cache
-		$(if $(and $(filter-out none,$(SONIC_DPKG_CACHE_METHOD)),$($*_CACHE_MODE)), $(call SAVE_CACHE,$*,$@))
+		$(call SAVE_CACHE,$*,$@)
 	fi
 
 	$(FOOTER)
@@ -720,19 +632,33 @@ $(SONIC_INSTALL_TARGETS) : $(DEBS_PATH)/%-install : .platform $$(addsuffix -inst
 #     SONIC_PYTHON_STDEB_DEBS += $(SOME_NEW_DEB)
 $(addprefix $(PYTHON_DEBS_PATH)/, $(SONIC_PYTHON_STDEB_DEBS)) : $(PYTHON_DEBS_PATH)/% : .platform \
 		$$(addsuffix -install,$$(addprefix $(PYTHON_DEBS_PATH)/,$$($$*_DEPENDS))) \
-		$$(addsuffix -install,$$(addprefix $(PYTHON_WHEELS_PATH)/,$$($$*_WHEEL_DEPENDS)))
+		$$(addsuffix -install,$$(addprefix $(PYTHON_WHEELS_PATH)/,$$($$*_WHEEL_DEPENDS))) \
+			$(PYTHON_DEBS_PATH)/%.dep 
+
 	$(HEADER)
-	# Apply series of patches if exist
-	if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && QUILT_PATCHES=../$(notdir $($*_SRC_PATH)).patch quilt push -a; popd; fi
-	# Build project
-	pushd $($*_SRC_PATH) $(LOG)
-	rm -rf deb_dist/* $(LOG)
-	python setup.py --command-packages=stdeb.command bdist_deb $(LOG)
-	popd $(LOG)
-	# Clean up
-	if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && quilt pop -a -f; popd; fi
-	# Take built package(s)
-	mv $(addprefix $($*_SRC_PATH)/deb_dist/, $* $($*_DERIVED_DEBS)) $(PYTHON_DEBS_PATH) $(LOG)
+
+	# Load the target deb from DPKG cache
+	$(call LOAD_CACHE,$*,$@)
+
+	# Skip building the target if it is already loaded from cache
+	if [ -z '$($*_CACHE_LOADED)' ] ; then
+
+		# Apply series of patches if exist
+		if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && QUILT_PATCHES=../$(notdir $($*_SRC_PATH)).patch quilt push -a; popd; fi
+		# Build project
+		pushd $($*_SRC_PATH) $(LOG)
+		rm -rf deb_dist/* $(LOG)
+		python setup.py --command-packages=stdeb.command bdist_deb $(LOG)
+		popd $(LOG)
+		# Clean up
+		if [ -f $($*_SRC_PATH).patch/series ]; then pushd $($*_SRC_PATH) && quilt pop -a -f; popd; fi
+		# Take built package(s)
+		mv $(addprefix $($*_SRC_PATH)/deb_dist/, $* $($*_DERIVED_DEBS)) $(PYTHON_DEBS_PATH) $(LOG)
+
+		# Save the target deb into DPKG cache
+		$(call SAVE_CACHE,$*,$@)
+	fi
+
 	$(FOOTER)
 
 SONIC_TARGET_LIST += $(addprefix $(PYTHON_DEBS_PATH)/, $(SONIC_PYTHON_STDEB_DEBS))
@@ -745,17 +671,31 @@ SONIC_TARGET_LIST += $(addprefix $(PYTHON_DEBS_PATH)/, $(SONIC_PYTHON_STDEB_DEBS
 #     $(SOME_NEW_WHL)_PYTHON_VERSION = 2 (or 3)
 #     $(SOME_NEW_WHL)_DEPENDS = $(SOME_OTHER_WHL1) $(SOME_OTHER_WHL2) ...
 #     SONIC_PYTHON_WHEELS += $(SOME_NEW_WHL)
-$(addprefix $(PYTHON_WHEELS_PATH)/, $(SONIC_PYTHON_WHEELS)) : $(PYTHON_WHEELS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(PYTHON_WHEELS_PATH)/,$$($$*_DEPENDS)))
+$(addprefix $(PYTHON_WHEELS_PATH)/, $(SONIC_PYTHON_WHEELS)) : $(PYTHON_WHEELS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(PYTHON_WHEELS_PATH)/,$$($$*_DEPENDS))) \
+			$(PYTHON_WHEELS_PATH)/%.dep 
+
 	$(HEADER)
-	pushd $($*_SRC_PATH) $(LOG)
-	# apply series of patches if exist
-	if [ -f ../$(notdir $($*_SRC_PATH)).patch/series ]; then QUILT_PATCHES=../$(notdir $($*_SRC_PATH)).patch quilt push -a; fi
-	[ "$($*_TEST)" = "n" ] || python$($*_PYTHON_VERSION) setup.py test $(LOG)
-	python$($*_PYTHON_VERSION) setup.py bdist_wheel $(LOG)
-	# clean up
-	if [ -f ../$(notdir $($*_SRC_PATH)).patch/series ]; then quilt pop -a -f; fi
-	popd $(LOG)
-	mv $($*_SRC_PATH)/dist/$* $(PYTHON_WHEELS_PATH) $(LOG)
+
+	# Load the target deb from DPKG cache
+	$(call LOAD_CACHE,$*,$@)
+
+	# Skip building the target if it is already loaded from cache
+	if [ -z '$($*_CACHE_LOADED)' ] ; then
+
+		pushd $($*_SRC_PATH) $(LOG)
+		# apply series of patches if exist
+		if [ -f ../$(notdir $($*_SRC_PATH)).patch/series ]; then QUILT_PATCHES=../$(notdir $($*_SRC_PATH)).patch quilt push -a; fi
+		[ "$($*_TEST)" = "n" ] || python$($*_PYTHON_VERSION) setup.py test $(LOG)
+		python$($*_PYTHON_VERSION) setup.py bdist_wheel $(LOG)
+		# clean up
+		if [ -f ../$(notdir $($*_SRC_PATH)).patch/series ]; then quilt pop -a -f; fi
+		popd $(LOG)
+		mv $($*_SRC_PATH)/dist/$* $(PYTHON_WHEELS_PATH) $(LOG)
+		
+		# Save the target deb into DPKG cache
+		$(call SAVE_CACHE,$*,$@)
+	fi
+
 	$(FOOTER)
 
 SONIC_TARGET_LIST += $(addprefix $(PYTHON_WHEELS_PATH)/, $(SONIC_PYTHON_WHEELS))
@@ -826,40 +766,53 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 		$$(addprefix $(PYTHON_DEBS_PATH)/,$$($$*.gz_PYTHON_DEBS)) \
 		$$(addprefix $(PYTHON_WHEELS_PATH)/,$$($$*.gz_PYTHON_WHEELS)) \
 		$$(addsuffix -load,$$(addprefix $(TARGET_PATH)/,$$($$*.gz_LOAD_DOCKERS))) \
-		$$($$*.gz_PATH)/Dockerfile.j2
+		$$($$*.gz_PATH)/Dockerfile.j2 \
+		$(TARGET_PATH)/%.gz.dep
 	$(HEADER)
-	# Apply series of patches if exist
-	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && QUILT_PATCHES=../$(notdir $($*.gz_PATH)).patch quilt push -a; popd; fi
-	mkdir -p $($*.gz_PATH)/debs $(LOG)
-	mkdir -p $($*.gz_PATH)/files $(LOG)
-	mkdir -p $($*.gz_PATH)/python-debs $(LOG)
-	mkdir -p $($*.gz_PATH)/python-wheels $(LOG)
-	sudo mount --bind $(DEBS_PATH) $($*.gz_PATH)/debs $(LOG)
-	sudo mount --bind $(FILES_PATH) $($*.gz_PATH)/files $(LOG)
-	sudo mount --bind $(PYTHON_DEBS_PATH) $($*.gz_PATH)/python-debs $(LOG)
-	sudo mount --bind $(PYTHON_WHEELS_PATH) $($*.gz_PATH)/python-wheels $(LOG)
-	# Export variables for j2. Use path for unique variable names, e.g. docker_orchagent_debs
-	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_debs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DEPENDS),RDEPENDS))\n" | awk '!a[$$0]++'))
-	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_pydebs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_PYTHON_DEBS)))\n" | awk '!a[$$0]++'))
-	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_whls=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_PYTHON_WHEELS)))\n" | awk '!a[$$0]++'))
-	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_dbgs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_PACKAGES)))\n" | awk '!a[$$0]++'))
-	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_load_image=$(shell printf "$(call docker-load-image-get,$(subst $(SPACE),\n,$(patsubst %.gz,%,$(call expand,$($*.gz_LOAD_DOCKERS)))))\n" | awk '!a[$$0]++'))
-	j2 $($*.gz_PATH)/Dockerfile.j2 > $($*.gz_PATH)/Dockerfile
-	docker info $(LOG)
-	docker build --squash --no-cache \
-		--build-arg http_proxy=$(HTTP_PROXY) \
-		--build-arg https_proxy=$(HTTPS_PROXY) \
-		--build-arg user=$(USER) \
-		--build-arg uid=$(UID) \
-		--build-arg guid=$(GUID) \
-		--build-arg docker_container_name=$($*.gz_CONTAINER_NAME) \
-		--build-arg frr_user_uid=$(FRR_USER_UID) \
-		--build-arg frr_user_gid=$(FRR_USER_GID) \
-		--label Tag=$(SONIC_GET_VERSION) \
-		-t $(DOCKER_IMAGE_REF) $($*.gz_PATH) $(LOG)
-	$(call docker-image-save,$*,$@)
-	# Clean up
-	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
+
+	# Load the target deb from DPKG cache
+	$(call LOAD_CACHE,$*.gz,$@)
+
+	# Skip building the target if it is already loaded from cache
+	if [ -z '$($*.gz_CACHE_LOADED)' ] ; then
+
+		# Apply series of patches if exist
+		if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && QUILT_PATCHES=../$(notdir $($*.gz_PATH)).patch quilt push -a; popd; fi
+		mkdir -p $($*.gz_PATH)/debs $(LOG)
+		mkdir -p $($*.gz_PATH)/files $(LOG)
+		mkdir -p $($*.gz_PATH)/python-debs $(LOG)
+		mkdir -p $($*.gz_PATH)/python-wheels $(LOG)
+		sudo mount --bind $(DEBS_PATH) $($*.gz_PATH)/debs $(LOG)
+		sudo mount --bind $(FILES_PATH) $($*.gz_PATH)/files $(LOG)
+		sudo mount --bind $(PYTHON_DEBS_PATH) $($*.gz_PATH)/python-debs $(LOG)
+		sudo mount --bind $(PYTHON_WHEELS_PATH) $($*.gz_PATH)/python-wheels $(LOG)
+		# Export variables for j2. Use path for unique variable names, e.g. docker_orchagent_debs
+		$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_debs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DEPENDS),RDEPENDS))\n" | awk '!a[$$0]++'))
+		$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_pydebs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_PYTHON_DEBS)))\n" | awk '!a[$$0]++'))
+		$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_whls=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_PYTHON_WHEELS)))\n" | awk '!a[$$0]++'))
+		$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_dbgs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_PACKAGES)))\n" | awk '!a[$$0]++'))
+		$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_load_image=$(shell printf "$(call docker-load-image-get,$(subst $(SPACE),\n,$(patsubst %.gz,%,$(call expand,$($*.gz_LOAD_DOCKERS)))))\n" | awk '!a[$$0]++'))
+		j2 $($*.gz_PATH)/Dockerfile.j2 > $($*.gz_PATH)/Dockerfile
+		docker info $(LOG)
+		docker build --squash --no-cache \
+			--build-arg http_proxy=$(HTTP_PROXY) \
+			--build-arg https_proxy=$(HTTPS_PROXY) \
+			--build-arg user=$(USER) \
+			--build-arg uid=$(UID) \
+			--build-arg guid=$(GUID) \
+			--build-arg docker_container_name=$($*.gz_CONTAINER_NAME) \
+			--build-arg frr_user_uid=$(FRR_USER_UID) \
+			--build-arg frr_user_gid=$(FRR_USER_GID) \
+			--label Tag=$(SONIC_GET_VERSION) \
+			-t $(DOCKER_IMAGE_REF) $($*.gz_PATH) $(LOG)
+		$(call docker-image-save,$*,$@)
+		# Clean up
+		if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
+		
+		# Save the target deb into DPKG cache
+		$(call SAVE_CACHE,$*.gz,$@)
+	fi
+
 	$(FOOTER)
 
 SONIC_TARGET_LIST += $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES))
@@ -867,29 +820,42 @@ SONIC_TARGET_LIST += $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES))
 # Targets for building docker debug images
 $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAGE_MARK).gz : .platform docker-start \
 		$$(addprefix $(DEBS_PATH)/,$$($$*.gz_DBG_DEPENDS)) \
-		$$(addsuffix -load,$$(addprefix $(TARGET_PATH)/,$$*.gz))
+		$$(addsuffix -load,$$(addprefix $(TARGET_PATH)/,$$*.gz)) \
+		$(TARGET_PATH)/%-$(DBG_IMAGE_MARK).gz.dep
 	$(HEADER)
-	mkdir -p $($*.gz_PATH)/debs $(LOG)
-	sudo mount --bind $(DEBS_PATH) $($*.gz_PATH)/debs $(LOG)
-	# Export variables for j2. Use path for unique variable names, e.g. docker_orchagent_debs
-	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_DEPENDS),RDEPENDS))\n" | awk '!a[$$0]++'))
-	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_IMAGE_PACKAGES)))\n" | awk '!a[$$0]++'))
-	./build_debug_docker_j2.sh $(DOCKER_IMAGE_REF) $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs > $($*.gz_PATH)/Dockerfile-dbg.j2
-	j2 $($*.gz_PATH)/Dockerfile-dbg.j2 > $($*.gz_PATH)/Dockerfile-dbg
-	docker info $(LOG)
-	docker build \
-		$(if $($*.gz_DBG_DEPENDS), --squash --no-cache, --no-cache) \
-		--build-arg http_proxy=$(HTTP_PROXY) \
-		--build-arg https_proxy=$(HTTPS_PROXY) \
-		--build-arg docker_container_name=$($*.gz_CONTAINER_NAME) \
-		--label Tag=$(SONIC_GET_VERSION) \
-		--file $($*.gz_PATH)/Dockerfile-dbg \
-		-t $(DOCKER_DBG_IMAGE_REF) $($*.gz_PATH) $(LOG)
-	$(call docker-image-save,$*-$(DBG_IMAGE_MARK),$@)
-	# Clean up
-	@echo "Removing docker image $(DOCKER_IMAGE_REF)" $(LOG)
-	docker rmi -f $(DOCKER_IMAGE_REF) &> /dev/null || true
-	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
+
+	# Load the target deb from DPKG cache
+	$(call LOAD_CACHE,$*-$(DBG_IMAGE_MARK).gz,$@)
+
+	# Skip building the target if it is already loaded from cache
+	if [ -z '$($*-$(DBG_IMAGE_MARK).gz_CACHE_LOADED)' ] ; then
+
+		mkdir -p $($*.gz_PATH)/debs $(LOG)
+		sudo mount --bind $(DEBS_PATH) $($*.gz_PATH)/debs $(LOG)
+		# Export variables for j2. Use path for unique variable names, e.g. docker_orchagent_debs
+		$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_DEPENDS),RDEPENDS))\n" | awk '!a[$$0]++'))
+		$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs=$(shell printf "$(subst $(SPACE),\n,$(call expand,$($*.gz_DBG_IMAGE_PACKAGES)))\n" | awk '!a[$$0]++'))
+		./build_debug_docker_j2.sh $(DOCKER_IMAGE_REF) $(subst -,_,$(notdir $($*.gz_PATH)))_dbg_debs $(subst -,_,$(notdir $($*.gz_PATH)))_image_dbgs > $($*.gz_PATH)/Dockerfile-dbg.j2
+		j2 $($*.gz_PATH)/Dockerfile-dbg.j2 > $($*.gz_PATH)/Dockerfile-dbg
+		docker info $(LOG)
+		docker build \
+			$(if $($*.gz_DBG_DEPENDS), --squash --no-cache, --no-cache) \
+			--build-arg http_proxy=$(HTTP_PROXY) \
+			--build-arg https_proxy=$(HTTPS_PROXY) \
+			--build-arg docker_container_name=$($*.gz_CONTAINER_NAME) \
+			--label Tag=$(SONIC_GET_VERSION) \
+			--file $($*.gz_PATH)/Dockerfile-dbg \
+			-t $(DOCKER_DBG_IMAGE_REF) $($*.gz_PATH) $(LOG)
+		$(call docker-image-save,$*-$(DBG_IMAGE_MARK),$@)
+		# Clean up
+		@echo "Removing docker image $(DOCKER_IMAGE_REF)" $(LOG)
+		docker rmi -f $(DOCKER_IMAGE_REF) &> /dev/null || true
+		if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && quilt pop -a -f; popd; fi
+
+		# Save the target deb into DPKG cache
+		$(call SAVE_CACHE,$*-$(DBG_IMAGE_MARK).gz,$@)
+	fi
+
 	$(FOOTER)
 
 SONIC_TARGET_LIST += $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES))
@@ -904,12 +870,24 @@ $(DOCKER_LOAD_TARGETS) : $(TARGET_PATH)/%.gz-load : .platform docker-start $$(TA
 	$(FOOTER)
 
 .PHONY: $(TARGET_PATH)/fsroot_prep
-$(TARGET_PATH)/fsroot_prep:
+$(TARGET_PATH)/fsroot_prep: $(FSROOT_PATH)/$(FSROOT).dep
 	$(HEADER)
-	USERNAME="$(USERNAME)" \
-	PASSWORD="$(PASSWORD)" \
-	NUMPROCS="$(SONIC_CONFIG_MAKE_JOBS)" \
-		./build_debian.sh 1 $(LOG)
+	
+	# Load the target deb from DPKG cache
+	$(call LOAD_CACHE,$(FSROOT),$(FSROOT_DST_PATH)/$(FSROOT))
+
+	# Skip building the target if it is already loaded from cache
+	if [ -z '$($*_CACHE_LOADED)' ] ; then
+
+		USERNAME="$(USERNAME)" \
+		PASSWORD="$(PASSWORD)" \
+		NUMPROCS="$(SONIC_CONFIG_MAKE_JOBS)" \
+			./build_debian.sh 1 $(LOG)
+
+		# Save the target deb into DPKG cache
+		$(call SAVE_CACHE,$(FSROOT),$(FSROOT_DST_PATH)/$(FSROOT))
+	fi
+
 	$(FOOTER)
 
 ###############################################################################
@@ -947,6 +925,7 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_INSTALLERS)) : $(TARGET_PATH)/% : \
         $(addprefix $(PYTHON_WHEELS_PATH)/,$(SONIC_PLATFORM_COMMON_PY2)) \
         $(addprefix $(PYTHON_WHEELS_PATH)/,$(REDIS_DUMP_LOAD_PY2)) \
         $(addprefix $(PYTHON_WHEELS_PATH)/,$(SONIC_PLATFORM_API_PY2)) \
+        $(ALL_DEP_FILES_LIST) \
         | $(TARGET_PATH)/fsroot_prep
 	$(HEADER)
 	# Pass initramfs and linux kernel explicitly. They are used for all platforms
@@ -1057,10 +1036,10 @@ SONIC_CLEAN_FILES = $(addsuffix -clean,$(addprefix $(FILES_PATH)/, \
 		   $(SONIC_COPY_FILES) \
 		   $(SONIC_MAKE_FILES)))
 
-$(SONIC_CLEAN_DEBS) : $(DEBS_PATH)/%-clean : .platform $$(addsuffix -clean,$$(addprefix $(DEBS_PATH)/,$$($$*_MAIN_DEB))) 
+$(SONIC_CLEAN_DEBS) : $(DEBS_PATH)/%-clean : .platform $$(addsuffix -clean,$$(addprefix $(DEBS_PATH)/,$$($$*_MAIN_DEB)))
 	@# remove derived or extra targets if main one is removed, because we treat them
 	@# as part of one package
-	@rm -f $(addprefix $(DEBS_PATH)/, $* $($*_DERIVED_DEBS) $($*_EXTRA_DEBS)) $($*_DEP_FLAGS_FILE) 
+	@rm -f $(addprefix $(DEBS_PATH)/, $* $($*_DERIVED_DEBS) $($*_EXTRA_DEBS))
 
 $(SONIC_CLEAN_FILES) : $(FILES_PATH)/%-clean : .platform
 	@rm -f $(FILES_PATH)/$*
