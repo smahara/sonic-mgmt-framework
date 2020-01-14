@@ -1,9 +1,17 @@
 #!/bin/bash
 
+REPORT=/tmp/bench.csv
+
+# e.g. sudo V=1 pde-bench
+VERBOSE=${V}
+if [ -z "${VERBOSE}" ]; then
+    VERBOSE=0
+fi
+
 # Make sure only root can run our script
 if [ "$(id -u)" != "0" ]; then
-   echo "This script must be run as root" 1>&2
-   exit 1
+    echo "This script must be run as root" 1>&2
+    exit 1
 fi
 
 # Start PDE if it's deactivated
@@ -23,5 +31,98 @@ if [ $(docker ps | grep -c pde) -eq 0 ]; then
     exit 1
 fi
 
-# Now launch the PDE benchmark utility
-docker exec -it pde /home/pde/nench.sh
+# Generate the bench.csv
+echo "Platform,Processor,CPU cores,Frequency,RAM,Disk,SHA256,bzip2,AES,sequential read,sequential write," > ${REPORT}
+
+# HWSKU
+HWSKU=$(docker exec -it pde head -1 /usr/share/sonic/platform/default_sku | cut -d ' ' -f 1)
+echo -n "${HWSKU}," >> ${REPORT}
+
+docker exec -it pde /home/pde/nench.sh | \
+while read line
+do
+    if [ ${VERBOSE} -gt 0 ]; then
+        echo "$line"
+    else
+        echo -n "#"
+    fi
+
+    KEY=$(echo ${line} | cut -d ':' -f 1)
+    case ${KEY} in
+    Processor)
+        echo -n "$(echo ${line} | cut -d ':' -f 2 | cut -d '@' -f 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')," >> ${REPORT}
+        ;;
+    CPU\ cores)
+        echo -n "$(echo ${line} | cut -d ':' -f 2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')," >> ${REPORT}
+        ;;
+    Frequency | RAM)
+        echo -n "$(echo ${line} | cut -d ':' -f 2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')," >> ${REPORT}
+        ;;
+    Disks)
+        while read line
+        do
+            if [ ${VERBOSE} -gt 0 ]; then
+                echo "${line}"
+            fi
+            KEY=$(echo ${line} | cut -d ' ' -f 1)
+            case ${KEY} in
+            sda | hda)
+                echo -n "$(echo ${line} | cut -d ' ' -f 2)," >> ${REPORT}
+                break
+                ;;
+            *)
+                ;;
+            esac
+        done
+        ;;
+    CPU)
+        read line
+        if [ ${VERBOSE} -gt 0 ]; then
+            echo "${line}"
+        fi
+        echo -n "$(echo ${line} | cut -d ' ' -f 1)," >> ${REPORT}
+        ;;
+    ioping)
+        read line
+        if [ ${VERBOSE} -gt 0 ]; then
+            echo "${line}"
+        fi
+        read line
+        if [ ${VERBOSE} -gt 0 ]; then
+            echo "${line}"
+        fi
+        read line
+        if [ ${VERBOSE} -gt 0 ]; then
+            echo "${line}"
+        fi
+        echo -n "$(echo ${line} | cut -d ',' -f 4 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')," >> ${REPORT}
+        ;;
+    dd)
+        while read line
+        do
+            if [ ${VERBOSE} -gt 0 ]; then
+                echo "${line}"
+            fi
+            KEY=$(echo ${line} | cut -d ':' -f 1)
+            case ${KEY} in
+            average)
+                echo -n "$(echo ${line} | cut -d ':' -f 2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')," >> ${REPORT}
+                break
+                ;;
+            *)
+                ;;
+            esac
+        done
+        ;;
+    *)
+        ;;
+    esac
+done
+
+echo "" >> ${REPORT}
+echo ""
+
+echo "------ ${REPORT} ------"
+echo "$(cat ${REPORT})"
+echo "----------------------------"
+
