@@ -465,7 +465,7 @@ configure:
 	@mkdir -p target/python-wheels
 	@echo $(PLATFORM) > .platform
 	@echo $(PLATFORM_ARCH) > .arch
-	echo CONFIGURED
+	@echo CONFIGURED
 
 .ONESHELL : reset
 reset :
