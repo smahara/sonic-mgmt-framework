@@ -125,9 +125,15 @@ func (app *CommonApp) translateGet(dbs [db.MaxDB]*db.DB) error {
 }
 
 func (app *CommonApp) translateSubscribe(dbs [db.MaxDB]*db.DB, path string) (*notificationOpts, *notificationInfo, error) {
-	err := errors.New("Not supported")
-	notifInfo := notificationInfo{dbno: db.ConfigDB}
-	return nil, &notifInfo, err
+	var err error
+	log.Info("translateSubscribe:path =", path)
+	/* static way of subscription.
+	   Infra enhancements/support in future release
+	*/
+	if strings.HasPrefix(path, "/openconfig-interfaces:interfaces") {
+		return intf_app_translateSubscribe(dbs, path)
+	}
+	return nil, nil, err
 }
 
 func (app *CommonApp) translateAction(dbs [db.MaxDB]*db.DB) error {
@@ -194,6 +200,7 @@ func (app *CommonApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error) {
     var resPayload []byte
     log.Info("processGet:path =", app.pathInfo.Path)
     var txCache interface{}
+
 
     for {
 	    // Keep a copy of the ygotRoot and let Transformer use this copy of ygotRoot
@@ -705,4 +712,42 @@ func checkAndProcessLeafList(existingEntry db.Value, tblRw db.Value, opcode int,
 	}
 	log.Infof("Returning Table Row %v", tblRw)
 	return tblRw
+}
+
+func intf_app_translateSubscribe(dbs [db.MaxDB]*db.DB, path string) (*notificationOpts, *notificationInfo, error) {
+	appDB := dbs[db.ApplDB]
+	pathInfo := NewPathInfo(path)
+	notifInfo := notificationInfo{dbno: db.ApplDB}
+	notSupported := tlerr.NotSupportedError{Format: "Subscribe not supported", Path: path}
+
+	if isSubtreeRequest(pathInfo.Template, "/openconfig-interfaces:interfaces") {
+		if pathInfo.HasSuffix("/interface{}") ||
+			pathInfo.HasSuffix("/config") ||
+			pathInfo.HasSuffix("/state") {
+			log.Errorf("Subscribe not supported for %s!", pathInfo.Template)
+			return nil, nil, notSupported
+		}
+		ifName := pathInfo.Var("name")
+		if len(ifName) == 0 {
+			return nil, nil, errors.New("Empty Interface name")
+		}
+		log.Info("Interface name = ", ifName)
+		ifKey := db.Key{Comp: []string{ifName}}
+		portTblTs := &db.TableSpec{Name: "PORT_TABLE"}
+		_, err := appDB.GetEntry(portTblTs, ifKey)
+		if err != nil {
+			log.Errorf("Error found on fetching Interface info from App DB for If Name : %s", ifName)
+			errStr := "Invalid Interface:" + ifName
+			err = tlerr.InvalidArgsError{Format: errStr}
+			return nil, nil, err
+		}
+
+		if pathInfo.HasSuffix("/state/oper-status") {
+			notifInfo.table = db.TableSpec{Name: "PORT_TABLE"}
+			notifInfo.key = asKey(ifName)
+			notifInfo.needCache = true
+			return &notificationOpts{pType: OnChange}, &notifInfo, nil
+		}
+	}
+	return nil, nil, notSupported
 }
