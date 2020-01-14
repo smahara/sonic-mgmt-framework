@@ -3,6 +3,7 @@
 export DH_VERBOSE = 1
 export DH_BUILD_DDEBS=1
 #export DEB_BUILD_OPTIONS=nostrip
+export DEB_BUILD_OPTIONS=autodbgsym
 #export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 #export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
@@ -23,6 +24,6 @@ endif
 
 .PHONY: override_dh_strip
 override_dh_strip:
-	dh_strip  --dbg-package=libebpf-dbg
-	#dh_strip  --keep-debug -plibebpf --dbg-package=libebpf-dbg
-	#dh_strip --ddebs  --automatic-dbgsym  
+	#dh_strip  --dbg-package=libebpf-dbg
+	dh_strip --ddebs  --automatic-dbgsym  
+
