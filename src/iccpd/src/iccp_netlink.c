@@ -71,6 +71,9 @@
 #define NETLINK_BROADCAST_SEND_ERROR    0x4
 #endif
 
+/* Use the same socket buffer size as in SwSS common */
+#define NETLINK_SOCKET_BUFFER_SIZE      16777216
+
 static int iccp_ack_handler(struct nl_msg *msg, void *arg)
 {
     bool *acked = arg;
@@ -1566,7 +1569,9 @@ int iccp_system_init_netlink_socket()
     if (err)
         goto err_route_sock_connect;
 
-    err = nl_socket_set_buffer_size(sys->route_sock, 98304, 0);
+    /* Set the same buffer size as done in SwSS common*/
+    //err = nl_socket_set_buffer_size(sys->route_sock, 98304, 0);
+    err = nl_socket_set_buffer_size(sys->route_sock, NETLINK_SOCKET_BUFFER_SIZE, 0);
     if (err)
     {
         ICCPD_LOG_ERR(__FUNCTION__, "Failed to set buffer size of netlink route event sock.");
@@ -1584,7 +1589,9 @@ int iccp_system_init_netlink_socket()
         goto err_route_event_sock_connect;
     }
 
-    err = nl_socket_set_buffer_size(sys->route_event_sock, 98304, 0);
+    /* Set the same buffer size as done in SwSS common*/
+    //err = nl_socket_set_buffer_size(sys->route_event_sock, 98304, 0);
+    err = nl_socket_set_buffer_size(sys->route_event_sock, NETLINK_SOCKET_BUFFER_SIZE, 0);
     if (err)
     {
         ICCPD_LOG_ERR(__FUNCTION__, "Failed to set buffer size of netlink route event sock.");
