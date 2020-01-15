@@ -1,80 +1,48 @@
-[{
-    "oc-module": "openconfig-acl",
-        "tables-groups": [{
-            "tables": [{
-                "name": "ACL_TABLE",
-                "children": [{
-                    "name": "ACL_RULE",
-                    "children": []
-                }]
-            }]
-        }]
-},
 {
-    "oc-module": "openconfig-network-instance",
-        "tables-groups": [{
-            "tables": [{
-                "name": "BGP_GLOBALS",
-                "children": [{
-                    "name": "BGP_GLOBALS_AF",
-                    "children": []
-                },
-                {
-                    "name": "BGP_GLOBALS_LISTEN_PREFIX",
-                    "children": []
-                },
-                {
-                    "name": "BGP_GLOBALS_AF_AGGREGATE_ADDR",
-                    "children": []
-                },
-                {
-                    "name": "BGP_GLOBALS_AF_NETWORK",
-                    "children": []
-                },
-                {
-                    "name": "BGP_GLOBALS_EVPN_RT",
-                    "children": []
-                },
-                {
-                    "name": "BGP_GLOBALS_EVPN_VNI",
-                    "children": []
-                },
-                {
-                    "name": "BGP_GLOBALS_EVPN_VNI_RT",
-                    "children": []
-                }]
-            },
-            {
-                "name": "BGP_PEER_GROUP",
-                "children": [{
-                    "name": "BGP_PEER_GROUP_AF",
-                    "children": []
-                }]
-            },
-            {
-                "name": "BGP_NEIGHBOR",
-                "children": [{
-                    "name": "BGP_NEIGHBOR_AF",
-                    "children": []
-                }]
-            }]
-        },
-        {
-            "tables": [{
-                "name": "CFG_L2MC_TABLE ",
-                "children": []
-            }]
-        }]
-},
-{
-    "oc-module": "openconfig-routing-policy",
-        "tables-groups": [{
-            "tables": [{
-                "name": "PREFIX_SET",
-                "children": [{
-                    "name": "PREFIX",
-                    "children": []
-                }]
-            }]
-        }]
-}]
+    "tablelist": [
+    {
+        "tablename": "ACL_RULE_TABLE",
+        "parent": "ACL_TABLE"
+    },
+    {
+        "tablename": "BGP_GLOBALS_AF",
+        "parent": "BGP_GLOBALS"
+    },
+    {
+        "tablename": "BGP_GLOBALS_LISTEN_PREFIX",
+        "parent": "BGP_GLOBALS"
+    },
+    {
+        "tablename": "BGP_GLOBALS_AF_AGGREGATE_ADDR",
+        "parent": "BGP_GLOBALS"
+    },
+    {
+        "tablename": "BGP_GLOBALS_AF_NETWORK",
+        "parent": "BGP_GLOBALS"
+    },
+    {
+        "tablename": "BGP_GLOBALS_EVPN_RT",
+        "parent": "BGP_GLOBALS"
+    },
+    {
+        "tablename": "BGP_GLOBALS_EVPN_VNI",
+        "parent": "BGP_GLOBALS"
+    },
+    {
+        "tablename": "BGP_GLOBALS_EVPN_VNI_RT",
+        "parent": "BGP_GLOBALS"
+    },
+    {
+        "tablename": "BGP_PEER_GROUP_AF",
+        "parent": "BGP_PEER_GROUP"
+    },
+    {
+        "tablename": "BGP_NEIGHBOR_AF",
+        "parent": "BGP_NEIGHBOR"
+    },
+    {
+        "tablename": "PREFIX",
+        "parent": "PREFIX_SET"
+    }
+    ]
+}
