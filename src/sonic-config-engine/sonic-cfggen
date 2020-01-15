@@ -150,6 +150,19 @@ def snmp_passkey(passStr):
     """
     return '0x' + ''.join(passStr.split(":"))
 
+def snmp_engine_id(value, paramType):
+    """ Encode SNMP agent id from : seperated to hex format
+        that is understandable by snmpd. System default engine-id is
+        constructed as 0x8000013703 suffixed with mac-address
+        (e.g system MAC 00:01:02:03:04:05 --> 0x8000013703000102030405).
+        For user specified SNMP agent-id, only : characters are filtered out
+        and 0x is prefixed to the string.
+    """
+    if paramType is not None and paramType == "default":
+        return '0x8000013703' + ''.join(value.split(":"))
+    else:
+        return '0x' + ''.join(value.split(":"))
+
 class FormatConverter:
     """Convert config DB based schema to legacy minigraph based schema for backward capability.
 We will move to DB schema and remove this class when the config templates are modified.
@@ -318,6 +331,7 @@ def main():
         env.filters['ip_network'] = ip_network
         env.filters['snmp_host_str'] = snmp_host_str
         env.filters['snmp_passkey'] = snmp_passkey
+        env.filters['snmp_engine_id'] = snmp_engine_id
         for attr in ['ip', 'network', 'prefixlen', 'netmask']:
             env.filters[attr] = partial(prefix_attr, attr)
         template = env.get_template(template_file)

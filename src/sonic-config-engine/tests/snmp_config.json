@@ -1,4 +1,13 @@
 {
+  "DEVICE_METADATA": {
+        "localhost": {
+            "type": "LeafRouter",
+            "hostname": "sonic",
+            "platform": "x86_64-bcm_xlr-r0",
+            "mac": "00:19:0f:23:40:06",
+            "hwsku": "BCM956960K"
+        }
+  },
   "SNMP_SERVER": {
     "SYSTEM": {
         "sysContact": "support@acme.com",
@@ -147,5 +156,15 @@
         "targetParams": "2002::10",
         "timeout": "600"
     }
+  },
+  "SNMP_SERVER_ENGINE" : {
+      "GLOBAL" : {
+        "engine-id" : "90:00:01:37:03:00:19:0f:23:40:06"
+      }
+  },
+  "SNMP_AGENT_ADDRESS_CONFIG": {
+        "10.27.7.180|20161|": {},
+        "2002::2||": {},
+        "10.27.7.180|2161|Vrf1": {}
   }
 }
