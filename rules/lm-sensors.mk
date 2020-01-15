@@ -16,16 +16,17 @@ LIBSENSORS = libsensors4_$(LM_SENSORS_VERSION_FULL)_$(CONFIGURED_ARCH).deb
 $(eval $(call add_derived_package,$(LM_SENSORS),$(LIBSENSORS)))
 
 LIBSENSORS_DBG = libsensors4-dbgsym_$(LM_SENSORS_VERSION_FULL)_$(CONFIGURED_ARCH).deb
-$(eval $(call add_derived_package,$(LIBSENSORS),$(LIBSENSORS_DBG)))
+$(eval $(call add_derived_package,$(LM_SENSORS),$(LIBSENSORS_DBG)))
 
 SENSORD = sensord_$(LM_SENSORS_VERSION_FULL)_$(CONFIGURED_ARCH).deb
 $(eval $(call add_derived_package,$(LM_SENSORS),$(SENSORD)))
 $(SENSORD)_DEPENDS += $(LIBSENSORS) $(LM_SENSORS)
 
 SENSORD_DBG = sensord-dbgsym_$(LM_SENSORS_VERSION_FULL)_$(CONFIGURED_ARCH).deb
-$(eval $(call add_derived_package,$(SENSORD),$(SENSORD_DBG)))
+$(eval $(call add_derived_package,$(LM_SENSORS),$(SENSORD_DBG)))
 
 SONIC_MAKE_DEBS += $(LM_SENSORS)
+
 
 # The .c, .cpp, .h & .hpp files under src/{$DBG_SRC_ARCHIVE list}
 # are archived into debug one image to facilitate debugging.

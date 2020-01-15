@@ -1772,6 +1772,10 @@ class BGPConfigDaemon:
                         	continue
 
 		    else:
+                        syslog.syslog(syslog.LOG_INFO, 'Set BFD single hop peer {} {} {}'.format(remoteaddr, vrf, interface))
+
+                        suffix_cmd, oper = self.__bfd_handle_delete (data)
+
                         if suffix_cmd and oper == CachedDataWithOp.OP_DELETE:
                             command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} vrf {} interface {}' -c '{}'".\
                             format(remoteaddr, vrf, interface, suffix_cmd)

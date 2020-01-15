@@ -24,6 +24,9 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	#git checkout master
 	#git branch -D $(FRR_BRANCH)
 	popd
+
+	#HACK for dbg packages
+	touch $(DERIVED_TARGET)
 	mv $(DERIVED_TARGET) $* $(DEST)/
 
 $(addprefix $(DEST)/, $(DERIVED_TARGET)): $(DEST)/% : $(DEST)/$(MAIN_TARGET)

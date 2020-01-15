@@ -1,9 +1,12 @@
-BRCM_SAI_VER = 3.8.1.1
+BRCM_SAI_VER = 3.8.1.4
 BRCM_SAI = libsaibcm_$(BRCM_SAI_VER)_amd64.deb
 BRCM_SAI_DEV = libsaibcm-dev_$(BRCM_SAI_VER)_amd64.deb
 BRCM_SAI_DIAG = libsaibcm-diag_$(BRCM_SAI_VER)_amd64.deb
 BRCM_SAI_URL = "http://10.59.132.240:9009/projects/csg_sonic/sonic_builds/sai_debs/$(BRCM_SAI_VER)"
 SAI_LIBS_MOUNT_POINT = /sai_libs
+$(BRCM_SAI)_SRC_PATH := platform/broadcom
+$(BRCM_SAI_DEV)_SRC_PATH := platform/broadcom
+$(BRCM_SAI_DIAG)_SRC_PATH := platform/broadcom
 
 ifneq  ($(LOCAL_SAI_DEBS_PATH),)
 override BRCM_SAI = $(shell find $(SAI_LIBS_MOUNT_POINT) -maxdepth 1 -regex '.*libsaibcm_[0-9.]+_amd64\.deb' -printf "%f")

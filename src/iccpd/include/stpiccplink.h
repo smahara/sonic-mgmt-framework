@@ -153,7 +153,7 @@ struct stpiccp_common_info
     uint16_t vid;
     char port_name[IFNAMSIZ];
 
-    VLAN_PORT_TC_TYPE_t vlan_port_tc_type; /* "TC Update Message" / "TC ACK Update Message" / "TCN Update Message" */
+    VLAN_PORT_TC_TYPE_t tc_type; /* "TC Update Message" / "TC ACK Update Message" / "TCN Update Message" */
 
     char		root_bridge_id[BRIDGE_ID_STR_LEN];
     uint32_t	root_path_cost;
@@ -173,6 +173,7 @@ struct stpiccp_common_info
 
     uint16_t    stp_port_id;//will be removed
     uint8_t		state;
+    uint8_t		role;
     uint8_t		tc_ack;
     uint8_t		change_detection_enabled;
     uint8_t		self_loop;

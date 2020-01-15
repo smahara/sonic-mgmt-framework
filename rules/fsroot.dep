@@ -1,0 +1,12 @@
+
+SPATH       := $($(FSROOT)_SRC_PATH)
+DEP_FILES   := $(SONIC_COMMON_FILES_LIST) rules/fsroot.mk rules/fsroot.dep   
+DEP_FILES   += $(SONIC_COMMON_BASE_FILES_LIST)
+DEP_FILES   += build_debian.sh
+
+
+#DPKG FRK - Add more dependency files
+$(FSROOT)_CACHE_MODE  := none
+$(FSROOT)_DEP_FLAGS   := $(SONIC_COMMON_FLAGS_LIST)
+$(FSROOT)_DEP_FILES   := $(DEP_FILES)
+
