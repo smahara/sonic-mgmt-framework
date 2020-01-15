@@ -501,14 +501,16 @@ class CommandArgument(object):
         bool_format = {'allow-as-in': 'origin',
                        'match-clust-len': 'equal-cluster-length',
                        'network-backdoor': 'backdoor',
-                       'as-set': 'as-set',
-                       'summary-only': 'summary-only',
+                       'aggr-as-set': 'as-set',
+                       'aggr-summary-only': 'summary-only',
                        'uchg-as-path': 'as-path',
                        'uchg-med': 'med',
                        'uchg-nh': 'next-hop',
                        'rm-as-all': 'all',
                        'rm-as-repl': 'replace-AS',
-                       'mp-as-set': ('as-set', 'no-as-set')
+                       'mp-as-set': ('as-set', 'no-as-set'),
+                       'no-prepend': 'no-prepend',
+                       'replace-as': 'replace-as'
         }
         if format == 'no-prefix':
             return 'no ' if not self.enabled else ''
@@ -599,12 +601,18 @@ class CommandArgument(object):
         elif format == 'redist-route-map':
             if len(self.value) > 0:
                 self.value = 'route-map %s' % self.to_str()
+        elif format == 'redist-metric':
+            if len(self.value) > 0:
+                self.value = 'metric %s' % self.to_str()
         elif format == 'network-policy':
             if len(self.value) > 0:
                 self.value = 'route-map %s' % self.to_str()
         elif format == 'src-proto':
             if self.value == 'ospf3':
                 self.value = 'ospf6'
+        elif format == 'aggr-policy':
+            if len(self.value) > 0:
+                self.value = 'route-map %s' % self.to_str()
         elif format == 'tolower':
             self.tolower = True
         return self.to_str()
@@ -685,7 +693,7 @@ def hdl_ibgp_maxpath(daemon, cmd_str, op, st_idx, args, data):
     return cmd_list + upd_cmd_list
 
 def hdl_af_aggregate(daemon, cmd_str, op, st_idx, args, data):
-    if len(args) < 4:
+    if len(args) < 5:
         return None
     cmd_list = []
     if op != CachedDataWithOp.OP_DELETE:
@@ -694,7 +702,7 @@ def hdl_af_aggregate(daemon, cmd_str, op, st_idx, args, data):
         ip_prefix = args[2]
         if vrf in daemon.af_aggr_list and ip_prefix in daemon.af_aggr_list[vrf]:
             cmd_list.append(cmd_str.format(CommandArgument(daemon, True, vrf), CommandArgument(daemon, True, af), CommandArgument(daemon, True, ip_prefix),
-                                           CommandArgument(daemon, True, ''), CommandArgument(daemon, True, ''),
+                                           CommandArgument(daemon, True, ''), CommandArgument(daemon, True, ''), CommandArgument(daemon, True, ''),
                                            no = CommandArgument(daemon, False)))
     upd_cmd_list = get_command_cmn(daemon, cmd_str, op, st_idx, args, data)
     if upd_cmd_list is None:
@@ -706,7 +714,7 @@ def hdl_route_redist_set(daemon, cmd_str, op, st_idx, args, data):
     if op != CachedDataWithOp.OP_DELETE:
         proto = args[0]
         # blindly run no command first
-        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, proto), CommandArgument(daemon, True, ''),
+        cmd_list.append(cmd_str.format(CommandArgument(daemon, True, proto), CommandArgument(daemon, True, ''), CommandArgument(daemon, True, ''),
                                        no = CommandArgument(daemon, False)))
     upd_cmd_list = get_command_cmn(daemon, cmd_str, op, st_idx, args, data)
     if upd_cmd_list is None:
@@ -951,7 +959,8 @@ class BGPConfigDaemon:
                       (['max_delay', '+establish_wait'],                '{no:no-prefix}update-delay {} {}'),
                       ('confed_id',                                     '{no:no-prefix}bgp confederation identifier {}'),
                       ('confed_peers',                                  '{no:no-prefix}bgp confederation peers {}', hdl_confed_peers),
-                      (['keepalive', 'holdtime'],                       '{no:no-prefix}timers bgp {} {}')
+                      (['keepalive', 'holdtime'],                       '{no:no-prefix}timers bgp {} {}'),
+                      (['max_med_admin', '+max_med_admin_val'],         '{no:no-prefix}bgp max-med administrative {}', ['true', 'false'])
     ]
 
     global_af_key_map = [(['ebgp_route_distance',
@@ -969,7 +978,8 @@ class BGPConfigDaemon:
     ]
 
     cmn_key_map = [('asn&peer_type',                        '{no:no-prefix}neighbor {} remote-as {}'),
-                   ('local_asn',                            '{no:no-prefix}neighbor {} local-as {}'),
+                   (['local_asn', '+local_as_no_prepend',
+                     '+local_as_replace_as'],               '{no:no-prefix}neighbor {} local-as {} {:no-prepend} {:replace-as}'),
                    (['admin_status', '+shutdown_message'],  '{no:no-prefix}neighbor {} shutdown {:shutdown-msg}', ['false', 'true']),
                    ('local_addr',                           '{no:no-prefix}neighbor {} update-source {}'),
                    ('name',                                 '{no:no-prefix}neighbor {} description {}'),
@@ -985,6 +995,7 @@ class BGPConfigDaemon:
                    ('solo_peer',                            '{no:no-prefix}neighbor {} solo', ['true', 'false']),
                    ('ttl_security_hops',                    '{no:no-prefix}neighbor {} ttl-security hops {}'),
                    ('bfd',                                  '{no:no-prefix}neighbor {} bfd', ['true', 'false']),
+                   ('bfd_check_ctrl_plane_failure',         '{no:no-prefix}neighbor {} bfd check-control-plane-failure', ['true', 'false']),
                    ('capability_dynamic',                   '{no:no-prefix}neighbor {} capability dynamic', ['true', 'false']),
                    ('dont_negotiate_capability',            '{no:no-prefix}neighbor {} dont-capability-negotiate', ['true', 'false']),
                    ('enforce_multihop',                     '{no:no-prefix}neighbor {} enforce-multihop', ['true', 'false']),
@@ -1059,9 +1070,11 @@ class BGPConfigDaemon:
 
     aspath_set_key_map = [('as_path_set_member', '{no:no-prefix}bgp as-path access-list {}', hdl_aspath_set)]
 
-    route_redist_key_map = [(['protocol', '+route_map'], '{no:no-prefix}redistribute {} {:redist-route-map}', hdl_route_redist_set)]
+    route_redist_key_map = [(['protocol', '++metric', '+route_map'],
+                             '{no:no-prefix}redistribute {} {:redist-metric} {:redist-route-map}', hdl_route_redist_set)]
 
-    af_aggregate_key_map = [(['ip_prefix', '++as_set', '+summary_only'], '{no:no-prefix}aggregate-address {2} {3:as-set} {4:summary-only}', hdl_af_aggregate)]
+    af_aggregate_key_map = [(['ip_prefix', '++as_set', '++summary_only', '+policy'],
+                             '{no:no-prefix}aggregate-address {2} {3:aggr-as-set} {4:aggr-summary-only} {5:aggr-policy}', hdl_af_aggregate)]
 
     af_network_key_map = [(['ip_prefix', '++policy', '+backdoor'], '{no:no-prefix}network {2} {3:network-policy} {4:network-backdoor}')]
 
@@ -1510,6 +1523,12 @@ class BGPConfigDaemon:
                                 syslog.syslog(syslog.LOG_ERR, 'failed to create neighbor of interface %s for VRF %s' % (key, vrf))
                                 continue
                             self.bgp_intf_nbr[vrf].add(key)
+                    bfd_val = data.get('bfd', None)
+                    if (bfd_val is not None and (bfd_val.op == CachedDataWithOp.OP_ADD or bfd_val.op == CachedDataWithOp.OP_UPDATE) and
+                        bfd_val.data == 'true'):
+                        cp_chk_val = data.get('bfd_check_ctrl_plane_failure', None)
+                        if cp_chk_val is not None and cp_chk_val.op == CachedDataWithOp.OP_NONE and cp_chk_val.data == 'true':
+                            cp_chk_val.op = CachedDataWithOp.OP_ADD
                     cmd_prefix = ['configure terminal', 'router bgp {} vrf {}'.format(local_asn, vrf)]
                     if not key_map.run_command(self, data, cmd_prefix, key):
                         syslog.syslog(syslog.LOG_ERR, 'failed running BGP neighbor config command')
