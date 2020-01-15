@@ -46,6 +46,7 @@
 #  * NOS_NAME : Optional SONiC OS name for the image we wish to build
 #
 ###############################################################################
+#KEEP_SLAVE_ON=yes
 
 SHELL = /bin/bash
 
@@ -156,9 +157,6 @@ include rules/config
 # This is also set up in slave.mk, but that's too late for passing into docker.
 ifeq ($(KERNEL_CACHE_PATH),)
 override KERNEL_CACHE_PATH := $(strip $(DEFAULT_KERNEL_CACHE_PATH))
-endif
-
-ifneq ($(KERNEL_CACHE_PATH),)
     DOCKER_RUN += -v "$(KERNEL_CACHE_PATH):/kernel_cache"
 endif
 
@@ -168,27 +166,26 @@ ifneq ($(SONIC_DPKG_CACHE_SOURCE),)
 endif
 
 
-ifneq  ($(LOCAL_SAI_DEBS_PATH),)
+ifneq  (,$(LOCAL_SAI_DEBS_PATH))
+LOCAL_SAI_DEBS_PATH:=$(strip ${LOCAL_SAI_DEBS_PATH})
 override LOCAL_SAI_DEBS_PATH := $(patsubst %/,%,$(strip $(LOCAL_SAI_DEBS_PATH)))
+
+ifneq (,$(shell echo ${LOCAL_SAI_DEBS_PATH}|grep '^/'))
+    DOCKER_RUN += -v "$(LOCAL_SAI_DEBS_PATH):/sai_libs"
 endif
 
-ifneq ($(LOCAL_SAI_DEBS_PATH),)
-    DOCKER_RUN += -v "$(LOCAL_SAI_DEBS_PATH):/sai_libs"
 endif
 
 # If SONIC_CONFIG_NATIVE_DOCKERD_SHARED is enabled, force
 # SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD enabled as well.
-ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
-override SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD := y
-endif
-
 # User name and tag for "docker-*" images created by native dockerd mode.
-ifeq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
-DOCKER_USERNAME = -$(USER)
-DOCKER_USERTAG = $(SLAVE_TAG)
-else
+ifneq ($(strip $(SONIC_CONFIG_NATIVE_DOCKERD_SHARED)),y)
 DOCKER_USERNAME =
 DOCKER_USERTAG = latest
+else
+override SONIC_CONFIG_USE_NATIVE_DOCKERD_FOR_BUILD := y
+DOCKER_USERNAME = -$(USER)
+DOCKER_USERTAG = $(SLAVE_TAG)
 endif
 
 # Define canned sequence to clean up Docker image cache.
@@ -238,8 +235,16 @@ ifneq (,$(filter $(CONFIGURED_ARCH), armhf arm64))
 
 endif
 
+DGRP=$(shell grep docker: /etc/group    | sed -e 's/:[^:]*:/ /' -e 's/:/ /g'|awk '{print $$2}')
+$(warning DGRP==!${DGRP}!)
+ifeq (${DGRP},)
+DGRP=$(shell ypcat group | grep docker: | sed -e 's/:[^:]*:/ /' -e 's/:/ /g'|awk '{print $$2}')
+endif
+$(warning DGRP==!${DGRP}!)
+
 DOCKER_BASE_BUILD = docker build --no-cache \
                     -t $(SLAVE_BASE_IMAGE):$(SLAVE_BASE_TAG) \
+                    --build-arg DGRP=${DGRP} \
                     --build-arg http_proxy=$(http_proxy) \
                     --build-arg https_proxy=$(https_proxy) \
                     --build-arg debian_archive_mirror=$(DEBIAN_ARCHIVE_MIRROR) \
@@ -442,10 +447,25 @@ initpde:
 	done
 	@git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
 
-init :
-	@git submodule update --init --recursive
-	@git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
-	@git submodule foreach --recursive 'git checkout dell_sonic || git checkout master'
+init:
+	git submodule update --init --recursive
+	git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
+ifneq (,${LOCAL_SAI_DEBS_PATH})
+	rm -rf ${LOCAL_SAI_DEBS_PATH}
+	mkdir -p `dirname ${LOCAL_SAI_DEBS_PATH}`
+	git clone --depth=1 git@gitlab.force10networks.com:e-sonic/sonic-binaries.git ${LOCAL_SAI_DEBS_PATH}
+endif
+
+configure:
+	@mkdir -p target/debs
+	@mkdir -p target/debs/stretch
+	@mkdir -p target/files
+	@mkdir -p target/files/stretch
+	@mkdir -p target/python-debs
+	@mkdir -p target/python-wheels
+	@echo $(PLATFORM) > .platform
+	@echo $(PLATFORM_ARCH) > .arch
+	echo CONFIGURED
 
 .ONESHELL : reset
 reset :

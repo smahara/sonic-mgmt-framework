@@ -40,9 +40,13 @@ STRETCH_FILES_PATH = $(TARGET_PATH)/files/stretch
 DBG_IMAGE_MARK = dbg
 DBG_SRC_ARCHIVE_FILE = $(TARGET_PATH)/sonic_src.tar.gz
 
-CONFIGURED_PLATFORM := $(shell [ -f .platform ] && cat .platform || echo generic)
+CONFIGURED_PLATFORM := $(shell cat .platform 2>/dev/null)
+ifeq (,$(CONFIGURED_PLATFORM))
+$(error Build system is not configured, please run:    make configure)
+endif
+
 PLATFORM_PATH = platform/$(CONFIGURED_PLATFORM)
-CONFIGURED_ARCH := $(shell [ -f .arch ] && cat .arch || echo amd64)
+CONFIGURED_ARCH := $(shell cat .arch 2>/dev/null || echo amd64)
 ifeq ($(PLATFORM_ARCH),)
 	override PLATFORM_ARCH = $(CONFIGURED_ARCH)
 endif
@@ -61,12 +65,6 @@ export CONFIGURED_ARCH
 ## Utility rules
 ## Define configuration, help etc.
 ###############################################################################
-
-.platform :
-ifneq ($(CONFIGURED_PLATFORM),generic)
-	@echo Build system is not configured, please run make configure
-	@exit 1
-endif
 
 configure :
 	@mkdir -p target/debs
@@ -790,7 +788,8 @@ $(addprefix $(TARGET_PATH)/, $(SONIC_SIMPLE_DOCKER_IMAGES)) : $(TARGET_PATH)/%.g
 	# Apply series of patches if exist
 	if [ -f $($*.gz_PATH).patch/series ]; then pushd $($*.gz_PATH) && QUILT_PATCHES=../$(notdir $($*.gz_PATH)).patch quilt push -a; popd; fi
 	docker info $(LOG)
-	docker build --squash --no-cache \
+	docker build \
+		--squash --no-cache \
 		--build-arg http_proxy=$(HTTP_PROXY) \
 		--build-arg https_proxy=$(HTTPS_PROXY) \
 		--build-arg user=$(USER) \
@@ -846,7 +845,8 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 	$(eval export $(subst -,_,$(notdir $($*.gz_PATH)))_load_image=$(shell printf "$(call docker-load-image-get,$(subst $(SPACE),\n,$(patsubst %.gz,%,$(call expand,$($*.gz_LOAD_DOCKERS)))))\n" | awk '!a[$$0]++'))
 	j2 $($*.gz_PATH)/Dockerfile.j2 > $($*.gz_PATH)/Dockerfile
 	docker info $(LOG)
-	docker build --squash --no-cache \
+	docker build \
+		--squash --no-cache \
 		--build-arg http_proxy=$(HTTP_PROXY) \
 		--build-arg https_proxy=$(HTTPS_PROXY) \
 		--build-arg user=$(USER) \
