@@ -1,0 +1,32 @@
+diff --git a/nss_tacplus.c b/nss_tacplus.c
+index f2a86e1..7b1dffc 100644
+--- a/nss_tacplus.c
++++ b/nss_tacplus.c
+@@ -421,6 +421,8 @@ static int create_or_modify_local_user(const char *name, int level, bool existin
+     int lvl, cnt;
+     bool found = false;
+     const char* command = existing_user ? "/usr/sbin/usermod": "/usr/sbin/useradd";
++    const char* cert_command = "/usr/bin/certgen";
++    char cert_buf[512];
+ 
+     fp = fopen(user_conf, "ab+");
+     if(!fp) {
+@@ -475,6 +477,17 @@ static int create_or_modify_local_user(const char *name, int level, bool existin
+             }
+             if(debug)
+                 syslog(LOG_DEBUG, "%s: %s %s success", nssname, command, name);
++
++            snprintf(cert_buf, len, "%s %s", cert_command, name);
++            fp = popen(cert_buf, "r");
++            if(!fp || -1 == pclose(fp)) {
++                syslog(LOG_ERR, "%s: %s popen failed errno=%d %s",
++                        nssname, cert_command, errno, strerror(errno));
++                delete_conf_line(name);
++                return -1;
++            }
++            if(debug)
++                syslog(LOG_DEBUG, "%s: %s %s success", nssname, cert_command, name);
+             delete_conf_line(name);
+             return 0;
+         }
+
