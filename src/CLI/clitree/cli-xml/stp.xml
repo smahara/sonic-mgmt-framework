@@ -1067,166 +1067,152 @@ limitations under the License.
         name="spanning-tree"
         help = "Configure spanning tree on port-channel"
         >
-        <PARAM
-            name="stp-if-subcmds"
-            help="spannig tree port-channel subcommands"
-            ptype="SUBCOMMAND"
-            mode="switch"
-            >
-            <PARAM
-                name="bpduguard"
-                help="Enables bpdu guard on the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-                <PARAM
-                    name="port-shutdown"
-                    help="Enable port shutdown on bpdu guard violation"
-                    ptype="SUBCOMMAND"
-                    mode="subcommand"
-                    optional="true"
-                    >
-                </PARAM>
-            </PARAM>
-            <PARAM
-                name="cost"
-                help="Set the port level cost"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-                <PARAM
-                    name="value"
-                    help="Port cost value"
-                    ptype="STP_COST"
-                    >
-                </PARAM>
-            </PARAM>
-            <PARAM
-                name="enable"
-                help="Enables spanning-tree on the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-            </PARAM>
-            <PARAM
-                name="link-type"
-                help="Set link type of the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-                <PARAM
-                    name="link-sub-cmds"
-                    help = "link type sub commands."
-                    ptype="SUBCOMMAND"
-                    mode="switch"
-                    >
-                    <PARAM
-                        name="auto"
-                        help = "link type is set based on the duplex setting of the port-channel."
-                        ptype="SUBCOMMAND"
-                        mode="subcommand"
-                        >
-                    </PARAM>
-                    <PARAM
-                        name="point-to-point"
-                        help = "link type of given port-channel is point-to-point."
-                        ptype="SUBCOMMAND"
-                        mode="subcommand"
-                        >
-                    </PARAM>
-                    <PARAM
-                        name="shared"
-                        help = "link type of given port-channel is shared."
-                        ptype="SUBCOMMAND"
-                        mode="subcommand"
-                        >
-                    </PARAM>
-                </PARAM>
-            </PARAM>
-            <PARAM
-                name="portfast"
-                help="Enables portfast on the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-            </PARAM>
+    </COMMAND>
 
-            <PARAM
-                name="port-priority"
-                help="Set the port level priority"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-                <PARAM
-                    name="value"
-                    help="Port priority value"
-                    ptype="STP_PORT_PRIORITY"
-                    >
-                </PARAM>
-            </PARAM>
-
-            <PARAM
-                name="port"
-                help="Set Spanning tree port"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-                <PARAM
-                    name="type"
-                    help="Spanning Tree port type"
-                    ptype="SUBCOMMAND"
-                    mode="subcommand"
-                    >
-                    <PARAM
-                        name="edge"
-                        help="Edge port"
-                        ptype="SUBCOMMAND"
-                        mode="subcommand"
-                        >
-                    </PARAM>
-                </PARAM>
-            </PARAM>
-
-        <PARAM
-            name="uplinkfast"
-            help="Enables uplink fast on the port-channel"
-            ptype="SUBCOMMAND"
-            mode="subcommand"
-            >
-        </PARAM>
-    </PARAM>
-    <ACTION>
-        if test "${stp-if-subcmds}" = "bpduguard";then&#xA;
-            if test "${port-shutdown}" != "";then&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_bpdu_guard_port_shutdown ${po_name} True&#xA;
-            else&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_bpdu_guard ${po_name} True&#xA;
-            fi&#xA;
-        elif test "${stp-if-subcmds}" = "portfast";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_portfast ${po_name} True&#xA;
-        elif test "${stp-if-subcmds}" = "uplinkfast";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_uplink_fast ${po_name} True&#xA;
-        elif test "${stp-if-subcmds}" = "enable";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_spanning_tree_enable ${po_name} True&#xA;
-        elif test "${stp-if-subcmds}" = "cost";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_cost ${po_name} ${value}&#xA;
-        elif test "${stp-if-subcmds}" = "port-priority";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_port_priority ${po_name} ${value}&#xA;
-        elif test "${stp-if-subcmds}" = "link-type";then&#xA;
-            if test "${link-sub-cmds}" = "auto";then&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-stp.py delete_openconfig_spanning_tree_stp_interfaces_interface_config_link_type ${po_name}&#xA;
-            elif test "${link-sub-cmds}" = "point-to-point";then&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_link_type ${po_name} "P2P"&#xA;
-            elif test "${link-sub-cmds}" = "shared";then&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_link_type ${po_name} "SHARED"&#xA;
-            fi&#xA;
-        elif test "${stp-if-subcmds}" = "port";then&#xA;
-            if test "${edge}" != "";then&#xA;
-            python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_edge_port ${po_name} True&#xA;
-            fi&#xA;
+    <COMMAND 
+        name="spanning-tree bpduguard" 
+        help="Enables bpdu guard on the port-channel" 
+        ptype="SUBCOMMAND" 
+        mode="subcommand">
+      <PARAM 
+        name="port-shutdown" 
+        help="Enable port shutdown on bpdu guard violation" 
+        ptype="SUBCOMMAND" 
+        mode="subcommand" 
+        optional="true"> 
+      </PARAM>
+      <ACTION>
+        if test "${port-shutdown}" != "";then&#xA;
+          python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_bpdu_guard_port_shutdown ${po_name} True&#xA;
+        else&#xA;
+          python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_bpdu_guard ${po_name} True&#xA;
         fi&#xA;
         builtin="clish_nop"
-    </ACTION>
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND 
+      name="spanning-tree cost" 
+      help="Set the port level cost" 
+      ptype="SUBCOMMAND" 
+      mode="subcommand">
+      <PARAM 
+        name="value" 
+        help="Port cost value" 
+        ptype="STP_COST"> 
+      </PARAM>
+      <ACTION> 
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_cost ${po_name} ${value}&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND 
+      name="spanning-tree enable" 
+      help="Enables spanning-tree on the port-channel" 
+      ptype="SUBCOMMAND" 
+      mode="subcommand">
+      <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_spanning_tree_enable ${po_name} True&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND 
+      name="spanning-tree link-type" 
+      help="Set link type of the port-channel" 
+      ptype="SUBCOMMAND" 
+      mode="subcommand">
+      <PARAM 
+        name="link-sub-cmds" 
+        help="link type sub commands." 
+        ptype="SUBCOMMAND" 
+        mode="switch">
+        <PARAM 
+          name="auto" 
+          help="link type is set based on the duplex setting of the port-channel." 
+          ptype="SUBCOMMAND" 
+          mode="subcommand"> 
+        </PARAM>
+        <PARAM 
+          name="point-to-point" 
+          help="link type of given port-channel is point-to-point." 
+          ptype="SUBCOMMAND" 
+          mode="subcommand"> 
+        </PARAM>
+        <PARAM 
+          name="shared" 
+          help="link type of given port-channel is shared." 
+          ptype="SUBCOMMAND" 
+          mode="subcommand"> 
+        </PARAM>
+      </PARAM>
+      <ACTION>
+ if test "${link-sub-cmds}" = "auto";then&#xA;
+ python $SONIC_CLI_ROOT/sonic-cli-stp.py delete_openconfig_spanning_tree_stp_interfaces_interface_config_link_type ${po_name}&#xA;
+ elif test "${link-sub-cmds}" = "point-to-point";then&#xA;
+ python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_link_type ${po_name} "P2P"&#xA;
+ elif test "${link-sub-cmds}" = "shared";then&#xA;
+ python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_link_type ${po_name} "SHARED"&#xA;
+ fi&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND 
+      name="spanning-tree portfast" 
+      help="Enables portfast on the port-channel" 
+      ptype="SUBCOMMAND" 
+      mode="subcommand">
+      <ACTION>
+ python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_portfast ${po_name} True&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND 
+      name="spanning-tree port-priority" 
+      help="Set the port level priority" 
+      ptype="SUBCOMMAND" 
+      mode="subcommand">
+      <PARAM 
+        name="value" 
+        help="Port priority value" 
+        ptype="STP_PORT_PRIORITY"> 
+      </PARAM>
+      <ACTION>
+ python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_port_priority ${po_name} ${value}&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND 
+      name="spanning-tree port" 
+      help="Set Spanning tree port" 
+      ptype="SUBCOMMAND" 
+      mode="subcommand">
+      <PARAM 
+        name="type" 
+        help="Spanning Tree port type" 
+        ptype="SUBCOMMAND" 
+        mode="subcommand">
+        <PARAM 
+          name="edge" 
+          help="Edge port" 
+          ptype="SUBCOMMAND" 
+          mode="subcommand"> 
+        </PARAM>
+      </PARAM>
+      <ACTION>
+ if test "${edge}" != "";then&#xA;
+ python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_edge_port ${po_name} True&#xA;
+ fi&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND 
+      name="spanning-tree uplinkfast" 
+      help="Enables uplink fast on the port-channel" 
+      ptype="SUBCOMMAND" 
+      mode="subcommand">
+      <ACTION>
+ python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_uplink_fast ${po_name} True&#xA;
+      </ACTION>
     </COMMAND>
 
     <COMMAND
