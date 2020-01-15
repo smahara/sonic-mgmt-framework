@@ -49,6 +49,10 @@
 *
 ******************************************************/
 
+//this needs to be fine tuned 
+#define PEER_SOCK_SND_BUF_LEN  (2 * 1024 * 1024)
+#define PEER_SOCK_RCV_BUF_LEN  (2 * 1024 * 1024)
+
 static int session_conn_thread_lock(pthread_mutex_t *conn_mutex)
 {
     return 1; /*pthread_mutex_lock(conn_mutex);*/
@@ -253,6 +257,8 @@ accept_client:
 
     struct epoll_event event;
     int err;
+    int send_buf_len = PEER_SOCK_SND_BUF_LEN;
+    int recv_buf_len = PEER_SOCK_RCV_BUF_LEN;
     event.data.fd = new_fd;
     event.events = EPOLLIN;
     err = epoll_ctl(sys->epoll_fd, EPOLL_CTL_ADD, new_fd, &event);
@@ -263,6 +269,14 @@ accept_client:
     }
 
     csm->sock_fd = new_fd;
+    if (setsockopt(csm->sock_fd, SOL_SOCKET, SO_SNDBUF, &send_buf_len, sizeof(send_buf_len)) == -1)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Set socket send buf option failed. Error");
+    }
+    if (setsockopt(csm->sock_fd, SOL_SOCKET, SO_RCVBUF, &recv_buf_len, sizeof(recv_buf_len)) == -1)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Set socket recv buf option failed. Error");
+    }
     csm->current_state = ICCP_NONEXISTENT;
     FD_SET(new_fd, &(sys->readfd));
     sys->readfd_count++;
@@ -556,12 +570,23 @@ void session_client_conn_handler(struct CSM *csm)
         /* Conn OK*/
         struct epoll_event event;
         int err;
+        int send_buf_len = PEER_SOCK_SND_BUF_LEN;
+        int recv_buf_len = PEER_SOCK_RCV_BUF_LEN;
         event.data.fd = connFd;
         event.events = EPOLLIN;
         err = epoll_ctl(sys->epoll_fd, EPOLL_CTL_ADD, connFd, &event);
         if (err)
             goto conn_fail;
         csm->sock_fd = connFd;
+        if (setsockopt(csm->sock_fd, SOL_SOCKET, SO_SNDBUF, &send_buf_len, sizeof(send_buf_len)) == -1)
+        {
+            ICCPD_LOG_ERR(__FUNCTION__, "Set socket send buf option failed. Error");
+        }
+        if (setsockopt(csm->sock_fd, SOL_SOCKET, SO_RCVBUF, &recv_buf_len, sizeof(recv_buf_len)) == -1)
+        {
+            ICCPD_LOG_ERR(__FUNCTION__, "Set socket recv buf option failed. Error");
+        }
+
         FD_SET(connFd, &(sys->readfd));
         sys->readfd_count++;
         ICCPD_LOG_INFO(__FUNCTION__, "Connect to server %s sucess .", csm->peer_ip);
