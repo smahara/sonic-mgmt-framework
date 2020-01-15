@@ -1324,125 +1324,115 @@ limitations under the License.
         name="no spanning-tree"
         help = "Unconfigure spanning tree on port-channel"
         >
-        <PARAM
-            name="stp-if-subcmds"
-            help="spannig tree port-channel subcommands"
-            ptype="SUBCOMMAND"
-            mode="switch"
-            >
-            <PARAM
-                name="bpdufilter"
-                help="if spanning-tree BPDU filter on the port-channel is disabled, global bpdufilter will be applied"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-            </PARAM>
-            <PARAM
-                name="bpduguard"
-                help="Disabled bpdu guard on the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-                <PARAM
-                    name="port-shutdown"
-                    help="disable port shutdown on bpdu guard violation"
-                    ptype="SUBCOMMAND"
-                    mode="subcommand"
-                    optional="true"
-                    >
-                </PARAM>
-            </PARAM>
-
-            <PARAM
-                name="cost"
-                help="Unset the port level cost value for a VLAN"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-            </PARAM>
-
-            <PARAM
-                name="enable"
-                help="Disables spanning-tree on the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-            </PARAM>
-
-            <PARAM
-                name="link-type"
-                help="Unset link type of the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-            </PARAM>
-
-            <PARAM
-                name="portfast"
-                help="Disables portfast on the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-            </PARAM>
-
-            <PARAM
-                name="port-priority"
-                help="Reset the port level priority on the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-            </PARAM>
-
-            <PARAM
-                name="port"
-                help="Unset Spanning Tree port info"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-                <PARAM
-                    name="type"
-                    help="Unset port type of the port-channel"
-                    ptype="SUBCOMMAND"
-                    mode="subcommand"
-                    >
-                </PARAM>
-            </PARAM>
-            <PARAM
-                name="uplinkfast"
-                help="Disables uplink fast on the port-channel"
-                ptype="SUBCOMMAND"
-                mode="subcommand"
-                >
-            </PARAM>
-        </PARAM>
-    <ACTION>
-       if test "${stp-if-subcmds}" = "bpduguard";then&#xA;
-            if test "${port-shutdown}" != "";then&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_bpdu_guard_port_shutdown ${po_name} False&#xA;
-            else&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_bpdu_guard ${po_name} False&#xA;
-            fi&#xA;
-        elif test "${stp-if-subcmds}" = "uplinkfast";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_uplink_fast ${po_name} False&#xA;
-        elif test "${stp-if-subcmds}" = "bpdufilter";then&#xA;
+    </COMMAND>
+    <COMMAND
+      name="no spanning-tree bpdufilter"
+      help="if spanning-tree BPDU filter on the port-channel is disabled, global bpdufilter will be applied"
+      ptype="SUBCOMMAND"
+      mode="subcommand">
+      <ACTION>
         python $SONIC_CLI_ROOT/sonic-cli-stp.py delete_openconfig_spanning_tree_stp_interfaces_interface_config_bpdu_filter ${po_name}&#xA;
-        elif test "${stp-if-subcmds}" = "portfast";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_portfast ${po_name} False&#xA;
-        elif test "${stp-if-subcmds}" = "enable";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_spanning_tree_enable ${po_name} False&#xA;
-        elif test "${stp-if-subcmds}" = "cost";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py delete_openconfig_spanning_tree_ext_stp_interfaces_interface_config_cost ${po_name}&#xA;
-        elif test "${stp-if-subcmds}" = "port-priority";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py delete_openconfig_spanning_tree_ext_stp_interfaces_interface_config_port_priority ${po_name}&#xA;
-        elif test "${stp-if-subcmds}" = "link-type";then&#xA;
-        python $SONIC_CLI_ROOT/sonic-cli-stp.py delete_openconfig_spanning_tree_stp_interfaces_interface_config_link_type ${po_name}&#xA;
-        elif test "${stp-if-subcmds}" = "port";then&#xA;
-            if test "${type}" != "";then&#xA;
-                python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_edge_port ${po_name} False&#xA;
-            fi&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND
+      name="no spanning-tree bpduguard"
+      help="Disabled bpdu guard on the port-channel"
+      ptype="SUBCOMMAND"
+      mode="subcommand">
+      <PARAM
+        name="port-shutdown"
+        help="disable port shutdown on bpdu guard violation"
+        ptype="SUBCOMMAND"
+        mode="subcommand"
+        optional="true">
+      </PARAM>
+      <ACTION>
+        if test "${port-shutdown}" != "";then&#xA;
+          python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_bpdu_guard_port_shutdown ${po_name} False&#xA;
+        else&#xA;
+          python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_bpdu_guard ${po_name} False&#xA;
         fi&#xA;
-        builtin="clish_nop"
-    </ACTION>
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND
+      name="no spanning-tree cost"
+      help="Unset the port level cost value for a VLAN"
+      ptype="SUBCOMMAND"
+      mode="subcommand">
+      <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py delete_openconfig_spanning_tree_ext_stp_interfaces_interface_config_cost ${po_name}&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND
+      name="no spanning-tree enable"
+      help="Disables spanning-tree on the port-channel"
+      ptype="SUBCOMMAND"
+      mode="subcommand">
+      <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_spanning_tree_enable ${po_name} False&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND
+      name="no spanning-tree link-type"
+      help="Unset link type of the port-channel"
+      ptype="SUBCOMMAND"
+      mode="subcommand">
+      <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py delete_openconfig_spanning_tree_stp_interfaces_interface_config_link_type ${po_name}&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND
+      name="no spanning-tree portfast"
+      help="Disables portfast on the port-channel"
+      ptype="SUBCOMMAND"
+      mode="subcommand">
+      <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_portfast ${po_name} False&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND
+      name="no spanning-tree port-priority"
+      help="Reset the port level priority on the port-channel"
+      ptype="SUBCOMMAND"
+      mode="subcommand">
+      <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py delete_openconfig_spanning_tree_ext_stp_interfaces_interface_config_port_priority ${po_name}&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND
+      name="no spanning-tree uplinkfast"
+      help="Disables uplink fast on the port-channel"
+      ptype="SUBCOMMAND"
+      mode="subcommand">
+      <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_ext_stp_interfaces_interface_config_uplink_fast ${po_name} False&#xA;
+      </ACTION>
+    </COMMAND>
+
+    <COMMAND
+      name="no spanning-tree port"
+      help="Unset Spanning Tree port info"
+      ptype="SUBCOMMAND"
+      mode="subcommand">
+      <PARAM
+        name="type"
+        help="Unset port type of the port-channel"
+        ptype="SUBCOMMAND"
+        mode="subcommand"
+        optional="true">
+      </PARAM>
+      <ACTION>
+        if test "${type}" != "";then&#xA;
+          python $SONIC_CLI_ROOT/sonic-cli-stp.py patch_openconfig_spanning_tree_stp_interfaces_interface_config_edge_port ${po_name} False&#xA;
+        fi&#xA;
+      </ACTION>
     </COMMAND>
 
     <COMMAND
