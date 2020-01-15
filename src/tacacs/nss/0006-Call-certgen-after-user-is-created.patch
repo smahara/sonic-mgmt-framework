@@ -1,0 +1,43 @@
+From 4d554143f30f5a6361275baab51a51e90021513c Mon Sep 17 00:00:00 2001
+From: Eric Seifert <seiferteric@gmail.com>
+Date: Wed, 15 Jan 2020 08:55:13 -0800
+Subject: [PATCH] Call certgen after user is created
+
+---
+ nss_tacplus.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/nss_tacplus.c b/nss_tacplus.c
+index 3ff3c35..5f9c258 100644
+--- a/nss_tacplus.c
++++ b/nss_tacplus.c
+@@ -421,6 +421,8 @@ static int create_or_modify_local_user(const char *name, int level, bool existin
+     int lvl, cnt;
+     bool found = false;
+     const char* command = existing_user ? "/usr/sbin/usermod": "/usr/sbin/useradd";
++    const char* cert_command = "/usr/bin/certgen";
++    char cert_buf[512];
+ 
+     fp = fopen(user_conf, "ab+");
+     if(!fp) {
+@@ -475,6 +477,17 @@ static int create_or_modify_local_user(const char *name, int level, bool existin
+             }
+             if(debug)
+                 syslog(LOG_DEBUG, "%s: %s %s success", nssname, command, name);
++
++            snprintf(cert_buf, len, "%s %s", cert_command, name);
++            fp = popen(cert_buf, "r");
++            if(!fp || -1 == pclose(fp)) {
++                syslog(LOG_ERR, "%s: %s popen failed errno=%d %s",
++                        nssname, cert_command, errno, strerror(errno));
++                delete_conf_line(name);
++                return -1;
++            }
++            if(debug)
++                syslog(LOG_DEBUG, "%s: %s %s success", nssname, cert_command, name);
+             delete_conf_line(name);
+             return 0;
+         }
+-- 
+2.17.1
+
