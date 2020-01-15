@@ -48,8 +48,8 @@ SONIC_COMMON_FLAGS_LIST :=  $(CONFIGURED_PLATFORM) $(SONIC_DPKG_CACHE_METHOD) \
                             $(SONIC_PROFILING_ON) $(SONIC_SANITIZER_ON)
 SONIC_COMMON_DPKG_LIST  :=  debian/control debian/changelog debian/rules \
                             debian/compat debian/install debian/copyright
-SONIC_COMMON_BASE_FILES_LIST  := sonic-slave/Dockerfile sonic-slave/Dockerfile.user \
-                                 sonic-slave-stretch/Dockerfile sonic-slave-stretch/Dockerfile.user
+SONIC_COMMON_BASE_FILES_LIST  := sonic-slave/Dockerfile.j2 sonic-slave/Dockerfile.user \
+                                 sonic-slave-stretch/Dockerfile.j2 sonic-slave-stretch/Dockerfile.user
 
 
 
@@ -260,6 +260,9 @@ endef
 # $(1) => target name
 # $(2) => target output file name
 define LOAD_CACHE
+	@echo "[ DEP    DEPENDS ]   - Modified Files: [$($(1)_DEP_FILES_MODIFIED)] " >> $($(1)_DST_PATH)/$(1).log
+	@echo "[ SMDEP  DEPENDS ]   - Modified Files: [$($(1)_SMDEP_FILES_MODIFIED)] " >> $($(1)_DST_PATH)/$(1).log
+	@echo "[ TARGET DEPENDS ]   - Modified Files: [$?] " >> $($(1)_DST_PATH)/$(1).log
 	$(if $(call CHECK_CACHE_ENABLED,$(1)), $(call LOAD_FROM_CACHE,$(1),$(2)) )
 endef
 
@@ -418,6 +421,7 @@ ALL_DEP_FILES_LIST += $(foreach pkg,$(2), $($(filter none,$($(1)_CACHE_MODE)), \
                       $(addsuffix .$(3).smsha,$(addprefix $(pkg)/, $(1)))))
 $(addsuffix .$(3),$(addprefix $(2)/, $(1))) : $(2)/%.$(3) : \
 	$(2)/%.flags   $$$$($$$$*_SMDEP_FILES)
+	@$$(eval $$*_SMDEP_FILES_MODIFIED := $$? )
 	@$$(file >$$@,$$(patsubst $$($$*_SRC_PATH)/%,%,$$($$*_SMDEP_FILES)))
 	@( cd $$($$*_SRC_PATH) ; cat $$($$*_MOD_REL_PATH)/$$@  |xargs git hash-object ) >$$@.smsha
 	@$$(if $$(MDEBUG), $$(info SMDEP:$$@, MOD:$$?))
@@ -461,6 +465,7 @@ ALL_DEP_FILES_LIST += $(foreach pkg,$(2), $($(filter none,$($(1)_CACHE_MODE)), \
                       $(addsuffix .$(3).sha,$(addprefix $(pkg)/, $(1)))))
 $(addsuffix .$(3),$(addprefix $(2)/, $(1))) : $(2)/%.$(3) : \
 	$(2)/%.flags $$$$($$$$*_DEP_FILES) $$$$(if $$$$($$$$*_SMDEP_FILES), $(2)/%.smdep)
+	@$$(eval $$*_DEP_FILES_MODIFIED := $$? )
 	@$$(file >$$@,$$($$*_DEP_FILES))
 	@cat $$@ |xargs git hash-object >$$@.sha
 	@$$(if $$(MDEBUG), $$(info DEP: $$@, MOD:$$?))
@@ -577,3 +582,8 @@ cprune:
 	@find $(SONIC_DPKG_CACHE_DIR) -name "*.tgz" !  -mtime -$(NUMDAYS) -exec rm -f {} \;
 
 
+
+# Invoke DPKG dependency only if DPKG cache is enabled.
+define dpkg_depend
+	$(if $(filter-out none,$(SONIC_DPKG_CACHE_METHOD)),$(1))
+endef
