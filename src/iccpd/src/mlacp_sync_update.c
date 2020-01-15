@@ -219,11 +219,19 @@ int mlacp_fsm_update_mac_entry_from_peer( struct CSM* csm, struct mLACPMACData *
     uint8_t from_mclag_intf = 0;/*0: orphan port, 1: MCLAG port*/
     memset(&mac_data, 0, sizeof(struct MACMsg));
     memset(&mac_find, 0, sizeof(struct MACMsg));
+    uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
     ICCPD_LOG_INFO("ICCP_FDB",
         "Received MAC Info, interface=[%s] vid[%d] MAC[%s] OperType[%s] MacType[%d] ",
         MacData->ifname, ntohs(MacData->vid), mac_addr_to_str(MacData->mac_addr),
         MacData->type == MAC_SYNC_ADD ? "add" : "del", MacData->mac_type);
+
+    if (memcmp(MacData->mac_addr, null_mac, ETHER_ADDR_LEN) == 0)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid MAC address from peer do not add.");
+        return;
+    }
+
 
     /*Find the interface in MCLAG interface list*/
     LIST_FOREACH(local_if, &(MLACP(csm).lif_list), mlacp_next)
