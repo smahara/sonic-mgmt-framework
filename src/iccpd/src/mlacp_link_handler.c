@@ -2238,7 +2238,7 @@ static void update_remote_macs_to_peerlink(struct CSM *csm, struct LocalInterfac
             continue;
 
         //consider only remote mac; rest of MACs no need to handle
-        if(!mac_entry->age_flag & MAC_AGE_LOCAL)
+        if(mac_entry->age_flag & MAC_AGE_PEER)
         {
             continue;
         }
