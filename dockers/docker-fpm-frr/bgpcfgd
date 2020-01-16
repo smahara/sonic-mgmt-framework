@@ -20,6 +20,7 @@ import re
 import logging
 import netaddr
 import StringIO
+import struct
 
 class CachedDataWithOp:
     OP_NONE = 0
@@ -47,18 +48,18 @@ class CachedDataWithOp:
             op_str = 'UPDATE'
         return '(%s, %s)' % (self.data, op_str)
 
-vtysh_mgr = None
+bgpd_client = None
 
-def g_run_command(command, use_vtysh_mgr):
+def g_run_command(command, use_bgpd_client):
     syslog.syslog(syslog.LOG_DEBUG, "execute command {}.".format(command))
     if not command.startswith('vtysh '):
-        use_vtysh_mgr = False
-    if use_vtysh_mgr:
-        global vtysh_mgr
-        if vtysh_mgr is None:
-            vtysh_mgr = VtyshSubprocessMgr()
-            vtysh_mgr.start()
-        if not vtysh_mgr.run_vtysh_command(command):
+        use_bgpd_client = False
+    if use_bgpd_client:
+        global bgpd_client
+        if bgpd_client is None:
+            bgpd_client = BgpdClientMgr()
+            bgpd_client.start()
+        if not bgpd_client.run_vtysh_command(command):
             syslog.syslog(syslog.LOG_ERR, 'command execution failure. Command: "{}"'.format(command))
             return False
     else:
@@ -71,42 +72,42 @@ def g_run_command(command, use_vtysh_mgr):
             return False
     return True
 
-class VtyshSubprocessMgr(threading.Thread):
+class BgpdClientMgr(threading.Thread):
     QUIT_MARK = '$$quit$$'
     VTYSH_MARK = 'vtysh '
+    PROXY_SERVER_ADDR = '/etc/frr/bgpd_client.sock'
+    @staticmethod
+    def __create_socket():
+        try:
+            os.unlink(BgpdClientMgr.PROXY_SERVER_ADDR)
+        except OSError:
+            if os.path.exists(BgpdClientMgr.PROXY_SERVER_ADDR):
+                raise
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.bind(BgpdClientMgr.PROXY_SERVER_ADDR)
+        sock.listen(1)
+        return sock
     def __init__(self):
-        super(VtyshSubprocessMgr, self).__init__(name = 'VTYSH sub-process manager')
-        self.master_fd, self.slave_fd = pty.openpty()
+        super(BgpdClientMgr, self).__init__(name = 'VTYSH sub-process manager')
+        self.proxy_thrd = None
+        self.proxy_running = False
+        self.cmd_q = Queue.Queue()
         self.resp_q = Queue.Queue()
-        self.hostname = os.uname()[1]
-    def get_reply_msg(self):
-        msg_buf = StringIO.StringIO()
-        while True:
-            try:
-                msg_buf.write(self.resp_q.get(True, 2))
-                reply_msg = msg_buf.getvalue()
-                idx = reply_msg.rfind('\n')
-                if idx < 0:
-                    idx = 0
-                else:
-                    idx += 1
-                chk_line = reply_msg[idx:].strip()
-                if chk_line.endswith('#'):
-                    if chk_line.startswith(self.hostname):
-                        break
-                    pmpt_idx = chk_line.find(self.hostname)
-                    if pmpt_idx > 0 and chk_line[pmpt_idx - 1] == '.':
-                        break
-            except Queue.Empty:
-                syslog.syslog(syslog.LOG_ERR, 'waiting for reply timeout')
-                syslog.syslog(syslog.LOG_ERR, 'MSG in buffer: %s' % msg_buf.getvalue())
-                return None
-        return msg_buf.getvalue()
-    def start(self):
-        syslog.syslog(syslog.LOG_DEBUG, 'starting vtysh sub-process manager thread')
-        super(VtyshSubprocessMgr, self).start()
-        self.get_reply_msg()
-        syslog.syslog(syslog.LOG_DEBUG, 'vtysh sub-process manager thread started')
+        self.lock = threading.Lock()
+        self.proxy_sock = self.__create_socket()
+    def __proc_command(self, command):
+        syslog.syslog(syslog.LOG_DEBUG, 'VTYSH CMD: %s' % command)
+        resp = None
+        self.cmd_q.put(command)
+        ret_code, reply = self.resp_q.get(True)
+        if ret_code is None:
+            syslog.syslog(syslog.LOG_ERR, 'failed to get command response')
+        elif ret_code != 0:
+            syslog.syslog(syslog.LOG_ERR, 'command failed: ret_code=%d' % ret_code)
+            syslog.syslog(syslog.LOG_ERR, reply)
+        else:
+            resp = reply
+        return reply
     def run_vtysh_command(self, command):
         if not command.startswith(self.VTYSH_MARK):
             syslog.syslog(syslog.LOG_ERR, 'command %s is not for vtysh config' % command)
@@ -115,45 +116,140 @@ class VtyshSubprocessMgr(threading.Thread):
         cmd_list = re.findall(r"-c\s+'([^']+)'\s*", cmd_line)
         cmd_list.append('end')
         ret_val = True
+        self.lock.acquire()
         for cmd in cmd_list:
-            syslog.syslog(syslog.LOG_DEBUG, 'VTYSH CMD: %s' % cmd)
-            os.write(self.master_fd, cmd + '\n')
-            reply = self.get_reply_msg()
-            if reply is not None:
-                lines = reply.splitlines()
-                err_lines = []
-                for ln in lines:
-                    if ln.lstrip().startswith('% '):
-                        err_lines.append(ln)
-                if len(err_lines) > 0:
-                    syslog.syslog(syslog.LOG_ERR, 'Error returned for CMD: %s' % cmd)
-                    for ln in err_lines:
-                        syslog.syslog(syslog.LOG_ERR, ln)
-                    ret_val = False
+            reply = self.__proc_command(cmd)
+            if reply is None:
+                ret_val = False
+        self.lock.release()
         return ret_val
+    @staticmethod
+    def __read_all(sock, data_len):
+        in_buf = StringIO.StringIO()
+        left_len = data_len
+        while left_len > 0:
+            data = sock.recv(left_len)
+            if data is None:
+                break
+            in_buf.write(data)
+            left_len -= len(data)
+        return in_buf.getvalue()
+    def vtysh_proxy(self):
+        syslog.syslog(syslog.LOG_DEBUG, 'entering VTYSH proxy thread')
+        while self.proxy_running:
+            syslog.syslog(syslog.LOG_DEBUG, 'waiting for client connection ...')
+            in_buf = StringIO.StringIO()
+            conn_sock, clnt_addr = self.proxy_sock.accept()
+            if not self.proxy_running:
+                conn_sock.close()
+                break
+            try:
+                syslog.syslog(syslog.LOG_DEBUG, 'client connection from %s' % clnt_addr)
+                data = self.__read_all(conn_sock, 4)
+                if len(data) == 4:
+                    data_len = struct.unpack('>I', data)[0]
+                    in_cmd = self.__read_all(conn_sock, data_len)
+                    if len(in_cmd) == data_len:
+                        in_lines = in_cmd.splitlines()
+                        self.lock.acquire()
+                        for line in in_lines:
+                            reply = self.__proc_command(line)
+                            if reply is not None:
+                                conn_sock.sendall(reply)
+                            else:
+                                syslog.syslog(syslog.LOG_ERR, 'failed running VTYSH command')
+                        self.lock.release()
+                    else:
+                        syslog.syslog(syslog.LOG_ERR, 'read data of length %d is not expected length %d' % (data_len, len(in_cmd)))
+                else:
+                    syslog.syslog(syslog.LOG_ERR, 'invalid data length %d' % len(data))
+            finally:
+                syslog.syslog(syslog.LOG_DEBUG, 'closing data socket from client')
+                conn_sock.close()
+        syslog.syslog(syslog.LOG_DEBUG, 'leaving VTYSH proxy thread')
+    def run_vtysh_proxy(self):
+        if self.proxy_thrd is None:
+            self.proxy_running = True
+            self.proxy_thrd = threading.Thread(target = self.vtysh_proxy)
+            self.proxy_thrd.start()
     def shutdown(self):
-        syslog.syslog(syslog.LOG_DEBUG, 'terminate vtysh manager')
+        syslog.syslog(syslog.LOG_DEBUG, 'terminate bgpd client manager')
+        if self.proxy_thrd is not None and self.proxy_thrd.is_alive():
+            self.proxy_running = False
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            try:
+                sock.connect(self.PROXY_SERVER_ADDR)
+            finally:
+                sock.close()
+            self.proxy_thrd.join()
+            self.proxy_thrd = None
         if self.is_alive():
-            os.write(self.master_fd, self.QUIT_MARK + '\n')
+            self.cmd_q.put(self.QUIT_MARK)
             self.join()
-    def run(self):
-        chld_pid, pty_fd = pty.fork()
-        if chld_pid == pty.CHILD:
-            os.execlp('vtysh', 'vtysh')
+    @staticmethod
+    def __get_reply(sock):
+        reply_msg = None
+        ret_code = None
+        chk_str = '\0\0\0'
+        msg_buf = StringIO.StringIO()
         while True:
-            readable, _, _ = select.select([pty_fd, self.slave_fd], [], [])
-            if pty_fd in readable:
-                line = os.read(pty_fd, 1000)
-                if not line:
-                    break
-                self.resp_q.put(line)
-            if self.slave_fd in readable:
-                line = os.read(self.slave_fd, 1000)
-                if line.strip() == self.QUIT_MARK:
-                    os.kill(chld_pid, signal.SIGTERM)
-                    os.waitpid(chld_pid, 0)
-                    break
-                os.write(pty_fd, line)
+            try:
+                msg_buf.write(sock.recv(1024))
+            except socket.timeout:
+                syslog.syslog(syslog.LOG_ERR, 'socket reading timeout')
+                break
+            reply_msg = msg_buf.getvalue()
+            if len(reply_msg) < 4:
+                continue
+            if reply_msg[-4:-1] == chk_str:
+                ret_code = ord(reply_msg[-1])
+                reply_msg = reply_msg[:-4]
+                break
+        return (ret_code, reply_msg)
+    def run(self):
+        client_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        retry_cnt = 0
+        while True:
+            try:
+                client_sock.connect('/run/frr/bgpd.vty')
+                break
+            except socket.error, msg:
+                syslog.syslog(syslog.LOG_ERR, 'failed to connect to frr daemon: %s' % msg)
+                retry_cnt += 1
+                if retry_cnt > 100:
+                    syslog.syslog(syslog.LOG_ERR, 're-tried too many times, give up')
+                    return
+                time.sleep(2)
+                continue
+        syslog.syslog(syslog.LOG_DEBUG, 'daemon socket connected, send initial enable command')
+        client_sock.settimeout(5)
+        try:
+            client_sock.sendall('enable\0')
+        except socket.error, msg:
+            syslog.syslog(syslog.LOG_ERR, 'failed to send initial enable command to bgpd')
+            return
+        ret_code, reply = self.__get_reply(client_sock)
+        if ret_code is None:
+            syslog.syslog(syslog.LOG_ERR, 'failed to command response for enable command')
+            return
+        if ret_code != 0:
+            syslog.syslog(syslog.LOG_ERR, 'enable command failed: ret_code=%d' % ret_code)
+            syslog.syslog(syslog.LOG_ERR, reply)
+            return
+        syslog.syslog(syslog.LOG_DEBUG, 'entering thread main loop ...')
+        while True:
+            cmd = self.cmd_q.get(True)
+            if cmd == self.QUIT_MARK:
+                syslog.syslog(syslog.LOG_DEBUG, 'leaving thread main loop')
+                break
+            try:
+                client_sock.sendall(cmd + '\0')
+            except socket.error, msg:
+                syslog.syslog(syslog.LOG_ERR, 'failed to send command to frr daemon: %s' % msg)
+                self.resp_q.put((None, None))
+                continue
+            self.resp_q.put(self.__get_reply(client_sock))
+        client_sock.close()
 
 class BGPPeerGroup:
     def __init__(self, vrf):
@@ -1520,7 +1616,7 @@ class BGPConfigDaemon:
                             if pfx_set_name in self.prefix_set_list:
                                 af_mode = self.prefix_set_list[pfx_set_name].af
                                 tbl_key[attr_name] = 'ipv4' if af_mode == socket.AF_INET else 'ipv6'
-		key_map = BGPKeyMapList(self.tbl_to_key_map[table], table, tbl_key)
+                key_map = BGPKeyMapList(self.tbl_to_key_map[table], table, tbl_key)
             else:
                 key_map = None
             if table == 'BGP_GLOBALS':
@@ -2097,18 +2193,26 @@ class BGPConfigDaemon:
 dft_sig_hdlr = {}
 
 def sig_handler(signum, frame):
-    global vtysh_mgr
+    global bgpd_client
     global dft_sig_hdlr
     syslog.syslog(syslog.LOG_DEBUG, 'entering signal handler')
-    if vtysh_mgr is not None:
-        vtysh_mgr.shutdown()
+    if bgpd_client is not None:
+        bgpd_client.shutdown()
     if signum in dft_sig_hdlr:
         dft_sig_hdlr[signum](signum, frame)
+
+def start_vtysh_proxy():
+    global bgpd_client
+    if bgpd_client is None:
+        bgpd_client = BgpdClientMgr()
+        bgpd_client.start()
+    bgpd_client.run_vtysh_proxy()
 
 def main():
     for sig_num in [signal.SIGTERM, signal.SIGINT]:
         orig_hdlr = signal.signal(sig_num, sig_handler)
         dft_sig_hdlr[sig_num] = orig_hdlr
+    start_vtysh_proxy()
     daemon = BGPConfigDaemon()
     daemon.start()
 
