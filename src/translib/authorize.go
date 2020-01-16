@@ -40,30 +40,41 @@ func init() {
 }
 
 //TODO:Subscribe to UserDB changes and repopulate the cache on any notification
-func isUserAuthorizedForSet(user string) bool {
-	//TODO:Need code to get role from username and then authorize based on that
-	//This is a temporary code, this needs to be fixed
+// func isUserAuthorizedForSet(user string) bool {
+// 	//TODO:Need code to get role from username and then authorize based on that
+// 	//This is a temporary code, this needs to be fixed
 
-	if ((user == "") || (user == "admin")) {
-		return true
-	}
+// 	if ((user == "") || (user == "admin")) {
+// 		return true
+// 	}
 
-	return false
-}
+// 	return false
+// }
 func isAuthorizedForSet(req SetRequest) bool {
 	// TODO: Allow empty user for now
-	return req.Group == "admin" || req.User == ""
+	for _, r := range req.User.Roles {
+        if r == "admin" {
+            return true
+        }
+    }
+	return false
 }
-
-func isUserAuthorizedForGet(user string) bool {
-	return  true
+func isAuthorizedForBulk(req BulkRequest) bool {
+	for _, r := range req.User.Roles {
+        if r == "admin" {
+            return true
+        }
+    }
+	return false
 }
 
 func isAuthorizedForGet(req GetRequest) bool {
 	return  true
 }
-
-func isUserAuthorizedForAction(user string) bool {
+func isAuthorizedForSubscribe(req SubscribeRequest) bool {
+	return  true
+}
+func isAuthorizedForIsSubscribe(req IsSubscribeRequest) bool {
 	return  true
 }
 
