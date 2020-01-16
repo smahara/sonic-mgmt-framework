@@ -116,6 +116,23 @@ class dict2obj(object):
                 setattr(self, a, dict2obj(b) if isinstance(b, dict) else b)
 
 
+def get_bgp_service_state():
+    command = "docker exec bgp ps -e | grep fpmsyncd"
+    
+    try:
+        #print "BGP service command :"+command
+        proc = subprocess.Popen(command,
+                                stdout=subprocess.PIPE,
+                                shell=True,
+                                stderr=subprocess.STDOUT)
+        stdout = proc.communicate()[0]
+        proc.wait()
+        result = stdout.rstrip('\n')
+
+    except OSError, e:
+        raise OSError("Cannot detect routing-stack")
+
+    return result
 
 #Retrive the process state
 def get_process_state(service):
@@ -133,6 +150,9 @@ def get_process_state(service):
     except OSError, e:
         raise OSError("Cannot detect routing-stack")
 
+    #if service == "bgp" and result != "":
+    #    result = get_bgp_service_state()
+
     return (result)
 
 
@@ -147,6 +167,7 @@ def get_system_status():
         'pmon',
         'syncd',
         'database',
+        'mgmt-framework',
     ]
 
 
