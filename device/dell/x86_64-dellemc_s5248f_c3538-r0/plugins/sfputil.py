@@ -48,6 +48,7 @@ SFP_MODULE_THRESHOLD_WIDTH = 56
 XCVR_DOM_CAPABILITY_OFFSET = 92
 XCVR_DOM_CAPABILITY_WIDTH = 1
 
+XCVR_EEPROM_TYPE_SFP = 1
 class SfpUtil(SfpUtilBase):
     """Platform-specific SfpUtil class"""
 
@@ -319,6 +320,14 @@ class SfpUtil(SfpUtilBase):
 
             time.sleep(0.5)
     
+    def is_media_type_set_required(self, port_num):
+        etype = self.get_eeprom_type(port_num)
+        # Set for SFP ports only
+        if etype == XCVR_EEPROM_TYPE_SFP:
+            return True
+        else:
+            return False
+
     def get_transceiver_dom_info_dict(self, port_num):
         transceiver_dom_info_dict = {}
 
