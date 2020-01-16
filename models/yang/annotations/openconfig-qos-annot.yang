@@ -91,10 +91,18 @@ module openconfig-qos-annot {
       }
     }
 
-    deviation /oc-qos:qos/oc-qos:queues {
+    deviation /oc-qos:qos/oc-qos:queues/oc-qos:queue {
       deviate add {
-        sonic-ext:subtree-transformer "qos_set_queues_xfmr";
         sonic-ext:db-name "CONFIG_DB";
+        sonic-ext:table-name "QUEUE";
+        sonic-ext:key-transformer "qos_queue_key_xfmr";
+        sonic-ext:key-delim "|";
+      }
+    }
+
+    deviation /oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:wred/oc-qos:config/oc-qos-ext:wred-profile {
+      deviate add {
+        sonic-ext:field-name "wred_profile";
       }
     }
 }
