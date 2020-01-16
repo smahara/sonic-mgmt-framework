@@ -3,6 +3,7 @@ package transformer
 import (
     "errors"
     "strings"
+    "translib/db"
     "translib/ocbinds"
     log "github.com/golang/glog"
 )
@@ -267,6 +268,23 @@ var YangToDb_bgp_pgrp_community_type_fld_xfmr FieldXfmrYangToDb = func(inParams 
         err = errors.New("No Params");
         return res_map, err
     }
+    
+    if inParams.oper == DELETE {
+        subOpMap := make(map[db.DBNum]map[string]map[string]db.Value)
+
+        if _, ok := subOpMap[db.ConfigDB]; !ok {
+            subOpMap[db.ConfigDB] = make(map[string]map[string]db.Value)
+        }
+        if _, ok := subOpMap[db.ConfigDB]["BGP_PEER_GROUP_AF"]; !ok {
+            subOpMap[db.ConfigDB]["BGP_PEER_GROUP_AF"] = make(map[string]db.Value)
+        }
+        subOpMap[db.ConfigDB]["BGP_PEER_GROUP_AF"][inParams.key] = db.Value{Field: make(map[string]string)}
+        subOpMap[db.ConfigDB]["BGP_PEER_GROUP_AF"][inParams.key].Field["send_community"] = "both"
+
+        inParams.subOpDataMap[UPDATE] = &subOpMap
+        return res_map, nil
+    }
+
     community_type, _ := inParams.param.(ocbinds.E_OpenconfigBgpExt_BgpExtCommunityType)
     log.Info("YangToDb_bgp_pgrp_community_type_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " community_type: ", community_type)
 
@@ -335,6 +353,11 @@ var YangToDb_bgp_pgrp_orf_type_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrPa
         err = errors.New("No Params");
         return res_map, err
     }
+    if inParams.oper == DELETE {
+        res_map["cap_orf"] = ""
+        return res_map, nil
+    }
+
     orf_type, _ := inParams.param.(ocbinds.E_OpenconfigBgpExt_BgpOrfType)
     log.Info("YangToDb_bgp_pgrp_orf_type_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " orf_type: ", orf_type)
 
@@ -390,6 +413,11 @@ var YangToDb_bgp_pgrp_tx_add_paths_fld_xfmr FieldXfmrYangToDb = func(inParams Xf
         err = errors.New("No Params");
         return res_map, err
     }
+    if inParams.oper == DELETE {
+        res_map["tx_add_paths"] = ""
+        return res_map, nil
+    }
+
     tx_add_paths_type, _ := inParams.param.(ocbinds.E_OpenconfigBgpExt_TxAddPathsType)
     log.Info("YangToDb_pgrp_tx_add_paths_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " add-paths-type: ", tx_add_paths_type)
 

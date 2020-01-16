@@ -99,21 +99,6 @@ module sonic-bgp-common {
             "type describing variations of community attributes";
     }
 
-    typedef bgp_ip_or_intf {
-        type union {
-            type inet:ip-address;
-            type leafref {
-                path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
-            }
-            type leafref {
-                path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
-            }
-            type leafref {
-                path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
-            }
-        }
-    }
-
     typedef sonic_bgp_direction {
         type enumeration {
             enum in {
@@ -215,7 +200,18 @@ module sonic-bgp-common {
         }
 
         leaf local_addr {
-            type sbc:bgp_ip_or_intf;
+            type union {
+                type inet:ip-address;
+                type leafref {
+                    path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                }
+                type leafref {
+                    path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                }
+                type leafref {
+                    path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                }
+            }
             description "Local source address or interface name to use for connection.";
         }
 
@@ -256,6 +252,11 @@ module sonic-bgp-common {
             description "BFD status";
         }
 
+        leaf bfd_check_ctrl_plane_failure {
+            type boolean;
+            description "Link dataplane status with BGP control plane";
+        }
+
         leaf capability_dynamic {
             type boolean;
             description "Advertise dynamic capability";
@@ -291,9 +292,23 @@ module sonic-bgp-common {
         leaf strict_capability_match {
             type boolean;
             description "Strict capability negotiation match";
-        }
+		}
 
-    }
+		leaf admin_status {
+			type boolean;
+			description "To enable BGP peer";
+		}
+
+		leaf local_as_no_prepend {
+			type boolean;
+            description "Do not prepend local-as to updates from ebgp peers";
+		}
+
+        leaf local_as_replace_as {
+            type boolean;
+            description "Do not prepend local-as to updates from ibgp peers";
+        }
+	}
 
 
     grouping sonic-bgp-cmn-af {
@@ -406,7 +421,7 @@ module sonic-bgp-common {
             type boolean;
             description "nexthop attribute unchanged";
         }
-
+        
         leaf filter_list_in {
             type leafref {
                 path "/srpolsets:sonic-routing-policy-sets/srpolsets:AS_PATH_SET/srpolsets:AS_PATH_SET_LIST/srpolsets:name";
@@ -420,7 +435,7 @@ module sonic-bgp-common {
             }
             description "Filter list name";
         }
-
+        
         leaf nhself {
             type boolean;
             description "Nexthop is self, no nexthop calculation";
@@ -430,7 +445,7 @@ module sonic-bgp-common {
             type boolean;
             description "Force nexthop to be self for reflected routes";
         }
-
+        
         leaf prefix_list_in {
             type leafref {
                 path "/srpolsets:sonic-routing-policy-sets/srpolsets:PREFIX_SET/srpolsets:PREFIX_SET_LIST/srpolsets:name";
@@ -444,7 +459,7 @@ module sonic-bgp-common {
             }
             description "Prefix list name";
         }
-
+        
         leaf remove_private_as_enabled {
             type boolean;
             description "Remove private ASN's in outbound updates";
