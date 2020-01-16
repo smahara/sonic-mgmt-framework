@@ -37,8 +37,16 @@
         "parent": "BGP_PEER_GROUP"
     },
     {
+        "tablename": "BGP_PEER_GROUP",
+        "parent": "BGP_GLOBALS"
+    },
+    {
         "tablename": "BGP_NEIGHBOR_AF",
         "parent": "BGP_NEIGHBOR"
+    },
+    {
+        "tablename": "BGP_NEIGHBOR",
+        "parent": "BGP_GLOBALS"
     },
     {
         "tablename": "PREFIX",
