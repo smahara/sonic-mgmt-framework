@@ -23,9 +23,13 @@ import logging
 import syslog
 import logging.handlers
 import argparse
+import psutil
+import pprint
 from multiprocessing import Process,Value
 import multiprocessing as mp
 from ahab import Ahab
+import collections
+
 
 from swsscommon import swsscommon
 import sonic_device_util
@@ -33,7 +37,7 @@ from swsssdk import ConfigDBConnector
 from swsssdk import SonicV2Connector
 
 
-SYSLOG_IDENTIFIER="system#state"
+SYSLOG_IDENTIFIER="system#monitor"
 SYSTEM_STATE="DOWN"
 REDIS_HOSTNAME = "127.0.0.1"
 REDIS_PORT = 6379
@@ -49,6 +53,19 @@ class Logger(object):
 
     def __del__(self):
         syslog.closelog()
+
+    def log_crit(self, msg, also_print_to_console=False):
+        syslog.syslog(syslog.LOG_CRIT, msg)
+
+        if also_print_to_console:
+            print msg
+
+    def log_alert(self, msg, also_print_to_console=False):
+        syslog.syslog(syslog.LOG_ALERT, msg)
+
+        if also_print_to_console:
+            print msg
+
 
     def log_error(self, msg, also_print_to_console=False):
         syslog.syslog(syslog.LOG_ERR, msg)
@@ -83,9 +100,22 @@ class Logger(object):
 
 
 #Initalise the syslog infrastructure
-def init_log():
-    global logger
-    logger = Logger(SYSLOG_IDENTIFIER)
+logger = Logger(SYSLOG_IDENTIFIER)
+
+
+class dict2obj(object):
+    """dict to dict2obj
+    d: data"""
+
+    def __init__(self, d):
+        for a, b in d.items():
+            if isinstance(b, (list, tuple)):
+                setattr(self, a, [dict2obj(x) if isinstance(
+                    x, dict) else x for x in b])
+            else:
+                setattr(self, a, dict2obj(b) if isinstance(b, dict) else b)
+
+
 
 #Retrive the process state
 def get_process_state(service):
@@ -265,12 +295,383 @@ def docker_event_handler(event, data):
         QUEUE.put("DOCKER_EVENT")
 
 
-
 #Listern for docker events
 def subscribe_docker_event_thread(queue):
     ahab = Ahab(handlers=[docker_event_handler])
     ahab.listen()
 
+
+
+
+syscfg={}
+syscfg['INTERVAL']=3*60 # Seconds
+
+
+def convert_bytes(n):
+    symbols = ('K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
+    prefix = {}
+    for i, s in enumerate(symbols):
+        prefix[s] = 1 << (i + 1) * 10
+    for s in reversed(symbols):
+        if n >= prefix[s]:
+            value = float(n) / prefix[s]
+            return '%.1f%s' % (value, s)
+    return "%sB" % n
+
+
+def dump_memory_usage():
+
+    total=0
+    for p in sorted( psutil.process_iter(attrs=['name', 'memory_info']), key=lambda p: p.info['memory_info'].rss,reverse=True):
+        if p.info['memory_info'].rss > 10*1024*1024 : # 10 MB
+            #logger.log_info("MEM:: {}".format(p.info))
+            logger.log_info("MEM :: Name:{}, Pid:{}, Rss:{} ".format( get_proc_name(p), p.pid, convert_bytes(p.info['memory_info'].rss)))
+
+        total += p.info['memory_info'].rss
+
+    logger.log_info("MEM :: All the process memory usage: {}".format( convert_bytes(total)))
+
+
+
+def dump_disk_usage():
+    disk_partitions = psutil.disk_partitions(all=False)
+    for partition in disk_partitions:
+        usage = psutil.disk_usage(partition.mountpoint)
+        device = {'device': partition.device,
+	      'mountpoint': partition.mountpoint,
+	      'fstype': partition.fstype,
+	      'opts': partition.opts,
+	      'total': usage.total,
+	      'used': usage.used,
+	      'free': usage.free,
+	      'percent': usage.percent
+	      }
+
+	logger.log_info("DISK:: {}".format(device))
+    
+
+class Data:
+    size=10
+    sidx=0
+    data={}
+    state=None
+    LogLevel=None
+    CurrentLevel=None
+
+    def __init__(self):
+	pass
+    
+    def getSize(self):
+        return self.psize
+
+    def setNextIdx(self):
+        self.sidx+=1
+        if self.sidx == self.size:
+            self.sidx=0
+        
+    def setData(self, obj):
+        self.data[self.sidx]=obj
+        self.setNextIdx()
+
+    def getData(self, idx):
+        return self.data[idx]
+
+    def printAll(self):
+        logger.log_info( "{}".format([self.data[idx].used for idx in range(0,self.size) if idx in  self.data ]))
+
+
+class DataArray:
+    size=10
+    sidx=0
+    data={}
+    state=None
+    LogLevel=None
+
+    def __init__(self):
+	pass
+    
+    def getSize(self):
+        return self.psize
+
+    def setNextIdx(self):
+        self.sidx+=1
+        if self.sidx == self.size:
+            self.sidx=0
+
+    def setData(self,obj, attr):
+        obj.attr = attr
+        if attr not in self.data.keys():
+            self.data[self.sidx] = {}
+        self.data[self.sidx][attr]=obj
+
+    def setDataNext(self,obj, attr):
+        self.setData(obj,attr)
+        self.setNextIdx()
+
+    def getData(self, idx):
+        return self.data[idx]
+
+    def printAll(self):
+        for idx in range(0,self.size):
+            if idx in  self.data:
+                for attr in self.data[idx].keys():
+                    if attr in self.data[idx]:
+                        logger.log_info( "PPMM attr:{}, name:{}".format(  self.data[idx][attr].attr , self.data[idx][attr]._name)  )
+
+
+class DataList:
+    data={}
+
+    def __init__(self):
+	pass
+
+    def setData(self,obj, attr):
+        obj.attr = attr
+        if attr not in self.data.keys():
+            self.data[self.sidx] = {}
+        self.data[self.sidx][attr]=obj
+
+    def setDataNext(self,obj, attr):
+        self.setData(obj,attr)
+        self.setNextIdx()
+
+    def getData(self, idx):
+        return self.data[idx]
+
+    def printAll(self):
+        for idx in range(0,self.size):
+            if idx in  self.data:
+                for attr in self.data[idx].keys():
+                    if attr in self.data[idx]:
+                        logger.log_info( "PPMM attr:{}, name:{}".format(  self.data[idx][attr].attr , self.data[idx][attr]._name)  )
+
+
+            
+
+
+def get_threshold(resource, total, config):
+    
+    tlimit = resource/(total/100)
+
+    for cfg in config['Range']:
+        if tlimit >= cfg['Start'] and tlimit <= cfg['End']:
+            return cfg
+
+
+def send_syslog(config, level,  msg):
+
+    for cfg in config['Range']:
+        if cfg['Level'] == level:
+            cfg['LogLevel'](msg)
+
+def get_threshold_percent(threshold):
+    if threshold['Start'] == 00:
+        return "[{}-{}%]".format(threshold['Start'],threshold['End'])
+    return "{}%".format(threshold['Start'])
+
+
+class SYSMEM:
+    
+    Threshold={"Range":[ \
+            { "Level":"NORMAL",   "Start":00, "End": 70, "LogLevel": logger.log_info },    \
+            { "Level":"WARNING",  "Start":70, "End": 80, "LogLevel": logger.log_warning }, \
+            { "Level":"ALERT",    "Start":80, "End": 90, "LogLevel": logger.log_alert },   \
+            { "Level":"CRITICAL", "Start":90, "End": 100, "LogLevel": logger.log_crit }    \
+            ]}
+    FreeLevel="NORMAL"
+    UsedLevel="NORMAL"
+
+    def checkRange(self, smem):
+
+        show_dump=0
+
+        # Check for System free Memory usage
+        #logger.log_info("SYSMEM:: Total {}, Free {}, Used {}, Avail {}".\
+                #format(convert_bytes(smem.total), convert_bytes(smem.free), convert_bytes(smem.used), convert_bytes(smem.available)))
+        free_clevel = get_threshold(smem.total-(smem.free), smem.total, self.Threshold)
+        free_tlimit = smem.free/((smem.total)/100)
+        #logger.log_info("SYSMEM:: FREE THRESHOLD {} Level: {}".format(free_tlimit, free_clevel['Level']))
+
+        if self.FreeLevel != free_clevel['Level'] :
+            show_dump=1
+            self.FreeLevel = free_clevel['Level']
+            send_syslog(self.Threshold, free_clevel['Level'], "System free memory usage is below {}%, Total: {}, Free: {}, Used: {}, Buffers: {}, Cached: {}, Avail: {}".\
+                    format( free_tlimit, convert_bytes(smem.total), \
+                    convert_bytes(smem.free), convert_bytes(smem.used), \
+                    convert_bytes(smem.buffers), convert_bytes(smem.cached), \
+                    convert_bytes(smem.available)))
+        
+
+        # Check for System free Memory usage
+        used_clevel = get_threshold(smem.used, smem.total, self.Threshold)
+        used_tlimit = smem.used/(smem.total/100)
+        #logger.log_info("SYSMEM:: USED THRESHOLD {} Level: {}".format(used_tlimit, used_clevel['Level']))
+
+        if self.UsedLevel != used_clevel['Level'] :
+            show_dump=1
+            self.UsedLevel = used_clevel['Level']
+            send_syslog(self.Threshold, used_clevel['Level'], "System used memory usage is above {}%, Total: {}, Free: {}, Used: {}, Buffers: {}, Cached: {}, Avail: {}".\
+                    format( used_tlimit, convert_bytes(smem.total), \
+                    convert_bytes(smem.free), convert_bytes(smem.used), \
+                    convert_bytes(smem.buffers), convert_bytes(smem.cached), \
+                    convert_bytes(smem.available)))
+
+        if show_dump == 1 :
+             dump_memory_usage()
+
+
+
+
+class ProcessData:
+    data={}
+
+    def __init__(self):
+	pass
+    
+    def getData(self,obj, attr):
+        obj.attr = attr
+        if attr not in self.data.keys():
+            self.data[attr] = {"MemLogLevel":"NORMAL", "CpuLogLevel":"NORMAL","Data":obj}
+
+        return self.data[attr]
+
+
+    def printAll(self):
+        for attr in self.data.keys():
+            logger.log_info( "PPMM data:{}".format(  self.data[attr].data)  )
+
+
+def get_proc_name(p):
+    if p.name().startswith('python') or \
+       p.name() == 'bash' or \
+       p.name() == 'sh':
+           for cmd in p.cmdline()[1:]:
+               if cmd.startswith('-'):
+                   continue
+               return "[{} {}]".format(p.cmdline()[0],cmd)
+
+    return p.info['name']
+
+class SYSPPMEM:
+    
+    MemThreshold={ "Range":[ 
+            { "Level":"NORMAL",   "Start":00, "End": 50, "LogLevel": logger.log_info },    \
+            { "Level":"WARNING",  "Start":50, "End": 60, "LogLevel": logger.log_warning }, \
+            { "Level":"ALERT",    "Start":60, "End": 70, "LogLevel": logger.log_alert },   \
+            { "Level":"CRITICAL", "Start":70, "End": 100, "LogLevel": logger.log_crit }    \
+            ]}
+
+    CpuThreshold={ "Range":[
+            { "Level":"NORMAL",   "Start":00, "End": 70, "LogLevel": logger.log_info },    \
+            { "Level":"WARNING",  "Start":70, "End": 80, "LogLevel": logger.log_warning }, \
+            { "Level":"ALERT",    "Start":80, "End": 90, "LogLevel": logger.log_alert },   \
+            { "Level":"CRITICAL", "Start":90, "End": 100, "LogLevel": logger.log_crit }    \
+            ]}
+    Data=ProcessData()
+
+    def checkRange(self, sysmem, ppmem):
+
+
+        # Check for System free Memory usage
+        for p in ppmem:
+            try:
+
+                if p.info['memory_info'].rss ==0:
+                    continue
+
+                data=self.Data.getData(p, p.pid)
+
+                used_tlimit = p.info['memory_info'].rss/(sysmem.total/100)       
+                #logger.log_info("SYSMEM:: Name: {}, Pid:{}, USED RSS {} Total: {}, Percentag:{} ".\
+                        #format( get_proc_name(p), p.pid, \
+                        #convert_bytes(p.info['memory_info'].rss),convert_bytes(sysmem.total), used_tlimit))
+                used_clevel=get_threshold(p.info['memory_info'].rss, sysmem.total, self.MemThreshold)
+                if data['MemLogLevel'] != used_clevel['Level'] :
+                    used_tlimit = p.info['memory_info'].rss/(sysmem.total/100)
+                    show_dump=1
+                    data['MemLogLevel'] = used_clevel['Level']
+                    send_syslog(self.MemThreshold, used_clevel['Level'], "Per process memory threshold exceeded for process {}[{}], threshold {} of system memory, current usage {}".\
+                        format( \
+                        get_proc_name(p), p.pid, \
+                        get_threshold_percent(used_clevel), \
+                        convert_bytes(p.info['memory_info'].rss)))
+
+
+
+                pcpu = p.cpu_percent(interval=None)
+                # Per Process CPU monitoring
+                #cpu_clevel=get_threshold(pcpu/psutil.cpu_count(), 100, self.CpuThreshold)
+                cpu_clevel=get_threshold(pcpu, 100, self.CpuThreshold)
+                if data['CpuLogLevel'] != cpu_clevel['Level'] :
+                    data['CpuLogLevel'] = cpu_clevel['Level']
+                    send_syslog(self.CpuThreshold, cpu_clevel['Level'], "CPU usage of process {}[{}] is {}%".\
+                            format(get_proc_name(p), p.pid, pcpu))
+            except Exception as e:
+                #TypeError
+                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                message = template.format(type(e).__name__, e.args)
+
+
+
+
+class DISK:
+
+    Threshold={ "Range":[
+            { "Level":"NORMAL",   "Start":00, "End": 70, "LogLevel": logger.log_info },    \
+            { "Level":"WARNING",  "Start":70, "End": 80, "LogLevel": logger.log_warning }, \
+            { "Level":"ALERT",    "Start":80, "End": 90, "LogLevel": logger.log_alert },   \
+            { "Level":"CRITICAL", "Start":90, "End": 100, "LogLevel": logger.log_crit }    \
+            ]}
+    DiskLevel="NORMAL"
+    Partition="/"
+
+    def __init__(self, partition):
+        self.Partition=partition
+
+    def checkRange(self):
+
+        root = psutil.disk_usage(self.Partition)
+        disk_clevel=get_threshold(root.used, root.total, self.Threshold)
+        if self.DiskLevel != disk_clevel['Level']:
+            self.DiskLevel = disk_clevel['Level']
+            send_syslog(self.Threshold, disk_clevel['Level'], "DISK usage of '/' is above {}, Total: {}, Free: {}, Used: {}".\
+                format(get_threshold_percent(disk_clevel), convert_bytes(root.total), \
+                convert_bytes(root.free), convert_bytes(root.used)))
+            dump_disk_usage()
+
+
+
+class ResourceMonitor:
+
+    smem = SYSMEM()
+    pmem = SYSPPMEM()
+    pdisk = DISK('/')
+    pdisklog = DISK('/var/log')
+
+    def Monitor(self, queue):
+        sysmem = psutil.virtual_memory()
+
+        try:
+            self.smem.checkRange(sysmem)
+            ppmem=[p for p in sorted(psutil.process_iter(attrs=['name', 'memory_info', 'cpu_times','cmdline']),key=lambda p: p.info['memory_info'].rss,reverse=True)]
+            self.pmem.checkRange(sysmem, ppmem)
+        except Exception as e:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(e).__name__, e.args)
+
+
+        self.pdisk.checkRange()
+        self.pdisklog.checkRange()
+
+
+rm = ResourceMonitor()
+
+# Monitor the memory usage periodically
+def memory_monitor_service_thread(queue):
+
+    while True:
+        rm.Monitor(queue)
+        time.sleep(syscfg['INTERVAL'])
 
 
 #Start the thread for monitoring the APPDB and systemd service state change event 
@@ -291,6 +692,10 @@ def system_service():
     thread_docker_event.start()
 
 
+    thread_docker_event = threading.Thread(target=memory_monitor_service_thread, name='memory', args=(QUEUE,)) 
+    thread_docker_event.start()
+
+
     # Queue to receive the APPDB and Systemd state change event
     while True:
         event = QUEUE.get()
@@ -305,7 +710,7 @@ def system_service():
 #Main method to lanch the process in background
 if __name__ == "__main__":
 
-    init_log()
+    #init_log()
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--daemon", action='store_true', help="Start with daemon mode")

@@ -14,4 +14,4 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	dpkg-buildpackage -us -uc -b -j$(SONIC_CONFIG_MAKE_JOBS)
 	popd
 
-	mv $* $(DEST)/
+	mv $(LIBEBPF_DBG) $* $(DEST)/

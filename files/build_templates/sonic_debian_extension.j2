@@ -234,7 +234,7 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y in
 			pkg-config libdbus-1-dev libglib2.0-dev libcairo2-dev libgirepository1.0-dev
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT  apt-mark manual \
 			libgirepository1.0-dev libgirepository-1.0-1
-sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install PyGObject dbus-python ahab
+sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip install PyGObject dbus-python ahab psutil
 
 
 

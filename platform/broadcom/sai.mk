@@ -1,4 +1,4 @@
-BRCM_SAI_VER = 3.8.1.1
+BRCM_SAI_VER = 3.8.1.4
 BRCM_SAI = "libsaibcm_$(BRCM_SAI_VER)_amd64.deb"
 BRCM_SAI_DEV = "libsaibcm-dev_$(BRCM_SAI_VER)_amd64.deb"
 BRCM_SAI_DIAG = "libsaibcm-diag_$(BRCM_SAI_VER)_amd64.deb"
@@ -38,5 +38,3 @@ else
 $(BRCM_SAI_DIAG)_PATH = $(SAI_LIBS_MOUNT_POINT)
 SONIC_COPY_DEBS += $(BRCM_SAI_DIAG)
 endif
-
-#$(error SONIC_ONLINE_DEBS==!${SONIC_ONLINE_DEBS}! SONIC_COPY_DEBS==!${SONIC_COPY_DEBS}!)

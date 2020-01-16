@@ -439,7 +439,7 @@ static void stp_process_peer_common_info(struct CSM* csm, struct Msg* msg)
     info->vid = ntohs(data->vlan_port_parameter.vlan_id);
     strncpy(info->port_name, data->vlan_port_parameter.port_name, IFNAMSIZ);
 
-    info->vlan_port_tc_type = data->tc_type;
+    info->tc_type = data->tc_type;
 
     strncpy(info->root_bridge_id, data->root_bridge_id, BRIDGE_ID_STR_LEN);
     info->root_path_cost = ntohl(data->root_path_cost);
@@ -459,6 +459,7 @@ static void stp_process_peer_common_info(struct CSM* csm, struct Msg* msg)
 
     info->seq_no = ntohl(data->seq_no);
     info->state = data->state;
+    info->role = data->role;
     info->tc_ack = data->tc_ack;
     info->change_detection_enabled = data->change_detection_enabled;
     info->self_loop = data->self_loop;
@@ -472,9 +473,9 @@ static void stp_process_peer_common_info(struct CSM* csm, struct Msg* msg)
 
     info->message_type =  data->message_type;
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (1)-- vlan_id %u port:%s tc_type:%d root_bridge %s root path cst %u desig bridge %s desig port %u root_port_req_resp: %d ", info->vid, info->port_name, info->vlan_port_tc_type, info->root_bridge_id, info->root_path_cost, info->desig_bridge_id, info->desig_port, info->root_port_req_resp_field);  
+    ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (1)-- vlan_id %u port:%s tc_type:%d root_bridge %s root path cst %u desig bridge %s desig port %u root_port_req_resp: %d ", info->vid, info->port_name, info->tc_type, info->root_bridge_id, info->root_path_cost, info->desig_bridge_id, info->desig_port, info->root_port_req_resp_field);  
     ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (2)-- nrpv:%d peer_nrpv:%d port_id:%d path_cost:%d max_age:%d msg_age:%d hello:%d fwd_del:%d ", info->nrpv_valid, info->peer_nrpv_valid, info->port_id, info->port_path_cost, info->max_age, info->message_age, info->hello_time, info->fwd_delay);
-    ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (3)-- state:%d tc_ack:%d change_detection_enabled:%d self_loop:%d auto_config:%d oper_edge:%d desig_cost:%d ", info->state, info->tc_ack, info->change_detection_enabled, info->self_loop, info->auto_config, info->oper_edge, info->desig_cost);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (3)-- state:%d role:%d tc_ack:%d change_detection_enabled:%d self_loop:%d auto_config:%d oper_edge:%d desig_cost:%d ", info->state, info->role, info->tc_ack, info->change_detection_enabled, info->self_loop, info->auto_config, info->oper_edge, info->desig_cost);
     ICCPD_LOG_DEBUG(__FUNCTION__, "stp_common_info from peer (4)-- master_node_req_resp %d rpvst_req_prop_ack_flag %d nrpv_req_resp_field %d message_type: %u", info->master_node_req_resp_field, info->rpvst_req_proposal_ack_flag, info->nrpv_req_resp_field, info->message_type);
 
     stp_sync_send_msg(sys, msg_buf, msg_hdr->msg_len);

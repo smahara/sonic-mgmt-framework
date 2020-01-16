@@ -1599,11 +1599,18 @@ void iccp_send_fdb_entry_to_syncd( struct MACMsg* mac_msg, uint8_t mac_type, uin
     struct System *sys;
     struct mclag_fdb_info * mac_info;
     ssize_t rc;
+    uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
     sys = system_get_instance();
     if (sys == NULL)
     {
         ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return;
+    }
+
+    if (memcmp(mac_msg->mac_addr, null_mac, ETHER_ADDR_LEN) == 0)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid MAC address do not send to Syncd.");
         return;
     }
 
@@ -2231,7 +2238,7 @@ static void update_remote_macs_to_peerlink(struct CSM *csm, struct LocalInterfac
             continue;
 
         //consider only remote mac; rest of MACs no need to handle
-        if(!mac_entry->age_flag & MAC_AGE_LOCAL)
+        if(mac_entry->age_flag & MAC_AGE_PEER)
         {
             continue;
         }
@@ -2920,12 +2927,19 @@ void do_mac_update_from_syncd(uint8_t mac_addr[ETHER_ADDR_LEN], uint16_t vid, ch
     size_t msg_len = 0;
     uint8_t from_mclag_intf = 0;/*0: orphan port, 1: MCLAG port*/
     struct CSM *first_csm = NULL;
+    uint8_t null_mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
     struct LocalInterface *lif_po = NULL, *mac_lif = NULL;
 
     if (!(sys = system_get_instance()))
     {
         ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return;
+    }
+
+    if (memcmp(mac_addr, null_mac, ETHER_ADDR_LEN) == 0)
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid MAC address from syncd do not add.");
         return;
     }
 

@@ -40,6 +40,14 @@ set_tmpfs_log_partition_size()
 
 ## Mount the overlay file system: rw layer over squashfs
 image_dir=$(cat /proc/cmdline | sed -e 's/.*loop=\(\S*\)\/.*/\1/')
+if [ -e ${rootmnt}/host/$image_dir/pending_erase ] && \
+   [ $(cat ${rootmnt}/host/$image_dir/pending_erase) = "install" ]; then
+    echo "Processing user request to restore SONiC image to factory defaults"
+    rm -rf ${rootmnt}/host/$image_dir/rw
+    rm -rf ${rootmnt}/host/$image_dir/work
+    touch ${rootmnt}/host/$image_dir/platform/firsttime
+    rm -f ${rootmnt}/host/$image_dir/pending_erase
+fi
 mkdir -p ${rootmnt}/host/$image_dir/rw
 mkdir -p ${rootmnt}/host/$image_dir/work
 mount -n -o lowerdir=${rootmnt},upperdir=${rootmnt}/host/$image_dir/rw,workdir=${rootmnt}/host/$image_dir/work -t overlay root-overlay ${rootmnt}

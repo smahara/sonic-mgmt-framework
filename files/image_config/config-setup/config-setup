@@ -24,6 +24,8 @@ CONFIG_SETUP_VAR_DIR=/var/lib/config-setup
 CONFIG_SETUP_PRE_MIGRATION_FLAG=${CONFIG_SETUP_VAR_DIR}/pending_pre_migration
 CONFIG_SETUP_POST_MIGRATION_FLAG=${CONFIG_SETUP_VAR_DIR}/pending_post_migration
 CONFIG_SETUP_INITIALIZATION_FLAG=${CONFIG_SETUP_VAR_DIR}/pending_initialization
+CONFIG_SETUP_PENDING_ERASE_FLAG=${CONFIG_SETUP_VAR_DIR}/pending_erase
+SONIC_CONFIG_LIST="minigraph.xml snmp.yml acl.json config_db.json frr"
 
 # Command usage and help
 usage()
@@ -228,14 +230,63 @@ generate_config()
   return 0
 }
 
+# Erase SONiC configuration files and optionally take backup of
+# management interface config
+do_config_erase()
+{
+    if [ "$(cat ${CONFIG_SETUP_PENDING_ERASE_FLAG})" = "" ]; then
+        # Take a backup copy of management table
+        python3 - <<END
+import sys
+import os
+import json
+
+try:
+    with open('/etc/sonic/config_db.json') as json_file:
+        mgmt_keys = [ 'MGMT_INTERFACE', 'MGMT_PORT', 'MGMT_VRF_CONFIG' ]
+        data = json.load(json_file)
+        mgmt_data = dict()
+        for k in data:
+            if k in mgmt_keys:
+                mgmt_data[k] = data[k]
+        if bool(mgmt_data):
+            with open('/etc/sonic/mgmt_config.json', 'w') as outfile:
+                json.dump(mgmt_data, outfile, indent=4, sort_keys=True)
+except:
+    pass
+END
+    fi
+    # Remove all SONiC configuration files
+    for f in $SONIC_CONFIG_LIST; do
+        echo "Deleting SONiC configuration files as per user request"
+        rm -rf /etc/sonic/$f
+    done
+}
+
 # Create SONiC configuration for first time bootup
 #  - If ZTP is enabled, ZTP configuraion is created
 #  - If ZTP is disabled and updategraph is disabled, factory default configuration
 #    is created
 #  - If updategraph is enabled and ZTP is disabled, updategraph initializes
 #    configuration
-do_config_intialization()
+do_config_initialization()
 {
+    if [ -e ${CONFIG_SETUP_PENDING_ERASE_FLAG} ]; then
+       generate_config factory ${CONFIG_DB_JSON}
+       # Load default config to DB
+       load_config ${CONFIG_DB_JSON}
+       # Restore management interface configuration
+       if [ "$(cat ${CONFIG_SETUP_PENDING_ERASE_FLAG})" = "" ]; then
+           [ -e /etc/sonic/mgmt_config.json ] && \
+             echo "Restoring management interface configuration" && \
+             sonic-cfggen -j /etc/sonic/mgmt_config.json --write-to-db && \
+             sonic-cfggen -d --print-data > ${CONFIG_DB_JSON}
+           rm -f /etc/sonic/mgmt_config.json
+       fi
+       rm -f ${CONFIG_SETUP_PENDING_ERASE_FLAG}
+       return
+    fi
+
     if  ! updategraph_is_enabled ; then
         if ! ztp_is_enabled ; then
            echo "No configuration detected, generating factory default configuration..."
@@ -276,11 +327,8 @@ copy_post_migration_hooks()
 #  - This step is performed when a new image is installed and SONiC switch boots into it
 do_config_migration()
 {
-  # Identify list of files to migrate
-  copy_list="minigraph.xml snmp.yml acl.json config_db.json frr"
-
   # Migrate all configuration files from old to new
-  copy_config_files_and_directories $copy_list
+  copy_config_files_and_directories $SONIC_CONFIG_LIST
 
   # Migrate post-migration hooks
   copy_post_migration_hooks
@@ -342,13 +390,22 @@ boot_config()
      do_config_migration
   fi
 
-  if [ -e /tmp/pending_config_initialization ] || [ -e  ${CONFIG_SETUP_INITIALIZATION_FLAG} ]; then
-     do_config_intialization
+  SONIC_VERSION=$(sonic-cfggen -y /etc/sonic/sonic_version.yml -v build_version)
+  if [ -e ${CONFIG_DB_JSON} ] && \
+     [ -e /host/image-${SONIC_VERSION}/pending_erase ]; then
+      mv /host/image-${SONIC_VERSION}/pending_erase ${CONFIG_SETUP_PENDING_ERASE_FLAG}
+      do_config_erase
+  fi
+
+  if [ -e /tmp/pending_config_initialization ] ||  \
+     [ -e  ${CONFIG_SETUP_INITIALIZATION_FLAG} ] || \
+     [ -e ${CONFIG_SETUP_PENDING_ERASE_FLAG} ]; then
+     do_config_initialization
   fi
 
   # If no startup configuration is found, create a configuration to be used
   if [ ! -e ${CONFIG_DB_JSON} ]; then
-    do_config_intialization
+    do_config_initialization
     # force ZTP to restart
     if  ztp_is_enabled ; then
        ztp_status=$(ztp status -c)
@@ -356,8 +413,6 @@ boot_config()
           [ "$ztp_status" = "6:FAILED" ]; then
           # Clear completed ztp information, before starting a new one
           ztp erase -y
-       else
-          touch /tmp/pending_ztp_restart
        fi
     fi
   fi

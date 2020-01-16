@@ -154,7 +154,7 @@ class TestJ2Files(TestCase):
         tmp = "snmpd.conf.output"
         sample_output_file = os.path.join(self.test_dir, 'sample_output', 'snmpd.conf')
         conf_template = os.path.join(self.test_dir, '..', '..', '..', 'dockers', 'docker-snmp-sv2', 'snmpd.conf.j2')
-        argument = '-j ' + self.snmp_config + ' -t ' + conf_template + ' | sed "0,/^# Begin Configuration derived from ConfigDB$/d" ' + ' > ' + tmp
+        argument = '-j ' + self.snmp_config + ' -t ' + conf_template + ' > ' + tmp
         self.run_script(argument)
         print ("===================={}===={}".format(sample_output_file, tmp))
         if filecmp.cmp(sample_output_file, tmp) is False:

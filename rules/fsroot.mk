@@ -1,0 +1,6 @@
+FSROOT_DST_PATH := /sonic/build/
+FSROOT := fsroot
+
+$(FSROOT)_SRC_PATH = /
+SONIC_INSTALL_PKGS += $(FSROOT)
+
