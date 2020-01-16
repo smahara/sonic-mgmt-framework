@@ -6,9 +6,9 @@
 {% set vars = {'flags': ""} %}
 {% set vars = {'ipv6_src_pfx': ""} %}
 {% if json_output -%}
-------------------------------------------------------------------------------------
-{{'%-20s'|format("Interface")}}{{'%-20s'|format("IPv4 address/mask")}}{{'%-15s'|format("Master")}}{{'%-15s'|format("Admin/Oper")}}{{'%-15s'|format("Flags")}}
-------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+{{'%-20s'|format("Interface")}}{{'%-35s'|format("IPv6 address/mask")}}{{'%-15s'|format("Master")}}{{'%-15s'|format("Admin/Oper")}}{{'%-15s'|format("Flags")}}
+------------------------------------------------------------------------------------------------
 {% for key_json in json_output %}
 {% set interface_list = json_output[key_json]["interface"] %}
 {% for interface in interface_list %}
@@ -40,7 +40,7 @@
               {% for ip in ip_list %}
                 {% set ipfx = ip["state"]["ip"] + "/" + ip["state"]["prefix-length"]|string() %}
                 {% if vars.update({'ipv6_src_pfx':ipfx}) %}{% endif %}
-{{'%-20s'|format(vars.name)}}{{'%-20s'|format(vars.ipv6_src_pfx)}}{{'%-15s'|format(vars.master)}}{{'%-15s'|format(vars.admin_oper)}}{{'%-15s'|format(vars.flags)}}
+{{'%-20s'|format(vars.name)}}{{'%-35s'|format(vars.ipv6_src_pfx)}}{{'%-15s'|format(vars.master)}}{{'%-15s'|format(vars.admin_oper)}}{{'%-15s'|format(vars.flags)}}
               {% endfor %}
             {% endif %}
           {% endfor %}
