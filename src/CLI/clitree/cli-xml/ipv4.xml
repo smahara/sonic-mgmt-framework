@@ -32,7 +32,17 @@ limitations under the License.
     <ACTION builtin="clish_nop"/>
     </COMMAND>
 
-<!-- show ip route -->
+    <!-- show ip interfaces -->
+    <COMMAND
+        name="show ip interfaces"
+        help="IP Info of Interfaces"
+        >
+    <ACTION>
+       python $SONIC_CLI_ROOT/sonic_cli_if.py get_openconfig_interfaces_interfaces show_ip_interfaces.j2 ${__full_line}
+    </ACTION>
+    </COMMAND>
+
+    <!-- show ip route -->
     <COMMAND
         help="IP route information"
         name="show ip route">
