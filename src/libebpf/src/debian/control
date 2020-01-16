@@ -10,10 +10,3 @@ Architecture: any
 Depends: 
 Description: This package contains eBPF library for SONiC project.
 
-Package: libebpf-dbg
-Architecture: any
-Section: debug
-Priority: extra
-Depends: libebpf (=${binary:Version})
-Description: debugging symbols for libebpf
-
