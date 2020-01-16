@@ -450,6 +450,7 @@ initpde:
 init:
 	git submodule update --init --recursive
 	git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
+	@git submodule foreach --recursive 'git checkout dell_sonic || git checkout master'
 ifneq (,${LOCAL_SAI_DEBS_PATH})
 	rm -rf ${LOCAL_SAI_DEBS_PATH}
 	mkdir -p `dirname ${LOCAL_SAI_DEBS_PATH}`
