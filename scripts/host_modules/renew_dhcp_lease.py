@@ -20,29 +20,37 @@ class RENEW_DHCP_LEASE(host_service.HostModule):
         cmd_opt = ""
         output = ""
         rc = 0
-        try:
-            for x in options[1:]:
-                if x == "ipv6":
-                    version = "-6"
-                    file_ext = "6"
-                    cmd_opt = "-D LL"
 
+        for x in options[1:]:
+            if x == "ipv6":
+                version = "-6"
+                file_ext = "6"
+                cmd_opt = "-D LL"
+
+            try:
                 cmd = "/sbin/dhclient {} -r {}".format(version, ifName)
                 output = subprocess.check_call(cmd, shell=True)
+            except subprocess.CalledProcessError as err:
+                print("Exception when calling get_sonic_error -> %s\n" %(err))
+                pass
 
+            try:
                 cmd = "[ -f /var/run/dhclient{}.{}.pid ] && kill `cat /var/run/dhclient{}.{}.pid` && rm -f /var/run/dhclient{}.{}.pid".format(file_ext, ifName, file_ext, ifName, file_ext, ifName)
                 output = subprocess.check_call(cmd, shell=True)
+            except subprocess.CalledProcessError as err:
+                print("Exception when calling get_sonic_error -> %s\n" %(err))
+                pass
 
+            try:
                 cmd = "/sbin/dhclient {} -pf /run/dhclient{}.{}.pid -lf /var/lib/dhcp/dhclient{}.{}.leases {} -nw {} ".format(version, file_ext, ifName, file_ext, ifName, ifName, cmd_opt)
                 output = subprocess.check_call(cmd, shell=True)
 
                 output = "SUCCESS"
+            except subprocess.CalledProcessError as err:
+                print("Exception when calling get_sonic_error -> %s\n" %(err))
+                rc = err.returncode
+                output = err.output
 
-        except subprocess.CalledProcessError as err:
-            print("Exception when calling get_sonic_error -> %s\n" %(err))
-            rc = err.returncode
-            output = err.output
-            
         return rc,output
 
 
