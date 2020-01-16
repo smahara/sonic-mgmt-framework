@@ -41,6 +41,7 @@
 /var/log/syslog
 /var/log/teamd.log
 /var/log/stpd.log
+/var/log/udldd.log
 /var/log/telemetry.log
 /var/log/iccp/iccpd.log
 /var/log/iccp/iccpd_fdb.log
