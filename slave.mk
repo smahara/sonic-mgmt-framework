@@ -417,7 +417,7 @@ SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_COPY_FILES))
 #     $(SOME_NEW_DEB)_URL = https://url/to/this/deb.deb
 #     SONIC_ONLINE_DEBS += $(SOME_NEW_DEB)
 $(addprefix $(DEBS_PATH)/, $(SONIC_ONLINE_DEBS)) : $(DEBS_PATH)/% : .platform \
-	$(DEBS_PATH)/%.dep
+	$(call dpkg_depend,$(DEBS_PATH)/%.dep)
 
 	$(HEADER)
 	# Load the target deb from DPKG cache
@@ -464,7 +464,7 @@ SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_ONLINE_FILES))
 #     $(SOME_NEW_FILE)_DEPENDS = $(SOME_OTHER_DEB1) $(SOME_OTHER_DEB2) ...
 #     SONIC_MAKE_FILES += $(SOME_NEW_FILE)
 $(addprefix $(FILES_PATH)/, $(SONIC_MAKE_FILES)) : $(FILES_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS))) \
-			$(FILES_PATH)/%.dep 
+			$(call dpkg_depend,$(FILES_PATH)/%.dep)
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
@@ -502,7 +502,7 @@ SONIC_TARGET_LIST += $(addprefix $(FILES_PATH)/, $(SONIC_MAKE_FILES))
 #     $(SOME_NEW_DEB)_DEPENDS = $(SOME_OTHER_DEB1) $(SOME_OTHER_DEB2) ...
 #     SONIC_MAKE_DEBS += $(SOME_NEW_DEB)
 $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS)) : $(DEBS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS))) \
-			$(DEBS_PATH)/%.dep 
+			$(call dpkg_depend,$(DEBS_PATH)/%.dep)
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
@@ -536,7 +536,7 @@ SONIC_TARGET_LIST += $(addprefix $(DEBS_PATH)/, $(SONIC_MAKE_DEBS))
 #     $(SOME_NEW_DEB)_DEPENDS = $(SOME_OTHER_DEB1) $(SOME_OTHER_DEB2) ...
 #     SONIC_DPKG_DEBS += $(SOME_NEW_DEB)
 $(addprefix $(DEBS_PATH)/, $(SONIC_DPKG_DEBS)) : $(DEBS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(DEBS_PATH)/,$$($$*_DEPENDS))) \
-			$(DEBS_PATH)/%.dep 
+			$(call dpkg_depend,$(DEBS_PATH)/%.dep )
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
@@ -633,7 +633,7 @@ $(SONIC_INSTALL_TARGETS) : $(DEBS_PATH)/%-install : .platform $$(addsuffix -inst
 $(addprefix $(PYTHON_DEBS_PATH)/, $(SONIC_PYTHON_STDEB_DEBS)) : $(PYTHON_DEBS_PATH)/% : .platform \
 		$$(addsuffix -install,$$(addprefix $(PYTHON_DEBS_PATH)/,$$($$*_DEPENDS))) \
 		$$(addsuffix -install,$$(addprefix $(PYTHON_WHEELS_PATH)/,$$($$*_WHEEL_DEPENDS))) \
-			$(PYTHON_DEBS_PATH)/%.dep 
+		$(call dpkg_depend,$(PYTHON_DEBS_PATH)/%.dep)
 
 	$(HEADER)
 
@@ -672,7 +672,7 @@ SONIC_TARGET_LIST += $(addprefix $(PYTHON_DEBS_PATH)/, $(SONIC_PYTHON_STDEB_DEBS
 #     $(SOME_NEW_WHL)_DEPENDS = $(SOME_OTHER_WHL1) $(SOME_OTHER_WHL2) ...
 #     SONIC_PYTHON_WHEELS += $(SOME_NEW_WHL)
 $(addprefix $(PYTHON_WHEELS_PATH)/, $(SONIC_PYTHON_WHEELS)) : $(PYTHON_WHEELS_PATH)/% : .platform $$(addsuffix -install,$$(addprefix $(PYTHON_WHEELS_PATH)/,$$($$*_DEPENDS))) \
-			$(PYTHON_WHEELS_PATH)/%.dep 
+			$(call dpkg_depend,$(PYTHON_WHEELS_PATH)/%.dep)
 
 	$(HEADER)
 
@@ -767,7 +767,7 @@ $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz : .platform
 		$$(addprefix $(PYTHON_WHEELS_PATH)/,$$($$*.gz_PYTHON_WHEELS)) \
 		$$(addsuffix -load,$$(addprefix $(TARGET_PATH)/,$$($$*.gz_LOAD_DOCKERS))) \
 		$$($$*.gz_PATH)/Dockerfile.j2 \
-		$(TARGET_PATH)/%.gz.dep
+		$(call dpkg_depend,$(TARGET_PATH)/%.gz.dep)
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
@@ -821,7 +821,7 @@ SONIC_TARGET_LIST += $(addprefix $(TARGET_PATH)/, $(DOCKER_IMAGES))
 $(addprefix $(TARGET_PATH)/, $(DOCKER_DBG_IMAGES)) : $(TARGET_PATH)/%-$(DBG_IMAGE_MARK).gz : .platform docker-start \
 		$$(addprefix $(DEBS_PATH)/,$$($$*.gz_DBG_DEPENDS)) \
 		$$(addsuffix -load,$$(addprefix $(TARGET_PATH)/,$$*.gz)) \
-		$(TARGET_PATH)/%-$(DBG_IMAGE_MARK).gz.dep
+		$(call dpkg_depend,$(TARGET_PATH)/%-$(DBG_IMAGE_MARK).gz.dep)
 	$(HEADER)
 
 	# Load the target deb from DPKG cache
@@ -870,7 +870,7 @@ $(DOCKER_LOAD_TARGETS) : $(TARGET_PATH)/%.gz-load : .platform docker-start $$(TA
 	$(FOOTER)
 
 .PHONY: $(TARGET_PATH)/fsroot_prep
-$(TARGET_PATH)/fsroot_prep: $(FSROOT_PATH)/$(FSROOT).dep
+$(TARGET_PATH)/fsroot_prep: $(call dpkg_depend,$(FSROOT_PATH)/$(FSROOT).dep)
 	$(HEADER)
 	
 	# Load the target deb from DPKG cache
