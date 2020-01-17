@@ -38,5 +38,17 @@
          }{%- if loop.last == False -%},{% endif %}
 
 {% endfor %}
-   }
+   },
+
+    "REST_SERVER": {
+      "default": {
+        "client_auth": "password,jwt"
+      }
+    },
+    "TELEMETRY": {
+      "gnmi": {
+        "client_auth": "password,jwt"
+      }
+    }
+
 }
