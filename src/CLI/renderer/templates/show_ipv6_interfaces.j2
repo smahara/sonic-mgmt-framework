@@ -15,6 +15,10 @@
     {% for key in interface %}
       {% if "state" in key %}
         {% if vars.update({'name':interface[key]["name"]}) %}{% endif %}
+        {% if vars.name.startswith('Loopback') %}
+            {% if vars.update({'admin_state':"UP"}) %}{% endif %}
+            {% if vars.update({'oper_state':"UP"}) %}{% endif %}
+        {% else %
         {% if "admin-status" in interface[key] %}
            {% if vars.update({'admin_state':interface[key]["admin-status"]}) %}{% endif %}
         {% else %}
@@ -24,6 +28,7 @@
             {% if vars.update({'oper_state':interface[key]["oper-status"]}) %}{% endif %}
         {% else %}
             {% if vars.update({'oper_state':"DOWN"}) %}{% endif %}
+        {% endif %}
         {% endif %}
         {% set admin_op = vars.admin_state + "/" + vars.oper_state|string() %}
         {% if vars.update({'admin_oper':admin_op}) %}{% endif %}
