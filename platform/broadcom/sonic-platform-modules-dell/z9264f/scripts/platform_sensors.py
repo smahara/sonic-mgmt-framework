@@ -28,6 +28,7 @@ PSU_PRESENCE = "PSU{0}_state"
 # PSU_PRESENCE="PSU{0}_prsnt"
 IPMI_PSU1_DATA_DOCKER = "ipmitool raw 0x04 0x2d 0x31 |  awk '{print substr($0,9,1)}'"
 IPMI_PSU2_DATA_DOCKER = "ipmitool raw 0x04 0x2d 0x32 |  awk '{print substr($0,9,1)}'"
+IPMI_RAW_STORAGE_READ = "ipmitool raw 0x0a 0x11 {0} 0 0 0xa0"
 ipmi_sdr_list = ""
 
 # Dump sensor registers
@@ -46,6 +47,22 @@ def ipmi_sensor_dump():
 
 # Fetch a BMC register
 
+
+def fetch_raw_fru_for_dir(dev_id, offset):
+    Airflow_Direction = [' B2F', ' F2B']
+    ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_RAW_STORAGE_READ.format(dev_id))
+    if ret_status:
+        logging.error('Failed to execute ipmitool')
+    return Airflow_Direction[int((ipmi_cmd_ret.splitlines()[offset/16]).split(' ')[(offset%16+1)])]
+
+
+def get_psu_airflow(psu_id):
+    return fetch_raw_fru_for_dir(psu_id+5, 0x30)
+
+
+def get_fan_airflow(fan_id):
+    return fetch_raw_fru_for_dir(fan_id, 0x46)
+    return Airflow_Direction[dir]
 
 def get_pmc_register(reg_name):
 
@@ -86,21 +103,20 @@ def print_temperature_sensors():
     print '  CPU Near Temp:                  ',\
         (get_pmc_register('CPU_temp'))
     print '  PSU FAN AirFlow Temperature 1:  ',\
-        (get_pmc_register('PSU1_AF_temp'))
+        (get_pmc_register('PSU1AF_temp'))
     print '  PSU FAN AirFlow Temperature 2:  ',\
-        (get_pmc_register('PSU2_AF_temp'))
+        (get_pmc_register('PSU2AF_temp'))
 
 ipmi_sensor_dump()
 
 print_temperature_sensors()
 
-# Print the information for 1 Fan Tray
 
+# Print the information for 1 Fan Tray
 
 def print_fan_tray(tray):
 
     Fan_Status = [' Normal', ' Abnormal', ' no reading']
-    Airflow_Direction = ['B2F', 'F2B']
 
     print '  Fan Tray ' + str(tray) + ':'
 
@@ -125,6 +141,8 @@ def print_fan_tray(tray):
             Fan_Status[fan1_status]
         print '    Fan2 State:                   ',\
             Fan_Status[fan2_status]
+        print '    AirFlow:                      ',\
+            get_fan_airflow(tray)
 
     elif (tray == 2):
 
@@ -147,6 +165,8 @@ def print_fan_tray(tray):
             Fan_Status[fan1_status]
         print '    Fan2 State:                   ',\
             Fan_Status[fan2_status]
+        print '    AirFlow:                      ',\
+            get_fan_airflow(tray)
 
     elif (tray == 3):
 
@@ -169,6 +189,8 @@ def print_fan_tray(tray):
             Fan_Status[fan1_status]
         print '    Fan2 State:                   ',\
             Fan_Status[fan2_status]
+        print '    AirFlow:                      ',\
+            get_fan_airflow(tray)
 
     elif (tray == 4):
 
@@ -191,6 +213,8 @@ def print_fan_tray(tray):
             Fan_Status[fan1_status]
         print '    Fan2 State:                   ',\
             Fan_Status[fan2_status]
+        print '    AirFlow:                      ',\
+            get_fan_airflow(tray)
 
 
 print('\nFan Trays:')
@@ -254,7 +278,7 @@ def print_psu(psu):
 
         print '    PSU1:'
         print '       FAN Temperature:              ',\
-            get_pmc_register('PSU1_temp')
+            get_pmc_register('PSU1_Normal_temp')
         print '       FAN RPM:                      ',\
             get_pmc_register('PSU1_rpm')
         print '       Input Voltage:                ',\
@@ -269,12 +293,14 @@ def print_psu(psu):
             get_pmc_register('PSU1_In_amp')
         print '       Output Current:               ',\
             get_pmc_register('PSU1_Out_amp')
+        print '       AirFlow:                      ',\
+            get_psu_airflow(psu)
 
     else:
 
         print '    PSU2:'
         print '       FAN Temperature:              ',\
-            get_pmc_register('PSU2_temp')
+            get_pmc_register('PSU1_Normal_temp')
         print '       FAN RPM:                      ',\
             get_pmc_register('PSU2_rpm')
         print '       Input Voltage:                ',\
@@ -289,6 +315,8 @@ def print_psu(psu):
             get_pmc_register('PSU2_In_amp')
         print '       Output Current:               ',\
             get_pmc_register('PSU2_Out_amp')
+        print '       AirFlow:                      ',\
+            get_psu_airflow(psu)
 
 
 print('\nPSUs:')

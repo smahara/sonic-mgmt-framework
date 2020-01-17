@@ -29,6 +29,8 @@ PSU_PRESENCE = "PSU{0}_stat"
 
 IPMI_PSU1_DATA_DOCKER = "ipmitool raw 0x04 0x2d 0x31 |  awk '{print substr($0,9,1)}'"
 IPMI_PSU2_DATA_DOCKER = "ipmitool raw 0x04 0x2d 0x32 |  awk '{print substr($0,9,1)}'"
+IPMI_RAW_STORAGE_READ = "ipmitool raw 0x0a 0x11 {0} 0 0 0xa0"
+
 ipmi_sdr_list = ""
 
 # Dump sensor registers
@@ -44,6 +46,22 @@ def ipmi_sensor_dump():
     if status:
         logging.error('Failed to execute:' + ipmi_sdr_list)
         sys.exit(0)
+
+# Fetch FRU on given offset
+def fetch_raw_fru(dev_id, offset):
+    ret_status, ipmi_cmd_ret = commands.getstatusoutput(IPMI_RAW_STORAGE_READ.format(dev_id))
+    if ret_status:
+        logging.error('Failed to execute ipmitool')
+    return int((ipmi_cmd_ret.splitlines()[offset/16]).split(' ')[(offset%16+1)])
+
+
+Airflow_Direction = [' F2B', ' B2F']
+def get_psu_airflow(psu_id):
+    return Airflow_Direction[fetch_raw_fru(psu_id, 0x30)]
+
+
+def get_fan_airflow(fan_id):
+    return Airflow_Direction[fetch_raw_fru(fan_id+2, 0x46)]
 
 # Fetch a BMC register
 
@@ -95,7 +113,6 @@ print_temperature_sensors()
 def print_fan_tray(tray):
 
     Fan_Status = [' Normal', ' Abnormal']
-    Airflow_Direction = ['B2F', 'F2B']
 
     print '  Fan Tray ' + str(tray) + ':'
 
@@ -134,6 +151,8 @@ def print_fan_tray(tray):
             get_pmc_register('FAN4_Rear_rpm')
         print '    Fan State:                   ',\
             Fan_Status[fan2_status]
+    print '    Airflow:                      ',\
+        get_fan_airflow(tray)
 
 
 print('\nFan Trays:')
@@ -242,6 +261,8 @@ def print_psu(psu):
             get_pmc_register('PSU2_In_amp')
         print '       Output Current:               ',\
             get_pmc_register('PSU2_Out_amp')
+    print '       Airflow:                      ',\
+        get_psu_airflow(psu)
 
 
 print('\nPSUs:')
