@@ -176,6 +176,26 @@ static int L2MCMsg_compare(const struct L2MCMsg *l2mc1, const struct L2MCMsg *l2
 
 RB_GENERATE(l2mc_rb_tree, L2MCMsg, l2mc_entry_rb, L2MCMsg_compare);
 
+static int L2MCMrouterMsg_compare(const struct L2MCMsg *l2mc1, const struct L2MCMsg *l2mc2)
+{
+    if (l2mc1->vid < l2mc2->vid)
+        return -1;
+
+    if (l2mc1->vid > l2mc2->vid)
+        return 1;
+
+    if(strcmp((char *)&l2mc1->ifname, (char *)&l2mc2->ifname) > 0)
+        return 1;
+
+    if(strcmp((char *)&l2mc1->ifname, (char *)&l2mc2->ifname) < 0)
+        return -1;
+
+    return 0;
+}
+
+RB_GENERATE(l2mc_mrouter_rb_tree, L2MCMsg, l2mc_entry_rb, L2MCMrouterMsg_compare)
+
+
 /*****************************************
 * Static Function
 *
@@ -430,11 +450,21 @@ static void mlacp_sync_send_syncL2mcInfo(struct CSM* csm)
         {
             if (!(l2mc_msg->l2mc_entry_rb.rbt_parent)) {
                 l2mc_find.vid = l2mc_msg->vid;
-                memcpy(l2mc_find.saddr,l2mc_msg->saddr, INET_ADDRSTRLEN);
-                memcpy(l2mc_find.gaddr,l2mc_msg->gaddr, INET_ADDRSTRLEN);
                 memcpy(l2mc_find.ifname, l2mc_msg->ifname, MAX_L_PORT_NAME);
-                if (!RB_FIND(l2mc_rb_tree, &MLACP(csm).l2mc_rb ,&l2mc_find))
-                    free(l2mc_msg);
+
+                if (l2mc_msg->l2mc_msg_type == MSG_TYPE_L2MC_ENTRY)
+                {
+                    memcpy(l2mc_find.saddr,l2mc_msg->saddr, INET_ADDRSTRLEN);
+                    memcpy(l2mc_find.gaddr,l2mc_msg->gaddr, INET_ADDRSTRLEN);
+                
+                    if (!RB_FIND(l2mc_rb_tree, &MLACP(csm).l2mc_rb ,&l2mc_find))
+                        free(l2mc_msg);
+                }
+                else
+                {
+                    if (!RB_FIND(l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb ,&l2mc_find))
+                        free(l2mc_msg);
+                }
             }
         }
 
@@ -851,6 +881,7 @@ void mlacp_init(struct CSM* csm, int all)
         MLACP_MSG_QUEUE_REINIT(MLACP(csm).ndisc_list);
         RB_INIT(mac_rb_tree, &MLACP(csm).mac_rb );
         RB_INIT(l2mc_rb_tree, &MLACP(csm).l2mc_rb );
+        RB_INIT(l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb);
         LIF_QUEUE_REINIT(MLACP(csm).lif_list);
 
         MLACP(csm).node_id = MLACP_SYSCONF_NODEID_MSB_MASK;
@@ -881,6 +912,7 @@ void mlacp_finalize(struct CSM* csm)
 
     RB_INIT(mac_rb_tree, &MLACP(csm).mac_rb );
     RB_INIT(l2mc_rb_tree, &MLACP(csm).l2mc_rb );
+    RB_INIT(l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb );
 
     /* remove lif & lif-purge queue */
     LIF_QUEUE_REINIT(MLACP(csm).lif_list);
@@ -1170,6 +1202,31 @@ void mlacp_sync_l2mc(struct CSM* csm)
             {
                 ICCPD_LOG_DEBUG(__FUNCTION__, "L2MC-msg-list not enqueue for local del flag: %s, saddr %s gaddr %s vlan-id %d,del_flag %d, remove local del flag",
                         l2mc_msg->ifname, l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid, l2mc_msg->del_flag);
+                l2mc_msg->del_flag &= ~L2MC_DEL_LOCAL;
+            }
+        }
+    }
+
+    RB_FOREACH (l2mc_msg, l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb)
+    {
+        if (!(l2mc_msg->del_flag & L2MC_DEL_LOCAL))
+        {
+            l2mc_msg->op_type = L2MC_SYNC_ADD;
+
+            if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail))
+            {
+                TAILQ_INSERT_TAIL(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail);
+            }
+
+            ICCPD_LOG_DEBUG(__FUNCTION__, "L2MC-msg-list enqueue interface %s, "
+                    "vlan %d, del_flag %d", l2mc_msg->ifname, l2mc_msg->vid, l2mc_msg->del_flag);
+        }
+        else
+        {
+            if (strcmp(l2mc_msg->ifname, csm->peer_itf_name) != 0)
+            {
+                ICCPD_LOG_DEBUG(__FUNCTION__, "L2MC-msg-list not enqueue for local del flag: %s,vlan-id %d,del_flag %d, remove local del flag",
+                        l2mc_msg->ifname, l2mc_msg->vid, l2mc_msg->del_flag);
                 l2mc_msg->del_flag &= ~L2MC_DEL_LOCAL;
             }
         }

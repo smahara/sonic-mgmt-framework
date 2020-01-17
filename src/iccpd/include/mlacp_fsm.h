@@ -176,6 +176,7 @@ struct mLACP
 
     struct mac_rb_tree mac_rb;
     struct l2mc_rb_tree l2mc_rb;
+    struct l2mc_mrouter_rb_tree l2mc_mrouter_rb;
 
     LIST_HEAD(lif_list, LocalInterface) lif_list;
     LIST_HEAD(lif_purge_list, LocalInterface) lif_purge_list;

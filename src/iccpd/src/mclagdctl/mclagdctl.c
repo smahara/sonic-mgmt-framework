@@ -43,6 +43,7 @@ char *mclagdctl_sock_path = "/var/run/iccpd/mclagdctl.sock";
    mclagdctl -i dump nd
    mclagdctl -i dump mac
    mclagdctl -i dump l2mc
+   mclagdctl -i dump l2mc_mrouter
    mclagdctl -i dump unique_ip
    mclagdctl -i dump portlist local
    mclagdctl -i dump portlist peer
@@ -108,6 +109,14 @@ static struct command_type command_types[] =
         .enca_msg = mclagdctl_enca_dump_l2mc,
         .parse_msg = mclagdctl_parse_dump_l2mc,
     },
+    {
+        .id = ID_CMDTYPE_D_A,
+        .parent_id = ID_CMDTYPE_D,
+        .info_type = INFO_TYPE_DUMP_L2MC_MROUTER,
+        .name = "l2mc_mrouter",
+        .enca_msg = mclagdctl_enca_dump_l2mc_mrouter,
+        .parse_msg = mclagdctl_parse_dump_l2mc_mrouter,
+    },    
     {
         .id = ID_CMDTYPE_D_A,
         .parent_id = ID_CMDTYPE_D,
@@ -526,6 +535,24 @@ int mclagdctl_enca_dump_l2mc(char *msg, int mclag_id, int argc, char **argv)
     return 1;
 }
 
+int mclagdctl_enca_dump_l2mc_mrouter(char *msg, int mclag_id, int argc, char **argv)
+{
+    struct mclagdctl_req_hdr req;
+
+    if (mclag_id <= 0)
+    {
+        fprintf(stderr, "Need to specify mclag-id through the parameter i !\n");
+        return MCLAG_ERROR;
+    }
+
+    memset(&req, 0, sizeof(struct mclagdctl_req_hdr));
+    req.info_type = INFO_TYPE_DUMP_L2MC_MROUTER;
+    req.mclag_id = mclag_id;
+    memcpy((struct mclagdctl_req_hdr *)msg, &req, sizeof(struct mclagdctl_req_hdr));
+
+    return 1;
+}
+
 int mclagdctl_parse_dump_l2mc(char *msg, int data_len)
 {
     struct mclagd_l2mc_msg * l2mc_info = NULL;
@@ -577,6 +604,54 @@ int mclagdctl_parse_dump_l2mc(char *msg, int data_len)
 
     return 0;
 }
+
+int mclagdctl_parse_dump_l2mc_mrouter(char *msg, int data_len)
+{
+    struct mclagd_l2mc_msg * l2mc_info = NULL;
+    int len = 0;
+    int count = 0;
+
+    fprintf(stdout, "%-60s\n", "TYPE: S-STATIC, D-DYNAMIC; DEL: L-Local del, P-Peer del");
+
+    fprintf(stdout, "%-6s", "No.");
+    fprintf(stdout, "%-5s", "TYPE");
+    fprintf(stdout, "%-5s", "VID");
+    fprintf(stdout, "%-20s", "DEV");
+    fprintf(stdout, "%-20s", "ORIGIN-DEV");
+    fprintf(stdout, "%-5s", "DEL");
+    fprintf(stdout, "\n");
+
+    len = sizeof(struct mclagd_l2mc_msg);
+
+    for (; data_len >= len; data_len -= len, count++)
+    {
+        l2mc_info = (struct mclagd_l2mc_msg*)(msg + len * count);
+
+        fprintf(stdout, "%-6d", count + 1);
+
+        if (l2mc_info->l2mc_type == L2MC_TYPE_STATIC_CTL)
+            fprintf(stdout, "%-5s", "S");
+        else
+            fprintf(stdout, "%-5s", "D");
+
+        fprintf(stdout, "%-5d", l2mc_info->vid);
+        fprintf(stdout, "%-20s", l2mc_info->ifname);
+        fprintf(stdout, "%-20s", l2mc_info->origin_ifname);
+
+        if ((l2mc_info->del_flag & L2MC_DEL_LOCAL_CTL) && (l2mc_info->del_flag & L2MC_DEL_PEER_CTL))
+            fprintf(stdout, "%-5s", "LP");
+        else if (l2mc_info->del_flag & L2MC_DEL_LOCAL_CTL)
+            fprintf(stdout, "%-5s", "L");
+        else if (l2mc_info->del_flag & L2MC_DEL_PEER_CTL)
+            fprintf(stdout, "%-5s", "P");
+        else
+            fprintf(stdout, "%-5s", " ");
+        fprintf(stdout, "\n");
+    }
+
+    return 0;
+}
+
 
 int mclagdctl_enca_dump_local_portlist(char *msg, int mclag_id, int argc, char **argv)
 {
@@ -843,6 +918,8 @@ static char *mclagdctl_dbg_counter_syncdtx2str(SYNCD_TX_DBG_CNTR_MSG_e syncdtx_i
             return "SetFdb";
         case SYNCD_TX_DBG_CNTR_MSG_SET_L2MC:
             return "SetL2mc";
+        case SYNCD_TX_DBG_CNTR_MSG_SET_L2MC_MROUTER:
+            return "SetL2mcMrouter";
         case SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_ENABLE:
             return "TrafficDistEnable";
         case SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_DISABLE:

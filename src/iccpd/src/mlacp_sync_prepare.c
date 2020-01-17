@@ -480,6 +480,7 @@ int mlacp_prepare_for_l2mc_info_to_peer(struct CSM* csm, char* buf, size_t max_b
     tlv = (struct mLACPL2MCInfoTLV*)&buf[sizeof(ICCHdr)];
     tlv->icc_parameter.len = htons(tlv_len - sizeof(ICCParameter));
     tlv->num_of_entry = htons(count + 1);
+    tlv->l2mc_msg_type = l2mc_msg->l2mc_msg_type;
 
     if (count == 0)
     {
@@ -498,8 +499,8 @@ int mlacp_prepare_for_l2mc_info_to_peer(struct CSM* csm, char* buf, size_t max_b
 
     #if 1
     ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg type = TLV_T_MLACP_L2MC_INFO");
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg if name %s  saddr  = %s, gaddr = %s, "
-            "vid = %d, type = %d count %d msg len %d", l2mc_msg->origin_ifname,
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg msg-type:%d if name %s  saddr  = %s, gaddr = %s, "
+            "vid = %d, type = %d count %d msg len %d", l2mc_msg->l2mc_msg_type, l2mc_msg->origin_ifname,
             l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid, l2mc_msg->op_type, count, msg_len);
     #endif
 

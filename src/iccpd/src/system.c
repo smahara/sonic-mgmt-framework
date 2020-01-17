@@ -272,6 +272,9 @@ SYNCD_TX_DBG_CNTR_MSG_e system_syncdtx_to_dbg_msg_type(uint32_t msg_type)
         case MCLAG_MSG_TYPE_SET_L2MC:
             return SYNCD_TX_DBG_CNTR_MSG_SET_L2MC;
 
+        case MCLAG_MSG_TYPE_SET_L2MC_MROUTER:
+            return SYNCD_TX_DBG_CNTR_MSG_SET_L2MC_MROUTER;
+
         case MCLAG_MSG_TYPE_SET_TRAFFIC_DIST_ENABLE:
             return SYNCD_TX_DBG_CNTR_MSG_SET_TRAFFIC_DIST_ENABLE;
 

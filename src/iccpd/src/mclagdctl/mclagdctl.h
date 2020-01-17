@@ -84,6 +84,7 @@ enum mclagdctl_notify_peer_type
     INFO_TYPE_DUMP_NDISC,
     INFO_TYPE_DUMP_MAC,
     INFO_TYPE_DUMP_L2MC,
+    INFO_TYPE_DUMP_L2MC_MROUTER,
     INFO_TYPE_DUMP_UNIQUE_IP,
     INFO_TYPE_DUMP_LOCAL_PORTLIST,
     INFO_TYPE_DUMP_PEER_PORTLIST,
@@ -256,7 +257,9 @@ extern int mclagdctl_parse_dump_ndisc(char *msg, int data_len);
 extern int mclagdctl_enca_dump_mac(char *msg, int mclag_id, int argc, char **argv);
 extern int mclagdctl_parse_dump_mac(char *msg, int data_len);
 extern int mclagdctl_enca_dump_l2mc(char *msg, int mclag_id, int argc, char **argv);
+extern int mclagdctl_enca_dump_l2mc_mrouter(char *msg, int mclag_id, int argc, char **argv);
 extern int mclagdctl_parse_dump_l2mc(char *msg, int data_len);
+extern int mclagdctl_parse_dump_l2mc_mrouter(char *msg, int data_len);
 extern int mclagdctl_enca_dump_local_portlist(char *msg, int mclag_id,  int argc, char **argv);
 extern int mclagdctl_parse_dump_local_portlist(char *msg, int data_len);
 extern int mclagdctl_enca_dump_peer_portlist(char *msg, int mclag_id,  int argc, char **argv);
