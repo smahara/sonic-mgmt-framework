@@ -2261,7 +2261,6 @@ var DbToYang_bgp_routes_get_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams)
 
     log.Info(dbg_log)
 
-<<<<<<< HEAD
     switch targetUriPath {
         case "/openconfig-network-instance:network-instances/network-instance/protocols/protocol/bgp/rib": fallthrough
         case "/openconfig-network-instance:network-instances/network-instance/protocols/protocol/bgp/rib/afi-safis":
@@ -2386,5 +2385,3 @@ var DbToYang_bgp_routes_get_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams)
 
     return err;
 }
-
-
