@@ -89,6 +89,14 @@ extern char mac_print_str[ETHER_ADDR_STR_LEN];
     (elm)->l2mc_entry_rb.rbt_right = NULL;    \
 } while (/*CONSTCOND*/0)
 
+#define L2MC_MROUTER_RB_REMOVE(name, head, elm) do {  \
+    RB_REMOVE(name, head, elm);              \
+    (elm)->l2mc_mrouter_entry_rb.rbt_parent = NULL;   \
+    (elm)->l2mc_mrouter_entry_rb.rbt_left = NULL;     \
+    (elm)->l2mc_mrouter_entry_rb.rbt_right = NULL;    \
+} while (/*CONSTCOND*/0)
+
+
 /* Debug counters */
 /* Debug counters to track messages ICCPd sent to MclagSyncd */
 typedef uint8_t SYNCD_DBG_CNTR_STS_e;
@@ -116,6 +124,7 @@ enum SYNCD_TX_DBG_CNTR_MSG_e
     SYNCD_TX_DBG_CNTR_MSG_DEL_ICCP_INFO              = 11,
     SYNCD_TX_DBG_CNTR_MSG_SET_REMOTE_IF_STATE        = 12,
     SYNCD_TX_DBG_CNTR_MSG_DEL_REMOTE_IF_INFO         = 13,
+    SYNCD_TX_DBG_CNTR_MSG_SET_L2MC_MROUTER           = 14,
     SYNCD_TX_DBG_CNTR_MSG_MAX
 };
 

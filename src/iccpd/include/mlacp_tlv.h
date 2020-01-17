@@ -439,6 +439,7 @@ struct mLACPL2MCInfoTLV
 {
     ICCParameter    icc_parameter;
     uint16_t num_of_entry;
+    uint8_t l2mc_msg_type;/*l2mc entry or mrouter */
     struct mLACPL2MCData L2mcEntry[0];
 } __attribute__ ((packed));
 
@@ -557,6 +558,12 @@ enum L2MC_TYPE
     L2MC_TYPE_DYNAMIC    = 2,
 };
 
+enum L2MC_MSG_TYPE 
+{
+    MSG_TYPE_L2MC_ENTRY     = 1, 
+    MSG_TYPE_L2MC_MROUTER   = 2,
+};
+
 struct L2MCMsg
 {
     RB_ENTRY(L2MCMsg) l2mc_entry_rb;
@@ -565,7 +572,7 @@ struct L2MCMsg
     uint8_t     gaddr[INET_ADDRSTRLEN];
     uint8_t     op_type;    /*add or del*/
     uint8_t     l2mc_type;   /*static or dynamic*/
-
+    uint8_t     l2mc_msg_type; /*l2mc entry or l2mc mrouter*/
     /*Current if name that set in chip*/
     char     ifname[MAX_L_PORT_NAME];
     /*if we set the entry to peer-link, origin_ifname store the
@@ -577,5 +584,8 @@ struct L2MCMsg
 
 RB_HEAD(l2mc_rb_tree, L2MCMsg);
 RB_PROTOTYPE(l2mc_rb_tree, L2MCMsg, l2mc_entry_rb, L2MCMsg_compare);
+
+RB_HEAD(l2mc_mrouter_rb_tree, L2MCMsg);
+RB_PROTOTYPE(l2mc_mrouter_rb_tree, L2MCMsg, l2mc_entry_rb, L2MCMrouterMsg_compare);
 
 #endif /* MLACP_TLV_H_ */
