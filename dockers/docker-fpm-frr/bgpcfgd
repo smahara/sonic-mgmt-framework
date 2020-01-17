@@ -19,7 +19,7 @@ import signal
 import re
 import logging
 import netaddr
-import StringIO
+import cStringIO
 import struct
 
 class CachedDataWithOp:
@@ -75,7 +75,9 @@ def g_run_command(command, use_bgpd_client):
 class BgpdClientMgr(threading.Thread):
     QUIT_MARK = '$$quit$$'
     VTYSH_MARK = 'vtysh '
-    PROXY_SERVER_ADDR = '/etc/frr/bgpd_client.sock'
+    PROXY_SERVER_ADDR = '/etc/frr/bgpd_client_sock'
+    VTYSH_CMD_DAEMON = {'show ip route': ['zebra'],
+                        'show ip route json': ['zebra']}
     @staticmethod
     def __create_socket():
         try:
@@ -97,17 +99,23 @@ class BgpdClientMgr(threading.Thread):
         self.proxy_sock = self.__create_socket()
     def __proc_command(self, command):
         syslog.syslog(syslog.LOG_DEBUG, 'VTYSH CMD: %s' % command)
-        resp = None
+        resp = ''
         self.cmd_q.put(command)
-        ret_code, reply = self.resp_q.get(True)
-        if ret_code is None:
-            syslog.syslog(syslog.LOG_ERR, 'failed to get command response')
-        elif ret_code != 0:
-            syslog.syslog(syslog.LOG_ERR, 'command failed: ret_code=%d' % ret_code)
-            syslog.syslog(syslog.LOG_ERR, reply)
-        else:
-            resp = reply
-        return reply
+        while True:
+            daemon, ret_code, reply = self.resp_q.get(True)
+            if ret_code is None or ret_code != 0:
+                if ret_code is None:
+                    syslog.syslog(syslog.LOG_ERR, '[%s] failed to get command response' % daemon)
+                else:
+                    syslog.syslog(syslog.LOG_ERR, '[%s] command failed: ret_code=%d' % (daemon, ret_code))
+                    syslog.syslog(syslog.LOG_ERR, reply)
+                resp = None
+                break
+            else:
+                resp += reply
+            if self.resp_q.empty():
+                break
+        return resp
     def run_vtysh_command(self, command):
         if not command.startswith(self.VTYSH_MARK):
             syslog.syslog(syslog.LOG_ERR, 'command %s is not for vtysh config' % command)
@@ -125,7 +133,7 @@ class BgpdClientMgr(threading.Thread):
         return ret_val
     @staticmethod
     def __read_all(sock, data_len):
-        in_buf = StringIO.StringIO()
+        in_buf = cStringIO.StringIO()
         left_len = data_len
         while left_len > 0:
             data = sock.recv(left_len)
@@ -138,7 +146,6 @@ class BgpdClientMgr(threading.Thread):
         syslog.syslog(syslog.LOG_DEBUG, 'entering VTYSH proxy thread')
         while self.proxy_running:
             syslog.syslog(syslog.LOG_DEBUG, 'waiting for client connection ...')
-            in_buf = StringIO.StringIO()
             conn_sock, clnt_addr = self.proxy_sock.accept()
             if not self.proxy_running:
                 conn_sock.close()
@@ -190,66 +197,86 @@ class BgpdClientMgr(threading.Thread):
     def __get_reply(sock):
         reply_msg = None
         ret_code = None
-        chk_str = '\0\0\0'
-        msg_buf = StringIO.StringIO()
+        msg_buf = cStringIO.StringIO()
         while True:
             try:
-                msg_buf.write(sock.recv(1024))
+                rd_msg = sock.recv(16384)
+                msg_buf.write(rd_msg)
             except socket.timeout:
                 syslog.syslog(syslog.LOG_ERR, 'socket reading timeout')
                 break
-            reply_msg = msg_buf.getvalue()
-            if len(reply_msg) < 4:
-                continue
-            if reply_msg[-4:-1] == chk_str:
-                ret_code = ord(reply_msg[-1])
-                reply_msg = reply_msg[:-4]
+            if len(rd_msg) < 4:
+                rd_msg = msg_buf.getvalue()
+                if len(rd_msg) < 4:
+                    continue
+            msg_tail = rd_msg[-4:]
+            if msg_tail[0] == '\0' and msg_tail[1] == '\0' and msg_tail[2] == '\0':
+                ret_code = ord(msg_tail[3])
+                reply_msg = msg_buf.getvalue()[:-4]
                 break
+        msg_buf.close()
         return (ret_code, reply_msg)
     def run(self):
-        client_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        retry_cnt = 0
-        while True:
+        client_socks = {}
+        all_daemons = ['bgpd', 'zebra']
+        for daemon in all_daemons:
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            serv_addr = '/run/frr/%s.vty' % daemon
+            retry_cnt = 0
+            while True:
+                try:
+                    sock.connect(serv_addr)
+                    break
+                except socket.error, msg:
+                    syslog.syslog(syslog.LOG_ERR, 'failed to connect to frr daemon %s: %s' % (daemon, msg))
+                    retry_cnt += 1
+                    if retry_cnt > 100:
+                        syslog.syslog(syslog.LOG_ERR, 're-tried too many times, give up')
+                        for _, sock in client_socks.items():
+                            sock.close()
+                        return
+                    time.sleep(2)
+                    continue
+            sock.settimeout(5)
+            client_socks[daemon] = sock
+        for daemon, sock in client_socks.items():
+            syslog.syslog(syslog.LOG_DEBUG, 'send initial enable command to %s' % daemon)
             try:
-                client_sock.connect('/run/frr/bgpd.vty')
-                break
+                sock.sendall('enable\0')
             except socket.error, msg:
-                syslog.syslog(syslog.LOG_ERR, 'failed to connect to frr daemon: %s' % msg)
-                retry_cnt += 1
-                if retry_cnt > 100:
-                    syslog.syslog(syslog.LOG_ERR, 're-tried too many times, give up')
-                    return
-                time.sleep(2)
-                continue
-        syslog.syslog(syslog.LOG_DEBUG, 'daemon socket connected, send initial enable command')
-        client_sock.settimeout(5)
-        try:
-            client_sock.sendall('enable\0')
-        except socket.error, msg:
-            syslog.syslog(syslog.LOG_ERR, 'failed to send initial enable command to bgpd')
-            return
-        ret_code, reply = self.__get_reply(client_sock)
-        if ret_code is None:
-            syslog.syslog(syslog.LOG_ERR, 'failed to command response for enable command')
-            return
-        if ret_code != 0:
-            syslog.syslog(syslog.LOG_ERR, 'enable command failed: ret_code=%d' % ret_code)
-            syslog.syslog(syslog.LOG_ERR, reply)
-            return
+                syslog.syslog(syslog.LOG_ERR, 'failed to send initial enable command to %s' % daemon)
+                return
+            ret_code, reply = self.__get_reply(sock)
+            if ret_code is None:
+                syslog.syslog(syslog.LOG_ERR, 'failed to command response for enable command')
+                return
+            if ret_code != 0:
+                syslog.syslog(syslog.LOG_ERR, 'enable command failed: ret_code=%d' % ret_code)
+                syslog.syslog(syslog.LOG_ERR, reply)
+                return
         syslog.syslog(syslog.LOG_DEBUG, 'entering thread main loop ...')
         while True:
             cmd = self.cmd_q.get(True)
             if cmd == self.QUIT_MARK:
                 syslog.syslog(syslog.LOG_DEBUG, 'leaving thread main loop')
                 break
-            try:
-                client_sock.sendall(cmd + '\0')
-            except socket.error, msg:
-                syslog.syslog(syslog.LOG_ERR, 'failed to send command to frr daemon: %s' % msg)
-                self.resp_q.put((None, None))
-                continue
-            self.resp_q.put(self.__get_reply(client_sock))
-        client_sock.close()
+            daemons = self.VTYSH_CMD_DAEMON.get(cmd.strip(), None)
+            if daemons is None:
+                daemons = [all_daemons[0]] #default daemon
+            for daemon in daemons:
+                sock = client_socks.get(daemon, None)
+                if sock is None:
+                    syslog.syslog(syslog.LOG_ERR, 'daemon %s is not connected' % daemon)
+                    continue
+                try:
+                    sock.sendall(cmd + '\0')
+                except socket.error, msg:
+                    syslog.syslog(syslog.LOG_ERR, 'failed to send command to frr daemon: %s' % msg)
+                    self.resp_q.put((daemon, None, None))
+                    continue
+                self.resp_q.put((daemon,) + self.__get_reply(sock))
+        for _, sock in client_socks.items():
+            sock.close()
 
 class BGPPeerGroup:
     def __init__(self, vrf):
