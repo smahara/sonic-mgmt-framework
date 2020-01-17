@@ -4,7 +4,7 @@
 #
 #  SPDX-License-Identifier:     GPL-2.0
 
-MEM=4096
+MEM=6144
 DISK=$1
 ONIE_RECOVERY_ISO=$2
 INSTALLER=$3
@@ -35,7 +35,7 @@ create_disk()
 
 prepare_installer_disk()
 {
-    fallocate -l 2048M $INSTALLER_DISK
+    fallocate -l 4096M $INSTALLER_DISK
 
     mkfs.vfat $INSTALLER_DISK
 
