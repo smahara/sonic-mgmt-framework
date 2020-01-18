@@ -318,7 +318,7 @@ add_ndisc:
                 ndisc_msg->mac_addr[3], ndisc_msg->mac_addr[4], ndisc_msg->mac_addr[5]);
 
         iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_msg->ipv6_addr, 1, ndisc_msg->mac_addr, ndisc_msg->ifname);
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Add dynamic ND to kernel [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
+        ICCPD_LOG_NOTICE(__FUNCTION__, "Add dynamic ND to kernel [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
     }
     goto done;
 
@@ -339,7 +339,7 @@ del_ndisc:
         iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_msg->ipv6_addr, 1, ndisc_msg->mac_addr, ndisc_msg->ifname);
 
         /* link broken, del all dynamic ndisc on the lif */
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Del dynamic ND [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
+        ICCPD_LOG_NOTICE(__FUNCTION__, "Del dynamic ND [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
     }
 
 done:
