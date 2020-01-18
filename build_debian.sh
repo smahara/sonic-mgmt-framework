@@ -470,6 +470,8 @@ set /files/etc/sysctl.conf/net.ipv4.conf.all.arp_ignore 1
 set /files/etc/sysctl.conf/net.ipv4.neigh.default.base_reachable_time_ms 1800000
 set /files/etc/sysctl.conf/net.ipv6.neigh.default.base_reachable_time_ms 1800000
 
+set /files/etc/sysctl.conf/net.ipv4.igmp_max_memberships 4096
+
 set /files/etc/sysctl.conf/net.ipv4.neigh.default.gc_thresh1 1
 set /files/etc/sysctl.conf/net.ipv6.neigh.default.gc_thresh1 1
 
