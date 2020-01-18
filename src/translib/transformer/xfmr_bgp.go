@@ -121,15 +121,13 @@ func exec_vtysh_cmd (vtysh_cmd string) (map[string]interface{}, error) {
 }
 
 func init () {
-    XlateFuncBind("YangToDb_network_instance_protocol_key_xfmr", YangToDb_network_instance_protocol_key_xfmr)
-    XlateFuncBind("DbToYang_network_instance_protocol_key_xfmr", DbToYang_network_instance_protocol_key_xfmr)
     XlateFuncBind("YangToDb_bgp_gbl_tbl_key_xfmr", YangToDb_bgp_gbl_tbl_key_xfmr)
     XlateFuncBind("DbToYang_bgp_gbl_tbl_key_xfmr", DbToYang_bgp_gbl_tbl_key_xfmr)
     XlateFuncBind("YangToDb_bgp_local_asn_fld_xfmr", YangToDb_bgp_local_asn_fld_xfmr)
     XlateFuncBind("DbToYang_bgp_local_asn_fld_xfmr", DbToYang_bgp_local_asn_fld_xfmr)
     XlateFuncBind("YangToDb_bgp_gbl_afi_safi_field_xfmr", YangToDb_bgp_gbl_afi_safi_field_xfmr)
     XlateFuncBind("DbToYang_bgp_gbl_afi_safi_field_xfmr", DbToYang_bgp_gbl_afi_safi_field_xfmr)
-	XlateFuncBind("YangToDb_bgp_dyn_neigh_listen_key_xfmr", YangToDb_bgp_dyn_neigh_listen_key_xfmr)
+    XlateFuncBind("YangToDb_bgp_dyn_neigh_listen_key_xfmr", YangToDb_bgp_dyn_neigh_listen_key_xfmr)
 	XlateFuncBind("DbToYang_bgp_dyn_neigh_listen_key_xfmr", DbToYang_bgp_dyn_neigh_listen_key_xfmr) 
 	XlateFuncBind("YangToDb_bgp_gbl_afi_safi_key_xfmr", YangToDb_bgp_gbl_afi_safi_key_xfmr)
 	XlateFuncBind("DbToYang_bgp_gbl_afi_safi_key_xfmr", DbToYang_bgp_gbl_afi_safi_key_xfmr) 
@@ -171,10 +169,6 @@ var YangToDb_bgp_local_asn_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams
         return rmap, err
     }
 
-    if inParams.oper == DELETE {
-        rmap["local_asn"] = ""
-        return rmap, nil
-    }
 
     log.Info("YangToDb_bgp_local_asn_fld_xfmr")
     pathInfo := NewPathInfo(inParams.uri)
@@ -189,8 +183,7 @@ var YangToDb_bgp_local_asn_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams
        local_asn := uint32(local_asn64)
        if err_conv == nil && local_asn != *asn {
            log.Info("YangToDb_bgp_local_asn_fld_xfmr Local ASN is already present", local_asn, *asn)
-           return rmap, tlerr.InvalidArgs("BGP is already running with AS number %s", 
-                                          strconv.FormatUint(local_asn64, 10))
+           return rmap, tlerr.InvalidArgs("Local AS '%d' can't be modified!", local_asn)
        }
     }
     rmap["local_asn"] = strconv.FormatUint(uint64(*asn), 10)
@@ -304,46 +297,31 @@ var DbToYang_bgp_gbl_afi_safi_addr_field_xfmr FieldXfmrDbtoYang = func(inParams 
     return rmap, err
 }
 
-var YangToDb_network_instance_protocol_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
-
-    return "", nil 
-}
-
-var DbToYang_network_instance_protocol_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
-    rmap := make(map[string]interface{})
-    var err error
-
-    pathInfo := NewPathInfo(inParams.uri)
-
-    bgpId := pathInfo.Var("identifier")
-    protoName := pathInfo.Var("name#2")
-
-    rmap["name"] = protoName; 
-    rmap["identifier"] = bgpId; 
-    return rmap, err
-}
-
 var YangToDb_bgp_gbl_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
     var err error
 
     pathInfo := NewPathInfo(inParams.uri)
 
+    log.Info("YangToDb_bgp_gbl_tbl_key_xfmr: ", inParams.uri)
     niName := pathInfo.Var("name")
     bgpId := pathInfo.Var("identifier")
     protoName := pathInfo.Var("name#2")
 
     if len(pathInfo.Vars) <  3 {
-        return niName, errors.New("Invalid Key length")
+        log.Info("Invalid key length")
+        return "", errors.New("Invalid Key length")
     }
 
     if len(niName) == 0 {
-        return niName, errors.New("vrf name is missing")
+        log.Info("vrf name is missing")
+        return "", errors.New("vrf name is missing")
     }
 
     if strings.Contains(bgpId,"BGP") == false {
-        return niName, errors.New("BGP ID is missing")
+        log.Info("BGP ID is missing")
+        return "", errors.New("BGP ID is missing")
     }
-    
+
     if len(protoName) == 0 {
         return niName, errors.New("Protocol Name is missing")
     }
@@ -451,30 +429,30 @@ var YangToDb_bgp_gbl_afi_safi_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParam
         afName = "IPV4_UNICAST"
         if strings.Contains(inParams.uri, "ipv6-unicast") ||
            strings.Contains(inParams.uri, "l2vpn-evpn") {
-		    err = errors.New("IPV4_UNICAST supported only on ipv4-config container")
-		    log.Info("IPV4_UNICAST supported only on ipv4-config container: ", afName);
-		    return afName, err
+			err = errors.New("IPV4_UNICAST supported only on ipv4-config container")
+			log.Info("IPV4_UNICAST supported only on ipv4-config container: ", afName);
+			return afName, err
         }
     } else if strings.Contains(afName, "IPV6_UNICAST") {
         afName = "IPV6_UNICAST"
         if strings.Contains(inParams.uri, "ipv4-unicast") ||
            strings.Contains(inParams.uri, "l2vpn-evpn") {
-		    err = errors.New("IPV6_UNICAST supported only on ipv6-config container")
-		    log.Info("IPV6_UNICAST supported only on ipv6-config container: ", afName);
-		    return afName, err
+			err = errors.New("IPV6_UNICAST supported only on ipv6-config container")
+			log.Info("IPV6_UNICAST supported only on ipv6-config container: ", afName);
+			return afName, err
         }
     } else if strings.Contains(afName, "L2VPN_EVPN") {
         afName = "L2VPN_EVPN"
         if strings.Contains(inParams.uri, "ipv6-unicast") ||
            strings.Contains(inParams.uri, "ipv4-unicast") {
-		    err = errors.New("L2VPN_EVPN supported only on l2vpn-evpn container")
-		    log.Info("L2VPN_EVPN supported only on l2vpn-evpn container: ", afName);
-		    return afName, err
+			err = errors.New("L2VPN_EVPN supported only on l2vpn-evpn container")
+			log.Info("L2VPN_EVPN supported only on l2vpn-evpn container: ", afName);
+			return afName, err
         }
     } else  {
-	    err = errors.New("Unsupported AFI SAFI")
-	    log.Info("Unsupported AFI SAFI ", afName);
-	    return afName, err
+		err = errors.New("Unsupported AFI SAFI")
+		log.Info("Unsupported AFI SAFI ", afName);
+		return afName, err
     }
 
 	key := niName + "|" + afi
@@ -561,30 +539,30 @@ var YangToDb_bgp_gbl_afi_safi_addr_key_xfmr KeyXfmrYangToDb = func(inParams Xfmr
         afName = "IPV4_UNICAST"
         if strings.Contains(inParams.uri, "ipv6-unicast") ||
            strings.Contains(inParams.uri, "l2vpn-evpn") {
-		    err = errors.New("IPV4_UNICAST supported only on ipv4-config container")
-		    log.Info("IPV4_UNICAST supported only on ipv4-config container: ", afName);
-		    return afName, err
+			err = errors.New("IPV4_UNICAST supported only on ipv4-config container")
+			log.Info("IPV4_UNICAST supported only on ipv4-config container: ", afName);
+			return afName, err
         }
     } else if strings.Contains(afName, "IPV6_UNICAST") {
         afName = "IPV6_UNICAST"
         if strings.Contains(inParams.uri, "ipv4-unicast") ||
            strings.Contains(inParams.uri, "l2vpn-evpn") {
-		    err = errors.New("IPV6_UNICAST supported only on ipv6-config container")
-		    log.Info("IPV6_UNICAST supported only on ipv6-config container: ", afName);
-		    return afName, err
+			err = errors.New("IPV6_UNICAST supported only on ipv6-config container")
+			log.Info("IPV6_UNICAST supported only on ipv6-config container: ", afName);
+			return afName, err
         }
     } else if strings.Contains(afName, "L2VPN_EVPN") {
         afName = "L2VPN_EVPN"
         if strings.Contains(inParams.uri, "ipv6-unicast") ||
            strings.Contains(inParams.uri, "ipv4-unicast") {
-		    err = errors.New("L2VPN_EVPN supported only on l2vpn-evpn container")
-		    log.Info("L2VPN_EVPN supported only on l2vpn-evpn container: ", afName);
-		    return afName, err
+			err = errors.New("L2VPN_EVPN supported only on l2vpn-evpn container")
+			log.Info("L2VPN_EVPN supported only on l2vpn-evpn container: ", afName);
+			return afName, err
         }
     } else  {
-	    err = errors.New("Unsupported AFI SAFI")
-	    log.Info("Unsupported AFI SAFI ", afName);
-	    return afName, err
+		err = errors.New("Unsupported AFI SAFI")
+		log.Info("Unsupported AFI SAFI ", afName);
+		return afName, err
     }
 
 	key := niName + "|" + afi + "|" + prefix

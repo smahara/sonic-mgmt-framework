@@ -28,3 +28,4 @@ openconfig-nat-annot.yang
 openconfig-rib-bgp-ext.yang
 sonic-bgp-clear.yang
 sonic-bgp-clear-annot.yang
+openconfig-network-instance-ext.yang
