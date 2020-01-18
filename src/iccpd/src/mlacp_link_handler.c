@@ -2099,8 +2099,7 @@ void mlacp_convert_remote_mac_to_local(struct CSM *csm, char *po_name)
 
     if (lif->state == PORT_STATE_DOWN)
     {
-        ICCPD_LOG_DEBUG("ICCP_FDB", "Do not Convert remote mac as Local interface %s is down "
-            "interface %s, MAC %s vlan-id %d", po_name);
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Do not Convert remote mac as Local interface %s is down", po_name);
         return;
     }
 

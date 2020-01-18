@@ -1,0 +1,19 @@
+#!/bin/sh
+# Based on the primary group, launch the real shell
+# admin -> /bin/bash
+# operator and all others -> /usr/bin/sonic-cli
+
+GROUP=$(id -gn)
+
+case "$GROUP" in
+    admin)
+        LAUNCH_SHELL=/bin/bash
+        ;;
+
+    *)
+        LAUNCH_SHELL=/usr/bin/sonic-cli
+        ;;
+esac
+
+# Run the real shell
+exec "$LAUNCH_SHELL"
