@@ -855,7 +855,7 @@ int iccp_netlink_neighbor_request(int family, uint8_t *addr, int add, uint8_t *m
 
     sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-    ICCPD_LOG_INFO(__FUNCTION__, "notify kernel %s %s entry(ip:%s, mac:%s, intf:%s)",
+    ICCPD_LOG_NOTICE(__FUNCTION__, "notify kernel %s %s entry(ip:%s, mac:%s, intf:%s)",
                    add ? "add" : "del", (family == AF_INET) ? "ARP" : "ND",
                    (family == AF_INET) ? show_ip_str(*((int *)addr)) : show_ipv6_str(addr), mac_str, portname);
 

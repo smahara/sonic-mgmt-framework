@@ -444,7 +444,8 @@ int mlacp_prepare_for_ndisc_info(struct CSM *csm, char *buf, size_t max_buf_size
     memcpy(NdiscData->ipv6_addr, ndisc_msg->ipv6_addr, 32);
     memcpy(NdiscData->mac_addr, ndisc_msg->mac_addr, ETHER_ADDR_LEN);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Send ND messge to peer, flag %d, if name %s  mac  =%02x:%02x:%02x:%02x:%02x:%02x IPv6 %s", NdiscData->flag, NdiscData->ifname,
+    ICCPD_LOG_NOTICE(__FUNCTION__, "Send ND messge to peer, flag %d, if name %s  mac  =%02x:%02x:%02x:%02x:%02x:%02x IPv6 %s", 
+                    NdiscData->flag, NdiscData->ifname,
                     NdiscData->mac_addr[0], NdiscData->mac_addr[1], NdiscData->mac_addr[2], NdiscData->mac_addr[3], NdiscData->mac_addr[4],
                     NdiscData->mac_addr[5], show_ipv6_str((char *)NdiscData->ipv6_addr));
 
