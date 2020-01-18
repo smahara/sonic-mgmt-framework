@@ -1,7 +1,7 @@
-snmp_rocommunity: NotConfigured
-snmp_rocommunity6: NotConfigured
-snmp_location: NotConfigured
-snmp_syscontact: NotConfigured
+snmp_rocommunity: public
+snmp_rocommunity6: public
+snmp_location: public
+snmp_syscontact: Azure Cloud Switch vteam <linuxnetdev@microsoft.com>
 v1_trap_dest: NotConfigured
 v2_trap_dest: NotConfigured
 v3_trap_dest: NotConfigured
