@@ -1173,7 +1173,7 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
     sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x", ndisc_entry->mac_addr[0], ndisc_entry->mac_addr[1], ndisc_entry->mac_addr[2],
             ndisc_entry->mac_addr[3], ndisc_entry->mac_addr[4], ndisc_entry->mac_addr[5]);
 
-    ICCPD_LOG_INFO(__FUNCTION__,
+    ICCPD_LOG_NOTICE(__FUNCTION__,
                    "Received ND Info, intf[%s] IP[%s], MAC[%s]", ndisc_entry->ifname, show_ipv6_str((char *)ndisc_entry->ipv6_addr), mac_str);
 
     if ((strncmp(ndisc_entry->ifname, SAG_PREFIX, strlen(SAG_PREFIX)) == 0))
@@ -1325,7 +1325,7 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
         {
             if (iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_entry->ipv6_addr, 1, ndisc_entry->mac_addr, ndisc_entry->ifname) < 0)
             {
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to add nd entry(%s %s %s) to kernel",
+                ICCPD_LOG_NOTICE(__FUNCTION__, "Failed to add nd entry(%s %s %s) to kernel",
                                 ndisc_entry->ifname, show_ipv6_str((char *)ndisc_entry->ipv6_addr), mac_str);
                 return MCLAG_ERROR;
             }
@@ -1340,7 +1340,7 @@ int mlacp_fsm_update_ndisc_entry(struct CSM *csm, struct NDISCMsg *ndisc_entry)
         {
             if (iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_entry->ipv6_addr, 0, ndisc_entry->mac_addr, ndisc_entry->ifname) < 0)
             {
-                ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to delete nd entry(%s %s %s) from kernel",
+                ICCPD_LOG_NOTICE(__FUNCTION__, "Failed to delete nd entry(%s %s %s) from kernel",
                                 ndisc_entry->ifname, show_ipv6_str((char *)ndisc_entry->ipv6_addr), mac_str);
                 return MCLAG_ERROR;
             }

@@ -390,7 +390,7 @@ static void do_ndisc_learn_from_kernel(struct ndmsg *ndm, struct rtattr *tb[], i
     if (!is_sag && tb[NDA_LLADDR])
         memcpy(ndisc_msg->mac_addr, RTA_DATA(tb[NDA_LLADDR]), RTA_PAYLOAD(tb[NDA_LLADDR]));
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "ndisc type %s, state (%04X)(%d), ifindex [%d] (%s), ip %s, mac [%02X:%02X:%02X:%02X:%02X:%02X]",
+    ICCPD_LOG_NOTICE(__FUNCTION__, "ndisc type %s, state (%04X)(%d), ifindex [%d] (%s), ip %s, mac [%02X:%02X:%02X:%02X:%02X:%02X]",
                     msgtype == RTM_NEWNEIGH ? "New" : "Del", ndm->ndm_state, fwd_neigh_state_valid(ndm->ndm_state),
                     ndm->ndm_ifindex, ndisc_lif->name,
                     show_ipv6_str((char *)ndisc_msg->ipv6_addr),
@@ -916,7 +916,7 @@ void do_ndisc_update_from_reply_packet(unsigned int ifindex, char *ipv6_addr, ui
     memcpy((char *)ndisc_msg->ipv6_addr, ipv6_addr, 16);
     memcpy(ndisc_msg->mac_addr, mac_addr, ETHER_ADDR_LEN);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "nd ifindex [%d] (%s) ip %s mac %s", ifindex, ndisc_lif->name, show_ipv6_str(ipv6_addr), mac_str);
+    ICCPD_LOG_NOTICE(__FUNCTION__, "nd ifindex [%d] (%s) ip %s mac %s", ifindex, ndisc_lif->name, show_ipv6_str(ipv6_addr), mac_str);
 
     /* Find MLACP itf, member of port-channel */
     LIST_FOREACH(csm, &(sys->csm_list), next)
@@ -1008,11 +1008,11 @@ void do_ndisc_update_from_reply_packet(unsigned int ifindex, char *ipv6_addr, ui
             ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to enqueue NDISC-list: %s, add %s", ndisc_msg->ifname, show_ipv6_str((char *)ndisc_msg->ipv6_addr));
     }
 
-        ICCPD_LOG_DEBUG(__FUNCTION__, "add nd entry(%s, %s, %s) to kernel",
+        ICCPD_LOG_NOTICE(__FUNCTION__, "add nd entry(%s, %s, %s) to kernel",
                         ndisc_msg->ifname, show_ipv6_str((char *)ndisc_msg->ipv6_addr), mac_str);
     if (iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_msg->ipv6_addr, 1, ndisc_msg->mac_addr, ndisc_msg->ifname) < 0)
     {
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to add nd entry(%s, %s, %s) to kernel",
+        ICCPD_LOG_NOTICE(__FUNCTION__, "Failed to add nd entry(%s, %s, %s) to kernel",
                         ndisc_msg->ifname, show_ipv6_str((char *)ndisc_msg->ipv6_addr), mac_str);
         return;
     }
