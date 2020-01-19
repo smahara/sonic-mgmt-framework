@@ -5,7 +5,7 @@ mkdir -p /etc/frr
 CONFIG_TYPE=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["docker_routing_config_mode"]'`
 
 if [ -z "$CONFIG_TYPE" ]; then
-	# Assume split (frr unified)
+       # Assume split (frr unified)
     echo "service integrated-vtysh-config" > /etc/frr/vtysh.conf
 
 elif [ "$CONFIG_TYPE" == "separated" ]; then
@@ -13,7 +13,7 @@ elif [ "$CONFIG_TYPE" == "separated" ]; then
     sonic-cfggen -d -t /usr/share/sonic/templates/zebra.conf.j2 > /etc/frr/zebra.conf
     sonic-cfggen -d -t /usr/share/sonic/templates/staticd.conf.j2 > /etc/frr/staticd.conf
     echo "no service integrated-vtysh-config" > /etc/frr/vtysh.conf
-	echo "" > /etc/frr/frr.conf
+    rm -f /etc/frr/frr.conf
 elif [ "$CONFIG_TYPE" == "unified" ]; then
     sonic-cfggen -d -y /etc/sonic/constants.yml -t /usr/share/sonic/templates/frr.conf.j2 >/etc/frr/frr.conf
     echo "service integrated-vtysh-config" > /etc/frr/vtysh.conf
@@ -21,7 +21,6 @@ elif [ "$CONFIG_TYPE" == "unified" ]; then
 fi
 
 chown -R frr:frr /etc/frr/
-
 sonic-cfggen -d -t /usr/share/sonic/templates/isolate.j2 > /usr/sbin/bgp-isolate
 chown root:root /usr/sbin/bgp-isolate
 chmod 0755 /usr/sbin/bgp-isolate
