@@ -45,6 +45,7 @@ var NwInstTblNameMapWithName = map[string]string {
 	"mgmt": "MGMT_VRF_CONFIG",
 	"Vrf": "VRF",
 	"default": "VRF",
+    "Vlan": "VLAN",
 }
 
 /*
@@ -60,6 +61,8 @@ func getInternalNwInstName (name string) (string, error) {
                 return "mgmt", err
         } else if (strings.HasPrefix(name, "Vrf") == true) {
                 return "Vrf", err
+        } else if (strings.HasPrefix(name, "Vlan") == true) {
+                return "Vlan", err
         } else if (strings.Compare(name, "default") == 0) {
                 return "default", err
         } else {
@@ -244,6 +247,7 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
                 if (inParams.oper == GET) {
                         tblList = append(tblList , "MGMT_VRF_CONFIG")
                         tblList = append(tblList, "VRF")
+                        tblList = append(tblList, "VLAN")
                         log.Info("network_instance_table_name_xfmr: tblList ", tblList)
                         return tblList, err
                 } else {
@@ -259,6 +263,7 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
 
                 /* If keyName not expected, make it hit the sonic VRF yang to return error msg */ 
                 tblList = append(tblList, "VRF");
+                tblList = append(tblList, "VLAN")
                 return tblList, err
         }
 
