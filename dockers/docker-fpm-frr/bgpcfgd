@@ -970,7 +970,7 @@ class BGPConfigDaemon:
                            'local_route_distance'],                     '{no:no-prefix}distance bgp {} {} {}'),
                          ('max_ebgp_paths',                         '{no:no-prefix}maximum-paths {}'),
                          (('max_ibgp_paths',
-                           '+ibgp_equal_cluster_length'],               '{no:no-prefix}maximum-paths ibgp {} {:match-clust-len}', hdl_ibgp_maxpath),
+                           '+ibgp_equal_cluster_length'),               '{no:no-prefix}maximum-paths ibgp {} {:match-clust-len}', hdl_ibgp_maxpath),
                          (('network_prefix',
                            '+network_policy', '+network_backdoor'), '{no:no-prefix}network {:network}'),
                          ('route_download_filter',                  '{no:no-prefix}table-map {}'),
@@ -983,7 +983,7 @@ class BGPConfigDaemon:
                          ('autort',                                      '{no:no-prefix}autort {}'),
                          ('flooding',                                    '{no:no-prefix}flooding {}'),
                          ('dad-enabled',                                 '{no:no-prefix}dup-addr-detection', ['true','false']),
-                         ('route-distinguisher',                         '{no:no-prefix}rd {}')
+                         ('route-distinguisher',                         '{no:no-prefix}rd {}'),
                          (['route_flap_dampen',
                            '+route_flap_dampen_half_life',
                            '+route_flap_dampen_reuse_threshold',
