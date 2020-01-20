@@ -2108,26 +2108,23 @@ void mlacp_convert_remote_mac_to_local(struct CSM *csm, char *po_name)
         if (strcmp(mac_msg->origin_ifname, po_name) != 0)
             continue;
 
-        mac_msg->age_flag |= MAC_AGE_PEER;
-        ICCPD_LOG_DEBUG("ICCP_FDB", "Convert remote mac on Origin Interface: interface %s, "
-                "interface %s, MAC %s vlan-id %d", mac_msg->origin_ifname,
-                mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
-
-        /* local and peer both aged, to be deleted*/
-        if (mac_msg->age_flag != (MAC_AGE_LOCAL | MAC_AGE_PEER))
-            continue;
-
-        ICCPD_LOG_DEBUG("ICCP_FDB", "Convert remote to local mac on Interface: %s, "
-            "MAC %s vlan-id %d", mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
-
-        /*Send mac add message to mclagsyncd with aging enabled*/
-        add_mac_to_chip(mac_msg, MAC_TYPE_DYNAMIC_LOCAL);
-
-        mac_msg->op_type = MAC_SYNC_ADD;
-
-        if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
+        // convert only remote macs.
+        if (mac_msg->age_flag == MAC_AGE_LOCAL)
         {
-            TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
+            mac_msg->age_flag = MAC_AGE_PEER;
+            ICCPD_LOG_DEBUG("ICCP_FDB", "Convert remote mac on Origin Interface as local: interface %s, "
+                    "interface %s, MAC %s vlan-id %d age flag:%d", mac_msg->origin_ifname,
+                    mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+
+            /*Send mac add message to mclagsyncd with aging enabled*/
+            add_mac_to_chip(mac_msg, MAC_TYPE_DYNAMIC_LOCAL);
+
+            mac_msg->op_type = MAC_SYNC_ADD;
+
+            if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
+            {
+                TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
+            }
         }
     }
 }
