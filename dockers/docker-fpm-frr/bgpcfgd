@@ -1974,28 +1974,43 @@ class BGPConfigDaemon:
                     self.__delete_bfd_peer(data)
             elif table == 'BFD_PEER_MULTI_HOP':
 		key = prefix + '|' + key
-                remoteaddr, vrf, localaddr = key.lower().split('|')
+                remoteaddr, interface, vrf, localaddr = key.lower().split('|')
                 if not del_table:
-		    syslog.syslog(syslog.LOG_INFO, 'Set BFD multi hop to {} {} {}'.format(remoteaddr, vrf, localaddr))
+		    syslog.syslog(syslog.LOG_INFO, 'Set BFD multi hop to {} {} {} {}'.format(remoteaddr, interface, vrf, localaddr))
                     suffix_cmd, oper = self.__bfd_handle_delete (data)
                     if suffix_cmd and oper == CachedDataWithOp.OP_DELETE:
-                        command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {} interface {}' -c '{}'".\
-                        format(remoteaddr, localaddr, vrf, interface, suffix_cmd)
+			if not 'null' in interface:
+                            command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {} interface {}' -c '{}'".\
+                            format(remoteaddr, localaddr, vrf, interface, suffix_cmd)
+                        else:
+                            command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {}' -c '{}'".\
+                            format(remoteaddr, localaddr, vrf, suffix_cmd)
 
                         if not self.__run_command(command):
                             syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
                             continue
 		    else:
-                        cmd_prefix = ['configure terminal',
-                                      'bfd',
-                              	      'peer {} vrf {} multihop local-address {}'.format(remoteaddr, vrf, localaddr)]
+                        if not 'null' in interface:
+                            cmd_prefix = ['configure terminal',
+                                          'bfd',
+                              	          'peer {} vrf {} multihop local-address {} interface {}'.format(remoteaddr, vrf, localaddr, interface)]
+                        else:
+                            cmd_prefix = ['configure terminal',
+                                          'bfd',
+                                          'peer {} vrf {} multihop local-address {}'.format(remoteaddr, vrf, localaddr)]
+
                         if not key_map.run_command(self, data, cmd_prefix):
                             syslog.syslog(syslog.LOG_ERR, 'failed running BFD multi-hop config command')
                             continue
 		else:
-                    syslog.syslog(syslog.LOG_INFO, 'Delete BFD multi hop to {} {} {}'.format(remoteaddr, vrf, localaddr))
-                    command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} multihop local-address {}'".\
+                    syslog.syslog(syslog.LOG_INFO, 'Delete BFD multi hop to {} {} {} {}'.format(remoteaddr, vrf, localaddr, interface))
+                    if not 'null' in interface:
+                        command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} multihop local-address {} interface {}'".\
+                        format(remoteaddr, vrf, localaddr, interface)
+                    else:
+                        command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} multihop local-address {}'".\
                         format(remoteaddr, vrf, localaddr)
+
                     if not self.__run_command(command):
                         syslog.syslog(syslog.LOG_ERR, 'failed to delete multihop peer {}'.format(key))
                         continue
