@@ -236,12 +236,15 @@ class LldpManager(object):
                 self.mgmt_ip = "None"
         else:
             for key in mgmt_intf_keys:
-                key = key.split('|', 1)
-                ip = key[1].split('/', 1)
-                if not self.mgmt_ip == ip[0]:
-                    log_info("Mgmt IP changed old ip {0}, new ip {1}".format(self.mgmt_ip, ip[0]))
-                    self.mgmt_ip = ip[0]
-                    self.update_mgmt_addr(ip[0]) 
+                if '|' in key:
+                    key = key.split('|', 1)
+                    if '/' in key[1]:
+                        ip = key[1].split('/', 1)
+                        if not self.mgmt_ip == ip[0]:
+                            log_info("Mgmt IP changed old ip {0}, new ip {1}".format(self.mgmt_ip, ip[0]))
+                            self.mgmt_ip = ip[0]
+                            self.update_mgmt_addr(ip[0]) 
+                            break
 
     def run(self):
         """

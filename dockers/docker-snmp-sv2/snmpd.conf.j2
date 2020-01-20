@@ -100,7 +100,6 @@ load   12 10 5
 #
 # Note: disabled snmp traps due to side effect of causing snmpd to listen on all ports (0.0.0.0)
 #
-{% if SNMP_SERVER is defined and SNMP_SERVER.SYSTEM['traps'] is defined and SNMP_SERVER.SYSTEM['traps'] == "enable" %}
 #   send SNMPv1  traps
 {%if v1_trap_dest and v1_trap_dest != 'NotConfigured' %}
 trapsink {{ v1_trap_dest }}
@@ -118,7 +117,6 @@ trap2sink {{ v2_trap_dest }}
 informsink {{ v3_trap_dest }}
 {% else %}
 #informsink   localhost public
-{% endif %}
 {% endif %}
 
 #  Note that you typically only want *one* of these three lines

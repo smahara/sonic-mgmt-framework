@@ -12,6 +12,8 @@
 #       by the script brcm-xlr-gts-create-eeprom-file.py
 #############################################################################
 
+import os
+
 try:
     from sonic_eeprom import eeprom_tlvinfo
 except ImportError, e:
@@ -22,6 +24,8 @@ class board(eeprom_tlvinfo.TlvInfoDecoder):
 
     def __init__(self, name, path, cpld_root, ro):
         self.eeprom_path = "/usr/share/sonic/platform/sys_eeprom.bin"
+        if os.path.isfile(self.eeprom_path) is False:
+             self.eeprom_path = "/usr/share/sonic/device/x86_64-bcm_xlr-r0/sys_eeprom.bin"
         super(board, self).__init__(self.eeprom_path, 0, '', False, True)
 
     def serial_number_str(self, e):

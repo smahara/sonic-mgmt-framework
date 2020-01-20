@@ -318,7 +318,7 @@ add_ndisc:
                 ndisc_msg->mac_addr[3], ndisc_msg->mac_addr[4], ndisc_msg->mac_addr[5]);
 
         iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_msg->ipv6_addr, 1, ndisc_msg->mac_addr, ndisc_msg->ifname);
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Add dynamic ND to kernel [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
+        ICCPD_LOG_NOTICE(__FUNCTION__, "Add dynamic ND to kernel [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
     }
     goto done;
 
@@ -339,7 +339,7 @@ del_ndisc:
         iccp_netlink_neighbor_request(AF_INET6, (uint8_t *)ndisc_msg->ipv6_addr, 1, ndisc_msg->mac_addr, ndisc_msg->ifname);
 
         /* link broken, del all dynamic ndisc on the lif */
-        ICCPD_LOG_DEBUG(__FUNCTION__, "Del dynamic ND [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
+        ICCPD_LOG_NOTICE(__FUNCTION__, "Del dynamic ND [%s]", show_ipv6_str((char *)ndisc_msg->ipv6_addr));
     }
 
 done:
@@ -1782,7 +1782,7 @@ uint8_t set_l2mc_local_del_flag(struct CSM *csm, struct L2MCMsg* l2mc_msg, uint8
     return new_del_flag;
 }
 
-void iccp_send_l2mc_entry_to_syncd( struct L2MCMsg* l2mc_msg, uint8_t l2mc_type, uint8_t op_type)
+void iccp_send_l2mc_entry_to_syncd( struct L2MCMsg* l2mc_msg, uint8_t l2mc_type, uint8_t l2mc_mlag_type, uint8_t op_type)
 {
     struct IccpSyncdHDr * msg_hdr;
     char *msg_buf = g_iccp_mlagsyncd_send_buf;
@@ -1801,21 +1801,34 @@ void iccp_send_l2mc_entry_to_syncd( struct L2MCMsg* l2mc_msg, uint8_t l2mc_type,
 
     msg_hdr = (struct IccpSyncdHDr *)msg_buf;
     msg_hdr->ver = ICCPD_TO_MCLAGSYNCD_HDR_VERSION;
-    msg_hdr->type = MCLAG_MSG_TYPE_SET_L2MC;
+    msg_hdr->type = l2mc_mlag_type;
 
     /*mac msg */
     l2mc_info = (struct mclag_l2mc_info *)&msg_buf[sizeof(struct IccpSyncdHDr)];
     l2mc_info->vid = l2mc_msg->vid;
     memcpy(l2mc_info->port_name, l2mc_msg->ifname, MAX_L_PORT_NAME);
-    memcpy(l2mc_info->saddr, l2mc_msg->saddr, INET_ADDRSTRLEN);
-    memcpy(l2mc_info->gaddr, l2mc_msg->gaddr, INET_ADDRSTRLEN);
+    if (l2mc_mlag_type == MCLAG_MSG_TYPE_SET_L2MC)
+    {
+        memcpy(l2mc_info->saddr, l2mc_msg->saddr, INET_ADDRSTRLEN);
+        memcpy(l2mc_info->gaddr, l2mc_msg->gaddr, INET_ADDRSTRLEN);
+    }
     l2mc_info->type = l2mc_type;
     l2mc_info->op_type = op_type;
     msg_hdr->len = sizeof(struct IccpSyncdHDr) + sizeof(struct mclag_l2mc_info);
 
-    ICCPD_LOG_NOTICE(__FUNCTION__, "fd %d write l2mc msg vid : %d ; ifname %s ; "
-        "saddr %s gaddr %s fdb type %d ; op type %d  ", sys->sync_fd, l2mc_info->vid,
-        l2mc_info->port_name, l2mc_info->saddr, l2mc_info->gaddr, l2mc_info->type, op_type);
+    if (l2mc_mlag_type == MCLAG_MSG_TYPE_SET_L2MC)
+    {
+        ICCPD_LOG_NOTICE(__FUNCTION__, "fd %d write l2mc msg vid : %d ; ifname %s ; "
+            "saddr %s gaddr %s l2mc type %d ; op type %d  ", sys->sync_fd, l2mc_info->vid,
+            l2mc_info->port_name, l2mc_info->saddr, l2mc_info->gaddr, l2mc_info->type, op_type);
+    }
+    else
+    {
+        ICCPD_LOG_NOTICE(__FUNCTION__, "fd %d write l2mc mrouter msg vid : %d ; ifname %s ; "
+            "l2mc mrouter type %d ; op type %d  ", sys->sync_fd, l2mc_info->vid,
+            l2mc_info->port_name, l2mc_info->type, op_type);
+    }
+
 
     /*send msg*/
     if (sys->sync_fd > 0 )
@@ -1842,16 +1855,16 @@ void iccp_send_l2mc_entry_to_syncd( struct L2MCMsg* l2mc_msg, uint8_t l2mc_type,
     return;
 }
 
-void add_l2mc_to_chip(struct L2MCMsg* l2mc_msg, uint8_t l2mc_type)
+void add_l2mc_to_chip(struct L2MCMsg* l2mc_msg, uint8_t l2mc_type, uint8_t l2mc_mlag_type)
 {
-    iccp_send_l2mc_entry_to_syncd( l2mc_msg, l2mc_type, L2MC_SYNC_ADD);
+    iccp_send_l2mc_entry_to_syncd( l2mc_msg, l2mc_type, l2mc_mlag_type, L2MC_SYNC_ADD);
 
     return;
 }
 
-void del_l2mc_from_chip(struct L2MCMsg* l2mc_msg)
+void del_l2mc_from_chip(struct L2MCMsg* l2mc_msg, uint8_t l2mc_mlag_type)
 {
-    iccp_send_l2mc_entry_to_syncd(  l2mc_msg, l2mc_msg->l2mc_type, L2MC_SYNC_DEL);
+    iccp_send_l2mc_entry_to_syncd(  l2mc_msg, l2mc_msg->l2mc_type, l2mc_mlag_type, L2MC_SYNC_DEL);
 
     return;
 }
@@ -2086,8 +2099,7 @@ void mlacp_convert_remote_mac_to_local(struct CSM *csm, char *po_name)
 
     if (lif->state == PORT_STATE_DOWN)
     {
-        ICCPD_LOG_DEBUG("ICCP_FDB", "Do not Convert remote mac as Local interface %s is down "
-            "interface %s, MAC %s vlan-id %d", po_name);
+        ICCPD_LOG_DEBUG("ICCP_FDB", "Do not Convert remote mac as Local interface %s is down", po_name);
         return;
     }
 
@@ -2096,26 +2108,23 @@ void mlacp_convert_remote_mac_to_local(struct CSM *csm, char *po_name)
         if (strcmp(mac_msg->origin_ifname, po_name) != 0)
             continue;
 
-        mac_msg->age_flag |= MAC_AGE_PEER;
-        ICCPD_LOG_DEBUG("ICCP_FDB", "Convert remote mac on Origin Interface: interface %s, "
-                "interface %s, MAC %s vlan-id %d", mac_msg->origin_ifname,
-                mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
-
-        /* local and peer both aged, to be deleted*/
-        if (mac_msg->age_flag != (MAC_AGE_LOCAL | MAC_AGE_PEER))
-            continue;
-
-        ICCPD_LOG_DEBUG("ICCP_FDB", "Convert remote to local mac on Interface: %s, "
-            "MAC %s vlan-id %d", mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid);
-
-        /*Send mac add message to mclagsyncd with aging enabled*/
-        add_mac_to_chip(mac_msg, MAC_TYPE_DYNAMIC_LOCAL);
-
-        mac_msg->op_type = MAC_SYNC_ADD;
-
-        if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
+        // convert only remote macs.
+        if (mac_msg->age_flag == MAC_AGE_LOCAL)
         {
-            TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
+            mac_msg->age_flag = MAC_AGE_PEER;
+            ICCPD_LOG_DEBUG("ICCP_FDB", "Convert remote mac on Origin Interface as local: interface %s, "
+                    "interface %s, MAC %s vlan-id %d age flag:%d", mac_msg->origin_ifname,
+                    mac_msg->ifname, mac_addr_to_str(mac_msg->mac_addr), mac_msg->vid, mac_msg->age_flag);
+
+            /*Send mac add message to mclagsyncd with aging enabled*/
+            add_mac_to_chip(mac_msg, MAC_TYPE_DYNAMIC_LOCAL);
+
+            mac_msg->op_type = MAC_SYNC_ADD;
+
+            if (!MAC_IN_MSG_LIST(&(MLACP(csm).mac_msg_list), mac_msg, tail))
+            {
+                TAILQ_INSERT_TAIL(&(MLACP(csm).mac_msg_list), mac_msg, tail);
+            }
         }
     }
 }
@@ -2148,7 +2157,7 @@ static void update_l2mc_state(struct CSM *csm,
             if (l2mc_msg->del_flag == (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
             {
                 /*send mac  message to mclagsyncd.*/
-                del_l2mc_from_chip(l2mc_msg);
+                del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC);
 
                 L2MC_RB_REMOVE(l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_msg);
 
@@ -2163,9 +2172,9 @@ static void update_l2mc_state(struct CSM *csm,
                 {
                     if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
                     {
-                        del_l2mc_from_chip(l2mc_msg);
+                        del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC);
                         memcpy(l2mc_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
-                        add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type);
+                        add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC);
                         ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, del flag %d, "
                            "redirect to peer-link: %s, saddr %s gaddr %s vlan-id %d",
                            l2mc_msg->del_flag, l2mc_msg->ifname,
@@ -2173,7 +2182,7 @@ static void update_l2mc_state(struct CSM *csm,
                     }
                     else
                     {
-                        del_l2mc_from_chip(l2mc_msg);
+                        del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC);
                         memcpy(l2mc_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
                         ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, del flag %d, "
                            "can not redirect, del L2MC as peer-link: %s down, "
@@ -2183,7 +2192,7 @@ static void update_l2mc_state(struct CSM *csm,
                 }
                 else
                 {
-                    del_l2mc_from_chip(l2mc_msg);
+                    del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC);
                 }
             }
         }
@@ -2198,12 +2207,12 @@ static void update_l2mc_state(struct CSM *csm,
                 l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
 
                 l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 0, 1);
-                del_l2mc_from_chip(l2mc_msg);
+                del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC);
                 
                 /*Reverse interface from peer-link to the original portchannel*/
                 memcpy(l2mc_msg->ifname, l2mc_msg->origin_ifname, MAX_L_PORT_NAME);
 
-                add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type);
+                add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC);
             }
             else
             {
@@ -2215,7 +2224,106 @@ static void update_l2mc_state(struct CSM *csm,
 
                 l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 0, 1);
 
-                add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type);
+                add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC);
+            }
+        }
+    }
+
+    return;
+}
+
+/*Deal with l2mc mrouter add,del when portchannel up or down*/
+static void update_l2mc_mrouter_state(struct CSM *csm,
+                                struct LocalInterface *lif,
+                                int po_state)
+{
+    struct L2MCMsg* l2mc_msg = NULL, *l2mc_temp = NULL;
+
+    if (!csm || !lif)
+        return;
+
+    RB_FOREACH_SAFE (l2mc_msg, l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb, l2mc_temp)
+    {
+        /* find the L2MC for this interface*/
+        if (strcmp(lif->name, l2mc_msg->origin_ifname) != 0)
+            continue;
+
+        /*portchannel down*/
+        if (po_state == 0)
+        {
+            l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 1, 1);
+
+            ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, del flag %d "
+                "vlan-id %d, Interface: %s", l2mc_msg->del_flag ,
+                l2mc_msg->vid, l2mc_msg->ifname);
+
+            if (l2mc_msg->del_flag == (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
+            {
+                /*send mac  message to mclagsyncd.*/
+                del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+
+                L2MC_RB_REMOVE(l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb, l2mc_msg);
+
+                if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail))
+                {
+                    free(l2mc_msg);
+                }
+            }
+            else
+            {
+                if (strlen(csm->peer_itf_name) != 0)
+                {
+                    if (csm->peer_link_if && csm->peer_link_if->state == PORT_STATE_UP)
+                    {
+                        del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+                        memcpy(l2mc_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
+                        add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+                        ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, del flag %d, "
+                           "redirect to peer-link: %s, vlan-id %d",
+                           l2mc_msg->del_flag, l2mc_msg->ifname, l2mc_msg->vid);
+                    }
+                    else
+                    {
+                        del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+                        memcpy(l2mc_msg->ifname, csm->peer_itf_name, MAX_L_PORT_NAME);
+                        ICCPD_LOG_DEBUG(__FUNCTION__, "Intf down, del flag %d, "
+                           "can not redirect, del L2MC as peer-link: %s down, "
+                           "vlanid %d", l2mc_msg->del_flag, l2mc_msg->ifname, l2mc_msg->vid);
+                    }
+                }
+                else
+                {
+                    del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+                }
+            }
+        }
+        else /*portchannel up*/
+        {
+            /*the old item is redirect to peerlink for portchannel down*/
+            /*when this portchannel up, recover the mac back*/
+            if (strcmp(l2mc_msg->ifname, csm->peer_itf_name) == 0)
+            {
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Intf up, redirect L2MC Mrouter to Interface: %s,"
+                "vlan-id %d", l2mc_msg->ifname, l2mc_msg->vid);
+
+                l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 0, 1);
+                del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+                
+                /*Reverse interface from peer-link to the original portchannel*/
+                memcpy(l2mc_msg->ifname, l2mc_msg->origin_ifname, MAX_L_PORT_NAME);
+
+                add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+            }
+            else
+            {
+                /*this may be peerlink is not configured and portchannel is down*/
+                /*when this portchannel up, add the l2mc back to ASIC*/
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Intf up, redirect L2MC Mrouter to Interface: %s,"
+                "vlan-id %d", l2mc_msg->ifname, l2mc_msg->vid);
+
+                l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 0, 1);
+
+                add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
             }
         }
     }
@@ -2607,7 +2715,32 @@ void mlacp_peer_disconn_handler(struct CSM* csm)
             "saddr %s gaddr %s vlan-id %d", l2mc_msg->ifname, l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
 
         /*Send del message to mclagsyncd, may be already deleted*/
-        del_l2mc_from_chip(l2mc_msg);
+        del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC);
+
+        L2MC_RB_REMOVE(l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_msg);
+        // free only if not in change list to be send to peer node,
+        // else free is taken care after sending the update to peer
+        if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail))
+        {
+            free(l2mc_msg);
+        }
+    }
+
+    RB_FOREACH_SAFE (l2mc_msg, l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb, l2mc_temp)
+    {
+        l2mc_msg->del_flag |= L2MC_DEL_PEER;
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Add peer del flag %d interface %s, vlan-id %d,"
+                " op_type %d", l2mc_msg->del_flag, l2mc_msg->ifname, l2mc_msg->vid, l2mc_msg->op_type);
+
+        /* find the entry that the port is peer-link or local and peer both deleted, to be deleted*/
+        if (strcmp(l2mc_msg->ifname, csm->peer_itf_name) != 0 && l2mc_msg->del_flag != (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
+            continue;
+
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer disconnect, del L2MC entry for peer-link: %s, "
+            "vlan-id %d", l2mc_msg->ifname, l2mc_msg->vid);
+
+        /*Send del message to mclagsyncd, may be already deleted*/
+        del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
 
         L2MC_RB_REMOVE(l2mc_rb_tree, &MLACP(csm).l2mc_rb, l2mc_msg);
         // free only if not in change list to be send to peer node,
@@ -2700,7 +2833,19 @@ void mlacp_peerlink_up_handler(struct CSM* csm)
         ICCPD_LOG_DEBUG(__FUNCTION__, "Peer link up, add L2MC to STATE_DB for peer-link: %s, "
                 "saddr %s gaddr %s vlan-id %d", l2mc_msg->ifname, l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
 
-        add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type);
+        add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC);
+    }
+
+    RB_FOREACH (l2mc_msg, l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb)
+    {
+        if ((strcmp(l2mc_msg->ifname, csm->peer_itf_name) != 0) ||
+            (!(l2mc_msg->del_flag & L2MC_DEL_LOCAL)))
+              continue;
+
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer link up, add L2MC mrouter to STATE_DB for peer-link: %s, "
+                "vlan-id %d", l2mc_msg->ifname, l2mc_msg->vid);
+
+        add_l2mc_to_chip(l2mc_msg, l2mc_msg->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
     }
 
     return;
@@ -2761,7 +2906,7 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
             " saddr %s gaddr %s vlan-id %d", l2mc_msg->ifname, l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid);
 
         /*Send del message to mclagsyncd*/
-        del_l2mc_from_chip(l2mc_msg);
+        del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC);
 
         /*If peer is not del, keep the entry in l2mc_rb, but ASIC is deleted*/
         if (l2mc_msg->del_flag == (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
@@ -2774,6 +2919,34 @@ void mlacp_peerlink_down_handler(struct CSM* csm)
             }
         }
     }
+
+    /*If peer link down, remove all the mrouter entries that point to the peer-link*/
+    RB_FOREACH_SAFE (l2mc_msg, l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb, l2mc_temp)
+    {
+        /* Find the entry that the port is peer-link to be deleted*/
+        if (strcmp(l2mc_msg->ifname, csm->peer_itf_name) != 0)
+            continue;
+
+       l2mc_msg->del_flag = set_l2mc_local_del_flag(csm, l2mc_msg, 1, 1);
+
+        ICCPD_LOG_DEBUG(__FUNCTION__, "Peer link down, del L2MC Mrouter for peer-link: %s,"
+            "vlan-id %d", l2mc_msg->ifname, l2mc_msg->vid);
+
+        /*Send del message to mclagsyncd*/
+        del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+
+        /*If peer is not del, keep the entry in l2mc_mrouter_rb, but ASIC is deleted*/
+        if (l2mc_msg->del_flag == (L2MC_DEL_LOCAL | L2MC_DEL_PEER))
+        {
+            L2MC_RB_REMOVE(l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb, l2mc_msg);
+
+            if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_msg, tail))
+            {
+                free(l2mc_msg);
+            }
+        }
+    }
+
     SYSTEM_INCR_PEER_LINK_DOWN_COUNTER(system_get_instance());
     return;
 }
@@ -3337,6 +3510,7 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
     l2mc_msg = (struct L2MCMsg*)buf;
     l2mc_msg->op_type = op_type;
     l2mc_msg->l2mc_type = l2mc_type;
+    l2mc_msg->l2mc_msg_type = MSG_TYPE_L2MC_ENTRY;
     memcpy(l2mc_msg->saddr, saddr, INET_ADDRSTRLEN);
     memcpy(l2mc_msg->gaddr, gaddr, INET_ADDRSTRLEN);
     l2mc_msg->vid = vid;
@@ -3344,9 +3518,9 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
     /*Debug*/
     #if 1
     /* dump receive L2MC info*/
-    fprintf(stderr, "\n======== L2MC Update==========\n");
-    fprintf(stderr, "  SMAC    =  %s \n", saddr);
-    fprintf(stderr, "  GMAC    =  %s \n", gaddr);
+    fprintf(stderr, "\n======== L2MC entry Update==========\n");
+    fprintf(stderr, "  SADDR    =  %s \n", saddr);
+    fprintf(stderr, "  GADDR    =  %s \n", gaddr);
     fprintf(stderr, "  vlan id = %d\n", vid);
     fprintf(stderr, "  ifname    =  %s \n", ifname);
     fprintf(stderr, "  l2mc type = %s\n", l2mc_type == L2MC_TYPE_STATIC ? "static" : "dynamic");
@@ -3450,7 +3624,7 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
                sync to iccp, this entry must be deleted */
             if (l2mc_lif->state == PORT_STATE_DOWN)
             {
-                del_l2mc_from_chip(l2mc_msg);
+                del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC);
                 return;
             }
             if (!from_mclag_intf || 
@@ -3547,7 +3721,7 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
                     if (!(l2mc_lif = local_if_find_by_name(l2mc_info->ifname)))
                         return;
                     if (l2mc_lif->state == PORT_STATE_UP) {
-                        add_l2mc_to_chip(l2mc_info, l2mc_info->l2mc_type);
+                        add_l2mc_to_chip(l2mc_info, l2mc_info->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC);
                     }
                 }
             }
@@ -3555,6 +3729,246 @@ void do_update_from_l2mc(uint8_t saddr[16], uint16_t vid, uint8_t gaddr[16], cha
     }
     return;
 }
+
+/* Received L2MC mrouter add and del from mclagsyncd */
+void do_update_from_l2mc_mrouter(uint16_t vid, char *ifname, uint8_t l2mc_type, uint8_t op_type, int leave)
+{
+    struct System *sys = NULL;
+    struct CSM *csm = NULL;
+    struct Msg *msg = NULL;
+    struct L2MCMsg *l2mc_msg = NULL, *l2mc_info = NULL, *new_l2mc_msg = NULL;
+    struct L2MCMsg l2mc_find;
+    uint8_t l2mc_exist = 0;
+    char buf[MAX_BUFSIZE];
+    size_t msg_len = 0;
+    uint8_t from_mclag_intf = 0;/*0: orphan port, 1: MCLAG port*/
+    struct CSM *first_csm = NULL;
+
+    struct LocalInterface *lif_po = NULL, *l2mc_lif = NULL;
+
+    if (!(sys = system_get_instance()))
+    {
+        ICCPD_LOG_ERR(__FUNCTION__, "Invalid system instance");
+        return;
+    }
+
+    /* create L2MC msg*/
+    memset(buf, 0, MAX_BUFSIZE);
+    msg_len = sizeof(struct L2MCMsg);
+    l2mc_msg = (struct L2MCMsg*)buf;
+    l2mc_msg->op_type = op_type;
+    l2mc_msg->l2mc_msg_type = MSG_TYPE_L2MC_MROUTER;
+    l2mc_msg->l2mc_type = l2mc_type;
+    l2mc_msg->vid = vid;
+
+    /*Debug*/
+    #if 1
+    /* dump receive L2MC info*/
+    fprintf(stderr, "\n======== L2MC Mrouter Update==========\n");
+    fprintf(stderr, "  vlan id = %d\n", vid);
+    fprintf(stderr, "  ifname    =  %s \n", ifname);
+    fprintf(stderr, "  l2mc type = %s\n", l2mc_type == L2MC_TYPE_STATIC ? "static" : "dynamic");
+    fprintf(stderr, "  op type = %s\n", op_type == L2MC_SYNC_ADD ? "add" : "del");
+    fprintf(stderr, "==============================\n");
+    #endif
+
+    /* Find MLACP itf, may be mclag enabled port-channel*/
+    LIST_FOREACH(csm, &(sys->csm_list), next)
+    {
+        if (csm && !first_csm)
+        {
+            /*Record the first CSM, only one CSM in the system currently*/
+            first_csm = csm;
+        }
+
+        /*If L2MC is from peer-link, break; peer-link is not in MLACP(csm).lif_list*/
+        if (strcmp(ifname, csm->peer_itf_name) == 0)
+            break;
+
+        LIST_FOREACH(lif_po, &(MLACP(csm).lif_list), mlacp_next)
+        {
+            if (lif_po->type != IF_T_PORT_CHANNEL)
+                continue;
+
+            if (strcmp(lif_po->name, ifname) == 0)
+            {
+                from_mclag_intf = 1;
+                break;
+            }
+        }
+
+        if (from_mclag_intf == 1)
+            break;
+    }
+
+    if (!first_csm)
+    {
+        ICCPD_LOG_NOTICE(__FUNCTION__, "CSM not ready...");
+        return;
+    }
+
+    /*If support multiple CSM, the L2MC list of orphan port must be moved to sys->l2mc_rb*/
+    csm = first_csm;
+
+    l2mc_find.vid = vid;
+    memcpy(l2mc_find.ifname, ifname, MAX_L_PORT_NAME);
+
+    l2mc_info = RB_FIND(l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb ,&l2mc_find);
+    if(l2mc_info)
+    {
+        l2mc_exist = 1;
+        ICCPD_LOG_DEBUG(__FUNCTION__, " RB_FIND success for the L2MC Mrouter entry"
+            " vid: %d , ifname %s", l2mc_info->vid, l2mc_info->ifname );
+    }
+
+    /*handle l2mc add*/
+    if (op_type == L2MC_SYNC_ADD)
+    {
+        /* Find local itf*/
+        if (!(l2mc_lif = local_if_find_by_name(ifname)))
+        {
+            ICCPD_LOG_NOTICE(__FUNCTION__, "local if for %s not found", ifname);
+            return;
+        }
+
+        sprintf(l2mc_msg->ifname, "%s", ifname);
+        sprintf(l2mc_msg->origin_ifname, "%s", ifname);
+
+        if (l2mc_exist)
+        {
+            if (strcmp(csm->peer_itf_name, l2mc_msg->ifname) == 0)
+            {
+                return;
+            }
+
+            if (l2mc_lif->state == PORT_STATE_DOWN)
+            {
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Ignore L2MC Mrouter add received, "
+                    "entry exists interface %s down, vlan %d ",
+                    l2mc_msg->ifname, l2mc_msg->vid);
+                return;
+            }
+
+            l2mc_info->del_flag = set_l2mc_local_del_flag(csm, l2mc_info, 0, 1);
+            ICCPD_LOG_DEBUG(__FUNCTION__, "Duplicate update for Mrouter vlan %d ifname %s",
+                    l2mc_msg->vid, l2mc_msg->ifname);
+            return;
+        }
+        else
+        {
+            struct PeerInterface* pif=NULL;
+            if (from_mclag_intf) {
+                pif = peer_if_find_by_name(csm, lif_po->name);
+            }
+
+            /*If the port change to down before the entry
+               sync to iccp, this entry must be deleted */
+            if (l2mc_lif->state == PORT_STATE_DOWN)
+            {
+                del_l2mc_from_chip(l2mc_msg, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+                return;
+            }
+            if (!from_mclag_intf || 
+              (pif && !peer_po_is_alive(csm, pif->ifindex))) {
+                l2mc_msg->del_flag |= L2MC_DEL_PEER;
+            }
+            ICCPD_LOG_DEBUG(__FUNCTION__, "Add peer del flag,del %d interface %s, "
+                "vlan-id %d ", l2mc_msg->del_flag, l2mc_msg->ifname, l2mc_msg->vid);
+            l2mc_msg->op_type = L2MC_SYNC_ADD;
+
+            struct L2MCMsg *new_l2mc_msg = NULL;
+            /*enqueue to l2mc-list*/
+            if (iccp_csm_init_l2mc_msg(&new_l2mc_msg, (char*)l2mc_msg, msg_len) == 0)
+            {
+                RB_INSERT(l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb, new_l2mc_msg);
+
+                ICCPD_LOG_DEBUG(__FUNCTION__, "L2MC-list Mrouter enqueue: %s, vlan-id %d",
+                    l2mc_msg->ifname, l2mc_msg->vid);
+                if (MLACP(csm).current_state == MLACP_STATE_EXCHANGE)
+                {
+                    TAILQ_INSERT_TAIL(&(MLACP(csm).l2mc_msg_list), new_l2mc_msg, tail);
+
+                    ICCPD_LOG_DEBUG(__FUNCTION__, "L2MC-msg-list Mrouter enqueue: "
+                        "add %s vlan-id %d", l2mc_msg->ifname,l2mc_msg->vid);
+                }
+            }
+            else
+                ICCPD_LOG_DEBUG(__FUNCTION__, "Failed to enqueue: %s, add %s %s vlan-id %d",
+                        l2mc_msg->ifname, l2mc_msg->vid);
+        }
+    }
+    else/*handle l2mc del*/
+    {
+        if (l2mc_exist)
+        {
+           /* entry delete due to igmp leave 
+              delete from both local and remote */
+           if (leave)
+           {
+               /*send L2MC_SYNC_LEAVE message to peer*/
+                if (MLACP(csm).current_state == MLACP_STATE_EXCHANGE)
+                {
+                    l2mc_info->op_type = L2MC_SYNC_LEAVE;
+                    if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_info, tail))
+                    {
+                        TAILQ_INSERT_TAIL(&(MLACP(csm).l2mc_msg_list), l2mc_info, tail);
+                    }
+                }
+                RB_REMOVE(l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb, l2mc_info);
+                if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_info, tail))
+                {
+                    free(l2mc_info);
+                }
+            }
+            else
+            {
+                /* entry delete is due to link down 
+                   send delete to peer and re-add entry 
+                   if remote has not deleted */
+
+                if ((strcmp(l2mc_info->ifname, csm->peer_itf_name) == 0) ||
+                    from_mclag_intf)
+                {
+                    ICCPD_LOG_NOTICE(__FUNCTION__, "Recv Del due to link down on peer link or mlag interface");
+                    return;
+                }
+
+                if (l2mc_info->del_flag & L2MC_DEL_PEER)
+                {
+                    /*Add L2MC_DEL_LOCAL flag*/
+                    l2mc_info->del_flag = set_l2mc_local_del_flag(csm, l2mc_info, 1, 1);
+
+                    ICCPD_LOG_DEBUG(__FUNCTION__, "Recv L2MC del interface %s, "
+                        "saddr %s gaddr %s vlan-id %d", l2mc_info->ifname,
+                        l2mc_info->saddr, l2mc_info->gaddr, l2mc_info->vid);
+
+                    L2MC_RB_REMOVE(l2mc_mrouter_rb_tree, &MLACP(csm).l2mc_mrouter_rb, l2mc_info);
+
+                    // free only if not in change list to be send to peer node,
+                    // else free is taken care after sending the update to peer
+                    if (!L2MC_IN_MSG_LIST(&(MLACP(csm).l2mc_msg_list), l2mc_info, tail))
+                    {
+                        free(l2mc_info);
+                    }
+                }
+                else
+                {
+                    ICCPD_LOG_DEBUG(__FUNCTION__, "Recv L2MC del interface %s, "
+                        "saddr %s gaddr %s vlan-id %d, peer is not deleted, add back to chip",
+                        l2mc_info->ifname, l2mc_info->saddr, l2mc_info->gaddr, l2mc_info->vid);
+
+                    if (!(l2mc_lif = local_if_find_by_name(l2mc_info->ifname)))
+                        return;
+                    if (l2mc_lif->state == PORT_STATE_UP) {
+                        add_l2mc_to_chip(l2mc_info, l2mc_info->l2mc_type, MCLAG_MSG_TYPE_SET_L2MC_MROUTER);
+                    }
+                }
+            }
+        }
+    }
+    return;
+}
+
 
 int iccp_mclagsyncd_mclag_domain_cfg_handler(struct System *sys, char *msg_buf)
 {
@@ -3825,6 +4239,29 @@ int iccp_receive_l2mc_handler_from_syncd(struct System *sys, char *msg_buf)
     return 0;
 }
 
+int iccp_receive_l2mc_mrouter_handler_from_syncd(struct System *sys, char *msg_buf)
+{
+    int count = 0;
+    int i = 0;
+    struct IccpSyncdHDr * msg_hdr;
+    struct mclag_l2mc_info * l2mc_info;
+
+    msg_hdr = (struct IccpSyncdHDr *)msg_buf;
+
+    count = (msg_hdr->len- sizeof(struct IccpSyncdHDr))/sizeof(struct mclag_l2mc_info);
+    ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg l2mc mrouter len %d size1 %d size2 %d count %d   ",
+                    msg_hdr->len, sizeof(struct IccpSyncdHDr), sizeof(struct mclag_l2mc_info), count );  
+
+    for (i =0; i<count;i++)
+    {
+        l2mc_info = (struct mclag_l2mc_info *)&msg_buf[sizeof(struct IccpSyncdHDr )+ i * sizeof(struct mclag_l2mc_info)];
+        ICCPD_LOG_DEBUG(__FUNCTION__, "recv msg l2mc mrouter count %d vid %d port %s  optype  %d leave %d",i, l2mc_info->vid, l2mc_info->port_name, l2mc_info->op_type, l2mc_info->leave);  
+
+        do_update_from_l2mc_mrouter(l2mc_info->vid, l2mc_info->port_name, l2mc_info->type, l2mc_info->op_type, l2mc_info->leave);
+    }
+    return 0;
+}
+
 int iccp_mclagsyncd_msg_handler(struct System *sys)
 {
     int num_bytes_rxed = 0;
@@ -3868,6 +4305,10 @@ int iccp_mclagsyncd_msg_handler(struct System *sys)
         else if (msg_hdr->type == MCLAG_SYNCD_MSG_TYPE_L2MC_OPERATION)
         {
             iccp_receive_l2mc_handler_from_syncd(sys, &msg_buf[pos]);
+        }
+        else if (msg_hdr->type == MCLAG_SYNCD_MSG_TYPE_L2MC_MROUTER_OPERATION)
+        {
+            iccp_receive_l2mc_mrouter_handler_from_syncd(sys, &msg_buf[pos]);
         }
         else if (msg_hdr->type == MCLAG_SYNCD_MSG_TYPE_CFG_MCLAG_DOMAIN)
         {
@@ -3967,6 +4408,9 @@ char * mclagd_ctl_cmd_str(int req_type)
 
         case INFO_TYPE_DUMP_L2MC:
             return "dump l2mc";
+        
+        case INFO_TYPE_DUMP_L2MC_MROUTER:
+            return "dump l2mc_mrouter";
 
         case INFO_TYPE_DUMP_LOCAL_PORTLIST:
             return "dump local portlist";
@@ -4319,6 +4763,48 @@ void mclagd_ctl_handle_dump_l2mc(int client_fd, int mclag_id)
     return;
 }
 
+void mclagd_ctl_handle_dump_l2mc_mrouter(int client_fd, int mclag_id)
+{
+    char * Pbuf = NULL;
+    char buf[512] = { 0 };
+    int l2mc_num = 0;
+    int ret = 0;
+    struct mclagd_reply_hdr *hd = NULL;
+    int len_tmp = 0;
+
+    ret = iccp_l2mc_mrouter_dump(&Pbuf, &l2mc_num, mclag_id);
+    if (ret != EXEC_TYPE_SUCCESS)
+    {
+        len_tmp = sizeof(struct mclagd_reply_hdr);
+        memcpy(buf, &len_tmp, sizeof(int));
+        hd = (struct mclagd_reply_hdr *)(buf + sizeof(int));
+        hd->exec_result = ret;
+        hd->info_type = INFO_TYPE_DUMP_L2MC_MROUTER;
+        hd->data_len = 0;
+        mclagd_ctl_sock_write(client_fd, buf, MCLAGD_REPLY_INFO_HDR);
+
+        if (Pbuf)
+            free(Pbuf);
+
+        return;
+    }
+
+    hd = (struct mclagd_reply_hdr *)(Pbuf + sizeof(int));
+    hd->exec_result = EXEC_TYPE_SUCCESS;
+    hd->info_type = INFO_TYPE_DUMP_L2MC_MROUTER;
+    hd->data_len = l2mc_num * sizeof(struct mclagd_l2mc_msg);
+
+    len_tmp = (hd->data_len + sizeof(struct mclagd_reply_hdr));
+    memcpy(Pbuf, &len_tmp, sizeof(int));
+
+    mclagd_ctl_sock_write(client_fd, Pbuf, MCLAGD_REPLY_INFO_HDR + hd->data_len);
+
+    if (Pbuf)
+        free(Pbuf);
+
+    return;
+}
+
 void mclagd_ctl_handle_dump_local_portlist(int client_fd, int mclag_id)
 {
     char * Pbuf = NULL;
@@ -4535,6 +5021,10 @@ int mclagd_ctl_interactive_process(int client_fd)
         case INFO_TYPE_DUMP_L2MC:
             mclagd_ctl_handle_dump_l2mc(client_fd, req->mclag_id);
             break;
+
+        case INFO_TYPE_DUMP_L2MC_MROUTER:
+            mclagd_ctl_handle_dump_l2mc_mrouter(client_fd, req->mclag_id);
+            break;        
 
         case INFO_TYPE_DUMP_LOCAL_PORTLIST:
             mclagd_ctl_handle_dump_local_portlist(client_fd, req->mclag_id);

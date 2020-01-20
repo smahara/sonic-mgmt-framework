@@ -26,11 +26,11 @@ $(SNMPD)_DEPENDS += $(LIBSNMP)
 $(SNMPD)_RDEPENDS += $(LIBSNMP)
 $(eval $(call add_derived_package,$(LIBSNMP_BASE),$(SNMPD)))
 
-SNMP_DBG = snmp-dbgsym_$(SNMPD_VERSION_FULL)_$(CONFIGURED_ARCH).deb
-$(eval $(call add_derived_package,$(SNMP),$(SNMP_DBG)))
+#SNMP_DBG = snmp-dbgsym_$(SNMPD_VERSION_FULL)_$(CONFIGURED_ARCH).deb
+#$(eval $(call add_derived_package,$(SNMP),$(SNMP_DBG)))
 
-SNMPD_DBG = snmpd-dbgsym_$(SNMPD_VERSION_FULL)_$(CONFIGURED_ARCH).deb
-$(eval $(call add_derived_package,$(SNMPD),$(SNMPD_DBG)))
+#SNMPD_DBG = snmpd-dbgsym_$(SNMPD_VERSION_FULL)_$(CONFIGURED_ARCH).deb
+#$(eval $(call add_derived_package,$(SNMPD),$(SNMPD_DBG)))
 
 LIBSNMP = libsnmp30_$(SNMPD_VERSION_FULL)_$(CONFIGURED_ARCH).deb
 $(LIBSNMP)_RDEPENDS += $(LIBSNMP_BASE)

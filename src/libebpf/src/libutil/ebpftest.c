@@ -29,11 +29,42 @@ extern char bpf_log_buf[65536];
 char bpf_log_buf[65536];
 int socket_create()
 {
-    int sock = socket(AF_UNIX, SOCK_DGRAM, 0);
+	/*int sock = socket(AF_UNIX, SOCK_DGRAM, 0);*/
+	int sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
     return sock;
 }
 
-int main()
+int create_netlink_socket()
+{
+    int nl_fd = 0;
+
+    struct sockaddr_nl sa = {
+        .nl_family = AF_NETLINK,
+        .nl_pad    = 0,
+        .nl_pid    = 0,
+        .nl_groups = RTMGRP_LINK
+    };
+
+
+    nl_fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (nl_fd == -1)
+    {
+        printf("nl_fd CREATE Failed : %s", strerror(errno));
+        return -1;
+    }
+
+    if(bind(nl_fd, (struct sockaddr *) &sa, sizeof(sa)) == -1)
+    {
+        printf("nl_fd BIND Failed : %s", strerror(errno));
+        return -1;
+    }
+
+    return nl_fd;
+}
+
+
+
+int timer_test()
 {
 
     int sock_fd = -1;
@@ -52,4 +83,18 @@ int main()
 
     return 0;
 }
+int main(int argc, char *argv[])
+{
+	if(argc <2){
+		printf("Usage: %s <ebpf filter object>\n",argv[0] );
+		exit(0);
+	}
 
+	int sd=create_netlink_socket();
+	if (sd == -1)
+	{
+		printf("sock CREATE Failed : %s", strerror(errno));
+		return -1;
+	}
+	attach_ebpf_filter(sd,argv[1]);
+}

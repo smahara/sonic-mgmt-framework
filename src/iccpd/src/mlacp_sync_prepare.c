@@ -444,7 +444,8 @@ int mlacp_prepare_for_ndisc_info(struct CSM *csm, char *buf, size_t max_buf_size
     memcpy(NdiscData->ipv6_addr, ndisc_msg->ipv6_addr, 32);
     memcpy(NdiscData->mac_addr, ndisc_msg->mac_addr, ETHER_ADDR_LEN);
 
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Send ND messge to peer, flag %d, if name %s  mac  =%02x:%02x:%02x:%02x:%02x:%02x IPv6 %s", NdiscData->flag, NdiscData->ifname,
+    ICCPD_LOG_NOTICE(__FUNCTION__, "Send ND messge to peer, flag %d, if name %s  mac  =%02x:%02x:%02x:%02x:%02x:%02x IPv6 %s", 
+                    NdiscData->flag, NdiscData->ifname,
                     NdiscData->mac_addr[0], NdiscData->mac_addr[1], NdiscData->mac_addr[2], NdiscData->mac_addr[3], NdiscData->mac_addr[4],
                     NdiscData->mac_addr[5], show_ipv6_str((char *)NdiscData->ipv6_addr));
 
@@ -480,6 +481,7 @@ int mlacp_prepare_for_l2mc_info_to_peer(struct CSM* csm, char* buf, size_t max_b
     tlv = (struct mLACPL2MCInfoTLV*)&buf[sizeof(ICCHdr)];
     tlv->icc_parameter.len = htons(tlv_len - sizeof(ICCParameter));
     tlv->num_of_entry = htons(count + 1);
+    tlv->l2mc_msg_type = l2mc_msg->l2mc_msg_type;
 
     if (count == 0)
     {
@@ -498,8 +500,8 @@ int mlacp_prepare_for_l2mc_info_to_peer(struct CSM* csm, char* buf, size_t max_b
 
     #if 1
     ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg type = TLV_T_MLACP_L2MC_INFO");
-    ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg if name %s  saddr  = %s, gaddr = %s, "
-            "vid = %d, type = %d count %d msg len %d", l2mc_msg->origin_ifname,
+    ICCPD_LOG_DEBUG(__FUNCTION__, "Prepare Msg msg-type:%d if name %s  saddr  = %s, gaddr = %s, "
+            "vid = %d, type = %d count %d msg len %d", l2mc_msg->l2mc_msg_type, l2mc_msg->origin_ifname,
             l2mc_msg->saddr, l2mc_msg->gaddr, l2mc_msg->vid, l2mc_msg->op_type, count, msg_len);
     #endif
 

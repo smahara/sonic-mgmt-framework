@@ -1,0 +1,81 @@
+VRRP Master relinquish during warmreboot
+
+From: Vijay Kumar Vasantha <vijay.vasantha@broadcom.com>
+
+
+---
+ keepalived/vrrp/vrrp_daemon.c |   35 +++++++++++++++++++++++++++++++++--
+
+diff --git a/keepalived/vrrp/vrrp_daemon.c b/keepalived/vrrp/vrrp_daemon.c
+index adf26ad..da362cb 100644
+--- a/keepalived/vrrp/vrrp_daemon.c
++++ b/keepalived/vrrp/vrrp_daemon.c
+@@ -76,6 +76,8 @@
+ /* Forward declarations */
+ static int print_vrrp_data(thread_t * thread);
+ static int print_vrrp_stats(thread_t * thread);
++static int vrrp_stop_priority(thread_t * thread);
++
+ #ifdef _WITH_JSON_
+ static int print_vrrp_json(thread_t * thread);
+ #endif
+@@ -357,14 +359,18 @@ sigusr1_vrrp(__attribute__((unused)) void *v, __attribute__((unused)) int sig)
+ 	log_message(LOG_INFO, "Printing VRRP data for process(%d) on signal",
+ 		    getpid());
+ 	thread_add_event(master, print_vrrp_data, NULL, 0);
++
++	log_message(LOG_INFO, "Printing VRRP stats for process(%d) on signal",
++		    getpid());
++	thread_add_event(master, print_vrrp_stats, NULL, 0);	
+ }
+ 
+ static void
+ sigusr2_vrrp(__attribute__((unused)) void *v, __attribute__((unused)) int sig)
+ {
+-	log_message(LOG_INFO, "Printing VRRP stats for process(%d) on signal",
++	log_message(LOG_INFO, "Forcing VRRP to send 0 priority keepalives for process (%d) on signal",
+ 		    getpid());
+-	thread_add_event(master, print_vrrp_stats, NULL, 0);
++	thread_add_event(master, vrrp_stop_priority, NULL, 0);
+ }
+ 
+ #ifdef _WITH_JSON_
+@@ -463,6 +469,24 @@ reload_vrrp_thread(__attribute__((unused)) thread_t * thread)
+ 	return 0;
+ }
+ 
++void vrrp_send_zero_priority_adv()
++{
++	list l = vrrp_data->vrrp;
++	int i, keepalive_count = 3;
++	element e;
++	vrrp_t *vrrp;
++
++	for (e = LIST_HEAD(l); e; ELEMENT_NEXT(e)) {
++
++		vrrp = ELEMENT_DATA(e);
++		vrrp->effective_priority = VRRP_PRIO_STOP;
++
++		for (i = 0; i < keepalive_count; i++) {
++			vrrp_send_adv(vrrp, VRRP_PRIO_STOP);
++		}
++	}
++}
++
+ static int
+ print_vrrp_data(__attribute__((unused)) thread_t * thread)
+ {
+@@ -477,6 +501,13 @@ print_vrrp_stats(__attribute__((unused)) thread_t * thread)
+ 	return 0;
+ }
+ 
++static int
++vrrp_stop_priority(__attribute__((unused)) thread_t * thread)
++{
++	vrrp_send_zero_priority_adv();
++	return 0;
++}
++
+ #ifdef _WITH_JSON_
+ static int
+ print_vrrp_json(__attribute__((unused)) thread_t * thread)
