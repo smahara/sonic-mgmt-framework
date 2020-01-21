@@ -25,6 +25,13 @@ def invoke(func, args=[]):
     if func == 'get_list_openconfig_qos_ext_qos_threshold_breaches_breach':
         path = cc.Path('/restconf/data/openconfig-qos:qos/openconfig-qos-ext:threshold-breaches/breach')
         return api.get(path)
+    if func == 'patch_openconfig_qos_ext_qos_queues_queue_wred_config_wred_profile':
+        path = cc.Path('/restconf/data/openconfig-qos:qos/queues/queue={name}/wred/config/openconfig-qos-ext:wred-profile', name=args[0])
+        body = {"openconfig-qos-ext:wred-profile" : args[1]}
+        return api.patch(path, body)
+    if func == 'get_openconfig_qos_qos_queues_queue':
+        path = cc.Path('/restconf/data/openconfig-qos:qos/queues/queue={name}', name=args[0])
+        return api.get(path)
     return api.cli_not_implemented(func)
 
 
@@ -58,11 +65,10 @@ def run(func, args):
                     if value is None:
                         return
                     show_cli_output(sys.argv[3], value)
-            elif 'openconfig-qos-ext:breach' in api_response:
-                    value = response['openconfig-qos-ext:breach']
-                    if value is None:
-                        return
-                    show_cli_output(sys.argv[2], value)
+            elif func == 'get_list_openconfig_qos_ext_qos_threshold_breaches_breach':
+                    show_cli_output('show_qos_queue_threshold_breaches.j2', response)
+            elif func == 'get_openconfig_qos_qos_queues_queue':
+                    show_cli_output('show_qos_queue_config.j2', response)
 
     else:
         print response.error_message()
