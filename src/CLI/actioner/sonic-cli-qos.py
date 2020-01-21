@@ -45,30 +45,19 @@ def run(func, args):
             
             #print api_response
             #print sys.argv[2:]
-            if 'openconfig-qos:state' in api_response:
-                value = response['openconfig-qos:state']
-                if value is None:
-                    return
-                show_cli_output(sys.argv[4], value)
-            elif 'openconfig-qos:queues' in api_response:
-                    value = response['openconfig-qos:queues']
-                    if value is None:
-                        return
-                    show_cli_output(sys.argv[3], value)
-            elif 'openconfig-qos:interfaces' in api_response:
-                    value = response['openconfig-qos:interfaces']
-                    if value is None:
-                        return
-                    show_cli_output(sys.argv[2], value)
-            elif 'openconfig-qos-ext:priority-groups' in api_response:
-                    value = response['openconfig-qos-ext:priority-groups']
-                    if value is None:
-                        return
-                    show_cli_output(sys.argv[3], value)
+
+            if func == 'get_openconfig_qos_qos_interfaces_interface_output_queues_queue_state':
+                show_cli_output('show_qos_interface_queue_counters.j2', response)
+            elif func == 'get_openconfig_qos_qos_interfaces_interface_output_queues':
+                show_cli_output(sys.argv[3], response['openconfig-qos:queues'])
+            elif func == 'get_openconfig_qos_qos_interfaces':
+                show_cli_output(sys.argv[2], response['openconfig-qos:interfaces'])
+            elif func == 'get_openconfig_qos_ext_qos_interfaces_interface_input_priority_groups':
+                show_cli_output(sys.argv[3], response['openconfig-qos-ext:priority-groups'])
             elif func == 'get_list_openconfig_qos_ext_qos_threshold_breaches_breach':
-                    show_cli_output('show_qos_queue_threshold_breaches.j2', response)
+                show_cli_output('show_qos_queue_threshold_breaches.j2', response)
             elif func == 'get_openconfig_qos_qos_queues_queue':
-                    show_cli_output('show_qos_queue_config.j2', response)
+                show_cli_output('show_qos_queue_config.j2', response)
 
     else:
         print response.error_message()

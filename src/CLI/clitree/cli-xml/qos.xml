@@ -208,7 +208,7 @@ limitations under the License.
                   if test "${queue-id}" = ""; then&#xA;
                       python $SONIC_CLI_ROOT/sonic-cli-qos.py get_openconfig_qos_qos_interfaces_interface_output_queues Ethernet${phy-if-id} show_qos_interface_all_queue_counters.j2&#xA;
                   else&#xA;
-                      python $SONIC_CLI_ROOT/sonic-cli-qos.py get_openconfig_qos_qos_interfaces_interface_output_queues_queue_state Ethernet${phy-if-id} ${queue-id} show_qos_interface_queue_counters.j2&#xA;
+                      python $SONIC_CLI_ROOT/sonic-cli-qos.py get_openconfig_qos_qos_interfaces_interface_output_queues_queue_state Ethernet${phy-if-id} ${queue-id} &#xA;
                   fi&#xA;
               fi&#xA;
           elif test "${queue-subcommands}" = "watermark"; then&#xA;
