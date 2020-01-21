@@ -96,7 +96,7 @@
 	branch = dell_sonic
 [submodule "src/sonic-telemetry"]
 	path = src/sonic-telemetry
-	url = https://github.com/project-arlo/sonic-telemetry.git
+	url = ssh://git@github.com/project-arlo/sonic-telemetry.git
 	branch = master
 [submodule "src/sonic-ztp"]
 	path = src/sonic-ztp
@@ -112,7 +112,7 @@
 	branch = dell_sonic
 [submodule "src/sonic-mgmt-framework"]
 	path = src/sonic-mgmt-framework
-	url = https://github.com/project-arlo/sonic-mgmt-framework.git
+	url = ssh://git@github.com/project-arlo/sonic-mgmt-framework.git
 	branch = master
 [submodule "src/sonic-l2mcd"]
 	path = src/sonic-l2mcd
