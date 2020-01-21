@@ -1087,10 +1087,46 @@ class BGPConfigDaemon:
     global_af_key_map = [(['ebgp_route_distance',
                            'ibgp_route_distance',
                            'local_route_distance'],                     '{no:no-prefix}distance bgp {} {} {}'),
+<<<<<<< HEAD
                          ('max_ebgp_paths',                             '{no:no-prefix}maximum-paths {}'),
                          (['max_ibgp_paths',
                            '+ibgp_equal_cluster_length'],               '{no:no-prefix}maximum-paths ibgp {} {:match-clust-len}', hdl_ibgp_maxpath),
                          ('route_download_filter',                      '{no:no-prefix}table-map {}'),
+||||||| merged common ancestors
+                         ('max_ebgp_paths',                         '{no:no-prefix}maximum-paths {}'),
+                         (('max_ibgp_paths',
+                           '+ibgp_equal_cluster_length'],               '{no:no-prefix}maximum-paths ibgp {} {:match-clust-len}', hdl_ibgp_maxpath),
+                         (('network_prefix',
+                           '+network_policy', '+network_backdoor'), '{no:no-prefix}network {:network}'),
+                         ('route_download_filter',                  '{no:no-prefix}table-map {}'),
+                         ('advertise-all-vni',                      '{no:no-prefix}advertise-all-vni', ['true','false']),
+                         ('advertise-default-gw',                   '{no:no-prefix}advertise-default-gw', ['true','false']),
+                         ('advertise-ipv4-unicast',                      '{no:no-prefix}advertise ipv4 unicast', ['true','false']),
+                         ('advertise-ipv6-unicast',                      '{no:no-prefix}advertise ipv6 unicast', ['true','false']),
+                         ('default-originate-ipv4',                      '{no:no-prefix}default-originate ipv4', ['true','false']),
+                         ('default-originate-ipv6',                      '{no:no-prefix}default-originate ipv6', ['true','false']),
+                         ('autort',                                      '{no:no-prefix}autort {}'),
+                         ('flooding',                                    '{no:no-prefix}flooding {}'),
+                         ('dad-enabled',                                 '{no:no-prefix}dup-addr-detection', ['true','false']),
+                         ('route-distinguisher',                         '{no:no-prefix}rd {}')
+=======
+                         ('max_ebgp_paths',                         '{no:no-prefix}maximum-paths {}'),
+                         (('max_ibgp_paths',
+                           '+ibgp_equal_cluster_length'),               '{no:no-prefix}maximum-paths ibgp {} {:match-clust-len}', hdl_ibgp_maxpath),
+                         (('network_prefix',
+                           '+network_policy', '+network_backdoor'), '{no:no-prefix}network {:network}'),
+                         ('route_download_filter',                  '{no:no-prefix}table-map {}'),
+                         ('advertise-all-vni',                      '{no:no-prefix}advertise-all-vni', ['true','false']),
+                         ('advertise-default-gw',                   '{no:no-prefix}advertise-default-gw', ['true','false']),
+                         ('advertise-ipv4-unicast',                      '{no:no-prefix}advertise ipv4 unicast', ['true','false']),
+                         ('advertise-ipv6-unicast',                      '{no:no-prefix}advertise ipv6 unicast', ['true','false']),
+                         ('default-originate-ipv4',                      '{no:no-prefix}default-originate ipv4', ['true','false']),
+                         ('default-originate-ipv6',                      '{no:no-prefix}default-originate ipv6', ['true','false']),
+                         ('autort',                                      '{no:no-prefix}autort {}'),
+                         ('flooding',                                    '{no:no-prefix}flooding {}'),
+                         ('dad-enabled',                                 '{no:no-prefix}dup-addr-detection', ['true','false']),
+                         ('route-distinguisher',                         '{no:no-prefix}rd {}'),
+>>>>>>> origin/broadcom_sonic_share
                          (['route_flap_dampen',
                            '+route_flap_dampen_half_life',
                            '+route_flap_dampen_reuse_threshold',
@@ -2086,28 +2122,43 @@ class BGPConfigDaemon:
                     self.__delete_bfd_peer(data)
             elif table == 'BFD_PEER_MULTI_HOP':
 		key = prefix + '|' + key
-                remoteaddr, vrf, localaddr = key.lower().split('|')
+                remoteaddr, interface, vrf, localaddr = key.lower().split('|')
                 if not del_table:
-		    syslog.syslog(syslog.LOG_INFO, 'Set BFD multi hop to {} {} {}'.format(remoteaddr, vrf, localaddr))
+		    syslog.syslog(syslog.LOG_INFO, 'Set BFD multi hop to {} {} {} {}'.format(remoteaddr, interface, vrf, localaddr))
                     suffix_cmd, oper = self.__bfd_handle_delete (data)
                     if suffix_cmd and oper == CachedDataWithOp.OP_DELETE:
-                        command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {} interface {}' -c '{}'".\
-                        format(remoteaddr, localaddr, vrf, interface, suffix_cmd)
+			if not 'null' in interface:
+                            command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {} interface {}' -c '{}'".\
+                            format(remoteaddr, localaddr, vrf, interface, suffix_cmd)
+                        else:
+                            command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {}' -c '{}'".\
+                            format(remoteaddr, localaddr, vrf, suffix_cmd)
 
                         if not self.__run_command(command):
                             syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
                             continue
 		    else:
-                        cmd_prefix = ['configure terminal',
-                                      'bfd',
-                              	      'peer {} vrf {} multihop local-address {}'.format(remoteaddr, vrf, localaddr)]
+                        if not 'null' in interface:
+                            cmd_prefix = ['configure terminal',
+                                          'bfd',
+                              	          'peer {} vrf {} multihop local-address {} interface {}'.format(remoteaddr, vrf, localaddr, interface)]
+                        else:
+                            cmd_prefix = ['configure terminal',
+                                          'bfd',
+                                          'peer {} vrf {} multihop local-address {}'.format(remoteaddr, vrf, localaddr)]
+
                         if not key_map.run_command(self, data, cmd_prefix):
                             syslog.syslog(syslog.LOG_ERR, 'failed running BFD multi-hop config command')
                             continue
 		else:
-                    syslog.syslog(syslog.LOG_INFO, 'Delete BFD multi hop to {} {} {}'.format(remoteaddr, vrf, localaddr))
-                    command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} multihop local-address {}'".\
+                    syslog.syslog(syslog.LOG_INFO, 'Delete BFD multi hop to {} {} {} {}'.format(remoteaddr, vrf, localaddr, interface))
+                    if not 'null' in interface:
+                        command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} multihop local-address {} interface {}'".\
+                        format(remoteaddr, vrf, localaddr, interface)
+                    else:
+                        command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} multihop local-address {}'".\
                         format(remoteaddr, vrf, localaddr)
+
                     if not self.__run_command(command):
                         syslog.syslog(syslog.LOG_ERR, 'failed to delete multihop peer {}'.format(key))
                         continue
