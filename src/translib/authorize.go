@@ -39,19 +39,7 @@ func init() {
 	//TODO:Allocate the maps and populate them here
 }
 
-//TODO:Subscribe to UserDB changes and repopulate the cache on any notification
-// func isUserAuthorizedForSet(user string) bool {
-// 	//TODO:Need code to get role from username and then authorize based on that
-// 	//This is a temporary code, this needs to be fixed
-
-// 	if ((user == "") || (user == "admin")) {
-// 		return true
-// 	}
-
-// 	return false
-// }
 func isAuthorizedForSet(req SetRequest) bool {
-	// TODO: Allow empty user for now
 	for _, r := range req.User.Roles {
         if r == "admin" {
             return true
