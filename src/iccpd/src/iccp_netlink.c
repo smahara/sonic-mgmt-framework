@@ -681,10 +681,10 @@ void update_if_ipmac_on_standby(struct LocalInterface* lif_po)
         }
 
         /* Refresh link local address according the new MAC */
-        /* Move the shutdown call before setting MAC address. Setting must be done
-         * on all members of the port-channel for it to take effect right away
         iccp_netlink_if_shutdown_set(lif_po->ifindex);
         iccp_netlink_if_startup_set(lif_po->ifindex);
+        /* Move the shutdown call before setting MAC address. Setting must be done
+         * on all members of the port-channel for it to take effect right away
         */
         iccp_netlink_set_portchannel_iff_flag(lif_po, true, 4);
     }
@@ -777,10 +777,10 @@ void recover_if_ipmac_on_standby(struct LocalInterface *lif_po)
         }
 
         /* Refresh link local address according the new MAC */
-        /* Move the shutdown call before setting MAC address. Setting must be done
-         * on all members of the port-channel for it to take effect right away
         iccp_netlink_if_shutdown_set(lif_po->ifindex);
         iccp_netlink_if_startup_set(lif_po->ifindex);
+        /* Move the shutdown call before setting MAC address. Setting must be done
+         * on all members of the port-channel for it to take effect right away
         */
         iccp_netlink_set_portchannel_iff_flag(lif_po, true, 2);
     
