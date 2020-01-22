@@ -7,7 +7,7 @@ from rpipe_utils import pipestr
 from collections import OrderedDict
 from scripts.render_cli import show_cli_output
 import cli_client as cc
-
+import ipaddress as ipa 
 SFLOW_DEFAULT_PORT = 6343
 
 import urllib3
@@ -49,6 +49,13 @@ def getId(item):
         return int(ifname[len(prfx):])
     return ifname
 
+def validateIp(ip):
+    try:
+	ipObj = ipa.ip_address(unicode(ip))
+	return not(ipObj.is_reserved or ipObj.is_loopback or ipObj.is_unspecified or ipObj.is_multicast)
+    except ValueError as e:
+	return False
+
 def invoke_api(func, args=[]):
     api = cc.ApiClient()
     port = SFLOW_DEFAULT_PORT
@@ -56,6 +63,9 @@ def invoke_api(func, args=[]):
     if func == 'put_sonic_sflow_sonic_sflow_sflow_collector_sflow_collector_list':
 	path = cc.Path('/restconf/data/sonic-sflow:sonic-sflow/SFLOW_COLLECTOR/SFLOW_COLLECTOR_LIST={collector_name}',
 		collector_name=args[0])
+	if not validateIp(args[1]):
+	    print('Invalid IP')
+	    return
         body = {  "sonic-sflow:SFLOW_COLLECTOR_LIST": [
           {
               "collector_name": args[0],
@@ -123,7 +133,8 @@ def invoke_api(func, args=[]):
 def run(func, args):
     try:
 	response = invoke_api(func, args)
-
+        if response is None:
+	    return 
 	if response.ok() is False:
             print response.error_message()
             return
