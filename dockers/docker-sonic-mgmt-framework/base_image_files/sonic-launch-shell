@@ -1,19 +1,11 @@
 #!/bin/sh
-# Based on the primary group, launch the real shell
-# admin -> /bin/bash
-# operator and all others -> /usr/bin/sonic-cli
+# Launch the "preferred" shell based on the groups that the user belongs to.
+# The preferred shell is either:
+#    /bin/bash:          If the user belongs to group "admin"
+#    /usr/bin/sonic-cli: Otherwise
 
-GROUP=$(id -gn)
-
-case "$GROUP" in
-    admin)
-        LAUNCH_SHELL=/bin/bash
-        ;;
-
-    *)
-        LAUNCH_SHELL=/usr/bin/sonic-cli
-        ;;
-esac
-
-# Run the real shell
-exec "$LAUNCH_SHELL"
+if /usr/bin/id -Gn | /bin/grep -qw "admin"; then
+    exec /bin/bash $@
+else
+    exec /usr/bin/sonic-cli
+fi
