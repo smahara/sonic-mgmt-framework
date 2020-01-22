@@ -70,7 +70,7 @@ switch_board_qsfp() {
         "new_device")
                         for ((i=2;i<=105;i++));
                         do
-                            echo sff8436 0x50 > /sys/bus/i2c/devices/i2c-$i/$1
+                            echo optoe1 0x50 > /sys/bus/i2c/devices/i2c-$i/$1
                         done
                         ;;
  
