@@ -347,6 +347,7 @@ var DbToYang_qos_get_one_intf_one_q_counters_xfmr SubTreeXfmrDbToYang = func(inP
 
     qosIntfsObj := getQosIntfRoot(inParams.ygRoot)
     pathInfo := NewPathInfo(inParams.uri)
+    log.Info("inParams.uri is: %s", inParams.uri)
     intfName := pathInfo.Var("interface-id")
     queueName := pathInfo.Var("name")
 
@@ -368,7 +369,9 @@ var DbToYang_qos_get_one_intf_one_q_counters_xfmr SubTreeXfmrDbToYang = func(inP
         if queuesObj != nil {
             queueObj = queuesObj.Queue[queueName]
         }
-        state_counters = queueObj.State
+        if queueObj != nil {
+            state_counters = queueObj.State
+        }
     }
 
     if state_counters == nil  {
@@ -459,7 +462,7 @@ var DbToYang_qos_get_one_intf_all_q_counters_xfmr SubTreeXfmrDbToYang = func(inP
 
         if state_counters == nil  {
             log.Info("DbToYang_qos_get_one_intf_all_q_counters_xfmr - state_counters is nil")
-	        return err
+            return err
         }
 
         state_counters.Name = &queueName
@@ -485,6 +488,15 @@ var DbToYang_qos_get_all_intf_all_counters_xfmr SubTreeXfmrDbToYang = func(inPar
     //pathInfo := NewPathInfo(inParams.uri)
 
     targetUriPath, err := getYangPathFromUri(inParams.uri)
+
+    if  targetUriPath == "/openconfig-qos:qos/interfaces/interface/output/queues" {
+        return DbToYang_qos_get_one_intf_all_q_counters_xfmr(inParams)
+    }
+    if  targetUriPath == "/openconfig-qos:qos/interfaces/interface/output/queues/queue/state" {
+        return DbToYang_qos_get_one_intf_one_q_counters_xfmr(inParams)
+    }
+
+
     if  targetUriPath != "/openconfig-qos:qos/interfaces" {
         log.Info("unexpected uri path: ", targetUriPath)
         return err
@@ -550,7 +562,7 @@ var DbToYang_qos_get_all_intf_all_counters_xfmr SubTreeXfmrDbToYang = func(inPar
 
         if state_counters == nil  {
             log.Info("DbToYang_qos_get_all_intf_all_counters_xfmr - state_counters is nil")
-	        return err
+            return err
         }
 
         state_counters.Name = &queueName
@@ -618,7 +630,7 @@ var DbToYang_qos_get_all_intf_all_counters_xfmr SubTreeXfmrDbToYang = func(inPar
 
         if pg_state == nil  {
             log.Info("DbToYang_qos_get_all_intf_all_counters_xfmr - pg_state is nil")
-	        return err
+            return err
         }
 
         pg_state.Name = &priorityGroupName
@@ -694,7 +706,7 @@ var DbToYang_qos_get_one_intf_all_pg_counters_xfmr SubTreeXfmrDbToYang = func(in
 
         if state_counters == nil  {
             log.Info("DbToYang_qos_get_one_intf_all_pg_counters_xfmr - state_counters is nil")
-	        return err
+            return err
         }
 
         state_counters.Name = &priorityGroupName
@@ -717,18 +729,18 @@ var THRESHOLD_BREACH_COUNTER_MAP = map[string]string{
 
 
 var DbToYang_threshold_breach_counter_field_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
-	result := make(map[string]interface{})
-	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_threshold_breach_counter_field_xfmr", data, inParams.ygRoot)
+    result := make(map[string]interface{})
+    data := (*inParams.dbDataMap)[inParams.curDb]
+    log.Info("DbToYang_threshold_breach_counter_field_xfmr", data, inParams.ygRoot)
 
     for watermark_str, _ := range  THRESHOLD_BREACH_COUNTER_MAP {
         // try each one of the strings
         val, found := data["THRESHOLD_BREACH_TABLE"][inParams.key].Field[watermark_str] 
         if  found == true {
-	        result["counter"] = val
+            result["counter"] = val
             break
         }
     }
 
-	return result, nil 
+    return result, nil 
 }
