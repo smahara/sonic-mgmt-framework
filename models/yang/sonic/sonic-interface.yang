@@ -47,7 +47,7 @@ module sonic-interface {
 
         revision 2019-12-01 {
                 description
-                        "Add leafre for vrf_name.";
+                        "Add leafref for vrf_name.";
         }
 
 /*
