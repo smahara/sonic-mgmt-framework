@@ -16,6 +16,7 @@ module openconfig-qos-annot {
       }
     }
 
+    /* No more subtree xfmr when there is a parent subtree xfmr already
     deviation /oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:queues {
       deviate add {
         sonic-ext:subtree-transformer "qos_get_one_intf_all_q_counters_xfmr";
@@ -29,6 +30,7 @@ module openconfig-qos-annot {
         sonic-ext:db-name "COUNTERS_DB";
       }
     }
+    */
 
     deviation /oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:input/oc-qos-ext:priority-groups {
       deviate add {
