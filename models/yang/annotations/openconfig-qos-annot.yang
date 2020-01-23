@@ -16,7 +16,6 @@ module openconfig-qos-annot {
       }
     }
 
-    /* No more subtree xfmr when there is a parent subtree xfmr already
     deviation /oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:queues {
       deviate add {
         sonic-ext:subtree-transformer "qos_get_one_intf_all_q_counters_xfmr";
@@ -24,6 +23,7 @@ module openconfig-qos-annot {
       }
     }
 
+    /*  Use parent tree xfmr
     deviation /oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:queues/oc-qos:queue/oc-qos:state {
       deviate add {
         sonic-ext:subtree-transformer "qos_get_one_intf_one_q_counters_xfmr";
