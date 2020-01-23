@@ -409,6 +409,10 @@ var DbToYang_qos_get_one_intf_all_q_counters_xfmr SubTreeXfmrDbToYang = func(inP
     intfName := pathInfo.Var("interface-id")
 
     targetUriPath, err := getYangPathFromUri(inParams.uri)
+    if  targetUriPath == "/openconfig-qos:qos/interfaces/interface/output/queues/queue/state" {
+        return DbToYang_qos_get_one_intf_one_q_counters_xfmr(inParams)
+    }
+
     if  targetUriPath != "/openconfig-qos:qos/interfaces/interface/output/queues" {
         log.Info("unexpected uri path: ", targetUriPath)
         return err
@@ -488,13 +492,6 @@ var DbToYang_qos_get_all_intf_all_counters_xfmr SubTreeXfmrDbToYang = func(inPar
     //pathInfo := NewPathInfo(inParams.uri)
 
     targetUriPath, err := getYangPathFromUri(inParams.uri)
-
-    if  targetUriPath == "/openconfig-qos:qos/interfaces/interface/output/queues" {
-        return DbToYang_qos_get_one_intf_all_q_counters_xfmr(inParams)
-    }
-    if  targetUriPath == "/openconfig-qos:qos/interfaces/interface/output/queues/queue/state" {
-        return DbToYang_qos_get_one_intf_one_q_counters_xfmr(inParams)
-    }
 
 
     if  targetUriPath != "/openconfig-qos:qos/interfaces" {
