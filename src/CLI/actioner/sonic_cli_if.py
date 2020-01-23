@@ -23,12 +23,32 @@ import json
 import ast
 from rpipe_utils import pipestr
 import cli_client as cc
+from netaddr import *
 from scripts.render_cli import show_cli_output
 
 import urllib3
 urllib3.disable_warnings()
 
 lag_type_map = {"active" : "LACP", "on": "STATIC"}
+
+def filter_address(d, isIPv4):
+    if d is None:
+        return
+    if 'sonic-interface:INTF_TABLE_IPADDR_LIST' in d:
+        ipData = d['sonic-interface:INTF_TABLE_IPADDR_LIST']
+        newIpData = []
+        for l in ipData:
+            for k, v in l.items():
+               if k == "ipPrefix":
+                  ip = IPNetwork(v)
+                  if isIPv4:
+                      if ip.version == 4:
+                          newIpData.append(l)
+                  else:
+                      if ip.version == 6:
+                          newIpData.append(l)
+        del ipData[:]
+        ipData.extend(newIpData)
 
 def invoke_api(func, args=[]):
     api = cc.ApiClient()
@@ -194,13 +214,17 @@ def invoke_api(func, args=[]):
     elif func == 'get_openconfig_interfaces_interfaces':
         path = cc.Path('/restconf/data/openconfig-interfaces:interfaces')
         return api.get(path)
-    elif func == 'ip_interfaces_get':
+    elif func == 'ip_interfaces_get' or func == 'ip6_interfaces_get':
         d = {}
+
         path = cc.Path('/restconf/data/sonic-interface:sonic-interface/INTF_TABLE/INTF_TABLE_IPADDR_LIST')
         responseIntfTbl = api.get(path)
         if responseIntfTbl.ok():
             d.update(responseIntfTbl.content)
-
+            if func == 'ip_interfaces_get':
+                filter_address(d, True)
+            else:
+                filter_address(d, False)
         path = cc.Path('/restconf/data/sonic-port:sonic-port/PORT_TABLE/PORT_TABLE_LIST')
         responsePortTbl = api.get(path)
         if responsePortTbl.ok():
@@ -215,6 +239,7 @@ def invoke_api(func, args=[]):
         responseVlanTbl =  api.get(path)
         if responseVlanTbl.ok():
             d.update(responseVlanTbl.content)
+
         return d
         
     # Add members to port-channel
@@ -282,7 +307,7 @@ def run(func, args):
 
     try:
         response = invoke_api(func, args)    
-        if func == 'ip_interfaces_get':
+        if func == 'ip_interfaces_get' or func == 'ip6_interfaces_get':
             show_cli_output(args[0], response)
             return
         if response.ok():
