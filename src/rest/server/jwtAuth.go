@@ -97,6 +97,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 		}
 
 		auth_success, err = UserPwAuth(creds.Username, creds.Password)
+		username = creds.Username
 	}
 	if auth_success {
 		usr, err := user.Lookup(username)
