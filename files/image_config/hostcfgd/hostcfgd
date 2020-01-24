@@ -341,9 +341,16 @@ class MgmtVrfCfg:
                 syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
                         .format(err.cmd, err.returncode, err.output))
 
-    def configure_mgmt_vrf(self):
-        syslog.syslog(syslog.LOG_INFO, "Configure MGMT VRF:")
+            cmd = 'cgdelete -g l3mdev:mgmt'
+            syslog.syslog(syslog.LOG_INFO, "Delete mgmt l3mdev group, cmd - {}".format(cmd))
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except subprocess.CalledProcessError as err:
+                syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
+                        .format(err.cmd, err.returncode, err.output))
 
+    def configure_mgmt_vrf(self):
+        syslog.syslog(syslog.LOG_INFO,  "Configure MGMT VRF:")
         self.create_mgmt_vrf_table()
         
         cmd = 'ip link set dev mgmt up'
@@ -447,6 +454,22 @@ class MgmtVrfCfg:
                         syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
                                 .format(err.cmd, err.returncode, err.output))
                         return
+
+            cmd = 'cgcreate -g l3mdev:mgmt'
+            syslog.syslog(syslog.LOG_INFO, "Create mgmt l3mdev group - {}".format(cmd))
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except subprocess.CalledProcessError as err:
+                syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
+                        .format(err.cmd, err.returncode, err.output))
+
+            cmd = 'cgset -r l3mdev.master-device=mgmt mgmt'
+            syslog.syslog(syslog.LOG_INFO, "Set cmd - {}".format(cmd))
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except subprocess.CalledProcessError as err:
+                syslog.syslog(syslog.LOG_ERR, "{} - failed: return code - {}, output:\n{}"
+                        .format(err.cmd, err.returncode, err.output))
 
 
     def unconfigure_mgmt_vrf(self):
