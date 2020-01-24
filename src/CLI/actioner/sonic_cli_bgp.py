@@ -102,6 +102,10 @@ def getPrefix(item):
     ip = netaddr.IPNetwork(item['prefix'])
     return int(ip.ip)
 
+def getNbr(item):
+    ip = netaddr.IPNetwork(item['neighbor-address'])
+    return int(ip.ip)
+
 def generate_show_bgp_routes(args):
    api = cc.ApiClient()
    keypath = []
@@ -1555,6 +1559,8 @@ def invoke_show_api(func, args=[]):
                 if 'openconfig-network-instance:neighbors' in response.content:
                     tmp = {}
                     tmp['neighbor'] = filter_bgp_nbrs(iptype, response.content['openconfig-network-instance:neighbors']['neighbor'])
+                    tup = tmp['neighbor']
+                    tmp['neighbor'] = sorted(tup, key=getNbr)
                     d['openconfig-network-instance:neighbors'] = tmp
                 return d
             else:
@@ -1584,12 +1590,14 @@ def invoke_show_api(func, args=[]):
 
         else:
             keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/neighbors', name=args[1], identifier=IDENTIFIER, name1=NAME1)
-        
+
             response = api.get(keypath)
             if response.ok():
                 if 'openconfig-network-instance:neighbors' in response.content:
                     tmp = {}
                     tmp['neighbor'] = filter_bgp_nbrs(iptype, response.content['openconfig-network-instance:neighbors']['neighbor'])
+                    tup = tmp['neighbor']
+                    tmp['neighbor'] = sorted(tup, key=getNbr)
                     d['openconfig-network-instance:neighbors'] = tmp
                 return d
             else:
