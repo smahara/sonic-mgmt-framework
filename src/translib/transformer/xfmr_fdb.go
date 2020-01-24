@@ -204,6 +204,18 @@ func fdbMacTableGetEntry(inParams XfmrParams, vlan string,  macAddress string, o
     vlanOid := findInMap(oidTOVlan, vlan)
     vlanId, _ := strconv.Atoi(vlan)
 
+    pathInfo := NewPathInfo(inParams.uri)
+    niName := pathInfo.Var("name")
+
+
+    // if network instance is a VLAN instance, only get entries for this VLAN.
+    if strings.HasPrefix(niName, "Vlan") {
+        niVlanId := strings.TrimPrefix(niName, "Vlan")
+        if vlan != niVlanId {
+            return nil
+        }
+    }
+
     mcEntries := macTbl.Entries
     var mcEntry *ocbinds.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Fdb_MacTable_Entries_Entry
     var mcEntryKey ocbinds.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Fdb_MacTable_Entries_Entry_Key
@@ -228,6 +240,7 @@ func fdbMacTableGetEntry(inParams XfmrParams, vlan string,  macAddress string, o
             return errors.New("FDB NewEntry create failed, " + vlan + " " + macAddress)
         }
     }
+
     mcEntry  = mcEntries.Entry[mcEntryKey]
     ygot.BuildEmptyTree(mcEntry)
     mcMac := new(string)
