@@ -39,13 +39,12 @@ func getUriAttributes(inParams XfmrParams) (*ocbinds.OpenconfigNetworkInstance_N
 
     netInstObj := netInstsObj.NetworkInstance[niName]
     if netInstObj == nil {
-        return nil, "", "", 0, errors.New("Network-instances obj missing")
+        ygot.BuildEmptyTree(netInstObj)
     }
 
     netInstVlansObj := netInstObj.Vlans
-
     if netInstVlansObj == nil {
-        return nil,  "", "", 0, errors.New("Network-instances-vlans obj missing")
+        ygot.BuildEmptyTree(netInstVlansObj)
     }
 
     // Add prefix "VLAN"
@@ -127,6 +126,13 @@ var DbToYang_netinst_vlans_subtree_xfmr SubTreeXfmrDbToYang = func (inParams Xfm
 
     // Vlan name given, get corresponding entry from Db.
     if len(vlanName) > 0 {
+        // if network instance is vlan, return nil for other vlans.
+        if strings.HasPrefix(niName, "Vlan") &&
+            vlanName != niName {
+            log.Infof("vlan_tbl_key_xfmr: vlanTbl_key %s, ntwk_inst %s ", vlanName, niName)
+            return err
+        }
+
         dbEntry, derr := inParams.d.GetEntry(dbspec, db.Key{Comp: []string{vlanName}})
         if derr != nil {
             log.Infof(" dbEntry get failure for Key %s", vlanName)
