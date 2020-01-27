@@ -2,6 +2,14 @@ module sonic-ifa {
     namespace "http://github.com/Azure/sonic-ifa";
     prefix ifa;
 
+    import sonic-acl {
+        prefix acl;
+    }
+
+    import sonic-tam {
+        prefix tam;
+    }
+
     organization
         "SONiC";
 
@@ -49,12 +57,16 @@ module sonic-ifa {
 
                 leaf acl-table-name {
                     mandatory true;
-                    type string;
+                    type leafref {
+		        path "/acl:sonic-acl/acl:ACL_TABLE/acl:ACL_TABLE_LIST/acl:aclname";
+		    }
                 }
 
                 leaf acl-rule-name {
                     mandatory true;
-                    type string;
+                    type leafref {
+		        path "/acl:sonic-acl/acl:ACL_RULE/acl:ACL_RULE_LIST[acl:aclname=current()/../acl-table-name]/acl:rulename";
+		    }
                 }
 
                 leaf sampling-rate {
@@ -66,10 +78,9 @@ module sonic-ifa {
                 }
 
                 leaf collector-name {
-                    type string {
-                        pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,32})';
-                        length 1..32;
-                    }
+                    type leafref {
+		        path "/tam:sonic-tam/tam:TAM_COLLECTOR_TABLE/tam:TAM_COLLECTOR_TABLE_LIST/tam:name";
+		    }
                 }
             }
         }
