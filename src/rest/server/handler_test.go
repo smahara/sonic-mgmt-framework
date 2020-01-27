@@ -38,7 +38,7 @@ var testRouter *Router
 
 // Basic mux.Router tests
 func TestRoutes(t *testing.T) {
-	initCount := countRoutes(newRouter())
+	initCount := countRoutes(newRouter(false))
 
 	// Add couple of test handlers
 
@@ -50,7 +50,7 @@ func TestRoutes(t *testing.T) {
 		w.WriteHeader(2)
 	})
 
-	testRouter = newRouter()
+	testRouter = newRouter(false)
 	newCount := countRoutes(testRouter)
 	expCount := initCount + 4 // OPTIONS handler is automaticall added for above 2 GET handlers
 
@@ -69,7 +69,7 @@ func TestRoutes(t *testing.T) {
 	// fail the requests with 401 error. Unknown path should still
 	// return 404.
 	ClientAuth.Set("password")
-	testRouter = newRouter()
+	testRouter = newRouter(false)
 	t.Run("Get1_auth", testGet("/test/1", 401))
 	t.Run("Get2_auth", testGet("/test/2", 401))
 	t.Run("GetUnknown_auth", testGet("/test/unknown", 404))
@@ -120,7 +120,7 @@ func TestOptions(t *testing.T) {
 	AddRoute("OPTPAT3", "PATCH", path3, h)
 	AddRoute("OPTPAT4", "POST", path4, h)
 
-	testRouter = newRouter()
+	testRouter = newRouter(false)
 	t.Run("OPT-1", testOptions(path1, "GET, OPTIONS", ""))
 	t.Run("OPT-2", testOptions(path2, "GET, PUT, PATCH, OPTIONS", ""))
 	t.Run("OPT-3", testOptions(path3, "PATCH, OPTIONS", mimeYangDataJSON))
@@ -319,7 +319,7 @@ func testPathConv(template, path, expPath string) func(*testing.T) {
 
 func testPathConv2(m map[string]string, template, path, expPath string) func(*testing.T) {
 	return func(t *testing.T) {
-		router := newRouter()
+		router := newRouter(false)
 		router.addRoute(t.Name(), "GET", template, pathConvHandler)
 
 		r := httptest.NewRequest("GET", path, nil)
@@ -704,7 +704,7 @@ func testResponseStatus(method, path string, expStatus int) func(*testing.T) {
 func (r *Router) addRoute(name, method, path string, h http.HandlerFunc) {
 	if isServeFromTree(path) {
 		rr := routeRegInfo{name: name, method: method, path: path, handler: h}
-		r.rcRoutes.add("", path, &rr)
+		r.rcRoutes.add("", path, &rr, false)
 	} else if path == "*" {
 		r.muxRoutes.Methods(method).HandlerFunc(h)
 	} else {

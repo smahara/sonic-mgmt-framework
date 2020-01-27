@@ -32,7 +32,7 @@ func TestMetaHandler(t *testing.T) {
 	r := httptest.NewRequest("GET", "/.well-known/host-meta", nil)
 	w := httptest.NewRecorder()
 
-	NewRouter().ServeHTTP(w, r)
+	NewRouter(false).ServeHTTP(w, r)
 
 	if w.Code != 200 {
 		t.Fatalf("Request failed with status %d", w.Code)
@@ -103,7 +103,7 @@ func testYanglibVer(t *testing.T, requestAcceptType, expectedContentType string)
 	}
 
 	t.Logf("GET /restconf/yang-library-version with accept=%s", requestAcceptType)
-	NewRouter().ServeHTTP(w, r)
+	NewRouter(false).ServeHTTP(w, r)
 
 	if w.Code != 200 {
 		t.Fatalf("Request failed with status %d", w.Code)
@@ -150,7 +150,7 @@ func TestYanglibHandler(t *testing.T) {
 	AddRoute("ylibOne", "GET", "/restconf/data/ietf-yang-library:modules-state/module={name},{revision}", h)
 	AddRoute("ylibNS", "GET", "/restconf/data/ietf-yang-library:modules-state/module={name},{revision}/namespace", h)
 
-	ylibRouter = NewRouter()
+	ylibRouter = NewRouter(false)
 
 	t.Run("all", testYlibGetAll)
 	t.Run("mset", testYlibGetMsetID)
@@ -250,7 +250,7 @@ func testCapability(t *testing.T, path string) {
 	r := httptest.NewRequest("GET", path, nil)
 	w := httptest.NewRecorder()
 
-	NewRouter().ServeHTTP(w, r)
+	NewRouter(false).ServeHTTP(w, r)
 
 	if w.Code != 200 {
 		t.Fatalf("Request failed with status %d", w.Code)

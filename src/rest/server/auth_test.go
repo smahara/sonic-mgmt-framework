@@ -102,7 +102,7 @@ var authTestHandler = authMiddleware(http.HandlerFunc(
 		} else {
 			Process(w, r)
 		}
-	}))
+	}), false)
 
 func TestAuthLocalUser_Get(t *testing.T) {
 	ensureAuthTestEnabled(t, "local")

@@ -45,8 +45,6 @@ var (
 	keyFile   string // Server private key file path
 	caFile    string // Client CA certificate file path
 	cliCAFile string // CLI client CA certificate file path
-	jwtValInt uint64 // JWT Valid Interval
-	jwtRefInt uint64 // JWT Refresh seconds before expiry
 )
 
 func init() {
@@ -57,8 +55,6 @@ func init() {
 	flag.StringVar(&caFile, "cacert", "", "CA certificate for client certificate validation")
 	flag.StringVar(&cliCAFile, "clicacert", "", "CA certificate for CLI client validation")
 	flag.Var(server.ClientAuth, "client_auth", "Client auth mode(s) - cert,password,jwt")
-	flag.Uint64Var(&jwtRefInt, "jwt_refresh_int", 30, "Seconds before JWT expiry the token can be refreshed.")
-	flag.Uint64Var(&jwtValInt, "jwt_valid_int", 3600, "Seconds that JWT token is valid for.")
 	flag.Parse()
 	// Suppress warning messages related to logging before flag parse
 	flag.CommandLine.Parse([]string{})
@@ -102,10 +98,10 @@ func main() {
 	swagger.Load()
 
 	server.GenerateJwtSecretKey()
-	server.JwtRefreshInt = time.Duration(jwtRefInt * uint64(time.Second))
-	server.JwtValidInt = time.Duration(jwtValInt * uint64(time.Second))
+	server.JwtRefreshInt = time.Duration(30 * uint64(time.Second))
+	server.JwtValidInt = time.Duration(3600 * uint64(time.Second))
 
-	router := server.NewRouter()
+	router := server.NewRouter(false)
 
 	address := fmt.Sprintf(":%d", port)
 
@@ -140,8 +136,6 @@ func main() {
 // unix socket. This is used for authentication of the CLI client to the REST
 // server, and will not be used for any other client.
 func spawnUnixListener() {
-	server.ClientAuth.Set("cert")
-	server.ClientAuth.Set("jwt")
 	tlsConfig := tls.Config{
 		ClientAuth:               tls.RequireAndVerifyClientCert,
 		Certificates:             prepareServerCertificate(),
@@ -158,7 +152,7 @@ func spawnUnixListener() {
 	}
 
 	localServer := &http.Server{
-		Handler:   server.NewRouter(),
+		Handler:   server.NewRouter(true),
 		TLSConfig: &tlsConfig,
 	}
 

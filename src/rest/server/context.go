@@ -71,6 +71,11 @@ type RequestContext struct {
 
 	// Auth contains the authorized user information
 	Auth AuthInfo
+
+	//Whether to enable RBAC on a request or not
+	Rbac bool
+	//Whether it is a CLI request ot not
+	CliUser bool
 }
 
 type contextkey int
