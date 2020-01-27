@@ -21,7 +21,6 @@ package transformer
 import (
     "fmt"
     "translib/db"
-    //"translib/tlerr"
     "strings"
     "encoding/json"
     "strconv"
@@ -76,12 +75,30 @@ func validateHandlerFunc(inParams XfmrParams) (bool) {
     return ret[0].Interface().(bool)
 }
 
-func xfmrTblHandlerFunc(xfmrTblFunc string, inParams XfmrParams) []string {
-    ret, err := XlateFuncCall(xfmrTblFunc, inParams)
-    if err != nil {
-        return []string{}
-    }
-    return ret[0].Interface().([]string)
+func xfmrTblHandlerFunc(xfmrTblFunc string, inParams XfmrParams) ([]string, error) {
+	xfmrLogInfoAll("Received inParams %v, table transformer function name %v", inParams, xfmrTblFunc)
+	var retTblLst []string
+	ret, err := XlateFuncCall(xfmrTblFunc, inParams)
+	if err != nil {
+		return retTblLst, err
+        }
+	if ((ret != nil) && (len(ret)>0)) {
+		if len(ret) == TBL_XFMR_RET_ARGS {
+			// table xfmr returns err as second value in return data list from <xfmr_func>.Call()
+			 if ret[TBL_XFMR_RET_ERR_INDX].Interface() != nil {
+				 err = ret[TBL_XFMR_RET_ERR_INDX].Interface().(error)
+				 if err != nil {
+					 log.Warningf("Transformer function(\"%v\") returned error - %v.", xfmrTblFunc, err)
+					 return retTblLst, err
+				 }
+			 }
+		}
+
+		if ret[TBL_XFMR_RET_VAL_INDX].Interface() != nil {
+			retTblLst = ret[TBL_XFMR_RET_VAL_INDX].Interface().([]string)
+		}
+	}
+	return retTblLst, err
 }
 
 
@@ -505,25 +522,22 @@ func yangListDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, r
 
 	_, ok := xYangSpecMap[xpath]
 	if ok {
-	if tbl == "" && xYangSpecMap[xpath].xfmrTbl != nil {
+	if xYangSpecMap[xpath].xfmrTbl != nil {
 		xfmrTblFunc := *xYangSpecMap[xpath].xfmrTbl
 		if len(xfmrTblFunc) > 0 {
 			inParams := formXfmrInputRequest(dbs[cdb], dbs, cdb, ygRoot, uri, requestUri, GET, tblKey, dbDataMap, nil, nil, txCache)
-			tblList   = xfmrTblHandlerFunc(xfmrTblFunc, inParams)
+			tblList, _   = xfmrTblHandlerFunc(xfmrTblFunc, inParams)
 			if len(tblList) != 0 {
 				for _, curTbl := range tblList {
 					dbDataFromTblXfmrGet(curTbl, inParams, dbDataMap)
 				}
 			}
 		}
+		if tbl != "" {
+			tblList = append(tblList, tbl)
+		}
 	} else if tbl != "" && xYangSpecMap[xpath].xfmrTbl == nil {
 		tblList = append(tblList, tbl)
-	} else if tbl != "" && xYangSpecMap[xpath].xfmrTbl != nil {
-		/*key instance level GET, table name and table key filled from xpathKeyExtract which internally calls table transformer*/
-		inParams := formXfmrInputRequest(dbs[cdb], dbs, cdb, ygRoot, uri, requestUri, GET, tblKey, dbDataMap, nil, nil, txCache)
-		dbDataFromTblXfmrGet(tbl, inParams, dbDataMap)
-		tblList = append(tblList, tbl)
-
 	} else if tbl == "" && xYangSpecMap[xpath].xfmrTbl == nil {
 		// Handling for case: Parent list is not associated with a tableName but has children containers/lists having tableNames.
 		if tblKey != "" {
@@ -780,7 +794,7 @@ func yangDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, reque
 						xfmrTblFunc := *xYangSpecMap[chldXpath].xfmrTbl
 						if len(xfmrTblFunc) > 0 {
 							inParams := formXfmrInputRequest(dbs[cdb], dbs, cdb, ygRoot, chldUri, requestUri, GET, tblKey, dbDataMap, nil, nil, txCache)
-							tblList := xfmrTblHandlerFunc(xfmrTblFunc, inParams)
+							tblList, _ := xfmrTblHandlerFunc(xfmrTblFunc, inParams)
 							if len(tblList) > 1 {
 								log.Warningf("Table transformer returned more than one table for container %v", chldXpath)
 							}
@@ -900,7 +914,7 @@ func dbDataToYangJsonCreate(uri string, ygRoot *ygot.GoStruct, dbs [db.MaxDB]*db
 					xfmrTblFunc := *xYangSpecMap[reqXpath].xfmrTbl
 					if len(xfmrTblFunc) > 0 {
 						inParams := formXfmrInputRequest(dbs[cdb], dbs, cdb, ygRoot, uri, requestUri, GET, keyName, dbDataMap, nil, nil, txCache)
-						tblList := xfmrTblHandlerFunc(xfmrTblFunc, inParams)
+						tblList, _ := xfmrTblHandlerFunc(xfmrTblFunc, inParams)
 						if len(tblList) > 1 {
 							log.Warningf("Table transformer returned more than one table for container %v", reqXpath)
 						}
