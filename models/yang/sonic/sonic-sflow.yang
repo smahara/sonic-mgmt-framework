@@ -17,6 +17,10 @@ module sonic-sflow {
                 prefix sonic-ext;
         }
 
+	import sonic-extension {
+		prefix sonic-ext;
+	}
+
         revision 2019-09-09 {
                 description
                         "Initial revision.";
@@ -92,9 +96,11 @@ module sonic-sflow {
                     }
 
                     leaf agent_id {
-                         type leafref {
-                             path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
-                         }
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        sonic-ext:custom-validation ValidateSflowAgentId;
+                        type string;
                     }
                 }
            }
