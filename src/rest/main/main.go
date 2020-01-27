@@ -55,10 +55,22 @@ func init() {
 	flag.StringVar(&keyFile, "key", "", "Server private key file path")
 	flag.StringVar(&caFile, "cacert", "", "CA certificate for client certificate validation")
 	flag.StringVar(&cliCAFile, "clicacert", "", "CA certificate for CLI client validation")
-	flag.Var(clientAuth, "client_auth", "Client auth mode(s) - cert,password,jwt")
+	flag.Var(clientAuth, "client_auth", "Client auth mode(s) - <cert,password,jwt,none> default: password,jwt")
 	flag.Parse()
 	// Suppress warning messages related to logging before flag parse
 	flag.CommandLine.Parse([]string{})
+	//Below is for setting the default client_auth to password,jwt.
+	//If you define the defaults in the above clientAuth, they will be merged together, which we don't want.
+	clientAuthFound := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "client_auth" {
+			clientAuthFound = true
+		}
+	})
+	if !clientAuthFound {
+		clientAuth = server.UserAuth{"password": true, "cert": false, "jwt": true}
+	}
+
 }
 
 var profRunning bool = true
