@@ -111,8 +111,8 @@ func main() {
 	swagger.Load()
 
 	server.GenerateJwtSecretKey()
-	server.JwtRefreshInt = time.Duration(30 * uint64(time.Second))
-	server.JwtValidInt = time.Duration(3600 * uint64(time.Second))
+	server.JwtRefreshInt = time.Duration(30 * time.Second)
+	server.JwtValidInt = time.Duration(3600 * time.Second)
 
 	router := server.NewRouter(clientAuth)
 
