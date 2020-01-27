@@ -77,7 +77,7 @@ func (i UserAuth) Set(mode string) error {
 	modes := strings.Split(mode, ",")
 	for _, m := range modes {
 		m = strings.Trim(m, " ")
-		if m == "none" {
+		if m == "none" || m == "" {
 			i["none"] = true
 			return nil
 		}
