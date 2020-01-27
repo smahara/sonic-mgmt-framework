@@ -1392,7 +1392,6 @@ var DbToYang_intf_ip_addr_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) 
 }
 
 func validIPv4(ipAddress string) bool {
-    log.Info("validIP: ip is ", []byte(ipAddress))
     if (strings.HasPrefix(ipAddress, "0.") || strings.HasPrefix(ipAddress, "255.")) {
         log.Info("validIP: ip is reserved ", ipAddress)
         return false
