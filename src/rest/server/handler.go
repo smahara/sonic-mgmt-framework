@@ -262,7 +262,7 @@ func invokeTranslib(args *translibArgs, r *http.Request, rc *RequestContext) (in
 	var status = 400
 	var content []byte
 	var err error
-
+	
 	ts := time.Now()
 
 	switch r.Method {
@@ -273,7 +273,7 @@ func invokeTranslib(args *translibArgs, r *http.Request, rc *RequestContext) (in
 			Depth: args.depth,
 			User: translib.UserRoles{Name: rc.Auth.User, Roles: rc.Auth.Roles},
 		}
-		if ClientAuth.Any() {
+		if rc.ClientAuth.Any() {
 			req.AuthEnabled = true
 		}
 
@@ -293,7 +293,7 @@ func invokeTranslib(args *translibArgs, r *http.Request, rc *RequestContext) (in
 				Payload: args.data,
 				User: translib.UserRoles{Name: rc.Auth.User, Roles: rc.Auth.Roles},
 			}
-			if ClientAuth.Any() {
+			if rc.ClientAuth.Any() {
 				req.AuthEnabled = true
 			}
 			res, err1 := translib.Action(req)
@@ -311,6 +311,9 @@ func invokeTranslib(args *translibArgs, r *http.Request, rc *RequestContext) (in
 				Payload: args.data,
 				User: translib.UserRoles{Name: rc.Auth.User, Roles: rc.Auth.Roles},
 			}
+			if rc.ClientAuth.Any() {
+				req.AuthEnabled = true
+			}
 
 			_, err = translib.Create(req)
 		}
@@ -324,7 +327,7 @@ func invokeTranslib(args *translibArgs, r *http.Request, rc *RequestContext) (in
 			Payload: args.data,
 			User: translib.UserRoles{Name: rc.Auth.User, Roles: rc.Auth.Roles},
 		}
-		if ClientAuth.Any() {
+		if rc.ClientAuth.Any() {
 			req.AuthEnabled = true
 		}
 		_, err = translib.Replace(req)
@@ -337,7 +340,7 @@ func invokeTranslib(args *translibArgs, r *http.Request, rc *RequestContext) (in
 			Payload: args.data,
 			User: translib.UserRoles{Name: rc.Auth.User, Roles: rc.Auth.Roles},
 		}
-		if ClientAuth.Any() {
+		if rc.ClientAuth.Any() {
 			req.AuthEnabled = true
 		}
 		_, err = translib.Update(req)
@@ -349,7 +352,7 @@ func invokeTranslib(args *translibArgs, r *http.Request, rc *RequestContext) (in
 			Path:  args.path,
 			User: translib.UserRoles{Name: rc.Auth.User, Roles: rc.Auth.Roles},
 		}
-		if ClientAuth.Any() {
+		if rc.ClientAuth.Any() {
 			req.AuthEnabled = true
 		}
 		_, err = translib.Delete(req)
