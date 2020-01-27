@@ -53,7 +53,7 @@ limitations under the License.
     <PTYPE
         name="LAG_ID"
         method="integer"
-        pattern="1..256"
+        pattern="1..9999"
         help=""
         />
     <!--=======================================================-->
