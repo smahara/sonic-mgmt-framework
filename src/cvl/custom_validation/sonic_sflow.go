@@ -7,7 +7,7 @@ import (
 
 
 //Validate ip address of sflow collector ip 
-func (t *CustomValidation) ValidateProperIp(vc *CustValidationCtxt) CVLErrorInfo {
+func (t *CustomValidation) ValidateIp(vc *CustValidationCtxt) CVLErrorInfo {
 	ip := net.ParseIP(vc.YNodeVal)
 	if ip == nil {
 	         util.CVL_LEVEL_LOG(0,"%s","IP IS NIL")
@@ -18,7 +18,7 @@ func (t *CustomValidation) ValidateProperIp(vc *CustValidationCtxt) CVLErrorInfo
 			    }
 	}
 
-	if ip.IsLoopback() || ip.IsUnspecified() || ip.Equal(net.IPv4bcast)|| ip.IsMulticast(){
+	if ip.IsLoopback() || ip.IsUnspecified() || ip.Equal(net.IPv4bcast) || ip.IsMulticast() {
 	        util.CVL_LEVEL_LOG(0,"%s","IP IS UNSPECIFIED OR LOOPBACK OR MULTICAST OR RESERVED")
 		return CVLErrorInfo{
 			            ErrCode: CVL_SYNTAX_INVALID_INPUT_DATA,
