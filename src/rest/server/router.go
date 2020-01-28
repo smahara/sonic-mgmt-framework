@@ -464,7 +464,7 @@ func authMiddleware(inner http.Handler, auth UserAuth) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rc, r := GetContext(r)
 		rc.ClientAuth = auth
-		glog.Infof("Valid Auth Modes: %s", rc.ClientAuth)
+		glog.V(2).Infof("Valid Auth Modes: %s", rc.ClientAuth)
 		var err error
 		success := false
 		ts := time.Now()
