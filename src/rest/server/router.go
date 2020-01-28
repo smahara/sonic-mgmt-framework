@@ -469,7 +469,7 @@ func authMiddleware(inner http.Handler, auth UserAuth) http.Handler {
 		success := false
 		ts := time.Now()
 
-		if rc.ClientAuth.Enabled("password") {
+		if rc.ClientAuth.Enabled("password") || rc.ClientAuth.Enabled("user") {
 			err = BasicAuthenAndAuthor(r, rc)
 			if err == nil {
 				success = true

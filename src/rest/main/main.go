@@ -45,7 +45,7 @@ var (
 	keyFile   string // Server private key file path
 	caFile    string // Client CA certificate file path
 	cliCAFile string // CLI client CA certificate file path
-	clientAuth = server.UserAuth{"password": false, "cert": false, "jwt": false}
+	clientAuth = server.UserAuth{"password": false, "user": false, "cert": false, "jwt": false}
 )
 
 func init() {
@@ -55,7 +55,7 @@ func init() {
 	flag.StringVar(&keyFile, "key", "", "Server private key file path")
 	flag.StringVar(&caFile, "cacert", "", "CA certificate for client certificate validation")
 	flag.StringVar(&cliCAFile, "clicacert", "", "CA certificate for CLI client validation")
-	flag.Var(clientAuth, "client_auth", "Client auth mode(s) - <cert,password,jwt,none> default: password,jwt")
+	flag.Var(clientAuth, "client_auth", "Client auth mode(s) - <none,cert,jwt,password|user(depricated)> default: password,jwt")
 	flag.Parse()
 	// Suppress warning messages related to logging before flag parse
 	flag.CommandLine.Parse([]string{})
@@ -106,6 +106,9 @@ func main() {
 
 	if caFile == "" && clientAuth.Enabled("cert") {
 		glog.Fatal("Must specify -cacert with -client_auth cert")
+	}
+	if clientAuth.Enabled("user") {
+		glog.Warning("client_auth mode \"user\" is deprecated, use \"password\" instead.")
 	}
 
 	swagger.Load()
