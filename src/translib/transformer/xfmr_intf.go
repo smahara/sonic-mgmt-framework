@@ -1397,13 +1397,8 @@ func validIPv4(ipAddress string) bool {
         return false
     }
 
-    ip := net.ParseIP(ipAddress)
-
-    if (ip.IsLinkLocalUnicast() || ip.IsUnspecified() ||  ip.IsLoopback() ||  ip.IsMulticast()) {
-        log.Info("validIP: ip is invalid ", ipAddress)
-        return false
-    }
-    return true
+    /* net would take care of v4 vs v6 */
+    return (validIPv6(ipAddress))
 }
 
 func validIPv6(ip6Address string) bool {
