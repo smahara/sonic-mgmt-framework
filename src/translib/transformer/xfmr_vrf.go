@@ -348,6 +348,11 @@ var YangToDb_network_instance_enabled_field_xfmr FieldXfmrYangToDb = func(inPara
                 return res_map, errors.New("Network instance not set")
         }
 
+        if strings.HasPrefix(inParams.key, "Vlan") {
+            log.Infof("YangToDb Vlan key %s, do not add fallback attriubtes.", inParams.key)
+            return res_map, err
+        }
+
         pathInfo := NewPathInfo(inParams.uri)
 
         if len(pathInfo.Vars) < 1 {
@@ -453,8 +458,13 @@ var YangToDb_network_instance_name_field_xfmr FieldXfmrYangToDb = func(inParams 
 
         log.Info("YangToDb_network_instance_name_field_xfmr")
 
-        /* the key name is not repeated as attr name in the DB */
-        res_map["NULL"] = "NULL"
+        if inParams.key != "" && strings.HasPrefix(inParams.key, "Vlan") {
+            vlanIdStr := strings.TrimPrefix(inParams.key, "Vlan")
+            res_map["vlanid"] = vlanIdStr
+        } else {
+            /* the key name is not repeated as attr name in the DB */
+            res_map["NULL"] = "NULL"
+        }
 
         return res_map, err
 }

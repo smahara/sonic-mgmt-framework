@@ -13,7 +13,6 @@ module openconfig-network-instance-annot {
     import openconfig-bgp-evpn-ext { prefix oc-bgp-evpn-ext; }
 	
     import ietf-yang-types { prefix yang; }
-    import openconfig-network-instance-ext { prefix oc-netinst-ext; }	
 
     deviation /oc-netinst:network-instances/oc-netinst:network-instance {
       deviate add {

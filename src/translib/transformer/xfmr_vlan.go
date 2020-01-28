@@ -39,12 +39,13 @@ func getUriAttributes(inParams XfmrParams) (*ocbinds.OpenconfigNetworkInstance_N
 
     netInstObj := netInstsObj.NetworkInstance[niName]
     if netInstObj == nil {
+        netInstObj, _ = netInstsObj.NewNetworkInstance(niName)
         ygot.BuildEmptyTree(netInstObj)
     }
 
     netInstVlansObj := netInstObj.Vlans
     if netInstVlansObj == nil {
-        ygot.BuildEmptyTree(netInstVlansObj)
+        ygot.BuildEmptyTree(netInstObj)
     }
 
     // Add prefix "VLAN"
@@ -58,7 +59,7 @@ func getUriAttributes(inParams XfmrParams) (*ocbinds.OpenconfigNetworkInstance_N
     }
     log.Infof(" niName %s vlanName %s targetUriPath %s", niName, vlanName, targetUriPath)
 
-    return netInstVlansObj, niName, vlanName, vlanId, err
+    return netInstObj.Vlans, niName, vlanName, vlanId, err
 }
 
 func dbToYangFillVlanMemberEntry(ocVlansVlan *ocbinds.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Vlans_Vlan, vlanName string, dbVal db.Value) (error){
