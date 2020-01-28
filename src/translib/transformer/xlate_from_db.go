@@ -536,11 +536,9 @@ func yangListDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, r
         if  tbl != "" {
 		    tblList = append(tblList, tbl)
         }
-        log.Infof("yangListDataFill After2 tblXfmr:%v, tblList:%v, dbDataMap:%v", xYangSpecMap[xpath].xfmrTbl, tblList, *dbDataMap)
 
 	} else if tbl != "" && xYangSpecMap[xpath].xfmrTbl == nil {
 		tblList = append(tblList, tbl)
-        log.Infof("yangListDataFill tbl:%v, tblList:%v, dbDataMap:%v", tbl, tblList, *dbDataMap)
 	} else if tbl == "" && xYangSpecMap[xpath].xfmrTbl == nil {
 		// Handling for case: Parent list is not associated with a tableName but has children containers/lists having tableNames.
 		if tblKey != "" {

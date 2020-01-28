@@ -122,6 +122,7 @@ def getIntfId(item):
         return ifName
     return ifId
 
+
 def generate_show_bgp_routes(args):
    api = cc.ApiClient()
    keypath = []
