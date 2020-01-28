@@ -533,10 +533,6 @@ func yangListDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, r
 				}
 			}
 		}
-        if  tbl != "" {
-		    tblList = append(tblList, tbl)
-        }
-
 	} else if tbl != "" && xYangSpecMap[xpath].xfmrTbl == nil {
 		tblList = append(tblList, tbl)
 	} else if tbl == "" && xYangSpecMap[xpath].xfmrTbl == nil {
