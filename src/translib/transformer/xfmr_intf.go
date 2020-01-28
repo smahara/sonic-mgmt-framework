@@ -1399,7 +1399,7 @@ func validIPv4(ipAddress string) bool {
 
     ip := net.ParseIP(ipAddress)
 
-    if (ip.IsLinkLocalUnicast() || ip.IsUnspecified() ||  ip.IsLoopback() ||  ip.IsMulticast() ||  ip.IsGlobalUnicast()) {
+    if (ip.IsLinkLocalUnicast() || ip.IsUnspecified() ||  ip.IsLoopback() ||  ip.IsMulticast()) {
         log.Info("validIP: ip is invalid ", ipAddress)
         return false
     }
@@ -1409,7 +1409,7 @@ func validIPv4(ipAddress string) bool {
 func validIPv6(ip6Address string) bool {
     ip := net.ParseIP(ip6Address)
 
-    if (ip.IsLinkLocalUnicast() || ip.IsUnspecified() ||  ip.IsLoopback() ||  ip.IsMulticast() ||  ip.IsGlobalUnicast()) {
+    if (ip.IsLinkLocalUnicast() || ip.IsUnspecified() ||  ip.IsLoopback() ||  ip.IsMulticast()) {
         log.Info("validIP: ip is invalid ", ip6Address)
         return false
     }
