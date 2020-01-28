@@ -302,10 +302,6 @@ var DbToYang_fdb_mac_table_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams)
     vlan := pathInfo.Var("vlan")
     macAddress := pathInfo.Var("mac-address")
 
-    if (instance != "default") {
-        return err
-    }
-
     targetUriPath, err := getYangPathFromUri(inParams.uri)
     log.Info("targetUriPath is ", targetUriPath)
 
@@ -319,7 +315,7 @@ var DbToYang_fdb_mac_table_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams)
     if vlan == "" || macAddress == "" {
         err = fdbMacTableGetAll (inParams)
     } else {
-        vlanString := strings.Contains(vlan, "Vlan")
+        vlanString := strings.HasPrefix(vlan, "Vlan")
         if vlanString == true {
             vlan = strings.Replace(vlan, "", "Vlan", 0)
         }
