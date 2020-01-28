@@ -72,7 +72,10 @@ func ztpAction(action string) (string, error) {
 	if ((action == "status") || (action == "getcfg")) {
 		// ztp.status returns an exit code and the stdout of the command
 		// We only care about the stdout (which is at [1] in the slice)
-		output, _ = result.Body[0].(string)
+        output, _ = result.Body[0].(string)
+        if output == "ZTP not supported" {
+            return "",tlerr.New(output)
+        }
 	} else {
         if (action == "run") {
 		    //rc, _ := result.Body[0].(string)
@@ -259,13 +262,13 @@ func getZtpStatusInfofromDb( statusObj *ocbinds.OpenconfigZtp_Ztp_State, statusC
     if allCfgList, present := empty[ZTP_CONFIG_SECTION_LIST]; present {
 	    for section, dataMap := range allCfgList.(map[string]interface{}) {
                 oneCfgList, err :=statusObj.NewCONFIG_SECTION_LIST(section)
-	        if err != nil {
+	            if err != nil {
                     log.Info("Creation of subsectionlist subtree failed!")
                     return err
                 }
                 ygot.BuildEmptyTree(oneCfgList)
                 getConfigSection(section, dataMap.(map[string]interface{}), statusCache)
-	        log.Info("type of data map", reflect.TypeOf(dataMap))
+	            log.Info("type of data map", reflect.TypeOf(dataMap))
                 populateConfigSectionYgotTree(section, oneCfgList, statusCache)
                 log.Info("Done populating config object for section:",section)
             }
