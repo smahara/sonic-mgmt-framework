@@ -100,7 +100,6 @@ module sonic-sflow {
                             path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
                         }
                         sonic-ext:custom-validation ValidateSflowAgentId;
-                        type string;
                     }
                 }
            }
