@@ -5,13 +5,25 @@
 {% set vars = {'master': ""} %}
 {% set vars = {'flags': ""} %}
 {% set vars = {'ipv4_src_pfx': ""} %}
-{% if json_output -%}
+{% if json_output %}
 -----------------------------------------------------------------------------------------------
 {{'%-20s'|format("Interface")}}{{'%-35s'|format("IP address/mask")}}{{'%-15s'|format("Master")}}{{'%-15s'|format("Admin/Oper")}}{{'%-15s'|format("Flags")}}
 -----------------------------------------------------------------------------------------------
 {% for key in json_output %}
    {% if "sonic-interface:INTF_TABLE_IPADDR_LIST" in key %}
       {% set intfTblList = json_output["sonic-interface:INTF_TABLE_IPADDR_LIST"] %}
+   {% endif %}
+   {% if "sonic-mgmt-interface:MGMT_INTF_TABLE_IPADDR_LIST" in key %}
+      {% set mgmtIntfTblList = json_output["sonic-mgmt-interface:MGMT_INTF_TABLE_IPADDR_LIST"] %}
+      {% for ifKey in mgmtIntfTblList %}
+         {% if vars.update({'name':ifKey["ifName"]}) %}{% endif %}
+         {% if vars.update({'ipv4_src_pfx':ifKey["ipPrefix"]}) %}{% endif %}
+         {% if vars.update({'admin_state':"up"}) -%}{% endif -%}
+         {% if vars.update({'oper_state':"up"}) -%}{% endif -%}
+        {% set admin_op = vars.admin_state + "/" + vars.oper_state|string() %}
+        {% if vars.update({'admin_oper':admin_op}) %}{% endif %}
+{{'%-20s'|format(vars.name)}}{{'%-35s'|format(vars.ipv4_src_pfx)}}{{'%-15s'|format(vars.master)}}{{'%-15s'|format(vars.admin_oper)}}{{'%-15s'|format(vars.flags)}}
+      {% endfor %}
    {% endif %}
 {% for ifKey in intfTblList %}
   {% if vars.update({'name':ifKey["ifName"]}) %}{% endif %}
