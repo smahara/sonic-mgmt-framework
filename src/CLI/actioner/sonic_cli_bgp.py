@@ -1660,7 +1660,7 @@ def invoke_show_api(func, args=[]):
             response = api.get(keypath)
             if response.ok():
                 if 'openconfig-network-instance:neighbor' in response.content:
-                    tmp['neighbor'] = preprocess_bgp_nbrs(iptype, response.content['openconfig-network-instance:neighbors']['neighbor'])
+                    tmp['neighbor'] = preprocess_bgp_nbrs(iptype, response.content['openconfig-network-instance:neighbor'])
                     d['openconfig-network-instance:neighbors'] = tmp
                 return d
             else:
