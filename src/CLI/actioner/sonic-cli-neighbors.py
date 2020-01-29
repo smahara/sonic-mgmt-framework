@@ -43,11 +43,11 @@ def get_keypath(func,args):
     elif func == 'rpc_sonic_clear_neighbors':
         keypath = cc.Path('/restconf/operations/sonic-neighbor:clear-neighbors')
         if (len (args) == 2):
-            body = {"sonic-neighbor:input":{"family": args[0], "force": args[1], "ip": "", "ifname": ""}}
+            body = {"sonic-neighbor:input":{"family": args[0], "force": args[1], "all": "true", "ip": "", "interface": ""}}
         elif (len (args) == 3):
-            body = {"sonic-neighbor:input":{"family": args[0], "force": args[1], "ip": args[2], "ifname": ""}}
+            body = {"sonic-neighbor:input":{"family": args[0], "force": args[1], "all": "false", "ip": args[2], "interface": ""}}
         elif (len (args) == 4):
-            body = {"sonic-neighbor:input":{"family": args[0], "force": args[1], "ip": "", "ifname": args[3]}}
+            body = {"sonic-neighbor:input":{"family": args[0], "force": args[1], "all": "false", "ip": "", "interface": args[3]}}
 
     return keypath, body
 
@@ -216,7 +216,7 @@ def run(func, args):
         elif 'sonic-neighbor:output' in response.keys():
             status = response['sonic-neighbor:output']
             status = status['response']
-            if (status != "Success"):
+            if (status != ""):
                 print status
             return
         else:

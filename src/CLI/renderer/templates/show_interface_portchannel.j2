@@ -1,5 +1,6 @@
 {% set mode, minlinks, fallback = "LACP", "1", "Disabled" %}
 
+
 {% if json_output['portchannel']['sonic-portchannel:LAG_TABLE'] and json_output['portchannel']['sonic-portchannel:LAG_TABLE']['LAG_TABLE_LIST'] %}
 {% for po_intf in json_output['portchannel']['sonic-portchannel:LAG_TABLE']['LAG_TABLE_LIST'] %}
 
@@ -45,15 +46,6 @@ MTU {{po_intf['mtu']}}
 
 {% if 'state' in intf %}
 LACP mode {{intf['state']['lacp-mode']}} interval {{intf['state']['interval']}} priority {{intf['state']['system-priority']}} address {{intf['state']['system-id-mac']}}
-
-{% else %}
-
-{% for lag_mem in json_output['portchannel']['sonic-portchannel:LAG_MEMBER_TABLE']['LAG_MEMBER_TABLE_LIST'] %}
-{% if lag_mem['name'] == po_intf['lagname'] %}
-Members in this channel: {{ lag_mem['ifname'] }}
-{% endif %}
-{% endfor %}
-
 {% endif %}
 
 
@@ -71,13 +63,6 @@ LACP Partner port {{mem['state']['partner-port-num']}}  address {{mem['state']['
 {% endfor %}
 {% endif %}
 
-{% endif %}
-
-{% endfor %}
-
-{% endif %}
-
-
 {% if po_intf['counters'] %}
 {%set counters = po_intf['counters']['openconfig-interfaces:counters'] %}
 Last clearing of "show interface" counters: {{ datetimeformat(counters['last-clear']) }}
@@ -92,7 +77,15 @@ Output statistics:
 {{counters['out-errors']}} error, {{counters['out-discards']}} discarded
 {% endif %}
 
-{{'\r\n\r\n'}}
+
+{% endif %}
+
+
 {% endfor %}
 {% endif %}
+
+
+{% endfor %}
+{% endif %}
+
 

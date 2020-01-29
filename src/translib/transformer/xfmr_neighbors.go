@@ -28,7 +28,6 @@ import (
     "fmt"
     "os/exec"
     "bufio"
-    "strconv"
 )
 
 func init () {
@@ -315,42 +314,12 @@ var DbToYang_neigh_tbl_get_all_ipv6_xfmr SubTreeXfmrDbToYang = func (inParams Xf
     return err
 }
 
-func clear_arp_all(fam_switch string, force bool) string {
+func clear_arp_all(fam_switch string, force string) string {
     var err error
-    var isPerm bool = false
 
-    /* First check if we have any permanent entry */
-    cmd := exec.Command("ip", fam_switch, "neigh", "show", "all")
-    cmd.Dir = "/bin"
-
-    out, err := cmd.StdoutPipe()
-    if err != nil {
-        log.Info("Can't get stdout pipe: ", err)
-        return err.Error()
-    }
-
-    err = cmd.Start()
-    if err != nil {
-        log.Info("cmd.Start() failed with: ", err)
-        return err.Error()
-    }
-
-    in := bufio.NewScanner(out)
-    for in.Scan() {
-        line := in.Text()
-
-        if strings.Contains(line, "PERMANENT") && force == false {
-            isPerm = true
-            break
-        }
-    }
-
-    /* Now flush all entries */
-    if (force == true) {
-        log.Info("Executing: ip ", fam_switch, " -s ", "-s ", "neigh ", "flush ", "all ", "nud ", "all")
+    if (force == "true") {
         _, err = exec.Command("ip", fam_switch, "-s", "-s", "neigh", "flush", "all", "nud", "all").Output()
     } else {
-        log.Info("Executing: ip ", fam_switch, " -s ", "-s ", "neigh ", "flush ", "all")
         _, err = exec.Command("ip", fam_switch, "-s", "-s", "neigh", "flush", "all").Output()
     }
 
@@ -358,19 +327,17 @@ func clear_arp_all(fam_switch string, force bool) string {
         log.Info(err)
         return err.Error()
     }
-    if isPerm {
-        return "Permanent entry found, use 'force' to delete permanent entries"
-    } else {
-        return "Success"
-    }
+    return ""
 }
 
-func clear_arp_ip(ip string, fam_switch string, force bool) string {
+func clear_arp_ip(ip string, fam_switch string, force string) string {
     var intf string
 
     //get interface first associated with this ip
+    log.Info("---A:", ip, fam_switch, force, ip)
     out, err := exec.Command("ip", fam_switch, "neigh", "show", ip).Output()
     line := string(out)
+    log.Info("---line:", line)
 
     if err != nil {
         log.Info(err)
@@ -381,27 +348,27 @@ func clear_arp_ip(ip string, fam_switch string, force bool) string {
         list := strings.Fields(line)
         intf = list[2]
     } else {
-        str := "Error: Neighbor " + ip + " not found"
+        str := "Neighbor " + ip + " not found"
         return str
     }
 
-    if strings.Contains(line, "PERMANENT") && force == false {
-        return "Permanent entry found, use 'force' to delete permanent entries"
+    log.Info("---1:", ip, fam_switch, force)
+    if strings.Contains(line, "PERMANENT") && force == "false" {
+        return ""
     }
 
-    log.Info("Executing: ip ", fam_switch, " neigh ", "del ", ip, " dev ", intf)
     out, err = exec.Command("ip", fam_switch, "neigh", "del", ip, "dev", intf).Output()
+    log.Info("---2:", ip, fam_switch, force, ip, intf)
     if err != nil {
         log.Info(err)
         return err.Error()
     }
 
-    return "Success"
+    return ""
 }
 
-func clear_arp_intf(intf string, fam_switch string, force bool) string {
+func clear_arp_intf(intf string, fam_switch string, force string) string {
     var isValidIntf bool = false
-    var isPerm bool = false
 
     cmd := exec.Command("ip", fam_switch, "neigh", "show", "dev", intf)
     cmd.Dir = "/bin"
@@ -418,6 +385,7 @@ func clear_arp_intf(intf string, fam_switch string, force bool) string {
         return err.Error()
     }
 
+    // read command's stdout line by line
     in := bufio.NewScanner(out)
     for in.Scan() {
         line := in.Text()
@@ -427,15 +395,14 @@ func clear_arp_intf(intf string, fam_switch string, force bool) string {
             return line
         }
 
-        if strings.Contains(line, "PERMANENT") && force == false {
+        if strings.Contains(line, "PERMANENT") && force == "false" {
+            log.Info("Skipping permenant entry: ", line)
             isValidIntf = true
-            isPerm = true
             continue
         }
 
         list := strings.Fields(line)
         ip := list[0]
-        log.Info("Executing: ip ", fam_switch, " neigh ", "del ", ip, " dev ", intf)
         _, e := exec.Command("ip", fam_switch, "neigh", "del", ip, "dev", intf).Output()
         if e != nil {
             log.Info(e)
@@ -444,12 +411,10 @@ func clear_arp_intf(intf string, fam_switch string, force bool) string {
         isValidIntf = true
     }
 
-    if isValidIntf == true && isPerm == false {
-        return "Success"
-    } else if isPerm == true {
-        return "Permanent entry found, use 'force' to delete permanent entries"
+    if isValidIntf {
+        return ""
     } else {
-        return "Error: Interface " + intf + " not found"
+        return "Interface " + intf + " not found"
     }
 }
 
@@ -457,10 +422,7 @@ var rpc_clear_neighbors RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) (
     log.Info("In rpc_clear_neighbors")
     var err error
     var status string
-    var fam_switch string = "-4"
-    var force bool = false
-    var intf string = ""
-    var ip string = ""
+    var fam_switch string
 
     var mapData map[string]interface{}
     err = json.Unmarshal(body, &mapData)
@@ -475,45 +437,39 @@ var rpc_clear_neighbors RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) (
         } `json:"sonic-neighbor:output"`
     }
 
-    if input, ok := mapData["sonic-neighbor:input"]; ok {
-        mapData = input.(map[string]interface{})
+    input, _ := mapData["sonic-neighbor:input"]
+    mapData = input.(map[string]interface{})
+
+    input = mapData["family"]
+    input_str := fmt.Sprintf("%v", input)
+    family := input_str
+    if family == "IPv4" {
+        fam_switch = "-4"
     } else {
-        result.Output.Status = "Invalid input"
-        return json.Marshal(&result)
+        fam_switch = "-6"
     }
 
-    if input, ok := mapData["family"]; ok {
-        input_str := fmt.Sprintf("%v", input)
-        family := input_str
-        if strings.EqualFold(family, "IPv6") || family == "1" {
-            fam_switch = "-6"
-        }
-    }
+    input = mapData["force"]
+    input_str = fmt.Sprintf("%v", input)
+    force := input_str
 
-    if input, ok := mapData["force"]; ok {
-        input_str := fmt.Sprintf("%v", input)
-        force, err = strconv.ParseBool(input_str)
-        if (err != nil) {
-            result.Output.Status = "Invalid input"
-            return json.Marshal(&result)
-        }
-    }
+    input = mapData["interface"]
+    input_str = fmt.Sprintf("%v", input)
+    intf := input_str
 
-    if input, ok := mapData["ifname"]; ok {
-        input_str := fmt.Sprintf("%v", input)
-        intf = input_str
-    }
+    input = mapData["ip"]
+    input_str = fmt.Sprintf("%v", input)
+    ip := input_str
 
-    if input, ok := mapData["ip"]; ok {
-        input_str := fmt.Sprintf("%v", input)
-        ip = input_str
-    }
+    input = mapData["all"]
+    input_str = fmt.Sprintf("%v", input)
+    all := input_str
 
-    if len(intf) > 0 {
+    if intf != "" {
         status = clear_arp_intf(intf, fam_switch, force)
-    } else if len(ip) > 0 {
+    } else if ip != "" {
         status = clear_arp_ip(ip, fam_switch, force)
-    } else if len(intf) <= 0 && len(ip) <= 0 {
+    } else if all != "False" || all != "false" {
         status = clear_arp_all(fam_switch, force)
     }
 

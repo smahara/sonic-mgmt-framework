@@ -471,9 +471,9 @@ var DbToYang_ptp_delay_mech_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (
 	}
 
 	switch inval {
-	case "1":
+	case "E2E":
 		outval = "e2e"
-	case "2":
+	case "P2P":
 		outval = "p2p"
 	default:
 		outval = ""

@@ -64,7 +64,6 @@ type SetRequest struct {
 	Path    string
 	Payload []byte
 	User    UserRoles
-	AuthEnabled bool
 }
 
 type SetResponse struct {
@@ -75,7 +74,6 @@ type SetResponse struct {
 type GetRequest struct {
 	Path    string
 	User    UserRoles
-	AuthEnabled bool
 	// Depth limits the depth of data subtree in the response
 	// payload. Default value 0 indicates there is no limit.
 	Depth   uint
@@ -90,7 +88,6 @@ type ActionRequest struct {
 	Path    string
 	Payload []byte
 	User    UserRoles
-	AuthEnabled bool
 }
 
 type ActionResponse struct {
@@ -104,7 +101,6 @@ type BulkRequest struct {
 	UpdateRequest  []SetRequest
 	CreateRequest  []SetRequest
 	User           UserRoles
-	AuthEnabled    bool
 }
 
 type BulkResponse struct {
@@ -119,7 +115,6 @@ type SubscribeRequest struct {
 	Q				*queue.PriorityQueue
 	Stop			chan struct{}
 	User            UserRoles
-	AuthEnabled     bool
 }
 
 type SubscribeResponse struct {
@@ -140,7 +135,6 @@ const (
 type IsSubscribeRequest struct {
 	Paths				[]string
 	User                UserRoles
-	AuthEnabled         bool
 }
 
 type IsSubscribeResponse struct {

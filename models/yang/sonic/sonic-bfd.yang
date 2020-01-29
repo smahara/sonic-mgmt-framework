@@ -155,7 +155,6 @@ module sonic-bfd {
                                 key "remote-address interface vrf local-address";
 
                                 uses sonic-bfd-session-key;
-                                uses sonic-bfd-cmn;
 				uses sonic-bfd-echo;
                         }                                                                              
                 }

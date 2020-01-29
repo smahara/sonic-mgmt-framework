@@ -34,6 +34,7 @@ clear counters [interface <interface>]
                         help="Clear counters interface"
                         ptype="SUBCOMMAND"
                         mode="subcommand"
+                        optional="true"
                         >
                         <PARAM
                             name="interface-switch"

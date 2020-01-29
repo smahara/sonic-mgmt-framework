@@ -601,12 +601,6 @@ var YangToDb_igmp_snooping_subtree_xfmr SubTreeXfmrYangToDb = func(inParams Xfmr
 
 	path, err := getUriPath(inParams.uri)
 
-        pathInfo := NewPathInfo(inParams.uri)
-        protoId := pathInfo.Var("identifier")
-        if strings.Contains(protoId,"IGMP_SNOOPING") == false {
-            return nil, errors.New("IGMP Proto ID is missing")
-        }
-
 	if err != nil {
 		return nil, err
 	}
@@ -635,12 +629,6 @@ var DbToYang_igmp_snooping_subtree_xfmr SubTreeXfmrDbToYang = func(inParams Xfmr
 	fmt.Println("DbToYang_igmp_snooping_subtree_xfmr entering => ", inParams)
 
 	path, err := getUriPath(inParams.uri)
-
-        pathInfo := NewPathInfo(inParams.uri)
-        protoId := pathInfo.Var("identifier")
-        if strings.Contains(protoId,"IGMP_SNOOPING") == false {
-            return errors.New("IGMP Proto ID is missing")
-        }
 
 	if err != nil {
 		return err

@@ -64,7 +64,7 @@ def invoke(func, args):
             entry["gre_type"] = args.gre
 
         if args.queue is not None:
-            entry["queue"] = int(args.queue)
+            entry["queue"] = args.queue
 
         body["MIRROR_SESSION_LIST"]=[entry]
 

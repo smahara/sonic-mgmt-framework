@@ -28,7 +28,6 @@ import (
 	"github.com/antchfx/xpath"
 	"github.com/antchfx/xmlquery"
 	"github.com/antchfx/jsonquery"
-	"cvl/internal/yparser"
 	. "cvl/internal/util"
 )
 
@@ -205,8 +204,7 @@ func (c *CVL) generateYangListData(jsonNode *jsonquery.Node,
 	var cvlErrObj CVLErrorInfo
 
 	tableName := fmt.Sprintf("%s",jsonNode.Data)
-	c.batchLeaf = nil
-	c.batchLeaf = make([]*yparser.YParserLeafValue, 0)
+	c.batchLeaf = ""
 
 	//Every Redis table is mapped as list within a container,
 	//E.g. ACL_RULE is mapped as 
@@ -1221,17 +1219,11 @@ func (c *CVL) validateLeafRef(node *xmlquery.Node,
 
 			leafRefSuccess := false
 			nonLeafRefPresent := false //If leaf has non-leafref data type due to union
-			nodeValMatchedWithLeafref := false
-
-			ctxtVal := ""
-			//Get the leaf value
-			if (ctxNode.FirstChild != nil) {
-				ctxtVal = ctxNode.FirstChild.Data
-			}
-
+			refPathExpr := ""
 			//Excute all leafref checks, multiple leafref for unions
 			leafRefLoop:
 			for _, leafRefPath := range leafRefs {
+				refPathExpr = leafRefPath.path
 				if (leafRefPath.path == "non-leafref") {
 					//Leaf has at-least one non-leaferf data type in union
 					nonLeafRefPresent = true
@@ -1241,6 +1233,12 @@ func (c *CVL) validateLeafRef(node *xmlquery.Node,
 				//Add dependent data for all referred tables
 				for _, refListName := range leafRefPath.yangListNames {
 					refRedisTableName := getYangListToRedisTbl(refListName)
+					ctxtVal := ""
+
+					//Get the leaf value
+					if (ctxNode.FirstChild != nil) {
+						ctxtVal = ctxNode.FirstChild.Data
+					}
 
 					filter := ""
 					var err error
@@ -1301,23 +1299,9 @@ func (c *CVL) validateLeafRef(node *xmlquery.Node,
 				}
 			} //for loop for all leafref check for a leaf - union case
 
-			if (leafRefSuccess == false) && (nonLeafRefPresent == true) &&
-			(len(leafRefs) > 1) {
-				//If union has mixed type with base and leafref type,
-				//check if node value matched with any leafref.
-				//If so non-existence of leafref in DB will be treated as failure.
-				if (ctxtVal != "") {
-					nodeValMatchedWithLeafref = c.yp.IsLeafrefMatchedInUnion(tblInfo.module,
-					fmt.Sprintf("/%s:%s/%s/%s_LIST/%s", tblInfo.modelName,
-					tblInfo.modelName, tblInfo.redisTableName,
-					tableName, nodeName),
-					ctxtVal)
-				}
-			}
-
-			if (leafRefSuccess == false) &&
-			((nonLeafRefPresent == false) || (nodeValMatchedWithLeafref == true)) {
-				//Return failure if none of the leafref exists
+			if (leafRefSuccess == false) && (nonLeafRefPresent == false) {
+				//Return failure if none of the leafref exists and
+				//the leaf has no non-leafref data type as well
 				return CVLErrorInfo{
 					TableName: tableName,
 					Keys: strings.Split(key,
@@ -1325,7 +1309,7 @@ func (c *CVL) validateLeafRef(node *xmlquery.Node,
 					ErrCode: CVL_SEMANTIC_DEPENDENT_DATA_MISSING,
 					CVLErrDetails: cvlErrorMap[CVL_SEMANTIC_DEPENDENT_DATA_MISSING],
 					ErrAppTag: "instance-required",
-					ConstraintErrMsg: "No instance found for '" + ctxtVal + "'",
+					ConstraintErrMsg: "Instance missing for path '" + refPathExpr + "'",
 				}
 			} else if (leafRefSuccess == false) {
 				TRACE_LOG(TRACE_SEMANTIC, "validateLeafRef(): " +

@@ -79,10 +79,6 @@ func main() {
 	keys, _ := d.GetKeys(&tsa);
 	fmt.Println("ts: ", tsa, " keys: ", keys)
 
-	fmt.Println("Testing GetKeys ==============")
-	keys, _ := d.GetKeysPattern(&tsa, akey);
-	fmt.Println("ts: ", tsa, " keys: ", keys)
-
 	fmt.Println("Testing NoTransaction DeleteEntry ==============")
 	akey = db.Key { Comp: ca}
 
