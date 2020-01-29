@@ -137,27 +137,20 @@ limitations under the License.
 
   <COMMAND name="set" help="Set values in destination routing protocol"/>
   <COMMAND name="set as-path" help="Transform BGP AS-path attribute">
-    <PARAM name="as-opt" mode="switch" ptype="SUBCOMMAND" help="Set as-path options">
-      <PARAM name="exclude" mode="subcommand" ptype="SUBCOMMAND" help="Exclude from the as-path">
-        <PARAM name="as-number" help="AS number" ptype="RANGE_1_4294967295"/>
-      </PARAM>
-      <PARAM name="prepend" mode="subcommand" ptype="SUBCOMMAND" help="Prepend to the as-path">
-        <PARAM name="prepend-opt" mode="switch" ptype="SUBCOMMAND" help="Set as-path prepend options">
-          <PARAM name="as-number" help="AS number" ptype="RANGE_1_4294967295"/>
-          <PARAM name="last-as" mode="subcommand" ptype="SUBCOMMAND" help="Use the peer's AS-number">
-            <PARAM name="insert-number" help="Number of times to insert" ptype="RANGE_1_10"/>
-          </PARAM>
-        </PARAM>
-      </PARAM>
+    <PARAM name="prepend" mode="subcommand" ptype="SUBCOMMAND" help="Prepend to the as-path">
+      <PARAM name="as-number" help="AS number" ptype="RANGE_1_4294967295"/>
     </PARAM>
     <ACTION> python $SONIC_CLI_ROOT/sonic-cli-routemap.py patch_openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_set_as_path_prepend_config_asn ${name} ${seq_num} ${as-number}</ACTION>
   </COMMAND>
-  <COMMAND name="set comm-list" help="Set BGP community list (for deletion)">
+  <!--<COMMAND name="set comm-list" help="Set BGP community list (for deletion)">
     <PARAM name="comm-nm" help="Community-list name" ptype="STRING">
-      <PARAM name="delete" mode="subcommand" ptype="SUBCOMMAND" help="Delete matching communities"/>
+      <PARAM name="comm-list-opt" mode="switch" ptype="SUBCOMMAND" help="Community list option">
+        <PARAM name="add" mode="subcommand" ptype="SUBCOMMAND" help="Add matching communities"/>
+        <PARAM name="del" mode="subcommand" ptype="SUBCOMMAND" help="Delete matching communities"/>
+      </PARAM>
     </PARAM>
     <ACTION builtin="clish_nop"/>
-  </COMMAND>
+  </COMMAND>-->
   <COMMAND name="set community" help="BGP community attribute">
     <PARAM name="comm-opt" mode="switch" ptype="SUBCOMMAND" help="Community options">
       <PARAM name="comm-num" help="Community number aa:nn format 0..65535:0..65535" ptype="AA_NN"/>
@@ -232,34 +225,27 @@ limitations under the License.
     </PARAM>
     <ACTION> python $SONIC_CLI_ROOT/sonic-cli-routemap.py patch_openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_config_set_route_origin ${name} ${seq_num} ${origopt}</ACTION>
   </COMMAND>
-  <COMMAND name="set tag" help="Tag value for routing protocol">
-    <PARAM name="tag-value" help="Tag value" ptype="RANGE_1_4294967295"/>
-    <ACTION builtin="clish_nop"/>
-  </COMMAND>
-  <COMMAND name="set weight" help="BGP weight for routing table">
-    <PARAM name="wgt-value" help="Weight value" ptype="RANGE_0_4294967295"/>
-    <ACTION builtin="clish_nop"/>
-  </COMMAND>
+<!--  <COMMAND name="set tag" help="Tag value for routing protocol">
+    <PARAM name="pvalue" help="Preference value" ptype="RANGE_1_4294967295"/>
+    <ACTION></ACTION>
+  </COMMAND>-->
   <COMMAND name="no set" help="Set values in destination routing protocol"/>
-  <COMMAND name="no set as-path" help="Transform BGP AS-path attribute">
-    <PARAM name="as-opt" mode="switch" ptype="SUBCOMMAND" help="Set as-path options">
-      <PARAM name="exclude" mode="subcommand" ptype="SUBCOMMAND" help="Exclude from the as-path">
-        <PARAM name="as-number" help="AS number" ptype="RANGE_1_4294967295"  optional="true"/>
-      </PARAM>
-      <PARAM name="prepend" mode="subcommand" ptype="SUBCOMMAND" help="Prepend to the as-path">
-        <PARAM name="as-number" help="AS number" ptype="RANGE_1_4294967295"  optional="true"/>
-      </PARAM>
+    <COMMAND name="no set as-path" help="Transform BGP AS-path attribute">
+    <PARAM name="prepend" mode="subcommand" ptype="SUBCOMMAND" help="Prepend to the as-path">
+      <PARAM name="as-number" help="AS number" ptype="RANGE_1_4294967295"/>
     </PARAM>
     <ACTION>  python $SONIC_CLI_ROOT/sonic-cli-routemap.py delete_openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_set_as_path_prepend_config_asn ${name} ${seq_num} ${as-number};
     </ACTION>
   </COMMAND>
-  <COMMAND name="no set comm-list" help="Set BGP community list (for deletion)">
+<!--  <COMMAND name="no set comm-list" help="Set BGP community list (for deletion)">
     <PARAM name="comm-nm" help="Community-list name" ptype="STRING">
-      <PARAM name="delete" mode="subcommand" ptype="SUBCOMMAND" help="Delete matching communities"/>
+      <PARAM name="comm-list-opt" mode="switch" ptype="SUBCOMMAND" help="Community list option">
+        <PARAM name="add" mode="subcommand" ptype="SUBCOMMAND" help="Add matching communities"/>
+        <PARAM name="del" mode="subcommand" ptype="SUBCOMMAND" help="Delete matching communities"/>
+      </PARAM>
     </PARAM>
     <ACTION builtin="clish_nop"/>
-  </COMMAND>
-
+  </COMMAND>-->
   <COMMAND name="no set community" help="BGP community attribute">
     <PARAM name="comm-opt" mode="switch" ptype="SUBCOMMAND" help="Community options" optional="true">
       <PARAM name="comm-num" help="Community number aa:nn format 0..65535:0..65535" ptype="AA_NN"/>
@@ -337,14 +323,10 @@ limitations under the License.
     </PARAM>
     <ACTION> python $SONIC_CLI_ROOT/sonic-cli-routemap.py delete_openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_config_set_route_origin ${name} ${seq_num} ${origopt}</ACTION>
   </COMMAND>
-  <COMMAND name="no set tag" help="Tag value for routing protocol">
-    <PARAM name="tag-value" help="Tag value" ptype="RANGE_1_4294967295" optional="true"/>
+<!--  <COMMAND name="no set tag" help="Tag value for routing protocol">
+    <PARAM name="pvalue" help="Preference value" ptype="RANGE_1_4294967295"/>
     <ACTION builtin="clish_nop"/>
-  </COMMAND>
-  <COMMAND name="no set weight" help="BGP weight for routing table">
-    <PARAM name="wgt-value" help="Weight value" ptype="RANGE_0_4294967295" optional="true"/>
-    <ACTION builtin="clish_nop"/> 
-  </COMMAND>
+  </COMMAND>-->
 </VIEW>
 
 </CLISH_MODULE>
