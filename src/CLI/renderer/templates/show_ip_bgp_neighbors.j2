@@ -44,9 +44,9 @@
             {% if vars.update({'kpa_intvl':neighbor['timers']['state']['keepalive-interval']}) %}{% endif %}
             {% if vars.update({'nego_time':neighbor['timers']['state']['negotiated-hold-time']}) %}{% endif %}
             {% if vars.update({'min_adv_intvl':neighbor['timers']['state']['minimum-advertisement-interval']}) %}{% endif %}
-            {{-'  Hold time is '}}{{vars.hold_time}}{{' seconds,'-}}
-            {{-', keepalive interval is '}}{{vars.kpa_intvl}}{{' seconds,'-}}
-            {{-'  negotiated hold time is '}}{{vars.nego_time}}{{' seconds'}}{{'\n'}}
+            {{-'  Hold time is '}}{{vars.hold_time}}{{' seconds'-}}
+            {{-', keepalive interval is '}}{{vars.kpa_intvl}}{{' seconds'-}}
+            {{-', negotiated hold time is '}}{{vars.nego_time}}{{' seconds'}}{{'\n'}}
             {{-'  Minimum time between advertisement runs is '}}{{vars.min_adv_intvl}}{{' seconds'}}{{'\n'}}
 
             {% if 'afi-safis' in neighbor %}
