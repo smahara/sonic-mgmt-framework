@@ -94,10 +94,10 @@
                         {% if 'import-policy' in afi_safi['apply-policy']['state'] %}
                             {% set import_policys = afi_safi['apply-policy']['state']['import-policy'] %}
                             {% set import_policys_len = import_policys|length %}
-                            {{-'Import policy:\n'}}
+                            {{-'  Import policy:\n'}}
                             {% for import_policy in afi_safi['apply-policy']['state']['import-policy'] %}
                                 {% if loop.index == 1 %}
-                                    {{-'  '}}{{import_policy|string}}
+                                    {{-'    '}}{{import_policy|string}}
                                 {% elif loop.index == import_policys_len %}
                                     {{-', '}}{{import_policy|string}}{{'\n'}}
                                 {% else %}
@@ -108,10 +108,10 @@
                         {% if 'export-policy' in afi_safi['apply-policy']['state'] %}
                             {% set export_policys = afi_safi['apply-policy']['state']['export-policy'] %}
                             {% set export_policys_len = export_policys|length %}
-                            {{-'Export policy:\n'}}
+                            {{-'  Export policy:\n'}}
                             {% for export_policy in afi_safi['apply-policy']['state']['export-policy'] %}
                                 {% if loop.index == 1 %}
-                                    {{-'  '}}{{export_policy|string}}
+                                    {{-'    '}}{{export_policy|string}}
                                 {% elif loop.index == export_policys_len %}
                                     {{-', '}}{{export_policy|string}}{{'\n'}}
                                 {% else %}
