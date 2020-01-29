@@ -27,9 +27,11 @@ const (
         DEFAULT_NETWORK_INSTANCE_CONFIG_TYPE        = "L3VRF"
 )
 
+
 var nwInstTypeMap = map[ocbinds.E_OpenconfigNetworkInstanceTypes_NETWORK_INSTANCE_TYPE] string {
         ocbinds.OpenconfigNetworkInstanceTypes_NETWORK_INSTANCE_TYPE_DEFAULT_INSTANCE: "DEFAULT_INSTANCE",
         ocbinds.OpenconfigNetworkInstanceTypes_NETWORK_INSTANCE_TYPE_L3VRF: "L3VRF",
+        ocbinds.OpenconfigNetworkInstanceTypes_NETWORK_INSTANCE_TYPE_L2L3: "L2L3",
 }
 
 /* Top level network instance table name based on key name and type */
@@ -38,6 +40,7 @@ var NwInstTblNameMapWithNameAndType = map[NwInstMapKey]string {
         {NwInstName: "Vrf",  NwInstType: "L3VRF"}: "VRF",
         {NwInstName: "default", NwInstType: "L3VRF"}: "VRF",
         {NwInstName: "default", NwInstType: "DEFAULT_INSTANCE"}: "VRF",
+        {NwInstName: "Vlan", NwInstType: "L2L3"}: "VLAN",
 }
 
 /* Top level network instance table name based on key name */
@@ -130,13 +133,13 @@ func getNwInstType (nwInstObj *ocbinds.OpenconfigNetworkInstance_NetworkInstance
         /* If config not set or config.type not set, return L3VRF */
         if ((nwInstObj.NetworkInstance[keyName].Config == nil) ||
             (nwInstObj.NetworkInstance[keyName].Config.Type == ocbinds.OpenconfigNetworkInstanceTypes_NETWORK_INSTANCE_TYPE_UNSET)) {
-                return DEFAULT_NETWORK_INSTANCE_CONFIG_TYPE, err
+                return DEFAULT_NETWORK_INSTANCE_CONFIG_TYPE, errors.New("Network instance type not set")
         } else {
                 instType, ok :=nwInstTypeMap[nwInstObj.NetworkInstance[keyName].Config.Type]
                 if ok {
                         return instType, err
                 } else {
-                        return instType, errors.New("Unknow network instance type")
+                        return instType, errors.New("Unknown network instance type")
                 }
         }
 }
@@ -157,8 +160,10 @@ func isMgmtVrf(inParams XfmrParams) (bool, error) {
         /* get the name at the top network-instance table level, this is the key */
         keyName := pathInfo.Var("name")
         oc_nwInstType, ierr := getNwInstType(nwInstObj, keyName)
-        if (ierr != nil) {
-                return false, errors.New("Network instance type not set")
+        if (ierr != nil && ierr.Error() == "Network instance type not set") {
+            oc_nwInstType = DEFAULT_NETWORK_INSTANCE_CONFIG_TYPE
+        } else {
+            return false, errors.New("Network instance type invalid")
         }
 
         if ((strings.Compare(keyName, "mgmt") == 0) &&
@@ -306,15 +311,11 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
          * For CREATE or PATCH at top level (Network_instances), check the config type if user provides one 
          * For other cases of UPATE, CREATE, or GET/DELETE, get the table name from the key only
          */ 
+        oc_nwInstType, ierr := getNwInstType(nwInstObj, keyName)
         if (((inParams.oper == CREATE) ||
              (inParams.oper == REPLACE) ||
              (inParams.oper == UPDATE)) &&
-             (inParams.requestUri == "/openconfig-network-instance:network-instances")) {
-                oc_nwInstType, ierr := getNwInstType(nwInstObj, keyName)
-                if (ierr != nil ) {
-                        log.Info("network_instance_table_name_xfmr, network instance type not correct ", oc_nwInstType)
-                        return tblList, errors.New("network instance type incorrect")
-                }
+             (ierr == nil)) {
 
                 log.Info("network_instance_table_name_xfmr, name ", keyName)
                 log.Info("network_instance_table_name_xfmr, type ", oc_nwInstType)
@@ -326,7 +327,7 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
                 }
 
                 tblList = append(tblList, tblName)
-        } else {
+        } else if ierr.Error() == "Network instance type not set" {
                 tblList = append(tblList, NwInstTblNameMapWithName[intNwInstName])
         }
 
