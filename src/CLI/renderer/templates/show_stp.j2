@@ -112,11 +112,11 @@ STP Port Parameters:
             {%else %}
                 {% if vars.update({'intf_fast': "N"}) %}{% endif %}
             {%endif %}
-            {% if "openconfig-spanning-tree-ext:uplink-fast" in stp_intf['state'] and stp_intf['state']['openconfig-spanning-tree-ext:uplink-fast'] == true %}
-                {% if vars.update({'intf_ufast': "Y"}) %}{% endif %}
-            {%else %}
-                {% if vars.update({'intf_ufast': "N"}) %}{% endif %}
-            {%endif %}
+        {%endif %}
+        {% if stp_intf['config']['openconfig-spanning-tree-ext:uplink-fast'] == true %}
+            {% if vars.update({'intf_ufast': "Y"}) %}{% endif %}
+        {%else %}
+            {% if vars.update({'intf_ufast': "N"}) %}{% endif %}
         {%endif %}
 {{'%-16s'|format(vars.intf_name)}}{{'%-5s'|format(vars.intf_pri)}}{{'%-10s'|format(vars.intf_path_cost)}}{{'%-5s'|format(vars.intf_fast)}}{{'%-7s'|format(vars.intf_ufast)}}{{'%-7s'|format(vars.intf_bpdu_filter)}}{{'%-11s'|format(vars.intf_state)}}{{'%-11s'|format(vars.intf_desig_cost)}}{{'%-17s'|format(vars.intf_desig_root)}}{{'%-17s'|format(vars.intf_desig_bridge)}}
         {%endif %}
