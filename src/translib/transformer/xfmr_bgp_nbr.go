@@ -1442,12 +1442,8 @@ var YangToDb_bgp_nbrs_nbr_auth_password_xfmr SubTreeXfmrYangToDb = func(inParams
         log.Infof("%s Neighbor object missing, add new", nbrAddr)
         return res_map, err
     }
-    if nbr_obj.AuthPassword.Config == nil {
-        log.Infof("%s Neighbor config container is missing", nbrAddr)
-        return res_map, err
-    }
     entry_key := niName + "|" + nbrAddr
-    if nbr_obj.AuthPassword.Config.Password != nil && (inParams.oper != DELETE){
+    if nbr_obj.AuthPassword.Config != nil && nbr_obj.AuthPassword.Config.Password != nil && (inParams.oper != DELETE){
         auth_password := nbr_obj.AuthPassword.Config.Password
         encrypted := nbr_obj.AuthPassword.Config.Encrypted
         log.Infof("Neighbor password:%d encrypted:%s", *auth_password, *encrypted)
@@ -1469,6 +1465,7 @@ var YangToDb_bgp_nbrs_nbr_auth_password_xfmr SubTreeXfmrYangToDb = func(inParams
         authmap[entry_key] = db.Value{Field: make(map[string]string)}
         authmap[entry_key].Field["auth_password"] = encrypted_password
     } else if (inParams.oper == DELETE) {
+        authmap[entry_key] = db.Value{Field: make(map[string]string)}
         authmap[entry_key].Field["auth_password"] = ""
     }
     res_map["BGP_NEIGHBOR"] = authmap

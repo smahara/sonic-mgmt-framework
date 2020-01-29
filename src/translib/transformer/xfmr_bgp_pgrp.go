@@ -312,12 +312,8 @@ var YangToDb_bgp_pgrp_auth_password_xfmr SubTreeXfmrYangToDb = func(inParams Xfm
         log.Infof("%s Peer group object missing, add new", pgrp)
         return res_map, err
     }
-    if pgrp_obj.AuthPassword.Config == nil {
-        log.Infof("%s PeerGroup config container is missing", pgrp)
-        return res_map, err
-    }
     entry_key := niName + "|" + pgrp 
-    if pgrp_obj.AuthPassword.Config.Password != nil && (inParams.oper != DELETE){
+    if pgrp_obj.AuthPassword.Config != nil && pgrp_obj.AuthPassword.Config.Password != nil && (inParams.oper != DELETE){
         auth_password := pgrp_obj.AuthPassword.Config.Password
         encrypted := pgrp_obj.AuthPassword.Config.Encrypted
         log.Infof("PeerGroup password:%d encrypted:%s", *auth_password, *encrypted)
@@ -338,6 +334,7 @@ var YangToDb_bgp_pgrp_auth_password_xfmr SubTreeXfmrYangToDb = func(inParams Xfm
         authmap[entry_key] = db.Value{Field: make(map[string]string)}
         authmap[entry_key].Field["auth_password"] = encrypted_password
     } else if (inParams.oper == DELETE) {
+        authmap[entry_key] = db.Value{Field: make(map[string]string)}
         authmap[entry_key].Field["auth_password"] = ""
     }
 
