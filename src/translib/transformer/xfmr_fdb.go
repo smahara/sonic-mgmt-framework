@@ -302,6 +302,10 @@ var DbToYang_fdb_mac_table_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams)
     vlan := pathInfo.Var("vlan")
     macAddress := pathInfo.Var("mac-address")
 
+    if strings.HasPrefix(instance, "Vrf") {
+        return nil
+    }
+
     targetUriPath, err := getYangPathFromUri(inParams.uri)
     log.Info("targetUriPath is ", targetUriPath)
 
