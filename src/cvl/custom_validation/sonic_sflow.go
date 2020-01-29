@@ -7,23 +7,32 @@ import (
 
 
 //Validate ip address of sflow collector ip 
-func (t *CustomValidation) ValidateIp(vc *CustValidationCtxt) CVLErrorInfo {
+func (t *CustomValidation) ValidateCollectorIp(vc *CustValidationCtxt) CVLErrorInfo {
+
+	if (vc.CurCfg.VOp == OP_DELETE) {
+		 return CVLErrorInfo{ErrCode: CVL_SUCCESS}
+	}
+
 	ip := net.ParseIP(vc.YNodeVal)
 	if ip == nil {
-	         util.CVL_LEVEL_LOG(0,"%s","IP IS NIL")
+		 errStr:= "Sflow collector IP is not valid"
+	         util.CVL_LEVEL_LOG(util.ERROR,"%s",errStr)
                  return CVLErrorInfo{
 			            ErrCode: CVL_SYNTAX_INVALID_INPUT_DATA,
 				    TableName: "SFLOW_COLLECTOR",
-				    CVLErrDetails : "IP address is not valid",
+				    CVLErrDetails : errStr,
+				    ConstraintErrMsg : errStr,
 			    }
 	}
 
 	if ip.IsLoopback() || ip.IsUnspecified() || ip.Equal(net.IPv4bcast) || ip.IsMulticast() {
-	        util.CVL_LEVEL_LOG(0,"%s","IP IS UNSPECIFIED OR LOOPBACK OR MULTICAST OR RESERVED")
+		errStr:= "Sflow collector IP is not valid, IP is either reserved or unspecified or loopback or broadcast"
+		util.CVL_LEVEL_LOG(util.ERROR,"%s",errStr)
 		return CVLErrorInfo{
 			            ErrCode: CVL_SYNTAX_INVALID_INPUT_DATA,
 				    TableName: "SFLOW_COLLECTOR",
-				    CVLErrDetails : "IP address is not valid",
+				    CVLErrDetails : errStr,
+				    ConstraintErrMsg : errStr,
 			    }
 	}
 	return CVLErrorInfo{ErrCode: CVL_SUCCESS}

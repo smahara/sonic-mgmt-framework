@@ -17,9 +17,6 @@ module sonic-sflow {
                 prefix sonic-ext;
         }
 
-	import sonic-extension {
-		prefix sonic-ext;
-	}
 
         revision 2019-09-09 {
                 description
@@ -41,7 +38,7 @@ module sonic-sflow {
                     leaf collector_ip {
                         mandatory true;
                         type inet:ip-address;
-                        sonic-ext:custom-validation ValidateIp;
+                        sonic-ext:custom-validation ValidateCollectorIp;
                     }
 
 
