@@ -27,6 +27,7 @@ import host_service
 import json
 import syslog 
 
+MOD_NAME = 'ztp'
 
 
 try:
@@ -35,8 +36,6 @@ try:
     from ztp.ZTPCfg import ZTPCfg
 
     """ZTP command handler"""
-
-    MOD_NAME = 'ztp'
 
     class ZTP(host_service.HostModule):
         """DBus endpoint that executes ZTP related commands
@@ -170,15 +169,15 @@ try:
 
     ## Calculate time string
     def getTimeString(msg):
-    split_msg = msg.split('|', 1)
-    if len(split_msg) == 2:
-        time_str = split_msg[0]
-        try:
-            return "({})".format(timeDiff(time_str.strip(), getTimestamp())) + split_msg[1]
-        except:
-            ret = msg
-    else:
-        return msg
+    	split_msg = msg.split('|', 1)
+    	if len(split_msg) == 2:
+            time_str = split_msg[0]
+            try:
+                return "({})".format(timeDiff(time_str.strip(), getTimestamp())) + split_msg[1]
+            except:
+                ret = msg
+    	else:
+            return msg
 
     ## Return duration since ZTP service has been active
     def ztpServiceRuntime():
@@ -195,28 +194,28 @@ try:
     ## Get ZTP Server activity
     def getActivityString():
         if ztp_active() != 0:
-        return 'ZTP Service is not running'
+            return 'ZTP Service is not running'
 
         activity_str = None
         f = getCfg('ztp-activity')
         if os.path.isfile(f):
-        fh = open(f, 'r')
-        activity_str = fh.readline().strip()
-        fh.close()
+            fh = open(f, 'r')
+            activity_str = fh.readline().strip()
+            fh.close()
 
         if activity_str is not None and activity_str != '':
-        return getTimeString(activity_str)
+            return getTimeString(activity_str)
 
     ## Display list of ZTP features available in the image
     def ztp_features(verboseFlag=False):
         features = getFeatures()
         
         for feat in features:
-        if  verboseFlag:
+            if verboseFlag:
                 print('%s: %s: %s' %(feat, getCfg('info-'+feat, ztp_cfg=ztp_cfg), getCfg(feat, ztp_cfg=ztp_cfg)))
-        else:
+            else:
                 if getCfg(feat) is True:
-                print(feat)
+                    print(feat)
 
 
     ## Display current ztp status in brief format.
@@ -292,7 +291,6 @@ try:
         retVal = json.dumps(statusdict)
         return retVal
 except ImportError:
-    MOD_NAME = 'ztp'
 
     class ZTP(host_service.HostModule):
         """DBus endpoint that executes ZTP related commands
