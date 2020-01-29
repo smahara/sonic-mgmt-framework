@@ -16,9 +16,9 @@
                 {{-', external link\n'}}
             {% endif %}
 
-            {% set vars = {'nbr_enabled': "False"} %}
+            {% set vars = {'nbr_enabled': False} %}
             {% if vars.update({'nbr_enabled':n_state['enabled']}) %}{% endif %}
-            {% if vars.nbr_enabled == 'True' %}
+            {% if vars.nbr_enabled == True %}
                 {{-'  Administratively up\n'}}
             {% else %}
                 {{-'  Administratively shut down\n'}}
@@ -54,7 +54,7 @@
                 {% for afi_safi in afi_safis %}
                     {% if 'state' in afi_safi %}
                         {% if 'enabled' in afi_safi['state'] %}
-                            {% if afi_safi['state']['enabled'] == 'True' %}
+                            {% if afi_safi['state']['enabled'] == True %}
                                 {{-'  Address-families enabled\n'}}
                             {% else %}
                                 {{-'  Address-families disabled\n'}}
@@ -73,7 +73,7 @@
                 {% for afi_safi in afi_safis %}
                     {% if 'state' in afi_safi %}
                         {% if 'openconfig-bgp-ext:route-reflector-client' in afi_safi['state'] %}
-                            {% if afi_safi['state']['openconfig-bgp-ext:route-reflector-client'] == 'True' %}
+                            {% if afi_safi['state']['openconfig-bgp-ext:route-reflector-client'] == True %}
                                 {{-'Route reflector client enabled\n'}}
                             {% else %}
                                 {{-'Route reflector client disabled\n'}}
@@ -124,9 +124,9 @@
 
             {% endif %}
 
-            {% set vars = {'nbr_bfd': "False"} %}
+            {% set vars = {'nbr_bfd': False} %}
             {% if vars.update({'nbr_bfd':n_state['openconfig-bgp-ext:bfd']}) %}{% endif %}
-            {% if vars.nbr_bfd == 'True' %}
+            {% if vars.nbr_bfd == True %}
                 {{-'  BFD enabled\n'}}
             {% endif %}
             {{-'  Neighbor capabilities:\n'}}
