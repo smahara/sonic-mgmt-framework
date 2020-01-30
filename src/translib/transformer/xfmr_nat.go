@@ -26,6 +26,7 @@ import (
     "translib/db"
     "github.com/openconfig/ygot/ygot"
     "translib/ocbinds"
+    "encoding/json"
 )
 
 func init() {
@@ -56,6 +57,7 @@ func init() {
     XlateFuncBind("YangToDb_nat_entry_type_field_xfmr", YangToDb_nat_entry_type_field_xfmr)
     XlateFuncBind("DbToYang_nat_entry_type_field_xfmr", DbToYang_nat_entry_type_field_xfmr)
     XlateFuncBind("nat_post_xfmr", nat_post_xfmr)
+    XlateFuncBind("rpc_clear_nat", rpc_clear_nat)
 }
 
 const (
@@ -265,14 +267,14 @@ var YangToDb_nat_mapping_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrPa
     tblName := STATIC_NAT
 
     natTblObj := getNatTblRoot(inParams.ygRoot, false)
-    if natTblObj == nil || natTblObj.NatMappingEntry == nil || len(natTblObj.NatMappingEntry) < 1 {
+    if inParams.oper != DELETE && (natTblObj == nil || natTblObj.NatMappingEntry == nil || len(natTblObj.NatMappingEntry) < 1) {
         errStr := "NAT [container/list] not populated."
         log.Info("YangToDb_nat_mapping_subtree_xfmr: " + errStr)
         return natMap, errors.New(errStr)
     }
 
     if inParams.oper == DELETE {
-        if natTblObj.NatMappingEntry == nil || len(natTblObj.NatMappingEntry) < 1 {
+        if natTblObj == nil || natTblObj.NatMappingEntry == nil || len(natTblObj.NatMappingEntry) < 1 {
             //All entries from db needs to be deleted
             allKeys, keyErr :=  getAllTableKeys(inParams.d, &db.TableSpec{Name:tblName})
             if keyErr != nil {
@@ -656,14 +658,14 @@ var YangToDb_napt_mapping_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrP
     tblName := STATIC_NAPT
 
     naptTblObj := getNaptTblRoot(inParams.ygRoot, false)
-    if naptTblObj == nil || naptTblObj.NaptMappingEntry == nil || len(naptTblObj.NaptMappingEntry) < 1 {
+    if inParams.oper != DELETE && (naptTblObj == nil || naptTblObj.NaptMappingEntry == nil || len(naptTblObj.NaptMappingEntry) < 1) {
         errStr := "NAPT [container/list] not populated."
         log.Info("YangToDb_napt_mapping_subtree_xfmr: " + errStr)
         return naptMap, errors.New(errStr)
     }
 
     if inParams.oper == DELETE {
-        if naptTblObj.NaptMappingEntry == nil || len(naptTblObj.NaptMappingEntry) < 1 {
+        if naptTblObj == nil || naptTblObj.NaptMappingEntry == nil || len(naptTblObj.NaptMappingEntry) < 1 {
             //All entries from db needs to be deleted
             allKeys, keyErr :=  getAllTableKeys(inParams.d, &db.TableSpec{Name:tblName})
             if keyErr != nil {
@@ -1517,3 +1519,33 @@ var DbToYang_nat_entry_type_field_xfmr FieldXfmrDbtoYang = func(inParams XfmrPar
     return result, err
 }
 
+var rpc_clear_nat RpcCallpoint = func(body []byte, dbs [db.MaxDB]*db.DB) ([]byte, error) {
+    var err error
+    log.Infof("Inside rpc_clear_nat: Input: %s\n", string(body))
+
+    var input map[string]interface{}
+    err = json.Unmarshal(body, &input)
+    if err != nil {
+        log.Infof("UnMarshall Error %v\n", err)
+        return nil, err
+    }
+
+    var  valLst [2]string
+    var data  []byte
+
+    i := input["sonic-nat:input"].(map[string]interface{})
+    valLst[0] = i["nat-param"].(string)
+    valLst[1] = "ALL"
+
+    data, err = json.Marshal(valLst)
+
+    if err != nil {
+        log.Error("Failed to  marshal input data; err=%v", err)
+        return nil, err
+    }
+
+    log.Infof("NAT DATA Published: %v\n", string(data))
+    err = dbs[db.ApplDB].Publish("FLUSHNATREQUEST",data)
+
+    return nil, err
+}

@@ -200,8 +200,6 @@ module sonic-bgp-common {
         }
 
         leaf local_addr {
-            type inet:ip-address;
-            /*
             type union {
                 type inet:ip-address;
                 type leafref {
@@ -213,7 +211,7 @@ module sonic-bgp-common {
                 type leafref {
                     path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
                 }
-            }*/
+            }
             description "Local source address or interface name to use for connection.";
         }
 
@@ -254,6 +252,11 @@ module sonic-bgp-common {
             description "BFD status";
         }
 
+        leaf bfd_check_ctrl_plane_failure {
+            type boolean;
+            description "Link dataplane status with BGP control plane";
+        }
+
         leaf capability_dynamic {
             type boolean;
             description "Advertise dynamic capability";
@@ -289,12 +292,22 @@ module sonic-bgp-common {
         leaf strict_capability_match {
             type boolean;
             description "Strict capability negotiation match";
-		}
+        }
 
-		leaf admin_status {
-			type boolean;
-			description "To enable BGP peer";
-		}
+        leaf admin_status {
+            type boolean;
+            description "To enable BGP peer";
+        }
+
+        leaf local_as_no_prepend {
+            type boolean;
+            description "Do not prepend local-as to updates from ebgp peers";
+        }
+
+        leaf local_as_replace_as {
+            type boolean;
+            description "Do not prepend local-as to updates from ibgp peers";
+        }
 	}
 
 
@@ -350,11 +363,19 @@ module sonic-bgp-common {
             type leafref {
                 path "/srmap:sonic-route-map/srmap:ROUTE_MAP_SET/srmap:ROUTE_MAP_SET_LIST/srmap:name";
             }
+            must "(count(current()) = 1)" {
+                error-app-tag "max-allowed-route-map-reached";
+                error-message "Only one route-map can be associated";
+            }
         }
 
         leaf-list route_map_out {
             type leafref {
                 path "/srmap:sonic-route-map/srmap:ROUTE_MAP_SET/srmap:ROUTE_MAP_SET_LIST/srmap:name";
+            }
+            must "(count(current()) = 1)" {
+                error-app-tag "max-allowed-route-map-reached";
+                error-message "Only one route-map can be associated";
             }
         }
 

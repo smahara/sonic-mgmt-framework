@@ -32,13 +32,7 @@ import (
 type AuthInfo struct {
 	// Username
 	User string
-
-	// Group name (primary group)
-	Group string
-
-	// Additional groups
-	Groups []string
-
+	
 	// Roles
 	Roles []string
 }
@@ -77,6 +71,9 @@ type RequestContext struct {
 
 	// Auth contains the authorized user information
 	Auth AuthInfo
+
+
+	ClientAuth UserAuth
 }
 
 type contextkey int
