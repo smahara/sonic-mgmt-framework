@@ -516,7 +516,10 @@ var DbToYang_network_instance_type_field_xfmr KeyXfmrDbToYang = func(inParams Xf
                 res_map["type"] = "L3VRF"
         } else if ((inParams.key == "default") && (isVrfDbTbl(inParams) == true)) {
                 res_map["type"] = "DEFAULT_INSTANCE"
+        } else if strings.HasPrefix(inParams.key, "Vlan") {
+                res_map["type"] = "L2L3"
         }
+
 
         return  res_map, err
 }
