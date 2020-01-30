@@ -138,7 +138,6 @@ func image_mgmt_operation(command string, body []byte) ([]byte, error) {
           if len(imagename) > 0 {
             options = append(options, imagename)
           }
-
           log.Info("Command:", options)
           query_result = HostQuery("image_mgmt.action", options)
         }
