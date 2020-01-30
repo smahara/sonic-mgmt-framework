@@ -81,9 +81,7 @@
         <COMMAND
             name="show kdump status"
             help="Show kdump status">
-            <ACTION>
-                python $SONIC_CLI_ROOT/sonic-cli-kdump.py ${__full_line}
-            </ACTION>
+            <ACTION builtin="clish_pyobj">sonic_cli_kdump ${__full_line}</ACTION>
         </COMMAND>
         <COMMAND
             name="show kdump memory"
