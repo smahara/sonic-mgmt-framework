@@ -12,12 +12,7 @@ class IMAGE_MGMT(host_service.HostModule):
         """ Run config mgmt command """
         cmd = ['/usr/bin/sonic_installer']
         for x in options:
-            if x == "-mgmt":
-                cmd.insert(0, 'cgexec')
-                cmd.insert(1, '-g')
-                cmd.insert(2, 'l3mdev:mgmt')
-            else :
-                cmd.append(str(x))
+            cmd.append(str(x))
             
         output =""
         try:
