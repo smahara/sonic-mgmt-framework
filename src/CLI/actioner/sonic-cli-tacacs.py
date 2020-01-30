@@ -50,6 +50,7 @@ def invoke_api(func, args):
        return api.patch(path, body)
     elif func == 'patch_tacacs_server':
        indata = {}
+       body = {}
        # get server data
        api_response = get_sonic_tacacs_server_api(args)
        if api_response:
@@ -57,7 +58,6 @@ def invoke_api(func, args):
        else:
            # default server values
            indata['port'] = 49
-           indata['key'] = ''
            indata['timeout'] = 5
            indata['authtype'] = 'pap'
            indata['priority'] = 1
@@ -68,7 +68,6 @@ def invoke_api(func, args):
            val_name = (args[i].split(":", 1))[0]
            if val:
                indata[val_name] = val
-
        path = cc.Path('/restconf/data/openconfig-system:system/aaa/server-groups/server-group=TACACS/servers/server={address}/tacacs/config', address=args[0])
        if "port" in indata:
          body = {
@@ -77,11 +76,14 @@ def invoke_api(func, args):
            }
          }
        if "key" in indata:
-         body = {
-           "openconfig-system:config": {
-             "secret-key": indata['key']
+         if body:
+             body["openconfig-system:config"]["secret-key"] = indata['key']
+         else:
+           body = {
+             "openconfig-system:config": {
+               "secret-key": indata['key']
+             }
            }
-         }
        api.patch(path, body)
        path = cc.Path('/restconf/data/openconfig-system:system/aaa/server-groups/server-group=TACACS/servers/server={address}/config', address=args[0])
        body = {
