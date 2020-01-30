@@ -25,9 +25,12 @@ module sonic-ssh-server-vrf {
                 max-elements 15;
 
                 leaf vrf_name {
-                    type string;
-                    description
-                        "VRF name";
+                    type string {
+                        pattern "mgmt|Vrf[a-zA-Z0-9_-]+" {
+                            error-message "Invalid VRF name for SSH server";
+                            error-app-tag vrf-name-ssh-invalid;
+                        }
+                    }
                 }
 
                 leaf port {
