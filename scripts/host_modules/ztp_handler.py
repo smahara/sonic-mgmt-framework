@@ -83,9 +83,10 @@ try:
             output = out.rstrip('\n')
             return rc, output
 
-        @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='')
+        @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='is')
         def enable(self):
-            self._run_command("enable")
+            rc, output = self._run_command("enable")
+            return rc, output
 
         @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='s')
         def getcfg(self):
@@ -97,9 +98,10 @@ try:
                 return "enabled"
 
 
-        @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='')
+        @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='is')
         def disable(self):
-            self._run_command(["disable", "-y"])
+            rc, output = self._run_command(["disable", "-y"])
+            return rc,output
 
         @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='s')
         def status(self):
@@ -296,25 +298,25 @@ except ImportError:
         """DBus endpoint that executes ZTP related commands
         """
 
-        @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='')
+        @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='is')
         def enable(self):
-            pass
-
+            return 1, "ZTP is not supported"
+            
         @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='s')
         def getcfg(self):
-            return "ZTP not supported"
-        @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='')
+            return "ZTP is not supported"
+
+        @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='is')
         def disable(self):
-            pass
+            return 1, "ZTP is not supported"
 
         @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='s')
         def status(self):
-            return "ZTP not supported"
+            return "ZTP is not supported"
             
         @host_service.method(host_service.bus_name(MOD_NAME), in_signature='', out_signature='is')
         def run(self):
-            rc,output = self._run_command_run()
-            return 1, "ZTP not supported"
+            return 1, "ZTP is not supported"
             
 def register():
     """Return the class name"""

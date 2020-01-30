@@ -70,18 +70,21 @@ func ztpAction(action string) (string, error) {
 		return output, result.Err
 	}
 	if ((action == "status") || (action == "getcfg")) {
-		// ztp.status returns an exit code and the stdout of the command
-		// We only care about the stdout (which is at [1] in the slice)
-        output, _ = result.Body[0].(string)
-        if output == "ZTP not supported" {
-            return "",tlerr.New(output)
-        }
+	    // ztp.status returns an exit code and the stdout of the command
+	    // We only care about the stdout (which is at [1] in the slice)
+            output, _ = result.Body[0].(string)
+	    log.Info("Output from ztp action:", output)
+            if output == "ZTP is not supported" {
+	        log.Info("Enters ZTP not supported")
+                return "",tlerr.New(output)
+            }
 	} else {
-        if (action == "run") {
-		    //rc, _ := result.Body[0].(string)
-		    output, _ = result.Body[1].(string)
+            if (action == "run") || (action == "enable") || (action == "disable"){
+		//rc, _ := result.Body[0].(string)
+		output, _ = result.Body[1].(string)
+		log.Info("Ztp run output:", output)
+	    }
         }
-    }
 	return output, nil
 }
 
@@ -243,6 +246,7 @@ func getZtpStatusInfofromDb( statusObj *ocbinds.OpenconfigZtp_Ztp_State, statusC
     mess, err:= ztpAction(act)
     if err != nil {
 	log.Info("Error from sonic host service:",err)
+	return err
     }
     log.Info(" message from ztp host service:",mess)
     
@@ -329,6 +333,7 @@ var DbToYang_ztp_config_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (e
     mess, err := ztpAction(act)
     if err != nil {
 	    log.Info("Error from host service:",err)
+	    return err
     }
     log.Info("Message from host:",mess)
     if ztpObj.Config == nil {
@@ -367,15 +372,11 @@ var YangToDb_ztp_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (ma
             act = "enable"
         }
     }
-	if act == "run" {
-        var mess string
-        mess, err = ztpAction(act)
-        if mess != "" {
-            err = tlerr.New(mess)
-        }
-	} else {
-	    _, err = ztpAction(act)
-	}
+    var mess string
+    mess, err = ztpAction(act)
+    if mess != "" {
+        err = tlerr.New(mess)
+    }
     return nil,err;
 }
 
