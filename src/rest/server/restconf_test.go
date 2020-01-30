@@ -31,8 +31,9 @@ import (
 func TestMetaHandler(t *testing.T) {
 	r := httptest.NewRequest("GET", "/.well-known/host-meta", nil)
 	w := httptest.NewRecorder()
+	clientAuth := UserAuth{"password": false, "cert": false, "jwt": false}
 
-	NewRouter().ServeHTTP(w, r)
+	NewRouter(clientAuth).ServeHTTP(w, r)
 
 	if w.Code != 200 {
 		t.Fatalf("Request failed with status %d", w.Code)
@@ -98,12 +99,13 @@ func TestYanglibVer_unknown(t *testing.T) {
 func testYanglibVer(t *testing.T, requestAcceptType, expectedContentType string) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/restconf/yang-library-version", nil)
+	clientAuth := UserAuth{"password": false, "cert": false, "jwt": false}
 	if requestAcceptType != "" {
 		r.Header.Set("Accept", requestAcceptType)
 	}
 
 	t.Logf("GET /restconf/yang-library-version with accept=%s", requestAcceptType)
-	NewRouter().ServeHTTP(w, r)
+	NewRouter(clientAuth).ServeHTTP(w, r)
 
 	if w.Code != 200 {
 		t.Fatalf("Request failed with status %d", w.Code)
@@ -144,13 +146,14 @@ func TestYanglibHandler(t *testing.T) {
 		rc.Produces.Add("application/yang-data+json")
 		Process(w, r)
 	}
+	clientAuth := UserAuth{"password": false, "cert": false, "jwt": false}
 
 	AddRoute("ylibTop", "GET", "/restconf/data/ietf-yang-library:modules-state", h)
 	AddRoute("ylibMset", "GET", "/restconf/data/ietf-yang-library:modules-state/module-set-id", h)
 	AddRoute("ylibOne", "GET", "/restconf/data/ietf-yang-library:modules-state/module={name},{revision}", h)
 	AddRoute("ylibNS", "GET", "/restconf/data/ietf-yang-library:modules-state/module={name},{revision}/namespace", h)
 
-	ylibRouter = NewRouter()
+	ylibRouter = NewRouter(clientAuth)
 
 	t.Run("all", testYlibGetAll)
 	t.Run("mset", testYlibGetMsetID)
@@ -249,8 +252,8 @@ func TestCapability_2(t *testing.T) {
 func testCapability(t *testing.T, path string) {
 	r := httptest.NewRequest("GET", path, nil)
 	w := httptest.NewRecorder()
-
-	NewRouter().ServeHTTP(w, r)
+	clientAuth := UserAuth{"password": false, "cert": false, "jwt": false}
+	NewRouter(clientAuth).ServeHTTP(w, r)
 
 	if w.Code != 200 {
 		t.Fatalf("Request failed with status %d", w.Code)
@@ -273,7 +276,46 @@ func testCapability(t *testing.T, path string) {
 		cap = top["ietf-restconf-monitoring:capability"]
 	}
 
-	if c, ok := cap.([]interface{}); !ok || len(c) != 1 {
-		log.Fatalf("Could not parse capability info: %v", w.Body.String())
+	if c, ok := cap.([]interface{}); !ok || len(c) != 2 {
+		log.Fatalf("Could not parse capability info: %s", w.Body.String())
+	}
+}
+
+func TestQuery(t *testing.T) {
+	t.Run("none", testQuery("GET", "", 0, translibArgs{}))
+	t.Run("unknown", testQuery("GET", "one=1", 400, translibArgs{}))
+	t.Run("depth_def", testQuery("GET", "depth=unbounded", 0, translibArgs{depth: 0}))
+	t.Run("depth_0", testQuery("GET", "depth=0", 400, translibArgs{}))
+	t.Run("depth_1", testQuery("GET", "depth=1", 0, translibArgs{depth: 1}))
+	t.Run("depth_101", testQuery("GET", "depth=101", 0, translibArgs{depth: 101}))
+	t.Run("depth_65535", testQuery("GET", "depth=65535", 0, translibArgs{depth: 65535}))
+	t.Run("depth_65536", testQuery("GET", "depth=65536", 400, translibArgs{}))
+	t.Run("depth_bad", testQuery("GET", "depth=bad", 400, translibArgs{}))
+	t.Run("depth_extra", testQuery("GET", "depth=1&extra=1", 400, translibArgs{}))
+	t.Run("depth_head", testQuery("HEAD", "depth=5", 0, translibArgs{depth: 5}))
+	t.Run("depth_head_bad", testQuery("HEAD", "depth=bad", 400, translibArgs{}))
+	t.Run("depth_patch", testQuery("PATCH", "depth=1", 400, translibArgs{}))
+}
+
+func testQuery(method, queryStr string, expStatus int, expData translibArgs) func(*testing.T) {
+	return func(t *testing.T) {
+		r := httptest.NewRequest(method, "/test?"+queryStr, nil)
+		p := translibArgs{}
+		err := parseRestconfQueryParams(&p, r)
+
+		if expStatus != 0 {
+			if e1, ok := err.(httpErrorType); ok && e1.status == expStatus {
+				return // success
+			}
+			t.Fatalf("Failed to process query '%s'; expected err %d, got=%v", queryStr, expStatus, err)
+		}
+
+		if err != nil {
+			t.Fatalf("Failed to process query '%s'; err=%v", queryStr, err)
+		}
+		if expData.depth != p.depth {
+			t.Errorf("Testcase failed for query '%s'", queryStr)
+			t.Fatalf("'depth' mismatch; expecting %d, found %d", expData.depth, p.depth)
+		}
 	}
 }
