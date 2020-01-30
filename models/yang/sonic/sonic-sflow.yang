@@ -93,8 +93,8 @@ module sonic-sflow {
                     }
 
                     leaf agent_id {
-			type string;
                         sonic-ext:custom-validation ValidateSflowAgentId;
+                        type string;
                     }
                 }
            }
