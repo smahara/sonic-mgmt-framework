@@ -46,7 +46,6 @@ var (
 	caFile    string // Client CA certificate file path
 	cliCAFile string // CLI client CA certificate file path
 	clientAuth = server.UserAuth{"password": false, "user": false, "cert": false, "jwt": false}
-	rbacEnable bool
 )
 
 func init() {
@@ -57,7 +56,7 @@ func init() {
 	flag.StringVar(&caFile, "cacert", "", "CA certificate for client certificate validation")
 	flag.StringVar(&cliCAFile, "clicacert", "", "CA certificate for CLI client validation")
 	flag.Var(clientAuth, "client_auth", "Client auth mode(s) - <none,cert,jwt,password|user(deprecated)> default: password,jwt")
-	flag.BoolVar(&rbacEnable, "rbac", true, "Enabled/Disable RBAC")
+	flag.BoolVar(&server.rbacEnable, "rbac", true, "Enabled/Disable RBAC")
 	flag.Parse()
 	// Suppress warning messages related to logging before flag parse
 	flag.CommandLine.Parse([]string{})

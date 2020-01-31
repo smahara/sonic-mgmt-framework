@@ -32,6 +32,8 @@ import (
 	"github.com/msteinert/pam"
 )
 
+var rbacEnable bool = true
+
 type UserCredential struct {
 	Username string
 	Password string
