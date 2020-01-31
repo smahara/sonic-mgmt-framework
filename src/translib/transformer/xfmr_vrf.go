@@ -303,7 +303,6 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
 
                 /* If keyName not expected, make it hit the sonic VRF yang to return error msg */ 
                 tblList = append(tblList, "VRF");
-                tblList = append(tblList, "VLAN")
                 return tblList, err
         }
 
