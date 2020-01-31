@@ -68,13 +68,13 @@ limitations under the License.
         <PARAM name="route-map-name" help="Route map name" ptype="STRING"/>
       </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_network_config_network_config ${vrf-name} L2VPN_EVPN ${prefix} ${backdoor} ${route-map-name}&#xA;
-             if test "${backdoor}" = "x" ; then&#xA;
+    <ACTION> if test "${backdoor}" = "x" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_network_config_network_config_backdoor ${vrf-name} L2VPN_EVPN ${prefix}&#xA;
              fi&#xA;
              if test -z "${route-map}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_network_config_network_config_policy_name ${vrf-name} L2VPN_EVPN ${prefix}&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_network_config_network_config ${vrf-name} L2VPN_EVPN ${prefix} ${backdoor} ${route-map-name}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="table-map" help="BGP table to RIB route download filter">
@@ -86,13 +86,13 @@ limitations under the License.
       <PARAM name="as-set" help="Generate AS set path information" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
       <PARAM name="summary-only" help="Filter more specific routes from updates" ptype="SUBCOMMAND" mode="subcommand" optional="true"/>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_aggregate_address_config_aggregate_address_config ${vrf-name} L2VPN_EVPN ${prefix} ${as-set} ${summary-only}&#xA;
-             if test -z "${as-set}" ; then&#xA;
+    <ACTION> if test -z "${as-set}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_aggregate_address_config_aggregate_address_config_as_set ${vrf-name} L2VPN_EVPN ${prefix}&#xA;
              fi&#xA;
              if test -z "${summary-only}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_aggregate_address_config_aggregate_address_config_summary_only ${vrf-name} L2VPN_EVPN ${prefix}&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_aggregate_address_config_aggregate_address_config ${vrf-name} L2VPN_EVPN ${prefix} ${as-set} ${summary-only}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="distance" help="Define an administrative distance"/>
@@ -458,10 +458,10 @@ limitations under the License.
   </COMMAND>
   <COMMAND name="next-hop-self" help="Disable the next hop calculation for this neighbor">
     <PARAM name="force" help="Set the next hop to self for reflected routes" mode="subcommand" ptype="SUBCOMMAND" optional="true"/>
-     <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_next_hop_self_config ${vrf-name} ${nbr-addr} L2VPN_EVPN True ${force}&#xA;
-             if test -z "${force}" ; then&#xA;
+     <ACTION> if test -z "${force}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_next_hop_self_config_force ${vrf-name} ${nbr-addr} L2VPN_EVPN&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_next_hop_self_config ${vrf-name} ${nbr-addr} L2VPN_EVPN True ${force}&#xA;
      </ACTION>
   </COMMAND>
   <COMMAND name="prefix-list" help="Filter updates to/from this neighbor">
@@ -481,13 +481,13 @@ limitations under the License.
   <COMMAND name="remove-private-AS" help="Remove private ASNs in outbound updates">
     <PARAM name="all" help="Apply to all AS numbers" mode="subcommand" ptype="SUBCOMMAND" order="true" optional="true"/>
     <PARAM name="replace-AS" help="Replace private ASNs with our ASN in outbound updates" mode="subcommand" ptype="SUBCOMMAND" order="true" optional="true"/>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_remove_private_as_config ${vrf-name} ${nbr-addr} L2VPN_EVPN True ${all} ${replace-AS}&#xA;
-             if test -z "${all}" ; then&#xA;
+    <ACTION> if test -z "${all}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_remove_private_as_config_all ${vrf-name} ${nbr-addr} L2VPN_EVPN&#xA;
              fi&#xA;
              if test -z "${replace-AS}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_remove_private_as_config_replace_as ${vrf-name} ${nbr-addr} L2VPN_EVPN&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_remove_private_as_config ${vrf-name} ${nbr-addr} L2VPN_EVPN True ${all} ${replace-AS}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="route-reflector-client" help="Configure a neighbor as Route Reflector client">
@@ -529,8 +529,7 @@ limitations under the License.
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_l2vpn_evpn_config_prefix_limit_config ${vrf-name} ${nbr-addr} L2VPN_EVPN ${max-prefix-val} ${threshold-val} ${maxpfopt} ${interval}&#xA;
-             if test "${threshold-val}" = "0" ; then&#xA;
+    <ACTION> if test "${threshold-val}" = "0" ; then&#xA;
                   python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_l2vpn_evpn_config_prefix_limit_config_warning_threshold_pct ${vrf-name} ${nbr-addr} L2VPN_EVPN&#xA;
              fi&#xA;
              if test -z "${warning-only}" ; then&#xA;
@@ -539,6 +538,7 @@ limitations under the License.
              if test -z "${restart}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_l2vpn_evpn_config_prefix_limit_config_restart_timer ${vrf-name} ${nbr-addr} L2VPN_EVPN&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_l2vpn_evpn_config_prefix_limit_config ${vrf-name} ${nbr-addr} L2VPN_EVPN ${max-prefix-val} ${threshold-val} ${maxpfopt} ${interval}&#xA;
     </ACTION>
   </COMMAND>
 
@@ -791,10 +791,10 @@ limitations under the License.
   </COMMAND>
   <COMMAND name="next-hop-self" help="Disable the next hop calculation for this neighbor">
     <PARAM name="force" help="Set the next hop to self for reflected routes" mode="subcommand" ptype="SUBCOMMAND" optional="true"/>
-     <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_next_hop_self_config ${vrf-name} ${template-name} L2VPN_EVPN True ${force}&#xA;
-             if test -z "${force}" ; then&#xA;
+     <ACTION> if test -z "${force}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_next_hop_self_config_force ${vrf-name} ${template-name} L2VPN_EVPN&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_next_hop_self_config ${vrf-name} ${template-name} L2VPN_EVPN True ${force}&#xA;
      </ACTION>
   </COMMAND>
   <COMMAND name="prefix-list" help="Filter updates to/from this neighbor">
@@ -814,13 +814,13 @@ limitations under the License.
   <COMMAND name="remove-private-AS" help="Remove private ASNs in outbound updates">
     <PARAM name="all" help="Apply to all AS numbers" mode="subcommand" ptype="SUBCOMMAND" order="true" optional="true"/>
     <PARAM name="replace-AS" help="Replace private ASNs with our ASN in outbound updates" mode="subcommand" ptype="SUBCOMMAND" order="true" optional="true"/>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_remove_private_as_config ${vrf-name} ${template-name} L2VPN_EVPN True ${all} ${replace-AS}&#xA;
-             if test -z "${all}" ; then&#xA;
+    <ACTION> if test -z "${all}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_remove_private_as_config_all ${vrf-name} ${template-name} L2VPN_EVPN&#xA;
              fi&#xA;
              if test -z "${replace-AS}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_remove_private_as_config_replace_as ${vrf-name} ${template-name} L2VPN_EVPN&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_remove_private_as_config ${vrf-name} ${template-name} L2VPN_EVPN True ${all} ${replace-AS}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="route-reflector-client" help="Configure a neighbor as Route Reflector client">
@@ -862,8 +862,7 @@ limitations under the License.
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_l2vpn_evpn_config_prefix_limit_config ${vrf-name} ${template-name} L2VPN_EVPN ${max-prefix-val} ${threshold-val} ${maxpfopt} ${interval}&#xA;
-             if test "${threshold-val}" = "0" ; then&#xA;
+    <ACTION> if test "${threshold-val}" = "0" ; then&#xA;
                   python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_l2vpn_evpn_config_prefix_limit_config_warning_threshold_pct ${vrf-name} ${template-name} L2VPN_EVPN&#xA;
              fi&#xA;
              if test -z "${warning-only}" ; then&#xA;
@@ -872,6 +871,7 @@ limitations under the License.
              if test -z "${restart}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_l2vpn_evpn_config_prefix_limit_config_restart_timer ${vrf-name} ${template-name} L2VPN_EVPN&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_l2vpn_evpn_config_prefix_limit_config ${vrf-name} ${template-name} L2VPN_EVPN ${max-prefix-val} ${threshold-val} ${maxpfopt} ${interval}&#xA;
     </ACTION>
   </COMMAND>
 
@@ -1078,7 +1078,7 @@ limitations under the License.
     <ACTION> python $SONIC_CLI_ROOT/sonic-cli-show-bgp-evpn.py get_bgp_evpn_routes show_evpn_routes_detail.j2 default L2VPN_EVPN</ACTION>
   </COMMAND>
   <COMMAND name="show bgp l2vpn evpn summary" help="Summary of BGP neighbor status">
-    <ACTION> python $SONIC_CLI_ROOT/sonic-cli-bgp.py get_ip_bgp_summary show_evpn_summary.j2 default</ACTION>
+    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_ip_bgp_summary show_evpn_summary.j2 default</ACTION>
   </COMMAND>
   <COMMAND name="show bgp l2vpn evpn route type" help="Specify Route type">
     <PARAM name="type" help="EVPN route type subcommands" ptype="SUBCOMMAND" mode="switch">
