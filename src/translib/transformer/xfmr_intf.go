@@ -1433,22 +1433,24 @@ var DbToYang_intf_ip_addr_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) 
 }
 
 func validIPv4(ipAddress string) bool {
-    ipAddress = strings.Trim(ipAddress, " ")
-
-    re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`)
-    if re.MatchString(ipAddress) {
-        return true
+    /* dont allow ip addresses that start with "0." or "255."*/
+    if (strings.HasPrefix(ipAddress, "0.") || strings.HasPrefix(ipAddress, "255.")) {
+        log.Info("validIP: ip is reserved ", ipAddress)
+        return false
     }
-    return false
+
+    /* 'net' package would know if ipAddress is v4 vs v6 */
+    return (validIPv6(ipAddress))
 }
 
 func validIPv6(ip6Address string) bool {
-    ip6Address = strings.Trim(ip6Address, " ")
-    re, _ := regexp.Compile(`(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))`)
-    if re.MatchString(ip6Address) {
-        return true
+    ip := net.ParseIP(ip6Address)
+
+    if (ip.IsLinkLocalUnicast() || ip.IsUnspecified() ||  ip.IsLoopback() ||  ip.IsMulticast()) {
+        log.Info("validIP: ip is invalid ", ip6Address)
+        return false
     }
-    return false
+    return true
 }
 
 /* Get all keys for given interface tables */
@@ -1950,6 +1952,12 @@ var YangToDb_intf_eth_port_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrP
                 err = validateIntfAssociatedWithPortChannel(inParams.d, &ifName)
                 if err != nil {
                     errStr := "Interface already part of a PortChannel"
+                    return nil, tlerr.InvalidArgsError{Format: errStr}
+                }
+                /* Restrict configuring member-port if iface configured as member-port of any vlan */
+                err = validateIntfAssociatedWithVlan(inParams.d, &ifName)
+                if err != nil {
+                    errStr := "PortChannel config not permitted on Vlan member-port"
                     return nil, tlerr.InvalidArgsError{Format: errStr}
                 }
                 /* Check if L3 configs present on given physical interface */
