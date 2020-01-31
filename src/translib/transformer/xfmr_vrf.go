@@ -299,11 +299,10 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
         /* get internal network instance name in order to fetch the DB table name */
         intNwInstName, ierr := getInternalNwInstName(keyName)
         if intNwInstName == "" || ierr != nil {
-                log.Info("network_instance_table_name_xfmr, invalid network instance name ", keyName)
-
-                /* If keyName not expected, make it hit the sonic VRF yang to return error msg */ 
-                tblList = append(tblList, "VRF");
-                return tblList, err
+            log.Info("network_instance_table_name_xfmr, invalid network instance name ", keyName)
+            errStr := "Invalid name " + keyName
+            err = tlerr.InvalidArgsError{Format: errStr}
+            return tblList, err
         }
 
         /*
