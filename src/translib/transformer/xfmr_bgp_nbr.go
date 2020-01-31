@@ -662,9 +662,39 @@ func fill_nbr_state_cmn_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataValue 
         nbrState.LastEstablished = &_lastEstablished
     }
 
+    if routerId, ok := frrNbrDataJson["remoteRouterId"] ; ok {
+        _routerId := routerId.(string)
+         nbrState.RemoteRouterId = &_routerId
+    }
+
     if value, ok := frrNbrDataJson["connectionsEstablished"] ; ok {
         _establishedTransitions := uint64(value.(float64))
         nbrState.EstablishedTransitions = &_establishedTransitions
+    }
+
+    if value, ok := frrNbrDataJson["connectionsDropped"] ; ok {
+        _connectionsDropped := uint64(value.(float64))
+        nbrState.ConnectionsDropped = &_connectionsDropped
+    }
+
+    if value, ok := frrNbrDataJson["lastResetTimerMsecs"] ; ok {
+        _lastResetTimerSec := uint64(value.(float64))/1000
+        nbrState.LastResetTime = &_lastResetTimerSec
+    }
+
+    if resetReason, ok := frrNbrDataJson["lastResetDueTo"] ; ok {
+         _resetReason := resetReason.(string)
+         nbrState.LastResetReason = &_resetReason
+    }
+
+    if value, ok := frrNbrDataJson["bgpTimerLastRead"] ; ok {
+        _lastRead := uint64(value.(float64))
+        nbrState.LastRead = &_lastRead
+    }
+
+    if value, ok := frrNbrDataJson["bgpTimerLastWrite"] ; ok {
+        _lastWrite := uint64(value.(float64))
+        nbrState.LastWrite = &_lastWrite
     }
 
     if statsMap, ok := frrNbrDataJson["messageStats"].(map[string]interface{}) ; ok {
@@ -738,19 +768,70 @@ func fill_nbr_state_cmn_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataValue 
     }
 
     if capabMap, ok := frrNbrDataJson["neighborCapabilities"].(map[string]interface{}) ; ok {
-        for capability,_ := range capabMap {
-            switch capability {
-                case "4byteAs":
+
+        if value, ok := capabMap["4byteAs"].(string) ; ok {
+           switch value {
+                case "advertisedAndReceived":
                     nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ASN32)
-                case "addPath":
-                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ADD_PATHS)
-                case "routeRefresh":
+                case "advertised":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ASN32_ADVERTISED_ONLY)
+                case "received":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ASN32_RECEIVED_ONLY)
+           }
+        }
+
+        if addPath, ok := capabMap["addPath"].(map[string]interface{}) ; ok {
+           if ipv4UCast, ok := addPath["ipv4Unicast"].(map[string]interface{}) ; ok {
+               if value, ok := ipv4UCast["rxAdvertised"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ADD_PATHS_ADVERTISED_ONLY)
+               }
+               if value, ok := ipv4UCast["rxReceived"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ADD_PATHS_RECEIVED_ONLY)
+               }
+               if value, ok := ipv4UCast["rxAdvertisedAndReceived"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ADD_PATHS)
+               }
+           }
+        }
+
+        if value, ok := capabMap["routeRefresh"].(string) ; ok {
+           switch value {
+                case "advertisedAndReceivedOldNew":
+                     fallthrough
+                case "advertisedAndReceivedOld":
+                     fallthrough
+                case "advertisedAndReceivedNew":
                     nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ROUTE_REFRESH)
-                case "multiprotocolExtensions":
-                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_MPBGP)
-                case "gracefulRestart":
+                case "advertised":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ROUTE_REFRESH_ADVERTISED_ONLY)
+                case "received":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ROUTE_REFRESH_RECEIVED_ONLY)
+           }
+        }
+
+        if multi, ok := capabMap["multiprotocolExtensions"].(map[string]interface{}) ; ok {
+           if ipv4UCast, ok := multi["ipv4Unicast"].(map[string]interface{}) ; ok {
+               if value, ok := ipv4UCast["rxAdvertised"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_MPBGP_ADVERTISED_ONLY)
+               }
+               if value, ok := ipv4UCast["rxReceived"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_MPBGP_RECEIVED_ONLY)
+               }
+               if value, ok := ipv4UCast["rxAdvertisedAndReceived"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_MPBGP)
+               }
+           }
+        }
+
+        if value, ok := capabMap["gracefulRestartCapability"].(string) ; ok {
+           switch value {
+                case "advertisedAndReceived":
                     nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_GRACEFUL_RESTART)
-            }
+                case "advertised":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_GRACEFUL_RESTART_ADVERTISED_ONLY)
+                case "received":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_GRACEFUL_RESTART_RECEIVED_ONLY)
+           }
         }
     }
 
