@@ -131,17 +131,22 @@ func getNwInstType (nwInstObj *ocbinds.OpenconfigNetworkInstance_NetworkInstance
         var err error
 
         /* If config not set or config.type not set, return L3VRF */
-        if ((nwInstObj.NetworkInstance[keyName].Config == nil) ||
-            (nwInstObj.NetworkInstance[keyName].Config.Type == ocbinds.OpenconfigNetworkInstanceTypes_NETWORK_INSTANCE_TYPE_UNSET)) {
-                return DEFAULT_NETWORK_INSTANCE_CONFIG_TYPE, errors.New("Network instance type not set")
-        } else {
-                instType, ok :=nwInstTypeMap[nwInstObj.NetworkInstance[keyName].Config.Type]
-                if ok {
-                        return instType, err
+        if (nwInstObj != nil) {
+            if ntinstKeyVal, ok := nwInstObj.NetworkInstance[keyName]; ok == true && ntinstKeyVal != nil {
+                if ((ntinstKeyVal.Config == nil) ||
+                    (ntinstKeyVal.Config.Type == ocbinds.OpenconfigNetworkInstanceTypes_NETWORK_INSTANCE_TYPE_UNSET)) {
+                        return DEFAULT_NETWORK_INSTANCE_CONFIG_TYPE, errors.New("Network instance type not set")
                 } else {
+                    instType, ok :=nwInstTypeMap[ntinstKeyVal.Config.Type]
+                    if ok {
+                        return instType, err
+                    } else {
                         return instType, errors.New("Unknown network instance type")
+                    }
                 }
+            }
         }
+        return DEFAULT_NETWORK_INSTANCE_CONFIG_TYPE, errors.New("Network instance type not set")
 }
 
 /* Check if this is mgmt vrf configuration. Note this is used for create, update only */
