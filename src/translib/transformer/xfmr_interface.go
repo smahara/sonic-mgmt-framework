@@ -21,7 +21,7 @@ package transformer
 import (
 	"github.com/openconfig/ygot/ygot"
 	"translib/db"
-    log "github.com/golang/glog"
+	"sync"
 )
 
 type RedisDbMap = map[db.DBNum]map[string]map[string]db.Value
@@ -38,7 +38,7 @@ type XfmrParams struct {
 	dbDataMap *map[db.DBNum]map[string]map[string]db.Value
 	subOpDataMap map[int]*RedisDbMap // used to add an in-flight data with a sub-op
 	param interface{}
-	txCache map[string]interface{}
+	txCache *sync.Map
 	skipOrdTblChk *bool
 }
 
@@ -124,23 +124,23 @@ type XfmrInterface interface {
 }
 
 func (KeyXfmrYangToDb) xfmrInterfaceValiidate () {
-    log.Info("xfmrInterfaceValiidate for KeyXfmrYangToDb")
+    xfmrLogInfo("xfmrInterfaceValiidate for KeyXfmrYangToDb")
 }
 func (KeyXfmrDbToYang) xfmrInterfaceValiidate () {
-    log.Info("xfmrInterfaceValiidate for KeyXfmrDbToYang")
+    xfmrLogInfo("xfmrInterfaceValiidate for KeyXfmrDbToYang")
 }
 func (FieldXfmrYangToDb) xfmrInterfaceValiidate () {
-    log.Info("xfmrInterfaceValiidate for FieldXfmrYangToDb")
+    xfmrLogInfo("xfmrInterfaceValiidate for FieldXfmrYangToDb")
 }
 func (FieldXfmrDbtoYang) xfmrInterfaceValiidate () {
-    log.Info("xfmrInterfaceValiidate for FieldXfmrDbtoYang")
+    xfmrLogInfo("xfmrInterfaceValiidate for FieldXfmrDbtoYang")
 }
 func (SubTreeXfmrYangToDb) xfmrInterfaceValiidate () {
-    log.Info("xfmrInterfaceValiidate for SubTreeXfmrYangToDb")
+    xfmrLogInfo("xfmrInterfaceValiidate for SubTreeXfmrYangToDb")
 }
 func (SubTreeXfmrDbToYang) xfmrInterfaceValiidate () {
-    log.Info("xfmrInterfaceValiidate for SubTreeXfmrDbToYang")
+    xfmrLogInfo("xfmrInterfaceValiidate for SubTreeXfmrDbToYang")
 }
 func (TableXfmrFunc) xfmrInterfaceValiidate () {
-    log.Info("xfmrInterfaceValiidate for TableXfmrFunc")
+    xfmrLogInfo("xfmrInterfaceValiidate for TableXfmrFunc")
 }

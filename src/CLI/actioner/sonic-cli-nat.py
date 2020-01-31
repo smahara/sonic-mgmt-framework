@@ -30,6 +30,7 @@ urllib3.disable_warnings()
 
 nat_type_map = {"snat" : "SNAT", "dnat": "DNAT"}
 nat_protocol_map = {"icmp": "1", "tcp": "6", "udp": "17"}
+clear_nat_map = {"translations": "ENTRIES", "statistics": "STATISTICS"}
 config = True
 
 def invoke_api(func, args=[]):
@@ -173,6 +174,12 @@ def invoke_api(func, args=[]):
         path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/openconfig-interfaces-ext:nat-zone/config/nat-zone', name=args[1])
         return api.delete(path)
 
+    # Clear NAT Translations/Statistics
+    elif func == 'rpc_nat_clear':
+        path = cc.Path('/restconf/operations/sonic-nat:clear_nat')
+        body = {"sonic-nat:input":{"nat-param": clear_nat_map[args[1]]}}
+        return api.post(path,body)
+
 
     # Get NAT Global Config
     elif func == 'get_openconfig_nat_nat_instances_instance_config':
@@ -213,10 +220,25 @@ def invoke_api(func, args=[]):
         path = cc.Path('/restconf/data/openconfig-nat:nat/instances/instance={id}/napt-twice-mapping-table', id=args[0])
         return api.get(path)
 
-    # Get all interfaces (needed for NAT Zone)
-    elif func == 'get_openconfig_interfaces_interfaces':
+    # Get all L3 interfaces (needed for NAT Zone)
+    elif func == 'get_sonic_interface_sonic_interface_interface':
         config = False
-        path = cc.Path('/restconf/data/openconfig-interfaces:interfaces')
+        path = cc.Path('/restconf/data/sonic-interface:sonic-interface/INTERFACE')
+        return api.get(path)
+
+    elif func == 'get_sonic_vlan_interface_sonic_vlan_interface_vlan_interface':
+        config = False
+        path = cc.Path('/restconf/data/sonic-vlan-interface:sonic-vlan-interface/VLAN_INTERFACE')
+        return api.get(path)
+
+    elif func == 'get_sonic_portchannel_interface_sonic_portchannel_interface_portchannel_interface':
+        config = False
+        path = cc.Path('/restconf/data/sonic-portchannel-interface:sonic-portchannel-interface/PORTCHANNEL_INTERFACE')
+        return api.get(path)
+
+    elif func == 'get_sonic_loopback_interface_sonic_loopback_interface_loopback_interface':
+        config = False
+        path = cc.Path('/restconf/data/sonic-loopback-interface:sonic-loopback-interface/LOOPBACK_INTERFACE')
         return api.get(path)
 
     else:
@@ -275,19 +297,50 @@ def get_nat_translations(func, args):
 
  
 def get_nat_zones(func,args):
-    response = invoke_api("get_openconfig_interfaces_interfaces")
+    output  = {}
+
+    # Get INTERFACE Table
+    response = invoke_api("get_sonic_interface_sonic_interface_interface")
     api_response = get_response_dict(response)
 
-    zone = {}
+    if 'sonic-interface:INTERFACE' in api_response and \
+          'INTERFACE_LIST' in api_response['sonic-interface:INTERFACE']:
+        for val in api_response['sonic-interface:INTERFACE']['INTERFACE_LIST']:
+            if 'nat_zone' in val and 'portname' in val:
+                output.update( {val['portname']: val['nat_zone']} )
 
-    if 'openconfig-interfaces:interfaces' in api_response and 'interface' in api_response['openconfig-interfaces:interfaces']:
-        for intf in api_response['openconfig-interfaces:interfaces']['interface']:
-            zone_value = 0
-            if 'openconfig-interfaces-ext:nat-zone' in intf and 'config' in intf['openconfig-interfaces-ext:nat-zone'] and 'nat-zone' in intf['openconfig-interfaces-ext:nat-zone']['config']:
-                zone_value = intf['openconfig-interfaces-ext:nat-zone']['config']['nat-zone']
-            zone.update({intf['name']: zone_value})
 
-    return zone
+    # Get VLAN_INTERFACE table
+    response1 = invoke_api("get_sonic_vlan_interface_sonic_vlan_interface_vlan_interface")
+    api_response1 = get_response_dict(response1)
+
+    if 'sonic-vlan-interface:VLAN_INTERFACE' in api_response1 and \
+          'VLAN_INTERFACE_LIST' in api_response1['sonic-vlan-interface:VLAN_INTERFACE']:
+        for val in api_response1['sonic-vlan-interface:VLAN_INTERFACE']['VLAN_INTERFACE_LIST']:
+            if 'nat_zone' in val and 'vlanName' in val:
+                output.update( {val['vlanName']: val['nat_zone']} )
+
+    # Get PORTCHANNEL_INTERFACE table
+    response2 = invoke_api("get_sonic_portchannel_interface_sonic_portchannel_interface_portchannel_interface")
+    api_response2 = get_response_dict(response2)
+
+    if 'sonic-portchannel-interface:PORTCHANNEL_INTERFACE' in api_response2 and \
+          'PORTCHANNEL_INTERFACE_LIST' in api_response2['sonic-portchannel-interface:PORTCHANNEL_INTERFACE']:
+        for val in api_response2['sonic-portchannel-interface:PORTCHANNEL_INTERFACE']['PORTCHANNEL_INTERFACE_LIST']:
+            if 'nat_zone' in val and 'pch_name' in val:
+                output.update( {val['pch_name']: val['nat_zone']} )
+
+    # Get LOOPBACK_INTERFACE table
+    response3 = invoke_api("get_sonic_loopback_interface_sonic_loopback_interface_loopback_interface")
+    api_response3 = get_response_dict(response3)
+
+    if 'sonic-loopback-interface:LOOPBACK_INTERFACE' in api_response3 and \
+          'LOOPBACK_INTERFACE_LIST' in api_response3['sonic-loopback-interface:LOOPBACK_INTERFACE']:
+        for val in api_response3['sonic-loopback-interface:LOOPBACK_INTERFACE']['LOOPBACK_INTERFACE_LIST']:
+            if 'nat_zone' in val and 'loIfName' in val:
+                output.update( {val['loIfName']: val['nat_zone']} )
+
+    return output
 
 
 
@@ -341,7 +394,7 @@ def get_nat_translations_count(func, args):
 def get_stats(key, l):
 
     stats = { "protocol": "all",
-              "source": "",
+              "source": "---",
               "destination": "---",
               "pkts": "0",
               "bytes": "0"}
@@ -352,9 +405,16 @@ def get_stats(key, l):
                 stats["protocol"] = k
 
     if key == "openconfig-nat:nat-mapping-table":
-        stats["source"] = l['external-address']
+        if 'type' in l['state'] and l['state']['type'] == 'openconfig-nat:SNAT' :
+            stats["source"] = l['external-address']
+        elif 'type' in l['state'] and l['state']['type'] == 'openconfig-nat:DNAT' :
+            stats["destination"] = l['external-address']
     elif key == "openconfig-nat:napt-mapping-table":
-        stats["source"] = l['external-address']+":"+str(l['external-port'])
+        addr = l['external-address']+":"+str(l['external-port'])
+        if 'type' in l['state'] and l['state']['type'] == 'openconfig-nat:SNAT' :
+            stats["source"] = addr
+        elif 'type' in l['state'] and l['state']['type'] == 'openconfig-nat:DNAT' :
+            stats["destination"] = addr
     elif key == "openconfig-nat:nat-twice-mapping-table":
         stats["source"] = l["src-ip"]
         stats["destination"] = l["dst-ip"]
@@ -363,17 +423,10 @@ def get_stats(key, l):
         stats["destination"] = l["dst-ip"]+":"+str(l["dst-port"])
 
     if 'state' in l and 'counters' in l['state']:
-        if key == "openconfig-nat:nat-mapping-table" or key == "openconfig-nat:napt-mapping-table":
-            if 'nat-translations-bytes' in l['state']['counters']:
-                stats["bytes"] = l['state']['counters']['nat-translations-bytes']
-            if 'nat-translations-pkts' in l['state']['counters']:
-                stats["pkts"] = l['state']['counters']['nat-translations-pkts']
-
-        elif key == "openconfig-nat:nat-twice-mapping-table" or key == "openconfig-nat:napt-twice-mapping-table":
-            if 'dnat-translations-bytes' in l['state']['counters']:
-                stats["bytes"] = l['state']['counters']['dnat-translations-bytes']
-            if 'dnat-translations-pkts' in l['state']['counters']:
-                stats["pkts"] = l['state']['counters']['dnat-translations-pkts']
+        if 'nat-translations-bytes' in l['state']['counters']:
+            stats["bytes"] = l['state']['counters']['nat-translations-bytes']
+        if 'nat-translations-pkts' in l['state']['counters']:
+            stats["pkts"] = l['state']['counters']['nat-translations-pkts']
 
     return stats 
 
@@ -411,7 +464,7 @@ def get_configs(table_name, l):
         if 'config' in l and 'protocol' in l['config']:
             proto = l['config']['protocol']
         for key,val in nat_protocol_map.items():
-            if val ==  proto:
+            if val ==  str(proto):
                 configs['ip_protocol'] = key
 
     # Nat Type

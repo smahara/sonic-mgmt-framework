@@ -43,6 +43,12 @@ const (
        PORTCHANNEL_TABLE  = "PORTCHANNEL"
 )
 
+var LAG_TYPE_MAP = map[string]string{
+    strconv.FormatInt(int64(ocbinds.OpenconfigIfAggregate_AggregationType_LACP), 10): "false",
+    strconv.FormatInt(int64(ocbinds.OpenconfigIfAggregate_AggregationType_STATIC), 10): "true",
+}
+
+
 /* Validate whether LAG exists in DB */
 func validateLagExists(d *db.DB, lagTs *string, lagName *string) error {
     if len(*lagName) == 0 {
@@ -73,13 +79,12 @@ func get_min_links(d *db.DB, lagName *string, links *uint16) error {
         }
         *links = uint16(min_links)
     } else {
-        log.Info("Minlinks set to 1 (dafault value)")
-        *links = 1
+        log.Info("Minlinks set to 0 (dafault value)")
+        *links = 0
     }
     log.Infof("Got min links from DB : %d\n", *links)
     return nil
 }
-
 
 func get_lag_type(d *db.DB, lagName *string, mode *string) error {
     intTbl := IntfTypeTblMap[IntfTypePortChannel]
@@ -93,17 +98,34 @@ func get_lag_type(d *db.DB, lagName *string, mode *string) error {
         *mode = val
         log.Infof("Mode from DB: %s\n", *mode)
     } else {
-        log.Info("Default LACP mode (static false)")
         *mode = "false"
-        log.Infof("Default Mode: %s\n", *mode)
+        log.Infof("Default LACP Mode: %s\n", *mode)
     }
     return nil
 }
 
+func get_fallback(d *db.DB, lagName *string, fallback *string) error {
+    intTbl := IntfTypeTblMap[IntfTypePortChannel]
+    curr, err := d.GetEntry(&db.TableSpec{Name:intTbl.cfgDb.portTN}, db.Key{Comp: []string{*lagName}})
+    if err != nil {
+        errStr := "Failed to Get PortChannel details"
+        log.Info(errStr)
+        return errors.New(errStr)
+    }
+    if val, ok := curr.Field["fallback"]; ok {
+        *fallback = val
+        log.Infof("Fallback option read from DB: %s\n", *fallback)
+    } else {
+        *fallback = "false"
+        log.Infof("Default Fallback option: %s\n", *fallback)
+    }
+    return nil
+}
+
+
 /* Validate physical interface configured as member of PortChannel */
 func validateIntfAssociatedWithPortChannel(d *db.DB, ifName *string) error {
     var err error
-
     if len(*ifName) == 0 {
         return errors.New("Interface name is empty!")
     }
@@ -172,25 +194,39 @@ func can_configure_fallback(inParams XfmrParams) error {
     i := res.IntfS["interface"].([]interface{})
     po_map := i[0].(map[string]interface{})
 
+    pathInfo := NewPathInfo(inParams.uri)
+    ifKey := pathInfo.Var("name")
+
+    var static string = "false"
     if agg,ok := po_map["openconfig-if-aggregate:aggregation"]; ok {
        a := agg.(map[string]interface{})
        agg_conf := a["config"].(map[string]interface{})
        if lag_type,k := agg_conf["lag-type"]; k {
            if lag_type == "STATIC" {
-               errStr := "Fallback is not supported for Static LAGs"
-               return tlerr.InvalidArgsError{Format:errStr}
-           }
-       } else {
-           //User did not specify LAG Type; Check from DB
-           pathInfo := NewPathInfo(inParams.uri)
-           ifKey := pathInfo.Var("name")
-           var mode string
-           e = get_lag_type(inParams.d, &ifKey, &mode)
-           if e == nil {
-               errStr := "Fallback option cannot be re-configured for an already existing PortChannel: " + ifKey
-               return tlerr.InvalidArgsError{Format:errStr}
+               // User Input Static LAG
+               static = "true"
+           } else {
+               // Read LAG Type from DB
+               var mode string
+               e = get_lag_type(inParams.d, &ifKey, &mode)
+               if e == nil && mode == "true" {
+                   static = "true"
+               }
            }
        }
+    }
+
+    if static == "true" {
+        errStr := "Fallback is not supported for Static LAGs"
+        return tlerr.InvalidArgsError{Format:errStr}
+    }
+
+    // LACP LAG: Check for fallback re-configuration
+    var fallback string
+    e = get_fallback(inParams.d, &ifKey, &fallback)
+    if e == nil && fallback == "false" {
+        errStr := "Fallback option cannot be configured for an already existing PortChannel: " + ifKey
+        return tlerr.InvalidArgsError{Format:errStr}
     }
 
     return nil
@@ -219,6 +255,15 @@ func getLagStateAttr(attr *string, ifName *string, lagInfoMap  map[string]db.Val
         return errors.New(errStr)
     }
     switch *attr {
+    case "mode":
+        oc_val.LagType = ocbinds.OpenconfigIfAggregate_AggregationType_LACP
+
+        lag_type,ok := lagEntries.Field["static"]
+        if ok {
+            if lag_type == "true" {
+                oc_val.LagType = ocbinds.OpenconfigIfAggregate_AggregationType_STATIC
+            }
+        }
     case "min-links":
         links, _ := strconv.Atoi(lagEntries.Field["min-links"])
         minlinks := uint16(links)
@@ -246,6 +291,15 @@ func getLagState(ifName *string, lagInfoMap  map[string]db.Value,
     oc_val.MinLinks = &minlinks
     fallbackVal, _:= strconv.ParseBool(lagEntries.Field["fallback"])
     oc_val.Fallback = &fallbackVal
+
+    oc_val.LagType = ocbinds.OpenconfigIfAggregate_AggregationType_LACP
+    lag_type,ok := lagEntries.Field["static"]
+    if ok {
+        if lag_type == "true" {
+            oc_val.LagType = ocbinds.OpenconfigIfAggregate_AggregationType_STATIC
+        }
+    }
+
     lagMembers := strings.Split(lagEntries.Field["member@"], ",")
     oc_val.Member = lagMembers
     return nil
@@ -307,6 +361,13 @@ func fillLagInfoForIntf(d *db.DB, ifName *string, lagInfoMap map[string]db.Value
         fallbackVal = "false"
     }
     lagInfoMap[*ifName].Field["fallback"] = fallbackVal
+
+    if v, k := curr.Field["static"]; k {
+        lagInfoMap[*ifName].Field["static"] = v
+    } else {
+        log.Info("Mode set to LACP, default value")
+        lagInfoMap[*ifName].Field["static"] = "false"
+    }
     log.Infof("Updated the lag-info-map for Interface: %s", *ifName)
 
     return err
@@ -369,6 +430,13 @@ var DbToYang_intf_lag_state_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams
         if err != nil {
             return err
         }
+    case "/openconfig-interfaces:interfaces/interface/openconfig-if-aggregate:aggregation/state/lag-type":
+         log.Info("Get is for lag type")
+         attr := "mode"
+         err = getLagStateAttr(&attr, &ifName, lagInfoMap, ocAggregationStateVal)
+         if err != nil {
+             return err
+         }
     case "/openconfig-interfaces:interfaces/interface/openconfig-if-aggregate:aggregation/state/openconfig-interfaces-ext:fallback":
         log.Info("Get is for fallback")
         attr := "fallback"
@@ -417,6 +485,13 @@ func deleteLagIntfAndMembers(inParams *XfmrParams, lagName *string) error {
         return errors.New(errStr)
     }
 
+    /* Restrict deletion if iface configured as member-port of any Vlan */
+    err = validateIntfAssociatedWithVlan(inParams.d, lagName)
+    if err != nil {
+        errStr := "Interface configured as member-port of Vlan"
+        return tlerr.InvalidArgsError{Format: errStr}
+    }
+
     /* Handle PORTCHANNEL_INTERFACE TABLE */
     err = validateL3ConfigExists(inParams.d, lagName)
     if err != nil {
@@ -447,11 +522,6 @@ func deleteLagIntfAndMembers(inParams *XfmrParams, lagName *string) error {
     return nil
 }
 
-var LAG_TYPE_MAP = map[string]string{
-    strconv.FormatInt(int64(ocbinds.OpenconfigIfAggregate_AggregationType_LACP), 10): "false",
-    strconv.FormatInt(int64(ocbinds.OpenconfigIfAggregate_AggregationType_STATIC), 10): "true",
-}
-
 
 var YangToDb_lag_type_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     result := make(map[string]string)
@@ -473,7 +543,7 @@ var YangToDb_lag_type_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[st
     user_mode := findInMap(LAG_TYPE_MAP, strconv.FormatInt(int64(t), 10))
 
     if err == nil && mode != user_mode  {
-        errStr := "Cannot reconfigure Mode for an existing PortChannel: " + ifKey
+        errStr := "Cannot configure Mode for an existing PortChannel: " + ifKey
         err = tlerr.InvalidArgsError{Format: errStr}
         return result, err
     }

@@ -8,11 +8,13 @@ module openconfig-vxlan {
   prefix "oc-vxlan"; 
 
   import openconfig-network-instance { prefix oc-ni; }
+  //import openconfig-network-instance-l2 { prefix oc-ni-l2; }
   import openconfig-interfaces { prefix oc-if; }
   import openconfig-inet-types { prefix oc-inet; }
   import openconfig-if-types-ext { prefix oc-if-types-ext; }
   // import openconfig-yang-types { prefix oc-yang; }
   import openconfig-extensions { prefix oc-ext; }
+  import openconfig-vlan-types { prefix oc-vlan-types; }
 
   // OpenConfig specific extensions for module metadata.
   oc-ext:regexp-posix;
@@ -164,6 +166,16 @@ module openconfig-vxlan {
       "bdBindVniType";
   }  
 
+  typedef vlan-suppress-type {
+    type enumeration {
+      enum "arp-and-nd" {
+        description
+          "Suppress both ARP and ND.";
+      }
+   }
+    description
+      "Neighbour Suppress Value";
+  }
 
   grouping vxlan-vni-static-ipv4-peer-config {
     description
@@ -522,6 +534,34 @@ module openconfig-vxlan {
       "VxLAN network instance state";
   }
 
+  grouping l2ni-mac-table-ext-state {
+    description
+      "Configuration data for MAC table entries";
+    leaf peer-ip {
+      type oc-inet:ipv4-address;
+      description
+        "The address of the NVE.";
+    }
+  }
+
+  grouping l2ni-mac-table-ext-top {
+    description
+      "l2ni mac table extension top";
+    container peer {
+      description
+        "l2ni mac table extension";
+      container config {
+        description
+          "l2ni mac table extension config";
+      }
+      container state {
+        config false;
+        description
+          "l2ni mac table extension state";
+        uses l2ni-mac-table-ext-state;
+      }
+    }
+  }
 
   grouping vxlan-interface-top {
     description
@@ -607,5 +647,56 @@ module openconfig-vxlan {
     }
   }
 
+  //augment /oc-ni:network-instances/oc-ni:network-instance/oc-ni-l2:fdb/oc-ni-l2:mac-table/oc-ni-l2:entries/oc-ni-l2:entry {
+  augment /oc-ni:network-instances/oc-ni:network-instance/oc-ni:fdb/oc-ni:mac-table/oc-ni:entries/oc-ni:entry {
+    description
+      "Augment for network instance mac table";
+    uses l2ni-mac-table-ext-top {
+      description
+        "l2ni mac table extension config/state";
+    }
+  }
+
   uses vxlan-top;
+
+  grouping neighbour-suppress-config {
+    description
+      "Grouping for Neigbour Suppress configuration";
+
+    leaf neigh-suppress{
+      type vlan-suppress-type;
+      description
+        "Enable Arp and ND Suppression";
+    }
+  }
+
+  grouping neighbour-suppress-top {
+      container neighbour-suppress {
+          container config {
+              description
+                  "Configuration data for neigh-suppress";
+              uses neighbour-suppress-config;
+          }
+          container state {
+              config false;
+              description
+                  "Operational state data ";
+              uses neighbour-suppress-config;
+          }
+      }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface" {
+      description
+          "Adds neighbour suppress configuration for routed VLAN interfaces";
+
+      uses  neighbour-suppress-top {
+          when "current()/oc-if:config/oc-if:type = 'ift:l3ipvlan'" {
+              description
+                  "Active when the interface is a logical interface providing
+                  L3 routing for VLANs";
+          }
+      }
+  }
+
 }

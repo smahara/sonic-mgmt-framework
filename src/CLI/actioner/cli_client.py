@@ -21,10 +21,13 @@ import os
 import json
 import urllib3
 import pwd
-import os
 from six.moves.urllib.parse import quote
+import syslog
+import requests
 
 urllib3.disable_warnings()
+
+sess = requests.Session()
 
 class ApiClient(object):
     """
@@ -35,20 +38,26 @@ class ApiClient(object):
         """
         Create a RESTful API client.
         """
-        self.api_uri = os.getenv('REST_API_ROOT', 'https://localhost:8443')
+
+        uri_root = 'https://localhost:8443'
+        self.api_uri = os.getenv('REST_API_ROOT', uri_root)
 
         self.checkCertificate = False
 
         self.version = "0.0.1"
 
-        username = os.getenv('CLI_USER', None)
-        if username is not None:
-            certdir = os.path.join(pwd.getpwnam(username)[5], ".cert")
-            cert = os.path.join(certdir, "certificate.pem")
-            key = os.path.join(certdir, "key.pem")
-            self.clientCert = (cert, key)
-        else:
-            self.clientCert = None
+        if sess.cert is None:
+            cert = os.getenv('USER_CERT_PATH', None)
+            key = os.getenv('USER_KEY_PATH', None)
+            if cert and key:
+                sess.cert = (cert, key)
+            else:
+                username = os.getenv('CLI_USER', None)
+                if username is not None:
+                    certdir = os.path.join(pwd.getpwnam(username)[5], ".cert")
+                    cert = os.path.join(certdir, "certificate.pem")
+                    key = os.path.join(certdir, "key.pem")
+                    sess.cert = (cert, key)
 
     def set_headers(self):
         from requests.structures import CaseInsensitiveDict
@@ -56,20 +65,19 @@ class ApiClient(object):
             'User-Agent': "CLI"
         })
 
-    @staticmethod
-    def merge_dicts(*dict_args):
-        result = {}
-        for dictionary in dict_args:
-            result.update(dictionary)
-        return result
-
-    def request(self, method, path, data=None, headers={}):
+    def request(self, method, path, data=None, headers={}, query=None):
         from requests import request, RequestException
 
         url = '{0}{1}'.format(self.api_uri, path)
 
         req_headers = self.set_headers()
         req_headers.update(headers)
+
+        client_token = os.getenv('REST_API_TOKEN', None)
+
+        if client_token:
+            syslog.syslog(syslog.LOG_DEBUG, "cli_client request using token %s" % client_token)
+            req_headers['Authorization'] = "Bearer " + client_token
 
         body = None
         if data is not None:
@@ -78,20 +86,29 @@ class ApiClient(object):
             body = json.dumps(data)
 
         try:
-            r = request(method, url, headers=req_headers, data=body, cert=self.clientCert, verify=self.checkCertificate)
+            r = sess.request(
+                method,
+                url,
+                headers=req_headers,
+                data=body,
+                params=query,
+                verify=self.checkCertificate)
             return Response(r)
-        except RequestException:
+        except RequestException as e:
+            syslog.syslog(syslog.LOG_WARNING, "cli_client request exception %s" % str(e))
             #TODO have more specific error message based
             return self._make_error_response('%Error: Could not connect to Management REST Server')
 
     def post(self, path, data={}):
         return self.request("POST", path, data)
 
-    def get(self, path):
-        return self.request("GET", path, None)
+    def get(self, path, depth=None):
+        q = self.prepare_query(depth=depth)
+        return self.request("GET", path, query=q)
 
-    def head(self, path):
-        return self.request("HEAD", path, None)
+    def head(self, path, depth=None):
+        q = self.prepare_query(depth=depth)
+        return self.request("HEAD", path, query=q)
 
     def put(self, path, data={}):
         return self.request("PUT", path, data)
@@ -101,6 +118,13 @@ class ApiClient(object):
 
     def delete(self, path):
         return self.request("DELETE", path, None)
+
+    @staticmethod
+    def prepare_query(depth=None):
+        query = {}
+        if depth != None and depth != "unbounded":
+            query["depth"] = depth
+        return query
 
     @staticmethod
     def _make_error_response(errMessage, errType='client', errTag='operation-failed'):
@@ -130,14 +154,17 @@ class Response(object):
     def __init__(self, response):
         self.response = response
         self.status_code = response.status_code
+        self.content = response.content
 
         try:
             if response.content is None or len(response.content) == 0:
                 self.content = None
-            else:
-                self.content = self.response.json()
+            elif _has_json_content(response):
+                self.content = json.loads(response.content)
         except ValueError:
-            self.content = self.response.text
+            # TODO Can we set status_code to 5XX in this case???
+            # Json parsing can fail only if server returned bad json
+            self.content = response.content
 
     def ok(self):
         return self.status_code >= 200 and self.status_code <= 299
@@ -176,6 +203,13 @@ class Response(object):
     def __getitem__(self, key):
         return self.content[key]
 
+def _has_json_content(resp):
+    ctype = resp.headers.get('Content-Type')
+    return (ctype is not None and 'json' in ctype)
+
+def _has_json_content(resp):
+    ctype = resp.headers.get('Content-Type')
+    return (ctype is not None and 'json' in ctype)
 
 def default_error_message_formatter(status_code, err_entry):
     if 'error-message' in err_entry:

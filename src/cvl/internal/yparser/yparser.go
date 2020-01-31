@@ -63,28 +63,30 @@ int lyd_data_validate(struct lyd_node **node, int options, struct ly_ctx *ctx)
 	return lyd_validate(node, options, ctx);
 }
 
-int lyd_multi_new_leaf(struct lyd_node *parent, const struct lys_module *module, const char *leafVal)
+struct leaf_value {
+	const char *name;
+	const char *value;
+};
+
+int lyd_multi_new_leaf(struct lyd_node *parent, const struct lys_module *module, 
+	struct leaf_value *leafValArr, int size)
 {
-	char s[4048];
-        char *name, *val;
-        char *saveptr;
+        const char *name, *val;
 	struct lyd_node *leaf;
 	struct lys_type *type = NULL;
 	int has_ptr_type = 0;
+	int idx = 0;
 
-        strcpy(s, leafVal);
-
-	name = strtok_r(s, "|", &saveptr);
-
-	while (name != NULL)
+	for (idx = 0; idx < size; idx++)
 	{
-		val = strtok_r(NULL, "|", &saveptr);
-		if (val == NULL)
+		if ((leafValArr[idx].name == NULL) || (leafValArr[idx].value == NULL)) 
 		{
-			name = strtok_r(NULL, "|", &saveptr);
 			continue;
 		}
 
+		name = leafValArr[idx].name;
+		val = leafValArr[idx].value;
+		
 		if (NULL == (leaf = lyd_new_leaf(parent, module, name, val)))
 		{
 			return -1;
@@ -109,8 +111,6 @@ int lyd_multi_new_leaf(struct lyd_node *parent, const struct lys_module *module,
 			//Restore has_ptr_type
 			type->info.uni.has_ptr_type = has_ptr_type;
 		}
-
-		name = strtok_r(NULL, "|", &saveptr);
 	}
 
 	return 0;
@@ -135,6 +135,47 @@ struct lyd_node *lyd_find_node(struct lyd_node *root, const char *xpath)
 	ly_set_free(set);
 
 	return node;
+}
+
+int lyd_node_leafref_match_in_union(struct lys_module *module, const char *xpath, const char *value) 
+{
+	struct ly_set *set = NULL;
+	struct lys_node *node = NULL;
+	int idx = 0;
+	struct lys_node_leaflist* lNode;
+
+	if (module == NULL)
+	{
+		return -1;
+	}
+
+	set = lys_find_path(module, NULL, xpath);
+	if (set == NULL || set->number == 0) {
+		return  -1;
+	}
+
+	node = set->set.s[0];
+	ly_set_free(set);
+
+	//Now check if it matches with any leafref node
+	lNode = (struct lys_node_leaflist*)node;
+
+	for (idx = 0; idx < lNode->type.info.uni.count; idx++) 
+	{
+		if (lNode->type.info.uni.types[idx].base != LY_TYPE_LEAFREF)  
+		{
+			//Look for leafref type only
+			continue;
+		}
+
+		if (0 == lyd_validate_value((struct lys_node*)
+		    lNode->type.info.uni.types[idx].info.lref.target, value))
+		{
+			return 0;
+		}
+	}
+
+	return -1;
 }
 
 struct lys_node* lys_get_snode(struct ly_set *set, int idx) {
@@ -232,6 +273,11 @@ type YParserListInfo struct {
 	XpathExpr map[string][]*XpathExpression
 	CustValidation map[string]string
 	WhenExpr map[string][]*WhenExpression //multiple when expression for choice/case etc
+}
+
+type YParserLeafValue struct {
+	Name string
+	Value string
 }
 
 type YParser struct {
@@ -351,9 +397,36 @@ func(yp *YParser) AddChildNode(module *YParserModule, parent *YParserNode, name 
 	return ret
 }
 
+//Check if value matches with leafref node in union
+func (yp *YParser) IsLeafrefMatchedInUnion(module *YParserModule, xpath, value string) bool {
+
+	if (0 == C.lyd_node_leafref_match_in_union((*C.struct_lys_module)(module),
+	C.CString(xpath), C.CString(value))) {
+		return true
+	}
+
+	return false
+}
+
 //Add child node to a parent node
-func(yp *YParser) AddMultiLeafNodes(module *YParserModule, parent *YParserNode, multiLeaf string) YParserError {
-	if (0 != C.lyd_multi_new_leaf((*C.struct_lyd_node)(parent), (*C.struct_lys_module)(module), C.CString(multiLeaf))) {
+func(yp *YParser) AddMultiLeafNodes(module *YParserModule, parent *YParserNode, multiLeaf []*YParserLeafValue) YParserError {
+
+	leafValArr := make([]C.struct_leaf_value, len(multiLeaf))
+
+	size := C.int(0)
+	for index := 0; index < len(multiLeaf); index++ {
+		if (multiLeaf[index] == nil) || (multiLeaf[index].Name == "") {
+			break
+		}
+
+		//Accumulate all name/value in array to be passed in lyd_multi_new_leaf()
+		leafValArr[index].name = C.CString(multiLeaf[index].Name)
+		leafValArr[index].value = C.CString(multiLeaf[index].Value)
+		size++
+	}
+
+	if (0 != C.lyd_multi_new_leaf((*C.struct_lyd_node)(parent), (*C.struct_lys_module)(module),
+	(*C.struct_leaf_value)(unsafe.Pointer(&leafValArr[0])), size)) {
 		if (Tracing == true) {
 			TRACE_LOG(TRACE_ONERROR, "Failed to create Multi Leaf Data = %v", multiLeaf)
 		}
@@ -363,7 +436,6 @@ func(yp *YParser) AddMultiLeafNodes(module *YParserModule, parent *YParserNode, 
 	return YParserError {ErrCode : YP_SUCCESS,}
 
 }
-
 //Return entire subtree in XML format in string
 func (yp *YParser) NodeDump(root *YParserNode) string {
 	if (root == nil) {
@@ -401,40 +473,6 @@ func (yp *YParser) MergeSubtree(root, node *YParserNode) (*YParserNode, YParserE
 	return (*YParserNode)(rootTmp), YParserError {ErrCode : YP_SUCCESS,}
 }
 
-/*
-//Cache subtree
-func (yp *YParser) CacheSubtree(dupSrc bool, node *YParserNode) YParserError {
-	rootTmp := (*C.struct_lyd_node)(yp.root)
-	var dup *C.struct_lyd_node
-
-	if (node == nil) {
-		//nothing to merge
-		return YParserError {ErrCode : YP_SUCCESS,}
-	}
-
-	if (dupSrc == true) {
-		dup = C.lyd_dup_withsiblings((*C.struct_lyd_node)(node), C.LYD_DUP_OPT_RECURSIVE | C.LYD_DUP_OPT_NO_ATTR)
-	} else {
-		dup = (*C.struct_lyd_node)(node)
-	}
-
-	if (yp.root != nil) {
-		if (0 != C.lyd_merge_to_ctx(&rootTmp, (*C.struct_lyd_node)(dup), C.LYD_OPT_DESTRUCT,
-		(*C.struct_ly_ctx)(ypCtx))) {
-			return getErrorDetails()
-		}
-	} else {
-		yp.root = (*YParserNode)(dup)
-	}
-
-	if (Tracing == true) {
-		dumpStr := yp.NodeDump((*YParserNode)(rootTmp))
-		TRACE_LOG(TRACE_YPARSER, "Cached subtree = %v\n", dumpStr)
-	}
-
-	return YParserError {ErrCode : YP_SUCCESS,}
-}*/
-
 func (yp *YParser) DestroyCache() YParserError {
 
 	if (yp.root != nil) {
@@ -458,34 +496,6 @@ func (yp *YParser) SetOperation(op string) YParserError {
 	yp.operation = op
 	return YParserError {ErrCode : YP_SUCCESS,}
 }
-
-/*
-//Validate config - syntax and semantics
-func (yp *YParser) ValidateData(data, depData *YParserNode) YParserError {
-
-	var dataRoot *YParserNode
-
-	if (depData != nil) {
-		if dataRoot, _ = yp.MergeSubtree(data, depData); dataRoot == nil {
-			CVL_LOG(ERROR, "Failed to merge dependent data\n")
-			return getErrorDetails()
-		}
-	}
-
-	dataRootTmp := (*C.struct_lyd_node)(dataRoot)
-
-	if (0 != C.lyd_data_validate(&dataRootTmp, C.LYD_OPT_CONFIG, (*C.struct_ly_ctx)(ypCtx))) {
-		if (Tracing == true) {
-			strData := yp.NodeDump((*YParserNode)(dataRootTmp))
-			TRACE_LOG(TRACE_ONERROR, "Failed to validate data = %v", strData)
-		}
-
-		CVL_LOG(ERROR, "Validation failed\n")
-		return getErrorDetails()
-	}
-
-	return YParserError {ErrCode : YP_SUCCESS,}
-} */
 
 //Perform syntax checks
 func (yp *YParser) ValidateSyntax(data, depData *YParserNode) YParserError {
@@ -512,83 +522,6 @@ func (yp *YParser) ValidateSyntax(data, depData *YParserNode) YParserError {
 
 	return YParserError {ErrCode : YP_SUCCESS,}
 }
-
-/*
-//Perform semantic checks 
-func (yp *YParser) ValidateSemantics(data, depData, appDepData *YParserNode) YParserError {
-
-	var dataTmp *C.struct_lyd_node
-
-	if (data != nil) {
-		dataTmp = (*C.struct_lyd_node)(data)
-	} else if (depData != nil) {
-		dataTmp = (*C.struct_lyd_node)(depData)
-	} else if (yp.root != nil) {
-		dataTmp = (*C.struct_lyd_node)(yp.root)
-	} else {
-		if (yp.operation == "CREATE") || (yp.operation == "UPDATE") {
-			return YParserError {ErrCode : YP_INTERNAL_UNKNOWN,}
-		} else {
-			return YParserError {ErrCode : YP_SUCCESS,}
-		}
-	}
-
-	//parse dependent data
-	if (data != nil && depData != nil) {
-
-		//merge input data and dependent data for semantic validation
-		if (0 != C.lyd_merge_to_ctx(&dataTmp, (*C.struct_lyd_node)(depData),
-		C.LYD_OPT_DESTRUCT, (*C.struct_ly_ctx)(ypCtx))) {
-			TRACE_LOG((TRACE_SEMANTIC | TRACE_LIBYANG), "Unable to merge dependent data\n")
-			return getErrorDetails()
-		}
-	}
-
-	//Merge cached data
-	if ((data != nil || depData != nil) && yp.root != nil) {
-		if (0 != C.lyd_merge_to_ctx(&dataTmp, (*C.struct_lyd_node)(yp.root),
-		0, (*C.struct_ly_ctx)(ypCtx))) {
-			TRACE_LOG((TRACE_SEMANTIC | TRACE_LIBYANG), "Unable to merge cached dependent data\n")
-			return getErrorDetails()
-		}
-	}
-
-	//Merge appDepData
-	if (appDepData != nil) {
-		if (0 != C.lyd_merge_to_ctx(&dataTmp, (*C.struct_lyd_node)(appDepData),
-		C.LYD_OPT_DESTRUCT, (*C.struct_ly_ctx)(ypCtx))) {
-			TRACE_LOG((TRACE_SEMANTIC | TRACE_LIBYANG), "Unable to merge other dependent data\n")
-			return getErrorDetails()
-		}
-	}
-
-	//Add operation for constraint check
-	if (ypOpRoot != nil) {
-		//if (0 != C.lyd_insert_sibling(&dataTmp, (*C.struct_lyd_node)(ypOpRoot))) {
-		if (0 != C.lyd_merge_to_ctx(&dataTmp, (*C.struct_lyd_node)(ypOpRoot),
-		0, (*C.struct_ly_ctx)(ypCtx))) {
-			TRACE_LOG((TRACE_SEMANTIC | TRACE_LIBYANG), "Unable to insert operation node")
-			return getErrorDetails()
-		}
-	}
-
-	if (Tracing == true) {
-		strData := yp.NodeDump((*YParserNode)(dataTmp))
-		TRACE_LOG(TRACE_YPARSER, "Semantics data = %v", strData)
-	}
-
-	//Check semantic validation
-	if (0 != C.lyd_data_validate(&dataTmp, C.LYD_OPT_CONFIG, (*C.struct_ly_ctx)(ypCtx))) {
-		if (Tracing == true) {
-			strData1 := yp.NodeDump((*YParserNode)(dataTmp))
-			TRACE_LOG(TRACE_ONERROR, "Failed to validate Semantics, data = %v", strData1)
-		}
-		return getErrorDetails()
-	}
-
-	return YParserError {ErrCode : YP_SUCCESS,}
-}
-*/
 
 func (yp *YParser) FreeNode(node *YParserNode) YParserError {
 

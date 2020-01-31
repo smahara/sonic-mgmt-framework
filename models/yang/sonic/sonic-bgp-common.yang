@@ -292,17 +292,17 @@ module sonic-bgp-common {
         leaf strict_capability_match {
             type boolean;
             description "Strict capability negotiation match";
-		}
+        }
 
-		leaf admin_status {
-			type boolean;
-			description "To enable BGP peer";
-		}
+        leaf admin_status {
+            type boolean;
+            description "To enable BGP peer";
+        }
 
-		leaf local_as_no_prepend {
-			type boolean;
+        leaf local_as_no_prepend {
+            type boolean;
             description "Do not prepend local-as to updates from ebgp peers";
-		}
+        }
 
         leaf local_as_replace_as {
             type boolean;
@@ -363,11 +363,19 @@ module sonic-bgp-common {
             type leafref {
                 path "/srmap:sonic-route-map/srmap:ROUTE_MAP_SET/srmap:ROUTE_MAP_SET_LIST/srmap:name";
             }
+            must "(count(current()) = 1)" {
+                error-app-tag "max-allowed-route-map-reached";
+                error-message "Only one route-map can be associated";
+            }
         }
 
         leaf-list route_map_out {
             type leafref {
                 path "/srmap:sonic-route-map/srmap:ROUTE_MAP_SET/srmap:ROUTE_MAP_SET_LIST/srmap:name";
+            }
+            must "(count(current()) = 1)" {
+                error-app-tag "max-allowed-route-map-reached";
+                error-message "Only one route-map can be associated";
             }
         }
 
