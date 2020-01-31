@@ -221,5 +221,16 @@ module openconfig-qos-ext {
     augment /oc-qos:qos {
         uses qos-threshold-breach-top;
     }
+
+
+    augment /oc-qos:qos/oc-qos:scheduler-policies/oc-qos:scheduler-policy/oc-qos:schedulers/oc-qos:scheduler/oc-qos:config {
+        leaf weight {
+            type uint8 {
+                range "0..255";
+            }
+        }
+    }
+
+
 }
 
