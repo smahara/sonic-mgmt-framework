@@ -68,13 +68,13 @@ limitations under the License.
         <PARAM name="route-map-name" help="Route map name" ptype="STRING"/>
       </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_network_config_network_config ${vrf-name} IPV4_UNICAST ${prefix} ${backdoor} ${route-map-name}&#xA;
-             if test "${backdoor}" = "x" ; then&#xA;
+    <ACTION> if test "${backdoor}" = "x" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_network_config_network_config_backdoor ${vrf-name} IPV4_UNICAST ${prefix}&#xA;
              fi&#xA;
              if test -z "${route-map}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_network_config_network_config_policy_name ${vrf-name} IPV4_UNICAST ${prefix}&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_network_config_network_config ${vrf-name} IPV4_UNICAST ${prefix} ${backdoor} ${route-map-name}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="table-map" help="BGP table to RIB route download filter">
@@ -89,9 +89,7 @@ limitations under the License.
         <PARAM name="rtemap" help="Route-map name" ptype="STRING"/>
       </PARAM>
     </PARAM>
-    <ACTION>              
-             python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_aggregate_address_config_aggregate_address_config ${vrf-name} IPV4_UNICAST ${prefix} ${as-set} ${summary-only}&#xA;
-             if test -n "${rtemap}" ; then&#xA;           
+    <ACTION> if test -n "${rtemap}" ; then&#xA;           
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_aggregate_address_config_aggregate_address_config_policy_name ${vrf-name} IPV4_UNICAST ${prefix} ${rtemap}&#xA;  
              fi&#xA; 
              if test -z "${as-set}" ; then&#xA;
@@ -100,6 +98,7 @@ limitations under the License.
              if test -z "${summary-only}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_aggregate_address_config_aggregate_address_config_summary_only ${vrf-name} IPV4_UNICAST ${prefix}&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_aggregate_address_config_aggregate_address_config ${vrf-name} IPV4_UNICAST ${prefix} ${as-set} ${summary-only}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="distance" help="Define an administrative distance"/>
@@ -119,8 +118,7 @@ limitations under the License.
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_route_flap_damping_config ${vrf-name} IPV4_UNICAST True ${halflife} ${reusethr} ${suppressthr} ${maxsuppress}&#xA;
-             if test -z "${reusethr}" ; then&#xA;
+    <ACTION> if test -z "${reusethr}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_route_flap_damping_config_reuse_threshold ${vrf-name} IPV4_UNICAST&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_route_flap_damping_config_suppress_threshold ${vrf-name} IPV4_UNICAST&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_route_flap_damping_config_max_suppress ${vrf-name} IPV4_UNICAST&#xA;
@@ -128,6 +126,7 @@ limitations under the License.
                      python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_route_flap_damping_config_half_life ${vrf-name} IPV4_UNICAST&#xA;
                  fi&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_route_flap_damping_config ${vrf-name} IPV4_UNICAST True ${halflife} ${reusethr} ${suppressthr} ${maxsuppress}&#xA;
     </ACTION>
   </COMMAND>
 
@@ -304,10 +303,11 @@ limitations under the License.
   </COMMAND>
   <COMMAND name="next-hop-self" help="Disable the next hop calculation for this neighbor">
     <PARAM name="force" help="Set the next hop to self for reflected routes" mode="subcommand" ptype="SUBCOMMAND" optional="true"/>
-     <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_next_hop_self_config ${vrf-name} ${nbr-addr} IPV4_UNICAST True ${force}&#xA;
+     <ACTION>
              if test -z "${force}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_next_hop_self_config_force ${vrf-name} ${nbr-addr} IPV4_UNICAST&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_next_hop_self_config ${vrf-name} ${nbr-addr} IPV4_UNICAST True ${force}&#xA;
      </ACTION>
   </COMMAND>
   <COMMAND name="prefix-list" help="Filter updates to/from this neighbor">
@@ -327,13 +327,13 @@ limitations under the License.
   <COMMAND name="remove-private-AS" help="Remove private ASNs in outbound updates">
     <PARAM name="all" help="Apply to all AS numbers" mode="subcommand" ptype="SUBCOMMAND" order="true" optional="true"/>
     <PARAM name="replace-AS" help="Replace private ASNs with our ASN in outbound updates" mode="subcommand" ptype="SUBCOMMAND" order="true" optional="true"/>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_remove_private_as_config ${vrf-name} ${nbr-addr} IPV4_UNICAST True ${all} ${replace-AS}&#xA;
-             if test -z "${all}" ; then&#xA;
+    <ACTION> if test -z "${all}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_remove_private_as_config_all ${vrf-name} ${nbr-addr} IPV4_UNICAST&#xA;
              fi&#xA;
              if test -z "${replace-AS}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_remove_private_as_config_replace_as ${vrf-name} ${nbr-addr} IPV4_UNICAST&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_remove_private_as_config ${vrf-name} ${nbr-addr} IPV4_UNICAST True ${all} ${replace-AS}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="route-reflector-client" help="Configure a neighbor as Route Reflector client">
@@ -377,8 +377,7 @@ limitations under the License.
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config ${vrf-name} ${nbr-addr} IPV4_UNICAST ${max-prefix-val} ${threshold-val} ${maxpfopt} ${interval}&#xA;
-             if test "${threshold-val}" = "0" ; then&#xA;
+    <ACTION> if test "${threshold-val}" = "0" ; then&#xA;
                   python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config_warning_threshold_pct ${vrf-name} ${nbr-addr} IPV4_UNICAST&#xA;
              fi&#xA;
              if test -z "${warning-only}" ; then&#xA;
@@ -387,6 +386,7 @@ limitations under the License.
              if test -z "${restart}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config_restart_timer ${vrf-name} ${nbr-addr} IPV4_UNICAST&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config ${vrf-name} ${nbr-addr} IPV4_UNICAST ${max-prefix-val} ${threshold-val} ${maxpfopt} ${interval}&#xA;
     </ACTION>
   </COMMAND>
 
@@ -662,13 +662,13 @@ limitations under the License.
   <COMMAND name="remove-private-AS" help="Remove private ASNs in outbound updates">
     <PARAM name="all" help="Apply to all AS numbers" mode="subcommand" ptype="SUBCOMMAND" order="true" optional="true"/>
     <PARAM name="replace-AS" help="Replace private ASNs with our ASN in outbound updates" mode="subcommand" ptype="SUBCOMMAND" order="true" optional="true"/>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_remove_private_as_config ${vrf-name} ${template-name} IPV4_UNICAST True ${all} ${replace-AS}&#xA;
-             if test -z "${all}" ; then&#xA;
+    <ACTION> if test -z "${all}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_remove_private_as_config_all ${vrf-name} ${template-name} IPV4_UNICAST&#xA;
              fi&#xA;
              if test -z "${replace-AS}" ; then&#xA;
                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_remove_private_as_config_replace_as ${vrf-name} ${template-name} IPV4_UNICAST&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_remove_private_as_config ${vrf-name} ${template-name} IPV4_UNICAST True ${all} ${replace-AS}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="route-reflector-client" help="Configure a neighbor as Route Reflector client">
@@ -712,8 +712,7 @@ limitations under the License.
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config ${vrf-name} ${template-name} IPV4_UNICAST ${max-prefix-val} ${threshold-val} ${maxpfopt} ${interval}&#xA;
-             if test "${threshold-val}" = "0" ; then&#xA;
+    <ACTION> if test "${threshold-val}" = "0" ; then&#xA;
                   python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config_warning_threshold_pct ${vrf-name} ${template-name} IPV4_UNICAST&#xA;
              fi&#xA;
              if test -z "${warning-only}" ; then&#xA;
@@ -722,6 +721,7 @@ limitations under the License.
              if test -z "${restart}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py DELETE_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config_restart_timer ${vrf-name} ${template-name} IPV4_UNICAST&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py PATCH_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config ${vrf-name} ${template-name} IPV4_UNICAST ${max-prefix-val} ${threshold-val} ${maxpfopt} ${interval}&#xA;
     </ACTION>
   </COMMAND>
 
