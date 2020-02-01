@@ -159,17 +159,34 @@ module sonic-route-map {
                 }
 
                 leaf-list match_neighbor {
-                    type inet:ip-address;
+                    type union {
+                        type inet:ip-address;
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                        type leafref {
+                            path "/svlanint:sonic-vlan-interface/svlanint:VLAN_INTERFACE/svlanint:VLAN_INTERFACE_LIST/svlanint:vlanName";
+                        }
+                    }
                     description
-                        "List of IP addresses in the neighbor set";
-                    max-elements 1;
+                        "Match neighbor IP or interface.";
+                    must "(count(current()) = 1)" {
+                        error-app-tag "max-allowed-match-nbr-reached";
+                        error-message "Only one match neighbor can be configured.";
+                    }
                 }
 
                 leaf-list match_tag {
                     type tag-type;
                     description
                         "Value of the tag set member";
-                    max-elements 1;
+                    must "(count(current()) = 1)" {
+                        error-app-tag "max-allowed-match-tag-reached";
+                        error-message "Only one match tag can be configured.";
+                    }
                 }
 
                 leaf match_med{

@@ -1,5 +1,8 @@
-{% if 'openconfig-network-instance:neighbors' in json_output %}
+{% if 'openconfig-network-instance:neighbors' in json_output and 'openconfig-network-instance:global' in json_output %}
     {% set neighbor_list = json_output['openconfig-network-instance:neighbors'] %}
+    {% set bgp_global = json_output['openconfig-network-instance:global'] %}
+    {% set g_config = bgp_global['config'] %}
+    {% set g_state = bgp_global['state'] %}
     {% if 'neighbor' in neighbor_list %}
         {{ '\n' }}
         {% set neighbors = neighbor_list['neighbor'] %}
@@ -24,8 +27,15 @@
                 {{-'  Administratively shut down\n'}}
             {% endif %}
             {{-'  BGP version '}}{{'4'-}}
-            {{-', remote router ID '}}{{' '-}}
-            {{-', local router ID '}}{{' '}}
+            {% set vars = {'remote_router_id': ""} %}
+            {% if vars.update({'remote_router_id':n_state['openconfig-bgp-ext:remote-router-id']}) %}{% endif %}
+            {{-', remote router ID '}}{{vars.remote_router_id|string}}{{' '-}}
+            {% if 'router-id' in state %}
+                {{-', local router ID '}}{{g_state['router-id']}}
+            {% else %}
+                {{-', local router ID '}}{{'0.0.0.0'}}{{'\n'}}
+            {% endif %}
+
             {% if 'session-state' in n_state %}
                 {{-'  BGP state = '}}{{(n_state['session-state']|string)-}}
                 {% if 'last-established' in n_state %} 
@@ -36,6 +46,18 @@
             {% else %}
                 {{-'  BGP state = Unestablished'}}
             {% endif %}
+
+            {% set vars = {'last_read': ""} %}
+            {% set vars = {'last_write': ""} %}
+            {% set vars = {'reset_reason': ""} %}
+            {% set vars = {'reset_time': ""} %}
+            {% if vars.update({'last_read':n_state['openconfig-bgp-ext:last-read']}) %}{% endif %}
+            {% if vars.update({'last_write':n_state['openconfig-bgp-ext:last-write']}) %}{% endif %}
+            {% if vars.update({'reset_reason':n_state['openconfig-bgp-ext:last-reset-reason']}) %}{% endif %}
+            {% if vars.update({'reset_time':n_state['openconfig-bgp-ext:last-reset-time']}) %}{% endif %}
+            {{-'  Last read '}}{{vars.last_read}}{{', Last write '}}{{vars.last_write}}{{'\n'}}
+            {{-'  Last reset '}}{{vars.reset_time}}{{', Last reset reason '}}{{vars.reset_reason|string}}{{'\n'}}
+
             {% set vars = {'hold_time': ""} %}
             {% set vars = {'kpa_intvl': ""} %}
             {% set vars = {'nego_time': ""} %}
@@ -130,7 +152,21 @@
                 {{-'  BFD enabled\n'}}
             {% endif %}
             {{-'  Neighbor capabilities:\n'}}
-            {{-'    4 Byte AS: advertised and received\n'}}
+            {% if 'supported-capabilities' in n_state %}
+                {% set supported_caps = n_state['supported-capabilities'] %}
+                {% for supported_cap in supported_caps %}
+                    {% if supported_cap == 'openconfig-bgp-types:ASN32' %}
+                        {{-'    4 Byte AS: advertised and received'}}{{'\n'}}
+                    {% elif supported_cap == 'openconfig-bgp-ext:ADD_PATHS_ADVERTISED_ONLY' %}
+                        {{-'    Advertise'}}{{'\n'}}
+                    {% elif supported_cap == 'openconfig-bgp-types:ROUTE_REFRESH' %}
+                        {{-'    Advertised and received'}}{{'\n'}}
+                    {% elif supported_cap == 'openconfig-bgp-ext:GRACEFUL_RESTART_ADVERTISED_ONLY' %}
+                        {{-'    Graceful restart'}}{{'\n'}}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
             {% if 'queues' in n_state %}
                 {% set n_queues = n_state['queues'] %}
                 {{-'  Message statistics:\n'}}

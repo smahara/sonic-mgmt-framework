@@ -135,13 +135,6 @@ module sonic-bgp-common {
 
     grouping sonic-bgp-cmn {
 
-        leaf local_asn {
-            type uint32 {
-                range "1..4294967295";
-            }
-            description "Local AS number";
-        }
-
         leaf name {
             type string;
             description "Peer description";
@@ -389,11 +382,6 @@ module sonic-bgp-common {
                 path "/srmap:sonic-route-map/srmap:ROUTE_MAP_SET/srmap:ROUTE_MAP_SET_LIST/srmap:name";
             }
             description "Route map";
-        }
-
-        leaf rrclient {
-            type boolean;
-            description "Route reflector client";
         }
 
         leaf weight {

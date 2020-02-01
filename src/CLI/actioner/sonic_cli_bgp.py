@@ -192,7 +192,7 @@ def generate_show_bgp_routes(args):
                   show_cli_output("show_ip_bgp_routes.j2", d)
 
    elif route_option == "routes":
-      keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/global/config', name=vrf, identifier=IDENTIFIER,name1=NAME1)
+      keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/global', name=vrf, identifier=IDENTIFIER,name1=NAME1)
       response = api.get(keypath)
       if(response.ok()):
          d.update(response.content)
@@ -207,7 +207,7 @@ def generate_show_bgp_routes(args):
                d.update(response1.content)
                show_cli_output("show_ip_bgp_routes.j2", d)
    elif route_option == "received-routes":
-      keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/global/config', name=vrf, identifier=IDENTIFIER,name1=NAME1)
+      keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/global', name=vrf, identifier=IDENTIFIER,name1=NAME1)
       response = api.get(keypath)
       d.update(response.content)
       keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/rib/afi-safis/afi-safi={afi_safi_name}/{type_name}/neighbors/neighbor={nbr_address}/adj-rib-in-pre', name=vrf, identifier=IDENTIFIER, name1=NAME1, afi_safi_name=afisafi, type_name=rib_type, nbr_address = neighbour_ip)
@@ -222,7 +222,7 @@ def generate_show_bgp_routes(args):
             show_cli_output("show_ip_bgp_routes.j2", d)
 
    elif route_option == "advertised-routes":
-      keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/global/config', name=vrf, identifier=IDENTIFIER,name1=NAME1)
+      keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/global', name=vrf, identifier=IDENTIFIER,name1=NAME1)
       response = api.get(keypath)
       if(response.ok()):
          d.update(response.content)
@@ -1575,6 +1575,25 @@ def invoke_api(func, args=[]):
 
     return api.cli_not_implemented(func)
 
+def seconds_to_wdhm_str(seconds):
+    d = datetime.now()
+    d = d - timedelta(seconds=int(seconds))
+    weeks = 0
+    days = d.day  
+    if days != 0:
+       days = days - 1 
+       if days != 0:
+          weeks = days // 7
+          days = days % 7
+    if weeks != 0:
+        wdhm = '{}w{}d{:02}h'.format(int(weeks), int(days), int(d.hour))
+    elif days != 0:
+        wdhm = '{}d{:02}h{:02}m'.format(int(days), int(d.hour), int(d.minute))
+    else:
+        wdhm = '{:02}:{:02}:{:02}'.format(int(d.hour), int(d.minute), int(d.second))
+
+    return wdhm
+
 def preprocess_bgp_nbrs(iptype, nbrs):
     new_nbrs = []
     un_enbrs = []
@@ -1593,26 +1612,26 @@ def preprocess_bgp_nbrs(iptype, nbrs):
             unnumbered = True
 
         if ipt == iptype:
-            if 'state' in nbr and 'session-state' in nbr['state'] and 'last-established' in nbr['state']:
-                if nbr['state']['session-state'] == 'ESTABLISHED':
-                    last_estbd = nbr['state']['last-established']
-                    d = datetime.now()
-                    d = d - timedelta(seconds=int(last_estbd))
-                    weeks = 0
-                    days = d.day  
-                    if days != 0:
-                       days = days - 1 
-                       if days != 0:
-                          weeks = days // 7  
-                          days = days % 7  
-                    if weeks != 0:
-                        nbr['state']['last-established'] = '{}w{}d{:02}h'.format(int(weeks), int(days), int(d.hour))
-                    elif days != 0:
-                        nbr['state']['last-established'] = '{}d{:02}h{:02}m'.format(int(days), int(d.hour), int(d.minute))
-                    else:
-                        nbr['state']['last-established'] = '{:02}:{:02}:{:02}'.format(int(d.hour), int(d.minute), int(d.second))                  
-                else:
-                    nbr['state']['last-established'] = 'never'
+            if 'state' in nbr:
+                if 'session-state' in nbr['state'] and 'last-established' in nbr['state']:
+                   if nbr['state']['session-state'] == 'ESTABLISHED':
+                       last_estbd = nbr['state']['last-established']
+                       nbr['state']['last-established'] = seconds_to_wdhm_str(last_estbd)
+                   else:
+                       nbr['state']['last-established'] = 'never'
+
+                if 'openconfig-bgp-ext:last-write' in nbr['state']:
+                    last_write = nbr['state']['openconfig-bgp-ext:last-write']
+                    nbr['state']['openconfig-bgp-ext:last-write'] = seconds_to_wdhm_str(last_write)
+
+                if 'openconfig-bgp-ext:last-read' in nbr['state']:
+                    last_read = nbr['state']['openconfig-bgp-ext:last-read']
+                    nbr['state']['openconfig-bgp-ext:last-read'] = seconds_to_wdhm_str(last_read)
+
+                if 'openconfig-bgp-ext:last-reset-time' in nbr['state']:
+                    last_reset_time = nbr['state']['openconfig-bgp-ext:last-reset-time']
+                    nbr['state']['openconfig-bgp-ext:last-reset-time'] = seconds_to_wdhm_str(last_reset_time)
+
             if unnumbered == True:
                 ifName = nbr['neighbor-address']
                 if ifName.startswith("Ethernet"):

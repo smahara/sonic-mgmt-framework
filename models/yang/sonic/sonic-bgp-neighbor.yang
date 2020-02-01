@@ -80,6 +80,30 @@ module sonic-bgp-neighbor {
                     description "Peer group name";
                 }
 
+                leaf local_asn {
+                    type uint32 {
+                        range "1..4294967295";
+                    }
+                    description "Local AS number";
+                    must "current() != /sbgpg:sonic-bgp-global/sbgpg:BGP_GLOBALS/sbgpg:BGP_GLOBALS_LIST[sbgpg:vrf_name=current()/../vrf_name]/sbgpg:local_asn" {
+                      error-app-tag "local-asn-global-asn-are-same";
+                      error-message "Local ASN and Global ASN should not be same.";
+                    }
+                }
+
+                leaf rrclient {
+                    type boolean;
+                    description "Route reflector client";
+                    must "count(current()/../local_asn) != 0 and ((current()/../local_asn) = current()/../asn)" {
+                      error-app-tag "local-asn-remote-asn-are-not-same";
+                      error-message "Local ASN and Remote ASN should be same.";
+                    }
+                    must "count(current()/../local_asn) = 0 and (current()/../asn = /sbgpg:sonic-bgp-global/sbgpg:BGP_GLOBALS/sbgpg:BGP_GLOBALS_LIST[sbgpg:vrf_name=current()/../vrf_name]/sbgpg:local_asn)" {
+                      error-app-tag "global-asn-remote-asn-are-not-same";
+                      error-message "Global ASN and Remote ASN should be same.";
+                    }
+                }
+
                 uses sbc:sonic-bgp-cmn;
             }
         }
@@ -100,7 +124,20 @@ module sonic-bgp-neighbor {
                         path "../../../BGP_NEIGHBOR/BGP_NEIGHBOR_LIST[vrf_name=current()/../vrf_name]/neighbor";
                     }
                 }
+
+                leaf local_asn {
+                    type uint32 {
+                        range "1..4294967295";
+                    }
+                    description "Local AS number";
+                    must "current() = /sbgpg:sonic-bgp-global/sbgpg:BGP_GLOBALS/sbgpg:BGP_GLOBALS_LIST[sbgpg:vrf_name=current()/../vrf_name]/sbgpg:local_asn" {
+                      error-app-tag "local-asn-global-asn-are-same";
+                      error-message "Local ASN and Global ASN should not be same.";
+                    }
+                }
+                
                 uses sbc:sonic-bgp-cmn-af;
+
             }
         }
     }
