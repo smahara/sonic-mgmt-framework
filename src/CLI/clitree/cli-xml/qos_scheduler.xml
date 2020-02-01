@@ -106,18 +106,24 @@ limitations under the License.
         completion="false"
         />
         <COMMAND
-            name="type"
-            help="type of scheduler for the queue: SP or WRR"
+            name="priority"
+            help="scheduler is set to strict priority"
             mode="subcommand"
             ptype="SUBCOMMAND"
         >
-        <PARAM
-            name="type"
-            help="type of scheduler for the queue: SP or WRR"
-            ptype="STRING">
-        </PARAM>
         <ACTION>
-            python $SONIC_CLI_ROOT/sonic-cli-qos-scheduler.py patch_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers_scheduler_config_type ${top_scheduler_policy_name} ${scheduler_policy_per_queue_name} ${type}
+            python $SONIC_CLI_ROOT/sonic-cli-qos-scheduler.py patch_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers_scheduler_config_priority ${top_scheduler_policy_name} ${scheduler_policy_per_queue_name}  
+        </ACTION>
+        </COMMAND>
+
+        <COMMAND
+            name="no priority"
+            help="scheduler is set to WRR"
+            mode="subcommand"
+            ptype="SUBCOMMAND"
+        >
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-qos-scheduler.py delete_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers_scheduler_config_priority ${top_scheduler_policy_name} ${scheduler_policy_per_queue_name}  
         </ACTION>
         </COMMAND>
 
