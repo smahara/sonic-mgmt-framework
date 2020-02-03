@@ -688,12 +688,12 @@ func fill_nbr_state_cmn_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataValue 
     }
 
     if value, ok := frrNbrDataJson["bgpTimerLastRead"] ; ok {
-        _lastRead := uint64(value.(float64))
+        _lastRead := uint64(value.(float64))/1000
         nbrState.LastRead = &_lastRead
     }
 
     if value, ok := frrNbrDataJson["bgpTimerLastWrite"] ; ok {
-        _lastWrite := uint64(value.(float64))
+        _lastWrite := uint64(value.(float64))/1000
         nbrState.LastWrite = &_lastWrite
     }
 
@@ -766,7 +766,7 @@ func fill_nbr_state_cmn_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataValue 
             _queues.Input = &_input
         }
     }
-
+    nbrState.SupportedCapabilities = nil
     if capabMap, ok := frrNbrDataJson["neighborCapabilities"].(map[string]interface{}) ; ok {
 
         if value, ok := capabMap["4byteAs"].(string) ; ok {
@@ -982,7 +982,7 @@ func fill_nbr_state_timers_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataVal
 func fill_nbr_state_transport_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataValue interface{}, cfgDb *db.DB,
                                     nbr_obj *ocbinds.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Protocols_Protocol_Bgp_Neighbors_Neighbor) error {
     var err error
-
+    ygot.BuildEmptyTree(nbr_obj.Transport)
     nbrTransportState := nbr_obj.Transport.State
     frrNbrDataJson := frrNbrDataValue.(map[string]interface{})
 
