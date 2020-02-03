@@ -2343,7 +2343,7 @@ var YangToDb_unnumbered_intf_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams
 }
 
 var DbToYang_unnumbered_intf_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) (error) {
-	var err error
+    var err error
 	intfsObj := getIntfsRoot(inParams.ygRoot)
 	pathInfo := NewPathInfo(inParams.uri)
 	ifName := pathInfo.Var("name")
@@ -2352,11 +2352,11 @@ var DbToYang_unnumbered_intf_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams
 
 	var intfObj *ocbinds.OpenconfigInterfaces_Interfaces_Interface
 	intfType, _, ierr := getIntfTypeByName(ifName)
-	if intfType == IntfTypeUnset || ierr != nil {
+    if intfType == IntfTypeUnset || ierr != nil {
 		errStr := "Invalid interface type IntfTypeUnset"
 		log.Info("DbToYang_unnumbered_intf_xfmr: " + errStr)
 		return errors.New(errStr)
-	}
+    }
 
     intTbl := IntfTypeTblMap[intfType]
 
@@ -2369,7 +2369,7 @@ var DbToYang_unnumbered_intf_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams
 		} else {
 			ygot.BuildEmptyTree(intfsObj)
 			intfObj, _ = intfsObj.NewInterface(ifName)
-		}
+    }
 
 		ygot.BuildEmptyTree(intfObj)
 
@@ -2379,8 +2379,8 @@ var DbToYang_unnumbered_intf_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams
 			if err != nil {
 				log.Error("Creation of subinterface subtree failed!")
 				return err
-			}
-		}
+    }
+    }
 
 		subIntf = intfObj.Subinterfaces.Subinterface[0]
 		ygot.BuildEmptyTree(subIntf)
@@ -2389,7 +2389,7 @@ var DbToYang_unnumbered_intf_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams
 		if dbErr != nil {
 			log.Info("Failed to read DB entry, " + intTbl.cfgDb.intfTN + " " + ifName)
 			return nil
-		}
+}
 
 		if entry.Has(UNNUMBERED) {
 			value := entry.Get(UNNUMBERED)
@@ -2451,10 +2451,10 @@ var YangToDb_intf_sag_ip_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 
     subIntfObj := intfObj.Subinterfaces.Subinterface[0]
 
-	var gwIPListStr string
+		var gwIPListStr string
 	sagIPMap := make(map[string]db.Value)
-	vlanIntfMap := make(map[string]db.Value)
-	vlanIntfMap[ifName] = db.Value{Field:make(map[string]string)}
+		vlanIntfMap := make(map[string]db.Value)
+		vlanIntfMap[ifName] = db.Value{Field:make(map[string]string)}
 	vlanEntry, _ := inParams.d.GetEntry(&db.TableSpec{Name:intTbl.cfgDb.intfTN}, db.Key{Comp: []string{ifName}})
 
     if subIntfObj.Ipv4 != nil && subIntfObj.Ipv4.SagIpv4 != nil {
@@ -2497,7 +2497,7 @@ var YangToDb_intf_sag_ip_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 			sagIPMap[sagIPv4Key].Field["gwip@"] = gwIPListStr
 
 			subIntfmap["SAG"] = sagIPMap
-        }
+    }
     }
 
     if subIntfObj.Ipv6 != nil && subIntfObj.Ipv6.SagIpv6 != nil {
@@ -2549,7 +2549,7 @@ var YangToDb_intf_sag_ip_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 }
 
 var DbToYang_intf_sag_ip_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) (error) {
-	var err error
+    var err error
 	intfsObj := getIntfsRoot(inParams.ygRoot)
 	pathInfo := NewPathInfo(inParams.uri)
 	ifName := pathInfo.Var("name")
@@ -2558,11 +2558,11 @@ var DbToYang_intf_sag_ip_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) (e
 
 	var intfObj *ocbinds.OpenconfigInterfaces_Interfaces_Interface
 	intfType, _, ierr := getIntfTypeByName(ifName)
-	if intfType == IntfTypeUnset || ierr != nil {
+    if intfType == IntfTypeUnset || ierr != nil {
 		errStr := "Invalid interface type IntfTypeUnset"
 		log.Info("DbToYang_intf_sag_ip_xfmr : " + errStr)
 		return errors.New(errStr)
-	}
+    }
 
 	ipv4_req := false
 	ipv6_req := false
@@ -2574,18 +2574,18 @@ var DbToYang_intf_sag_ip_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) (e
 	} else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6/openconfig-interfaces-ext:sag-ipv6/config/static-anycast-gateway") {
 		ipv6_req = true
 		sagIPKey = ifName + "|IPv6"
-	}
+    }
 
 	if ipv4_req || ipv6_req {
 		if intfsObj != nil && intfsObj.Interface != nil && len(intfsObj.Interface) > 0 {
 			var ok bool = false
 			if intfObj, ok = intfsObj.Interface[ifName]; !ok {
 				intfObj, _ = intfsObj.NewInterface(ifName)
-			}
-		} else {
+    }
+    } else {
 			ygot.BuildEmptyTree(intfsObj)
 			intfObj, _ = intfsObj.NewInterface(ifName)
-		}
+    }
 
 		ygot.BuildEmptyTree(intfObj)
 
