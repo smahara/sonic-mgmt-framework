@@ -69,7 +69,7 @@ cust_to_oc_URI  = {
     'get_custom_stp': 'get_openconfig_spanning_tree_stp_rapid_pvst',
     'get_custom_stp_vlan': 'get_openconfig_spanning_tree_stp_rapid_pvst_vlan',
     'get_custom_stp_vlan_interfaces_interface':
-    'get_openconfig_spanning_tree_stp_rapid_pvst_vlan_interfaces_interface',
+    'get_openconfig_spanning_tree_stp_rapid_pvst_vlan',
     'get_custom_stp_counters': 'get_openconfig_spanning_tree_stp_rapid_pvst',
     'get_custom_stp_counters_vlan': 'get_openconfig_spanning_tree_stp_rapid_pvst_vlan',
     'get_custom_stp_inconsistentports': 'get_openconfig_spanning_tree_stp_rapid_pvst',
@@ -279,6 +279,16 @@ def run(args):
 
     c = openconfig_spanning_tree_client.Configuration()
     c.verify_ssl = False
+
+    import os
+    c.host = os.getenv('REST_API_ROOT', 'https://localhost:8443')
+    username = os.getenv('CLI_USER', None)
+    if username is not None:
+        import pwd
+        certdir = os.path.join(pwd.getpwnam(username).pw_dir, ".cert")
+        c.cert_file = os.path.join(certdir, "certificate.pem")
+        c.key_file  = os.path.join(certdir, "key.pem")
+
     aa = openconfig_spanning_tree_client.OpenconfigSpanningTreeApi(api_client=openconfig_spanning_tree_client.ApiClient(configuration=c))
 
     oc_func = None
