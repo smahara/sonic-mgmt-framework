@@ -120,7 +120,7 @@ module openconfig-qos-annot {
     deviation /oc-qos:qos/oc-qos:scheduler-policies/oc-qos:scheduler-policy/oc-qos:schedulers/oc-qos:scheduler/oc-qos:config/oc-qos:priority {
       deviate add {
         sonic-ext:field-name "type";
-        sonic-ext:field-transformer "priority_xfmr";
+        sonic-ext:field-transformer "qos_scheduler_priority_xfmr";
       }
     }
 
