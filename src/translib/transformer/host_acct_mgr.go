@@ -15,8 +15,10 @@ func roleToGroup(role string) []string {
 	switch role {
 	case "admin":
 		return []string{"admin", "sudo", "docker"}
-	default:
+	case "operator":
 		return []string{"operator", "docker"}
+	default:
+		return []string{}
 	}
 }
 // hostAccountCallObject returns a dbus.BusObject which can be used to call
