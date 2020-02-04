@@ -452,12 +452,28 @@ var intf_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error)
 			// allowed for create
 			tblList = append(tblList, "VXLAN_TUNNEL")
 		} else if inParams.oper == 3 || inParams.oper == 4 {
-		    _, errTmp := inParams.d.GetEntry(&db.TableSpec{Name:"VXLAN_TUNNEL"}, db.Key{Comp: []string{ifName}})
-		    if errTmp != nil {
-		    	tblList = append(tblList, "VXLAN_TUNNEL")
-		    } else {
-			    return tblList, tlerr.New("PUT / PATCH method not allowed to replace the existing Vxlan Interface %s", ifName)	
-		    }
+	      log.Info("VXLAN_TUNNEL testing ==> intfPathTmp ==> inParams.requestUri ==> ", inParams.requestUri)
+	      intfPathTmp, errIntf := getIntfUriPath(inParams.requestUri)
+	      if errIntf == nil && intfPathTmp != nil {
+	        log.Info("VXLAN_TUNNEL testing ==> intfPathTmp target string", intfPathTmp.Target)
+	        intfPathElem := intfPathTmp.Elem
+	        if len(intfPathElem) > 0 {
+	          targetIdx :=  len(intfPathElem)-1
+	          if intfPathElem[targetIdx].Name == "interfaces" || intfPathElem[targetIdx].Name == "interface" {
+	            log.Info("VXLAN_TUNNEL testing ==> TARGET FOUND ==>", intfPathElem[targetIdx].Name)
+	                _, errTmp := inParams.d.GetEntry(&db.TableSpec{Name:"VXLAN_TUNNEL"}, db.Key{Comp: []string{ifName}})
+	                if errTmp != nil {
+	                    tblList = append(tblList, "VXLAN_TUNNEL")
+	                } else {
+	                    return tblList, tlerr.New("PUT / PATCH method not allowed to replace the existing Vxlan Interface %s", ifName)
+	                }
+	          } else {
+	            log.Info("VXLAN_TUNNEL testing ==> target not found - target node", intfPathElem[targetIdx].Name)
+	          }
+	        }
+	      } else {
+	        log.Info("VXLAN_TUNNEL testing ==> TARGET err ==>", errIntf)
+	      }
 		}
 	} else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/config") {
 		if IntfTypeVxlan == intfType {
