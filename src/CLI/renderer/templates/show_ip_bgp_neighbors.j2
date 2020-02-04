@@ -23,7 +23,6 @@
             {% set vars = {'nbr_enabled': False} %}
             {% if vars.update({'nbr_enabled':n_state['enabled']}) %}{% endif %}
             {% if vars.nbr_enabled == True %}
-                {{-'  Administratively up\n'}}
             {% else %}
                 {{-'  Administratively shut down\n'}}
             {% endif %}
@@ -60,7 +59,7 @@
             {% set vars = {'hold_time': ""} %}
             {% set vars = {'kpa_intvl': ""} %}
             {% set vars = {'nego_time': ""} %}
-            {% set vars = {'min_adv_intvl': "0"} %}
+            {% set vars = {'min_adv_intvl': "30"} %}
             {% if vars.update({'hold_time':neighbor['timers']['state']['hold-time']}) %}{% endif %}
             {% if vars.update({'kpa_intvl':neighbor['timers']['state']['keepalive-interval']}) %}{% endif %}
             {% if vars.update({'nego_time':neighbor['timers']['state']['negotiated-hold-time']}) %}{% endif %}
@@ -75,25 +74,25 @@
             {% if vars.nbr_bfd == True %}
                 {{-'  BFD enabled\n'}}
             {% endif %}
-            {{-'  Neighbor capabilities:\n'}}
             {% if 'supported-capabilities' in n_state %}
+            {{-'  Neighbor capabilities:\n'}}
                 {% set supported_caps = n_state['supported-capabilities'] %}
                 {% for supported_cap in supported_caps %}
-                    {% if supported_cap == 'openconfig-bgp-types:ASN32_ADVERTISED_ONLY' %}
+                    {% if supported_cap == 'openconfig-bgp-ext:ASN32_ADVERTISED_ONLY' %}
                         {{-'    4 Byte AS: advertised'}}{{'\n'}}
-                    {% elif supported_cap == 'openconfig-bgp-types:ASN32_RECEIVED_ONLY' %}
+                    {% elif supported_cap == 'openconfig-bgp-ext:ASN32_RECEIVED_ONLY' %}
                         {{-'    4 Byte AS: received'}}{{'\n'}}
                     {% elif supported_cap == 'openconfig-bgp-types:ASN32' %}
                         {{-'    4 Byte AS: advertised and received'}}{{'\n'}}
                     {% elif supported_cap == 'openconfig-bgp-ext:ADD_PATHS_ADVERTISED_ONLY' %}
-                        {{-'    AddPath: advertise'}}{{'\n'}}
+                        {{-'    AddPath: advertised'}}{{'\n'}}
                     {% elif supported_cap == 'openconfig-bgp-ext:ADD_PATHS_RECEIVED_ONLY' %}
                         {{-'    AddPath: received'}}{{'\n'}}
-                    {% elif supported_cap == 'openconfig-bgp-ext:ADD_PATHS' %}
+                    {% elif supported_cap == 'openconfig-bgp-types:ADD_PATHS' %}
                         {{-'    AddPath: advertised and received'}}{{'\n'}}
-                    {% elif supported_cap == 'openconfig-bgp-types:ROUTE_REFRESH_ADVERTISED_ONLY' %}
+                    {% elif supported_cap == 'openconfig-bgp-ext:ROUTE_REFRESH_ADVERTISED_ONLY' %}
                         {{-'    Route refresh: advertised'}}{{'\n'}}
-                    {% elif supported_cap == 'openconfig-bgp-types:ROUTE_REFRESH_RECEIVED_ONLY' %}
+                    {% elif supported_cap == 'openconfig-bgp-ext:ROUTE_REFRESH_RECEIVED_ONLY' %}
                         {{-'    Route refresh: received'}}{{'\n'}}
                     {% elif supported_cap == 'openconfig-bgp-types:ROUTE_REFRESH' %}
                         {{-'    Route refresh: advertised and received'}}{{'\n'}}
@@ -101,9 +100,9 @@
                         {{-'    Graceful restart: advertised'}}{{'\n'}}
                     {% elif supported_cap == 'openconfig-bgp-ext:GRACEFUL_RESTART_RECEIVED_ONLY' %}
                         {{-'    Graceful restart: advertised'}}{{'\n'}}
-                    {% elif supported_cap == 'openconfig-bgp-ext:GRACEFUL_RESTART' %}
+                    {% elif supported_cap == 'openconfig-bgp-types:GRACEFUL_RESTART' %}
                         {{-'    Graceful restart: advertised and received'}}{{'\n'}}
-                    {% elif supported_cap == 'openconfig-bgp-ext:MPBGP' %}
+                    {% elif supported_cap == 'openconfig-bgp-types:MPBGP' %}
                         {{-'    Multiprotocol Extension: advertised and received'}}{{'\n'}}
                     {% elif supported_cap == 'openconfig-bgp-ext:MPBGP_RECEIVED_ONLY' %}
                         {{-'    Multiprotocol Extension: received'}}{{'\n'}}
@@ -234,11 +233,16 @@
             {{-'  Last reset '}}{{vars.reset_time}}{{', Last reset reason '}}{{vars.reset_reason|string}}{{'\n'}}
             {% if 'transport' in neighbor %}
                 {% set n_tp_state = neighbor['transport']['state'] %}
-                {{-'Local host: '}}{{n_tp_state['local-address']-}}
+                {{-'  Local host: '}}{{n_tp_state['local-address']-}}
                 {{-', Local port: '}}{{n_tp_state['local-port']}}{{'\n'}}
-                {{-'Foreign host: '}}{{n_tp_state['remote-address']-}}
+                {{-'  Foreign host: '}}{{n_tp_state['remote-address']-}}
                 {{-', Foreign port: '}}{{n_tp_state['remote-port']}}{{'\n'}}
             {% endif %}
+            {% set vars = {'conn_retry_time': "120"} %}
+            {% if 'connect-retry' in neighbor['timers']['state'] %}
+               {% if vars.update({'conn_retry_time':neighbor['timers']['state']['connect-retry']}) %}{% endif %}
+            {% endif %}
+               {{-'  BGP Connect Retry Timer in Seconds '}}{{vars.conn_retry_time}}{{'\n'}}
             {{ '\n' }}
         {% endif %}
         {% endfor %}
