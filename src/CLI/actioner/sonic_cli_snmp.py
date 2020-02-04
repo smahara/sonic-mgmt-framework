@@ -213,12 +213,33 @@ config_db.connect()
 
 aa = cc.ApiClient()
 
-def LevelsSecurity(snmpSecLevel):
-  """ Reverse lookup to convert SNMP security Level to CLI security option. """
-  for key, value in SecurityLevels.items():
-    if value == snmpSecLevel:
-      return key
-  return none
+def findKeyForTargetEntry(ipAddr):
+  keypath = cc.Path('/restconf/data/ietf-snmp:snmp/target')
+  response=aa.get(keypath)
+  if response.ok():
+    if 'ietf-snmp:target' in response.content.keys():
+      for key, table in response.content.items():
+        while len(table) > 0:
+          data = table.pop(0)
+          udp = data['udp']
+          if udp['ip'] == ipAddr:
+            return data['name']
+  return "None"
+
+def findNextKeyForTargetEntry(ipAddr):
+  key = "None"
+  index = 1
+  while 1:
+    key = "targetEntry{}".format(index)
+    index += 1
+    keypath = cc.Path('/restconf/data/ietf-snmp:snmp/target={name}', name=key)
+    response=aa.get(keypath)
+    if response.ok():
+      if len(response.content) == 0:
+        break
+    else:
+      break
+  return key
 
 def createYangHexStr(textString):
   """ Convert plain hex string into yang:hex-string """
@@ -228,23 +249,23 @@ def createYangHexStr(textString):
     data = data + ':' + textString[i:i+2]
     i = i + 2
   return data
- 
+
 def getEngineID():
   """ Construct SNMP engineID from the configured value or from scratch """
-  keypath = cc.Path('/restconf/data/ietf-snmp:snmp/engine/engine-id')  
+  keypath = cc.Path('/restconf/data/ietf-snmp:snmp/engine/engine-id')
   response=aa.get(keypath)
-  
+
   # First, try to get engineID from config_db  
   engineID = ''
   if response.ok():
     content = response.content
     if content.has_key('ietf-snmp:engine-id'):
       engineID = content['ietf-snmp:engine-id']
-    else:
+    elif content.has_key('engine-id'):
       engineID = content['engine-id']
     engineID = engineID.encode('ascii')
     engineID = engineID.translate(None, ':')
- 
+
   # ensure engineID is properly formatted before use. See RFC 3411
   try:
     # must be hex (base 16)
@@ -257,7 +278,7 @@ def getEngineID():
   except:
     # Whoops, not hex
     engineID = ''
-  
+
   # if the engineID is not configured, construct as per SnmpEngineID 
   # TEXTUAL-CONVENTION in RFC 3411 using the system MAC address.
   if len(engineID) == 0:
@@ -332,12 +353,12 @@ def invoke(func, args):
          order.append(key)
      tuples = [(key, datam[key]) for key in order]
      datam = OrderedDict(tuples) 
-     
+
    agentAddr = {}
    agentAddresses = getAgentAddresses()
    if len(agentAddresses) > 0:
      agentAddr['agentAddr'] = agentAddresses
-     
+
    response=aa.cli_not_implemented("global")      # Just to get the proper format to return data and status
    response.content = {}                          # This method is used extensively throughout
    response.status_code = 204
@@ -512,7 +533,7 @@ def invoke(func, args):
                   g['security-model'] = entry['security-model']
                   groups.append(g)
 
-    response=aa.cli_not_implemented("group")              # just to get the proper format ...
+    response=aa.cli_not_implemented("group")              # just to get the proper format
     response.content = {}
     response.status_code = 200
     response.content['group-member'] = sorted(groups, key=itemgetter('name', 'security-model', 'security-name'))
@@ -533,7 +554,7 @@ def invoke(func, args):
       key = (args[0], args[1])
       entry = { "securityModel" : args[2] }
       config_db.set_entry(SNMP_SERVER_GROUP_MEMBER, key, entry)
-      response=aa.cli_not_implemented("group")              # just to get the proper format ...
+      response=aa.cli_not_implemented("group")              # just to get the proper format
       response.content = {}
       response.status_code = 200
     ################ workaround ends #####################
@@ -543,7 +564,7 @@ def invoke(func, args):
       entry=collections.defaultdict(dict)
       entry["group"]=[{ "name" : args[0] }]
       response = aa.patch(keypath, entry)
-    
+
       path = '/restconf/data/ietf-snmp:snmp/vacm/group={name}/member={secName}/security-model'
       keypath = cc.Path(path, name=args[0], secName=args[1])
       entry= { "security-model" : [args[2]] }
@@ -559,7 +580,7 @@ def invoke(func, args):
       key = (args[0], args[1])
       entry = None                    # default is to delete the entry
       config_db.set_entry(SNMP_SERVER_GROUP_MEMBER, key, entry)
-      response=aa.cli_not_implemented("group")              # just to get the proper format ...
+      response=aa.cli_not_implemented("group")              # just to get the proper format
 
       response.content = {}
       response.status_code = 200
@@ -572,7 +593,7 @@ def invoke(func, args):
       print keypath
       response = aa.delete(keypath)
       print response.content
-    
+
       # only delete master key if all access and all member antries are removed.
       if response.ok():
         response = invoke('snmp_group_member_get', None)
@@ -624,7 +645,7 @@ def invoke(func, args):
                     g['notify-view'] = entry['notify-view']
                     groups.append(g)
 
-    response=aa.cli_not_implemented("group")              # just to get the proper format ...
+    response=aa.cli_not_implemented("group")              # just to get the proper format
     response.content = {}
     response.status_code = 204
     response.content['group-access'] = sorted(groups, key=itemgetter('name', 'model', 'security'))
@@ -731,7 +752,7 @@ def invoke(func, args):
   elif func == 'snmp_user_get':
     keypath = cc.Path('/restconf/data/ietf-snmp:snmp/usm/local/user')
     response=aa.get(keypath)
-    
+
     users = []
     if response.ok():
       if 'ietf-snmp:user' in response.content.keys():
@@ -746,7 +767,7 @@ def invoke(func, args):
               if grpResponse['security-name'] == u['username'] and grpResponse['security-model'] == 'usm':
                 u['group'] = grpResponse['name']
                 break
-            
+
             auth = row['auth']
             if auth.has_key('md5'):
               u['auth'] = 'md5'
@@ -760,7 +781,7 @@ def invoke(func, args):
             value = value.translate(None, ':')
             if value == '00000000000000000000000000000000':
               u['auth'] = 'None'
-            
+
             u['priv'] = 'None'
             if row.has_key('priv'):
               priv = row['priv']
@@ -779,9 +800,8 @@ def invoke(func, args):
               if u['priv'] == 'aes':
                 u['priv'] = 'aes-128'
 
-            users.append(u)            
+            users.append(u)
       response.content = {'user' : users}
-      
     return response
 
   elif func == 'snmp_user_add':
@@ -905,8 +925,8 @@ def invoke(func, args):
             h = {}
             h['target'] = data['target-params']
             udp = data['udp']
-            h['ipaddress'] = udp['ip']
-            h['ip6'] = getIPType(h['target'])
+            h['ipaddr'] = udp['ip']
+            h['ip6'] = getIPType(h['ipaddr'])
             for key, value in data.items():
               if key == 'target-params':
                 path = cc.Path('/restconf/data/ietf-snmp:snmp/target-params={name}', name=data[key])
@@ -918,7 +938,7 @@ def invoke(func, args):
                       entry = data.pop(0)
                       if 'v1' in entry:
                         security = entry['v1']
-                        h['version'] = '1'
+                        h['version'] = 'v1'
                         h['security-name'] = security['security-name']
                       elif 'v2c' in entry:
                         security = entry['v2c']
@@ -952,17 +972,21 @@ def invoke(func, args):
     if len(hosts4_c) == 0 and len(hosts6_c) == 0 and len(hosts4_u) == 0 and len(hosts6_u) == 0:
       return None
     else:
-      response.content = { "community" : sorted(hosts4_c, key=lambda i: ipaddress.ip_address(i['target'])) + sorted(hosts6_c, key=lambda i: ipaddress.ip_address(i['target'])), 
-                           "user"      : sorted(hosts4_u, key=lambda i: ipaddress.ip_address(i['target'])) + sorted(hosts6_u, key=lambda i: ipaddress.ip_address(i['target'])) }
+      response.content = { "community" : sorted(hosts4_c, key=lambda i: ipaddress.ip_address(i['ipaddr'])) + sorted(hosts6_c, key=lambda i: ipaddress.ip_address(i['ipaddr'])),
+                           "user"      : sorted(hosts4_u, key=lambda i: ipaddress.ip_address(i['ipaddr'])) + sorted(hosts6_u, key=lambda i: ipaddress.ip_address(i['ipaddr'])) }
     return response
 
   # Add a host.
   elif func == 'snmp_host_add':
+    key = findKeyForTargetEntry(args[0])
+    if key == 'None':
+      key = findNextKeyForTargetEntry(args[0])
+
     type = 'trapNotify'
     if 'user' == args[1]:
       secModel = SecurityModels['v3']
     else:
-      secModel = SecurityModels['v1']
+      secModel = SecurityModels['v2c']                      # v1 is not supported, v2c should be default
 
     response = invoke('snmp_host_delete', [args[0]])        # delete user config if it already exists
     secLevel = SecurityLevels['noauth']
@@ -986,10 +1010,10 @@ def invoke(func, args):
       secModel = SecurityModels['v2c']
 
     targetEntry=collections.defaultdict(dict)
-    targetEntry["target"]=[{ "name": args[0],
+    targetEntry["target"]=[{ "name": key,
                              "timeout": 100*int(params['timeout']),
                              "retries": int(params['retries']),
-                             "target-params": args[0],
+                             "target-params": key,
                              "tag": [ type ],
                              "udp" : { "ip": args[0], "port": 162}
                              }]
@@ -1000,7 +1024,7 @@ def invoke(func, args):
       security = { "security-name": args[2]}
 
     targetParams=collections.defaultdict(dict)
-    targetParams["target-params"]=[{ "name": args[0],
+    targetParams["target-params"]=[{ "name": key,
                                      secModel : security }]
 
 
@@ -1017,16 +1041,13 @@ def invoke(func, args):
 
   # Remove a host.
   elif func == 'snmp_host_delete':
-    keypath = cc.Path('/restconf/data/ietf-snmp:snmp/target={name}', name=args[0])
+    key = findKeyForTargetEntry(args[0])
+    keypath = cc.Path('/restconf/data/ietf-snmp:snmp/target={name}', name=key)
     response = aa.delete(keypath)
     if response.ok():
-      keypath = cc.Path('/restconf/data/ietf-snmp:snmp/target-params={name}', name=args[0])
+      keypath = cc.Path('/restconf/data/ietf-snmp:snmp/target-params={name}', name=key)
       response = aa.delete(keypath)
     return response
-    if response.ok():
-      return None
-    else:
-      return response
 
   else:
       print("%Error: %func not implemented "+func)

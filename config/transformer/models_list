@@ -4,6 +4,7 @@ openconfig-acl-annot.yang
 openconfig-interfaces.yang
 openconfig-if-ip.yang
 openconfig-if-ethernet.yang
+openconfig-if-ethernet-ext.yang
 openconfig-interfaces-annot.yang
 openconfig-ztp.yang
 openconfig-ztp-annot.yang
@@ -40,6 +41,7 @@ ietf-snmp-tsm.yang
 ietf-snmp-usm.yang
 ietf-snmp-vacm.yang
 ietf-snmp-annot.yang
+ietf-snmp-ext.yang
 openconfig-bfd.yang
 openconfig-bfd-ext.yang
 openconfig-bfd-annot.yang
@@ -48,3 +50,7 @@ openconfig-mclag.yang
 openconfig-mclag-annot.yang
 sonic-bgp-clear.yang
 sonic-bgp-clear-annot.yang
+sonic-bgp-show.yang
+sonic-bgp-show-annot.yang
+sonic-ip-show.yang
+sonic-ip-show-annot.yang

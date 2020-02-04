@@ -7,10 +7,19 @@ module sonic-mgmt-interface-annot {
 
     import sonic-extensions { prefix sonic-ext; }
     import sonic-mgmt-interface { prefix smgmt-intf; }
+    import sonic-interface { prefix sintf; }
 
     deviation /smgmt-intf:renew_dhcp_lease {
         deviate add {
 	    sonic-ext:rpc-callback "rpc_renew_dhcp_lease";
         }
     }
+
+
+    deviation /smgmt-intf:sonic-mgmt-interface/smgmt-intf:MGMT_INTF_TABLE {
+        deviate add {
+            sonic-ext:db-name "APPL_DB";
+        }
+    }
+
 }
