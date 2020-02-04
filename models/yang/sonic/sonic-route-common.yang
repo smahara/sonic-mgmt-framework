@@ -53,13 +53,9 @@ module sonic-route-common {
                     type string;
                 }
 
-                leaf-list route_map {
+                leaf route_map {
                     type leafref {
                         path "/srmap:sonic-route-map/srmap:ROUTE_MAP_SET/srmap:ROUTE_MAP_SET_LIST/srmap:name";
-                    }
-                    must "(count(current()) = 1)" {
-                        error-app-tag "max-allowed-route-map-reached";
-                        error-message "Only one route-map can be associated with neighbor.";
                     }
                 }
 
