@@ -159,7 +159,6 @@ var DbToYang_sys_memory_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) err
     getSystemMemory(&jsonsystem, sysObj.Memory.State)
     return err;
 }
-
 func getSystemCpu (idx int, cpu Cpu, syscpus *ocbinds.OpenconfigSystem_System_Cpus) {
     log.Infof("getSystemCpu Entry idx ", idx)
 
@@ -176,8 +175,8 @@ func getSystemCpu (idx int, cpu Cpu, syscpus *ocbinds.OpenconfigSystem_System_Cp
         log.Infof("syscpus.NewCpu failed")
         return
     }
-    ygot.BuildEmptyTree(syscpu)
-    syscpu.Index = &index
+   ygot.BuildEmptyTree(syscpu)
+   syscpu.Index = &index
     var cpucur CpuState
     if idx == 0 {
         cpucur.user = uint8((cpu.User/4)/sysinfo.Uptime)
@@ -222,6 +221,9 @@ var DbToYang_sys_cpus_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) error
 
     path := NewPathInfo(inParams.uri) 
     val := path.Vars["index"]
+    for k := range sysObj.Cpus.Cpu {
+	delete(sysObj.Cpus.Cpu,k)
+    }
     if len(val) != 0 {
         cpu, _ := strconv.Atoi(val)
         log.Info("Cpu id: ", cpu, ", max is ", len(jsonsystem.Cpus))
