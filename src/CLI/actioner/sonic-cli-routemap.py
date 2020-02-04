@@ -76,10 +76,8 @@ def invoke_api(func, args=[]):
             keypath = cc.Path('/restconf/data/openconfig-routing-policy:routing-policy/policy-definitions/policy-definition={name}',
             name=args[0])
             return api.delete(keypath)
-        elif attr == 'openconfig_routing_policy_routing_policy_policy_definitions_policy_definition_statements_statement':
-            keypath = cc.Path('/restconf/data/openconfig-routing-policy:routing-policy/policy-definitions/policy-definition={name}/statements/statement={name1}',
-            name=args[0], name1=args[1])
-            return api.delete(keypath)
+        keypath = cc.Path(uri, name=args[0], name1=args[1])
+        return api.delete(keypath)
 
     elif op == 'get':
 
