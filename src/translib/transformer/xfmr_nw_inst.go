@@ -1,13 +1,13 @@
 package transformer
 
 import (
-	"translib/db"
+    "translib/db"
     "translib/tlerr"
     log "github.com/golang/glog"
 )
 
 func init() {
-	XlateFuncBind("network_instance_post_xfmr", network_instance_post_xfmr)
+    XlateFuncBind("network_instance_post_xfmr", network_instance_post_xfmr)
 }
 
 var nw_inst_del_not_allowed_map = map[string]bool {
@@ -120,7 +120,7 @@ var nw_inst_del_not_allowed_map = map[string]bool {
 
 var network_instance_post_xfmr PostXfmrFunc = func(inParams XfmrParams) (map[string]map[string]db.Value, error) {
     var err error
-	retDbDataMap := (*inParams.dbDataMap)[inParams.curDb]
+    retDbDataMap := (*inParams.dbDataMap)[inParams.curDb]
 
     if inParams.oper == DELETE {
         xpath, _ := XfmrRemoveXPATHPredicates(inParams.uri)
@@ -133,5 +133,5 @@ var network_instance_post_xfmr PostXfmrFunc = func(inParams XfmrParams) (map[str
         }
     }
 
-	return retDbDataMap, err
+    return retDbDataMap, err
 }
