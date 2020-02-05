@@ -384,11 +384,11 @@ func (mb *muxBuilder) finish(auth UserAuth) {
 	router.Methods("GET").Path("/ui").
 		Handler(http.RedirectHandler("/ui/index.html", 301))
 
-	
 	//Allow POST for user/pass auth and or GET for cert auth.
-	router.Methods("POST","GET").Path("/authenticate").Handler(withMiddleware(http.HandlerFunc(Authenticate), "jwtAuthHandler", auth))
-	router.Methods("POST","GET").Path("/refresh").Handler(withMiddleware(http.HandlerFunc(Refresh), "jwtRefreshHandler", auth))
-	
+	router.Methods("POST","GET").Path("/authenticate").Handler(
+		withAuthContextMiddleware(http.HandlerFunc(Authenticate), "jwtAuthHandler", auth))
+	router.Methods("POST","GET").Path("/refresh").Handler(
+		withAuthContextMiddleware(http.HandlerFunc(Refresh), "jwtRefreshHandler", auth))	
 
 	// To download yang models
 	ydirHandler := http.FileServer(http.Dir(translib.GetYangPath()))
@@ -498,6 +498,19 @@ func authMiddleware(inner http.Handler, auth UserAuth) http.Handler {
 			inner.ServeHTTP(w, r)
 		}
 	})
+}
+
+// withAuthContextMiddleware adds UserAuth to request's context.
+// It implicitly adds loggingMiddleware too. Used by JWT login handlers
+func withAuthContextMiddleware(inner http.Handler, name string, auth UserAuth) http.Handler {
+	return loggingMiddleware(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			rc, r := GetContext(r)
+			rc.ClientAuth = auth
+
+			inner.ServeHTTP(w, r)
+		}),
+		name)
 }
 
 // notFound responds with HTTP 404 status

@@ -23,8 +23,8 @@ module sonic-route-map {
         prefix srpolsets;
     }
 
-    import sonic-vlan-interface {
-        prefix svlanint;
+    import sonic-vlan {
+        prefix svlan;
     }
 
     organization
@@ -64,7 +64,7 @@ module sonic-route-map {
                 path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
             }
             type leafref {
-                path "/svlanint:sonic-vlan-interface/svlanint:VLAN_INTERFACE/svlanint:VLAN_INTERFACE_LIST/svlanint:vlanName";
+                path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
             }
         }
     }
@@ -168,25 +168,19 @@ module sonic-route-map {
                             path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
                         }
                         type leafref {
-                            path "/svlanint:sonic-vlan-interface/svlanint:VLAN_INTERFACE/svlanint:VLAN_INTERFACE_LIST/svlanint:vlanName";
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
                         }
                     }
                     description
-                        "Match neighbor IP or interface.";
-                    must "(count(current()) = 1)" {
-                        error-app-tag "max-allowed-match-nbr-reached";
-                        error-message "Only one match neighbor can be configured.";
-                    }
+                        "IP addresse or interface for match operation.";
+                    max-elements 1;
                 }
 
                 leaf-list match_tag {
                     type tag-type;
                     description
-                        "Value of the tag set member";
-                    must "(count(current()) = 1)" {
-                        error-app-tag "max-allowed-match-tag-reached";
-                        error-message "Only one match tag can be configured.";
-                    }
+                        "Value of the tag match member";
+                    max-elements 1;
                 }
 
                 leaf match_med{
@@ -266,6 +260,16 @@ module sonic-route-map {
                     type leafref {
                         path "/srpolsets:sonic-routing-policy-sets/srpolsets:EXTENDED_COMMUNITY_SET/srpolsets:EXTENDED_COMMUNITY_SET_LIST/srpolsets:name";
                     }
+                }
+
+                leaf set_tag {
+                    type tag-type;
+                    description
+                        "Value of the tag set member";
+                }
+
+                leaf set_weight{
+                    type uint32;
                 }
 
             }

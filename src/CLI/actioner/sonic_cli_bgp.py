@@ -173,7 +173,7 @@ def generate_show_bgp_routes(args):
                show_cli_output("show_ip_bgp_routes_rpc.j2", d)
          else:
             print response.error_message()
-            exit(1)
+            return 1
 
       else:
          keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/global', name=vrf, identifier=IDENTIFIER,name1=NAME1)
@@ -1122,10 +1122,10 @@ def invoke_api(func, args=[]):
         body = { "openconfig-bgp-ext:enabled": True if args[2] == 'True' else False }
         return api.patch(keypath, body)
     elif attr == 'openconfig_network_instance_network_instances_network_instance_table_connections_table_connection_config_import_policy':
-        keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/table-connections/table-connection={src_protocol},{dst_protocol},{address_family}/config/import-policy',
+        keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/table-connections/table-connection={src_protocol},{dst_protocol},{address_family}/config/openconfig-network-instance-ext:import-policy',
                 name=args[0], src_protocol= "STATIC" if 'static' == args[2] else "DIRECTLY_CONNECTED" if 'connected' == args[2] else 'OSPF', dst_protocol=IDENTIFIER, address_family=args[1].split('_',1)[0])
         if op == 'patch':
-            body = { "openconfig-network-instance:import-policy" : [ args[3] ] }
+            body = { "openconfig-network-instance-ext:import-policy" : [ args[3] ] }
             return api.patch(keypath, body)
         else:
             return api.delete(keypath)
@@ -1185,16 +1185,16 @@ def invoke_api(func, args=[]):
 
         elif attr == 'openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_apply_policy_config_import_policy':
             # openconfig_network_instance3764031561
-            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/neighbors/neighbor={neighbor_address}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/import-policy',
+            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/neighbors/neighbor={neighbor_address}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/openconfig-bgp-ext:import-policy',
                 name=args[0], identifier=IDENTIFIER, name1=NAME1, neighbor_address=args[1], afi_safi_name=args[2])
             if op == OCEXTPREFIX_PATCH:
-                body = { "openconfig-network-instance:import-policy": [ args[3] ] }
+                body = { "openconfig-bgp-ext:import-policy": [ args[3] ] }
         elif attr == 'openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_apply_policy_config_export_policy':
             # openconfig_network_instance1837635724
-            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/neighbors/neighbor={neighbor_address}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/export-policy',
+            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/neighbors/neighbor={neighbor_address}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/openconfig-bgp-ext:export-policy',
                 name=args[0], identifier=IDENTIFIER, name1=NAME1, neighbor_address=args[1], afi_safi_name=args[2])
             if op == OCEXTPREFIX_PATCH:
-                body = { "openconfig-network-instance:export-policy": [ args[3] ] }
+                body = { "openconfig-bgp-ext:export-policy": [ args[3] ] }
         elif attr == 'openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config':
             # openconfig_network_instance3828573403
             keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/neighbors/neighbor={neighbor_address}/afi-safis/afi-safi={afi_safi_name}/ipv4-unicast/prefix-limit/config',
@@ -1327,16 +1327,16 @@ def invoke_api(func, args=[]):
 
         elif attr == 'openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_apply_policy_config_import_policy':
             # openconfig_network_instance1779097864
-            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/peer-groups/peer-group={peer_group_name}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/import-policy',
+            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/peer-groups/peer-group={peer_group_name}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/openconfig-bgp-ext:import-policy',
                 name=args[0], identifier=IDENTIFIER, name1=NAME1, peer_group_name=args[1], afi_safi_name=args[2])
             if op == OCEXTPREFIX_PATCH:
-                body = { "openconfig-network-instance:import-policy":  [ args[3] ] }
+                body = { "openconfig-bgp-ext::import-policy":  [ args[3] ] }
         elif attr == 'openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_apply_policy_config_export_policy':
             # openconfig_network_instance251836598
-            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/peer-groups/peer-group={peer_group_name}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/export-policy',
+            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/peer-groups/peer-group={peer_group_name}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/openconfig-bgp-ext:export-policy',
                 name=args[0], identifier=IDENTIFIER, name1=NAME1, peer_group_name=args[1], afi_safi_name=args[2])
             if op == OCEXTPREFIX_PATCH:
-                body = { "openconfig-network-instance:export-policy": [ args[3] ] }
+                body = { "openconfig-bgp-ext:export-policy": [ args[3] ] }
         elif attr == 'openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_ipv4_unicast_config_prefix_limit_config':
             # openconfig_network_instance3096500951
             keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/peer-groups/peer-group={peer_group_name}/afi-safis/afi-safi={afi_safi_name}/ipv4-unicast/prefix-limit/config',
@@ -1686,7 +1686,7 @@ def preprocess_bgp_nbrs(iptype, nbrs):
     un_lnbrs = sorted(tup, key=getIntfId)
     tup = un_nbrs
     un_nbr = sorted(tup, key=getIntfId)
-     
+
     un_enbrs.extend(un_pnbrs)
     un_enbrs.extend(un_vnbrs)
     un_enbrs.extend(un_lnbrs)
@@ -1811,10 +1811,10 @@ def run(func, args):
                 print(api_response)
                 if api_response is None:
                     print("Failed")
-                    return
+                    return 1
         else:
             print response.error_message()
-            return
+            return 1
 
 if __name__ == '__main__':
 

@@ -69,7 +69,7 @@ cust_to_oc_URI  = {
     'get_custom_stp': 'get_openconfig_spanning_tree_stp_rapid_pvst',
     'get_custom_stp_vlan': 'get_openconfig_spanning_tree_stp_rapid_pvst_vlan',
     'get_custom_stp_vlan_interfaces_interface':
-    'get_openconfig_spanning_tree_stp_rapid_pvst_vlan_interfaces_interface',
+    'get_openconfig_spanning_tree_stp_rapid_pvst_vlan',
     'get_custom_stp_counters': 'get_openconfig_spanning_tree_stp_rapid_pvst',
     'get_custom_stp_counters_vlan': 'get_openconfig_spanning_tree_stp_rapid_pvst_vlan',
     'get_custom_stp_inconsistentports': 'get_openconfig_spanning_tree_stp_rapid_pvst',
@@ -264,14 +264,14 @@ def stp_mode_get(aa):
            stp_mode = "RAPID_PVST"
 
     except ApiException as e:
-        error_body = json.loads(e.body)
+        error_body = get_error_json(e)
         if "ietf-restconf:errors" in error_body and 'error' in error_body["ietf-restconf:errors"]:
             error = error_body["ietf-restconf:errors"]["error"][0]
             if "error-message" in error and error["error-message"]:
                 print "%Error: "+ error["error-message"] + " or STP not enabled"
                 return stp_resp,stp_mode
             
-        print "%Error: Transaction Failure"
+        print "%Error: Operation failed"
 
     return stp_resp,stp_mode
 
@@ -365,16 +365,25 @@ def run(args):
             return
 
     except ApiException as e:
-        error_body = json.loads(e.body)
+        error_body = get_error_json(e)
         if "ietf-restconf:errors" in error_body and 'error' in error_body["ietf-restconf:errors"]:
             error = error_body["ietf-restconf:errors"]["error"][0]
             if "error-message" in error and error["error-message"]:
                 print "%Error: "+ error["error-message"]
                 return
             
-        print "%Error: Transaction Failure"
+        print "%Error: Operation failed"
 
     return
+
+# Resolve error json from an ApiException
+def get_error_json(e):
+    if not hasattr(e, 'body') or e.body is None:
+        return {}
+    try:
+        return json.loads(e.body)
+    except ValueError:
+        return { 'error': e.body }
 
 if __name__ == '__main__':
 
