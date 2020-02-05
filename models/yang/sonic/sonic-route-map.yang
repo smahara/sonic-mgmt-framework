@@ -239,6 +239,10 @@ module sonic-route-map {
                 leaf set_next_hop{
                     type string;
                 }
+                 
+                leaf set_prefer_global {
+                    type boolean;
+                } 
 
                 leaf set_repeat_asn{
                     type uint8;
@@ -246,6 +250,10 @@ module sonic-route-map {
 
                 leaf set_asn{
                     type uint32;
+                }
+ 
+                leaf set_asn_list{
+                    type string;
                 }
 
                 leaf-list set_community_inline {
