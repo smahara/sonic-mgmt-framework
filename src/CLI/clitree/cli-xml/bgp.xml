@@ -29,7 +29,7 @@ limitations under the License.
     <PARAM name="bgp subcommands" help="BGP Subcommands" ptype="SUBCOMMAND" mode="switch" optional="true">
        <MACRO name="IP_BGP_SUB_CMDS" arg=""></MACRO>
        <PARAM name="vrf" help="BGP VRF" mode="subcommand" ptype="SUBCOMMAND" optional="true">
-         <PARAM name="vrf-name" help="VRF Name" ptype="STRING" default="default">
+         <PARAM name="vrf-name" help="VRF Name" ptype="STRING_15" default="default">
            <PARAM name="ip subcommands" help="IP subcommands" ptype="SUBCOMMAND" mode="switch" optional="true">
            <MACRO name="IP_BGP_SUB_CMDS" arg=""></MACRO>
            </PARAM>
@@ -75,7 +75,7 @@ limitations under the License.
         <MACRO name="CLEAR_IPV6_BGP_ADDR_OPTIONS_SUB_CMDS" arg=""></MACRO>
         <MACRO name="CLEAR_IP_BGP_SUB_CMDS" arg=""></MACRO>
         <PARAM name="vrf" help="BGP VRF" ptype="SUBCOMMAND" mode="subcommand" optional="true">
-         <PARAM name="vrf-name" help="VRF Name" ptype="STRING" default="default">
+         <PARAM name="vrf-name" help="VRF Name" ptype="STRING_15" default="default">
            <PARAM name="ip_subcommands" help="IP subcommands" ptype="SUBCOMMAND" mode="switch">
                <MACRO name="CLEAR_BGP_COMMON_OPTIONS_SUB_CMDS" arg=""></MACRO>
                <MACRO name="CLEAR_IPV4_BGP_ADDR_OPTIONS_SUB_CMDS" arg=""></MACRO>
@@ -94,7 +94,7 @@ limitations under the License.
     <PARAM name="bgp" help="Border Gateway protocol (BGP)" mode="subcommand" ptype="SUBCOMMAND">
       <PARAM name="as-num-dot" help="Autonomous system number" ptype="RANGE_1_4294967295">
         <PARAM name="vrf" help="VRF Instance" ptype="SUBCOMMAND" mode="subcommand" optional="true">
-          <PARAM name="vrf-name" help="Name of VRF (Max size 32, prefixed by Vrf)" ptype="STRING_32" default="default"/>
+          <PARAM name="vrf-name" help="Name of VRF (Max size 15, prefixed by Vrf)" ptype="STRING_15" default="default"/>
         </PARAM>
       </PARAM>
     </PARAM>
@@ -103,7 +103,7 @@ limitations under the License.
   <COMMAND name="no router" help="Border Gateway protocol (BGP)">
     <PARAM name="bgp" help="Border Gateway protocol (BGP)" mode="subcommand" ptype="SUBCOMMAND">
       <PARAM name="vrf" help="VRF Instance" ptype="SUBCOMMAND" mode="subcommand" optional="true">
-        <PARAM name="vrf-name" help="VRF Name" ptype="STRING" default="default"/>
+        <PARAM name="vrf-name" help="VRF Name" ptype="STRING_15" default="default"/>
       </PARAM>
     </PARAM>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_global_config ${vrf-name}</ACTION>
