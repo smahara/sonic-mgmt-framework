@@ -232,7 +232,7 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
             }
 
         }
-    } else if targetUriPath == "/openconfig-lldp:lldp/interfaces/interface" {
+    } else if ((targetUriPath == "/openconfig-lldp:lldp/interfaces/interface") || (targetUriPath == "/openconfig-lldp:lldp/interfaces/interface/neighbors")) {
         intfObj := lldpIntfObj.Interfaces
         ygot.BuildEmptyTree(intfObj)
         if intfObj.Interface != nil && len(intfObj.Interface) > 0 {
@@ -244,6 +244,12 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
                 app.getLldpNeighInfoFromInternalMap(&ifname, ifInfo)
 
                 if *app.ygotTarget == intfObj.Interface[ifname] {
+                    payload, err = dumpIetfJson(intfObj, true)
+                    if err != nil {
+                        log.Info("Creation of subinterface subtree failed!")
+                        return GetResponse{Payload: payload, ErrSrc: AppErr}, err
+                    }
+                } else if *app.ygotTarget == intfObj.Interface[ifname].Neighbors {
                     payload, err = dumpIetfJson(intfObj, true)
                     if err != nil {
                         log.Info("Creation of subinterface subtree failed!")
