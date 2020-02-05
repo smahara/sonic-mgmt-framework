@@ -771,7 +771,6 @@ module openconfig-bgp-ext {
   }
   grouping bgp-ext-neighbor-group-state { 
 
-      uses bgp-ext-neighbor-group-config;
   
       leaf connections-dropped {
           type oc-yang:counter64;
@@ -1993,6 +1992,7 @@ deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:p
   }
 
   augment /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:state {
+      uses bgp-ext-neighbor-group-config;
       uses bgp-ext-neighbor-group-state;
   }
 
@@ -2015,6 +2015,7 @@ deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:p
 
   augment /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:state {
       uses bgp-ext-peer-group-config;
+      uses bgp-ext-neighbor-group-config;
       uses bgp-ext-neighbor-group-state;
   }
 
