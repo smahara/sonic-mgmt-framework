@@ -79,10 +79,10 @@ def get_egress_port(macAddr, vlanName):
 def build_vrf_list():
     aa = cc.ApiClient()
 
-    tIntf     = ("/restconf/data/sonic-interface:sonic-interface/INTERFACE/", "sonic-interface:INTERFACE", "INTERFACE_LIST")
-    tVlanIntf = ("/restconf/data/sonic-interface:sonic-vlan-interface/VLAN_INTERFACE/", "sonic-vlan-interface:VLAN_INTERFACE", "VLAN_INTERFACE_LIST")
-    tPortChannelIntf = ("/restconf/data/sonic-interface:sonic-portchannel-interface/PORTCHANNEL_INTERFACE/", "sonic-portchannel-interface:PORTCHANNEL_INTERFACE", "PORTCHANNEL_INTERFACE_LIST" )
-    tMgmtIntf = ("/restconf/data/sonic-interface:sonic-mgmt-interface/MGMT_INTERFACE/", "sonic-mgmt-interface:MGMT_INTERFACE", "MGMT_INTERFACE_LIST")
+    tIntf = ("/restconf/data/sonic-interface:sonic-interface/INTERFACE/", "sonic-interface:INTERFACE", "INTERFACE_LIST","portname")
+    tVlanIntf = ("/restconf/data/sonic-vlan-interface:sonic-vlan-interface/VLAN_INTERFACE/", "sonic-vlan-interface:VLAN_INTERFACE", "VLAN_INTERFACE_LIST","vlanName")
+    tPortChannelIntf = ("/restconf/data/sonic-portchannel-interface:sonic-portchannel-interface/PORTCHANNEL_INTERFACE/", "sonic-portchannel-interface:PORTCHANNEL_INTERFACE", "PORTCHANNEL_INTERFACE_LIST", "pch_name")
+    tMgmtIntf = ("/restconf/data/sonic-mgmt-interface:sonic-mgmt-interface/MGMT_INTERFACE/", "sonic-mgmt-interface:MGMT_INTERFACE", "MGMT_INTERFACE_LIST", "portname")
 
     requests = [tIntf, tVlanIntf, tPortChannelIntf, tMgmtIntf]
 
@@ -102,10 +102,11 @@ def build_vrf_list():
                 continue
 
             for intf in intfsList:
-                portName = intf.get('portname')
+                portName = intf.get(request[3])
                 vrfName = intf.get('vrf_name')
                 if len(portName) > 0 and len(vrfName) > 0:
                     vrfDict[portName] = vrfName
+
         except Exception as e:
             print "Error in getting interfaces: ", e
 
