@@ -43,26 +43,31 @@ limitations under the License.
            iptype="ipv4"&#xA;
         fi&#xA;
         if test -n "${summary}"; then&#xA;
-           python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_ip_bgp_summary show_ip_bgp_summary.j2 ${vrf-name} $iptype ${__full_line}&#xA;
+           python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_ip_bgp_summary show_ip_bgp_summary.j2 ${vrf-name} $iptype&#xA;
         elif test -n "${prefix}"; then&#xA;
-           python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_show_bgp_prefix ${__full_line}&#xA;
+           python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_show_bgp_prefix prefix ${prefix} ${__full_line}&#xA;
         elif test -n "${peer-group}"; then&#xA;
-	   if test -n "${peer-group-name}"; then&#xA;
+	       if test -n "${peer-group-name}"; then&#xA;
               python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_show_bgp_peer_group ${__full_line}&#xA;
-	   else&#xA;
+	       else&#xA;
               python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_show_bgp_peer_group_all ${__full_line}&#xA;
-	   fi&#xA;
+	       fi&#xA;
         elif test -n "${neighbors}"; then&#xA;
            if test -n "${neighbor-subcommands}"; then&#xA;
               python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_show_bgp ${__full_line}&#xA;
            else&#xA;
-              python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_ip_bgp_neighbors show_ip_bgp_neighbors.j2 ${vrf-name} $iptype ${neighbor-ip}&#xA;
+              if test -n "${neighbor-ip}"; then&#xA;
+                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_ip_bgp_neighbors_neighborip show_ip_bgp_neighbors.j2 ${vrf-name} $iptype ${neighbor-ip} ${__full_line}&#xA;
+	          else&#xA;
+                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_ip_bgp_neighbors show_ip_bgp_neighbors.j2 ${vrf-name} $iptype ${__full_line}&#xA;
+              fi&#xA;
            fi&#xA;
         else&#xA;
            python $SONIC_CLI_ROOT/sonic_cli_bgp.py get_show_bgp ${__full_line}&#xA;
         fi&#xA;
   </ACTION>
   </COMMAND>
+  <COMMAND name="clear bgp" help="Clear BGP"/>
   <COMMAND name="clear ip bgp" help="Clear BGP">
     <PARAM name="clear_bgp_subcommands" help="BGP Subcommands" ptype="SUBCOMMAND" mode="switch">
         <MACRO name="CLEAR_BGP_COMMON_OPTIONS_SUB_CMDS" arg=""></MACRO>
@@ -87,9 +92,9 @@ limitations under the License.
 <VIEW name="configure-view">
   <COMMAND name="router" help="Router mode" view="configure-router-bgp-view" viewid="instance=${as-num-dot};vrf-name=${vrf-name}">
     <PARAM name="bgp" help="Border Gateway protocol (BGP)" mode="subcommand" ptype="SUBCOMMAND">
-      <PARAM name="as-num-dot" help="Autonomous system number" ptype="RANGE_1_4294967295" view="configure-router-bgp-view" viewid="instance=${as-num-dot};vrf-name=${vrf-name}">
+      <PARAM name="as-num-dot" help="Autonomous system number" ptype="RANGE_1_4294967295">
         <PARAM name="vrf" help="VRF Instance" ptype="SUBCOMMAND" mode="subcommand" optional="true">
-          <PARAM name="vrf-name" help="Name of VRF (Max size 32, prefixed by Vrf)" ptype="STRING_32" view="configure-router-bgp-view" default="default"/>
+          <PARAM name="vrf-name" help="Name of VRF (Max size 32, prefixed by Vrf)" ptype="STRING_32" default="default"/>
         </PARAM>
       </PARAM>
     </PARAM>
@@ -98,7 +103,7 @@ limitations under the License.
   <COMMAND name="no router" help="Border Gateway protocol (BGP)">
     <PARAM name="bgp" help="Border Gateway protocol (BGP)" mode="subcommand" ptype="SUBCOMMAND">
       <PARAM name="vrf" help="VRF Instance" ptype="SUBCOMMAND" mode="subcommand" optional="true">
-        <PARAM name="vrf-name" help="VRF Name" ptype="STRING" view="configure-router-bgp-view" default="default"/>
+        <PARAM name="vrf-name" help="VRF Name" ptype="STRING" default="default"/>
       </PARAM>
     </PARAM>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_global_config ${vrf-name}</ACTION>
@@ -174,14 +179,14 @@ limitations under the License.
       <PARAM name="administrative" help="Administratively applied,  for an indefinite period" ptype="SUBCOMMAND" mode="subcommand"/>
     </PARAM>
     <PARAM name="maxmedval" help="Max MED value to be used" ptype="RANGE_0_4294967295" optional="true"/>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_max_med_config ${vrf-name} ${maxmedopts} ${stime} ${maxmedval}&#xA;
-             if test -z "${maxmedval}" ; then&#xA;
+    <ACTION> if test -z "${maxmedval}" ; then&#xA;
                  if test "${maxmedopts}" = "on-startup" ; then&#xA;
                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_max_med_config_max_med_val ${vrf-name}&#xA;
                  else&#xA;
                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_max_med_config_admin_max_med_val ${vrf-name}&#xA;
                  fi&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_max_med_config ${vrf-name} ${maxmedopts} ${stime} ${maxmedval}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="default" help="Configure BGP defaults"/>
@@ -222,10 +227,10 @@ limitations under the License.
     <PARAM name="time" help="Seconds" ptype="RANGE_0_3600">
        <PARAM name="maxmedval" help="Seconds" ptype="RANGE_1_3600" optional="true"/>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_update_delay_config ${vrf-name} ${time} ${maxmedval}&#xA;
-             if test -z "${maxmedval}" ; then&#xA;
+    <ACTION> if test -z "${maxmedval}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_update_delay_config_establish_wait ${vrf-name}&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_update_delay_config ${vrf-name} ${time} ${maxmedval}&#xA;
     </ACTION>
   </COMMAND>
 
@@ -258,31 +263,41 @@ limitations under the License.
       <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_global_route_selection_options_config_external_compare_router_id ${vrf-name} True</ACTION>
   </COMMAND>
 
-  <COMMAND name="neighbor" help="Specify a neighbor router" view="configure-router-bgp-nbr-view" viewid="nbr-addr=${ip}${interface}${ifnum};vrf-name=${vrf-name}">
+  <COMMAND name="neighbor" help="Specify a neighbor router" view="configure-router-bgp-nbr-view" viewid="nbr-addr=${ip}${iftype}${ifnum};vrf-name=${vrf-name}">
     <PARAM name="nbopt" help="neighbor router" mode="switch" ptype="SUBCOMMAND">
       <PARAM name="ip" help="Neighbor router" ptype="IPV4V6_ADDR"/>
-      <PARAM name="interface" help="Interface type name" ptype="STRING">
-          <PARAM name="ifnum" help="Interfce number" ptype="LOOPBACK_NUM" optional="true"/>
+      <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
+        <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
+          <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
+            <PARAM name="ifnum" help="Physical interface" ptype="UINT"/>
+          </PARAM>
+          <PARAM name="PortChannel" help="Port channel Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
+            <PARAM name="ifnum" help="PortChannel identifier" ptype="LAG_ID"/>
+          </PARAM>
+          <PARAM name="Vlan" help="Vlan Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
+            <PARAM name="ifnum" help="Vlan identifier" ptype="VLAN_ID"/>
+          </PARAM>
+        </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config ${vrf-name} ${ip} ${interface}${ifnum} ${instance}</ACTION>
+    <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config ${vrf-name} ${ip} ${iftype}${ifnum} ${instance}</ACTION>
   </COMMAND>
 
   <COMMAND name="peer-group" help="Specify a peer-group" view="configure-router-bgp-template-view" viewid="template-name=${template-str};vrf-name=${vrf-name}">
-    <PARAM name="template-str" help="Peer-group" ptype="STRING" view="configure-router-bgp-template-view" viewid="template-name=${template-str}"/>
+    <PARAM name="template-str" help="Peer-group" ptype="STRING"/>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config ${vrf-name} ${template-str} ${instance}</ACTION>
   </COMMAND>
   <COMMAND name="address-family" help="Enter Address Family command mode"/>
   <COMMAND name="address-family ipv4" help="Enter Address Family command mode" view="configure-router-bgp-ipv4-view" viewid="vrf-name=${vrf-name};family=ipv4">
-    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-ipv4-view" viewid="vrf-family=ipv4"/>
+    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND"/>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_config ${vrf-name} IPV4_UNICAST</ACTION>
   </COMMAND>
   <COMMAND name="address-family ipv6" help="Enter Address Family command mode" view="configure-router-bgp-ipv6-view" viewid="vrf-name=${vrf-name};family=ipv6">
-    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-ipv6-view" viewid="family=ipv6"/>
+    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND"/>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_config ${vrf-name} IPV6_UNICAST</ACTION>
   </COMMAND>
   <COMMAND name="address-family l2vpn" help="Enter Address Family command mode" view="configure-router-bgp-l2vpn-view" viewid="vrf-name=${vrf-name};family=l2vpn">
-    <PARAM name="evpn" help="Address Family" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-l2vpn-view" viewid="family=l2vpn"/>
+    <PARAM name="evpn" help="Address Family" mode="subcommand" ptype="SUBCOMMAND"/>
     <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_global_afi_safis_afi_safi_config ${vrf-name} L2VPN_EVPN</ACTION>
   </COMMAND>
 
@@ -477,11 +492,21 @@ limitations under the License.
   <COMMAND name="no neighbor" help="Specify a neighbor router">
     <PARAM name="nbopt" help="neighbor router" mode="switch" ptype="SUBCOMMAND">
       <PARAM name="ip" help="Neighbor router" ptype="IPV4V6_ADDR"/>
-      <PARAM name="interface" help="Interface type name" ptype="STRING">
-          <PARAM name="ifnum" help="Interfce number" ptype="LOOPBACK_NUM" optional="true"/>
+      <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
+        <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
+          <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
+            <PARAM name="ifnum" help="Physical interface" ptype="UINT"/>
+          </PARAM>
+          <PARAM name="PortChannel" help="Port channel Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
+            <PARAM name="ifnum" help="PortChannel identifier" ptype="LAG_ID"/>
+          </PARAM>
+          <PARAM name="Vlan" help="Vlan Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
+            <PARAM name="ifnum" help="Vlan identifier" ptype="VLAN_ID"/>
+          </PARAM>
+        </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor ${vrf-name} ${ip} ${interface}${ifnum}</ACTION>
+    <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor ${vrf-name} ${ip} ${iftype}${ifnum}</ACTION>
   </COMMAND>
   <COMMAND name="no peer-group" help="Specify a peer-group">
     <PARAM name="template" help="Peer-group" ptype="STRING"/>
@@ -605,8 +630,8 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
   </COMMAND>
   <COMMAND name="update-source" help="Source of routing updates">
     <PARAM name="source_param" help="update-source param"  mode="switch" ptype="SUBCOMMAND">
-      <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" view="configure-router-bgp-nbr-view" viewid="nbr-addr=${ip};vrf-name=${vrf-name}"/>
-      <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-nbr-view" viewid="nbr-addr=${ip};vrf-name=${vrf-name}">
+      <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR"/>
+      <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
           <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
             <PARAM name="phy-if-name" help="Physical interface" ptype="UINT"/>
@@ -622,16 +647,16 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
     </PARAM>
     <ACTION>
              if test "${source_param}" = "ip" ; then&#xA;
-                 python $SONIC_CLI_ROOT/sonic-cli-bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip}&#xA;
+                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip}&#xA;
              else&#xA;
                  if test "${iftype}" = "Ethernet" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Ethernet${phy-if-name}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Ethernet${phy-if-name}&#xA;
                  fi&#xA;
                  if test "${iftype}" = "PortChannel" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} PortChannel${lag-id}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} PortChannel${lag-id}&#xA;
                  fi&#xA;
                  if test "${iftype}" = "Vlan" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Vlan${vlan-id}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Vlan${vlan-id}&#xA;
                  fi&#xA;
 
              fi&#xA;
@@ -654,10 +679,10 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
   </COMMAND>
   <COMMAND name="bfd" help="Enables BFD support">
     <PARAM name="check-control-plane-failure" help="Link dataplane status with BGP controlplane" mode="subcommand" ptype="SUBCOMMAND" optional="true"/>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_bfd ${vrf-name} ${nbr-addr} True&#xA;
-             if test -n "${check-control-plane-failure}" ; then&#xA;
+    <ACTION> if test -n "${check-control-plane-failure}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_bfd_check_control_plane_failure ${vrf-name} ${nbr-addr} True&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_bfd ${vrf-name} ${nbr-addr} True&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="capability" help="Advertise capability to the peer"/>
@@ -685,8 +710,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
         <PARAM name="replace-as" help="Do not prepend local-as to updates from ibgp peers"  mode="subcommand" ptype="SUBCOMMAND" optional="true"/>
       </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_local_as ${vrf-name} ${nbr-addr} ${asnum}&#xA;
-             if test -n "${no-prepend}" ; then&#xA;
+    <ACTION> if test -n "${no-prepend}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_local_as_no_prepend ${vrf-name} ${nbr-addr} True&#xA;
              else&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_local_as_no_prepend ${vrf-name} ${nbr-addr} False&#xA;
@@ -696,6 +720,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
              else&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_local_as_replace_as ${vrf-name} ${nbr-addr} False&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_local_as ${vrf-name} ${nbr-addr} ${asnum}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="override-capability" help="Override capability negotiation result">
@@ -708,7 +733,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
     <PARAM name="String" help="Password" ptype="STRING">
       <PARAM name="encrypted" help="The password is stored in an encrypted format" mode="subcommand" ptype="SUBCOMMAND" optional="true"/>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_auth_password ${vrf-name} ${nbr-addr} ${String}</ACTION>
+    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_auth_password ${vrf-name} ${nbr-addr} ${String} ${encrypted}</ACTION>
   </COMMAND>
   <COMMAND name="port" help="Neighbor's BGP port">
     <PARAM name="tcpport" help="TCP port number" ptype="RANGE_0_65535"/>
@@ -728,15 +753,15 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
 
   <COMMAND name="address-family" help="Enter Address Family command mode" />
   <COMMAND name="address-family ipv4" help="Enter Address Family command mode" view="configure-router-bgp-nbr-ipv4-view" viewid="vrf-name=${vrf-name};nbr-addr=${nbr-addr};nbr-family=nbr-ipv4">
-    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-nbr-ipv4-view" viewid="vrf-name=${vrf-name};nbr-addr=${nbr-addr};nbr-family=nbr-ipv4"/>
+    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND"/>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_config ${vrf-name} ${nbr-addr} IPV4_UNICAST</ACTION>
   </COMMAND>
   <COMMAND name="address-family ipv6" help="Enter Address Family command mode" view="configure-router-bgp-nbr-ipv6-view" viewid="vrf-name=${vrf-name};nbr-addr=${nbr-addr};nbr-family=nbr-ipv6">
-    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-nbr-ipv6-view" viewid="vrf-name=${vrf-name};nbr-addr=${nbr-addr};nbr-family=nbr-ipv6"/>
+    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND"/>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_config ${vrf-name} ${nbr-addr} IPV6_UNICAST</ACTION>
   </COMMAND>
   <COMMAND name="address-family l2vpn" help="Enter Address Family command mode" view="configure-router-bgp-nbr-l2vpn-view" viewid="vrf-name=${vrf-name};nbr-addr=${nbr-addr};nbr-family=nbr-l2vpn">
-    <PARAM name="evpn" help="Address Family" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-nbr-l2vpn-view" viewid="vrf-name=${vrf-name};nbr-addr=${nbr-addr};nbr-family=nbr-l2vpn"/>
+    <PARAM name="evpn" help="Address Family" mode="subcommand" ptype="SUBCOMMAND"/>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_afi_safis_afi_safi_config ${vrf-name} ${nbr-addr} L2VPN_EVPN</ACTION>
   </COMMAND>
 
@@ -798,7 +823,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
   </COMMAND>
   <COMMAND name="no update-source" help="Source of routing updates">
     <PARAM name="source_param" help="update-source param"  mode="switch" ptype="SUBCOMMAND">
-      <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" view="configure-router-bgp-nbr-view" viewid="nbr-addr=${ip};vrf-name=${vrf-name}" optional="true"/>
+      <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" optional="true"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
           <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
@@ -815,16 +840,16 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
     </PARAM>
     <ACTION>
              if test "${source_param}" = "ip" ; then&#xA;
-                 python $SONIC_CLI_ROOT/sonic-cli-bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip}&#xA;
+                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip}&#xA;
              else&#xA;
                  if test "${iftype}" = "Ethernet" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Ethernet${phy-if-name}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Ethernet${phy-if-name}&#xA;
                  fi&#xA;
                  if test "${iftype}" = "PortChannel" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} PortChannel${lag-id}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} PortChannel${lag-id}&#xA;
                  fi&#xA;
                  if test "${iftype}" = "Vlan" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Vlan${vlan-id}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Vlan${vlan-id}&#xA;
                  fi&#xA;
 
              fi&#xA;
@@ -883,7 +908,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
       <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_passive_mode ${vrf-name} ${nbr-addr}</ACTION>
   </COMMAND>
   <COMMAND name="no password" help="Set a password">
-      <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_auth_password ${vrf-name} ${nbr-addr}</ACTION>
+      <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_auth_password ${vrf-name} ${nbr-addr}</ACTION>
   </COMMAND>
   <COMMAND name="no port" help="Neighbor's BGP port">
       <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_config_peer_port ${vrf-name} ${nbr-addr} ${tcpport}</ACTION>
@@ -951,8 +976,8 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
 
   <COMMAND name="update-source" help="Source of routing updates">
     <PARAM name="source_param" help="update-source param"  mode="switch" ptype="SUBCOMMAND">
-      <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" view="configure-router-bgp-template-view"/>
-      <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-template-view">
+      <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR"/>
+      <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
           <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
             <PARAM name="phy-if-name" help="Physical interface" ptype="UINT"/>
@@ -968,16 +993,16 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
     </PARAM>
     <ACTION>
              if test "${source_param}" = "ip" ; then&#xA;
-                 python $SONIC_CLI_ROOT/sonic-cli-bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} ${ip}&#xA;
+                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} ${ip}&#xA;
              else&#xA;
                  if test "${iftype}" = "Ethernet" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Ethernet${phy-if-name}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Ethernet${phy-if-name}&#xA;
                  fi&#xA;
                  if test "${iftype}" = "PortChannel" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} PortChannel${lag-id}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} PortChannel${lag-id}&#xA;
                  fi&#xA;
                  if test "${iftype}" = "Vlan" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Vlan${vlan-id}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Vlan${vlan-id}&#xA;
                  fi&#xA;
 
              fi&#xA;
@@ -999,10 +1024,10 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
   </COMMAND>
   <COMMAND name="bfd" help="Enables BFD support">
     <PARAM name="check-control-plane-failure" help="Link dataplane status with BGP controlplane" mode="subcommand" ptype="SUBCOMMAND" optional="true"/>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_bfd ${vrf-name} ${template-name} True&#xA;
-             if test -n "${check-control-plane-failure}" ; then&#xA;
+    <ACTION> if test -n "${check-control-plane-failure}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_bfd_check_control_plane_failure ${vrf-name} ${template-name} True&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_bfd ${vrf-name} ${template-name} True&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="capability" help="Advertise capability to the peer"/>
@@ -1030,8 +1055,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
         <PARAM name="replace-as" help="Do not prepend local-as to updates from ibgp peers"  mode="subcommand" ptype="SUBCOMMAND" optional="true"/>
       </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_local_as ${vrf-name} ${template-name} ${asnum}&#xA;
-             if test -n "${no-prepend}" ; then&#xA;
+    <ACTION> if test -n "${no-prepend}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_local_as_no_prepend ${vrf-name} ${template-name} True&#xA;
              else&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_local_as_no_prepend ${vrf-name} ${template-name} False&#xA;
@@ -1041,6 +1065,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
              else&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_local_as_replace_as ${vrf-name} ${template-name} False&#xA;
              fi&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_local_as ${vrf-name} ${template-name} ${asnum}&#xA;
     </ACTION>
   </COMMAND>
   <COMMAND name="override-capability" help="Override capability negotiation result">
@@ -1053,7 +1078,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
     <PARAM name="String" help="Password" ptype="STRING">
       <PARAM name="encrypted" help="The password is stored in an encrypted format" mode="subcommand" ptype="SUBCOMMAND" optional="true"/>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_auth_password ${vrf-name} ${template-name} ${String}</ACTION>
+    <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_auth_password ${vrf-name} ${template-name} ${String} ${encrypted}</ACTION>
   </COMMAND>
   <COMMAND name="port" help="Neighbor's BGP port" ref="hidden">
     <PARAM name="tcpport" help="TCP port number" ptype="RANGE_0_65535"/>
@@ -1072,15 +1097,15 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
   </COMMAND>
   <COMMAND name="address-family" help="Enter Address Family command mode" />
   <COMMAND name="address-family ipv4" help="Enter Address Family command mode" view="configure-router-bgp-template-ipv4-view" viewid="vrf-name=${vrf-name};template-name=${template-name};pg-family=pg-ipv4">
-    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-template-ipv4-view" viewid="vrf-name=${vrf-name};template-name=${template-name};pg-family=pg-ipv4"/>
+    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND"/>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_config ${vrf-name} ${template-name} IPV4_UNICAST</ACTION>
   </COMMAND>
   <COMMAND name="address-family ipv6" help="Enter Address Family command mode" view="configure-router-bgp-template-ipv6-view" viewid="vrf-name=${vrf-name};template-name=${template-name};pg-family=pg-ipv6">
-    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-template-ipv6-view" viewid="vrf-name=${vrf-name};template-name=${template-name};pg-family=pg-ipv6"/>
+    <PARAM name="unicast" help="Address Family" mode="subcommand" ptype="SUBCOMMAND"/>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_config ${vrf-name} ${template-name} IPV6_UNICAST</ACTION>
   </COMMAND>
   <COMMAND name="address-family l2vpn" help="Enter Address Family command mode" view="configure-router-bgp-template-l2vpn-view" viewid="vrf-name=${vrf-name};template-name=${template-name};pg-family=pg-l2vpn">
-    <PARAM name="evpn" help="Address Family" mode="subcommand" ptype="SUBCOMMAND" view="configure-router-bgp-template-l2vpn-view" viewid="vrf-name=${vrf-name};template-name=${template-name};pg-family=pg-l2vpn"/>
+    <PARAM name="evpn" help="Address Family" mode="subcommand" ptype="SUBCOMMAND"/>
     <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_config ${vrf-name} ${template-name} L2VPN_EVPN</ACTION>
   </COMMAND>
   <COMMAND name="no" help="no commands"/>
@@ -1138,7 +1163,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
   </COMMAND>
   <COMMAND name="no update-source" help="Source of routing updates">
     <PARAM name="source_param" help="update-source param"  mode="switch" ptype="SUBCOMMAND">
-      <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" view="configure-router-bgp-template-view" viewid="nbr-addr=${ip};vrf-name=${vrf-name}" optional="true"/>
+      <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" optional="true"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
           <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
@@ -1155,16 +1180,16 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
     </PARAM>
     <ACTION>
              if test "${source_param}" = "ip" ; then&#xA;
-                 python $SONIC_CLI_ROOT/sonic-cli-bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} ${ip}&#xA;
+                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} ${ip}&#xA;
              else&#xA;
                  if test "${iftype}" = "Ethernet" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Ethernet${phy-if-name}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Ethernet${phy-if-name}&#xA;
                  fi&#xA;
                  if test "${iftype}" = "PortChannel" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} PortChannel${lag-id}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} PortChannel${lag-id}&#xA;
                  fi&#xA;
                  if test "${iftype}" = "Vlan" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic-cli-bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Vlan${vlan-id}&#xA;
+                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Vlan${vlan-id}&#xA;
                  fi&#xA;
 
              fi&#xA;
@@ -1223,7 +1248,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
       <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_passive_mode ${vrf-name} ${template-name}</ACTION>
   </COMMAND>
   <COMMAND name="no password" help="Set a password">
-      <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_auth_password ${vrf-name} ${template-name}</ACTION>
+      <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_auth_password ${vrf-name} ${template-name}</ACTION>
   </COMMAND>
   <COMMAND name="no port" help="Neighbor's BGP port">
       <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_peer_port ${vrf-name} ${template-name} ${tcpport}</ACTION>

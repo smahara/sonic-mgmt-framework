@@ -312,31 +312,32 @@ var YangToDb_bgp_pgrp_auth_password_xfmr SubTreeXfmrYangToDb = func(inParams Xfm
         log.Infof("%s Peer group object missing, add new", pgrp)
         return res_map, err
     }
-    if pgrp_obj.AuthPassword.Config == nil || pgrp_obj.AuthPassword.Config.Password == nil {
-        log.Infof("%s PeerGroup config container is missing", pgrp)
-        return res_map, err
-    }
-    auth_password := pgrp_obj.AuthPassword.Config.Password
-    encrypted := pgrp_obj.AuthPassword.Config.Encrypted
-    log.Infof("PeerGroup password:%d encrypted:%s", *auth_password, *encrypted)
+    entry_key := niName + "|" + pgrp 
+    if pgrp_obj.AuthPassword.Config != nil && pgrp_obj.AuthPassword.Config.Password != nil && (inParams.oper != DELETE){
+        auth_password := pgrp_obj.AuthPassword.Config.Password
+        encrypted := pgrp_obj.AuthPassword.Config.Encrypted
+        log.Infof("PeerGroup password:%d encrypted:%s", *auth_password, *encrypted)
 
-    encrypted_password := *auth_password
-    if encrypted == nil || (encrypted != nil && *encrypted == false) {
-        cmd := "show bgp encrypt " + *auth_password + " json"
-        bgpPgrpPasswordJson, cmd_err := exec_vtysh_cmd (cmd)
-        if (cmd_err != nil) {
-            log.Errorf ("Failed !! Error:%s", cmd_err);
-            return res_map, err
-        }
-        encrypted_password, ok = bgpPgrpPasswordJson["Encrypted_string"].(string); if !ok {
-            return res_map, err
+        encrypted_password := *auth_password
+        if encrypted == nil || (encrypted != nil && *encrypted == false) {
+            cmd := "show bgp encrypt " + *auth_password + " json"
+            bgpPgrpPasswordJson, cmd_err := exec_vtysh_cmd (cmd)
+            if (cmd_err != nil) {
+                log.Errorf ("Failed !! Error:%s", cmd_err);
+                return res_map, err
+            }
+            encrypted_password, ok = bgpPgrpPasswordJson["Encrypted_string"].(string); if !ok {
+                return res_map, err
+            }
         }
         log.Infof("PeerGroup password:%s encrypted:%s", *auth_password, encrypted_password)
+        authmap[entry_key] = db.Value{Field: make(map[string]string)}
+        authmap[entry_key].Field["auth_password"] = encrypted_password
+    } else if (inParams.oper == DELETE) {
+        authmap[entry_key] = db.Value{Field: make(map[string]string)}
+        authmap[entry_key].Field["auth_password"] = ""
     }
-    entry_key := niName + "|" + pgrp 
 
-    authmap[entry_key] = db.Value{Field: make(map[string]string)}
-    authmap[entry_key].Field["auth_password"] = encrypted_password
     res_map["BGP_PEER_GROUP"] = authmap
     return res_map, err
 }

@@ -662,9 +662,39 @@ func fill_nbr_state_cmn_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataValue 
         nbrState.LastEstablished = &_lastEstablished
     }
 
+    if routerId, ok := frrNbrDataJson["remoteRouterId"] ; ok {
+        _routerId := routerId.(string)
+         nbrState.RemoteRouterId = &_routerId
+    }
+
     if value, ok := frrNbrDataJson["connectionsEstablished"] ; ok {
         _establishedTransitions := uint64(value.(float64))
         nbrState.EstablishedTransitions = &_establishedTransitions
+    }
+
+    if value, ok := frrNbrDataJson["connectionsDropped"] ; ok {
+        _connectionsDropped := uint64(value.(float64))
+        nbrState.ConnectionsDropped = &_connectionsDropped
+    }
+
+    if value, ok := frrNbrDataJson["lastResetTimerMsecs"] ; ok {
+        _lastResetTimerSec := uint64(value.(float64))/1000
+        nbrState.LastResetTime = &_lastResetTimerSec
+    }
+
+    if resetReason, ok := frrNbrDataJson["lastResetDueTo"] ; ok {
+         _resetReason := resetReason.(string)
+         nbrState.LastResetReason = &_resetReason
+    }
+
+    if value, ok := frrNbrDataJson["bgpTimerLastRead"] ; ok {
+        _lastRead := uint64(value.(float64))/1000
+        nbrState.LastRead = &_lastRead
+    }
+
+    if value, ok := frrNbrDataJson["bgpTimerLastWrite"] ; ok {
+        _lastWrite := uint64(value.(float64))/1000
+        nbrState.LastWrite = &_lastWrite
     }
 
     if statsMap, ok := frrNbrDataJson["messageStats"].(map[string]interface{}) ; ok {
@@ -736,21 +766,72 @@ func fill_nbr_state_cmn_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataValue 
             _queues.Input = &_input
         }
     }
-
+    nbrState.SupportedCapabilities = nil
     if capabMap, ok := frrNbrDataJson["neighborCapabilities"].(map[string]interface{}) ; ok {
-        for capability,_ := range capabMap {
-            switch capability {
-                case "4byteAs":
+
+        if value, ok := capabMap["4byteAs"].(string) ; ok {
+           switch value {
+                case "advertisedAndReceived":
                     nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ASN32)
-                case "addPath":
-                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ADD_PATHS)
-                case "routeRefresh":
+                case "advertised":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ASN32_ADVERTISED_ONLY)
+                case "received":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ASN32_RECEIVED_ONLY)
+           }
+        }
+
+        if addPath, ok := capabMap["addPath"].(map[string]interface{}) ; ok {
+           if ipv4UCast, ok := addPath["ipv4Unicast"].(map[string]interface{}) ; ok {
+               if value, ok := ipv4UCast["rxAdvertised"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ADD_PATHS_ADVERTISED_ONLY)
+               }
+               if value, ok := ipv4UCast["rxReceived"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ADD_PATHS_RECEIVED_ONLY)
+               }
+               if value, ok := ipv4UCast["rxAdvertisedAndReceived"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ADD_PATHS)
+               }
+           }
+        }
+
+        if value, ok := capabMap["routeRefresh"].(string) ; ok {
+           switch value {
+                case "advertisedAndReceivedOldNew":
+                     fallthrough
+                case "advertisedAndReceivedOld":
+                     fallthrough
+                case "advertisedAndReceivedNew":
                     nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ROUTE_REFRESH)
-                case "multiprotocolExtensions":
-                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_MPBGP)
-                case "gracefulRestart":
+                case "advertised":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ROUTE_REFRESH_ADVERTISED_ONLY)
+                case "received":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_ROUTE_REFRESH_RECEIVED_ONLY)
+           }
+        }
+
+        if multi, ok := capabMap["multiprotocolExtensions"].(map[string]interface{}) ; ok {
+           if ipv4UCast, ok := multi["ipv4Unicast"].(map[string]interface{}) ; ok {
+               if value, ok := ipv4UCast["advertised"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_MPBGP_ADVERTISED_ONLY)
+               }
+               if value, ok := ipv4UCast["received"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_MPBGP_RECEIVED_ONLY)
+               }
+               if value, ok := ipv4UCast["advertisedAndReceived"].(bool) ; (ok && value == true) {
+                   nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_MPBGP)
+               }
+           }
+        }
+
+        if value, ok := capabMap["gracefulRestartCapability"].(string) ; ok {
+           switch value {
+                case "advertisedAndReceived":
                     nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_GRACEFUL_RESTART)
-            }
+                case "advertised":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_GRACEFUL_RESTART_ADVERTISED_ONLY)
+                case "received":
+                    nbrState.SupportedCapabilities = append(nbrState.SupportedCapabilities, ocbinds.OpenconfigBgpTypes_BGP_CAPABILITY_GRACEFUL_RESTART_RECEIVED_ONLY)
+           }
         }
     }
 
@@ -901,7 +982,7 @@ func fill_nbr_state_timers_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataVal
 func fill_nbr_state_transport_info (nbr_key *_xfmr_bgp_nbr_state_key, frrNbrDataValue interface{}, cfgDb *db.DB,
                                     nbr_obj *ocbinds.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Protocols_Protocol_Bgp_Neighbors_Neighbor) error {
     var err error
-
+    ygot.BuildEmptyTree(nbr_obj.Transport)
     nbrTransportState := nbr_obj.Transport.State
     frrNbrDataJson := frrNbrDataValue.(map[string]interface{})
 
@@ -1163,7 +1244,7 @@ var DbToYang_bgp_nbrs_nbr_af_state_xfmr SubTreeXfmrDbToYang = func(inParams Xfmr
         return nbr_cmd_err
     }
 
-    frrNbrDataJson, ok := nbrMapJson[nbr_af_key.nbrAddr].(map[string]interface{}); if ok {
+    frrNbrDataJson, ok := nbrMapJson[nbr_af_key.nbrAddr].(map[string]interface{}); if !ok {
         log.Errorf("Failed to decode data from bgp neighbors state info for niName:%s nbrAddr:%s afi-safi-name:%s. Err: %s\n",
                    nbr_af_key.niName, nbr_af_key.nbrAddr, afiSafi_cmd, nbr_cmd_err)
         return nbr_cmd_err
@@ -1442,31 +1523,32 @@ var YangToDb_bgp_nbrs_nbr_auth_password_xfmr SubTreeXfmrYangToDb = func(inParams
         log.Infof("%s Neighbor object missing, add new", nbrAddr)
         return res_map, err
     }
-    if nbr_obj.AuthPassword.Config == nil || nbr_obj.AuthPassword.Config.Password == nil {
-        log.Infof("%s Neighbor config container is missing", nbrAddr)
-        return res_map, err
-    }
-    auth_password := nbr_obj.AuthPassword.Config.Password
-    encrypted := nbr_obj.AuthPassword.Config.Encrypted
-    log.Infof("Neighbor password:%d encrypted:%s", *auth_password, *encrypted)
-
-    encrypted_password := *auth_password
-    if encrypted == nil || (encrypted != nil && *encrypted == false) {
-        cmd := "show bgp encrypt " + *auth_password + " json"
-        bgpNeighPasswordJson, cmd_err := exec_vtysh_cmd (cmd)
-        if (cmd_err != nil) {
-            log.Errorf ("Failed !! Error:%s", cmd_err);
-            return res_map, err
-        }
-        encrypted_password, ok = bgpNeighPasswordJson["Encrypted_string"].(string); if !ok {
-            return res_map, err
-        }
-        log.Infof("Neighbor password:%s encrypted:%s", *auth_password, encrypted_password)
-    }
     entry_key := niName + "|" + nbrAddr
+    if nbr_obj.AuthPassword.Config != nil && nbr_obj.AuthPassword.Config.Password != nil && (inParams.oper != DELETE){
+        auth_password := nbr_obj.AuthPassword.Config.Password
+        encrypted := nbr_obj.AuthPassword.Config.Encrypted
+        log.Infof("Neighbor password:%d encrypted:%s", *auth_password, *encrypted)
 
-    authmap[entry_key] = db.Value{Field: make(map[string]string)}
-    authmap[entry_key].Field["auth_password"] = encrypted_password
+        encrypted_password := *auth_password
+        if encrypted == nil || (encrypted != nil && *encrypted == false) {
+            cmd := "show bgp encrypt " + *auth_password + " json"
+            bgpNeighPasswordJson, cmd_err := exec_vtysh_cmd (cmd)
+            if (cmd_err != nil) {
+                log.Errorf ("Failed !! Error:%s", cmd_err);
+                return res_map, err
+            }
+            encrypted_password, ok = bgpNeighPasswordJson["Encrypted_string"].(string); if !ok {
+                return res_map, err
+            }
+            log.Infof("Neighbor password:%s encrypted:%s", *auth_password, encrypted_password)
+        }
+
+        authmap[entry_key] = db.Value{Field: make(map[string]string)}
+        authmap[entry_key].Field["auth_password"] = encrypted_password
+    } else if (inParams.oper == DELETE) {
+        authmap[entry_key] = db.Value{Field: make(map[string]string)}
+        authmap[entry_key].Field["auth_password"] = ""
+    }
     res_map["BGP_NEIGHBOR"] = authmap
     return res_map, err
 }

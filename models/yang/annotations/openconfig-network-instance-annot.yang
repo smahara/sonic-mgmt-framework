@@ -6,13 +6,20 @@ module openconfig-network-instance-annot {
     prefix "oc-netinst-annot";
 
     import openconfig-network-instance { prefix oc-netinst; }
+    import openconfig-network-instance-ext { prefix oc-netinst-ext; }
     import sonic-extensions { prefix sonic-ext; }
     import openconfig-network-instance-deviation { prefix oc-netinst-deviation; }
     import openconfig-bgp-ext { prefix oc-bgp-ext; }
     import openconfig-bgp-evpn-ext { prefix oc-bgp-evpn-ext; }
 	
     import ietf-yang-types { prefix yang; }
-    import openconfig-network-instance-ext { prefix oc-netinst-ext; }	
+    import openconfig-vxlan {prefix oc-vxlan; }
+
+    deviation /oc-netinst:network-instances {
+      deviate add {
+        sonic-ext:post-transformer "network_instance_post_xfmr";
+      }
+    }
 
     deviation /oc-netinst:network-instances/oc-netinst:network-instance {
       deviate add {
@@ -209,6 +216,12 @@ module openconfig-network-instance-annot {
     deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:state/oc-netinst:external-compare-router-id {
       deviate add {
           sonic-ext:field-name "external_compare_router_id";
+      }
+    }
+
+    deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:vlans {
+      deviate add {
+            sonic-ext:subtree-transformer "netinst_vlans_subtree_xfmr";
       }
     }
 
@@ -3019,5 +3032,30 @@ module openconfig-network-instance-annot {
       deviate add {
       }
     }	
+
+    deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-vxlan:neighbour-suppress {
+        deviate add {
+            sonic-ext:table-name "SUPPRESS_VLAN_NEIGH";
+            sonic-ext:key-transformer "vlan_nd_suppress_key_xfmr";
+        }
+    }
+
+    deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-vxlan:neighbour-suppress/oc-vxlan:config/oc-vxlan:arp-and-nd-suppress {
+        deviate add {
+            sonic-ext:field-transformer "vlan_nd_suppress_fld_xfmr";
+        }
+    }
+
+    deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-vxlan:neighbour-suppress/oc-vxlan:state/oc-vxlan:arp-and-nd-suppress {
+        deviate add {
+            sonic-ext:field-transformer "vlan_nd_suppress_fld_xfmr";
+        }
+    }
+    
+    deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-vxlan:vxlan-vni-instances {
+        deviate add {
+            sonic-ext:subtree-transformer "vxlan_vni_instance_subtree_xfmr";
+        }
+    }    
 }
 

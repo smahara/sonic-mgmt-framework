@@ -17,31 +17,21 @@ def invoke(func, args):
     if func == 'get_openconfig_ztp_ztp_state':
         path = cc.Path('/restconf/data/openconfig-ztp:ztp/state')
         return aa.get(path)
-    elif func == 'patch_openconfig_ztp_ztp_run':
-        path = cc.Path('/restconf/data/openconfig-ztp:ztp/config')
-        body = {
-                 "openconfig-ztp:config": {
-                 "admin_mode":2
-                 }
-                }
-        api_response = aa.patch(path,body)
-        return api_response
     else:
         path = cc.Path('/restconf/data/openconfig-ztp:ztp/config')
-        if 'no' in sys.argv:
+        if 'no' in args:
             body = {
                      "openconfig-ztp:config": {
-                     "admin_mode":0
+                     "admin_mode":False
                      }
                     }
         else:
             body = {
                      "openconfig-ztp:config": {
-                     "admin_mode":1
+                     "admin_mode":True
                      }
                     }
         return aa.patch(path,body)
-
 
 
 def run(func, args):
@@ -53,12 +43,9 @@ def run(func, args):
                 if 'openconfig-ztp:state' in response.keys():
                    value = response['openconfig-ztp:state']
                    if value is not None:
-                       show_cli_output(sys.argv[2],value)
-        else:
-            if func == "patch_openconfig_ztp_ztp_run":
-                response = api_response.content['ietf-restconf:errors']['error'][0]['error-message']
-                print("%s" % response)
-    except:
+                       show_cli_output(args[0],value)
+    except Exception as ex:
+        print ex
         print("%Error: Transaction Failure")
 
 if __name__ == '__main__':

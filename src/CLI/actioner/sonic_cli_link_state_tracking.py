@@ -22,9 +22,10 @@ import sys
 import json
 import collections
 import re
+import os
 import cli_client as cc
 from rpipe_utils import pipestr
-from scripts.render_cli import show_cli_output
+import scripts.render_cli as cli
 
 
 def create_link_state_tracking_group(args):
@@ -152,32 +153,37 @@ def generic_delete_response_handler(response, args):
 
 
 def show_link_state_tracking_group_data(groups, details):
+    output = ""
     for data in groups:
-        print('Name: {}'.format(data['name']))
-        print('Description: {}'.format(data.get('description', "")))
-        print('Timeout: {}'.format(data.get('timeout', "")))
+        output = output + 'Name: {}'.format(data['name']) + '\n'
+        output = output + 'Description: {}'.format(data.get('description', "")) + '\n'
+        output = output + 'Timeout: {}'.format(data.get('timeout', "")) + '\n'
 
         if details:
-            print('Upstream:')
+            output = output + 'Upstream:' + '\n'
             for upstr, status in zip(data.get('upstream', []), data.get('upstream_status', [])):
                 if status == "":
-                    print('    {}'.format(upstr))
+                    output = output + '    {}'.format(upstr) + '\n'
                 else:
-                    print('    {} ({})'.format(upstr, status))
+                    output = output + '    {} ({})'.format(upstr, status) + '\n'
 
-            print('Downstream:')
+            output = output + 'Downstream:' + '\n'
             for downstr, status in zip(data.get('downstream', []), data.get('downstream_status', [])):
                 if status == "":
-                    print('    {}'.format(downstr))
+                    output = output + '    {}'.format(downstr) + '\n'
                 else:
-                    print('    {} ({})'.format(downstr, status))
-        print('')
+                    output = output + '    {} ({})'.format(downstr, status) + '\n'
+        output = output + '' + '\n'
+    cli.write(output)
 
 
 def show_link_state_tracking_group_response_handler(response, args):
     if response.ok():
         data = response.content
-        show_link_state_tracking_group_data(data['sonic-link-state-tracking:INTF_TRACKING_TABLE_LIST'], len(args) > 0)
+        if bool(data):
+            show_link_state_tracking_group_data(data['sonic-link-state-tracking:INTF_TRACKING_TABLE_LIST'], len(args) > 0)
+        elif len(args) > 0:
+             print("%Error: Group not found")
     elif str(response.status_code) == '404':
         if len(args) > 0:
             print("%Error: Group not found")
@@ -215,17 +221,13 @@ response_handlers = {
 
 
 def run(op_str, args):
-    pipestr().write(args)
     try:
+        full_cmd = os.getenv('USER_COMMAND', None)
+        if full_cmd is not None:
+            pipestr().write(full_cmd.split())
         resp = request_handlers[op_str](args)
         response_handlers[op_str](resp, args)
     except Exception as e:
         print("%Error: {}".format(str(e)))
 
     return
-
-
-if __name__ == '__main__':
-    pipestr().write(sys.argv)
-    run(sys.argv[1], sys.argv[2:])
-

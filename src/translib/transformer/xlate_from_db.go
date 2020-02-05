@@ -384,7 +384,14 @@ func sonicDbToYangDataFill(uri string, xpath string, dbIdx db.DBNum, table strin
 							xfmrLogInfoAll("Empty list for xpath(%v)", curUri)
 						}
 					}
+				} else if chldYangType == YANG_CHOICE || chldYangType == YANG_CASE {
+					curUri := table + "/" + yangChldName
+					sonicDbToYangDataFill(curUri, curUri, xDbSpecMap[table].dbIndex, table, key, dbDataMap, resultMap)
+				} else {
+					xfmrLogInfoAll("Not handled case %v", chldXpath)
 				}
+			} else {
+				xfmrLogInfoAll("Yang entry not found for %v", chldXpath)
 			}
 		}
 	}
@@ -534,7 +541,9 @@ func yangListDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, r
 			}
 		}
 		if tbl != "" {
-			tblList = append(tblList, tbl)
+			if !contains(tblList, tbl) {
+				tblList = append(tblList, tbl)
+			}
 		}
 	} else if tbl != "" && xYangSpecMap[xpath].xfmrTbl == nil {
 		tblList = append(tblList, tbl)
@@ -580,6 +589,12 @@ func yangListDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, r
 	var tblWg sync.WaitGroup
 	for _, tbl = range(tblList) {
 		tblWg.Add(1)
+
+		defer func() {
+                        if rc := recover(); rc != nil {
+                                log.Errorf("Recover Table handling for :%v", tbl)
+                        }
+                }()
 
 		go func(tbl string) {
 		defer tblWg.Done()
@@ -643,8 +658,18 @@ func yangListInstanceDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri s
 	var err error
 	var chData typeChMapErr
 	curMap := make(map[string]interface{})
-
 	err = nil
+
+	defer func() {
+		if rc := recover(); rc != nil {
+			log.Errorf("Recover List Instance handling for dbKey:%v", dbKey)
+			chData.err    = err
+			chData.result = curMap
+			chl <- chData
+			wg.Done()
+		}
+	}()
+
 	curKeyMap, curUri, _ := dbKeyToYangDataConvert(uri, requestUri, xpath, dbKey, dbs[cdb].Opts.KeySeparator, txCache)
 	parentXpath := parentXpathGet(xpath)
 	_, ok := xYangSpecMap[xpath]
