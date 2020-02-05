@@ -42,14 +42,6 @@ module openconfig-routing-policy-ext {
       }
     }
 
-    grouping prefer_global_ipv6 {
-        leaf prefer_global {
-           type boolean;
-            description
-                "If set to true, Prefer global over link-local";
-        }
-    }
-
     grouping routing-policy-ext-action {
         leaf action {
             type routing-policy-ext-action-type;
@@ -94,11 +86,6 @@ module openconfig-routing-policy-ext {
         uses asn_list_val;
    }
 
-   augment  /oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:config {
-        uses prefer_global_ipv6;
-   }
-
-   
     deviation /oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:conditions/oc-bgp-pol:bgp-conditions/oc-bgp-pol:community-count {
         deviate not-supported;
     }
