@@ -306,6 +306,13 @@ limitations under the License.
         help="Hostname string"
         />
     <!--=======================================================-->
+    <PTYPE 
+        name="STR_ASN_LST"
+        pattern="^[0-9\,]*$"
+        help="asn list"
+        />
+    <!--=======================================================--> 
+
     <PTYPE
         name="HOSTNAME_STR_64"
         pattern="(&HOSTNAME_PATTERN_64;)"
