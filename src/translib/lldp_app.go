@@ -243,13 +243,7 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
                 ygot.BuildEmptyTree(ifInfo)
                 app.getLldpNeighInfoFromInternalMap(&ifname, ifInfo)
 
-                if *app.ygotTarget == intfObj.Interface[ifname] {
-                    payload, err = dumpIetfJson(intfObj, true)
-                    if err != nil {
-                        log.Info("Creation of subinterface subtree failed!")
-                        return GetResponse{Payload: payload, ErrSrc: AppErr}, err
-                    }
-                } else if *app.ygotTarget == intfObj.Interface[ifname].Neighbors {
+                if ((*app.ygotTarget == intfObj.Interface[ifname]) || (*app.ygotTarget == intfObj.Interface[ifname].Neighbors)) {
                     payload, err = dumpIetfJson(intfObj, true)
                     if err != nil {
                         log.Info("Creation of subinterface subtree failed!")
