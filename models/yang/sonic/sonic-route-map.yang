@@ -240,10 +240,6 @@ module sonic-route-map {
                     type string;
                 }
                  
-                leaf set_prefer_global {
-                    type boolean;
-                } 
-
                 leaf set_repeat_asn{
                     type uint8;
                 }
