@@ -10,7 +10,6 @@ module openconfig-network-instance-ext {
   import ietf-yang-types {
         prefix ietf;
     }  
-  import openconfig-routing-policy {prefix oc-rpol; }
 
   // import some basic types
   import openconfig-network-instance { prefix "oc-netinst"; }
@@ -29,13 +28,6 @@ module openconfig-network-instance-ext {
           type uint32;
           description
               "Metric for redistributed routes";
-      }
-      leaf import-policy {
-          type leafref {
-              path "/oc-rpol:routing-policy/oc-rpol:policy-definitions/" +
-                  "oc-rpol:policy-definition/oc-rpol:name";
-          }
-          description "Policy name to be applied when importing routes from one protocol to another.";
       }
   }
 
@@ -74,20 +66,13 @@ module openconfig-network-instance-ext {
           "Global Anycast Gateway";
       uses global-sag-top;	
   }
+	
   augment /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:table-connections/oc-netinst:table-connection/oc-netinst:config {
       uses oc-table-connection-ext-config;
   }
  
   augment /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:table-connections/oc-netinst:table-connection/oc-netinst:state {
       uses oc-table-connection-ext-config;
-  }
-
-  deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:table-connections/oc-netinst:table-connection/oc-netinst:config/oc-netinst:import-policy {
-      deviate not-supported;
-  }
-
-  deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:table-connections/oc-netinst:table-connection/oc-netinst:state/oc-netinst:import-policy {
-      deviate not-supported;
   }
 
   deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:inter-instance-policies {

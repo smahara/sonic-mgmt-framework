@@ -134,7 +134,7 @@ module sonic-bgp-common {
     }
 
     grouping sonic-bgp-cmn {
-        
+
         leaf local_asn {
             type uint32 {
                 range "1..4294967295";
@@ -359,15 +359,23 @@ module sonic-bgp-common {
             description "Interval after which connection will get re-established";
         }
 
-        leaf route_map_in {
+        leaf-list route_map_in {
             type leafref {
                 path "/srmap:sonic-route-map/srmap:ROUTE_MAP_SET/srmap:ROUTE_MAP_SET_LIST/srmap:name";
             }
+            must "(count(current()) = 1)" {
+                error-app-tag "max-allowed-route-map-reached";
+                error-message "Only one route-map can be associated";
+            }
         }
 
-        leaf route_map_out {
+        leaf-list route_map_out {
             type leafref {
                 path "/srmap:sonic-route-map/srmap:ROUTE_MAP_SET/srmap:ROUTE_MAP_SET_LIST/srmap:name";
+            }
+            must "(count(current()) = 1)" {
+                error-app-tag "max-allowed-route-map-reached";
+                error-message "Only one route-map can be associated";
             }
         }
 

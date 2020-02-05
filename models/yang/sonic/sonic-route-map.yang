@@ -158,7 +158,7 @@ module sonic-route-map {
                     }
                 }
 
-                leaf match_neighbor {
+                leaf-list match_neighbor {
                     type union {
                         type inet:ip-address;
                         type leafref {
@@ -173,12 +173,14 @@ module sonic-route-map {
                     }
                     description
                         "IP addresse or interface for match operation.";
+                    max-elements 1;
                 }
 
-                leaf match_tag {
+                leaf-list match_tag {
                     type tag-type;
                     description
                         "Value of the tag match member";
+                    max-elements 1;
                 }
 
                 leaf match_med{
