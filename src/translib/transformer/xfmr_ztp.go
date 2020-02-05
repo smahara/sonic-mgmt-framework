@@ -10,25 +10,29 @@ import (
     "translib/ocbinds"
     "encoding/json"
     "fmt"
+	//"github.com/golang/glog"
+    //"translib/tlerr"
 )
 /*App specific constants */
 const (
-    ZTP_STATUS_ADMIN_MODE            = "admin_mode"
-    ZTP_STATUS_SERVICE               = "service"
-    ZTP_STATUS_STATUS                = "status"
-    ZTP_STATUS_SOURCE                = "source"
-    ZTP_STATUS_RUNTIME               = "runtime"
-    ZTP_STATUS_TIMESTAMP             = "timestamp"
-    ZTP_STATUS_JSON_VERSION          = "json_version"
-    ZTP_STATUS_ACTIVITY_STRING       = "activity_string"
-    ZTP_CONFIG_SECTION_LIST          = "config_section_list"
-    ZTP_CONFIG_SECTION_STATUS        = "cfg_status"
-    ZTP_CONFIG_SECTION_NAME          = "cfg_sectionname"
-    ZTP_CONFIG_SECTION_RUNTIME       = "cfg_runtime"
-    ZTP_CONFIG_SECTION_TIMESTAMP     = "cfg_timestamp"
-    ZTP_CONFIG_SECTION_EXITCODE      = "cfg_exitcode"
-    ZTP_CONFIG_SECTION_IGNORE_RESULT = "cfg_ignoreresult"
-    ZTP_STATUS_ERROR                 = "error"
+    ZTP_STATUS_ADMIN_MODE              = "admin_mode"
+    ZTP_STATUS_SERVICE                 = "service"
+    ZTP_STATUS_STATUS                  = "status"
+    ZTP_STATUS_SOURCE                  = "source"
+    ZTP_STATUS_RUNTIME                 = "runtime"
+    ZTP_STATUS_TIMESTAMP               = "timestamp"
+    ZTP_STATUS_JSON_VERSION            = "json_version"
+    ZTP_STATUS_ACTIVITY_STRING         = "activity_string"
+    ZTP_CONFIG_SECTION_LIST            = "config_section_list"
+    ZTP_CONFIG_SECTION_STATUS          = "cfg_status"
+    ZTP_CONFIG_SECTION_NAME            = "cfg_sectionname"
+    ZTP_CONFIG_SECTION_RUNTIME         = "cfg_runtime"
+    ZTP_CONFIG_SECTION_TIMESTAMP       = "cfg_timestamp"
+    ZTP_CONFIG_SECTION_EXITCODE        = "cfg_exitcode"
+    ZTP_CONFIG_SECTION_IGNORE_RESULT   = "cfg_ignoreresult"
+    ZTP_CONFIG_SECTION_DESCRIPTION     = "cfg_description"
+    ZTP_CONFIG_SECTION_HALT_ON_FAILURE = "cfg_haltonfailure"
+    ZTP_STATUS_ERROR                   = "error"
 )
 
 /* App specific type definitions */
@@ -69,7 +73,7 @@ func ztpAction(action string) (string, error) {
 		// ztp.status returns an exit code and the stdout of the command
 		// We only care about the stdout (which is at [1] in the slice)
 		output, _ = result.Body[0].(string)
-	}
+    }
 	return output, nil
 }
 
@@ -122,11 +126,15 @@ func getConfigSection(sectionName string, dataMap map[string]interface{}, status
 	    case ZTP_CONFIG_SECTION_EXITCODE:
     		statusCache.ztpConfigSectionMap[sectionName][ZTP_CONFIG_SECTION_EXITCODE]  = fmt.Sprintf("%d",val)
 	    case ZTP_CONFIG_SECTION_IGNORE_RESULT:
-                statusCache.ztpConfigSectionMap[sectionName][ZTP_CONFIG_SECTION_IGNORE_RESULT] = fmt.Sprintf("%t",val)
+            statusCache.ztpConfigSectionMap[sectionName][ZTP_CONFIG_SECTION_IGNORE_RESULT] = fmt.Sprintf("%t",val)
+	    case ZTP_CONFIG_SECTION_DESCRIPTION:
+            statusCache.ztpConfigSectionMap[sectionName][ZTP_CONFIG_SECTION_DESCRIPTION] = fmt.Sprintf("%v",val)
+	    case ZTP_CONFIG_SECTION_HALT_ON_FAILURE:
+            statusCache.ztpConfigSectionMap[sectionName][ZTP_CONFIG_SECTION_HALT_ON_FAILURE] = fmt.Sprintf("%t",val)
 	    case ZTP_STATUS_ERROR:
-                statusCache.ztpConfigSectionMap[sectionName][ZTP_STATUS_ERROR] = fmt.Sprintf("%v",val)
+            statusCache.ztpConfigSectionMap[sectionName][ZTP_STATUS_ERROR] = fmt.Sprintf("%v",val)
 	    default:
-		log.Info("Invalid attr:",attr)
+    		log.Info("Invalid attr:",attr)
 	}
     }
 }
@@ -207,6 +215,15 @@ func populateConfigSectionYgotTree(sectionName string, configObj *ocbinds.Openco
         er := value
         configObj.Error = &er
     }
+    if value,present := statusCache.ztpConfigSectionMap[sectionName][ZTP_CONFIG_SECTION_DESCRIPTION]; present {
+        sec := value
+        configObj.Description = &sec
+    }
+    if value,present := statusCache.ztpConfigSectionMap[sectionName][ZTP_CONFIG_SECTION_HALT_ON_FAILURE]; present {
+        haltonfail := new(bool)
+        *haltonfail,_ = strconv.ParseBool(value)
+        configObj.Haltonfailure = haltonfail
+    }
 }
 
 /* Get status info from db */
@@ -255,6 +272,9 @@ func getZtpStatusInfofromDb( statusObj *ocbinds.OpenconfigZtp_Ztp_State, statusC
 
 func getZtpStatus(ztpObj *ocbinds.OpenconfigZtp_Ztp) (error) {
 
+    if ztpObj.State == nil {
+	ygot.BuildEmptyTree(ztpObj)
+    }
     statusObj := ztpObj.State
     ygot.BuildEmptyTree(statusObj)
     var statusCache ztpStatusCache
@@ -300,22 +320,26 @@ var DbToYang_ztp_config_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (e
     act:= "getcfg"
     mess, err := ztpAction(act)
     if err != nil {
-	log.Info("Error from host service:",err)
+	    log.Info("Error from host service:",err)
     }
     log.Info("Message from host:",mess)
+    if ztpObj.Config == nil {
+	ygot.BuildEmptyTree(ztpObj)
+    }
     configObj := ztpObj.Config
     ygot.BuildEmptyTree(configObj)
     var temp bool
     if mess == "disabled" {
-	temp = false
+	    temp = false
     }
     if mess == "enabled" {
-	temp = true
+	    temp = true
     }
     configObj.AdminMode = &temp
     return err;
 
 }
+
 var YangToDb_ztp_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (map[string]map[string]db.Value,error) {
     var err error
     log.Info("TableXfmrFunc - Uri ZTP: ", inParams.uri);
@@ -325,15 +349,13 @@ var YangToDb_ztp_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (ma
     var act string = "disable"
     ztpObj := getZtpRoot(inParams.ygRoot)
     if ztpObj.Config.AdminMode == nil {
-	log.Info("Invalid Input")
-	return nil,err
+		log.Info("Invalid Input")
+		return nil,err
     }
     b := * ztpObj.Config.AdminMode
-    if (b){
+    if (b) {
         act = "enable"
     }
     _, err = ztpAction(act)
     return nil,err;
 }
-
-

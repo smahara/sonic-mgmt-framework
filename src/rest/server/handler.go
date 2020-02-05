@@ -38,23 +38,35 @@ import (
 func Process(w http.ResponseWriter, r *http.Request) {
 	rc, r := GetContext(r)
 	reqID := rc.ID
-	path := r.URL.Path
+	args := translibArgs{
+		reqID: reqID,
+		method: r.Method,
+		AuthEnabled: rc.ClientAuth.Any(),
+		User: translib.UserRoles{Name: rc.Auth.User, Roles: rc.Auth.Roles},
+	}
 
+	var err error
 	var status int
 	var data []byte
 	var rtype string
 
-	glog.Infof("[%s] %s %s; content-len=%d", reqID, r.Method, path, r.ContentLength)
-	_, body, err := getRequestBody(r, rc)
+	glog.Infof("[%s] %s %s; content-len=%d", reqID, r.Method, r.URL.Path, r.ContentLength)
+	_, args.data, err = getRequestBody(r, rc)
 	if err != nil {
 		status, data, rtype = prepareErrorResponse(err, r)
 		goto write_resp
 	}
 
-	path = getPathForTranslib(r)
-	glog.V(2).Infof("[%s] Translated path = %s", reqID, path)
+	args.path = getPathForTranslib(r)
+	glog.V(1).Infof("[%s] Translated path = %s", reqID, args.path)
 
-	status, data, err = invokeTranslib(r, rc, path, body)
+	err = parseQueryParams(&args, r)
+	if err != nil {
+		status, data, rtype = prepareErrorResponse(err, r)
+		goto write_resp
+	}
+
+	status, data, err = invokeTranslib(&args, r, rc)
 	if err != nil {
 		glog.Errorf("[%s] Translib error %T - %v", reqID, err, err)
 		status, data, rtype = prepareErrorResponse(err, r)
@@ -76,7 +88,7 @@ func Process(w http.ResponseWriter, r *http.Request) {
 	}
 
 write_resp:
-	glog.Infof("[%s] Sending response %d, type=%s, data=%s", reqID, status, rtype, data)
+	glog.Infof("[%s] Sending response %d, type=%s, size=%d", reqID, status, rtype, len(data))
 
 	// Write http response.. Following strict order should be
 	// maintained to form proper response.
@@ -84,9 +96,14 @@ write_resp:
 	//	2. Set status code via w.WriteHeader(code)
 	//	3. Finally, write response body via w.Write(bytes)
 	if len(data) != 0 {
+		if status >= 400 || glog.V(1) {
+			glog.Infof("[%s] data=%s", reqID, data)
+		}
+
 		w.Header().Set("Content-Type", rtype)
 		w.WriteHeader(status)
 		w.Write([]byte(data))
+
 	} else {
 		// No data, status only
 		w.WriteHeader(status)
@@ -96,7 +113,7 @@ write_resp:
 // getRequestBody returns the validated request body
 func getRequestBody(r *http.Request, rc *RequestContext) (*MediaType, []byte, error) {
 	if r.ContentLength == 0 {
-		glog.Infof("[%s] No body", rc.ID)
+		glog.V(1).Infof("[%s] No body", rc.ID)
 		return nil, nil, nil
 	}
 
@@ -138,7 +155,7 @@ func getRequestBody(r *http.Request, rc *RequestContext) (*MediaType, []byte, er
 		}
 	}
 
-	glog.Infof("[%s] Content-type=%s; data=%s", rc.ID, ctype, body)
+	glog.V(1).Infof("[%s] Content-type=%s; data=%s", rc.ID, ctype, body)
 	return ct, body, nil
 }
 
@@ -229,18 +246,46 @@ func isOperationsRequest(r *http.Request) bool {
 	//Use swagger generated API name instead???
 }
 
+// parseQueryParams parses the http request's query parameters
+// into a translibArgs args.
+func parseQueryParams(args *translibArgs, r *http.Request) error {
+	if strings.HasPrefix(r.URL.Path, restconfPathPrefix) {
+		return parseRestconfQueryParams(args, r)
+	}
+
+	return nil
+}
+
+// translibArgs holds arguments for invoking translib APIs.
+type translibArgs struct {
+	reqID  string // request id
+	method string // method name
+	path   string // Translib path
+	data   []byte // payload
+	depth uint // RESTCONF depth, for Get API only
+	AuthEnabled bool //Enable Authorization
+	User translib.UserRoles // User and role info for RBAC
+}
+
 // invokeTranslib calls appropriate TransLib API for the given HTTP
 // method. Returns response status code and content.
-func invokeTranslib(r *http.Request, rc *RequestContext, path string, payload []byte) (int, []byte, error) {
+func invokeTranslib(args *translibArgs, r *http.Request, rc *RequestContext) (int, []byte, error) {
 	var status = 400
 	var content []byte
 	var err error
-
+	
 	ts := time.Now()
 
 	switch r.Method {
 	case "GET", "HEAD":
-		req := translib.GetRequest{Path: path, User: rc.Auth.User, Group: rc.Auth.Group}
+
+		req := translib.GetRequest{
+			Path:  args.path,
+			Depth: args.depth,
+			AuthEnabled: args.AuthEnabled,
+			User: args.User,
+		}
+
 		resp, err1 := translib.Get(req)
 		if err1 == nil {
 			status = 200
@@ -251,7 +296,13 @@ func invokeTranslib(r *http.Request, rc *RequestContext, path string, payload []
 
 	case "POST":
 		if isOperationsRequest(r) {
-			req := translib.ActionRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
+
+			req := translib.ActionRequest{
+				Path:    args.path,
+				Payload: args.data,
+				AuthEnabled: args.AuthEnabled,
+				User: args.User,
+			}
 			res, err1 := translib.Action(req)
 			if err1 == nil {
 				status = 200
@@ -261,24 +312,48 @@ func invokeTranslib(r *http.Request, rc *RequestContext, path string, payload []
 			}
 		} else {
 			status = 201
-			req := translib.SetRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
+
+			req := translib.SetRequest{
+				Path:    args.path,
+				Payload: args.data,
+				AuthEnabled: args.AuthEnabled,
+				User: args.User,
+			}
+
 			_, err = translib.Create(req)
 		}
 
 	case "PUT":
 		//TODO send 201 if PUT resulted in creation
 		status = 204
-		req := translib.SetRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
+
+		req := translib.SetRequest{
+			Path:    args.path,
+			Payload: args.data,
+			AuthEnabled: args.AuthEnabled,
+			User: args.User,
+		}
 		_, err = translib.Replace(req)
 
 	case "PATCH":
 		status = 204
-		req := translib.SetRequest{Path: path, Payload: payload, User: rc.Auth.User, Group: rc.Auth.Group}
+
+		req := translib.SetRequest{
+			Path:    args.path,
+			Payload: args.data,
+			AuthEnabled: args.AuthEnabled,
+			User: args.User,
+		}
 		_, err = translib.Update(req)
 
 	case "DELETE":
 		status = 204
-		req := translib.SetRequest{Path: path, User: rc.Auth.User, Group: rc.Auth.Group}
+
+		req := translib.SetRequest{
+			Path:  args.path,
+			AuthEnabled: args.AuthEnabled,
+			User: args.User,
+		}
 		_, err = translib.Delete(req)
 
 	default:

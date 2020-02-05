@@ -44,11 +44,22 @@ def mac_fill_count(mac_entries):
     return mac_entry_table
 
 def fill_mac_info(mac_entry):
-    mac_entry_table = {'Vlan':mac_entry['vlan'], 
-                        'mac-address':mac_entry['mac-address'],
-                        'entry-type': mac_entry['state']['entry-type'],
-                        'port': mac_entry['interface']['interface-ref']['state']['interface']
-    }
+    ip_address = "0.0.0.0"
+    if ('openconfig-vxlan:peer' in mac_entry):
+        ip_address = mac_entry['openconfig-vxlan:peer']['state']['peer-ip']
+
+    if ip_address == '0.0.0.0':
+        mac_entry_table = {'Vlan':mac_entry['vlan'], 
+                           'mac-address':mac_entry['mac-address'],
+                           'entry-type': mac_entry['state']['entry-type'],
+                           'port': mac_entry['interface']['interface-ref']['state']['interface']
+                          }
+    else:
+        mac_entry_table = {'Vlan':mac_entry['vlan'], 
+                           'mac-address':mac_entry['mac-address'],
+                           'entry-type': mac_entry['state']['entry-type'],
+                           'port': "VxLAN DIP: " + mac_entry['openconfig-vxlan:peer']['state']['peer-ip']
+                          }
     return mac_entry_table
 
 def invoke(func, args):
@@ -71,7 +82,7 @@ def run(func, args):
 
         if api_response.ok():
             response = api_response.content
-            if len(response) is not 0:
+            if response is not None and len(response) is not 0:
                 if 'openconfig-network-instance:entries' in response:
                     mac_entries = response['openconfig-network-instance:entries']['entry']
                 else:
