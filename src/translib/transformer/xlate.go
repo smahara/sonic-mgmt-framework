@@ -26,6 +26,7 @@ import (
 	"github.com/openconfig/ygot/ygot"
 	"reflect"
 	"strings"
+	"sync"
 	"translib/db"
 	"translib/ocbinds"
 	"translib/tlerr"
@@ -49,6 +50,7 @@ type KeySpec struct {
 }
 
 var XlateFuncs = make(map[string]reflect.Value)
+var xlateFuncCallMutex = &sync.Mutex{}
 
 var (
 	ErrParamsNotAdapted = errors.New("The number of params is not adapted.")
@@ -61,10 +63,16 @@ func XlateFuncBind(name string, fn interface{}) (err error) {
 		}
 	}()
 
-	if _, ok := XlateFuncs[name]; !ok {
+	xlateFuncCallMutex.Lock()
+	_, ok := XlateFuncs[name]
+	xlateFuncCallMutex.Unlock()
+
+	if !ok {
 		v := reflect.ValueOf(fn)
 		v.Type().NumIn()
+		xlateFuncCallMutex.Lock()
 		XlateFuncs[name] = v
+		xlateFuncCallMutex.Unlock()
 	} else {
 		xfmrLogInfo("Duplicate entry found in the XlateFunc map " + name)
 	}
@@ -72,11 +80,15 @@ func XlateFuncBind(name string, fn interface{}) (err error) {
 }
 
 func XlateFuncCall(name string, params ...interface{}) (result []reflect.Value, err error) {
-	if _, ok := XlateFuncs[name]; !ok {
+	xlateFuncCallMutex.Lock()
+	xlateFuncName, ok := XlateFuncs[name]
+	xlateFuncCallMutex.Unlock()
+
+	if !ok {
 		log.Warning(name + " Xfmr function does not exist.")
 		return nil, nil
 	}
-	if len(params) != XlateFuncs[name].Type().NumIn() {
+	if len(params) != xlateFuncName.Type().NumIn() {
 		err = ErrParamsNotAdapted
 		return nil, nil
 	}
@@ -84,7 +96,7 @@ func XlateFuncCall(name string, params ...interface{}) (result []reflect.Value, 
 	for k, param := range params {
 		in[k] = reflect.ValueOf(param)
 	}
-	result = XlateFuncs[name].Call(in)
+	result = xlateFuncName.Call(in)
 	return result, nil
 }
 
@@ -540,3 +552,13 @@ func AddModelCpbltInfo() map[string]*mdlInfo {
 	return xMdlCpbltMap
 }
 
+func XlateDefValFill(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requestUri string, result map[string]map[string]db.Value, txCache interface{}) error {
+	var err error
+	tblXpathMap  := make(map[string][]string)
+	subOpDataMap := make(map[int]*RedisDbMap)
+	err = dbMapDefaultValFill(d, ygRoot, oper, uri, requestUri, result, subOpDataMap, tblXpathMap, txCache)
+	if err != nil {
+		return err
+	}
+	return err
+}
