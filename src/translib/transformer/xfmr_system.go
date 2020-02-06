@@ -159,7 +159,7 @@ var DbToYang_sys_memory_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) err
     getSystemMemory(&jsonsystem, sysObj.Memory.State)
     return err;
 }
-func getSystemCpu (idx int, cpu Cpu, syscpus *ocbinds.OpenconfigSystem_System_Cpus) {
+func getSystemCpu (idx int, cpu Cpu, syscpu *ocbinds.OpenconfigSystem_System_Cpus_Cpu) {
     log.Infof("getSystemCpu Entry idx ", idx)
 
     sysinfo := syscall.Sysinfo_t{}
@@ -167,16 +167,6 @@ func getSystemCpu (idx int, cpu Cpu, syscpus *ocbinds.OpenconfigSystem_System_Cp
     if sys_err != nil {
         log.Infof("syscall.Sysinfo failed.")
     }
-
-    var index  ocbinds.OpenconfigSystem_System_Cpus_Cpu_State_Index_Union_Uint32
-    index.Uint32 = uint32(idx)
-    syscpu, err := syscpus.NewCpu(&index)
-    if err != nil {
-        log.Infof("syscpus.NewCpu failed")
-        return
-    }
-   ygot.BuildEmptyTree(syscpu)
-   syscpu.Index = &index
     var cpucur CpuState
     if idx == 0 {
         cpucur.user = uint8((cpu.User/4)/sysinfo.Uptime)
@@ -202,7 +192,16 @@ func getSystemCpus (sys *JSONSystem, syscpus *ocbinds.OpenconfigSystem_System_Cp
     }
 
     for  idx, cpu := range sys.Cpus {
-        getSystemCpu(idx, cpu, syscpus)
+        var index  ocbinds.OpenconfigSystem_System_Cpus_Cpu_State_Index_Union_Uint32
+        index.Uint32 = uint32(idx)
+        syscpu, err := syscpus.NewCpu(&index)
+        if err != nil {
+           log.Infof("syscpus.NewCpu failed")
+           return
+        }
+        ygot.BuildEmptyTree(syscpu)
+        syscpu.Index = &index
+       getSystemCpu(idx, cpu, syscpu)
     }
 }
 
@@ -216,19 +215,20 @@ var DbToYang_sys_cpus_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) error
         log.Infof("getSystemInfoFromFile failed")
         return err
     }
-
-    ygot.BuildEmptyTree(sysObj)
+    if sysObj == nil {
+        ygot.BuildEmptyTree(sysObj)
+    }
 
     path := NewPathInfo(inParams.uri) 
     val := path.Vars["index"]
-    for k := range sysObj.Cpus.Cpu {
-	delete(sysObj.Cpus.Cpu,k)
-    }
     if len(val) != 0 {
         cpu, _ := strconv.Atoi(val)
         log.Info("Cpu id: ", cpu, ", max is ", len(jsonsystem.Cpus))
         if cpu >=0 && cpu < len(jsonsystem.Cpus) {
-            getSystemCpu(cpu, jsonsystem.Cpus[cpu], sysObj.Cpus)	
+	    for _, value := range sysObj.Cpus.Cpu {
+		ygot.BuildEmptyTree(value)
+	        getSystemCpu(cpu, jsonsystem.Cpus[cpu], value)
+	    }
         } else {
             log.Info("Cpu id: ", cpu, "is invalid, max is ", len(jsonsystem.Cpus))
         }
