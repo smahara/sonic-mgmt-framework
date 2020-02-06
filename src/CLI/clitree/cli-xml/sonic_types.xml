@@ -1051,7 +1051,7 @@ limitations under the License.
     <PTYPE
         name="VLAN_INTERFACE"
         method="regexp_select"
-        ext_pattern="Vlan(1-4093)"
+        ext_pattern="Vlan(1-4094)"
         pattern="&VLAN_ALL_INTF;"
         help=""
         />
