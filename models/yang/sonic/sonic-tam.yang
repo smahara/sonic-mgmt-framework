@@ -25,16 +25,26 @@ module sonic-tam {
         container TAM_DEVICE_TABLE {
 
             list TAM_DEVICE_TABLE_LIST {
+		description
+		    "Information on TAM Device Information.";
+
                 key "name";
+
                 leaf name {
                     type enumeration {
                         enum device;
                     }
+
+		    description
+		       "Only one instance and has a fixed key "device.";
                 }
 
                 leaf deviceid {
                     type uint16;
                     default 0;
+
+		    description
+		       "Uniquely identifies a device on the network to be analyzed.";
                 }
             }
         }
@@ -44,11 +54,17 @@ module sonic-tam {
             list TAM_COLLECTOR_TABLE_LIST {
                 key "name";
 
+	        description
+	            "Defines TAM collector configuration.";
+
                 leaf name {
                     type string {
                         pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,32})';
                         length 1..32;
                     }
+
+		    description
+		       "Collector name and should be unique.";
                 }
 
                 leaf ipaddress-type {
@@ -62,14 +78,23 @@ module sonic-tam {
                         enum ipv4;
                         enum ipv6;
                     }
+
+		    description
+		       "Collector IP address type.";
                 }
 
                 leaf ipaddress {
                     type inet:ip-address;
+
+		    description
+		       "IP address of the collector.";
                 }
 
                 leaf port {
                     type inet:port-number;
+
+		    description
+		       "Collector UDP port number.";
                 }
             }
         }
