@@ -1649,11 +1649,11 @@ def preprocess_bgp_nbrs(iptype, nbrs):
 
                 if 'openconfig-bgp-ext:last-write' in nbr['state']:
                     last_write = nbr['state']['openconfig-bgp-ext:last-write']
-                    nbr['state']['openconfig-bgp-ext:last-write'] = seconds_to_wdhm_str(last_write)
+                    nbr['state']['openconfig-bgp-ext:last-write'] = seconds_to_dhms_str(last_write)
 
                 if 'openconfig-bgp-ext:last-read' in nbr['state']:
                     last_read = nbr['state']['openconfig-bgp-ext:last-read']
-                    nbr['state']['openconfig-bgp-ext:last-read'] = seconds_to_wdhm_str(last_read)
+                    nbr['state']['openconfig-bgp-ext:last-read'] = seconds_to_dhms_str(last_read)
 
                 if 'openconfig-bgp-ext:last-reset-time' in nbr['state']:
                     last_reset_time = nbr['state']['openconfig-bgp-ext:last-reset-time']
