@@ -31,12 +31,14 @@ module sonic-tam {
                 key "name";
 
                 leaf name {
+
                     type enumeration {
                         enum device;
                     }
 
-		    description
-		       "Only one instance and has a fixed key "device.";
+                    description
+			"Device Identifier.";
+
                 }
 
                 leaf deviceid {
