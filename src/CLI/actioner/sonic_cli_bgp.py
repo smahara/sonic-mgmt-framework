@@ -1657,7 +1657,7 @@ def preprocess_bgp_nbrs(iptype, nbrs):
 
                 if 'openconfig-bgp-ext:last-reset-time' in nbr['state']:
                     last_reset_time = nbr['state']['openconfig-bgp-ext:last-reset-time']
-                    nbr['state']['openconfig-bgp-ext:last-reset-time'] = seconds_to_wdhm_str(last_reset_time)
+                    nbr['state']['openconfig-bgp-ext:last-reset-time'] = seconds_to_dhms_str(last_reset_time)
 
             if unnumbered == True:
                 ifName = nbr['neighbor-address']
@@ -1713,8 +1713,11 @@ def invoke_show_api(func, args=[]):
             response = api.get(keypath)
             if response.ok():
                 iptype = 4
+                d['afisafiname'] = 'openconfig-bgp-types:IPV4_UNICAST'
                 if args[2] == 'ipv6':
                     iptype = 6
+                    d['afisafiname'] = 'openconfig-bgp-types:IPV6_UNICAST'
+
                 if 'openconfig-network-instance:neighbors' in response.content:
                     tmp['neighbor'] = preprocess_bgp_nbrs(iptype, response.content['openconfig-network-instance:neighbors']['neighbor'])
                     d['openconfig-network-instance:neighbors'] = tmp
