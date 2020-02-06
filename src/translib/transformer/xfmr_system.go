@@ -225,10 +225,8 @@ var DbToYang_sys_cpus_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) error
         cpu, _ := strconv.Atoi(val)
         log.Info("Cpu id: ", cpu, ", max is ", len(jsonsystem.Cpus))
         if cpu >=0 && cpu < len(jsonsystem.Cpus) {
+	//Since key(a pointer) is unknown, there is no way to do a lookup. So looping through a map with only one entry
 	    for _, value := range sysObj.Cpus.Cpu {
-		if value == nil {
-		    return fmt.Errorf("%s", "CPU object is nil" )
-		}
 		ygot.BuildEmptyTree(value)
 	        getSystemCpu(cpu, jsonsystem.Cpus[cpu], value)
 	    }
