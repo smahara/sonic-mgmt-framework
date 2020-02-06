@@ -215,7 +215,7 @@ var DbToYang_sys_cpus_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) error
         log.Infof("getSystemInfoFromFile failed")
         return err
     }
-    if sysObj == nil {
+    if sysObj.Cpus == nil {
         ygot.BuildEmptyTree(sysObj)
     }
 
@@ -226,6 +226,9 @@ var DbToYang_sys_cpus_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) error
         log.Info("Cpu id: ", cpu, ", max is ", len(jsonsystem.Cpus))
         if cpu >=0 && cpu < len(jsonsystem.Cpus) {
 	    for _, value := range sysObj.Cpus.Cpu {
+		if value == nil {
+		    return fmt.Errorf("%s", "CPU object is nil" )
+		}
 		ygot.BuildEmptyTree(value)
 	        getSystemCpu(cpu, jsonsystem.Cpus[cpu], value)
 	    }
