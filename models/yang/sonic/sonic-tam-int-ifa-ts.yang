@@ -59,8 +59,8 @@ module sonic-tam-int-ifa-ts {
                 key "name";
 
                 leaf name {
-                type string {
-                        pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,71})'{
+                        type string {
+                                pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{0,71})'{
                                    error-message "Invalid INT IFA TS Flow name";
                                    error-app-tag int-ifa-ts-invalid-flow-name;
                                 }
