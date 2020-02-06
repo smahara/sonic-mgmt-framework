@@ -154,6 +154,13 @@ limitations under the License.
         pattern="1312..&MAX_MTU;"
         help=""
         />
+     <!--=======================================================-->
+     <PTYPE
+        name="MGMT_RANGE_MTU"
+        method="integer"
+        pattern="1500..&MAX_MTU;"
+        help=""
+        />
     <!--=======================================================-->
     <PTYPE
         name="RANGE_0_63"
