@@ -40,11 +40,15 @@ module sonic-tam-int-ifa-ts {
 			type string {
 				pattern 'feature';
 			}
+			description
+				"Feature identifier name in IFA TailStamping feature table.";
 		}
 
                 leaf enable {
                     type boolean;
                     default false;
+		    description
+			    "Feature identifier name in IFA TailStamping feature table.";
                 }
             }
         }
@@ -61,14 +65,20 @@ module sonic-tam-int-ifa-ts {
                                    error-app-tag int-ifa-ts-invalid-flow-name;
                                 }
 			}
+		    description
+			    "Flow name in flow configuration list.";
                 }
 
                 leaf acl-table-name {
                     type string;
+		    description
+			    "ACL table name used in IFA TailStamping flow configuration table.";
                 }
 
                 leaf acl-rule-name {
                     type string;
+		    description
+			    "ACL rule name used in IFA TailStamping flow configuration table.";
                 }
 
                container state {
@@ -81,11 +91,14 @@ module sonic-tam-int-ifa-ts {
 			leaf MATCHED_PACKETS {
 				type yang:counter64;
 				default 0;
+				description
+				    "Number of packets matching a IFA TailStamping flow.";
 			}
 
 			leaf MATCHED_OCTETS {
 				type yang:counter64;
 				default 0;
+				    "Number of octets matching a IFA TailStamping flow.";
 			}
                 }
             }
