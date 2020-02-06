@@ -48,7 +48,7 @@ module sonic-tam-int-ifa-ts {
                     type boolean;
                     default false;
                     description
-                        "Feature identifier name in IFA TailStamping feature table.";
+                        "Flag to enable or disable IFA TailStamping feature.";
                 }
             }
         }

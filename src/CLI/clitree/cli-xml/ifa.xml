@@ -36,17 +36,17 @@ limitations under the License.
       <ACTION builtin="clish_pyobj">sonic_cli_ifa get_sonic_ifa_sonic_ifa_tam_int_ifa_feature_table show_tam_feature.j2</ACTION>
       <DOCGEN>
             <DESCRIPTION>
-	    Shows IFA feature status.
+                Shows IFA feature status.
             </DESCRIPTION>
             <USAGE>
-	    USe this command to display IFA feature status.
+                Use this command to display IFA feature status.
             </USAGE>
             <EXAMPLE summary="Show IFA feature details">
-		sonic# show tam int-ifa supported
-		---------------------------------------------------------
-		TAM IFA Feature Information
-		---------------------------------------------------------
-		IFA Feature Supported: True
+                sonic# show tam int-ifa supported
+                ---------------------------------------------------------
+                TAM IFA Feature Information
+                ---------------------------------------------------------
+                IFA Feature Supported: True
             </EXAMPLE>
       </DOCGEN>
     </COMMAND>
@@ -62,24 +62,24 @@ limitations under the License.
        <ACTION builtin="clish_pyobj">sonic_cli_ifa get_sonic_ifa_sonic_ifa_tam_int_ifa_flow_table show_tam_flow.j2 ${name}</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	    Show IFA flow configuration.
+                Show IFA flow configuration.
             </DESCRIPTION>
             <USAGE>
-	    Use this command to display IFA flow configuration.
+                Use this command to display IFA flow configuration.
             </USAGE>
             <EXAMPLE summary="This">
-	    sonic# show tam int-ifa flow
-	    ------------------------------------------------------------------------------------------------
-	    FLOW           ACL TABLE      ACL RULE       SAMPLING RATE  COLLECTOR
-	    ------------------------------------------------------------------------------------------------
-	    iflow1         iacl1          irule1         12             icol
-	    iflow2         iacl2          irule1         17             icol1
+                sonic# show tam int-ifa flow
+                ------------------------------------------------------------------------------------------------
+                FLOW           ACL TABLE      ACL RULE       SAMPLING RATE  COLLECTOR
+                ------------------------------------------------------------------------------------------------
+                iflow1         iacl1          irule1         12             icol
+                iflow2         iacl2          irule1         17             icol1
 
-	    sonic# show tam int-ifa flow iflow2
-	    ------------------------------------------------------------------------------------------------
-	    FLOW           ACL TABLE      ACL RULE       SAMPLING RATE  COLLECTOR
-	    ------------------------------------------------------------------------------------------------
-	    iflow2         iacl2          irule1         17             icol1
+                sonic# show tam int-ifa flow iflow2
+                ------------------------------------------------------------------------------------------------
+                FLOW           ACL TABLE      ACL RULE       SAMPLING RATE  COLLECTOR
+                ------------------------------------------------------------------------------------------------
+                iflow2         iacl2          irule1         17             icol1
 
             </EXAMPLE>
        </DOCGEN>
@@ -97,17 +97,17 @@ limitations under the License.
        <ACTION builtin="clish_pyobj">sonic_cli_ifa get_tam_ifa_flow_stats ${name}</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	    Shows IFA flow statistics.
+                Shows IFA flow statistics.
             </DESCRIPTION>
             <USAGE>
-	    Use this command to display packet count and byte count for matcing IFA flow.
+                Use this command to display packet count and byte count for matcing IFA flow.
             </USAGE>
             <EXAMPLE summary="This">
-	    sonic# show tam int-ifa statistics
-	    ------------------------------------------------------------------------------------------------
-	    FLOW           ACL TABLE      ACL RULE       PACKET COUNT   BYTE COUNT
-	    ------------------------------------------------------------------------------------------------
-	    iflow1         iacl1          irule1         0              0
+                sonic# show tam int-ifa statistics
+                ------------------------------------------------------------------------------------------------
+                FLOW           ACL TABLE      ACL RULE       PACKET COUNT   BYTE COUNT
+                ------------------------------------------------------------------------------------------------
+                iflow1         iacl1          irule1         0              0
             </EXAMPLE>
        </DOCGEN>
     </COMMAND>
@@ -119,20 +119,20 @@ limitations under the License.
       <ACTION builtin="clish_pyobj">sonic_cli_ifa get_tam_ifa_status</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	    Shows IFA status.
+                Shows IFA overall status.
             </DESCRIPTION>
             <USAGE>
-	    Use this command to display overall IFA status including device-id, number of flow configured, number of flow configured etc.
+                Use this command to display overall IFA status including device-id, number of collectors configured, number of flow configured etc.
             </USAGE>
             <EXAMPLE summary="Shows IFA overall status">
-	    sonic# show tam int-ifa status
-	    ---------------------------------------------------------
-	    TAM/IFA Status
-	    ---------------------------------------------------------
-	    Device Identifier    : 7765
-	    Number of collectors : 1
-	    Number of flows      : 1
-	    Feature Enabled      : True
+                sonic# show tam int-ifa status
+                ---------------------------------------------------------
+                TAM/IFA Status
+                ---------------------------------------------------------
+                Device Identifier    : 7765
+                Number of collectors : 1
+                Number of flows      : 1
+                Feature Enabled      : True
             </EXAMPLE>
        </DOCGEN>
     </COMMAND>
@@ -157,19 +157,19 @@ limitations under the License.
       <ACTION builtin="clish_pyobj">sonic_cli_ifa patch_sonic_ifa_sonic_ifa_tam_int_ifa_feature_table_tam_int_ifa_feature_table_list_enable ${__params}</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	    Enables or disables IFA feature.
+                Enables or disables IFA feature.
             </DESCRIPTION>
             <USAGE>
-	    Use this command to enable or disable IFA feature.
+                Use this command to enable or disable IFA feature.
             </USAGE>
             <EXAMPLE summary="This">
-	    sonic(config-tam-int-ifa)# feature disable
+                sonic(config-tam-int-ifa)# feature disable
 
-	    sonic(config-tam-int-ifa)# do show tam int-ifa supported
-	    ---------------------------------------------------------
-	    TAM IFA Feature Information
-	    ---------------------------------------------------------
-	    IFA Feature Supported: False
+                sonic(config-tam-int-ifa)# do show tam int-ifa supported
+                ---------------------------------------------------------
+                TAM IFA Feature Information
+                ---------------------------------------------------------
+                IFA Feature Supported: False
             </EXAMPLE>
        </DOCGEN>
     </COMMAND>
@@ -224,14 +224,14 @@ limitations under the License.
       <ACTION builtin="clish_pyobj">sonic_cli_ifa patch_sonic_ifa_sonic_ifa_tam_int_ifa_flow_table_tam_int_ifa_flow_table_list ${flow-name} ${acl-rule-val} ${acl-table-val} sv ${sampling-rate-val} cv ${collector-val}</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	    	Configure IFA flow.
+                Configures IFA flow.
             </DESCRIPTION>
             <USAGE>
-	        Use this command to configure IFA flow. The collector used in the cofiguration should be configured separately.
+                Use this command to configure IFA flow. The collector used in the cofiguration should be configured separately.
             </USAGE>
             <EXAMPLE summary="Configure IFA flow configuration">
-		sonic(config-tam-int-ifa)# flow iflow1 acl-table iacl1 acl-rule irule1 sampling-rate 12 collector-name icol
-		sonic(config-tam-int-ifa)# exit
+                sonic(config-tam-int-ifa)# flow iflow1 acl-table iacl1 acl-rule irule1 sampling-rate 12 collector-name icol
+                sonic(config-tam-int-ifa)# exit
             </EXAMPLE>
        </DOCGEN>
     </COMMAND>
@@ -248,14 +248,14 @@ limitations under the License.
       <ACTION builtin="clish_pyobj">sonic_cli_ifa delete_sonic_ifa_sonic_ifa_tam_int_ifa_flow_table_tam_int_ifa_flow_table_list ${name}</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	    	Remove IFA flow configuration.
+                Remove IFA flow configuration.
             </DESCRIPTION>
             <USAGE>
-	    	Use this command to remove existing IFA flow configuration.
+                Use this command to remove existing IFA flow configuration.
             </USAGE>
             <EXAMPLE summary="Clear IFA flow configuration">
-		sonic(config-tam-int-ifa)# no flow iflow2
-		sonic(config-tam-int-ifa)# end
+                sonic(config-tam-int-ifa)# no flow iflow2
+                sonic(config-tam-int-ifa)# end
             </EXAMPLE>
        </DOCGEN>
     </COMMAND>

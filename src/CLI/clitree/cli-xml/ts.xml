@@ -19,19 +19,19 @@
       <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts get_tam_int_ifa_ts_supported</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	     	Shows IFA Tail Timestamping feature status
+                Shows IFA Tail Timestamping feature status.
             </DESCRIPTION>
             <USAGE>
-	     	After enabling IFA Timestamping feature, use this command to display feature status.		 
+                After enabling IFA Timestamping feature, use this command to display feature status.		 
             </USAGE>
             <EXAMPLE summary="Shows IFA Tail Timestamping feature enabled status">
-		sonic(config)# tam
-		sonic(config-tam)# int-ifa-ts
-		sonic(config-int-ifa-ts)# feature enable
+                sonic(config)# tam
+                sonic(config-tam)# int-ifa-ts
+                sonic(config-int-ifa-ts)# feature enable
 
-	    	sonic# show tam int-ifa-ts supported
+                sonic# show tam int-ifa-ts supported
 
-	    	Feature Supported      : True
+                Feature Supported      : True
             </EXAMPLE>
        </DOCGEN>
     </COMMAND>
@@ -40,18 +40,18 @@
       <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts get_sonic_tam_int_ifa_ts_sonic_tam_int_ifa_ts_tam_int_ifa_ts_flow_table show_tam_int_ifa_ts_flow.j2 ${name}</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	    	Shows IFA Tail Timestamping flow configutaion details
+                Shows IFA Tail Timestamping flow configutaion details.
             </DESCRIPTION>
             <USAGE>
-	    	Use this command to display flow configuration once flow configuration has been done 
+                Use this command to display flow configuration once flow configuration has been done.
             </USAGE>
             <EXAMPLE summary="Shows IFA Tail Timestamping flow details">
-		sonic# show tam int-ifa-ts flow
-		------------------------------------------------------------------------------------------------
-		FLOW           ACL TABLE      ACL RULE
-		------------------------------------------------------------------------------------------------
-		flow1          acl1           rule1
-		flow2          acl2           rule1
+                sonic# show tam int-ifa-ts flow
+                ------------------------------------------------------------------------------------------------
+                FLOW           ACL TABLE      ACL RULE
+                ------------------------------------------------------------------------------------------------
+                flow1          acl1           rule1
+                flow2          acl2           rule1
 
             </EXAMPLE>
        </DOCGEN>
@@ -60,19 +60,19 @@
       <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts get_tam_ifa_ts_status</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	    	Shows IFA Tail Timestamping status
+                Shows IFA Tail Timestamping status.
             </DESCRIPTION>
             <USAGE>
-	    	Use this command to display overall status of IFA Tail Timestamping feature
+                Use this command to display overall status of IFA Tail Timestamping feature.
             </USAGE>
             <EXAMPLE summary="Shows IFA Tail Timestamping status details">
-	        sonic# show tam int-ifa-ts status
-	        ---------------------------------------------------------
-	        TAM INT IFA TS Status
-	        ---------------------------------------------------------
-	        Device Identifier    : 2345
-	        Number of flows      : 2
-	        Feature Enabled      : True
+                sonic# show tam int-ifa-ts status
+                ---------------------------------------------------------
+                TAM INT IFA TS Status
+                ---------------------------------------------------------
+                Device Identifier    : 2345
+                Number of flows      : 2
+                Feature Enabled      : True
 
             </EXAMPLE>
        </DOCGEN>
@@ -82,19 +82,19 @@
       <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts get_tam_int_ifa_ts_flow_stats ${name}</ACTION>
        <DOCGEN>
             <DESCRIPTION>
-	    	Shows IFA Tail Timestamping flow statistics
+                Shows IFA Tail Timestamping flow statistics
             </DESCRIPTION>
             <USAGE>
-	    	Use this command once all required configurations are done and traffic is flowing.
+                Use this command once all required configurations are done and traffic is flowing.
             </DESCRIPTION>
             </USAGE>
             <EXAMPLE summary="Shows IFA Tail Timestamping flow statistics">
-	        sonic# show tam int-ifa-ts statistics
-	        ------------------------------------------------------------------------------------------------
-	        FLOW           ACL TABLE      ACL RULE       PACKET COUNT   BYTE COUNT
-	        ------------------------------------------------------------------------------------------------
-	        flow1          acl1           rule1          0              0
-	        flow2          acl2           rule1          0              0
+                sonic# show tam int-ifa-ts statistics
+                ------------------------------------------------------------------------------------------------
+                FLOW           ACL TABLE      ACL RULE       PACKET COUNT   BYTE COUNT
+                ------------------------------------------------------------------------------------------------
+                flow1          acl1           rule1          0              0
+                flow2          acl2           rule1          0              0
             </EXAMPLE>
        </DOCGEN>
     </COMMAND>	    
@@ -115,26 +115,26 @@
           <COMMAND name="no flow"
                 help="Remove Flow"
                  >
-	   <PARAM
-	       name="flow-name"
-	       help="Name of the flow"
-	       ptype="STRING"
-	       optional="true">
+           <PARAM
+               name="flow-name"
+               help="Name of the flow"
+               ptype="STRING"
+               optional="true">
            </PARAM>
 
-	   <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts delete_sonic_tam_int_ifa_ts_sonic_tam_int_ifa_ts_tam_int_ifa_ts_flow_table_tam_int_ifa_ts_flow_table_list ${flow-name}</ACTION>
-	   <DOCGEN>
-		<DESCRIPTION>
-		   	Delete a flow already configured.
-		</DESCRIPTION>
-		<USAGE>
-		   	Use this command to delete a flow already configured.
-		</USAGE>
-		<EXAMPLE summary="Deletes IFA Tail Timestamping flow">
-			dhcp-10-59-142-164(config-int-ifa-ts)# no flow flow32
-			dhcp-10-59-142-164(config-int-ifa-ts)#
-		</EXAMPLE>
-	   </DOCGEN>
+           <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts delete_sonic_tam_int_ifa_ts_sonic_tam_int_ifa_ts_tam_int_ifa_ts_flow_table_tam_int_ifa_ts_flow_table_list ${flow-name}</ACTION>
+                <DOCGEN>
+                <DESCRIPTION>
+                        Delete a IFA Tail Timestamping flow already configured.
+                </DESCRIPTION>
+                <USAGE>
+                        Use this command to delete a IFA Tail Timestamping flow already configured.
+                </USAGE>
+                <EXAMPLE summary="Deletes IFA Tail Timestamping flow">
+                        dhcp-10-59-142-164(config-int-ifa-ts)# no flow flow32
+                        dhcp-10-59-142-164(config-int-ifa-ts)#
+                </EXAMPLE>
+                </DOCGEN>
          </COMMAND>
 
           <COMMAND name="feature"
@@ -163,19 +163,19 @@
                    >
                 </PARAM>
          </PARAM>
-	   <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts patch_sonic_tam_int_ifa_ts_sonic_tam_int_ifa_ts_tam_int_ifa_ts_feature_table_tam_int_ifa_ts_feature_table_list_enable ${__params}</ACTION>
-	   <DOCGEN>
-		<DESCRIPTION>
-		   Enable or disable IFA Tail Timestamping feature.
-		</DESCRIPTION>
-		<USAGE>
-		   Use this command to enable or disable IFA Tail Timestamping feature.
-		</USAGE>
-		<EXAMPLE summary="Enable/disable IFA Tail Timestamping feature">
-		   dhcp-10-59-142-164(config-int-ifa-ts)# feature enable
-		   dhcp-10-59-142-164(config-int-ifa-ts)#
-		</EXAMPLE>
-	   </DOCGEN>
+           <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts patch_sonic_tam_int_ifa_ts_sonic_tam_int_ifa_ts_tam_int_ifa_ts_feature_table_tam_int_ifa_ts_feature_table_list_enable ${__params}</ACTION>
+                <DOCGEN>
+                <DESCRIPTION>
+                     Enable or disable IFA Tail Timestamping feature.
+                </DESCRIPTION>
+                <USAGE>
+                     Use this command to enable or disable IFA Tail Timestamping feature.
+                </USAGE>
+                <EXAMPLE summary="Enable/disable IFA Tail Timestamping feature">
+                     dhcp-10-59-142-164(config-int-ifa-ts)# feature enable
+                     dhcp-10-59-142-164(config-int-ifa-ts)#
+                </EXAMPLE>
+                </DOCGEN>
          </COMMAND>
 
          <COMMAND
@@ -218,19 +218,19 @@
                    >
               </PARAM>
 
-	   <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts patch_sonic_tam_int_ifa_ts_sonic_tam_int_ifa_ts_tam_int_ifa_ts_flow_table_tam_int_ifa_ts_flow_table_list ${flow-name} ${acl-table-name} ${acl-rule-name}</ACTION>
-	   <DOCGEN>
-		<DESCRIPTION>
-		   Configure Tail Timestamping flow parameters.
-		</DESCRIPTION>
-		<USAGE>
-		   Use this command to configure Tail Timestamping flow table.
-		</USAGE>
-		<EXAMPLE summary="Tail Timestamping flow configuration">
-		   dhcp-10-59-142-164(config-int-ifa-ts)# flow flow32 acl-table tacl1 acl-rule trule1
-		   dhcp-10-59-142-164(config-int-ifa-ts)#
-		</EXAMPLE>
-	   </DOCGEN>
+           <ACTION builtin="clish_pyobj">sonic_cli_tam_int_ifa_ts patch_sonic_tam_int_ifa_ts_sonic_tam_int_ifa_ts_tam_int_ifa_ts_flow_table_tam_int_ifa_ts_flow_table_list ${flow-name} ${acl-table-name} ${acl-rule-name}</ACTION>
+           <DOCGEN>
+                <DESCRIPTION>
+                   Configure Tail Timestamping flow parameters.
+                </DESCRIPTION>
+                <USAGE>
+                   Use this command to configure Tail Timestamping flow table.
+                </USAGE>
+                <EXAMPLE summary="Tail Timestamping flow configuration">
+                   dhcp-10-59-142-164(config-int-ifa-ts)# flow flow32 acl-table tacl1 acl-rule trule1
+                   dhcp-10-59-142-164(config-int-ifa-ts)#
+                </EXAMPLE>
+           </DOCGEN>
          </COMMAND>
   </VIEW>
 
