@@ -109,9 +109,14 @@ int print_error(const char *str) {
         /* Since error-message is an optional attribute, we need to check for "error-tag"
            and print the error-message accordingly */
         } else {
+            std::string err_msg = "operation failed";
+
             cJSON* err_tag = cJSON_GetObjectItemCaseSensitive(error, "error-tag");
+            if(err_tag == nullptr) {
+                lub_dump_printf("%% Error: %s\r\n", err_msg.c_str());
+                return 1;
+            }
             std::string err_tag_str = std::string {err_tag->valuestring};
-            std::string err_msg;
 
             if(err_tag_str == "invalid-value") {
                 err_msg = "validation failed";
