@@ -31,7 +31,7 @@ limitations under the License.
     <PARAM name="protocol" help="protocol" mode="switch" ptype="SUBCOMMAND">
       <PARAM name="connected" help="Connected Routes" mode="subcommand" ptype="SUBCOMMAND"/>
       <PARAM name="static" help="Static Routes" mode="subcommand" ptype="SUBCOMMAND"/>
-      <PARAM name="ospf" help="Open Shortest Path First (OSPFv2)" mode="subcommand" ptype="SUBCOMMAND"/>
+      <PARAM name="ospfv3" help="Open Shortest Path First (IPv6) (OSPFv3)" mode="subcommand" ptype="SUBCOMMAND"/>
     </PARAM>
     <PARAM name="route-map" help="Route-map reference" mode="subcommand" ptype="SUBCOMMAND" optional="true">
       <PARAM name="route-map-name" help="Route map name" ptype="STRING"/>
@@ -116,7 +116,7 @@ limitations under the License.
     <PARAM name="protocol" help="protocol" mode="switch" ptype="SUBCOMMAND">
       <PARAM name="connected" help="Connected Routes" mode="subcommand" ptype="SUBCOMMAND"/>
       <PARAM name="static" help="Static Routes" mode="subcommand" ptype="SUBCOMMAND"/>
-      <PARAM name="ospf" help="Open Shortest Path First (OSPFv2)" mode="subcommand" ptype="SUBCOMMAND"/>
+      <PARAM name="ospfv3" help="Open Shortest Path First (IPv6) (OSPFv3)" mode="subcommand" ptype="SUBCOMMAND"/>
     </PARAM>
     <PARAM name="route-map" help="Route-map reference" mode="subcommand" ptype="SUBCOMMAND" optional="true">
       <PARAM name="route-map-name" help="Route map name" ptype="STRING"/>
