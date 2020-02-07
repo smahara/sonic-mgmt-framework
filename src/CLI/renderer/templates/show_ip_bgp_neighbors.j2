@@ -60,11 +60,13 @@
             {% set vars = {'kpa_intvl': ""} %}
             {% set vars = {'nego_time': ""} %}
             {% set vars = {'min_adv_intvl': "30"} %}
-            {% if vars.update({'hold_time':neighbor['timers']['state']['hold-time']}) %}{% endif %}
-            {% if vars.update({'kpa_intvl':neighbor['timers']['state']['keepalive-interval']}) %}{% endif %}
-            {% if vars.update({'nego_time':neighbor['timers']['state']['negotiated-hold-time']}) %}{% endif %}
-            {% if 'minimum-advertisement-interval' in neighbor['timers']['state'] %}
+            {% if 'timers' in neighbor and 'state' in neighbor['timers'] %}
+              {% if vars.update({'hold_time':neighbor['timers']['state']['hold-time']}) %}{% endif %}
+              {% if vars.update({'kpa_intvl':neighbor['timers']['state']['keepalive-interval']}) %}{% endif %}
+              {% if vars.update({'nego_time':neighbor['timers']['state']['negotiated-hold-time']}) %}{% endif %}
+              {% if 'minimum-advertisement-interval' in neighbor['timers']['state'] %}
                 {% if vars.update({'min_adv_intvl':neighbor['timers']['state']['minimum-advertisement-interval']}) %}{% endif %}
+              {% endif %}
             {% endif %}
             {{-'  Hold time is '}}{{vars.nego_time}}{{' seconds'-}}
             {{-', keepalive interval is '}}{{vars.kpa_intvl}}{{' seconds'-}}{{'\n'}}
@@ -231,7 +233,7 @@
 
             {{-'  Connections established '}}{{vars.conn_eas}}{{', dropped '}}{{vars.conn_drop}}{{'\n'}}
             {{-'  Last reset '}}{{vars.reset_time}}{{', Last reset reason '}}{{vars.reset_reason|string}}{{'\n'}}
-            {% if 'transport' in neighbor %}
+            {% if 'transport' in neighbor and 'state' in neighbor['transport'] %}
                 {% set n_tp_state = neighbor['transport']['state'] %}
                 {{-'  Local host: '}}{{n_tp_state['local-address']-}}
                 {{-', Local port: '}}{{n_tp_state['local-port']}}{{'\n'}}
@@ -239,7 +241,7 @@
                 {{-', Foreign port: '}}{{n_tp_state['remote-port']}}{{'\n'}}
             {% endif %}
             {% set vars = {'conn_retry_time': "120"} %}
-            {% if 'connect-retry' in neighbor['timers']['state'] %}
+            {% if 'timers' in neighbor and 'state' in neighbor['timers'] and 'connect-retry' in neighbor['timers']['state'] %}
                {% if vars.update({'conn_retry_time':neighbor['timers']['state']['connect-retry']}) %}{% endif %}
             {% endif %}
                {{-'  BGP Connect Retry Timer in Seconds '}}{{vars.conn_retry_time}}{{'\n'}}
