@@ -106,7 +106,11 @@ limitations under the License.
         <PARAM name="vrf-name" help="VRF Name" ptype="STRING_15" default="default"/>
       </PARAM>
     </PARAM>
-    <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_global_config ${vrf-name}</ACTION>
+    <ACTION> for aft in IPV4_UNICAST IPV6_UNICAST ; do for proto in connected static ospf ; do&#xA;
+                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_table_connections_table_connection ${vrf-name} $aft $proto&#xA;
+             done ; done&#xA;
+             python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_global_config ${vrf-name}&#xA;
+    </ACTION>
   </COMMAND>
 </VIEW>
 
