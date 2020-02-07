@@ -125,10 +125,6 @@ module openconfig-qos-annot {
     }
 
 
-    deviation /oc-qos:qos/oc-qos:scheduler-policies/oc-qos:scheduler-policy/oc-qos:schedulers/oc-qos:scheduler/oc-qos:config/oc-qos:type{
-      deviate not-supported;
-    }
-
 
 }
 
