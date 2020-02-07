@@ -10,8 +10,8 @@ from rpipe_utils import pipestr
 
 def invoke(func, args=[]):
     api = cc.ApiClient()
-    if func == 'get_openconfig_qos_qos_scheduler_policies_scheduler_policy_config':
-        path = cc.Path('/restconf/data/openconfig-qos:qos/scheduler-policies/scheduler-policy={name}/config', name=args[0] )
+    if func == 'get_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers':
+        path = cc.Path('/restconf/data/openconfig-qos:qos/scheduler-policies/scheduler-policy={name}/schedulers', name=args[0] )
         return api.get(path)
     if func == 'patch_openconfig_qos_qos_scheduler_policies_scheduler_policy':
         path = cc.Path('/restconf/data/openconfig-qos:qos/scheduler-policies/scheduler-policy={name}/config', name=args[0] )
@@ -77,7 +77,7 @@ def run(func, args):
             #print api_response
             #print sys.argv[2:]
 
-            if func == 'get_openconfig_qos_qos_scheduler_policies_scheduler_policy_config':
+            if func == 'get_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers':
                 show_cli_output('show_qos_scheduler.j2', response)
 
     else:

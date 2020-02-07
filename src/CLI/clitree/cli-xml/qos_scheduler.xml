@@ -208,12 +208,11 @@ limitations under the License.
         <PARAM 
             name="name"
             help="name of scheduler policy"
-            ptype="SUBCOMMAND"
-            mode="subcommand"
+            ptype="STRING"
             >
         </PARAM>
         <ACTION>
-            python $SONIC_CLI_ROOT/sonic-cli-qos-scheduler.py get_openconfig_qos_qos_scheduler_policies_scheduler_policy_config ${name}
+            python $SONIC_CLI_ROOT/sonic-cli-qos-scheduler.py get_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers ${name}
         </ACTION>
     </COMMAND>
   </VIEW>
