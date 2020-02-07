@@ -134,59 +134,29 @@ def invoke_show_api(func, args=[]):
 	body = None
 
 	if func == 'get_bfd_peers':
-		d = {}
-	
 		keypath = cc.Path('/restconf/data/openconfig-bfd:bfd/openconfig-bfd-ext:bfd-state')
-		response = api.get(keypath)
-		if response.ok():
-			return response.content
-  
+		return api.get(keypath)
 	elif func == 'get_openconfig_bfd_ext_bfd_sessions_single_hop':
-		d = {}
-                if len(args) == 4:
-                    print("%Error: Interface should be configured for single-hop peer")
-                    exit(1)
-
 		keypath = cc.Path('/restconf/data/openconfig-bfd:bfd/openconfig-bfd-ext:bfd-state/single-hop-state={address},{interfacename},{vrfname},{localaddress}', address=args[1], interfacename=args[2], vrfname=args[3], localaddress=args[4])
-		response = api.get(keypath)
-		if response.ok():
-			tmp = {}
-			tmp['sessions'] = response.content['openconfig-bfd-ext:single-hop-state']
-			d['openconfig-bfd-ext:single-hop'] = tmp
-			d.update(response.content)
-
-			return d
-
+		return api.get(keypath)
 	elif func == 'get_openconfig_bfd_ext_bfd_sessions_multi_hop':
-		d = {}
-
-                if args[4] == "null":
-                    print("%Error: Local Address must be configured for multi-hop peer")
-                    exit(1)
-
 		keypath = cc.Path('/restconf/data/openconfig-bfd:bfd/openconfig-bfd-ext:bfd-state/multi-hop-state={address},{interfacename},{vrfname},{localaddress}', address=args[1], interfacename=args[2], vrfname=args[3], localaddress=args[4])
-		response = api.get(keypath)
-		if response.ok():
-			tmp = {}
-			tmp['sessions'] = response.content['openconfig-bfd-ext:multi-hop-state']
-			d['openconfig-bfd-ext:single-hop'] = tmp
-			d.update(response.content)
-
-			return d
-
-	return api.cli_not_implemented(func)
+                return api.get(keypath)
+	else:
+		return api.cli_not_implemented(func)
 
 
 def run(func, args):
-	if func == 'get_bfd_peers':
-		content = invoke_show_api(func, args)
-		show_cli_output(args[0], content)
-	elif func == 'get_openconfig_bfd_ext_bfd_sessions_single_hop':
+	if func == 'get_bfd_peers' or func == 'get_openconfig_bfd_ext_bfd_sessions_single_hop' or func == 'get_openconfig_bfd_ext_bfd_sessions_multi_hop':
 		response = invoke_show_api(func, args)
-		show_cli_output(args[0], response)
-	elif func == 'get_openconfig_bfd_ext_bfd_sessions_multi_hop':
-		response = invoke_show_api(func, args)
-		show_cli_output(args[0], response)
+		if response.ok():
+			if response.content is not None:
+				# Get Command Output
+				api_response = response.content
+				if api_response is None:
+					print("Failed")
+					return
+		show_cli_output(args[0], api_response)
 	else:
 		response = invoke_api(func, args)
 
