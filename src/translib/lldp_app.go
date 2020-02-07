@@ -232,7 +232,7 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
             }
 
         }
-    } else if ((targetUriPath == "/openconfig-lldp:lldp/interfaces/interface") || (targetUriPath == "/openconfig-lldp:lldp/interfaces/interface/neighbors")) {
+    } else if ((targetUriPath == "/openconfig-lldp:lldp/interfaces/interface") || (strings.Contains(targetUriPath, "/openconfig-lldp:lldp/interfaces/interface/neighbors"))) {
         intfObj := lldpIntfObj.Interfaces
         ygot.BuildEmptyTree(intfObj)
         if intfObj.Interface != nil && len(intfObj.Interface) > 0 {
