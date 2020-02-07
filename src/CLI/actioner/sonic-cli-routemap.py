@@ -34,7 +34,6 @@ def invoke_api(func, args=[]):
 
     op, attr = func.split('_', 1)
     uri = restconf_map[attr]
-
     if op == 'patch':
         if attr == 'openconfig_routing_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_config_policy_result':
             keypath = cc.Path(uri, name=args[0], name1=args[1])
@@ -48,13 +47,17 @@ def invoke_api(func, args=[]):
             keypath = cc.Path(uri, name=args[0], name1=args[1])
             body = { "openconfig-bgp-policy:set-local-pref" : int(args[2]) }
             return api.patch(keypath, body)
+        elif attr == 'openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_config_set_med':
+            keypath = cc.Path(uri, name=args[0], name1=args[1])
+            body = { "openconfig-bgp-policy:set-med" : int(args[2]) }
+            return api.patch(keypath, body)
         elif attr == 'openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_config_set_route_origin':
             keypath = cc.Path(uri, name=args[0], name1=args[1])
             body = { "openconfig-bgp-policy:set-route-origin" : args[2].upper() }
             return api.patch(keypath, body)
-        elif attr == 'openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_set_as_path_prepend_config_asn':
+        elif attr == 'openconfig_routing_policy_ext_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_set_as_path_prepend_config_asn_list':
             keypath = cc.Path(uri, name=args[0], name1=args[1])
-            body = { "openconfig-bgp-policy:asn" : int(args[2]) }
+            body = {"openconfig-routing-policy-ext:asn_list":args[2]}
             return api.patch(keypath, body)  
         elif attr == 'openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_set_community':
             keypath = cc.Path(uri, name=args[0], name1=args[1])
@@ -68,7 +71,10 @@ def invoke_api(func, args=[]):
                 body = { "openconfig-bgp-policy:set-ext-community": { "config" : { "method":"INLINE", "options":args[4]}, "inline": {"config": {"communities":["route-origin:"+args[3]]}}}}
             return api.patch(keypath, body)
     elif op == 'delete':
-
+        if attr == 'openconfig_routing_policy_routing_policy_policy_definitions_policy_definition':
+            keypath = cc.Path('/restconf/data/openconfig-routing-policy:routing-policy/policy-definitions/policy-definition={name}',
+            name=args[0])
+            return api.delete(keypath)
         keypath = cc.Path(uri, name=args[0], name1=args[1])
         return api.delete(keypath)
 

@@ -1203,6 +1203,14 @@ var YangToDb_sw_vlans_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (map[
     if err != nil {
         return nil, err
     }
+    /* Restrict configuring member-port if Physical interface configured as lag interface */
+    if intfType == IntfTypeEthernet {
+        err = validateIntfAssociatedWithPortChannel(inParams.d, &ifName)
+        if err != nil {
+            errStr := "VLAN config is not permitted on LAG member port"
+            return nil, tlerr.InvalidArgsError{Format: errStr}
+        }
+    }
     switch inParams.oper {
     case CREATE:
         fallthrough
@@ -1471,10 +1479,14 @@ var DbToYang_sw_vlans_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (err
     log.Infof("Ethernet-Switched Vlan Get observed for Interface: %s", ifName)
     intfType, _, err := getIntfTypeByName(ifName)
     if intfType != IntfTypeEthernet && intfType != IntfTypePortChannel || err != nil {
-        intfTypeStr := strconv.Itoa(int(intfType))
-        errStr := "TableXfmrFunc - Invalid interface type" + intfTypeStr
-        log.Error(errStr);
-        return errors.New(errStr);
+    	if intfType == IntfTypeVxlan {
+    		return nil
+    	} else {
+	        intfTypeStr := strconv.Itoa(int(intfType))
+    	    errStr := "TableXfmrFunc - Invalid interface type" + intfTypeStr
+        	log.Error(errStr);
+	        return errors.New(errStr);
+    	}
     }
 
     targetUriPath, err := getYangPathFromUri(inParams.uri)

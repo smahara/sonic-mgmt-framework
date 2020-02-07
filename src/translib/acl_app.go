@@ -20,8 +20,8 @@
 package translib
 
 import (
-	"errors"
 	"bytes"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -40,7 +40,7 @@ const (
 	KEY_SEPARATOR            = "|"
 	ACL_TABLE                = "ACL_TABLE"
 	RULE_TABLE               = "ACL_RULE"
-	COUNTERS                 = "COUNTERS"
+	ACL_COUNTERS             = "ACL_COUNTERS"
 	ACL_TYPE                 = "type"
 	ACL_DESCRIPTION          = "policy_desc"
 	SONIC_ACL_TYPE_L2        = "L2"
@@ -83,8 +83,8 @@ type AclApp struct {
 	ygotRoot   *ygot.GoStruct
 	ygotTarget *interface{}
 
-	aclTs  *db.TableSpec
-	ruleTs *db.TableSpec
+	aclTs     *db.TableSpec
+	ruleTs    *db.TableSpec
 	counterTs *db.TableSpec
 
 	aclTableMap  map[string]db.Value
@@ -118,7 +118,7 @@ func (app *AclApp) initialize(data appData) {
 
 	app.aclTs = &db.TableSpec{Name: ACL_TABLE}
 	app.ruleTs = &db.TableSpec{Name: RULE_TABLE}
-	app.counterTs = &db.TableSpec{Name: COUNTERS}
+	app.counterTs = &db.TableSpec{Name: ACL_COUNTERS}
 
 	app.aclTableMap = make(map[string]db.Value)
 	app.ruleTableMap = make(map[string]map[string]db.Value)
@@ -171,8 +171,8 @@ func (app *AclApp) translateGet(dbs [db.MaxDB]*db.DB) error {
 }
 
 func (app *AclApp) translateAction(dbs [db.MaxDB]*db.DB) error {
-    err := errors.New("Not supported")
-    return err
+	err := errors.New("Not supported")
+	return err
 }
 
 func (app *AclApp) translateSubscribe(dbs [db.MaxDB]*db.DB, path string) (*notificationOpts, *notificationInfo, error) {
@@ -297,10 +297,10 @@ func (app *AclApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error) {
 }
 
 func (app *AclApp) processAction(dbs [db.MaxDB]*db.DB) (ActionResponse, error) {
-    var resp ActionResponse
-    err := errors.New("Not implemented")
+	var resp ActionResponse
+	err := errors.New("Not implemented")
 
-    return resp, err
+	return resp, err
 }
 
 func (app *AclApp) translateCRUCommon(d *db.DB, opcode int) ([]db.WatchKeys, error) {
@@ -337,15 +337,16 @@ func (app *AclApp) processAclGet(dbs [db.MaxDB]*db.DB) error {
 		if isSubtreeRequest(app.pathInfo.Template, "/openconfig-acl:acl/acl-sets/acl-set{}{}") {
 			for aclSetKey, _ := range acl.AclSets.AclSet {
 				aclSet := acl.AclSets.AclSet[aclSetKey]
-				aclKey := getAclKeyStrFromOCKey(aclSetKey.Name, aclSetKey.Type)
+				aclKey := app.getAclKeyByCheckingDbForNameWithoutType(d, aclSetKey.Name, aclSetKey.Type)
 
 				if isSubtreeRequest(app.pathInfo.Template, "/openconfig-acl:acl/acl-sets/acl-set{}{}/acl-entries/acl-entry{}") {
 					// Subtree of one Rule
 					for seqId, _ := range aclSet.AclEntries.AclEntry {
 						entrySet := aclSet.AclEntries.AclEntry[seqId]
-						err = app.convertDBAclRulesToInternal(dbs , aclKey, int64(seqId), db.Key{})
+						ruleKeyStr := app.getAclRuleByCheckingDbForNameWithoutRule(d, aclKey, strconv.FormatInt(int64(seqId), 10))
+						err = app.convertDBAclRulesToInternal(dbs, aclKey, ruleKeyStr, db.Key{})
 						ygot.BuildEmptyTree(entrySet)
-						app.convertInternalToOCAclRule(aclKey, aclSetKey.Type, int64(seqId), nil, entrySet)
+						app.convertInternalToOCAclRule(aclKey, aclSetKey.Type, ruleKeyStr, nil, entrySet)
 					}
 				} else {
 					err = app.convertDBAclToInternal(dbs, db.Key{Comp: []string{aclKey}})
@@ -383,7 +384,7 @@ func (app *AclApp) processAclGet(dbs [db.MaxDB]*db.DB) error {
 						return err
 					}
 					err = app.getAclBindingInfoForInterfaceData(d, intfData, intfId, "EGRESS")
-					if (err != nil) {
+					if err != nil {
 						log.Infof("processGetAcl: (direction unknown) no egress-acl for  Interface %s", intfId)
 					}
 				}
@@ -598,21 +599,25 @@ func (app *AclApp) processCommonToplevelPath(d *db.DB, acl *ocbinds.OpenconfigAc
 }
 
 /***********    These are Translation Helper Function   ***********/
-func (app *AclApp) convertDBAclRulesToInternal(dbs [db.MaxDB]*db.DB, aclName string, seqId int64, ruleKey db.Key) error {
+func (app *AclApp) convertDBAclRulesToInternal(dbs [db.MaxDB]*db.DB, aclName string, ruleName string, ruleKey db.Key) error {
 	dbCl := dbs[db.ConfigDB]
 	dbCo := dbs[db.CountersDB]
 
-
 	var err error
-	if seqId != -1 {
-		ruleKey.Comp = []string{aclName, "RULE_" + strconv.FormatInt(int64(seqId), 10)}
+	if len(ruleName) > 0 {
+        aclData, acl_err := dbCl.GetEntry(app.aclTs, db.Key{Comp: []string{aclName}})
+        if acl_err != nil {
+            log.Info("Configdb getentry failed for acl ", aclName)
+            return acl_err
+        }
+		ruleKey.Comp = []string{aclName, ruleName, strings.ToUpper(aclData.Get("stage"))}
 	}
 	if ruleKey.Len() > 1 {
 		ruleName := ruleKey.Get(1)
 		var co_err error
-		ruleData, err := dbCl.GetEntry(app.ruleTs, ruleKey)
+		ruleData, err := dbCl.GetEntry(app.ruleTs, db.Key{Comp: []string{ruleKey.Get(0), ruleKey.Get(1)}})
 		if err != nil {
-			log.Info("Configdb getentry failed for rule " , ruleName)		
+			log.Info("Configdb getentry failed for rule ", ruleName)
 			return err
 		}
 		if app.ruleTableMap[aclName] == nil {
@@ -626,13 +631,20 @@ func (app *AclApp) convertDBAclRulesToInternal(dbs [db.MaxDB]*db.DB, aclName str
 		}
 		app.ruleTableMap[aclName][ruleName] = ruleData
 	} else {
+        aclData, acl_err := dbCl.GetEntry(app.aclTs, db.Key{Comp: []string{aclName}})
+        if acl_err != nil {
+            log.Info("Configdb getentry failed for acl ", aclName)
+            return acl_err
+        }
+
 		ruleKeys, err := dbCl.GetKeys(app.ruleTs)
 		if err != nil {
 			return err
 		}
 		for i, _ := range ruleKeys {
 			if aclName == ruleKeys[i].Get(0) {
-				app.convertDBAclRulesToInternal(dbs, aclName, -1, ruleKeys[i])
+				app.convertDBAclRulesToInternal(dbs, aclName, "", db.Key{Comp: []string{ruleKeys[i].Get(0),
+                            ruleKeys[i].Get(1), strings.ToUpper(aclData.Get("stage"))}})
 			}
 		}
 	}
@@ -652,7 +664,7 @@ func (app *AclApp) convertDBAclToInternal(dbs [db.MaxDB]*db.DB, aclkey db.Key) e
 		if entry.IsPopulated() {
 			app.aclTableMap[aclkey.Get(0)] = entry
 			app.ruleTableMap[aclkey.Get(0)] = make(map[string]db.Value)
-			err = app.convertDBAclRulesToInternal(dbs, aclkey.Get(0), -1, db.Key{})
+			err = app.convertDBAclRulesToInternal(dbs, aclkey.Get(0), "", db.Key{})
 			if err != nil {
 				return err
 			}
@@ -691,7 +703,7 @@ func (app *AclApp) convertInternalToOCAcl(aclName string, aclSets *ocbinds.Openc
 					continue
 				}
 			}
-			app.convertInternalToOCAclRule(aclName, aclSet.Type, -1, aclSet, nil)
+			app.convertInternalToOCAclRule(aclName, aclSet.Type, "", aclSet, nil)
 		}
 	} else {
 		for acln := range app.aclTableMap {
@@ -718,9 +730,9 @@ func (app *AclApp) convertInternalToOCAcl(aclName string, aclSets *ocbinds.Openc
 	}
 }
 
-func (app *AclApp) convertInternalToOCAclRule(aclName string, aclType ocbinds.E_OpenconfigAcl_ACL_TYPE, seqId int64, aclSet *ocbinds.OpenconfigAcl_Acl_AclSets_AclSet, entrySet *ocbinds.OpenconfigAcl_Acl_AclSets_AclSet_AclEntries_AclEntry) {
-	if seqId != -1 {
-		ruleName := "RULE_" + strconv.FormatInt(int64(seqId), 10)
+func (app *AclApp) convertInternalToOCAclRule(aclName string, aclType ocbinds.E_OpenconfigAcl_ACL_TYPE, ruleName string, aclSet *ocbinds.OpenconfigAcl_Acl_AclSets_AclSet, entrySet *ocbinds.OpenconfigAcl_Acl_AclSets_AclSet_AclEntries_AclEntry) {
+	if len(ruleName) > 0 {
+		//ruleName := "RULE_" + strconv.FormatInt(int64(seqId), 10)
 		app.convertInternalToOCAclRuleProperties(app.ruleTableMap[aclName][ruleName], aclType, nil, entrySet)
 	} else {
 		for ruleName := range app.ruleTableMap[aclName] {
@@ -770,7 +782,7 @@ func (app *AclApp) convertInternalToOCAclRuleProperties(ruleData db.Value, aclTy
 			entrySet.Transport.Config.TcpFlags = getTransportConfigTcpFlags(tcpFlags)
 			entrySet.Transport.State.TcpFlags = getTransportConfigTcpFlags(tcpFlags)
 		} else if "PACKET_ACTION" == ruleKey {
-			if "FORWARD" == ruleData.Get(ruleKey) {
+			if "FORWARD" == strings.ToUpper(ruleData.Get(ruleKey)) {
 				entrySet.Actions.Config.ForwardingAction = ocbinds.OpenconfigAcl_FORWARDING_ACTION_ACCEPT
 				entrySet.Actions.State.ForwardingAction = ocbinds.OpenconfigAcl_FORWARDING_ACTION_ACCEPT
 			} else {
@@ -778,12 +790,12 @@ func (app *AclApp) convertInternalToOCAclRuleProperties(ruleData db.Value, aclTy
 				entrySet.Actions.State.ForwardingAction = ocbinds.OpenconfigAcl_FORWARDING_ACTION_DROP
 			}
 		} else if "Packets" == ruleKey {
-				pkts, _ := strconv.ParseUint(ruleData.Get(ruleKey), 10, 64)
-				entrySet.State.MatchedPackets = &pkts
-				log.Info("Packets count " ,pkts,  " found in  COUNTER db for rulekey ", ruleKey)
+			pkts, _ := strconv.ParseUint(ruleData.Get(ruleKey), 10, 64)
+			entrySet.State.MatchedPackets = &pkts
+			log.Info("Packets count ", pkts, " found in  COUNTER db for rulekey ", ruleKey)
 		} else if "Bytes" == ruleKey {
-				bytes, _ :=  strconv.ParseUint(ruleData.Get(ruleKey), 10, 64)
-				entrySet.State.MatchedOctets  = &bytes
+			bytes, _ := strconv.ParseUint(ruleData.Get(ruleKey), 10, 64)
+			entrySet.State.MatchedOctets = &bytes
 		}
 	}
 
@@ -833,7 +845,7 @@ func (app *AclApp) convertInternalToOCAclRuleProperties(ruleData db.Value, aclTy
 				addr := ruleData.Get(ruleKey)
 				entrySet.Ipv6.Config.DestinationAddress = &addr
 				entrySet.Ipv6.State.DestinationAddress = &addr
-                        }
+			}
 		}
 	} else if aclType == ocbinds.OpenconfigAcl_ACL_TYPE_ACL_L2 {
 		ygot.BuildEmptyTree(entrySet.L2)
@@ -901,7 +913,7 @@ func (app *AclApp) convertInternalToOCAclBinding(d *db.DB, aclName string, intfI
 		if err1 != nil {
 			return err1
 		}
-		if !contains(aclEntry.GetList("ports"), intfId) {
+		if !contains(aclEntry.GetList("ports"), intfId) && intfId != aclEntry.Get("ports") {
 			return tlerr.InvalidArgs("Acl %s not binded with %s", aclName, intfId)
 		}
 	}
@@ -918,8 +930,8 @@ func (app *AclApp) convertInternalToOCAclBinding(d *db.DB, aclName string, intfI
 		}
 	} else {
 		for ruleName := range app.ruleTableMap[aclName] {
-            seqId, _ := strconv.Atoi(strings.Replace(ruleName, "RULE_", "", 1))
-            convertInternalToOCAclRuleBinding(d, 0, int64(seqId), direction, intfAclSet, nil)
+			seqId, _ := strconv.Atoi(strings.Replace(ruleName, "RULE_", "", 1))
+			convertInternalToOCAclRuleBinding(d, 0, int64(seqId), direction, intfAclSet, nil)
 		}
 	}
 
@@ -945,6 +957,11 @@ func (app *AclApp) getAllBindingsInfo(d *db.DB) error {
 				if !contains(interfaces, aclIntfs[i]) && aclIntfs[i] != "" {
 					interfaces = append(interfaces, aclIntfs[i])
 				}
+			}
+		} else if len(aclData.Get("ports")) > 0 {
+			aclIntf := aclData.Get("ports")
+			if !contains(interfaces, aclIntf) {
+				interfaces = append(interfaces, aclIntf)
 			}
 		}
 	}
@@ -972,13 +989,14 @@ func (app *AclApp) getAclBindingInfoForInterfaceData(d *db.DB, intfData *ocbinds
 		if intfData.IngressAclSets != nil && len(intfData.IngressAclSets.IngressAclSet) > 0 {
 			for ingressAclSetKey, _ := range intfData.IngressAclSets.IngressAclSet {
 				aclName := strings.Replace(strings.Replace(ingressAclSetKey.SetName, " ", "_", -1), "-", "_", -1)
-				aclType := ingressAclSetKey.Type.ΛMap()["E_OpenconfigAcl_ACL_TYPE"][int64(ingressAclSetKey.Type)].Name
-				aclKey := aclName + "_" + aclType
+				//aclType := ingressAclSetKey.Type.ΛMap()["E_OpenconfigAcl_ACL_TYPE"][int64(ingressAclSetKey.Type)].Name
+				//aclKey := aclName + "_" + aclType
+				aclKey := app.getAclKeyByCheckingDbForNameWithoutType(d, aclName, ingressAclSetKey.Type)
 
 				ingressAclSet := intfData.IngressAclSets.IngressAclSet[ingressAclSetKey]
 				if ingressAclSet != nil && ingressAclSet.AclEntries != nil && len(ingressAclSet.AclEntries.AclEntry) > 0 {
 					for seqId, _ := range ingressAclSet.AclEntries.AclEntry {
-						rulekey := "RULE_" + strconv.Itoa(int(seqId))
+						rulekey := app.getAclRuleByCheckingDbForNameWithoutRule(d, aclKey, strconv.FormatInt(int64(seqId), 10))
 						entrySet := ingressAclSet.AclEntries.AclEntry[seqId]
 						_, err := d.GetEntry(app.ruleTs, db.Key{Comp: []string{aclKey, rulekey}})
 						if err != nil {
@@ -1000,13 +1018,14 @@ func (app *AclApp) getAclBindingInfoForInterfaceData(d *db.DB, intfData *ocbinds
 		if intfData.EgressAclSets != nil && len(intfData.EgressAclSets.EgressAclSet) > 0 {
 			for egressAclSetKey, _ := range intfData.EgressAclSets.EgressAclSet {
 				aclName := strings.Replace(strings.Replace(egressAclSetKey.SetName, " ", "_", -1), "-", "_", -1)
-				aclType := egressAclSetKey.Type.ΛMap()["E_OpenconfigAcl_ACL_TYPE"][int64(egressAclSetKey.Type)].Name
-				aclKey := aclName + "_" + aclType
+				//aclType := egressAclSetKey.Type.ΛMap()["E_OpenconfigAcl_ACL_TYPE"][int64(egressAclSetKey.Type)].Name
+				//aclKey := aclName + "_" + aclType
+				aclKey := app.getAclKeyByCheckingDbForNameWithoutType(d, aclName, egressAclSetKey.Type)
 
 				egressAclSet := intfData.EgressAclSets.EgressAclSet[egressAclSetKey]
 				if egressAclSet != nil && egressAclSet.AclEntries != nil && len(egressAclSet.AclEntries.AclEntry) > 0 {
 					for seqId, _ := range egressAclSet.AclEntries.AclEntry {
-						rulekey := "RULE_" + strconv.Itoa(int(seqId))
+						rulekey := app.getAclRuleByCheckingDbForNameWithoutRule(d, aclKey, strconv.FormatInt(int64(seqId), 10))
 						entrySet := egressAclSet.AclEntries.AclEntry[seqId]
 						_, err := d.GetEntry(app.ruleTs, db.Key{Comp: []string{aclKey, rulekey}})
 						if err != nil {
@@ -1057,7 +1076,7 @@ func (app *AclApp) findAndGetAclBindingInfoForInterfaceData(d *db.DB, intfId str
 			aclOrigType = ocbinds.OpenconfigAcl_ACL_TYPE_ACL_L2
 		}
 
-		if contains(aclIntfs, intfId) && direction == aclData.Get("stage") {
+		if (contains(aclIntfs, intfId) || (aclData.Has("ports") && intfId == aclData.Get("ports"))) && direction == aclData.Get("stage") {
 			if direction == "INGRESS" {
 				if intfData.IngressAclSets != nil {
 					aclSetKey := ocbinds.OpenconfigAcl_Acl_Interfaces_Interface_IngressAclSets_IngressAclSet_Key{SetName: aclOrigName, Type: aclOrigType}
@@ -1665,6 +1684,50 @@ func (app *AclApp) setAclBindDataInConfigDb(d *db.DB, aclData map[string]db.Valu
 	return err
 }
 
+func (app *AclApp) getAclKeyByCheckingDbForNameWithoutType(d *db.DB, aclname string, acltype ocbinds.E_OpenconfigAcl_ACL_TYPE) string {
+	var aclKey string
+	aclN := strings.Replace(strings.Replace(aclname, " ", "_", -1), "-", "_", -1)
+	aclT := acltype.ΛMap()["E_OpenconfigAcl_ACL_TYPE"][int64(acltype)].Name
+	aclKey = aclN + "_" + aclT
+
+	// For ACLs created by Config json directly, ACL name may not appended with its type
+	patternKeys, err := d.GetKeysByPattern(app.aclTs, aclN+"*")
+	if err != nil {
+		return aclKey
+	}
+	for i, _ := range patternKeys {
+		// Find entry which does not ends with Acl type and its name matches with name given in url
+		patternKeyFromDb := patternKeys[i].Get(0)
+		if !strings.HasSuffix(patternKeyFromDb, aclT) && patternKeyFromDb == aclN {
+			aclKey = aclN
+			log.Infof("getAclKeyByCheckingDbForNameWithoutType: Modified aclKey to: %s", aclKey)
+		}
+	}
+
+	return aclKey
+}
+
+func (app *AclApp) getAclRuleByCheckingDbForNameWithoutRule(d *db.DB, aclname string, ruleId string) string {
+	var ruleKey string
+
+	ruleKey = "RULE_" + ruleId
+	//For Rules created by Config json directly, Rule name may not prefixed with "RULE_"
+	patternKeys, err := d.GetKeysByPattern(app.ruleTs, aclname+"|"+"*"+ruleId)
+	if err != nil {
+		return ruleKey
+	}
+	for i, _ := range patternKeys {
+		// Find entry which does not starts with "RULE_" and its name matches with rule name given in url
+		patternKeyFromDb := patternKeys[i].Get(1)
+		if !strings.HasPrefix(patternKeyFromDb, "RULE_") && patternKeyFromDb == ruleId {
+			ruleKey = ruleId
+			log.Infof("getAclRuleByCheckingDbForNameWithoutRule: Modified ruleKey to: %s", ruleKey)
+		}
+	}
+
+	return ruleKey
+}
+
 func getIpProtocol(proto int64) interface{} {
 	for k, v := range IP_PROTOCOL_MAP {
 		if uint8(proto) == v {
@@ -1775,4 +1838,3 @@ func getAclKeyStrFromOCKey(aclname string, acltype ocbinds.E_OpenconfigAcl_ACL_T
 	aclT := acltype.ΛMap()["E_OpenconfigAcl_ACL_TYPE"][int64(acltype)].Name
 	return aclN + "_" + aclT
 }
-

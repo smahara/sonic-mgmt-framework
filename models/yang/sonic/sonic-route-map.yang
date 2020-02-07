@@ -23,8 +23,8 @@ module sonic-route-map {
         prefix srpolsets;
     }
 
-    import sonic-vlan-interface {
-        prefix svlanint;
+    import sonic-vlan {
+        prefix svlan;
     }
 
     organization
@@ -64,9 +64,49 @@ module sonic-route-map {
                 path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
             }
             type leafref {
-                path "/svlanint:sonic-vlan-interface/svlanint:VLAN_INTERFACE/svlanint:VLAN_INTERFACE_LIST/svlanint:vlanName";
+                path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
             }
         }
+    }
+
+    typedef bgp-origin-attr-type {
+        type enumeration {
+            enum IGP {
+                description
+                "Origin of the NLRI is internal";
+            }
+            enum EGP {
+                description
+                "Origin of the NLRI is EGP";
+            }
+            enum INCOMPLETE {
+                description
+                "Origin of the NLRI is neither IGP or EGP";
+            }
+        }
+        description
+            "Type definition for standard BGP origin attribute";
+              reference "RFC 4271 - A Border Gateway Protocol 4 (BGP-4),
+              Sec 4.3";
+    }
+
+    typedef bgp-set-med-type {
+        type union {
+            type uint32;
+            type string {
+                pattern '^[+-][0-9]+$';
+            }
+            type enumeration {
+                enum IGP {
+                   description "set the MED value to the IGP cost toward the next hop for the route";
+                }
+            }
+        }
+        description
+                   "Type definition for specifying how the BGP MED can
+                    be set in BGP policy actions. The three choices are to set
+                    the MED directly, increment/decrement using +/- notation,
+                    and setting it to the IGP cost (predefined value).";
     }
 
     container sonic-route-map {
@@ -119,17 +159,34 @@ module sonic-route-map {
                 }
 
                 leaf-list match_neighbor {
-                    type inet:ip-address;
+                    type union {
+                        type inet:ip-address;
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+                    }
                     description
-                        "List of IP addresses in the neighbor set";
-                    max-elements 1;
+                        "IP addresse or interface for match operation.";
+                    must "(count(current()) = 1)" {
+                        error-app-tag "max-allowed-neighbor-reached";
+                        error-message "Only one neighbor or interface can be configured.";
+                    }
                 }
 
                 leaf-list match_tag {
                     type tag-type;
                     description
-                        "Value of the tag set member";
-                    max-elements 1;
+                        "Value of the tag match member";
+                    must "(count(current()) = 1)" {
+                        error-app-tag "max-allowed-tag-reached";
+                        error-message "Only one tag value can be configured.";
+                    }
                 }
 
                 leaf match_med{
@@ -175,16 +232,24 @@ module sonic-route-map {
                     type uint32;
                 }
 
+                leaf set_med {
+                    type bgp-set-med-type;
+                }
+
                 leaf set_next_hop{
                     type string;
                 }
-
+                 
                 leaf set_repeat_asn{
                     type uint8;
                 }
 
                 leaf set_asn{
                     type uint32;
+                }
+ 
+                leaf set_asn_list{
+                    type string;
                 }
 
                 leaf-list set_community_inline {
@@ -205,6 +270,16 @@ module sonic-route-map {
                     type leafref {
                         path "/srpolsets:sonic-routing-policy-sets/srpolsets:EXTENDED_COMMUNITY_SET/srpolsets:EXTENDED_COMMUNITY_SET_LIST/srpolsets:name";
                     }
+                }
+
+                leaf set_tag {
+                    type tag-type;
+                    description
+                        "Value of the tag set member";
+                }
+
+                leaf set_weight{
+                    type uint32;
                 }
 
             }

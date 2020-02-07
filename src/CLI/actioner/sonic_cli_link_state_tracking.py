@@ -22,9 +22,10 @@ import sys
 import json
 import collections
 import re
+import os
 import cli_client as cc
 from rpipe_utils import pipestr
-from scripts.render_cli import show_cli_output
+import scripts.render_cli as cli
 
 
 def create_link_state_tracking_group(args):
@@ -113,9 +114,9 @@ def delete_link_state_tracking_group_upstream(args):
 def show_link_state_tracking_group_info(args):
     aa = cc.ApiClient()
     if len(args):
-        uri = cc.Path('/restconf/data/sonic-link-state-tracking:sonic-link-state-tracking/INTF_TRACKING/INTF_TRACKING_LIST={grp_name}', grp_name=args[0])
+        uri = cc.Path('/restconf/data/sonic-link-state-tracking:sonic-link-state-tracking/INTF_TRACKING_TABLE/INTF_TRACKING_TABLE_LIST={grp_name}', grp_name=args[0])
     else:
-        uri = cc.Path('/restconf/data/sonic-link-state-tracking:sonic-link-state-tracking')
+        uri = cc.Path('/restconf/data/sonic-link-state-tracking:sonic-link-state-tracking/INTF_TRACKING_TABLE/INTF_TRACKING_TABLE_LIST')
     return aa.get(uri)
 
 
@@ -151,31 +152,41 @@ def generic_delete_response_handler(response, args):
             print(response.error_message())
 
 
-def show_link_state_tracking_group_data(groups):
+def show_link_state_tracking_group_data(groups, details):
+    output = ""
     for data in groups:
-        print('Name: {}'.format(data['name']))
-        print('Description: {}'.format(data.get('description', "")))
-        print('Timeout: {}'.format(data.get('timeout', "")))
+        output = output + 'Name: {}'.format(data['name']) + '\n'
+        output = output + 'Description: {}'.format(data.get('description', "")) + '\n'
+        output = output + 'Timeout: {}'.format(data.get('timeout', "")) + '\n'
 
-        print('Upstream:')
-        for upstr in data.get('upstream', '').split(','):
-            print('    {}'.format(upstr))
+        if details:
+            output = output + 'Upstream:' + '\n'
+            for upstr, status in zip(data.get('upstream', []), data.get('upstream_status', [])):
+                if status == "":
+                    output = output + '    {}'.format(upstr) + '\n'
+                else:
+                    output = output + '    {} ({})'.format(upstr, status) + '\n'
 
-        print('Downstream:')
-        for downstr in data.get('downstream', '').split(','):
-            print('    {}'.format(downstr))
-        print('')
+            output = output + 'Downstream:' + '\n'
+            for downstr, status in zip(data.get('downstream', []), data.get('downstream_status', [])):
+                if status == "":
+                    output = output + '    {}'.format(downstr) + '\n'
+                else:
+                    output = output + '    {} ({})'.format(downstr, status) + '\n'
+        output = output + '' + '\n'
+    cli.write(output)
 
 
 def show_link_state_tracking_group_response_handler(response, args):
     if response.ok():
         data = response.content
-        if len(args):
-            show_link_state_tracking_group_data(data['sonic-link-state-tracking:INTF_TRACKING_LIST'])
-        elif 'sonic-link-state-tracking:sonic-link-state-tracking' in data:
-            show_link_state_tracking_group_data(data['sonic-link-state-tracking:sonic-link-state-tracking']['INTF_TRACKING']['INTF_TRACKING_LIST'])
+        if bool(data):
+            show_link_state_tracking_group_data(data['sonic-link-state-tracking:INTF_TRACKING_TABLE_LIST'], len(args) > 0)
+        elif len(args) > 0:
+             print("%Error: Group not found")
     elif str(response.status_code) == '404':
-        print("%Error: Group not found")
+        if len(args) > 0:
+            print("%Error: Group not found")
     else:
         print(response.error_message())
 
@@ -210,17 +221,13 @@ response_handlers = {
 
 
 def run(op_str, args):
-    pipestr().write(args)
     try:
+        full_cmd = os.getenv('USER_COMMAND', None)
+        if full_cmd is not None:
+            pipestr().write(full_cmd.split())
         resp = request_handlers[op_str](args)
         response_handlers[op_str](resp, args)
     except Exception as e:
         print("%Error: {}".format(str(e)))
 
     return
-
-
-if __name__ == '__main__':
-    pipestr().write(sys.argv)
-    run(sys.argv[1], sys.argv[2:])
-
