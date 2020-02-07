@@ -1120,9 +1120,31 @@ var YangToDb_vxlan_vni_instance_subtree_xfmr SubTreeXfmrYangToDb = func(inParams
 		log.Info("YangToDb_vxlan_vni_instance_subtree_xfmr: srcNveKeyStr in URI => ", srcNveKeyStr)
 	}
 
-	if vniIdKeyStr != "" && srcNveKeyStr != "" {
-		if tblName == "VXLAN_TUNNEL_MAP" {
-			var VXLAN_TUNNEL_MAP_TS *db.TableSpec = &db.TableSpec{Name: tblName}
+	if tblName == "VXLAN_TUNNEL_MAP" {
+		var VXLAN_TUNNEL_MAP_TS *db.TableSpec = &db.TableSpec{Name: tblName}
+		var isKeysInPaylod bool
+		isKeysInPaylod = false
+		if vniIdKeyStr == "" && srcNveKeyStr == "" {
+			if reqP.vxlanNetInstObj.VxlanVniInstances != nil && len(reqP.vxlanNetInstObj.VxlanVniInstances.VniInstance) > 0 {
+				for vniKeyObj, _ := range reqP.vxlanNetInstObj.VxlanVniInstances.VniInstance {
+					vniIdKeyStr = strconv.Itoa(int(vniKeyObj.VniId))
+					srcNveKeyStr = vniKeyObj.SourceNve
+					log.Info("YangToDb_vxlan_vni_instance_subtree_xfmr: vniIdKeyStr in payload => ", vniIdKeyStr)
+					log.Info("YangToDb_vxlan_vni_instance_subtree_xfmr: srcNveKeyStr in payload => ", srcNveKeyStr)
+					isKeysInPaylod = true
+					break
+				}
+				if inParams.oper == 3 { // since PUT will replace existing entries
+					tunnelMapKeys, err := reqP.db.GetKeys(VXLAN_TUNNEL_MAP_TS)
+					if err == nil && len(tunnelMapKeys) > 0 {
+						log.Error("YangToDb_vxlan_vni_instance_subtree_xfmr ==> returning ERROR, since Operation not allowed to modify the existing vxlan tunnel map")
+						return res_map, tlerr.New("Operation not allowed to modify/replace the existing vxlan tunnel map")	
+					}
+				}	
+			}			
+		}
+		
+		if vniIdKeyStr != "" && srcNveKeyStr != "" {
 			tunnelMapKeyStr := "map_" + vniIdKeyStr + "_" + niName
 			if log.V(3) {
 				log.Info("YangToDb_vxlan_vni_instance_subtree_xfmr: tunnelMapKeyStr => ", tunnelMapKeyStr)
@@ -1131,11 +1153,14 @@ var YangToDb_vxlan_vni_instance_subtree_xfmr SubTreeXfmrYangToDb = func(inParams
 			if log.V(3) {
 				log.Info("YangToDb_vxlan_vni_instance_subtree_xfmr: tblVxlanMapKeys => err => ", err)
 			}
-			if err != nil {
+			if err != nil && inParams.oper != 3 && isKeysInPaylod == false {
 				log.Error("YangToDb_vxlan_vni_instance_subtree_xfmr ==> returning ERROR, since the key doesn't exist")
 				return res_map, tlerr.NotFound("Resource Not Found")
+			} else if err == nil && (inParams.oper == 3 || inParams.oper == 4) {
+				log.Error("YangToDb_vxlan_vni_instance_subtree_xfmr ==> returning ERROR, since Operation not allowed to modify the existing vxlan tunnel map")
+				return res_map, tlerr.New("Operation not allowed to modify the existing vxlan tunnel map")
 			}
-		}
+ 		}
 	}
 
 	var vniId uint32
