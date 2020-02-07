@@ -2,6 +2,7 @@ package transformer
 
 import (
     "strings"
+    "strconv"
     log "github.com/golang/glog"
     "translib/ocbinds"
 )
@@ -39,8 +40,7 @@ var DbToYang_qos_scheduler_policy_key_xfmr KeyXfmrDbToYang = func(inParams XfmrP
 
     key := strings.Split(entry_key, "@")
 
-    rmap["name"] = key[0]
-    rmap["sequence"] = key[1]
+    rmap["sequence"], _ = strconv.Atoi(key[1])
 
     return rmap, nil 
 }
