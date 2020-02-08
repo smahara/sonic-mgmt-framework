@@ -1123,7 +1123,7 @@ def invoke_api(func, args=[]):
         return api.patch(keypath, body)
     elif attr == 'openconfig_network_instance_network_instances_network_instance_table_connections_table_connection_config_import_policy':
         keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/table-connections/table-connection={src_protocol},{dst_protocol},{address_family}/config/import-policy',
-                name=args[0], src_protocol= "STATIC" if 'static' == args[2] else "DIRECTLY_CONNECTED" if 'connected' == args[2] else 'OSPF', dst_protocol=IDENTIFIER, address_family=args[1].split('_',1)[0])
+                name=args[0], src_protocol= "STATIC" if 'static' == args[2] else "DIRECTLY_CONNECTED" if 'connected' == args[2] else 'OSPF' if 'ospf' == args[2] else 'OSPF3', dst_protocol=IDENTIFIER, address_family=args[1].split('_',1)[0])
         if op == 'patch':
             body = { "openconfig-network-instance:import-policy" : [ args[3] ] }
             return api.patch(keypath, body)
@@ -1131,7 +1131,7 @@ def invoke_api(func, args=[]):
             return api.delete(keypath)
     elif attr == 'openconfig_network_instance_ext_network_instances_network_instance_table_connections_table_connection_config_metric':
         keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/table-connections/table-connection={src_protocol},{dst_protocol},{address_family}/config/openconfig-network-instance-ext:metric',
-                name=args[0], src_protocol= "STATIC" if 'static' == args[2] else "DIRECTLY_CONNECTED" if 'connected' == args[2] else 'OSPF', dst_protocol=IDENTIFIER, address_family=args[1].split('_',1)[0])
+                name=args[0], src_protocol= "STATIC" if 'static' == args[2] else "DIRECTLY_CONNECTED" if 'connected' == args[2] else 'OSPF' if 'ospf' == args[2] else 'OSPF3', dst_protocol=IDENTIFIER, address_family=args[1].split('_',1)[0])
         if op == 'patch':
             body = { "openconfig-network-instance-ext:metric" : int(args[3]) }
             return api.patch(keypath, body)
@@ -1139,7 +1139,7 @@ def invoke_api(func, args=[]):
             return api.delete(keypath)
     elif attr == 'openconfig_network_instance_network_instances_network_instance_table_connections_table_connection_config':
         keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/table-connections/table-connection={src_protocol},{dst_protocol},{address_family}/config',
-                name=args[0], src_protocol= "STATIC" if 'static' == args[2] else "DIRECTLY_CONNECTED" if 'connected' == args[2] else 'OSPF', dst_protocol=IDENTIFIER, address_family=args[1].split('_',1)[0])
+                name=args[0], src_protocol= "STATIC" if 'static' == args[2] else "DIRECTLY_CONNECTED" if 'connected' == args[2] else 'OSPF' if 'ospf' == args[2] else 'OSPF3', dst_protocol=IDENTIFIER, address_family=args[1].split('_',1)[0])
         if op == 'patch':
             body = { "openconfig-network-instance:config" : { "address-family" : args[1].split('_',1)[0] } }
             return api.patch(keypath, body)
@@ -1147,7 +1147,7 @@ def invoke_api(func, args=[]):
             return api.delete(keypath)
     elif attr == 'openconfig_network_instance_network_instances_network_instance_table_connections_table_connection':
         keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/table-connections/table-connection={src_protocol},{dst_protocol},{address_family}',
-                name=args[0], src_protocol= "STATIC" if 'static' == args[2] else "DIRECTLY_CONNECTED" if 'connected' == args[2] else 'OSPF', dst_protocol=IDENTIFIER, address_family=args[1].split('_',1)[0])
+                name=args[0], src_protocol= "STATIC" if 'static' == args[2] else "DIRECTLY_CONNECTED" if 'connected' == args[2] else 'OSPF' if 'ospf' == args[2] else 'OSPF3', dst_protocol=IDENTIFIER, address_family=args[1].split('_',1)[0])
         if op == 'patch':
             body = { "openconfig-network-instance:table-connection": [ { "config": { "address-family": args[1].split('_',1)[0] } } ] }
             return api.patch(keypath, body)

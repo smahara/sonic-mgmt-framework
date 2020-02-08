@@ -123,8 +123,8 @@ var network_instance_post_xfmr PostXfmrFunc = func(inParams XfmrParams) (map[str
     retDbDataMap := (*inParams.dbDataMap)[inParams.curDb]
 
     if inParams.oper == DELETE {
-        xpath, _ := XfmrRemoveXPATHPredicates(inParams.uri)
-        log.Info("In Network-instance Post transformer for DELETE op ==> URI : ", inParams.uri, " ; XPATH : ", xpath)
+        xpath, _ := XfmrRemoveXPATHPredicates(inParams.requestUri)
+        log.Info("In Network-instance Post transformer for DELETE op ==> URI : ", inParams.requestUri, " ; XPATH : ", xpath)
 
         if del_not_allowed, found := nw_inst_del_not_allowed_map[xpath]; found && del_not_allowed {
             var err_str string = "Delete not allowed at this container"
