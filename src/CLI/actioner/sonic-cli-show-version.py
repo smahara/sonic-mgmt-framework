@@ -39,7 +39,7 @@ def run(func, args):
         show_cli_output(sys.argv[3], responseContent)
         print 'RESPONSE::: '+str(responseContent)
     else:
-        print response.error_message()
+        print api_response.error_message()
 
 
 if __name__ == '__main__':
