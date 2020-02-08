@@ -590,14 +590,13 @@ func yangListDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, r
 	for _, tbl = range(tblList) {
 		tblWg.Add(1)
 
-		defer func() {
-                        if rc := recover(); rc != nil {
-                                log.Errorf("Recover Table handling for :%v", tbl)
-                        }
-                }()
-
 		go func(tbl string) {
-		defer tblWg.Done()
+		defer func() {
+			if rc := recover(); rc != nil {
+				log.Errorf("Recover Table handling for :%v", tbl)
+			}
+			tblWg.Done()
+		}()
 		tblData, ok := (*dbDataMap)[cdb][tbl]
 
 		if ok {
@@ -777,6 +776,12 @@ func yangDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, reque
 	isValid := validate
 	yangNode, ok := xYangSpecMap[xpath]
 
+	defer func() {
+		if rc := recover(); rc != nil {
+			log.Errorf("Recover at yangDataFill handling :%v", uri)
+		}
+	}()
+
 	if ok  && yangNode.yangEntry != nil {
 		for yangChldName := range yangNode.yangEntry.Dir {
 			chldXpath := xpath+"/"+yangChldName
@@ -906,6 +911,12 @@ func dbDataToYangJsonCreate(uri string, ygRoot *ygot.GoStruct, dbs [db.MaxDB]*db
 		var d *db.DB
 		reqXpath, keyName, tableName, _ := xpathKeyExtract(d, ygRoot, GET, uri, requestUri, nil, txCache)
 		yangNode, ok := xYangSpecMap[reqXpath]
+		defer func() {
+			if rc := recover(); rc != nil {
+				log.Errorf("Recover at dbDataToYangJsonCreate handling:%v", uri)
+			}
+		}()
+
 		if ok {
 			yangType := yangTypeGet(yangNode.yangEntry)
 			validateHandlerFlag := false
