@@ -83,7 +83,7 @@ var YangToDb_route_table_conn_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParam
     if strings.Contains(srcProto, "DIRECTLY_CONNECTED") {
         source = "connected"
     } else if strings.Contains(srcProto, "OSPF3") {
-        source = "ospf6"
+        source = "ospf3"
     } else if strings.Contains(srcProto, "OSPF") {
         source = "ospf"
     } else if strings.Contains(srcProto, "STATIC") {
@@ -127,7 +127,7 @@ var DbToYang_route_table_conn_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParam
         src_proto = "STATIC"
     } else if source == "ospf" {
         src_proto = "OSPF"
-    } else if source == "ospf6" {
+    } else if source == "ospf3" {
         src_proto = "OSPF3"
     } else {
 		return rmap, errors.New("Unsupported src protocol " + source)
