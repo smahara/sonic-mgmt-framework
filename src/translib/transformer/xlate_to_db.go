@@ -287,6 +287,15 @@ func mapFillDataUtil(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requ
 	}
 	fieldName := xpathInfo.fieldName
 	valueStr := ""
+
+        fieldXpath := tableName + "/" + fieldName
+        _, ok = xDbSpecMap[fieldXpath]
+        if !ok {
+                logStr := fmt.Sprintf("Failed to find the xDbSpecMap: xpath(\"%v\").", fieldXpath)
+                log.Error(logStr)
+                return nil
+        }
+
 	if xpathInfo.yangEntry.IsLeafList() {
 		/* Both yang side and Db side('@' suffix field) the data type is leaf-list */
 		xfmrLogInfoAll("Yang type and Db type is Leaflist for field  = %v", xpath)
@@ -301,17 +310,35 @@ func mapFillDataUtil(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requ
 			if fidx > 0 {
 				valueStr += ","
 			}
-			fVal := fmt.Sprintf("%v", valData.Index(fidx).Interface())
-			if ((strings.Contains(fVal, ":")) && (strings.HasPrefix(fVal, OC_MDL_PFX) || strings.HasPrefix(fVal, IETF_MDL_PFX) || strings.HasPrefix(fVal, IANA_MDL_PFX))) {
-				// identity-ref/enum has module prefix
-				fVal = strings.SplitN(fVal, ":", 2)[1]
-			}
-			valueStr = valueStr + fVal
+
+                        // SNC-3626 - string conversion based on the primitive type
+                        fVal, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldName, valData.Index(fidx).Interface())
+                        if err == nil {
+			      if ((strings.Contains(fVal, ":")) && (strings.HasPrefix(fVal, OC_MDL_PFX) || strings.HasPrefix(fVal, IETF_MDL_PFX) || strings.HasPrefix(fVal, IANA_MDL_PFX))) {
+				      // identity-ref/enum has module prefix
+				      fVal = strings.SplitN(fVal, ":", 2)[1]
+			      }
+			      valueStr = valueStr + fVal
+                        } else {
+                              logStr := fmt.Sprintf("Failed to unmarshal Json to DbData: table(\"%v\") field(\"%v\") value(\"%v\").", tableName, fieldName, valData.Index(fidx).Interface())
+                              log.Error(logStr)
+                              return nil
+                        }
 		}
 		xfmrLogInfoAll("leaf-list value after conversion to DB format %v  :  %v", fieldName, valueStr)
 
 	} else { // xpath is a leaf
-		valueStr  = fmt.Sprintf("%v", value)
+
+                // SNC-3626 - string conversion based on the primitive type
+                fVal, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldName, value)
+                if err == nil {
+                      valueStr = fVal
+                } else {
+                      logStr := fmt.Sprintf("Failed to unmarshal Json to DbData: table(\"%v\") field(\"%v\") value(\"%v\").", tableName, fieldName, value)
+                      log.Error(logStr)
+                      return nil
+                }
+
 		if ((strings.Contains(valueStr, ":")) && (strings.HasPrefix(valueStr, OC_MDL_PFX) || strings.HasPrefix(valueStr, IETF_MDL_PFX) || strings.HasPrefix(valueStr, IANA_MDL_PFX))) {
 			// identity-ref/enum might has module prefix
 			valueStr = strings.SplitN(valueStr, ":", 2)[1]
