@@ -169,13 +169,13 @@ module openconfig-bgp-evpn-ext {
       }
     }
 
-    leaf flooding {
+    /*leaf flooding {
       description "Specify handling of BUM packets";
       type enumeration {
         enum disable;
         enum head-end-replication;
       }
-    }
+    }*/
 
     container dup-addr-detection {
       description "Specify duplicate address detection parameters";
@@ -520,7 +520,7 @@ module openconfig-bgp-evpn-ext {
       "Routing tables for the L2VPN, EVPN SAFI.";
 
       uses evpn-loc-rib-top;
-      uses evpn-adj-rib-top;
+      //uses evpn-adj-rib-top;
 
     }
   }//augment
@@ -537,7 +537,7 @@ module openconfig-bgp-evpn-ext {
     deviate not-supported;
   }
 
-  deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:neighbors/oc-bgp-evpn-ext:neighbor/oc-bgp-evpn-ext:adj-rib-in-pre/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route/oc-bgp-evpn-ext:state/oc-bgp-evpn-ext:attr-index {
+  /*deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:neighbors/oc-bgp-evpn-ext:neighbor/oc-bgp-evpn-ext:adj-rib-in-pre/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route/oc-bgp-evpn-ext:state/oc-bgp-evpn-ext:attr-index {
     deviate not-supported;
   }
 
@@ -548,7 +548,6 @@ module openconfig-bgp-evpn-ext {
   deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:neighbors/oc-bgp-evpn-ext:neighbor/oc-bgp-evpn-ext:adj-rib-in-pre/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route/oc-bgp-evpn-ext:state/oc-bgp-evpn-ext:ext-community-index {
     deviate not-supported;
   }
-
 
   deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:neighbors/oc-bgp-evpn-ext:neighbor/oc-bgp-evpn-ext:adj-rib-in-post/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route/oc-bgp-evpn-ext:state/oc-bgp-evpn-ext:attr-index {
     deviate not-supported;
@@ -585,13 +584,13 @@ module openconfig-bgp-evpn-ext {
 
   deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:neighbors/oc-bgp-evpn-ext:neighbor/oc-bgp-evpn-ext:adj-rib-out-post/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route/oc-bgp-evpn-ext:state/oc-bgp-evpn-ext:ext-community-index {
     deviate not-supported;
-  }
+  }*/
 
   augment /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:loc-rib/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route {
       uses oc-bgp-ext:bgp-ext-attr-sets;
   }
 
-  augment /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:neighbors/oc-bgp-evpn-ext:neighbor/oc-bgp-evpn-ext:adj-rib-in-pre/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route {
+  /*augment /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:neighbors/oc-bgp-evpn-ext:neighbor/oc-bgp-evpn-ext:adj-rib-in-pre/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route {
       uses oc-bgp-ext:bgp-ext-attr-sets;
   }
   augment /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:neighbors/oc-bgp-evpn-ext:neighbor/oc-bgp-evpn-ext:adj-rib-in-post/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route {
@@ -603,6 +602,6 @@ module openconfig-bgp-evpn-ext {
   }
   augment /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:rib/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-bgp-evpn-ext:l2vpn-evpn/oc-bgp-evpn-ext:neighbors/oc-bgp-evpn-ext:neighbor/oc-bgp-evpn-ext:adj-rib-out-post/oc-bgp-evpn-ext:routes/oc-bgp-evpn-ext:route {
       uses oc-bgp-ext:bgp-ext-attr-sets;
-  }
+  }*/
 
 }//end module

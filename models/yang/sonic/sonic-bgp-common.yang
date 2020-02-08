@@ -549,9 +549,9 @@ module sonic-bgp-common {
             type string;
         }
 
-        leaf flooding {
+        /*leaf flooding {
             type string;
-        }
+        }*/
 
         leaf dad-enabled {
             type boolean;
