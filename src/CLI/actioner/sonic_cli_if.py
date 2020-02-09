@@ -258,6 +258,11 @@ def invoke_api(func, args=[]):
             else:
                 filter_address(d, False)
 
+        path = cc.Path('/restconf/data/sonic-interface:sonic-interface/INTF_TABLE/INTF_TABLE_LIST')
+        responsePortTbl = api.get(path)
+        if responsePortTbl.ok():
+            d.update(responsePortTbl.content)
+
         path = cc.Path('/restconf/data/sonic-port:sonic-port/PORT_TABLE/PORT_TABLE_LIST')
         responsePortTbl = api.get(path)
         if responsePortTbl.ok():
