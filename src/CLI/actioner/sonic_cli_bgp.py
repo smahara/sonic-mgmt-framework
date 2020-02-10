@@ -1333,7 +1333,7 @@ def invoke_api(func, args=[]):
                 body = { "openconfig-network-instance:import-policy":  [ args[3] ] }
         elif attr == 'openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_afi_safis_afi_safi_apply_policy_config_export_policy':
             # openconfig_network_instance251836598
-            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/peer-groups/peer-group={peer_group_name}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/openconfig-bgp-ext:export-policy',
+            keypath = cc.Path('/restconf/data/openconfig-network-instance:network-instances/network-instance={name}/protocols/protocol={identifier},{name1}/bgp/peer-groups/peer-group={peer_group_name}/afi-safis/afi-safi={afi_safi_name}/apply-policy/config/export-policy',
                 name=args[0], identifier=IDENTIFIER, name1=NAME1, peer_group_name=args[1], afi_safi_name=args[2])
             if op == OCEXTPREFIX_PATCH:
                 body = { "openconfig-network-instance:export-policy": [ args[3] ] }
@@ -1649,15 +1649,15 @@ def preprocess_bgp_nbrs(iptype, nbrs):
 
                 if 'openconfig-bgp-ext:last-write' in nbr['state']:
                     last_write = nbr['state']['openconfig-bgp-ext:last-write']
-                    nbr['state']['openconfig-bgp-ext:last-write'] = seconds_to_wdhm_str(last_write)
+                    nbr['state']['openconfig-bgp-ext:last-write'] = seconds_to_dhms_str(last_write)
 
                 if 'openconfig-bgp-ext:last-read' in nbr['state']:
                     last_read = nbr['state']['openconfig-bgp-ext:last-read']
-                    nbr['state']['openconfig-bgp-ext:last-read'] = seconds_to_wdhm_str(last_read)
+                    nbr['state']['openconfig-bgp-ext:last-read'] = seconds_to_dhms_str(last_read)
 
                 if 'openconfig-bgp-ext:last-reset-time' in nbr['state']:
                     last_reset_time = nbr['state']['openconfig-bgp-ext:last-reset-time']
-                    nbr['state']['openconfig-bgp-ext:last-reset-time'] = seconds_to_wdhm_str(last_reset_time)
+                    nbr['state']['openconfig-bgp-ext:last-reset-time'] = seconds_to_dhms_str(last_reset_time)
 
             if unnumbered == True:
                 ifName = nbr['neighbor-address']
@@ -1713,8 +1713,11 @@ def invoke_show_api(func, args=[]):
             response = api.get(keypath)
             if response.ok():
                 iptype = 4
+                d['afisafiname'] = 'openconfig-bgp-types:IPV4_UNICAST'
                 if args[2] == 'ipv6':
                     iptype = 6
+                    d['afisafiname'] = 'openconfig-bgp-types:IPV6_UNICAST'
+
                 if 'openconfig-network-instance:neighbors' in response.content:
                     tmp['neighbor'] = preprocess_bgp_nbrs(iptype, response.content['openconfig-network-instance:neighbors']['neighbor'])
                     d['openconfig-network-instance:neighbors'] = tmp

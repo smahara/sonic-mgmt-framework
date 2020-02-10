@@ -138,10 +138,16 @@ limitations under the License.
 
   <COMMAND name="set" help="Set values in destination routing protocol"/>
   <COMMAND name="set as-path" help="Transform BGP AS-path attribute">
-    <PARAM name="prepend" mode="subcommand" ptype="SUBCOMMAND" help="Prepend to the as-path">
-      <PARAM name="as-number" help="AS number" ptype="RANGE_1_4294967295"/>
+    <PARAM name="as-opt" mode="switch" ptype="SUBCOMMAND" help="Set as-path options">
+      <PARAM name="prepend" mode="subcommand" ptype="SUBCOMMAND" help="Prepend to the as-path">
+        <PARAM name="prepend-opt" mode="switch" ptype="SUBCOMMAND" help="Set as-path prepend options">
+          <PARAM name="as-number_list" help="(,) separated individual as-number list in range 1 to 4294967295; for example, 2000,3000" ptype="STR_ASN_LST"/>
+        </PARAM>
+      </PARAM>
     </PARAM>
-    <ACTION> python $SONIC_CLI_ROOT/sonic-cli-routemap.py patch_openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_set_as_path_prepend_config_asn ${name} ${seq_num} ${as-number}</ACTION>
+    <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-routemap.py patch_openconfig_routing_policy_ext_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_set_as_path_prepend_config_asn_list ${name} ${seq_num} ${as-number_list}&#xA;
+    </ACTION>
   </COMMAND>
   <!--<COMMAND name="set comm-list" help="Set BGP community list (for deletion)">
     <PARAM name="comm-nm" help="Community-list name" ptype="STRING">
@@ -225,11 +231,11 @@ limitations under the License.
     <ACTION></ACTION>
   </COMMAND>-->
   <COMMAND name="no set" help="Set values in destination routing protocol"/>
-    <COMMAND name="no set as-path" help="Transform BGP AS-path attribute">
-    <PARAM name="prepend" mode="subcommand" ptype="SUBCOMMAND" help="Prepend to the as-path">
-      <PARAM name="as-number" help="AS number" ptype="RANGE_1_4294967295"/>
+  <COMMAND name="no set as-path" help="Transform BGP AS-path attribute">
+    <PARAM name="as-opt" mode="switch" ptype="SUBCOMMAND" help="Set as-path options">
+      <PARAM name="prepend" mode="subcommand" ptype="SUBCOMMAND" help="Prepend to the as-path"/>
     </PARAM>
-    <ACTION>  python $SONIC_CLI_ROOT/sonic-cli-routemap.py delete_openconfig_bgp_policy_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_set_as_path_prepend_config_asn ${name} ${seq_num} ${as-number};
+    <ACTION>  python $SONIC_CLI_ROOT/sonic-cli-routemap.py delete_openconfig_routing_policy_ext_routing_policy_policy_definitions_policy_definition_statements_statement_actions_bgp_actions_set_as_path_prepend_config_asn_list ${name} ${seq_num};
     </ACTION>
   </COMMAND>
 <!--  <COMMAND name="no set comm-list" help="Set BGP community list (for deletion)">

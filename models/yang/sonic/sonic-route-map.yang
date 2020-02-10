@@ -173,14 +173,20 @@ module sonic-route-map {
                     }
                     description
                         "IP addresse or interface for match operation.";
-                    max-elements 1;
+                    must "(count(current()) = 1)" {
+                        error-app-tag "max-allowed-neighbor-reached";
+                        error-message "Only one neighbor or interface can be configured.";
+                    }
                 }
 
                 leaf-list match_tag {
                     type tag-type;
                     description
                         "Value of the tag match member";
-                    max-elements 1;
+                    must "(count(current()) = 1)" {
+                        error-app-tag "max-allowed-tag-reached";
+                        error-message "Only one tag value can be configured.";
+                    }
                 }
 
                 leaf match_med{
@@ -233,13 +239,17 @@ module sonic-route-map {
                 leaf set_next_hop{
                     type string;
                 }
-
+                 
                 leaf set_repeat_asn{
                     type uint8;
                 }
 
                 leaf set_asn{
                     type uint32;
+                }
+ 
+                leaf set_asn_list{
+                    type string;
                 }
 
                 leaf-list set_community_inline {
