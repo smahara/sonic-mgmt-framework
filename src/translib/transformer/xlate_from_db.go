@@ -24,8 +24,8 @@ import (
     "strings"
     "encoding/json"
     "strconv"
+    "sync"
     "errors"
-	"sync"
     "github.com/openconfig/goyang/pkg/yang"
     "github.com/openconfig/ygot/ygot"
 
@@ -33,10 +33,6 @@ import (
 )
 
 type typeMapOfInterface map[string]interface{}
-type typeChMapErr struct {
-    result typeMapOfInterface
-    err    error
-}
 
 var mapCopyMutex = &sync.Mutex{}
 
@@ -550,23 +546,12 @@ func yangListDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, r
 	} else if tbl == "" && xYangSpecMap[xpath].xfmrTbl == nil {
 		// Handling for case: Parent list is not associated with a tableName but has children containers/lists having tableNames.
 		if tblKey != "" {
-			var wg sync.WaitGroup
 			var mapSlice []typeMapOfInterface
-			wg.Add(1)
-			chl := make(chan typeChMapErr)
-			go yangListInstanceDataFill(dbs, ygRoot, uri, requestUri, xpath, dbDataMap, resultMap, tbl, tblKey, cdb, validate, txCache, isFirstCall, &wg, chl)
-			wg.Wait()
-			close(chl)
-			for chData := range chl {
-				if chData.err != nil {
-					xfmrLogInfoAll("Error(%v) returned for %v", chData.err, uri)
-				} else {
-					if len(chData.result) > 0 {
-						mapSlice = append(mapSlice, chData.result)
-					} else {
-						xfmrLogInfoAll("Empty map returned for (%v)", uri)
-					}
-				}
+			instMap, err := yangListInstanceDataFill(dbs, ygRoot, uri, requestUri, xpath, dbDataMap, resultMap, tbl, tblKey, cdb, validate, txCache, isFirstCall)
+			if err != nil {
+				log.Infof("Error(%v) returned for %v", err, uri)
+			} else if len(instMap) > 0 {
+				mapSlice = append(mapSlice, instMap)
 			}
 
 			if len(mapSlice) > 0 {
@@ -586,39 +571,17 @@ func yangListDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, r
 	}
 	}
 
-	var tblWg sync.WaitGroup
 	for _, tbl = range(tblList) {
-		tblWg.Add(1)
-
-		defer func() {
-                        if rc := recover(); rc != nil {
-                                log.Errorf("Recover Table handling for :%v", tbl)
-                        }
-                }()
-
-		go func(tbl string) {
-		defer tblWg.Done()
 		tblData, ok := (*dbDataMap)[cdb][tbl]
 
 		if ok {
-			var wg sync.WaitGroup
 			var mapSlice []typeMapOfInterface
-			chl := make(chan typeChMapErr, len(tblData))
 			for dbKey, _ := range tblData {
-				wg.Add(1)
-				go yangListInstanceDataFill(dbs, ygRoot, uri, requestUri, xpath, dbDataMap, resultMap, tbl, dbKey, cdb, validate, txCache, isFirstCall, &wg, chl)
-			}
-			wg.Wait()
-			close(chl)
-			for chData := range chl {
-				if chData.err != nil {
-					xfmrLogInfoAll("Error(%v) returned for %v", chData.err, uri)
-				} else {
-					if len(chData.result) > 0 {
-						mapSlice = append(mapSlice, chData.result)
-					} else {
-						xfmrLogInfoAll("Empty map returned for (%v)", uri)
-					}
+				instMap, err := yangListInstanceDataFill(dbs, ygRoot, uri, requestUri, xpath, dbDataMap, resultMap, tbl, dbKey, cdb, validate, txCache, isFirstCall)
+				if err != nil {
+					log.Infof("Error(%v) returned for %v", err, uri)
+				} else if len(instMap) > 0 {
+					mapSlice = append(mapSlice, instMap)
 				}
 			}
 
@@ -646,29 +609,15 @@ func yangListDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, r
 				xfmrLogInfoAll("Empty slice for (\"%v\").\r\n", uri)
 			}
 		}
-		}(tbl)
 	}// end of tblList for
-	tblWg.Wait()
-
 	return nil
 }
 
-func yangListInstanceDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, requestUri string, xpath string, dbDataMap *map[db.DBNum]map[string]map[string]db.Value, resultMap map[string]interface{}, tbl string, dbKey string, cdb db.DBNum, validate bool, txCache interface{}, isFirstCall bool, wg *sync.WaitGroup, chl chan typeChMapErr) {
+func yangListInstanceDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, requestUri string, xpath string, dbDataMap *map[db.DBNum]map[string]map[string]db.Value, resultMap map[string]interface{}, tbl string, dbKey string, cdb db.DBNum, validate bool, txCache interface{}, isFirstCall bool) (typeMapOfInterface,error) {
 
 	var err error
-	var chData typeChMapErr
 	curMap := make(map[string]interface{})
 	err = nil
-
-	defer func() {
-		if rc := recover(); rc != nil {
-			log.Errorf("Recover List Instance handling for dbKey:%v", dbKey)
-			chData.err    = err
-			chData.result = curMap
-			chl <- chData
-			wg.Done()
-		}
-	}()
 
 	curKeyMap, curUri, _ := dbKeyToYangDataConvert(uri, requestUri, xpath, dbKey, dbs[cdb].Opts.KeySeparator, txCache)
 	parentXpath := parentXpathGet(xpath)
@@ -698,11 +647,7 @@ func yangListInstanceDataFill(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri s
 			yangDataFill(dbs, ygRoot, curUri, requestUri, curXpath, dbDataMap, curMap, tbl, dbKey, cdb, validate, txCache)
 		}
 	}
-
-	chData.err    = err
-	chData.result = curMap
-	chl <- chData
-	wg.Done()
+	return curMap, err
 }
 
 func terminalNodeProcess(dbs [db.MaxDB]*db.DB, ygRoot *ygot.GoStruct, uri string, requestUri string, xpath string, dbDataMap *map[db.DBNum]map[string]map[string]db.Value, tbl string, tblKey string, txCache interface{}) (map[string]interface{}, error) {
