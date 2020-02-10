@@ -87,26 +87,10 @@ func exec_vtysh_cmd (vtysh_cmd string) (map[string]interface{}, error) {
         return nil, oper_err
     }
     log.Infof("Reading data from server\n")
-    var buffer bytes.Buffer
-    data := make([]byte, 10240)
-    for {
-        count, err := conn.Read(data)
-        if err == io.EOF {
-            log.Infof("End reading\n")
-            break
-        }
-        if err != nil {
-            log.Infof("Failed to read from server: %s\n", err)
-            return nil, oper_err
-        }
-        buffer.WriteString(string(data[:count]))
-    }
-    json_str := buffer.String()
-    log.Infof("Successfully got data from BGP container thru UDS socket ==> \"%s\"", vtysh_cmd)
 
     log.Infof("Data decoding started ==> \"%s\"", vtysh_cmd)
     var outputJson map[string]interface{}
-    err = json.NewDecoder(strings.NewReader(json_str)).Decode(&outputJson)
+    err = json.NewDecoder(conn).Decode(&outputJson)
     if err != nil {
         log.Infof("Not able to decode vtysh json output: %s\n", err)
         return nil, oper_err
