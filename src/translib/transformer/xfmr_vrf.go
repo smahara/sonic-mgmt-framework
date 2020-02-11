@@ -118,7 +118,7 @@ func isVrfDbTbl (inParams XfmrParams) (bool)  {
 /* Check if "mgmtVrfEnabled" is set to true in the "MGMT_VRF_CONFIG" table */
 func mgmtVrfEnabledInDb (inParams XfmrParams) (string) {
         data := (*inParams.dbDataMap)[inParams.curDb]
-	xfmrLogInfoAl("mgmtVrfEnabledInDb %v, inParams :%v", data, inParams)
+	xfmrLogInfoAll("mgmtVrfEnabledInDb %v, inParams :%v", data, inParams)
 
         mgmtTbl := data["MGMT_VRF_CONFIG"]
         mgmtVrf := mgmtTbl[inParams.key]

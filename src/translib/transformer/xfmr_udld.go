@@ -1,9 +1,5 @@
 package transformer
 
-import (
-	log "github.com/golang/glog"
-)
-
 func init() {
 	XlateFuncBind("YangToDb_udld_global_key_xfmr", YangToDb_udld_global_key_xfmr)
 }
