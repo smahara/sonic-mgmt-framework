@@ -453,12 +453,28 @@ var intf_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error)
 			// allowed for create
 			tblList = append(tblList, "VXLAN_TUNNEL")
 		} else if inParams.oper == 3 || inParams.oper == 4 {
-		    _, errTmp := inParams.d.GetEntry(&db.TableSpec{Name:"VXLAN_TUNNEL"}, db.Key{Comp: []string{ifName}})
-		    if errTmp != nil {
-		    	tblList = append(tblList, "VXLAN_TUNNEL")
-		    } else {
-			    return tblList, tlerr.New("PUT / PATCH method not allowed to replace the existing Vxlan Interface %s", ifName)	
-		    }
+	      log.Info("VXLAN_TUNNEL testing ==> intfPathTmp ==> inParams.requestUri ==> ", inParams.requestUri)
+	      intfPathTmp, errIntf := getIntfUriPath(inParams.requestUri)
+	      if errIntf == nil && intfPathTmp != nil {
+	        log.Info("VXLAN_TUNNEL testing ==> intfPathTmp target string", intfPathTmp.Target)
+	        intfPathElem := intfPathTmp.Elem
+	        if len(intfPathElem) > 0 {
+	          targetIdx :=  len(intfPathElem)-1
+	          if intfPathElem[targetIdx].Name == "interfaces" || intfPathElem[targetIdx].Name == "interface" {
+	            log.Info("VXLAN_TUNNEL testing ==> TARGET FOUND ==>", intfPathElem[targetIdx].Name)
+	                _, errTmp := inParams.d.GetEntry(&db.TableSpec{Name:"VXLAN_TUNNEL"}, db.Key{Comp: []string{ifName}})
+	                if errTmp != nil {
+	                    tblList = append(tblList, "VXLAN_TUNNEL")
+	                } else {
+	                    return tblList, tlerr.New("PUT / PATCH method not allowed to replace the existing Vxlan Interface %s", ifName)
+	                }
+	          } else {
+	            log.Info("VXLAN_TUNNEL testing ==> target not found - target node", intfPathElem[targetIdx].Name)
+	          }
+	        }
+	      } else {
+	        log.Info("VXLAN_TUNNEL testing ==> TARGET err ==>", errIntf)
+	      }
 		}
 	} else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface/config") {
 		if IntfTypeVxlan == intfType {
@@ -2208,14 +2224,12 @@ var YangToDb_intf_eth_port_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrP
                 /* Check if given iface already part of a PortChannel */
                 err = validateIntfAssociatedWithPortChannel(inParams.d, &ifName)
                 if err != nil {
-                    errStr := "Interface already part of a PortChannel"
-                    return nil, tlerr.InvalidArgsError{Format: errStr}
+                    return nil, err
                 }
                 /* Restrict configuring member-port if iface configured as member-port of any vlan */
                 err = validateIntfAssociatedWithVlan(inParams.d, &ifName)
                 if err != nil {
-                    errStr := "PortChannel config not permitted on Vlan member-port"
-                    return nil, tlerr.InvalidArgsError{Format: errStr}
+                    return nil, err
                 }
                 /* Check if L3 configs present on given physical interface */
                 err = validateL3ConfigExists(inParams.d, &ifName)
