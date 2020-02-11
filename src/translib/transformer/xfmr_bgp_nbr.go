@@ -237,7 +237,11 @@ var YangToDb_bgp_nbr_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (s
 
     var pNbrKey string
 
-    pNbrKey = vrfName + "|" + pNbrAddr
+    if net.ParseIP(pNbrAddr) == nil {
+        pNbrKey = vrfName + "|" + pNbrAddr
+    } else {
+        pNbrKey = vrfName + "|" + net.ParseIP(pNbrAddr).String()
+    }
 
     log.Info("YangToDb_bgp_nbr_tbl_key_xfmr: pNbrKey:", pNbrKey)
     return pNbrKey, nil
