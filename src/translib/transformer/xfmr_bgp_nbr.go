@@ -1,9 +1,4 @@
-package transformer
-
-import (
-    "errors"
-    "strings"
-    "translib/ocbinds"
+nbrKey  "translib/ocbinds"
     "translib/db"
     "strconv"
     "github.com/openconfig/ygot/ygot"
@@ -237,11 +232,7 @@ var YangToDb_bgp_nbr_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (s
 
     var pNbrKey string
 
-    if net.ParseIP(pNbrAddr) == nil {
-        pNbrKey = vrfName + "|" + pNbrAddr
-    } else {
-        pNbrKey = vrfName + "|" + net.ParseIP(pNbrAddr).String()
-    }
+    pNbrKey = vrfName + "|" + pNbrAddr
 
     log.Info("YangToDb_bgp_nbr_tbl_key_xfmr: pNbrKey:", pNbrKey)
     return pNbrKey, nil
@@ -1086,7 +1077,13 @@ func get_specific_nbr_state (get_req_uri_type E_bgp_nbr_state_get_req_uri_t,
         log.Errorf("Failed to fetch bgp neighbors state info for niName:%s nbrAddr:%s. Err: %s vtysh_cmd %s \n", nbr_key.niName, nbr_key.nbrAddr, cmd_err, vtysh_cmd)
     }
 
-    if frrNbrDataJson, ok := nbrMapJson[net.ParseIP(nbr_key.nbrAddr).String()].(map[string]interface{}) ; ok {
+    if net.ParseIP(nbr_key.nbrAddr) == nil {
+        nbrKey := pNbrAddr
+    } else {
+        nbrKey := net.ParseIP(nbr_key.nbrAddr).String()
+    }
+
+    if frrNbrDataJson, ok := nbrMapJson[nbrKey].(map[string]interface{}) ; ok {
         err = fill_nbr_state_info (get_req_uri_type, nbr_key, frrNbrDataJson, cfgDb, nbr_obj)
     } else {
         err = fill_nbr_state_info (get_req_uri_type, nbr_key, nil, cfgDb, nbr_obj)
@@ -1337,7 +1334,13 @@ var DbToYang_bgp_nbrs_nbr_af_state_xfmr SubTreeXfmrDbToYang = func(inParams Xfmr
         return nil
     }
 
-    frrNbrDataJson, ok := nbrMapJson[net.ParseIP(nbr_af_key.nbrAddr).String()].(map[string]interface{}); if !ok {
+    if net.ParseIP(nbr_af_key.nbrAddr) == nil {
+        nbrKey := pNbrAddr
+    } else {
+        nbrKey := net.ParseIP(nbr_af_key.nbrAddr).String()
+    }
+
+    frrNbrDataJson, ok := nbrMapJson[nbrKey].(map[string]interface{}); if !ok {
         log.Errorf("Failed data from bgp neighbors state info for niName:%s nbrAddr:%s afi-safi-name:%s. Err: %s vtysh_cmd: %s \n",
                    nbr_af_key.niName, nbr_af_key.nbrAddr, afiSafi_cmd, nbr_cmd_err, vtysh_cmd)
         return nil
@@ -1571,7 +1574,7 @@ var YangToDb_bgp_nbrs_nbr_auth_password_xfmr SubTreeXfmrYangToDb = func(inParams
     nbr_obj, ok := nbrs_obj.Neighbor[nbrAddr]
     if !ok {
         log.Infof("%s Neighbor object missing, add new", nbrAddr)
-        return res_map, err
+        nbr_obj,_ = nbrs_obj.NewNeighbor(nbrAddr)
     }
     entry_key := niName + "|" + nbrAddr
     if nbr_obj.AuthPassword.Config != nil && nbr_obj.AuthPassword.Config.Password != nil && (inParams.oper != DELETE){
