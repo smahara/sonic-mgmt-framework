@@ -74,6 +74,7 @@ module sonic-vxlan {
 
             list VXLAN_TUNNEL_MAP_LIST { 
                 key "name mapname";
+		sonic-ext:custom-validation ValidateVxlanMapDelete;
 
                 leaf name {
                     must "(/cmn:operation/cmn:operation != 'CREATE') and (/cmn:operation/cmn:operation != 'UPDATE') or " + 
