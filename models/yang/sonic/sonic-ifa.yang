@@ -2,6 +2,10 @@ module sonic-ifa {
     namespace "http://github.com/Azure/sonic-ifa";
     prefix ifa;
 
+    import sonic-extension {
+            prefix sonic-ext;
+    }
+
     organization
         "SONiC";
 
@@ -22,6 +26,7 @@ module sonic-ifa {
 
             list TAM_INT_IFA_FEATURE_TABLE_LIST {
                 key "name";
+	        sonic-ext:custom-validation ValidateTAMFeature;
 
                 leaf name {
                     type enumeration {
@@ -39,6 +44,7 @@ module sonic-ifa {
 
             list TAM_INT_IFA_FLOW_TABLE_LIST {
                 key "name";
+	        sonic-ext:custom-validation ValidateTAMFeature;
 
                 leaf name {
                     type string {
