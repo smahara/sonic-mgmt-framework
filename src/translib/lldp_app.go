@@ -232,12 +232,11 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
             }
 
         }
-    } else if ((targetUriPath == "/openconfig-lldp:lldp/interfaces/interface") || (strings.Contains(targetUriPath, "/openconfig-lldp:lldp/interfaces/interface/neighbors"))) {
+    } else if ((targetUriPath == "/openconfig-lldp:lldp/interfaces/interface") || (targetUriPath == "/openconfig-lldp:lldp/interfaces/interface/neighbors")) {
         intfObj := lldpIntfObj.Interfaces
         ygot.BuildEmptyTree(intfObj)
         if intfObj.Interface != nil && len(intfObj.Interface) > 0 {
             for ifname, _ := range intfObj.Interface {
-                log.Info("if-name = ", ifname)
                 app.getLldpInfoFromDB(&ifname)
                 ifInfo := intfObj.Interface[ifname]
                 ygot.BuildEmptyTree(ifInfo)
@@ -256,6 +255,27 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
         } else {
             log.Info("No data")
         }
+   } else if (strings.Contains(targetUriPath, "/openconfig-lldp:lldp/interfaces/interface/neighbors")) {
+        intfObj := lldpIntfObj.Interfaces
+        ygot.BuildEmptyTree(intfObj)
+        // fetch attribute name from the path
+        ss := strings.Split(targetUriPath, "/")
+        sattr := ss[len(ss)-1]
+        if intfObj.Interface != nil && len(intfObj.Interface) > 0 {
+            for ifname, _ := range intfObj.Interface {
+                app.getLldpInfoFromDB(&ifname)
+                nbrInfo := intfObj.Interface[ifname].Neighbors.Neighbor[ifname]
+                ygot.BuildEmptyTree(nbrInfo)
+                app.getLldpNeighInfo(&ifname, nbrInfo, &sattr)
+                payload, err = dumpIetfJson(intfObj, true)
+                if err != nil {
+                    log.Info("Creation of nbr subtree failed!")
+                    return GetResponse{Payload: payload, ErrSrc: AppErr}, err
+                }
+            }
+        } else {
+            log.Info("No data")
+        }
    }
 
    return GetResponse{Payload:payload}, err
@@ -266,6 +286,84 @@ func (app *lldpApp) processAction(dbs [db.MaxDB]*db.DB) (ActionResponse, error) 
     err := errors.New("Not implemented")
 
     return resp, err
+}
+
+/** Helper function to populate JSON response for GET request **/
+func (app *lldpApp) getLldpNeighInfo(ifName *string, ngInfo *ocbinds.OpenconfigLldp_Lldp_Interfaces_Interface_Neighbors_Neighbor, sattr *string) {
+    ygot.BuildEmptyTree(ngInfo)
+    tattr := "NONE"
+    // map attr name to internal ID
+    switch *sattr {
+        case "chassis-id":
+            tattr = LLDP_REMOTE_CHASS_ID
+        case "system-name":
+            tattr = LLDP_REMOTE_SYS_NAME
+        case "port-description":
+            tattr = LLDP_REMOTE_PORT_DESC
+        case "port-id-type":
+            tattr = LLDP_REMOTE_PORT_ID_SUBTYPE
+        case "system-description":
+            tattr = LLDP_REMOTE_SYS_DESC
+        case "port-id":
+            tattr = LLDP_REMOTE_PORT_ID
+        case "id":
+            tattr = LLDP_REMOTE_REM_ID
+        case "chassis-id-type":
+            tattr = LLDP_REMOTE_CHASS_ID_SUBTYPE
+        case "management-address":
+            tattr = LLDP_REMOTE_MAN_ADDR
+        default:
+            tattr = "NONE"
+    }
+    for attr, value := range app.lldpNeighTableMap[*ifName] {
+        if (attr != tattr) {
+            continue
+        }
+        switch attr {
+            case LLDP_REMOTE_SYS_NAME:
+                name  := new(string)
+                *name  = value
+                ngInfo.State.SystemName = name
+            case LLDP_REMOTE_PORT_DESC:
+                pdescr := new(string)
+                *pdescr = value
+                ngInfo.State.PortDescription = pdescr
+            case LLDP_REMOTE_CHASS_ID:
+                chId := new (string)
+                *chId = value
+                ngInfo.State.ChassisId = chId
+            case LLDP_REMOTE_PORT_ID_SUBTYPE:
+                remPortIdTypeVal, err :=  strconv.Atoi(value)
+                if err == nil {
+                        ngInfo.State.PortIdType =ocbinds.E_OpenconfigLldp_PortIdType(remPortIdTypeVal)
+                }
+            case LLDP_REMOTE_SYS_DESC:
+                sdesc:= new(string)
+                *sdesc = value
+                ngInfo.State.SystemDescription = sdesc
+            case LLDP_REMOTE_REM_TIME:
+            /* Ignore Remote System time */
+            case LLDP_REMOTE_PORT_ID:
+                remPortIdPtr := new(string)
+                *remPortIdPtr = value
+                ngInfo.State.PortId = remPortIdPtr
+            case LLDP_REMOTE_REM_ID:
+                Id := new(string)
+                *Id = value
+                ngInfo.State.Id = Id
+            case LLDP_REMOTE_CHASS_ID_SUBTYPE:
+                remChassIdTypeVal , err:=strconv.Atoi(value)
+                if err  == nil {
+                        ngInfo.State.ChassisIdType =ocbinds.E_OpenconfigLldp_ChassisIdType(remChassIdTypeVal)
+                }
+            case LLDP_REMOTE_MAN_ADDR:
+                mgmtAdr:= new(string)
+                *mgmtAdr = value
+                ngInfo.State.ManagementAddress = mgmtAdr
+            default:
+                log.Info("Not a valid attribute!")
+        }
+    }
 }
 
 /** Helper function to populate JSON response for GET request **/
