@@ -1,5 +1,3 @@
-#!/usr/bin/python
-###########################################################################
 #
 # Copyright 2019 Dell, Inc.
 #
@@ -17,6 +15,7 @@
 #
 ###########################################################################
 
+import syslog as log
 import sys
 import cli_client as cc
 from rpipe_utils import pipestr
@@ -27,36 +26,48 @@ urllib3.disable_warnings()
 
 #For interface to VRF mapping
 vrfDict = {}
+inputDict = {}
+
+aa = cc.ApiClient()
 
 def get_keypath(func,args):
     keypath = None
     instance = None
     body = None
 
+    rcvdIntfName = inputDict.get('intf')
+    if rcvdIntfName == None:
+        rcvdIntfName = ""
+
+    rcvdIpAddr = inputDict.get('ip')
+    if rcvdIpAddr == None:
+        rcvdIpAddr = ""
+
+    rcvdFamily = inputDict.get('family')
+    if rcvdFamily == None:
+        rcvdFamily = ""
+
+    rcvdForceStatus = inputDict.get('force')
+    if rcvdForceStatus == None:
+        rcvdForceStatus = ""
+
     if func == 'get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors':
-        keypath = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/neighbors', name=args[1], index="0")
+        keypath = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/neighbors', name=rcvdIntfName, index="0")
     elif func == 'get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_neighbors':
-        keypath = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/neighbors', name=args[1], index="0")
+        keypath = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/neighbors', name=rcvdIntfName, index="0")
     elif func == 'get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors_neighbor':
-        keypath = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/neighbors/neighbor={ip}', name=args[1], index="0", ip=args[3])
+        keypath = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv4/neighbors/neighbor={ip}', name=rcvdIntfName, index="0", ip=rcvdIpAddr)
     elif func == 'get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv6_neighbors_neighbor':
-        keypath = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/neighbors/neighbor={ip}',name=args[1], index="0", ip=args[3])
+        keypath = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/subinterfaces/subinterface={index}/openconfig-if-ip:ipv6/neighbors/neighbor={ip}',name=rcvdIntfName, index="0", ip=rcvdIpAddr)
     elif func == 'get_sonic_neigh_sonic_neigh_neigh_table':
         keypath = cc.Path('/restconf/data/sonic-neighbor:sonic-neighbor/NEIGH_TABLE')
     elif func == 'rpc_sonic_clear_neighbors':
         keypath = cc.Path('/restconf/operations/sonic-neighbor:clear-neighbors')
-        if (len (args) == 2):
-            body = {"sonic-neighbor:input":{"family": args[0], "force": args[1], "ip": "", "ifname": ""}}
-        elif (len (args) == 3):
-            body = {"sonic-neighbor:input":{"family": args[0], "force": args[1], "ip": args[2], "ifname": ""}}
-        elif (len (args) == 4):
-            body = {"sonic-neighbor:input":{"family": args[0], "force": args[1], "ip": "", "ifname": args[3]}}
+        body = {"sonic-neighbor:input":{"family": rcvdFamily, "force": rcvdForceStatus, "ip": rcvdIpAddr, "ifname": rcvdIntfName}}
 
     return keypath, body
 
 def get_egress_port(macAddr, vlanName):
-    aa = cc.ApiClient()
-
     vlanId = vlanName[len("Vlan"):]
     macAddr = macAddr.strip()
 
@@ -77,12 +88,26 @@ def get_egress_port(macAddr, vlanName):
         return "-"
 
 def build_vrf_list():
-    aa = cc.ApiClient()
+    global vrfDict
+    tIntf = ("/restconf/data/sonic-interface:sonic-interface/INTERFACE/",
+             "sonic-interface:INTERFACE",
+             "INTERFACE_LIST",
+             "portname")
 
-    tIntf = ("/restconf/data/sonic-interface:sonic-interface/INTERFACE/", "sonic-interface:INTERFACE", "INTERFACE_LIST","portname")
-    tVlanIntf = ("/restconf/data/sonic-vlan-interface:sonic-vlan-interface/VLAN_INTERFACE/", "sonic-vlan-interface:VLAN_INTERFACE", "VLAN_INTERFACE_LIST","vlanName")
-    tPortChannelIntf = ("/restconf/data/sonic-portchannel-interface:sonic-portchannel-interface/PORTCHANNEL_INTERFACE/", "sonic-portchannel-interface:PORTCHANNEL_INTERFACE", "PORTCHANNEL_INTERFACE_LIST", "pch_name")
-    tMgmtIntf = ("/restconf/data/sonic-mgmt-interface:sonic-mgmt-interface/MGMT_INTERFACE/", "sonic-mgmt-interface:MGMT_INTERFACE", "MGMT_INTERFACE_LIST", "portname")
+    tVlanIntf = ("/restconf/data/sonic-vlan-interface:sonic-vlan-interface/VLAN_INTERFACE/",
+                 "sonic-vlan-interface:VLAN_INTERFACE",
+                 "VLAN_INTERFACE_LIST",
+                 "vlanName")
+
+    tPortChannelIntf = ("/restconf/data/sonic-portchannel-interface:sonic-portchannel-interface/PORTCHANNEL_INTERFACE/",
+                        "sonic-portchannel-interface:PORTCHANNEL_INTERFACE",
+                        "PORTCHANNEL_INTERFACE_LIST",
+                        "pch_name")
+
+    tMgmtIntf = ("/restconf/data/sonic-mgmt-interface:sonic-mgmt-interface/MGMT_INTERFACE/",
+                 "sonic-mgmt-interface:MGMT_INTERFACE",
+                 "MGMT_INTERFACE_LIST",
+                 "portname")
 
     requests = [tIntf, tVlanIntf, tPortChannelIntf, tMgmtIntf]
 
@@ -104,11 +129,14 @@ def build_vrf_list():
             for intf in intfsList:
                 portName = intf.get(request[3])
                 vrfName = intf.get('vrf_name')
-                if len(portName) > 0 and len(vrfName) > 0:
-                    vrfDict[portName] = vrfName
+                if len(portName) > 0:
+                    if len(vrfName) > 0:
+                        vrfDict[portName] = vrfName
+                    else:
+                        vrfDict[portName] = ""
 
         except Exception as e:
-            print "Error in getting interfaces: ", e
+            print "%Error: Internal error"
 
 def process_single_nbr(response, args):
     nbr_list = []
@@ -134,62 +162,81 @@ def process_single_nbr(response, args):
                        'intfName':args[1],
                        'extIntfName':ext_intf_name
                      }
-    nbr_list.append(nbr_table_entry)
+    vrfName = vrfDict.get(args[1])
+
+    if (args[2] == "vrf" and args[3] == vrfName):
+        nbr_list.append(nbr_table_entry)
+    elif (vrfName is None):
+        nbr_list.append(nbr_table_entry)
+
     return nbr_list
 
-def process_nbrs_intf(response, args):
+def process_nbrs_intf(response):
     nbr_list = []
-    if response['openconfig-if-ip:neighbors'] is None:
+    rcvdIntfName = inputDict.get('intf')
+
+    nbrsContainer = response.get('openconfig-if-ip:neighbors')
+    if nbrsContainer is None:
         return
 
-    nbrs = response['openconfig-if-ip:neighbors']['neighbor']
-    if nbrs is None:
+    nbrsList = nbrsContainer.get('neighbor')
+    if nbrsList is None:
         return
 
-    for nbr in nbrs:
+    for nbr in nbrsList:
         ext_intf_name = "-"
-        ipAddr = nbr['state']['ip']
+
+	state = nbr.get('state')
+	if state is None:
+           log.syslog(log.LOG_INFO, "sonic-cli-neighbor.py: 'state' not available")
+	   continue
+
+        ipAddr = state.get('ip')
         if ipAddr is None:
-            return[]
+            log.syslog(log.LOG_INFO, "sonic-cli-neighbor.py: 'ip' not available")
+            continue
 
-        macAddr = nbr['state']['link-layer-address']
+        macAddr = state.get('link-layer-address')
         if macAddr is None:
-            return[]
+            log.syslog(log.LOG_INFO, "sonic-cli-neighbor.py: 'link-layer-address' not available")
+            continue
 
-        if args[1].startswith('Vlan'):
-            ext_intf_name = get_egress_port(macAddr, args[1])
+        if rcvdIntfName.startswith('Vlan'):
+            ext_intf_name = get_egress_port(macAddr, rcvdIntfName)
 
         nbr_table_entry = {'ipAddr':ipAddr,
                             'macAddr':macAddr,
-                            'intfName':args[1],
+                            'intfName':rcvdIntfName,
                             'extIntfName':ext_intf_name
                           }
         nbr_list.append(nbr_table_entry)
 
     return nbr_list
 
-def process_sonic_nbrs(response, args):
+def process_sonic_nbrs(response):
     nbr_list = []
-    vrfName = ""
+    rcvdVrfName = inputDict.get('vrf')
+    rcvdIpAddr = inputDict.get('ip')
+    rcvdMacAddr = inputDict.get('mac')
+    rcvdFamily = inputDict.get('family')
 
-    if response['sonic-neighbor:NEIGH_TABLE'] is None:
+    nbrContainer = response.get('sonic-neighbor:NEIGH_TABLE')
+    if nbrContainer is None:
         return
 
-    nbrs = response['sonic-neighbor:NEIGH_TABLE']['NEIGH_TABLE_LIST']
+    nbrs = nbrContainer.get('NEIGH_TABLE_LIST')
     if nbrs is None:
         return
 
-    if len(args) == 4 and args[2] == "vrf":
-	    build_vrf_list()
-
     for nbr in nbrs:
+    	vrfName = ""
         ext_intf_name = "-"
 
         family = nbr.get('family')
         if family is None:
             return []
 
-        if family != args[1]:
+        if family != rcvdFamily:
             continue
 
         ifName = nbr.get('ifname')
@@ -204,8 +251,7 @@ def process_sonic_nbrs(response, args):
         if macAddr is None:
             return []
 
-        if len(args) == 4 and args[2] == "vrf":
-            vrfName = vrfDict.get(ifName)
+        vrfName = vrfDict.get(ifName)
 
         if ifName.startswith('Vlan'):
             ext_intf_name = get_egress_port(macAddr, ifName)
@@ -215,26 +261,31 @@ def process_sonic_nbrs(response, args):
                            'intfName':ifName,
                            'extIntfName':ext_intf_name
                         }
-        if (len(args) == 4):
-            if (args[2] == "mac" and args[3] == macAddr):
+	if (rcvdVrfName == vrfName):
+       	    if (rcvdMacAddr == macAddr):
                 nbr_list.append(nbr_table_entry)
-            if (args[2] == "vrf" and args[3] == vrfName):
+            elif (rcvdIpAddr == ipAddr):
                 nbr_list.append(nbr_table_entry)
-        elif (len(args) == 3 and args[2] != "summary"):
-            if args[2] == ipAddr:
+	    elif (rcvdIpAddr is None and rcvdMacAddr is None):
                 nbr_list.append(nbr_table_entry)
-        else:
-            nbr_list.append(nbr_table_entry)
 
     return nbr_list
 
+def process_args(args):
+    global inputDict
+
+    for arg in args:
+        tmp = arg.split(":", 1)
+	if tmp[1] == "":
+		tmp[1] = None
+	inputDict[tmp[0]] = tmp[1]
+
 def run(func, args):
-    aa = cc.ApiClient()
+    process_args(args)
 
     # create a body block
     keypath, body = get_keypath(func, args)
     nbr_list = []
-
     try:
         if (func == 'rpc_sonic_clear_neighbors'):
             api_response = aa.post(keypath, body)
@@ -242,7 +293,7 @@ def run(func, args):
             api_response = aa.get(keypath)
     except:
         # system/network error
-        print "Error: Unable to connect to the server"
+        print "%Error: Unable to connect to the server"
 
     try:
         if api_response.ok():
@@ -253,12 +304,11 @@ def run(func, args):
         if response is None:
             return
 
-        if 'openconfig-if-ip:neighbor' in response.keys():
-            nbr_list = process_single_nbr(response, args)
-        elif 'openconfig-if-ip:neighbors' in response.keys():
-            nbr_list = process_nbrs_intf(response, args)
+        build_vrf_list()
+        if 'openconfig-if-ip:neighbors' in response.keys():
+            nbr_list = process_nbrs_intf(response)
         elif 'sonic-neighbor:NEIGH_TABLE' in response.keys():
-            nbr_list = process_sonic_nbrs(response, args)
+            nbr_list = process_sonic_nbrs(response)
         elif 'sonic-neighbor:output' in response.keys():
             status = response['sonic-neighbor:output']
             status = status['response']
@@ -267,16 +317,14 @@ def run(func, args):
             return
         else:
             return
-	if (len(args) == 3 and args[2] == "summary"):
-            show_cli_output(args[0], len(nbr_list))
+	if (inputDict.get('summary') == "summary"):
+            show_cli_output(inputDict.get('script'), len(nbr_list))
 	else:
-            show_cli_output(args[0], nbr_list)
+            show_cli_output(inputDict.get('script'), nbr_list)
         return
     except Exception as e:
-        print "Error: ",  e
+        print "%Error: Internal error"
 
 if __name__ == '__main__':
     pipestr().write(sys.argv)
     run(sys.argv[1], sys.argv[2:])
-
-

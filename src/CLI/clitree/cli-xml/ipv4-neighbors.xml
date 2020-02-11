@@ -41,22 +41,60 @@ limitations under the License.
         help="show ARP commands"
         name="show ip arp">
         <PARAM
-            name="arp-subcommands"
+            name="vrf"
             help="ARP subcommands"
-            mode="switch"
             ptype="SUBCOMMAND"
+            mode="subcommand"
             optional="true">
+            <PARAM
+                name="vrf-name"
+                help="VRF name"
+                ptype="STRING_15">
+            </PARAM>
+        </PARAM>
+
+        <PARAM
+            name="filter"
+            help="Filtering parameter 'ip' or 'mac-address'"
+            optional="true"
+            mode="switch"
+            order="true"
+            ptype="SUBCOMMAND">
                 <PARAM
                     help="ARP entry for this IP address"
                     name="ip-addr"
                     ptype="IP_ADDR"
                     optional="true">
                 </PARAM>
+                <PARAM
+                    name="mac-address"
+                    help="HW address"
+                    ptype="SUBCOMMAND"
+                    mode="subcommand"
+                    optional="true">
+                    <PARAM
+                        help="48 bit MAC address"
+                        name="mac-addr"
+                        ptype="MAC_ADDR">
+                    </PARAM>
+                </PARAM>
+                <PARAM
+                     name="summary"
+                     help="Summary of ARP entries"
+                     ptype="SUBCOMMAND"
+                     mode="subcommand"
+                     optional="true">
+                </PARAM>
         </PARAM>
-       <ACTION>
-               python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_sonic_neigh_sonic_neigh_neigh_table arp_show.j2 IPv4 ${ip-addr}&#xA;
+        <ACTION>
+          if test "${summary}" = ""; then&#xA;
+          	python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_sonic_neigh_sonic_neigh_neigh_table script:arp_show.j2 family:IPv4 ip:${ip-addr} mac:${mac-addr} vrf:${vrf-name} summary:${summary}&#xA;
+          else&#xA;
+          	python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_sonic_neigh_sonic_neigh_neigh_table script:arp_summary_show.j2 family:IPv4 ip:${ip-addr} mac:${mac-addr} vrf:${vrf-name} summary:${summary}&#xA;
+          fi&#xA;
        </ACTION>
     </COMMAND>
+
 
 <!-- show ip arp interface <intf> [summary] -->
     <COMMAND
@@ -178,91 +216,53 @@ limitations under the License.
         </PARAM>
         <ACTION>
             if test "${summary}" = ""; then&#xA;
-                if test "${iftype}" = "Ethernet" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_show.j2 ${iftype}${phy-if-name} None&#xA;
+                if test "${iftype}" = "Ethernet"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_show.j2 intf:${iftype}${phy-if-name} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "Loopback" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_show.j2 ${iftype}${lo-id} None&#xA;
+                if test "${iftype}" = "Loopback"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_show.j2 intf:${iftype}${lo-id} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "Management" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_show.j2 eth${mgmt-if-id} None&#xA;
+                if test "${iftype}" = "Management"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_show.j2 intf:eth${mgmt-if-id} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "PortChannel" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_show.j2 ${iftype}${lag-id} None&#xA;
+                if test "${iftype}" = "PortChannel"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_show.j2 intf:${iftype}${lag-id} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "Vlan" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_show.j2 ${iftype}${vlan-id} None&#xA;
+                if test "${iftype}" = "Vlan"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_show.j2 intf:${iftype}${vlan-id} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "Vxlan" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_show.j2 ${iftype}${vxlan-if-name} None&#xA;
+                if test "${iftype}" = "Vxlan"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_show.j2 intf:${iftype}${vxlan-if-name} summary:${summary}&#xA;
                 fi&#xA;
             else&#xA;
-                if test "${iftype}" = "Ethernet" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_summary_show.j2 ${iftype}${phy-if-name} summary&#xA;
+                if test "${iftype}" = "Ethernet"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_summary_show.j2 intf:${iftype}${phy-if-name} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "Loopback" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_summary_show.j2 ${iftype}${lo-id} summary&#xA;
+                if test "${iftype}" = "Loopback"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_summary_show.j2 intf:${iftype}${lo-id} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "Management" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_summary_show.j2 eth${mgmt-if-id} summary&#xA;
+                if test "${iftype}" = "Management"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_summary_show.j2 intf:eth${mgmt-if-id} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "PortChannel" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_summary_show.j2 ${iftype}${lag-id} summary&#xA;
+                if test "${iftype}" = "PortChannel"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_summary_show.j2 intf:${iftype}${lag-id} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "Vlan" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_summary_show.j2 ${iftype}${vlan-id} summary&#xA;
+                if test "${iftype}" = "Vlan"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_summary_show.j2 intf:${iftype}${vlan-id} summary:${summary}&#xA;
                 fi&#xA;
-                if test "${iftype}" = "Vxlan" ; then&#xA;
-                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors arp_summary_show.j2 ${iftype}${vxlan-if-name} summary&#xA;
+                if test "${iftype}" = "Vxlan"; then&#xA;
+                    python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_openconfig_if_ip_interfaces_interface_subinterfaces_subinterface_ipv4_neighbors script:arp_summary_show.j2 intf:${iftype}${vxlan-if-name} summary:${summary}&#xA;
                 fi&#xA;
             fi&#xA;
 
         </ACTION>
     </COMMAND>
 
-<!--- show ip arp [mac-address <mac-addr>] -->
-    <COMMAND
-        help="HW address"
-        name="show ip arp mac-address">
-        <PARAM
-            help="48 bit MAC address"
-            name="mac-addr"
-            ptype="MAC_ADDR">
-        </PARAM>
-        <ACTION>
-            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_sonic_neigh_sonic_neigh_neigh_table arp_show.j2 IPv4 mac ${mac-addr}&#xA;
-        </ACTION>
-   </COMMAND>
-
-<!-- show ip arp summary -->
-    <COMMAND
-        help="Summary of ARP entries"
-        name="show ip arp summary">
-        <ACTION>
-            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_sonic_neigh_sonic_neigh_neigh_table arp_summary_show.j2 IPv4 summary&#xA;
-        </ACTION>
-    </COMMAND>
-
-<!-- show ip arp vrf <vrf name> -->
-    <COMMAND
-        help="ARP entries belong to given VRF"
-        name="show ip arp vrf">
-        <PARAM
-            name="vrf-name"
-            help="VRF name"
-            ptype="STRING_15">
-        </PARAM>
-        <ACTION>
-            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py get_sonic_neigh_sonic_neigh_neigh_table arp_show.j2 IPv4 vrf ${vrf-name}&#xA;
-        </ACTION>
-   </COMMAND>
-
 <!-- clear ip arp -->
     <COMMAND
         help="clear IP commands"
         name="clear ip"
         >
-    <ACTION builtin="clish_nop"/>
     </COMMAND>
 
 <!-- clear ip arp interface <intf> -->
@@ -288,9 +288,9 @@ limitations under the License.
         </PARAM>
         <ACTION>
         if test "${force}" = ""; then
-            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py rpc_sonic_clear_neighbors "IPv4" "false" interface ${if-type}${if-id}&#xA;
+            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py rpc_sonic_clear_neighbors family:IPv4 force:false intf:${if-type}${if-id}&#xA;
         else
-            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py rpc_sonic_clear_neighbors "IPv4" "true" interface ${if-type}${if-id}&#xA;
+            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py rpc_sonic_clear_neighbors family:IPv4 force:true intf:${if-type}${if-id}&#xA;
         fi
         </ACTION>
     </COMMAND>
@@ -321,9 +321,9 @@ limitations under the License.
         </PARAM>
        <ACTION>
         if test "${force}" = ""; then
-            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py rpc_sonic_clear_neighbors "IPv4" "false" ${ip-addr}&#xA;
+            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py rpc_sonic_clear_neighbors family:IPv4 force:false ip:${ip-addr}&#xA;
         else
-            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py rpc_sonic_clear_neighbors "IPv4" "true" ${ip-addr}&#xA;
+            python $SONIC_CLI_ROOT/sonic-cli-neighbors.py rpc_sonic_clear_neighbors family:IPv4 force:true ip:${ip-addr}&#xA;
         fi
        </ACTION>
     </COMMAND>
