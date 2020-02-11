@@ -8,6 +8,7 @@ import (
     "strconv"
     "github.com/openconfig/ygot/ygot"
     log "github.com/golang/glog"
+    "net"
 )
 
 func init () {
@@ -1078,10 +1079,10 @@ func get_specific_nbr_state (get_req_uri_type E_bgp_nbr_state_get_req_uri_t,
     vtysh_cmd := "show ip bgp vrf " + nbr_key.niName + " neighbors " + nbr_key.nbrAddr + " json"
     nbrMapJson, cmd_err := exec_vtysh_cmd (vtysh_cmd)
     if cmd_err != nil {
-        log.Errorf("Failed to fetch bgp neighbors state info for niName:%s nbrAddr:%s. Err: %s\n", nbr_key.niName, nbr_key.nbrAddr, cmd_err)
+        log.Errorf("Failed to fetch bgp neighbors state info for niName:%s nbrAddr:%s. Err: %s vtysh_cmd %s \n", nbr_key.niName, nbr_key.nbrAddr, cmd_err, vtysh_cmd)
     }
 
-    if frrNbrDataJson, ok := nbrMapJson[nbr_key.nbrAddr].(map[string]interface{}) ; ok {
+    if frrNbrDataJson, ok := nbrMapJson[net.ParseIP(nbr_key.nbrAddr).String()].(map[string]interface{}) ; ok {
         err = fill_nbr_state_info (get_req_uri_type, nbr_key, frrNbrDataJson, cfgDb, nbr_obj)
     } else {
         err = fill_nbr_state_info (get_req_uri_type, nbr_key, nil, cfgDb, nbr_obj)
@@ -1268,9 +1269,9 @@ var DbToYang_bgp_nbrs_nbr_af_state_xfmr SubTreeXfmrDbToYang = func(inParams Xfmr
     var afiSafi_cmd string
     switch (nbr_af_key.afiSafiNameEnum) {
         case ocbinds.OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV4_UNICAST:
-            afiSafi_cmd = "ipv4 unicast"
+            afiSafi_cmd = "ipv4"
         case ocbinds.OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV6_UNICAST:
-            afiSafi_cmd = "ipv6 unicast"
+            afiSafi_cmd = "ipv6"
     }
 
     if cfgDbEntry, cfgdb_get_err := get_spec_nbr_af_cfg_tbl_entry (inParams.dbs[db.ConfigDB], &nbr_af_key) ; cfgdb_get_err == nil {
@@ -1324,17 +1325,17 @@ var DbToYang_bgp_nbrs_nbr_af_state_xfmr SubTreeXfmrDbToYang = func(inParams Xfmr
         }
     }
 
-    vtysh_cmd := "show ip bgp vrf " + nbr_af_key.niName + " neighbors " + nbr_af_key.nbrAddr + " json"
+    vtysh_cmd := "show ip bgp vrf " + nbr_af_key.niName + " " + afiSafi_cmd + " neighbors " + nbr_af_key.nbrAddr + " json"
     nbrMapJson, nbr_cmd_err := exec_vtysh_cmd (vtysh_cmd)
     if nbr_cmd_err != nil {
-        log.Errorf("Failed to fetch bgp neighbors state info for niName:%s nbrAddr:%s afi-safi-name:%s. Err: %s\n",
-                   nbr_af_key.niName, nbr_af_key.nbrAddr, afiSafi_cmd, nbr_cmd_err)
+        log.Errorf("Failed to fetch bgp neighbors state info for niName:%s nbrAddr:%s afi-safi-name:%s. Err: %s, Cmd: %s\n",
+                   nbr_af_key.niName, nbr_af_key.nbrAddr, afiSafi_cmd, nbr_cmd_err, vtysh_cmd)
         return nil
     }
 
-    frrNbrDataJson, ok := nbrMapJson[nbr_af_key.nbrAddr].(map[string]interface{}); if !ok {
-        log.Errorf("Failed to decode data from bgp neighbors state info for niName:%s nbrAddr:%s afi-safi-name:%s. Err: %s\n",
-                   nbr_af_key.niName, nbr_af_key.nbrAddr, afiSafi_cmd, nbr_cmd_err)
+    frrNbrDataJson, ok := nbrMapJson[net.ParseIP(nbr_af_key.nbrAddr).String()].(map[string]interface{}); if !ok {
+        log.Errorf("Failed data from bgp neighbors state info for niName:%s nbrAddr:%s afi-safi-name:%s. Err: %s vtysh_cmd: %s \n",
+                   nbr_af_key.niName, nbr_af_key.nbrAddr, afiSafi_cmd, nbr_cmd_err, vtysh_cmd)
         return nil
     }
 
