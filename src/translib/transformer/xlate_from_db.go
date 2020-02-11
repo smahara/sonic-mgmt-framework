@@ -227,7 +227,7 @@ func DbToYangType(yngTerminalNdDtType yang.TypeKind, fldXpath string, dbFldVal s
         case yang.Ybinary, yang.Ydecimal64, yang.Yenum, yang.Yidentityref, yang.Yint64, yang.Yuint64, yang.Ystring, yang.Yunion, yang.Yleafref:
                 // TODO - handle the union type
                 // Make sure to encode as string, expected by util_types.go: ytypes.yangToJSONType
-                log.Info("Yenum/Ystring/Yunion(having all members as strings) type for yangXpath ", fldXpath)
+                xfmrLogInfoAll("Yenum/Ystring/Yunion(having all members as strings) type for yangXpath %v", fldXpath)
                 res = dbFldVal
 		var resString string = res.(string)
 		resPtr = &resString
@@ -249,12 +249,12 @@ func processLfLstDbToYang(fieldXpath string, dbFldVal string, yngTerminalNdDtTyp
 	var resLst []interface{}
 	const INTBASE = 10
 
-	log.Info("xpath:", fieldXpath, ", dbFldVal:", dbFldVal)
+	xfmrLogInfoAll("xpath: %v, dbFldVal: %v", fieldXpath, dbFldVal)
 	switch  yngTerminalNdDtType {
 	case yang.Ybinary, yang.Ydecimal64, yang.Yenum, yang.Yidentityref, yang.Yint64, yang.Yuint64, yang.Ystring, yang.Yunion:
                 // TODO - handle the union type.OC yang should have field xfmr.sonic-yang?
                 // Make sure to encode as string, expected by util_types.go: ytypes.yangToJSONType:
-		log.Info("DB leaf-list and Yang leaf-list are of same data-type")
+		xfmrLogInfoAll("DB leaf-list and Yang leaf-list are of same data-type")
 		for _, fldVal := range valLst {
 			resLst = append(resLst, fldVal)
 		}
