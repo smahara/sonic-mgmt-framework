@@ -87,6 +87,14 @@ def get_egress_port(macAddr, vlanName):
     except:
         return "-"
 
+def isMgmtVrfEnabled():
+    request = "/restconf/data/openconfig-network-instance:network-instances/network-instance=mgmt/state/enabled/"
+    response = aa.get(request)
+    response = response.content
+
+    print response
+    return true
+
 def build_vrf_list():
     global vrfDict
     tIntf = ("/restconf/data/sonic-interface:sonic-interface/INTERFACE/",
@@ -104,12 +112,8 @@ def build_vrf_list():
                         "PORTCHANNEL_INTERFACE_LIST",
                         "pch_name")
 
-    tMgmtIntf = ("/restconf/data/sonic-mgmt-interface:sonic-mgmt-interface/MGMT_INTERFACE/",
-                 "sonic-mgmt-interface:MGMT_INTERFACE",
-                 "MGMT_INTERFACE_LIST",
-                 "portname")
 
-    requests = [tIntf, tVlanIntf, tPortChannelIntf, tMgmtIntf]
+    requests = [tIntf, tVlanIntf, tPortChannelIntf]
 
     for request in requests:
         keypath = cc.Path(request[0])
@@ -137,6 +141,9 @@ def build_vrf_list():
 
         except Exception as e:
             print "%Error: Internal error"
+
+        if isMgmtVrfEnabled():
+            vrfDict["eth0"] = "management"
 
 def process_nbrs_intf(response):
     nbr_list = []
