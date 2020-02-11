@@ -89,7 +89,7 @@ var nat_post_xfmr PostXfmrFunc = func(inParams XfmrParams) (map[string]map[strin
             *inParams.skipOrdTblChk  = true
         }
     }
-    log.Infof("nat_post_xfmr returned : %v, skipOrdTblChk: %v", (*inParams.dbDataMap)[db.ConfigDB], *inParams.skipOrdTblChk)
+    xfmrLogInfoAll("nat_post_xfmr returned : %v, skipOrdTblChk: %v", (*inParams.dbDataMap)[db.ConfigDB], *inParams.skipOrdTblChk)
     return (*inParams.dbDataMap)[db.ConfigDB], nil
 }
 
@@ -1431,7 +1431,7 @@ var DbToYang_nat_type_field_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_nat_type_field_xfmr", data, inParams.ygRoot)
+    xfmrLogInfoAll("DbToYang_nat_type_field_xfmr %v, %v", data, inParams.ygRoot)
 
     targetUriPath, err := getYangPathFromUri(inParams.uri)
     var tblName string
@@ -1488,7 +1488,7 @@ var DbToYang_nat_entry_type_field_xfmr FieldXfmrDbtoYang = func(inParams XfmrPar
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_nat_entry_type_field_xfmr", data, inParams.ygRoot)
+    xfmrLogInfoAll("DbToYang_nat_entry_type_field_xfmr %v, %v", data, inParams.ygRoot)
     targetUriPath, err := getYangPathFromUri(inParams.uri)
     var tblName string
 

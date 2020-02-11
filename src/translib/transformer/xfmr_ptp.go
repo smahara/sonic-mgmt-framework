@@ -342,7 +342,7 @@ var DbToYang_ptp_clock_identity_xfmr FieldXfmrDbtoYang = func(inParams XfmrParam
 	var ptp_id ptp_id_bin
 	var field,identity,sEnc string
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_clock_identity_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_clock_identity_xfmr ygRoot: %v, Xpath: %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 
 	if strings.Contains(inParams.uri, "grandmaster-identity") {
 		field = "grandmaster-identity"
@@ -400,7 +400,7 @@ var DbToYang_ptp_boolean_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map
 	result := make(map[string]interface{})
 	var inval string
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_boolean_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_boolean_xfmr ygRoot: %v,  Xpath: %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 
 	_, field := filepath.Split(inParams.uri)
 	if field == "two-step-flag" {
@@ -460,7 +460,7 @@ var DbToYang_ptp_delay_mech_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (
 	var inval string
 	var outval string
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_delay_mech_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_delay_mech_xfmr ygRoot: %v, Xpath: %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 
 	_, field := filepath.Split(inParams.uri)
 
@@ -533,7 +533,7 @@ var DbToYang_ptp_port_state_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (
 	result := make(map[string]interface{})
 
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_port_state_xfmr :", data, inParams.ygRoot)
+	xfmrLogInfoAll("DbToYang_ptp_port_state_xfmr : %v, %v", data, inParams.ygRoot)
 
 	inval = data["PTP_PORT"][inParams.key].Field["port-state"]
 	switch inval {
@@ -625,7 +625,7 @@ var DbToYang_ptp_network_transport_xfmr FieldXfmrDbtoYang = func(inParams XfmrPa
 	result := make(map[string]interface{})
 
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_network_transport_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_network_transport_xfmr ygRoot: %v, Xpath: %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 	log.Info("DbToYang_ptp_network_transport_xfmr inParams.key: ", inParams.key)
 
 	_, field := filepath.Split(inParams.uri)
@@ -685,7 +685,7 @@ var DbToYang_ptp_domain_number_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams
 	result := make(map[string]interface{})
 
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_domain_number_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_domain_number_xfmr ygRoot: %v, Xpath: %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 	log.Info("DbToYang_ptp_domain_number_xfmr inParams.key: ", inParams.key)
 
 	_, field := filepath.Split(inParams.uri)
@@ -773,7 +773,7 @@ var DbToYang_ptp_clock_type_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (
 	result := make(map[string]interface{})
 
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_clock_type_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_clock_type_xfmr ygRoot: %v, Xpath: %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 	log.Info("DbToYang_ptp_clock_type_xfmr inParams.key: ", inParams.key)
 
 	_, field := filepath.Split(inParams.uri)
@@ -872,7 +872,7 @@ var DbToYang_ptp_domain_profile_xfmr FieldXfmrDbtoYang = func(inParams XfmrParam
 	result := make(map[string]interface{})
 
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_domain_profile_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_domain_profile_xfmr ygRoot: %v, Xpath: %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 	log.Info("DbToYang_ptp_domain_profile_xfmr inParams.key: ", inParams.key)
 
 	_, field := filepath.Split(inParams.uri)
@@ -963,7 +963,7 @@ var DbToYang_ptp_unicast_multicast_xfmr FieldXfmrDbtoYang = func(inParams XfmrPa
 	result := make(map[string]interface{})
 
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_unicast_multicast_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_unicast_multicast_xfmr ygRoot: %v, Xpath: %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 	log.Info("DbToYang_ptp_unicast_multicast_xfmr inParams.key: ", inParams.key)
 
 	_, field := filepath.Split(inParams.uri)
@@ -1038,7 +1038,7 @@ var DbToYang_ptp_unicast_table_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams
 
 	result := make(map[string]interface{})
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_unicast_table_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_unicast_table_xfmr ygRoot: %v, Xpath; %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 	log.Info("DbToYang_ptp_unicast_table_xfmr inParams.key: ", inParams.key)
 
 	_, field := filepath.Split(inParams.uri)
@@ -1086,7 +1086,7 @@ var DbToYang_ptp_udp6_scope_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (
 
 	result := make(map[string]interface{})
 	data := (*inParams.dbDataMap)[inParams.curDb]
-	log.Info("DbToYang_ptp_udp6_scope_xfmr ygRoot: ", *inParams.ygRoot, " Xpath: ", inParams.uri, " data: ", data)
+	xfmrLogInfoAll("DbToYang_ptp_udp6_scope_xfmr ygRoot: %v, Xpath: %v, data: %v", *inParams.ygRoot, inParams.uri, data)
 	log.Info("DbToYang_ptp_udp6_scope_xfmr inParams.key: ", inParams.key)
 
 	_, field := filepath.Split(inParams.uri)

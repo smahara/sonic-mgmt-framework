@@ -54,7 +54,7 @@ var YangToDb_neigh_tbl_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (str
     var neightbl_key string
     var err error
 
-    log.Info("YangToDb_neigh_tbl_key_xfmr - inParams: ", inParams)
+    xfmrLogInfoAll("YangToDb_neigh_tbl_key_xfmr - inParams: %v", inParams)
     pathInfo := NewPathInfo(inParams.uri)
     intfName := pathInfo.Var("name")
     ipAddr := pathInfo.Var("ip")
@@ -69,7 +69,7 @@ var DbToYang_neigh_tbl_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map
     rmap := make(map[string]interface{})
     var err error
 
-    log.Info("DbToYang_neigh_tbl_key_xfmr - inParams: ", inParams)
+    xfmrLogInfoAll("DbToYang_neigh_tbl_key_xfmr - inParams: %v", inParams)
     mykey := strings.Split(inParams.key,":")
 
     rmap["ip"] =  inParams.key[(len(mykey[0])+1):]
@@ -82,7 +82,7 @@ var DbToYang_neigh_tbl_get_all_ipv4_xfmr SubTreeXfmrDbToYang = func (inParams Xf
     var ok bool
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_neigh_tbl_get_all_ipv4_xfmr - data:", data)
+    xfmrLogInfoAll("DbToYang_neigh_tbl_get_all_ipv4_xfmr - data: %v", data)
     pathInfo := NewPathInfo(inParams.uri)
     targetUriPath, err := getYangPathFromUri(pathInfo.Path)
     log.Info("DbToYang_neigh_tbl_get_all_ipv4_xfmr - targetUriPath: ", targetUriPath)
@@ -201,7 +201,7 @@ var DbToYang_neigh_tbl_get_all_ipv6_xfmr SubTreeXfmrDbToYang = func (inParams Xf
     var ok bool
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_neigh_tbl_get_all_ipv6_xfmr - data: ", data)
+    xfmrLogInfoAll("DbToYang_neigh_tbl_get_all_ipv6_xfmr - data: %v", data)
     pathInfo := NewPathInfo(inParams.uri)
     targetUriPath, err := getYangPathFromUri(pathInfo.Path)
     log.Info("DbToYang_neigh_tbl_get_all_ipv6_xfmr - targetUriPath: ", targetUriPath)
