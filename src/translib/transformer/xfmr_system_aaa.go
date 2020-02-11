@@ -42,8 +42,7 @@ func init () {
 
 var YangToDb_auth_method_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     if log.V(3) {
-        log.Info( "YangToDb_auth_method_xfmr: root: ", inParams.ygRoot,
-            ", uri: ", inParams.uri, "param: ", inParams.param)
+	    xfmrLogInfoAll( "YangToDb_auth_method_xfmr: root: %v, uri: %v param: %v", inParams.ygRoot, inParams.uri, inParams.param)
     }
 
     var db_auth_method string
@@ -68,8 +67,7 @@ var YangToDb_auth_method_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map
 
 var DbToYang_auth_method_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
     if log.V(3) {
-        log.Info( "DbToYang_auth_method_xfmr: root: ", inParams.ygRoot,
-            ", uri: ", inParams.uri)
+	    xfmrLogInfoAll( "DbToYang_auth_method_xfmr: root: %v, uri: %v", inParams.ygRoot, inParams.uri)
     }
 
     var err error
@@ -89,8 +87,7 @@ var YangToDb_auth_set_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (stri
 
 var YangToDb_server_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
     if log.V(3) {
-        log.Info( "YangToDb_server_key_xfmr: root: ", inParams.ygRoot,
-            ", uri: ", inParams.uri)
+	    xfmrLogInfoAll( "YangToDb_server_key_xfmr: root: %v, uri: %v", inParams.ygRoot, inParams.uri)
     }
     pathInfo := NewPathInfo(inParams.uri)
     serverkey := pathInfo.Var("address")
@@ -102,7 +99,7 @@ var DbToYang_server_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[st
         res_map := make(map[string]interface{}, 1)
         var err error
 
-        log.Info("DbToYang_server_key_xfmr: ", inParams.key)
+        xfmrLogInfoAll("DbToYang_server_key_xfmr: %v", inParams.key)
 
         res_map["address"] = inParams.key
 
@@ -113,8 +110,7 @@ var DbToYang_server_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[st
 var server_table_xfmr TableXfmrFunc = func(inParams XfmrParams) ([]string, error) {
     var err error;
     if log.V(3) {
-        log.Info( "server_table_xfmr: root: ", inParams.ygRoot,
-            ", uri: ", inParams.uri)
+	    xfmrLogInfoAll( "server_table_xfmr: root: %v, uri: %v", inParams.ygRoot, inParams.uri)
     }
 
     pathInfo := NewPathInfo(inParams.uri)
@@ -136,8 +132,7 @@ var server_table_xfmr TableXfmrFunc = func(inParams XfmrParams) ([]string, error
 
 var YangToDb_server_name_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     if log.V(3) {
-        log.Info( "YangToDb_server_name_xfmr: root: ", inParams.ygRoot,
-            ", uri: ", inParams.uri)
+	    xfmrLogInfoAll("YangToDb_server_name_xfmr: root: %v, uri: %v", inParams.ygRoot, inParams.uri)
     }
 
     res_map :=  make(map[string]string)
@@ -147,8 +142,7 @@ var YangToDb_server_name_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map
 
 var YangToDb_global_sg_name_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     if log.V(3) {
-        log.Info( "YangToDb_global_sg_name_xfmr: root: ", inParams.ygRoot,
-            ", uri: ", inParams.uri)
+	    xfmrLogInfoAll("YangToDb_global_sg_name_xfmr: root: %v, uri: %v", inParams.ygRoot, inParams.uri)
     }
 
     res_map :=  make(map[string]string)
@@ -158,8 +152,7 @@ var YangToDb_global_sg_name_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (
 
 var YangToDb_global_sg_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
     if log.V(3) {
-        log.Info( "YangToDb_global_sg_key_xfmr: root: ", inParams.ygRoot,
-            ", uri: ", inParams.uri)
+	    xfmrLogInfoAll("YangToDb_global_sg_key_xfmr: root: %v, uri: %v", inParams.ygRoot, inParams.uri)
     }
 
     return "global", nil
@@ -169,7 +162,7 @@ var DbToYang_global_sg_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map
         res_map := make(map[string]interface{})
         var err error
 
-        log.Info("DbToYang_global_sg_key_xfmr: ", inParams.key)
+        xfmrLogInfoAll("DbToYang_global_sg_key_xfmr: %v", inParams.key)
 
         return  res_map, err
 }
@@ -178,8 +171,7 @@ var global_sg_tbl_xfmr TableXfmrFunc = func(inParams XfmrParams) ([]string, erro
     var err error
 
     if log.V(3) {
-        log.Info( "global_sg_tbl_xfmr: root: ", inParams.ygRoot,
-            ", uri: ", inParams.uri)
+	    xfmrLogInfoAll("global_sg_tbl_xfmr: root: %v, uri: %v", inParams.ygRoot, inParams.uri)
     }
 
     pathInfo := NewPathInfo(inParams.uri)

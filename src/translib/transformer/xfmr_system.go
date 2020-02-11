@@ -311,7 +311,7 @@ var DbToYang_sys_procs_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) erro
 
 
 var YangToDb_sys_aaa_auth_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (map[string]map[string]db.Value,error){
-    log.Info("SubtreeXfmrFunc - Uri SYS AUTH: ", inParams.uri);
+    xfmrLogInfoAll("SubtreeXfmrFunc - Uri SYS AUTH: %v", inParams.uri);
     pathInfo := NewPathInfo(inParams.uri)
     targetUriPath,_ := getYangPathFromUri(pathInfo.Path)
     log.Info("TARGET URI PATH SYS AUTH:", targetUriPath)

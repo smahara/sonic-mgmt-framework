@@ -79,7 +79,7 @@ var YangToDb_prefix_action_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams
     }
 
     action, _ := inParams.param.(ocbinds.E_OpenconfigRoutingPolicyExt_RoutingPolicyExtActionType)
-    log.Info("YangToDb_prefix_action_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " route-operation: ", action)
+    xfmrLogInfoAll("YangToDb_prefix_action_fld_xfmr: %v, Xpath: %v, route-operation: %v", inParams.ygRoot, inParams.uri, action)
     if action == ocbinds.OpenconfigRoutingPolicyExt_RoutingPolicyExtActionType_PERMIT {
         res_map["action"] = "permit"
     } else if action == ocbinds.OpenconfigRoutingPolicyExt_RoutingPolicyExtActionType_DENY {
@@ -93,11 +93,11 @@ var DbToYang_prefix_action_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_prefix_action_fld_xfmr", data, "inParams : ", inParams)
+    xfmrLogInfoAll("DbToYang_prefix_action_fld_xfmr: %v, inParams : %v", data, inParams)
 
     pTbl := data["PREFIX"]
     if _, ok := pTbl[inParams.key]; !ok {
-        log.Info("DbToYang_route_map_action_policy_result_xfmr table not found : ", inParams.key)
+        xfmrLogInfoAll("DbToYang_route_map_action_policy_result_xfmr table not found : %v", inParams.key)
         return result, errors.New("Policy definition table not found : " + inParams.key)
     }
     niInst := pTbl[inParams.key]
@@ -118,14 +118,14 @@ var DbToYang_prefix_action_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams
 var YangToDb_prefix_empty_set_name_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
 
-    log.Info("YangToDb_prefix_empty_set_name_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("YangToDb_prefix_empty_set_name_fld_xfmr: %v", inParams.key)
     return res_map, nil
 }
 
 var YangToDb_prefix_set_name_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
 
-    log.Info("YangToDb_prefix_cfg_set_name_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("YangToDb_prefix_cfg_set_name_fld_xfmr: %v", inParams.key)
     res_map["NULL"] = "NULL"
     return res_map, nil
 }
@@ -133,7 +133,7 @@ var YangToDb_prefix_set_name_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrPara
 var DbToYang_prefix_set_name_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
     res_map := make(map[string]interface{})
     var err error
-    log.Info("DbToYang_prefix_set_name_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("DbToYang_prefix_set_name_fld_xfmr: %v", inParams.key)
     /*name attribute corresponds to key in redis table*/
     key := inParams.key
     log.Info("DbToYang_prefix_set_name_fld_xfmr: ", key)
@@ -218,7 +218,7 @@ var YangToDb_prefix_set_mode_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrPara
     log.Info("YangToDb_prefix_set_mode_fld_xfmr: setName ", setName, "is_prefixes_exits ", is_prefixes_exits)
 
     mode, _ := inParams.param.(ocbinds.E_OpenconfigRoutingPolicy_RoutingPolicy_DefinedSets_PrefixSets_PrefixSet_Config_Mode)
-    log.Info("YangToDb_prefix_set_mode_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " Mode: ", mode)
+    xfmrLogInfoAll("YangToDb_prefix_set_mode_fld_xfmr: %v, Xpath: %v, Mode: %v", inParams.ygRoot, inParams.uri, mode)
     new_mode := findInMap(PREFIX_SET_MODE_MAP, strconv.FormatInt(int64(mode), 10))
 
     prev_mode, _ := prefix_set_mode_get_by_set_name (inParams.d, setName, "PREFIX_SET")
@@ -237,7 +237,7 @@ var DbToYang_prefix_set_mode_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrPara
     var err error
     result := make(map[string]interface{})
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_prefix_set_mode_fld_xfmr: Input", data, inParams.ygRoot)
+    xfmrLogInfoAll("DbToYang_prefix_set_mode_fld_xfmr: %v Input: %v", data, inParams.ygRoot)
     mode, ok := data["PREFIX_SET"][inParams.key].Field["mode"]
     if ok {
         oc_mode := findInMap(PREFIX_SET_MODE_MAP, mode)
@@ -256,7 +256,7 @@ var YangToDb_prefix_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string
     var masklenrange string
     var prefixTblKey string
 
-    log.Info("YangToDb_prefix_key_xfmr: ", inParams.ygRoot, inParams.uri)
+    xfmrLogInfoAll("YangToDb_prefix_key_xfmr: %v, uri: %v", inParams.ygRoot, inParams.uri)
     pathInfo := NewPathInfo(inParams.uri)
 
     if ((inParams.oper == DELETE) && (len(pathInfo.Vars) == 1)) {
@@ -354,14 +354,14 @@ var DbToYang_prefix_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[st
 var YangToDb_prefix_empty_ip_prefix_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
 
-    log.Info("YangToDb_prefix_empty_ip_prefix_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("YangToDb_prefix_empty_ip_prefix_fld_xfmr: %v", inParams.key)
     return res_map, nil
 }
 
 var YangToDb_prefix_ip_prefix_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
 
-    log.Info("YangToDb_prefix_ip_prefix_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("YangToDb_prefix_ip_prefix_fld_xfmr: %v", inParams.key)
     res_map["NULL"] = "NULL"
     return res_map, nil
 }
@@ -369,7 +369,7 @@ var YangToDb_prefix_ip_prefix_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrPar
 var DbToYang_prefix_ip_prefix_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
     res_map := make(map[string]interface{})
     var err error
-    log.Info("DbToYang_prefix_ip_prefix_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("DbToYang_prefix_ip_prefix_fld_xfmr: %v", inParams.key)
     /*name attribute corresponds to key in redis table*/
     key := inParams.key
     prefixKey := strings.Split(key, "|")
@@ -383,14 +383,14 @@ var DbToYang_prefix_ip_prefix_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrPar
 var YangToDb_prefix_empty_masklength_range_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
 
-    log.Info("YangToDb_prefix_empty_masklength_range_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("YangToDb_prefix_empty_masklength_range_fld_xfmr: %v", inParams.key)
     return res_map, nil
 }
 
 var YangToDb_prefix_masklength_range_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
 
-    log.Info("YangToDb_prefix_masklength_range_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("YangToDb_prefix_masklength_range_fld_xfmr: %v", inParams.key)
     res_map["NULL"] = "NULL"
     return res_map, nil
 }
@@ -398,7 +398,7 @@ var YangToDb_prefix_masklength_range_fld_xfmr FieldXfmrYangToDb = func(inParams 
 var DbToYang_prefix_masklength_range_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
     res_map := make(map[string]interface{})
     var err error
-    log.Info("DbToYang_prefix_masklength_range_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("DbToYang_prefix_masklength_range_fld_xfmr: %v", inParams.key)
     /*name attribute corresponds to key in redis table*/
     key := inParams.key
     prefixKey := strings.Split(key, "|")
@@ -413,7 +413,7 @@ var DbToYang_prefix_masklength_range_fld_xfmr FieldXfmrDbtoYang = func(inParams 
 var YangToDb_community_set_name_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
 
-    log.Info("YangToDb_community_set_name_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("YangToDb_community_set_name_fld_xfmr: %v", inParams.key)
     res_map["NULL"] = "NULL"
     return res_map, nil
 }
@@ -421,7 +421,7 @@ var YangToDb_community_set_name_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrP
 var DbToYang_community_set_name_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
     res_map := make(map[string]interface{})
     var err error
-    log.Info("DbToYang_community_set_name_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("DbToYang_community_set_name_fld_xfmr: %v", inParams.key)
     /*name attribute corresponds to key in redis table*/
     key := inParams.key
     log.Info("DbToYang_community_set_name_fld_xfmr: ", key)
@@ -465,7 +465,7 @@ var YangToDb_community_match_set_options_fld_xfmr FieldXfmrYangToDb = func(inPar
         return res_map, nil
     }
 
-    log.Info("YangToDb_community_match_set_options_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri)
+    xfmrLogInfoAll("YangToDb_community_match_set_options_fld_xfmr: %v, Xpath: %v", inParams.ygRoot, inParams.uri)
 
     pathInfo := NewPathInfo(inParams.uri)
     if len(pathInfo.Vars) <  1 {
@@ -506,7 +506,7 @@ var DbToYang_community_match_set_options_fld_xfmr FieldXfmrDbtoYang = func(inPar
     var err error
     result := make(map[string]interface{})
 
-    log.Info("DbToYang_community_match_set_options_fld_xfmr", inParams.ygRoot)
+    xfmrLogInfoAll("DbToYang_community_match_set_options_fld_xfmr: %v", inParams.ygRoot)
     data := (*inParams.dbDataMap)[inParams.curDb]
     opt, ok := data["COMMUNITY_SET"][inParams.key].Field["match_action"]
     if ok {
@@ -572,7 +572,7 @@ var YangToDb_community_member_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrPar
     var new_type string
     var prev_type string
 
-    log.Info("YangToDb_community_member_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, "inParams : ", inParams)
+    xfmrLogInfoAll("YangToDb_community_member_fld_xfmr: %v, Xpath: v, inParams: %v", inParams.ygRoot, inParams.uri, inParams)
     if inParams.param == nil {
         res_map["community_member@"] = ""
         return res_map, errors.New("Invalid Inputs")
@@ -670,7 +670,7 @@ var DbToYang_community_member_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrPar
     var result_community string
     data := (*inParams.dbDataMap)[inParams.curDb]
 
-    log.Info("DbToYang_community_member_fld_xfmr", data, inParams.ygRoot, inParams.key)
+    xfmrLogInfoAll("DbToYang_community_member_fld_xfmr: %v, %v, %v", data, inParams.ygRoot, inParams.key)
 
     set_type := data["COMMUNITY_SET"][inParams.key].Field["set_type"]
 
@@ -711,7 +711,7 @@ var DbToYang_community_member_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrPar
 var YangToDb_ext_community_set_name_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
 
-    log.Info("YangToDb_ext_community_set_name_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("YangToDb_ext_community_set_name_fld_xfmr: %v", inParams.key)
     res_map["NULL"] = "NULL"
     return res_map, nil
 }
@@ -719,7 +719,7 @@ var YangToDb_ext_community_set_name_fld_xfmr FieldXfmrYangToDb = func(inParams X
 var DbToYang_ext_community_set_name_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) (map[string]interface{}, error) {
     res_map := make(map[string]interface{})
     var err error
-    log.Info("DbToYang_ext_community_set_name_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("DbToYang_ext_community_set_name_fld_xfmr: %v", inParams.key)
     /*name attribute corresponds to key in redis table*/
     key := inParams.key
     log.Info("DbToYang_ext_community_set_name_fld_xfmr: ", key)
@@ -743,7 +743,7 @@ var YangToDb_ext_community_match_set_options_fld_xfmr FieldXfmrYangToDb = func(i
         return res_map, nil
     }
 
-    log.Info("YangToDb_ext_community_match_set_options_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri)
+    xfmrLogInfoAll("YangToDb_ext_community_match_set_options_fld_xfmr: %v, Xpath: %v", inParams.ygRoot, inParams.uri)
 
     pathInfo := NewPathInfo(inParams.uri)
     if len(pathInfo.Vars) <  1 {
@@ -784,7 +784,7 @@ var DbToYang_ext_community_match_set_options_fld_xfmr FieldXfmrDbtoYang = func(i
     var err error
     result := make(map[string]interface{})
 
-    log.Info("DbToYang_ext_community_match_set_options_fld_xfmr", inParams.ygRoot)
+    xfmrLogInfoAll("DbToYang_ext_community_match_set_options_fld_xfmr: %v", inParams.ygRoot)
     data := (*inParams.dbDataMap)[inParams.curDb]
     opt, ok := data["EXTENDED_COMMUNITY_SET"][inParams.key].Field["match_action"]
     if ok {
@@ -804,7 +804,7 @@ var YangToDb_ext_community_member_fld_xfmr FieldXfmrYangToDb = func(inParams Xfm
     var new_type string
     var prev_type string
 
-    log.Info("YangToDb_ext_community_member_fld_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, "inParams : ", inParams)
+    xfmrLogInfoAll("YangToDb_ext_community_member_fld_xfmr: %v, Xpath: %v, inParams: %v", inParams.ygRoot, inParams.uri, inParams)
     if inParams.param == nil {
         res_map["community_member@"] = ""
         return res_map, errors.New("Invalid Inputs")
@@ -877,7 +877,7 @@ var DbToYang_ext_community_member_fld_xfmr FieldXfmrDbtoYang = func(inParams Xfm
     var result_community string
     data := (*inParams.dbDataMap)[inParams.curDb]
 
-    log.Info("DbToYang_ext_community_member_fld_xfmr", data, inParams.ygRoot, inParams.key)
+    xfmrLogInfoAll("DbToYang_ext_community_member_fld_xfmr %v, %v, %v", data, inParams.ygRoot, inParams.key)
 
     set_type := data["EXTENDED_COMMUNITY_SET"][inParams.key].Field["set_type"]
 
@@ -907,7 +907,7 @@ var DbToYang_ext_community_member_fld_xfmr FieldXfmrDbtoYang = func(inParams Xfm
 var YangToDb_as_path_set_name_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrParams) (map[string]string, error) {
     res_map := make(map[string]string)
 
-    log.Info("YangToDb_as_path_set_name_fld_xfmr: ", inParams.key)
+    xfmrLogInfoAll("YangToDb_as_path_set_name_fld_xfmr: %v", inParams.key)
     res_map["NULL"] = "NULL"
     return res_map, nil
 }

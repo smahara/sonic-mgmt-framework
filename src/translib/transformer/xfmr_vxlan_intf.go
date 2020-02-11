@@ -89,8 +89,8 @@ func init() {
 var YangToDb_vxlan_vni_state_peer_info_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
 
 	if log.V(3) {
-		log.Info("YangToDb_vxlan_vni_state_peer_info_key_xfmr ==>inParams.uri => ", inParams.uri)
-		log.Info("YangToDb_vxlan_vni_state_peer_info_key_xfmr ==>inParams.requestUri => ", inParams.requestUri)
+		xfmrLogInfoAll("YangToDb_vxlan_vni_state_peer_info_key_xfmr ==>inParams.uri => %v ", inParams.uri)
+		xfmrLogInfoAll("YangToDb_vxlan_vni_state_peer_info_key_xfmr ==>inParams.requestUri => %v ", inParams.requestUri)
 	}
 
 	pathInfo := NewPathInfo(inParams.uri)
@@ -243,14 +243,14 @@ var DbToYang_vxlan_state_peer_tunnel_type_xfmr FieldXfmrDbtoYang = func(inParams
 
 var DbToYang_vxlan_vni_state_peer_info_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
 
-	log.Info("DbToYang_vxlan_vni_state_peer_info_key_xfmr Entering ==> ", inParams)
+	xfmrLogInfoAll("DbToYang_vxlan_vni_state_peer_info_key_xfmr Entering ==> %v", inParams)
 
 	rmap := make(map[string]interface{})
 
 	if inParams.key != "" {
 
 //		if log.V(3) {
-			log.Info("DbToYang_vxlan_vni_state_peer_info_key_xfmr ==> inParams.key => ", inParams.key)
+			xfmrLogInfoAll("DbToYang_vxlan_vni_state_peer_info_key_xfmr ==> inParams.key => %v", inParams.key)
 //		}
 
 		/*
@@ -351,8 +351,8 @@ var DbToYang_vxlan_vni_state_peer_info_key_xfmr KeyXfmrDbToYang = func(inParams 
 
 var YangToDb_vxlan_state_tunnel_info_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
 //	if log.V(3) {
-		log.Info("YangToDb_vxlan_state_tunnel_info_key_xfmr ==>inParams.uri => ", inParams.uri)
-		log.Info("YangToDb_vxlan_state_tunnel_info_key_xfmr ==>inParams.requestUri => ", inParams.requestUri)
+		xfmrLogInfoAll("YangToDb_vxlan_state_tunnel_info_key_xfmr ==>inParams.uri => %v", inParams.uri)
+		xfmrLogInfoAll("YangToDb_vxlan_state_tunnel_info_key_xfmr ==>inParams.requestUri => %v", inParams.requestUri)
 //	}
 
 	pathInfo := NewPathInfo(inParams.uri)
@@ -394,7 +394,7 @@ var YangToDb_vxlan_state_tunnel_info_key_xfmr KeyXfmrYangToDb = func(inParams Xf
 
 var DbToYang_vxlan_state_tunnel_info_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
 //	if log.V(3) {
-		log.Info("DbToYang_vxlan_state_tunnel_info_key_xfmr ==> inParams.key => ", inParams.key)
+		xfmrLogInfoAll("DbToYang_vxlan_state_tunnel_info_key_xfmr ==> inParams.key => %v", inParams.key)
 //	}
 
 	pathOrigInfo := NewPathInfo(inParams.requestUri)
@@ -752,7 +752,7 @@ var YangToDb_intf_vxlan_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrPara
 	var err error
 
 	if log.V(3) {
-		log.Info("YangToDb_intf_vxlan_config_xfmr entering => inParams.uri => ", inParams.uri)
+		xfmrLogInfoAll("YangToDb_intf_vxlan_config_xfmr entering => inParams.uri => %v", inParams.uri)
 	}
 
 	path, err := getIntfUriPath(inParams.uri)
@@ -791,7 +791,7 @@ var YangToDb_intf_vxlan_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrPara
 var DbToYang_intf_vxlan_config_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) error {
 
 	if log.V(3) {
-		log.Info("Entering DbToYang_intf_vxlan_config_xfmr ===> inParams.uri => ", inParams.uri)
+		xfmrLogInfoAll("Entering DbToYang_intf_vxlan_config_xfmr ===> inParams.uri => %v", inParams.uri)
 	}
 
 	path, err := getIntfUriPath(inParams.uri)
@@ -891,7 +891,7 @@ var YangToDb_nw_inst_vxlan_vni_id_xfmr FieldXfmrYangToDb = func(inParams XfmrPar
 	var err error
 
 	if log.V(3) {
-		log.Info("YangToDb_nw_inst_vxlan_vni_id_xfmr ==> printing target object inParams.uri ==> ", (inParams.uri))
+		xfmrLogInfoAll("YangToDb_nw_inst_vxlan_vni_id_xfmr ==> printing target object inParams.uri ==> %v", (inParams.uri))
 	}
 
 	path, err := getVxlanNiUriPath(inParams.uri)
@@ -931,7 +931,7 @@ var YangToDb_nw_inst_vxlan_source_nve_xfmr FieldXfmrYangToDb = func(inParams Xfm
 	var err error
 
 	if log.V(3) {
-		log.Info("YangToDb_nw_inst_vxlan_source_nve_xfmr ==> printing target object request ==> ", inParams.param)
+		xfmrLogInfoAll("YangToDb_nw_inst_vxlan_source_nve_xfmr ==> printing target object request ==> %v", inParams.param)
 	}
 
 	path, err := getVxlanNiUriPath(inParams.uri)
@@ -987,7 +987,7 @@ var YangToDb_nw_inst_vxlan_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) 
 	var err error
 
 	if log.V(3) {
-		log.Info("YangToDb_nw_inst_vxlan_key_xfmr ==> printing target object request ==> ", (inParams.param))
+		xfmrLogInfoAll("YangToDb_nw_inst_vxlan_key_xfmr ==> printing target object request ==> %v", (inParams.param))
 	}
 
 	path, err := getVxlanNiUriPath(inParams.uri)
@@ -1083,7 +1083,7 @@ var YangToDb_vxlan_vni_instance_subtree_xfmr SubTreeXfmrYangToDb = func(inParams
 	valueMap := make(map[string]db.Value)
 	pathInfo := NewPathInfo(inParams.uri)
 	if log.V(3) {
-		log.Info("YangToDb_vxlan_vni_instance_subtree_xfmr: ", inParams.ygRoot, inParams.uri)
+		xfmrLogInfoAll("YangToDb_vxlan_vni_instance_subtree_xfmr: %v, uri:%v", inParams.ygRoot, inParams.uri)
 	}
 
 	path, err := getVxlanNiUriPath(inParams.uri)
@@ -1384,7 +1384,7 @@ var YangToDb_vlan_nd_suppress_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParam
 var DbToYang_vlan_nd_suppress_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
 	res_map := make(map[string]interface{})
 
-	log.Info("Vlan Name = ", inParams.key)
+	xfmrLogInfoAll("Vlan Name = %v", inParams.key)
 	res_map["name"] = inParams.key
 	return res_map, nil
 }
@@ -1398,7 +1398,7 @@ var YangToDb_vlan_nd_suppress_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrPar
 	if !strings.HasPrefix(vlanIdStr, "Vlan") {
 		return res_map, tlerr.InvalidArgs("Invalid key: %v", vlanIdStr)
 	}
-	log.Infof("YangToDb_vlan_nd_suppress_fld_xfmr: Params: %v", inParams.param)
+	xfmrLogInfoAll("YangToDb_vlan_nd_suppress_fld_xfmr: Params: %v", inParams.param)
 
 	if inParams.param != nil {
 		val, _ := inParams.param.(ocbinds.E_OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_NeighbourSuppress_Config_ArpAndNdSuppress)
@@ -1417,7 +1417,7 @@ var DbToYang_vlan_nd_suppress_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrPar
 	vlanIdStr := pathInfo.Var("name")
 	data := (*inParams.dbDataMap)[inParams.curDb]
 
-	log.Infof("vlan_nd_suppress_fld_xfmr: key: %v, data: %v", vlanIdStr, data)
+	xfmrLogInfoAll("vlan_nd_suppress_fld_xfmr: key: %v, data: %v", vlanIdStr, data)
 	if data != nil && len(data) > 0 {
 		val := data["SUPPRESS_VLAN_NEIGH"][vlanIdStr]
 		if val.Get("suppress") == "on" {

@@ -36,7 +36,7 @@ var YangToDb_sag_ipv4_if_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (s
     var err error
     var ifname string
 
-    log.Info("YangToDb_sag_ipv4_if_key_xfmr ***", inParams.uri)
+    xfmrLogInfoAll("YangToDb_sag_ipv4_if_key_xfmr ***:%v", inParams.uri)
     pathInfo := NewPathInfo(inParams.uri)
 
     /* Key should contain, <name, index> */
@@ -94,7 +94,7 @@ var YangToDb_sag_ipv6_if_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (s
     var err error
     var ifname string
 
-    log.Info("YangToDb_sag_ipv6_if_key_xfmr ***", inParams.uri)
+    xfmrLogInfoAll("YangToDb_sag_ipv6_if_key_xfmr ***: %v", inParams.uri)
     pathInfo := NewPathInfo(inParams.uri)
 
     /* Key should contain, <name, index> */

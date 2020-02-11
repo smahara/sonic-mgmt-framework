@@ -9,6 +9,6 @@ func init() {
 }
 
 var YangToDb_udld_global_key_xfmr = func(inParams XfmrParams) (string, error) {
-	log.Info("YangToDb_udld_global_key_xfmr: ", inParams.ygRoot, inParams.uri)
+	xfmrLogInfoAll("YangToDb_udld_global_key_xfmr: %v,uri: %v", inParams.ygRoot, inParams.uri)
 	return "GLOBAL", nil
 }

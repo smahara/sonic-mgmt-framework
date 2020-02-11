@@ -13,20 +13,20 @@ func init() {
 }
  
 var YangToDb_snmp_engine_key_xfmr = func(inParams XfmrParams) (string, error) {
-  log.Info("YangToDb_snmp_engine_key_xfmr            uri: ", inParams.uri)
+  xfmrLogInfoAll("YangToDb_snmp_engine_key_xfmr            uri: %v", inParams.uri)
   return "GLOBAL", nil
 }
 
 func YangToDb_snmp_group_name_xfmr(inParams XfmrParams) (map[string]string, error) {
   data := map[string]string{ "NULL": "NULL" }
-  log.Info("*** YangToDb_snmp_group_name_xfmr        map: ", data)
+  xfmrLogInfoAll("*** YangToDb_snmp_group_name_xfmr        map: %v", data)
   return data, nil
 }
 
 var YangToDb_snmp_member_key_xfmr = func(inParams XfmrParams) (string, error) {
   var entry_key string
-  log.Info("YangToDb_snmp_member_key_xfmr            uri: ", inParams.uri)
-  log.Info("YangToDb_snmp_member_key_xfmr            key: ", inParams.key)
+  xfmrLogInfoAll("YangToDb_snmp_member_key_xfmr            uri: %v", inParams.uri)
+  xfmrLogInfoAll("YangToDb_snmp_member_key_xfmr            key: %v", inParams.key)
 
   pathInfo := NewPathInfo(inParams.uri)
   gName := pathInfo.Var("name")
@@ -44,8 +44,8 @@ var YangToDb_snmp_member_key_xfmr = func(inParams XfmrParams) (string, error) {
 
 var DbToYang_snmp_member_key_xfmr = func(inParams XfmrParams) (map[string]interface{}, error) {
   rmap := make(map[string]interface{})
-  log.Info("DbToYang_snmp_member_key_xfmr            uri: ", inParams.uri)
-  log.Info("DbToYang_snmp_member_key_xfmr            key: ", inParams.key)
+  xfmrLogInfoAll("DbToYang_snmp_member_key_xfmr            uri: %v", inParams.uri)
+  xfmrLogInfoAll("DbToYang_snmp_member_key_xfmr            key: %v", inParams.key)
 
   keys := strings.Split(inParams.key, "|")
   secName := keys[1]

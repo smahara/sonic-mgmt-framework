@@ -300,7 +300,7 @@ var DbToYang_ztp_status_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (e
     targetUriPath, err := getYangPathFromUri(pathInfo.Path)
     if targetUriPath == "/openconfig-ztp:ztp/state" {
 	log.Info("TARGET URI PATH ZTP:", targetUriPath)
-        log.Info("TableXfmrFunc - Uri ZTP: ", inParams.uri);
+        xfmrLogInfoAll("TableXfmrFunc - Uri ZTP: %v", inParams.uri);
         log.Info("type of ZTP-ROOT OBJECT:",reflect.TypeOf(ztpObj))
         err =  getZtpStatus(ztpObj)
 	return err
@@ -311,7 +311,7 @@ var DbToYang_ztp_status_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (e
 
 var DbToYang_ztp_config_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (error) {
     ztpObj := getZtpRoot(inParams.ygRoot)
-    log.Info("TableXfmrFunc - Uri ZTP: ", inParams.uri);
+    xfmrLogInfoAll("TableXfmrFunc - Uri ZTP: %v", inParams.uri);
     pathInfo := NewPathInfo(inParams.uri)
 
     targetUriPath, err := getYangPathFromUri(pathInfo.Path)
@@ -342,7 +342,7 @@ var DbToYang_ztp_config_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (e
 
 var YangToDb_ztp_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (map[string]map[string]db.Value,error) {
     var err error
-    log.Info("TableXfmrFunc - Uri ZTP: ", inParams.uri);
+    xfmrLogInfoAll("TableXfmrFunc - Uri ZTP: %v", inParams.uri);
     pathInfo := NewPathInfo(inParams.uri)
     targetUriPath, err := getYangPathFromUri(pathInfo.Path)
     log.Info("TARGET URI PATH ZTP:", targetUriPath)

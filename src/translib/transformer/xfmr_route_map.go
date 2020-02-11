@@ -134,7 +134,7 @@ var YangToDb_route_map_action_policy_result_xfmr FieldXfmrYangToDb = func(inPara
     }
 
     action, _ := inParams.param.(ocbinds.E_OpenconfigRoutingPolicy_PolicyResultType)
-    log.Info("YangToDb_route_map_action_policy_result_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " route-operation: ", action)
+    xfmrLogInfoAll("YangToDb_route_map_action_policy_result_xfmr: %v, Xpath: %v, route-operation:%v", inParams.ygRoot, inParams.uri, action)
     if action == ocbinds.OpenconfigRoutingPolicy_PolicyResultType_ACCEPT_ROUTE {
         res_map["route_operation"] = "permit"
     } else if action == ocbinds.OpenconfigRoutingPolicy_PolicyResultType_REJECT_ROUTE {
@@ -148,11 +148,11 @@ var DbToYang_route_map_action_policy_result_xfmr FieldXfmrDbtoYang = func(inPara
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_bgp_external_compare_router_id_xfmr", data, "inParams : ", inParams)
+    xfmrLogInfoAll("DbToYang_bgp_external_compare_router_id_xfmr: %v, inParams: %v", data, inParams)
 
     pTbl := data["ROUTE_MAP"]
     if _, ok := pTbl[inParams.key]; !ok {
-        log.Info("DbToYang_route_map_action_policy_result_xfmr table not found : ", inParams.key)
+        xfmrLogInfoAll("DbToYang_route_map_action_policy_result_xfmr table not found : %v", inParams.key)
         return result, errors.New("Policy definition table not found : " + inParams.key)
     }
     niInst := pTbl[inParams.key]
@@ -183,7 +183,7 @@ var YangToDb_route_map_match_protocol_xfmr FieldXfmrYangToDb = func(inParams Xfm
     }
 
     protocol, _ := inParams.param.(ocbinds.E_OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE)
-    log.Info("YangToDb_route_map_match_protocol_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " protocol: ", protocol)
+    xfmrLogInfoAll("YangToDb_route_map_match_protocol_xfmr: %v, Xpath: %v, protocol: %v", inParams.ygRoot, inParams.uri, protocol)
     switch protocol {
         case ocbinds.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP:
             res_map["match_protocol"] = "bgp"
@@ -207,11 +207,11 @@ var DbToYang_route_map_match_protocol_xfmr FieldXfmrDbtoYang = func(inParams Xfm
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_route_map_match_protocol_xfmr", data, "inParams : ", inParams)
+    xfmrLogInfoAll("DbToYang_route_map_match_protocol_xfmr, %v, inParams: %v", data, inParams)
 
     pTbl := data["ROUTE_MAP"]
     if _, ok := pTbl[inParams.key]; !ok {
-        log.Info("DbToYang_route_map_match_protocol_xfmr table not found : ", inParams.key)
+	    xfmrLogInfoAll("DbToYang_route_map_match_protocol_xfmr table not found : :%v", inParams.key)
         return result, errors.New("Policy definition table not found : " + inParams.key)
     }
     niInst := pTbl[inParams.key]
@@ -246,7 +246,7 @@ var YangToDb_route_map_match_set_options_xfmr FieldXfmrYangToDb = func(inParams 
         return res_map, err
     }
     action, _ := inParams.param.(ocbinds.E_OpenconfigRoutingPolicy_MatchSetOptionsType)
-    log.Info("YangToDb_route_map_match_set_options_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " match-set-option: ", action)
+    xfmrLogInfoAll("YangToDb_route_map_match_set_options_xfmr: %v, Xpath: %v, match-set-option: %v", inParams.ygRoot, inParams.uri,action)
     if action != ocbinds.OpenconfigRoutingPolicy_MatchSetOptionsType_ANY {
         err = errors.New("Invalid match set option")
         return res_map, err
@@ -270,7 +270,7 @@ var YangToDb_route_map_match_set_options_restrict_type_xfmr FieldXfmrYangToDb = 
         return res_map, err
     }
     action, _ := inParams.param.(ocbinds.E_OpenconfigRoutingPolicy_MatchSetOptionsRestrictedType)
-    log.Info("YangToDb_route_map_match_set_options_restrict_type_xfmr: ", inParams.ygRoot, " Xpath: ", inParams.uri, " match-set-option: ", action)
+    xfmrLogInfoAll("YangToDb_route_map_match_set_options_restrict_type_xfmr: %v, Xpath: %v, match-set-option: %v", inParams.ygRoot, inParams.uri, action)
     if action != ocbinds.OpenconfigRoutingPolicy_MatchSetOptionsRestrictedType_ANY {
         err = errors.New("Invalid match set option")
         return res_map, err
@@ -297,7 +297,7 @@ var YangToDb_route_map_bgp_action_set_community SubTreeXfmrYangToDb = func(inPar
     res_map := make(map[string]map[string]db.Value)
     stmtmap := make(map[string]db.Value)
 
-    log.Info("YangToDb_route_map_bgp_action_set_community: ", inParams.ygRoot, inParams.uri)
+    xfmrLogInfoAll("YangToDb_route_map_bgp_action_set_community: %v, %v ", inParams.ygRoot, inParams.uri)
     rtPolDefsObj := getRoutingPolicyRoot(inParams.ygRoot)
     if rtPolDefsObj == nil || rtPolDefsObj.PolicyDefinitions == nil || len (rtPolDefsObj.PolicyDefinitions.PolicyDefinition) < 1 {
         log.Info("YangToDb_route_map_bgp_action_set_community : Routing policy definitions list is empty.")
@@ -426,7 +426,7 @@ var DbToYang_route_map_bgp_action_set_community SubTreeXfmrDbToYang = func (inPa
         return errors.New("Routing policy definitions list is empty")
     }
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_route_map_bgp_action_set_community: ", data, inParams.ygRoot)
+    xfmrLogInfoAll("DbToYang_route_map_bgp_action_set_community: %v, %v", data, inParams.ygRoot)
 
     pathInfo := NewPathInfo(inParams.uri)
     rtPolicyName := pathInfo.Var("name")
@@ -536,7 +536,7 @@ var YangToDb_route_map_bgp_action_set_ext_community SubTreeXfmrYangToDb = func(i
     res_map := make(map[string]map[string]db.Value)
     stmtmap := make(map[string]db.Value)
 
-    log.Info("YangToDb_route_map_bgp_action_set_community: ", inParams.ygRoot, inParams.uri)
+    xfmrLogInfoAll("YangToDb_route_map_bgp_action_set_community: %v, %v", inParams.ygRoot, inParams.uri)
     rtPolDefsObj := getRoutingPolicyRoot(inParams.ygRoot)
     if rtPolDefsObj == nil || rtPolDefsObj.PolicyDefinitions == nil || len (rtPolDefsObj.PolicyDefinitions.PolicyDefinition) < 1 {
         log.Info("YangToDb_route_map_bgp_action_set_community : Routing policy definitions list is empty.")
@@ -661,7 +661,7 @@ var DbToYang_route_map_bgp_action_set_ext_community SubTreeXfmrDbToYang = func (
         return errors.New("Routing policy definitions list is empty")
     }
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_route_map_bgp_action_set_community: ", data, inParams.ygRoot)
+    xfmrLogInfoAll("DbToYang_route_map_bgp_action_set_community: %v, %v", data, inParams.ygRoot)
 
     pathInfo := NewPathInfo(inParams.uri)
     rtPolicyName := pathInfo.Var("name")
