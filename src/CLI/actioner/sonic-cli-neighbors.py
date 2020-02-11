@@ -138,39 +138,6 @@ def build_vrf_list():
         except Exception as e:
             print "%Error: Internal error"
 
-def process_single_nbr(response, args):
-    nbr_list = []
-    ext_intf_name = "-"
-    nbr = response['openconfig-if-ip:neighbor']
-
-    if nbr[0]['state'] is None:
-      return
-
-    ipAddr = nbr[0]['state']['ip']
-    if ipAddr is None:
-        return
-
-    macAddr = nbr[0]['state']['link-layer-address']
-    if macAddr is None:
-        return
-
-    if args[1].startswith('Vlan'):
-      ext_intf_name = get_egress_port(macAddr, args[1])
-
-    nbr_table_entry = {'ipAddr':ipAddr,
-                       'macAddr':macAddr,
-                       'intfName':args[1],
-                       'extIntfName':ext_intf_name
-                     }
-    vrfName = vrfDict.get(args[1])
-
-    if (args[2] == "vrf" and args[3] == vrfName):
-        nbr_list.append(nbr_table_entry)
-    elif (vrfName is None):
-        nbr_list.append(nbr_table_entry)
-
-    return nbr_list
-
 def process_nbrs_intf(response):
     nbr_list = []
     rcvdIntfName = inputDict.get('intf')
