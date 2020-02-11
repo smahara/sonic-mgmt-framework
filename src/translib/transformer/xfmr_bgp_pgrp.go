@@ -35,7 +35,7 @@ var DbToYang_bgp_pgrp_name_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_bgp_pgrp_name_fld_xfmr : ", data, "inParams : ", inParams)
+    xfmrLogInfoAll("DbToYang_bgp_pgrp_name_fld_xfmr : %v, inParams : %v", data, inParams)
 
     entry_key := inParams.key
     peer_group_Key := strings.Split(entry_key, "|")
@@ -80,7 +80,7 @@ var DbToYang_bgp_pgrp_peer_type_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrP
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_bgp_pgrp_peer_type_fld_xfmr : ", data, "inParams : ", inParams)
+    xfmrLogInfoAll("DbToYang_bgp_pgrp_peer_type_fld_xfmr : %v, inParams : %v", data, inParams)
 
     pTbl := data["BGP_PEER_GROUP"]
     if _, ok := pTbl[inParams.key]; !ok {

@@ -315,7 +315,7 @@ var DbToYang_bgp_pgrp_community_type_fld_xfmr FieldXfmrDbtoYang = func(inParams 
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_bgp_pgrp_community_type_fld_xfmr : ", data, "inParams : ", inParams)
+    xfmrLogInfoAll("DbToYang_bgp_pgrp_community_type_fld_xfmr : %v, nParams : %v", data, inParams)
 
     pTbl := data["BGP_PEER_GROUP_AF"]
     if _, ok := pTbl[inParams.key]; !ok {
@@ -381,7 +381,7 @@ var DbToYang_bgp_pgrp_orf_type_fld_xfmr FieldXfmrDbtoYang = func(inParams XfmrPa
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_bgp_pgrp_orf_type_fld_xfmr : ", data, "inParams : ", inParams)
+    xfmrLogInfoAll("DbToYang_bgp_pgrp_orf_type_fld_xfmr : %v, inParams : %v", data, inParams)
 
     pTbl := data["BGP_PEER_GROUP_AF"]
     if _, ok := pTbl[inParams.key]; !ok {
@@ -440,7 +440,7 @@ var DbToYang_bgp_pgrp_tx_add_paths_fld_xfmr FieldXfmrDbtoYang = func(inParams Xf
     result := make(map[string]interface{})
 
     data := (*inParams.dbDataMap)[inParams.curDb]
-    log.Info("DbToYang_bgp_pgrp_tx_add_paths_fld_xfmr: ", data, "inParams : ", inParams)
+    xfmrLogInfoAll("DbToYang_bgp_pgrp_tx_add_paths_fld_xfmr: %v, inParams : %v", data, inParams)
 
     pTbl := data["BGP_PEER_GROUP_AF"]
     if _, ok := pTbl[inParams.key]; !ok {
