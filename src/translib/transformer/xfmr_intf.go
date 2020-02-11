@@ -1231,7 +1231,14 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
                     *addr.Config.Ip = ip
                 }
                 log.Info("Ipv6 IP:=", *addr.Config.Ip)
+                if addr.Config.PrefixLength == nil {
+                    log.Error("Prefix Length empty!")
+                    errStr := "Prefix Length not present"
+                    err = tlerr.InvalidArgsError{Format:errStr}
+                    return subIntfmap, err
+                }
                 log.Info("Ipv6 prefix:=", *addr.Config.PrefixLength)
+
                 if !validIPv6(*addr.Config.Ip) {
                     errStr := "Invalid IPv6 address " + *addr.Config.Ip
                     err = tlerr.InvalidArgsError{Format: errStr}
