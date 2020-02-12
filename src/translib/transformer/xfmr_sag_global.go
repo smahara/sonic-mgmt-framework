@@ -36,7 +36,7 @@ func init () {
 var YangToDb_sag_global_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
     /* var err error */
 
-    xfmrLogInfoAll("YangToDb_sag_global_key_xfmr ***: %v", inParams.uri)
+    log.Info("YangToDb_sag_global_key_xfmr ***", inParams.uri)
     /* pathInfo := NewPathInfo(inParams.uri) */
 
     /* Key should contain, <network-instance-name> */
@@ -105,7 +105,7 @@ var DbToYang_sag_ipv4_enable_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) 
 	
     pTbl := data[tblName]
     if _, ok := pTbl[inParams.key]; !ok {
-        xfmrLogInfoAll("DbToYang_sag_ipv4_enable_xfmr SAG not found : %v", inParams.key)
+        log.Info("DbToYang_sag_ipv4_enable_xfmr SAG not found : ", inParams.key)
         return result, errors.New("SAG not found : " + inParams.key)
     }
     prtInst := pTbl[inParams.key]
@@ -136,7 +136,7 @@ var DbToYang_sag_ipv6_enable_xfmr FieldXfmrDbtoYang = func(inParams XfmrParams) 
 
     pTbl := data[tblName]
     if _, ok := pTbl[inParams.key]; !ok {
-        xfmrLogInfoAll("DbToYang_sag_ipv6_enable_xfmr SAG not found : %v", inParams.key)
+        log.Info("DbToYang_sag_ipv6_enable_xfmr SAG not found : ", inParams.key)
         return result, errors.New("SAG not found : " + inParams.key)
     }
     prtInst := pTbl[inParams.key]
