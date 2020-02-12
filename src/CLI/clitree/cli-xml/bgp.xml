@@ -272,7 +272,7 @@ limitations under the License.
       <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_global_route_selection_options_config_external_compare_router_id ${vrf-name} True</ACTION>
   </COMMAND>
 
-  <COMMAND name="neighbor" help="Specify a neighbor router" view="configure-router-bgp-nbr-view" viewid="nbr-addr=${ip}${iftype}${ifnum};vrf-name=${vrf-name}">
+  <COMMAND name="neighbor" help="Specify a neighbor router" view="configure-router-bgp-nbr-view" viewid="nbr-addr=${ip}${Ethernet}${PortChannel}${Vlan};vrf-name=${vrf-name}">
     <PARAM name="nbopt" help="neighbor router" mode="switch" ptype="SUBCOMMAND">
       <PARAM name="ip" help="Neighbor router" ptype="IPV4V6_ADDR"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
@@ -497,19 +497,13 @@ limitations under the License.
       <PARAM name="ip" help="Neighbor router" ptype="IPV4V6_ADDR"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="ifnum" help="Physical interface" ptype="UINT"/>
-          </PARAM>
-          <PARAM name="PortChannel" help="Port channel Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="ifnum" help="PortChannel identifier" ptype="LAG_ID"/>
-          </PARAM>
-          <PARAM name="Vlan" help="Vlan Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="ifnum" help="Vlan identifier" ptype="VLAN_ID"/>
-          </PARAM>
+          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor ${vrf-name} ${ip} ${iftype}${ifnum}</ACTION>
+    <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor ${vrf-name} ${ip} ${Ethernet} ${PortChannel} ${Vlan}</ACTION>
   </COMMAND>
   <COMMAND name="no peer-group" help="Specify a peer-group">
     <PARAM name="template" help="Peer-group" ptype="STRING"/>
@@ -644,34 +638,13 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
       <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="phy-if-name" help="Physical interface" ptype="UINT"/>
-          </PARAM>
-          <PARAM name="PortChannel" help="Port channel Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="lag-id" help="PortChannel identifier" ptype="LAG_ID"/>
-          </PARAM>
-          <PARAM name="Vlan" help="Vlan Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="vlan-id" help="Vlan identifier" ptype="VLAN_ID"/>
-          </PARAM>
+          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION>
-             if test "${source_param}" = "ip" ; then&#xA;
-                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip}&#xA;
-             else&#xA;
-                 if test "${iftype}" = "Ethernet" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Ethernet${phy-if-name}&#xA;
-                 fi&#xA;
-                 if test "${iftype}" = "PortChannel" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} PortChannel${lag-id}&#xA;
-                 fi&#xA;
-                 if test "${iftype}" = "Vlan" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Vlan${vlan-id}&#xA;
-                 fi&#xA;
-
-             fi&#xA;
-    </ACTION>
+    <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip} ${Ethernet} ${PortChannel} ${Vlan}</ACTION>
   </COMMAND>
 
   <COMMAND name="shutdown" help="Shutdown a neighbor">
@@ -837,34 +810,13 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
       <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" optional="true"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="phy-if-name" help="Physical interface" ptype="UINT"/>
-          </PARAM>
-          <PARAM name="PortChannel" help="Port channel Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="lag-id" help="PortChannel identifier" ptype="LAG_ID"/>
-          </PARAM>
-          <PARAM name="Vlan" help="Vlan Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="vlan-id" help="Vlan identifier" ptype="VLAN_ID"/>
-          </PARAM>
+          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION>
-             if test "${source_param}" = "ip" ; then&#xA;
-                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip}&#xA;
-             else&#xA;
-                 if test "${iftype}" = "Ethernet" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Ethernet${phy-if-name}&#xA;
-                 fi&#xA;
-                 if test "${iftype}" = "PortChannel" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} PortChannel${lag-id}&#xA;
-                 fi&#xA;
-                 if test "${iftype}" = "Vlan" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} Vlan${vlan-id}&#xA;
-                 fi&#xA;
-
-             fi&#xA;
-    </ACTION>
+    <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip} ${Ethernet} ${PortChannel} ${Vlan}</ACTION>
   </COMMAND>
   <COMMAND name="no shutdown" help="Shutdown a neighbor">
     <PARAM name="message" help="Add a shutdown message (draft-ietf-idr-shutdown-06)" mode="subcommand" ptype="SUBCOMMAND" optional="true">
@@ -990,34 +942,13 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
       <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="phy-if-name" help="Physical interface" ptype="UINT"/>
-          </PARAM>
-          <PARAM name="PortChannel" help="Port channel Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="lag-id" help="PortChannel identifier" ptype="LAG_ID"/>
-          </PARAM>
-          <PARAM name="Vlan" help="Vlan Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="vlan-id" help="Vlan identifier" ptype="VLAN_ID"/>
-          </PARAM>
+          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION>
-             if test "${source_param}" = "ip" ; then&#xA;
-                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} ${ip}&#xA;
-             else&#xA;
-                 if test "${iftype}" = "Ethernet" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Ethernet${phy-if-name}&#xA;
-                 fi&#xA;
-                 if test "${iftype}" = "PortChannel" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} PortChannel${lag-id}&#xA;
-                 fi&#xA;
-                 if test "${iftype}" = "Vlan" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Vlan${vlan-id}&#xA;
-                 fi&#xA;
-
-             fi&#xA;
-    </ACTION>
+    <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} ${ip} ${Ethernet} ${PortChannel} ${Vlan}</ACTION>
   </COMMAND>
   <COMMAND name="shutdown" help="Shutdown a neighbor">
     <PARAM name="message" help="Add a shutdown message (draft-ietf-idr-shutdown-06)" mode="subcommand" ptype="SUBCOMMAND" optional="true">
@@ -1177,34 +1108,13 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
       <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" optional="true"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Select an interface" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="phy-if-name" help="Physical interface" ptype="UINT"/>
-          </PARAM>
-          <PARAM name="PortChannel" help="Port channel Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="lag-id" help="PortChannel identifier" ptype="LAG_ID"/>
-          </PARAM>
-          <PARAM name="Vlan" help="Vlan Interface Configuration" mode="subcommand" ptype="SUBCOMMAND">
-            <PARAM name="vlan-id" help="Vlan identifier" ptype="VLAN_ID"/>
-          </PARAM>
+          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION>
-             if test "${source_param}" = "ip" ; then&#xA;
-                 python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} ${ip}&#xA;
-             else&#xA;
-                 if test "${iftype}" = "Ethernet" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Ethernet${phy-if-name}&#xA;
-                 fi&#xA;
-                 if test "${iftype}" = "PortChannel" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} PortChannel${lag-id}&#xA;
-                 fi&#xA;
-                 if test "${iftype}" = "Vlan" ; then&#xA;
-                     python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} Vlan${vlan-id}&#xA;
-                 fi&#xA;
-
-             fi&#xA;
-    </ACTION>
+    <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_transport_config_local_address ${vrf-name} ${template-name} ${ip} ${Ethernet} ${PortChannel} ${Vlan}</ACTION>
   </COMMAND>
   <COMMAND name="no shutdown" help="Shutdown a neighbor">
     <PARAM name="message" help="Add a shutdown message (draft-ietf-idr-shutdown-06)" mode="subcommand" ptype="SUBCOMMAND" optional="true">
@@ -1244,7 +1154,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
       <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_enforce_first_as ${vrf-name} ${template-name}</ACTION>
   </COMMAND>
   <COMMAND name="no enforce-multihop" help="Enforce EBGP neighbors perform multihop">
-      <ACTION builtin="clish_pyobj">sonic_cli_bgpy delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_enforce_multihop ${vrf-name} ${template-name} False</ACTION>
+      <ACTION builtin="clish_pyobj">sonic_cli_bgp delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_enforce_multihop ${vrf-name} ${template-name} False</ACTION>
   </COMMAND>
   <COMMAND name="no local-as" help="Specify a local-as number">
     <ACTION> python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_peer_groups_peer_group_config_local_as ${vrf-name} ${template-name}&#xA;
