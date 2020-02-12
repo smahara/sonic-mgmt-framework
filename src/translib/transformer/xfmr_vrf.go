@@ -334,7 +334,7 @@ var network_instance_table_name_xfmr TableXfmrFunc = func (inParams XfmrParams) 
                 tblList = append(tblList, NwInstTblNameMapWithName[intNwInstName])
         }
 
-	xfmrLogInfoAll("network_instance_table_name_xfmr, OP :%v", inParams.oper)
+	log.Info("network_instance_table_name_xfmr, OP ", inParams.oper)
         log.Info("network_instance_table_name_xfmr,  DB table name ", tblList)
 
         return tblList, err
