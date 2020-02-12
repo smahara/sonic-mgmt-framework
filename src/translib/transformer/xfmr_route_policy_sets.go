@@ -572,7 +572,7 @@ var YangToDb_community_member_fld_xfmr FieldXfmrYangToDb = func(inParams XfmrPar
     var new_type string
     var prev_type string
 
-    xfmrLogInfoAll("YangToDb_community_member_fld_xfmr: %v, Xpath: v, inParams: %v", inParams.ygRoot, inParams.uri, inParams)
+    xfmrLogInfoAll("YangToDb_community_member_fld_xfmr: %v, Xpath: %v, inParams: %v", inParams.ygRoot, inParams.uri, inParams)
     if inParams.param == nil {
         res_map["community_member@"] = ""
         return res_map, errors.New("Invalid Inputs")
