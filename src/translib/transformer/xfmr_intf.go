@@ -444,8 +444,12 @@ var intf_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error)
     		}
     	}	
     }
-	
-	if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface") == true && IntfTypeVxlan == intfType  {
+
+	if  inParams.oper == DELETE && (targetUriPath == "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4" ||
+        targetUriPath ==  "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6") {
+            return tblList, tlerr.New("DELETE operation not allowed on  this container")
+
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface") == true && IntfTypeVxlan == intfType  {
 		if inParams.oper == 5 {
 			tblList = append(tblList, "VXLAN_TUNNEL")
 			tblList = append(tblList, "EVPN_NVO")
