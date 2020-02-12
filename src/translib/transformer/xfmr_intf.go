@@ -1298,6 +1298,8 @@ func convertIpMapToOC (intfIpMap map[string]db.Value, ifInfo *ocbinds.Openconfig
 
     subIntf = ifInfo.Subinterfaces.Subinterface[0]
     ygot.BuildEmptyTree(subIntf)
+    ygot.BuildEmptyTree(subIntf.Ipv4)
+    ygot.BuildEmptyTree(subIntf.Ipv6)
 
     for ipKey, ipdata := range intfIpMap {
         log.Info("IP address = ", ipKey)
