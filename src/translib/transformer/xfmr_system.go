@@ -21,6 +21,9 @@ func init () {
     XlateFuncBind("DbToYang_sys_cpus_xfmr", DbToYang_sys_cpus_xfmr)
     XlateFuncBind("DbToYang_sys_procs_xfmr", DbToYang_sys_procs_xfmr)
     XlateFuncBind("YangToDb_sys_aaa_auth_xfmr", YangToDb_sys_aaa_auth_xfmr)
+    XlateFuncBind("YangToDb_sys_config_key_xfmr", YangToDb_sys_config_key_xfmr)
+    XlateFuncBind("DbToYang_sys_config_key_xfmr", DbToYang_sys_config_key_xfmr)
+
 }
 
 type JSONSystem  struct {
@@ -120,6 +123,17 @@ func getSystemState (sys *JSONSystem, sysstate *ocbinds.OpenconfigSystem_System_
     }
 }
 
+var YangToDb_sys_config_key_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
+       log.Info("YangToDb_sys_config_key_xfmr: ", inParams.uri)
+       dvKey := "localhost"
+       return dvKey, nil
+}
+
+var DbToYang_sys_config_key_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map[string]interface{}, error) {
+       rmap := make(map[string]interface{})
+       log.Info("DbToYang_sys_config_key_xfmr root, uri: ", inParams.ygRoot, inParams.uri)
+       return rmap, nil
+}
 
 var DbToYang_sys_state_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) error {
     var err error
