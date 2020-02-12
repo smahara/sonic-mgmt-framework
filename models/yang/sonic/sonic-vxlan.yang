@@ -74,8 +74,15 @@ module sonic-vxlan {
 
             list VXLAN_TUNNEL_MAP_LIST { 
                 key "name mapname";
+		sonic-ext:custom-validation ValidateVxlanMapDelete;
 
                 leaf name {
+                    must "(/cmn:operation/cmn:operation != 'CREATE') and (/cmn:operation/cmn:operation != 'UPDATE') or " + 
+                      "(../../../VXLAN_TUNNEL/VXLAN_TUNNEL_LIST[name=current()]/src_ip != '')"
+                    {
+                        error-message "Vxlan tunnel map entry cannot be created, since source ip-address does not exist for this tunnel";
+                        error-app-tag creation-not-allowed-no-source-ip-exist;
+                    }                
                     type leafref {
                         path "../../../VXLAN_TUNNEL/VXLAN_TUNNEL_LIST/name";
                     }
