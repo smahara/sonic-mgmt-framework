@@ -35,6 +35,7 @@ module sonic-tam-int-ifa-ts {
 
             list TAM_INT_IFA_TS_FEATURE_TABLE_LIST {
                 key "name";
+	        sonic-ext:custom-validation ValidateTAMFeature;
 
 		leaf name {
 			type string {
@@ -53,6 +54,7 @@ module sonic-tam-int-ifa-ts {
 
             list TAM_INT_IFA_TS_FLOW_TABLE_LIST {
                 key "name";
+	        sonic-ext:custom-validation ValidateTAMFeature;
 
                 leaf name {
 			type string {
