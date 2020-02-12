@@ -267,7 +267,7 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
                 nbrInfo := intfObj.Interface[ifname].Neighbors.Neighbor[ifname]
                 ygot.BuildEmptyTree(nbrInfo)
                 app.getLldpNeighInfo(&ifname, nbrInfo, &sattr)
-                payload, err = dumpIetfJson(nbrInfo, true)
+                payload, err = dumpIetfJson(nbrInfo.State, true)
                 if err != nil {
                     log.Info("Creation of nbr subtree failed!")
                     return GetResponse{Payload: payload, ErrSrc: AppErr}, err
