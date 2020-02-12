@@ -27,6 +27,7 @@ urllib3.disable_warnings()
 #For interface to VRF mapping
 vrfDict = {}
 inputDict = {}
+egressPortDict = {}
 
 aa = cc.ApiClient()
 
@@ -88,12 +89,21 @@ def get_egress_port(macAddr, vlanName):
         return "-"
 
 def isMgmtVrfEnabled():
-    request = "/restconf/data/openconfig-network-instance:network-instances/network-instance=mgmt/state/enabled/"
-    response = aa.get(request)
-    response = response.content
+    try:
+        request = "/restconf/data/openconfig-network-instance:network-instances/network-instance=mgmt/state/enabled/"
 
-    print response
-    return true
+        response = aa.get(request)
+        response = response.content
+        response = response.get('openconfig-network-instance:enabled')
+        if response == True:
+            return response
+        else:
+            return False
+
+    except Exception as e:
+        print "%Error: Internal error"
+
+    return False
 
 def build_vrf_list():
     global vrfDict
@@ -142,8 +152,8 @@ def build_vrf_list():
         except Exception as e:
             print "%Error: Internal error"
 
-        if isMgmtVrfEnabled():
-            vrfDict["eth0"] = "management"
+    if isMgmtVrfEnabled():
+        vrfDict["eth0"] = "management"
 
 def process_nbrs_intf(response):
     nbr_list = []
@@ -160,10 +170,10 @@ def process_nbrs_intf(response):
     for nbr in nbrsList:
         ext_intf_name = "-"
 
-	state = nbr.get('state')
-	if state is None:
+        state = nbr.get('state')
+        if state is None:
            log.syslog(log.LOG_INFO, "sonic-cli-neighbor.py: 'state' not available")
-	   continue
+           continue
 
         ipAddr = state.get('ip')
         if ipAddr is None:
@@ -175,8 +185,12 @@ def process_nbrs_intf(response):
             log.syslog(log.LOG_INFO, "sonic-cli-neighbor.py: 'link-layer-address' not available")
             continue
 
-        if rcvdIntfName.startswith('Vlan'):
-            ext_intf_name = get_egress_port(macAddr, rcvdIntfName)
+        if ifName.startswith('Vlan'):
+            tmpKey = macAddr + "-" + ifName
+            ext_intf_name = egressPortDict.get(tmpKey)
+            if ext_intf_name is None:
+                ext_intf_name = get_egress_port(macAddr, ifName)
+                egressPortDict[tmpKey] = ext_intf_name
 
         nbr_table_entry = {'ipAddr':ipAddr,
                             'macAddr':macAddr,
@@ -203,7 +217,7 @@ def process_sonic_nbrs(response):
         return
 
     for nbr in nbrs:
-    	vrfName = ""
+        vrfName = ""
         ext_intf_name = "-"
 
         family = nbr.get('family')
@@ -228,31 +242,35 @@ def process_sonic_nbrs(response):
         vrfName = vrfDict.get(ifName)
 
         if ifName.startswith('Vlan'):
-            ext_intf_name = get_egress_port(macAddr, ifName)
+            tmpKey = macAddr + "-" + ifName
+            ext_intf_name = egressPortDict.get(tmpKey)
+            if ext_intf_name is None:
+                ext_intf_name = get_egress_port(macAddr, ifName)
+                egressPortDict[tmpKey] = ext_intf_name
 
         nbr_table_entry = {'ipAddr':ipAddr,
                            'macAddr':macAddr,
                            'intfName':ifName,
                            'extIntfName':ext_intf_name
                         }
-	if (rcvdVrfName == vrfName):
-       	    if (rcvdMacAddr == macAddr):
+        if (rcvdVrfName == vrfName):
+            if (rcvdMacAddr == macAddr):
                 nbr_list.append(nbr_table_entry)
             elif (rcvdIpAddr == ipAddr):
                 nbr_list.append(nbr_table_entry)
-	    elif (rcvdIpAddr is None and rcvdMacAddr is None):
+            elif (rcvdIpAddr is None and rcvdMacAddr is None):
                 nbr_list.append(nbr_table_entry)
 
     return nbr_list
 
 def process_args(args):
-    global inputDict
+  global inputDict
 
-    for arg in args:
+  for arg in args:
         tmp = arg.split(":", 1)
-	if tmp[1] == "":
-		tmp[1] = None
-	inputDict[tmp[0]] = tmp[1]
+        if tmp[1] == "":
+                tmp[1] = None
+        inputDict[tmp[0]] = tmp[1]
 
 def run(func, args):
     process_args(args)
@@ -291,9 +309,9 @@ def run(func, args):
             return
         else:
             return
-	if (inputDict.get('summary') == "summary"):
+        if (inputDict.get('summary') == "summary"):
             show_cli_output(inputDict.get('script'), len(nbr_list))
-	else:
+        else:
             show_cli_output(inputDict.get('script'), nbr_list)
         return
     except Exception as e:
