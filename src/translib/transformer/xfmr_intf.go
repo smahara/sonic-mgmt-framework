@@ -1109,7 +1109,7 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
 	intfType, _, ierr := getIntfTypeByName(ifName)
 
     if IntfTypeVxlan == intfType {
-	    return subIntfmap, nil	
+	    return subIntfmap, nil
     }
 
     intfsObj := getIntfsRoot(inParams.ygRoot)
@@ -1123,7 +1123,7 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
         log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr)
         return subIntfmap, errors.New(errStr)
     }
-    
+
     if intfType == IntfTypeUnset || ierr != nil {
         errStr := "Invalid interface type IntfTypeUnset"
         log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr)
@@ -1192,7 +1192,14 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
                     *addr.Config.Ip = ip
                 }
                 log.Info("Ip:=", *addr.Config.Ip)
+                if addr.Config.PrefixLength == nil {
+                    log.Error("Prefix Length empty!")
+                    errStr := "Prefix Length not present"
+                    err = tlerr.InvalidArgsError{Format:errStr}
+                    return subIntfmap, err
+                }
                 log.Info("prefix:=", *addr.Config.PrefixLength)
+
                 if !validIPv4(*addr.Config.Ip) {
                     errStr := "Invalid IPv4 address " + *addr.Config.Ip
                     err = tlerr.InvalidArgsError{Format: errStr}
@@ -1244,7 +1251,14 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
                     *addr.Config.Ip = ip
                 }
                 log.Info("Ipv6 IP:=", *addr.Config.Ip)
+                if addr.Config.PrefixLength == nil {
+                    log.Error("Prefix Length empty!")
+                    errStr := "Prefix Length not present"
+                    err = tlerr.InvalidArgsError{Format:errStr}
+                    return subIntfmap, err
+                }
                 log.Info("Ipv6 prefix:=", *addr.Config.PrefixLength)
+
                 if !validIPv6(*addr.Config.Ip) {
                     errStr := "Invalid IPv6 address " + *addr.Config.Ip
                     err = tlerr.InvalidArgsError{Format: errStr}
