@@ -20,6 +20,7 @@ package transformer
 
 import (
     "translib/tlerr"
+    "errors"
     "encoding/json"
     "translib/ocbinds"
     "translib/db"
@@ -41,32 +42,29 @@ func getLacpRoot (s *ygot.GoStruct) *ocbinds.OpenconfigLacp_Lacp {
 func getLacpData(ifKey string) (map[string]interface{}, error) {
     var TeamdJson map[string]interface{}
     var err error
+    errStr := "Internal Error"
 
     cmd := exec.Command("docker", "exec", "teamd", "teamdctl", ifKey, "state", "dump")
     out_stream, e := cmd.StdoutPipe()
     if e != nil {
-        errStr := "Can't get stdout pipe: "+ err.Error()
-        log.Fatalf(errStr)
+        log.Warningf("Can't get stdout pipe: %s\n", e.Error())
         return TeamdJson, tlerr.InternalError{Format:errStr}
     }
     err = cmd.Start()
     if err != nil {
-        errStr := "cmd.Start() failed with "+ err.Error()
-        log.Fatalf(errStr)
+        log.Warningf("cmd.Start() failed with %s\n", err.Error())
         return TeamdJson, tlerr.InternalError{Format:errStr}
     }
 
     err = json.NewDecoder(out_stream).Decode(&TeamdJson)
     if err != nil {
-        errStr := "Not able to decode teamd json output"
-        log.Infof(errStr)
+        log.Infof("Not able to decode teamd json output")
         return TeamdJson, tlerr.InternalError{Format:errStr}
     }
 
     err = cmd.Wait()
     if err != nil {
-        errStr := "Command execution completion failed with "+ err.Error()
-        log.Fatalf(errStr)
+        log.Warningf("Command execution completion failed with %s\n", err.Error())
         return TeamdJson, tlerr.InternalError{Format:errStr}
     }
 
@@ -190,19 +188,19 @@ func populateLacpData(ifKey string, state *ocbinds.OpenconfigLacp_Lacp_Interface
                                     members *ocbinds.OpenconfigLacp_Lacp_Interfaces_Interface_Members) error {
     TeamdJson, err := getLacpData(ifKey)
     if err != nil {
-        log.Errorf("Failure in getting LACP data %s\n", err)
+        log.Error("Failure in getting LACP data " )
         return err
     }
 
     e := fillLacpState(TeamdJson, state)
     if e != nil {
-        log.Errorf("Failure in filling LACP state data %s\n", e)
+        log.Error("Failure in filling LACP state data ")
         return e
     }
 
     er := fillLacpMembers(TeamdJson, members)
     if er != nil {
-        log.Errorf("Failure in filling LACP members data %s\n", er)
+        log.Error("Failure in filling LACP members data ")
         return er
     }
 
@@ -256,28 +254,35 @@ var DbToYang_lacp_get_xfmr  SubTreeXfmrDbToYang = func(inParams XfmrParams) erro
     ifMemKey := pathInfo.Var("interface")
 
     targetUriPath, err := getYangPathFromUri(pathInfo.Path)
+    if err != nil {
+        log.Warningf("Get Yang Path from URI failed")
+        return err
+    }
 
     log.Infof("Received GET for path: %s; template: %s vars: %v targetUriPath: %s ifKey: %s", pathInfo.Path, pathInfo.Template, pathInfo.Vars, targetUriPath, ifKey)
 
     if isSubtreeRequest(targetUriPath, "/openconfig-lacp:lacp/interfaces/interface/members/member") {
         if lacpintfObj, ok = lacpIntfsObj.Interfaces.Interface[ifKey]; !ok {
-            log.Info("PortChannel Instance doesn't exist")
-            return err
+            errStr := "PortChannel Instance doesn't exist"
+            log.Info(errStr)
+            return errors.New(errStr)
         }
 
         members = lacpintfObj.Members
         if members != nil && ifMemKey != "" {
             if member, ok = members.Member[ifMemKey]; !ok {
-                log.Info("PortChannel Member Instance doesn't exist")
-                return err
+                errStr := "PortChannel Member Instance doesn't exist"
+                log.Info(errStr)
+                return errors.New(errStr)
             }
             ygot.BuildEmptyTree(member)
             return populateLacpMember(ifKey, ifMemKey, member)
         }
     } else if isSubtreeRequest(targetUriPath, "/openconfig-lacp:lacp/interfaces/interface/members") {
         if lacpintfObj, ok = lacpIntfsObj.Interfaces.Interface[ifKey]; !ok {
-            log.Info("PortChannel Instance doesn't exist")
-            return err
+            errStr := "PortChannel Instance doesn't exist"
+            log.Info(errStr)
+            return errors.New(errStr)
         }
 
         members = lacpintfObj.Members
@@ -324,7 +329,7 @@ var DbToYang_lacp_get_xfmr  SubTreeXfmrDbToYang = func(inParams XfmrParams) erro
         log.Info("Unsupported Path");
     }
 
-    return err
+    return nil
 
 }
 
