@@ -444,8 +444,12 @@ var intf_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error)
     		}
     	}	
     }
-	
-	if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface") == true && IntfTypeVxlan == intfType  {
+
+	if  inParams.oper == DELETE && (targetUriPath == "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4" ||
+        targetUriPath ==  "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6") {
+            return tblList, tlerr.New("DELETE operation not allowed on  this container")
+
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface") == true && IntfTypeVxlan == intfType  {
 		if inParams.oper == 5 {
 			tblList = append(tblList, "VXLAN_TUNNEL")
 			tblList = append(tblList, "EVPN_NVO")
@@ -1298,6 +1302,8 @@ func convertIpMapToOC (intfIpMap map[string]db.Value, ifInfo *ocbinds.Openconfig
 
     subIntf = ifInfo.Subinterfaces.Subinterface[0]
     ygot.BuildEmptyTree(subIntf)
+    ygot.BuildEmptyTree(subIntf.Ipv4)
+    ygot.BuildEmptyTree(subIntf.Ipv6)
 
     for ipKey, ipdata := range intfIpMap {
         log.Info("IP address = ", ipKey)
@@ -2224,14 +2230,12 @@ var YangToDb_intf_eth_port_config_xfmr SubTreeXfmrYangToDb = func(inParams XfmrP
                 /* Check if given iface already part of a PortChannel */
                 err = validateIntfAssociatedWithPortChannel(inParams.d, &ifName)
                 if err != nil {
-                    errStr := "Interface already part of a PortChannel"
-                    return nil, tlerr.InvalidArgsError{Format: errStr}
+                    return nil, err
                 }
                 /* Restrict configuring member-port if iface configured as member-port of any vlan */
                 err = validateIntfAssociatedWithVlan(inParams.d, &ifName)
                 if err != nil {
-                    errStr := "PortChannel config not permitted on Vlan member-port"
-                    return nil, tlerr.InvalidArgsError{Format: errStr}
+                    return nil, err
                 }
                 /* Check if L3 configs present on given physical interface */
                 err = validateL3ConfigExists(inParams.d, &ifName)
