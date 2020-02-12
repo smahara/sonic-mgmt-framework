@@ -63,6 +63,7 @@ func init () {
     XlateFuncBind("YangToDb_intf_sag_ip_xfmr", YangToDb_intf_sag_ip_xfmr)
     XlateFuncBind("DbToYang_intf_sag_ip_xfmr", DbToYang_intf_sag_ip_xfmr)
     XlateFuncBind("rpc_clear_counters", rpc_clear_counters)
+    XlateFuncBind("intf_subintfs_table_xfmr", intf_subintfs_table_xfmr)
 }
 
 const (
@@ -444,8 +445,12 @@ var intf_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error)
     		}
     	}	
     }
-	
-	if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface") == true && IntfTypeVxlan == intfType  {
+
+	if  inParams.oper == DELETE && (targetUriPath == "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4" ||
+        targetUriPath ==  "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6") {
+            return tblList, tlerr.New("DELETE operation not allowed on  this container")
+
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface") == true && IntfTypeVxlan == intfType  {
 		if inParams.oper == 5 {
 			tblList = append(tblList, "VXLAN_TUNNEL")
 			tblList = append(tblList, "EVPN_NVO")
@@ -869,6 +874,21 @@ func getDbToYangSpeed (speed string) (ocbinds.E_OpenconfigIfEthernet_ETHERNET_SP
 
 func intf_intf_tbl_key_gen (intfName string, ip string, prefixLen int, keySep string) string {
     return intfName + keySep + ip + "/" + strconv.Itoa(prefixLen)
+}
+
+var intf_subintfs_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error) {
+    var tblList []string
+
+    log.Info("intf_subintfs_table_xfmr")
+    if (inParams.oper == GET) {
+        if(inParams.dbDataMap != nil) {
+            (*inParams.dbDataMap)[db.ConfigDB]["SUBINTF_TBL"] = make(map[string]db.Value)
+            (*inParams.dbDataMap)[db.ConfigDB]["SUBINTF_TBL"]["0"] = db.Value{Field: make(map[string]string)}
+            (*inParams.dbDataMap)[db.ConfigDB]["SUBINTF_TBL"]["0"].Field["NULL"] = "NULL"
+            tblList = append(tblList, "SUBINTF_TBL")
+        }
+    }
+    return tblList, nil
 }
 
 var YangToDb_intf_subintfs_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
@@ -1327,6 +1347,8 @@ func convertIpMapToOC (intfIpMap map[string]db.Value, ifInfo *ocbinds.Openconfig
 
     subIntf = ifInfo.Subinterfaces.Subinterface[0]
     ygot.BuildEmptyTree(subIntf)
+    ygot.BuildEmptyTree(subIntf.Ipv4)
+    ygot.BuildEmptyTree(subIntf.Ipv6)
 
     for ipKey, ipdata := range intfIpMap {
         log.Info("IP address = ", ipKey)

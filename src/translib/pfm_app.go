@@ -346,7 +346,7 @@ func (app *PlatformApp) getSysEepromFromFile (eeprom *ocbinds.OpenconfigPlatform
                 eeprom.SerialNo = &jsoneeprom.Serial_Number
             }
             if jsoneeprom.Service_Tag != "" {
-                if eeprom.SerialNo == nil {
+                if eeprom.SerialNo == nil || *eeprom.SerialNo == "" {
                     eeprom.SerialNo = &jsoneeprom.Service_Tag
                 }
             }
@@ -361,7 +361,7 @@ func (app *PlatformApp) getSysEepromFromFile (eeprom *ocbinds.OpenconfigPlatform
                 eeprom.HardwareVersion = &jsoneeprom.Label_Revision
             }
             if jsoneeprom.Hardware_Version != "" {
-                if eeprom.HardwareVersion == nil {
+                if eeprom.HardwareVersion == nil || *eeprom.HardwareVersion == "" {
                     eeprom.HardwareVersion = &jsoneeprom.Hardware_Version
                 }
             }
@@ -374,7 +374,7 @@ func (app *PlatformApp) getSysEepromFromFile (eeprom *ocbinds.OpenconfigPlatform
                 eeprom.MfgName = &jsoneeprom.Manufacturer
             }
             if jsoneeprom.Vendor_Name != "" {
-                if eeprom.MfgName == nil {
+                if eeprom.MfgName == nil || *eeprom.MfgName == "" {
                     eeprom.MfgName = &jsoneeprom.Vendor_Name
                 }
             }
