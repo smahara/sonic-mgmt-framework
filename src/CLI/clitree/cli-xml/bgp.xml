@@ -277,9 +277,9 @@ limitations under the License.
       <PARAM name="ip" help="Neighbor router" ptype="IPV4V6_ADDR"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
-          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
-          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
+          <PARAM name="Ethernet" help="Ethernet interface" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel interface" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan interface" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
@@ -497,9 +497,9 @@ limitations under the License.
       <PARAM name="ip" help="Neighbor router" ptype="IPV4V6_ADDR"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
-          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
-          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
+          <PARAM name="Ethernet" help="Ethernet interface" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel interface" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan interface" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
@@ -638,9 +638,9 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
       <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
-          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
-          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
+          <PARAM name="Ethernet" help="Ethernet interface" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel interface" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan interface" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
@@ -810,9 +810,9 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
       <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" optional="true"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
-          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
-          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
+          <PARAM name="Ethernet" help="Ethernet interface" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel interface" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan interface" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
@@ -942,9 +942,9 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
       <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
-          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
-          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
+          <PARAM name="Ethernet" help="Ethernet interface" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel interface" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan interface" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
@@ -1108,9 +1108,9 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_network_instance_netwo
       <PARAM name="ip" help="IP source" ptype="IPV4V6_ADDR" optional="true"/>
       <PARAM name="interface" help="Interface name" mode="subcommand" ptype="SUBCOMMAND">
         <PARAM name="iftype" help="interface type" mode="switch" ptype="SUBCOMMAND">
-          <PARAM name="Ethernet" help="Ethernet Interface to display Neighbor information about" ptype="PHY_INTERFACE" mode="subcommand"/>
-          <PARAM name="PortChannel" help="PortChannel to display Neighbor information about" ptype="PO_INTERFACE" mode="subcommand"/>
-          <PARAM name="Vlan" help="Vlan to display Neighbor information about" ptype="VLAN_INTERFACE" mode="subcommand"/>
+          <PARAM name="Ethernet" help="Ethernet interface" ptype="PHY_INTERFACE" mode="subcommand"/>
+          <PARAM name="PortChannel" help="PortChannel interface" ptype="PO_INTERFACE" mode="subcommand"/>
+          <PARAM name="Vlan" help="Vlan interface" ptype="VLAN_INTERFACE" mode="subcommand"/>
         </PARAM>
       </PARAM>
     </PARAM>
