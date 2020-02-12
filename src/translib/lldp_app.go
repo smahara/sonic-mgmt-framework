@@ -223,16 +223,10 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
             }
             ygot.BuildEmptyTree(oneIfInfo)
             app.getLldpNeighInfoFromInternalMap(&ifname, oneIfInfo)
-            if *app.ygotTarget == lldpIntfObj {
-                payload, err = dumpIetfJson(lldpIntfObj, true)
-            } else if *app.ygotTarget == lldpIntfObj.Interfaces {
-                payload, err = dumpIetfJson(lldpIntfObj, true)
-            } else {
-                log.Info("Wrong request!")
-            }
 
+			payload, err = generateGetResponsePayload(app.path.Path, (*app.ygotRoot).(*ocbinds.Device), app.ygotTarget)
         }
-    } else if ((targetUriPath == "/openconfig-lldp:lldp/interfaces/interface") || (targetUriPath == "/openconfig-lldp:lldp/interfaces/interface/neighbors")) {
+   } else if (strings.Contains(targetUriPath, "/openconfig-lldp:lldp/interfaces/interface")) {
         intfObj := lldpIntfObj.Interfaces
         ygot.BuildEmptyTree(intfObj)
         if intfObj.Interface != nil && len(intfObj.Interface) > 0 {
@@ -242,44 +236,8 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
                 ygot.BuildEmptyTree(ifInfo)
                 app.getLldpNeighInfoFromInternalMap(&ifname, ifInfo)
 
-                if ((*app.ygotTarget == intfObj.Interface[ifname]) || (*app.ygotTarget == intfObj.Interface[ifname].Neighbors)) {
-                    payload, err = dumpIetfJson(intfObj, true)
-                    if err != nil {
-                        log.Info("Creation of subinterface subtree failed!")
-                        return GetResponse{Payload: payload, ErrSrc: AppErr}, err
-                    }
-                } else {
-                    log.Info("Wrong request!")
-                }
-            }
-        } else {
-            log.Info("No data")
-        }
-   } else if (strings.Contains(targetUriPath, "/openconfig-lldp:lldp/interfaces/interface/neighbors")) {
-        intfObj := lldpIntfObj.Interfaces
-        ygot.BuildEmptyTree(intfObj)
-        // fetch attribute name from the path
-        ss := strings.Split(targetUriPath, "/")
-        sattr := ss[len(ss)-1]
-
-        if intfObj.Interface != nil && len(intfObj.Interface) > 0 {
-            for ifname, _ := range intfObj.Interface {
-                app.getLldpInfoFromDB(&ifname)
-                if (sattr == "neighbor") {
-                    ifInfo := intfObj.Interface[ifname]
-                    ygot.BuildEmptyTree(ifInfo)
-                    app.getLldpNeighInfoFromInternalMap(&ifname, ifInfo)
-                } else {
-                    nbrInfo := intfObj.Interface[ifname].Neighbors.Neighbor[ifname]
-                    ygot.BuildEmptyTree(nbrInfo)
-                    app.getLldpNeighInfo(&ifname, nbrInfo)
-                }
-                payload, err = generateGetResponsePayload(app.path.Path, (*app.ygotRoot).(*ocbinds.Device), app.ygotTarget)
-                if err != nil {
-                    log.Info("Creation of nbr subtree failed!")
-                    return GetResponse{Payload: payload, ErrSrc: AppErr}, err
-                }
-            }
+			}
+			payload, err = generateGetResponsePayload(app.path.Path, (*app.ygotRoot).(*ocbinds.Device), app.ygotTarget)
         } else {
             log.Info("No data")
         }
@@ -296,65 +254,18 @@ func (app *lldpApp) processAction(dbs [db.MaxDB]*db.DB) (ActionResponse, error) 
 }
 
 /** Helper function to populate JSON response for GET request **/
-func (app *lldpApp) getLldpNeighInfo(ifName *string, ngInfo *ocbinds.OpenconfigLldp_Lldp_Interfaces_Interface_Neighbors_Neighbor) {
-    ygot.BuildEmptyTree(ngInfo)
-
-    for attr, value := range app.lldpNeighTableMap[*ifName] {
-        switch attr {
-            case LLDP_REMOTE_SYS_NAME:
-                name  := new(string)
-                *name  = value
-                ngInfo.State.SystemName = name
-            case LLDP_REMOTE_PORT_DESC:
-                pdescr := new(string)
-                *pdescr = value
-                ngInfo.State.PortDescription = pdescr
-            case LLDP_REMOTE_CHASS_ID:
-                chId := new (string)
-                *chId = value
-                ngInfo.State.ChassisId = chId
-            case LLDP_REMOTE_PORT_ID_SUBTYPE:
-                remPortIdTypeVal, err :=  strconv.Atoi(value)
-                if err == nil {
-                        ngInfo.State.PortIdType =ocbinds.E_OpenconfigLldp_PortIdType(remPortIdTypeVal)
-                }
-            case LLDP_REMOTE_SYS_DESC:
-                sdesc:= new(string)
-                *sdesc = value
-                ngInfo.State.SystemDescription = sdesc
-            case LLDP_REMOTE_REM_TIME:
-            /* Ignore Remote System time */
-            case LLDP_REMOTE_PORT_ID:
-                remPortIdPtr := new(string)
-                *remPortIdPtr = value
-                ngInfo.State.PortId = remPortIdPtr
-            case LLDP_REMOTE_REM_ID:
-                Id := new(string)
-                *Id = value
-                ngInfo.State.Id = Id
-            case LLDP_REMOTE_CHASS_ID_SUBTYPE:
-                remChassIdTypeVal , err:=strconv.Atoi(value)
-                if err  == nil {
-                        ngInfo.State.ChassisIdType =ocbinds.E_OpenconfigLldp_ChassisIdType(remChassIdTypeVal)
-                }
-            case LLDP_REMOTE_MAN_ADDR:
-                mgmtAdr:= new(string)
-                *mgmtAdr = value
-                ngInfo.State.ManagementAddress = mgmtAdr
-            default:
-                log.Info("Not a valid attribute!")
-        }
-    }
-}
-
-/** Helper function to populate JSON response for GET request **/
 func (app *lldpApp) getLldpNeighInfoFromInternalMap(ifName *string, ifInfo *ocbinds.OpenconfigLldp_Lldp_Interfaces_Interface) {
 
-    ngInfo, err := ifInfo.Neighbors.NewNeighbor(*ifName)
-    if err != nil {
-        log.Info("Creation of subinterface subtree failed!")
-        return
+    var err error
+    ngInfo, ok := ifInfo.Neighbors.Neighbor[*ifName]
+    if !ok {
+        ngInfo, err = ifInfo.Neighbors.NewNeighbor(*ifName)
+        if err != nil {
+            log.Info("Creation of subinterface subtree failed!")
+            return
+        }
     }
+
     ygot.BuildEmptyTree(ngInfo)
     neighAttrMap:= app.lldpNeighTableMap[*ifName]
     for attr, value := range neighAttrMap {
