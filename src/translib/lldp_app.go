@@ -261,13 +261,20 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
         // fetch attribute name from the path
         ss := strings.Split(targetUriPath, "/")
         sattr := ss[len(ss)-1]
+
         if intfObj.Interface != nil && len(intfObj.Interface) > 0 {
             for ifname, _ := range intfObj.Interface {
                 app.getLldpInfoFromDB(&ifname)
-                nbrInfo := intfObj.Interface[ifname].Neighbors.Neighbor[ifname]
-                ygot.BuildEmptyTree(nbrInfo)
-                app.getLldpNeighInfo(&ifname, nbrInfo, &sattr)
-                payload, err = dumpIetfJson(nbrInfo.State, true)
+                if (sattr == "neighbor") {
+                    ifInfo := intfObj.Interface[ifname]
+                    ygot.BuildEmptyTree(ifInfo)
+                    app.getLldpNeighInfoFromInternalMap(&ifname, ifInfo)
+                } else {
+                    nbrInfo := intfObj.Interface[ifname].Neighbors.Neighbor[ifname]
+                    ygot.BuildEmptyTree(nbrInfo)
+                    app.getLldpNeighInfo(&ifname, nbrInfo, &sattr)
+                }
+                payload, err = generateGetResponsePayload(app.path.Path, (*app.ygotRoot).(*ocbinds.Device), app.ygotTarget)
                 if err != nil {
                     log.Info("Creation of nbr subtree failed!")
                     return GetResponse{Payload: payload, ErrSrc: AppErr}, err
@@ -315,6 +322,7 @@ func (app *lldpApp) getLldpNeighInfo(ifName *string, ngInfo *ocbinds.OpenconfigL
         default:
             tattr = "NONE"
     }
+
     for attr, value := range app.lldpNeighTableMap[*ifName] {
         if (attr != tattr) {
             continue
