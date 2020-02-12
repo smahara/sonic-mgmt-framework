@@ -990,8 +990,18 @@ func validateIntfExists(d *db.DB, intfTs string, intfName string) error {
     return nil
 }
 
+// Validates Prefix Length for all interface types except loopback
+func isValidPrefixLength(pLen *uint8, isIpv4 bool) bool {
+    // maxPrfxLen corresponds to Maximum prefix length for all interface types other than loopback
+    var maxPrfxLen uint8 = 31
+    if !isIpv4 {
+        maxPrfxLen = 127
+    }
+    return *pLen <= maxPrfxLen
+}
+
 /* Note: This function can be extended for IP validations for all Interface types */
-func validateIpForIntfType(ifType E_InterfaceType, ip *string, prfxLen *uint8, isIpv4 bool) error {
+func validateIpPrefixForIntfType(ifType E_InterfaceType, ip *string, prfxLen *uint8, isIpv4 bool) error {
     var err error
 
     switch ifType {
@@ -1008,6 +1018,13 @@ func validateIpForIntfType(ifType E_InterfaceType, ip *string, prfxLen *uint8, i
                 err = tlerr.InvalidArgsError{Format:errStr}
                 return err
             }
+        }
+    case IntfTypeEthernet, IntfTypeVlan, IntfTypePortChannel, IntfTypeMgmt:
+        if !isValidPrefixLength(prfxLen, isIpv4) {
+            log.Errorf("Invalid Mask configuration!")
+            errStr := "Prefix Length not supported"
+            err = tlerr.InvalidArgsError{Format: errStr}
+            return err
         }
     }
     return err
@@ -1179,14 +1196,13 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
                     return subIntfmap, err
                 }
                 log.Info("prefix:=", *addr.Config.PrefixLength)
-
                 if !validIPv4(*addr.Config.Ip) {
                     errStr := "Invalid IPv4 address " + *addr.Config.Ip
                     err = tlerr.InvalidArgsError{Format: errStr}
                     return subIntfmap, err
                 }
                 /* Validate IP specific to Interface type */
-                err = validateIpForIntfType(intfType, addr.Config.Ip, addr.Config.PrefixLength,  true)
+                err = validateIpPrefixForIntfType(intfType, addr.Config.Ip, addr.Config.PrefixLength,  true)
                 if err != nil {
                     return subIntfmap, err
                 }
@@ -1238,14 +1254,13 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
                     return subIntfmap, err
                 }
                 log.Info("Ipv6 prefix:=", *addr.Config.PrefixLength)
-
                 if !validIPv6(*addr.Config.Ip) {
                     errStr := "Invalid IPv6 address " + *addr.Config.Ip
                     err = tlerr.InvalidArgsError{Format: errStr}
                     return subIntfmap, err
                 }
                 /* Validate IP specific to Interface type */
-                err = validateIpForIntfType(intfType, addr.Config.Ip, addr.Config.PrefixLength, false)
+                err = validateIpPrefixForIntfType(intfType, addr.Config.Ip, addr.Config.PrefixLength, false)
                 if err != nil {
                     return subIntfmap, err
                 }
