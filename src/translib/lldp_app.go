@@ -272,7 +272,7 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
                 } else {
                     nbrInfo := intfObj.Interface[ifname].Neighbors.Neighbor[ifname]
                     ygot.BuildEmptyTree(nbrInfo)
-                    app.getLldpNeighInfo(&ifname, nbrInfo, &sattr)
+                    app.getLldpNeighInfo(&ifname, nbrInfo)
                 }
                 payload, err = generateGetResponsePayload(app.path.Path, (*app.ygotRoot).(*ocbinds.Device), app.ygotTarget)
                 if err != nil {
@@ -296,37 +296,10 @@ func (app *lldpApp) processAction(dbs [db.MaxDB]*db.DB) (ActionResponse, error) 
 }
 
 /** Helper function to populate JSON response for GET request **/
-func (app *lldpApp) getLldpNeighInfo(ifName *string, ngInfo *ocbinds.OpenconfigLldp_Lldp_Interfaces_Interface_Neighbors_Neighbor, sattr *string) {
+func (app *lldpApp) getLldpNeighInfo(ifName *string, ngInfo *ocbinds.OpenconfigLldp_Lldp_Interfaces_Interface_Neighbors_Neighbor) {
     ygot.BuildEmptyTree(ngInfo)
-    tattr := "NONE"
-    // map attr name to internal ID
-    switch *sattr {
-        case "chassis-id":
-            tattr = LLDP_REMOTE_CHASS_ID
-        case "system-name":
-            tattr = LLDP_REMOTE_SYS_NAME
-        case "port-description":
-            tattr = LLDP_REMOTE_PORT_DESC
-        case "port-id-type":
-            tattr = LLDP_REMOTE_PORT_ID_SUBTYPE
-        case "system-description":
-            tattr = LLDP_REMOTE_SYS_DESC
-        case "port-id":
-            tattr = LLDP_REMOTE_PORT_ID
-        case "id":
-            tattr = LLDP_REMOTE_REM_ID
-        case "chassis-id-type":
-            tattr = LLDP_REMOTE_CHASS_ID_SUBTYPE
-        case "management-address":
-            tattr = LLDP_REMOTE_MAN_ADDR
-        default:
-            tattr = "NONE"
-    }
 
     for attr, value := range app.lldpNeighTableMap[*ifName] {
-        if (attr != tattr) {
-            continue
-        }
         switch attr {
             case LLDP_REMOTE_SYS_NAME:
                 name  := new(string)
