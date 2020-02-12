@@ -223,8 +223,7 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
             }
             ygot.BuildEmptyTree(oneIfInfo)
             app.getLldpNeighInfoFromInternalMap(&ifname, oneIfInfo)
-
-			payload, err = generateGetResponsePayload(app.path.Path, (*app.ygotRoot).(*ocbinds.Device), app.ygotTarget)
+            payload, err = generateGetResponsePayload(app.path.Path, (*app.ygotRoot).(*ocbinds.Device), app.ygotTarget)
         }
    } else if (strings.Contains(targetUriPath, "/openconfig-lldp:lldp/interfaces/interface")) {
         intfObj := lldpIntfObj.Interfaces
@@ -235,9 +234,8 @@ func (app *lldpApp) processGet(dbs [db.MaxDB]*db.DB) (GetResponse, error)  {
                 ifInfo := intfObj.Interface[ifname]
                 ygot.BuildEmptyTree(ifInfo)
                 app.getLldpNeighInfoFromInternalMap(&ifname, ifInfo)
-
-			}
-			payload, err = generateGetResponsePayload(app.path.Path, (*app.ygotRoot).(*ocbinds.Device), app.ygotTarget)
+            }
+            payload, err = generateGetResponsePayload(app.path.Path, (*app.ygotRoot).(*ocbinds.Device), app.ygotTarget)
         } else {
             log.Info("No data")
         }
@@ -261,7 +259,7 @@ func (app *lldpApp) getLldpNeighInfoFromInternalMap(ifName *string, ifInfo *ocbi
     if !ok {
         ngInfo, err = ifInfo.Neighbors.NewNeighbor(*ifName)
         if err != nil {
-            log.Info("Creation of subinterface subtree failed!")
+            log.Info("Creation of neighbor failed!")
             return
         }
     }
