@@ -554,7 +554,7 @@ func AddModelCpbltInfo() map[string]*mdlInfo {
 
 func XlateDefValFill(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requestUri string, result map[string]map[string]db.Value, txCache interface{}) error {
 	var err error
-	tblXpathMap  := make(map[string][]string)
+    tblXpathMap  := make(map[string]map[string]bool)
 	subOpDataMap := make(map[int]*RedisDbMap)
 	err = dbMapDefaultValFill(d, ygRoot, oper, uri, requestUri, result, subOpDataMap, tblXpathMap, txCache)
 	if err != nil {

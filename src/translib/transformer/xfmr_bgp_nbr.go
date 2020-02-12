@@ -1641,4 +1641,8 @@ var DbToYang_bgp_nbrs_nbr_auth_password_xfmr SubTreeXfmrDbToYang = func (inParam
     return err
 }
 
+func check_and_set_bgp_nbr_yang_defaults (inParams XfmrParams) error {
+    var err error
 
+    return err
+}

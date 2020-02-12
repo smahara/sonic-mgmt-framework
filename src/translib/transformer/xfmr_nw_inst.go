@@ -122,6 +122,17 @@ var network_instance_post_xfmr PostXfmrFunc = func(inParams XfmrParams) (map[str
     var err error
     retDbDataMap := (*inParams.dbDataMap)[inParams.curDb]
 
+    xpath, _ := XfmrRemoveXPATHPredicates(inParams.requestUri)
+    log.Infof ("In Network-instance Post transformer for op : %d ==> URI : %s Request-URI: %s XPATH : %s retDbDataMap : %v", inParams.oper, inParams.uri, inParams.requestUri, xpath, retDbDataMap)
+
+    if inParams.oper == CREATE || inParams.oper == REPLACE || inParams.oper == UPDATE {
+        if xpath == "/openconfig-network-instance:network-instances/network-instance/protocols/protocol/bgp/neighbors/neighbor" {
+        }
+
+        if xpath == "/openconfig-network-instance:network-instances/network-instance/protocols/protocol/bgp/peer-groups/peer-group" {
+        }
+    }
+
     if inParams.oper == DELETE {
         xpath, _ := XfmrRemoveXPATHPredicates(inParams.requestUri)
         log.Info("In Network-instance Post transformer for DELETE op ==> URI : ", inParams.requestUri, " ; XPATH : ", xpath)
