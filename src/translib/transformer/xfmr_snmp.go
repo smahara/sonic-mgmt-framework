@@ -19,7 +19,7 @@ var YangToDb_snmp_engine_key_xfmr = func(inParams XfmrParams) (string, error) {
 
 func YangToDb_snmp_group_name_xfmr(inParams XfmrParams) (map[string]string, error) {
   data := map[string]string{ "NULL": "NULL" }
-  xfmrLogInfoAll("*** YangToDb_snmp_group_name_xfmr        map: %v", data)
+  log.Info("*** YangToDb_snmp_group_name_xfmr        map: ", data)
   return data, nil
 }
 
