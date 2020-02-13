@@ -19,8 +19,8 @@ module sonic-aaa {
 
     container sonic-aaa {
 
-        container USER_DB {
-            list USER_TABLE {
+        container USER_TABLE {
+            list USER_INFO_LIST {
                 key "user tenant";
 
                 leaf user {
@@ -38,8 +38,9 @@ module sonic-aaa {
                     type string;
                 }
             }
-
-            list PRIVILEGE_TABLE {
+	}
+        container PRIVILEGE_TABLE {
+	    list PRIVILEGE_INFO_LIST {
                 key "role feature";
 
                 leaf role {
