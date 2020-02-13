@@ -63,6 +63,7 @@ func init () {
     XlateFuncBind("YangToDb_intf_sag_ip_xfmr", YangToDb_intf_sag_ip_xfmr)
     XlateFuncBind("DbToYang_intf_sag_ip_xfmr", DbToYang_intf_sag_ip_xfmr)
     XlateFuncBind("rpc_clear_counters", rpc_clear_counters)
+    XlateFuncBind("intf_subintfs_table_xfmr", intf_subintfs_table_xfmr)
 }
 
 const (
@@ -444,8 +445,12 @@ var intf_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error)
     		}
     	}	
     }
-	
-	if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface") == true && IntfTypeVxlan == intfType  {
+
+	if  inParams.oper == DELETE && (targetUriPath == "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4" ||
+        targetUriPath ==  "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6") {
+            return tblList, tlerr.New("DELETE operation not allowed on  this container")
+
+    } else if strings.HasPrefix(targetUriPath, "/openconfig-interfaces:interfaces/interface") == true && IntfTypeVxlan == intfType  {
 		if inParams.oper == 5 {
 			tblList = append(tblList, "VXLAN_TUNNEL")
 			tblList = append(tblList, "EVPN_NVO")
@@ -871,6 +876,21 @@ func intf_intf_tbl_key_gen (intfName string, ip string, prefixLen int, keySep st
     return intfName + keySep + ip + "/" + strconv.Itoa(prefixLen)
 }
 
+var intf_subintfs_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error) {
+    var tblList []string
+
+    log.Info("intf_subintfs_table_xfmr")
+    if (inParams.oper == GET) {
+        if(inParams.dbDataMap != nil) {
+            (*inParams.dbDataMap)[db.ConfigDB]["SUBINTF_TBL"] = make(map[string]db.Value)
+            (*inParams.dbDataMap)[db.ConfigDB]["SUBINTF_TBL"]["0"] = db.Value{Field: make(map[string]string)}
+            (*inParams.dbDataMap)[db.ConfigDB]["SUBINTF_TBL"]["0"].Field["NULL"] = "NULL"
+            tblList = append(tblList, "SUBINTF_TBL")
+        }
+    }
+    return tblList, nil
+}
+
 var YangToDb_intf_subintfs_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (string, error) {
     var subintf_key string
     var err error
@@ -1089,7 +1109,7 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
 	intfType, _, ierr := getIntfTypeByName(ifName)
 
     if IntfTypeVxlan == intfType {
-	    return subIntfmap, nil	
+	    return subIntfmap, nil
     }
 
     intfsObj := getIntfsRoot(inParams.ygRoot)
@@ -1103,7 +1123,7 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
         log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr)
         return subIntfmap, errors.New(errStr)
     }
-    
+
     if intfType == IntfTypeUnset || ierr != nil {
         errStr := "Invalid interface type IntfTypeUnset"
         log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr)
@@ -1172,7 +1192,14 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
                     *addr.Config.Ip = ip
                 }
                 log.Info("Ip:=", *addr.Config.Ip)
+                if addr.Config.PrefixLength == nil {
+                    log.Error("Prefix Length empty!")
+                    errStr := "Prefix Length not present"
+                    err = tlerr.InvalidArgsError{Format:errStr}
+                    return subIntfmap, err
+                }
                 log.Info("prefix:=", *addr.Config.PrefixLength)
+
                 if !validIPv4(*addr.Config.Ip) {
                     errStr := "Invalid IPv4 address " + *addr.Config.Ip
                     err = tlerr.InvalidArgsError{Format: errStr}
@@ -1224,7 +1251,14 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
                     *addr.Config.Ip = ip
                 }
                 log.Info("Ipv6 IP:=", *addr.Config.Ip)
+                if addr.Config.PrefixLength == nil {
+                    log.Error("Prefix Length empty!")
+                    errStr := "Prefix Length not present"
+                    err = tlerr.InvalidArgsError{Format:errStr}
+                    return subIntfmap, err
+                }
                 log.Info("Ipv6 prefix:=", *addr.Config.PrefixLength)
+
                 if !validIPv6(*addr.Config.Ip) {
                     errStr := "Invalid IPv6 address " + *addr.Config.Ip
                     err = tlerr.InvalidArgsError{Format: errStr}

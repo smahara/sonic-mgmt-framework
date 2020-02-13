@@ -146,8 +146,9 @@ def generate_show_bgp_routes(args):
            afisafi = "IPV6_UNICAST"
            rib_type = "ipv6-unicast"
         elif "neighbors" == arg:
-           neighbour_ip = args[i+1]
-           route_option = args[i+2]
+           ni = i+2 if "interface" == args[i+1] else i+1
+           neighbour_ip = args[ni]
+           route_option = args[ni+1]
         else:
            pass
         i = i + 1
