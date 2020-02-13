@@ -1042,7 +1042,7 @@ func validateIpPrefixForIntfType(ifType E_InterfaceType, ip *string, prfxLen *ui
     case IntfTypeEthernet, IntfTypeVlan, IntfTypePortChannel, IntfTypeMgmt:
         if !isValidPrefixLength(prfxLen, isIpv4) {
             log.Errorf("Invalid Mask configuration!")
-            errStr := "Prefix length 32 not supported"
+            errStr := "Prefix length " + strconv.Itoa(int(*prfxLen)) + " not supported"
             err = tlerr.InvalidArgsError{Format: errStr}
             return err
         }
