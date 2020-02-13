@@ -645,7 +645,7 @@ python $SONIC_CLI_ROOT/sonic_cli_bgp.py patch_openconfig_network_instance_networ
         </PARAM>
       </PARAM>
     </PARAM>
-    <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip} ${Ethernet} ${PortChannel} ${Vlan} ${Loopback} ${Loopback}</ACTION>
+    <ACTION builtin="clish_pyobj">sonic_cli_bgp patch_openconfig_network_instance_network_instances_network_instance_protocols_protocol_bgp_neighbors_neighbor_transport_config_local_address ${vrf-name} ${nbr-addr} ${ip} ${Ethernet} ${PortChannel} ${Vlan} ${Loopback}</ACTION>
   </COMMAND>
 
   <COMMAND name="shutdown" help="Shutdown a neighbor">
