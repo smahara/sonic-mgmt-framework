@@ -110,7 +110,7 @@ def process_nbrs_intf(response, args):
             key = ifName + "-" + macAddr
             ext_intf_name = macDict.get(key)
             if ext_intf_name is None:
-                ext_int_name = "-"
+                ext_intf_name = "-"
 
         nbr_table_entry = {'ipAddr':ipAddr,
                             'macAddr':macAddr,
@@ -161,7 +161,7 @@ def process_sonic_nbrs(response, args):
             key = ifName + "-" + macAddr
             ext_intf_name = macDict.get(key)
             if ext_intf_name is None:
-                ext_int_name = "-"
+                ext_intf_name = "-"
 
         nbr_table_entry = {'ipAddr':ipAddr,
                            'macAddr':macAddr,
