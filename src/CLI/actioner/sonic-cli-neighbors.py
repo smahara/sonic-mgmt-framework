@@ -221,7 +221,7 @@ def run(func, args):
         show_cli_output(args[0],nbr_list)
         return
     except:
-        print "Error: Unexpected response from the server"
+        print "%Error: Internal error"
 
 if __name__ == '__main__':
     pipestr().write(sys.argv)
