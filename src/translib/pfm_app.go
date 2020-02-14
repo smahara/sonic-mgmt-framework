@@ -403,6 +403,10 @@ func (app *PlatformApp) getPlatformEnvironment (pf_comp *ocbinds.OpenconfigPlatf
     for scanner.Scan() {
         var pf_sensor_cat *ocbinds.OpenconfigPlatform_Components_Component_Subcomponents_Subcomponent_State_SensorCategory
         log.Infof("comp: %s",scanner.Text())
+        if strings.Contains(scanner.Text(), "Total Power") {
+            continue
+        }
+
         SubCatFound := false
         pf_scomp,_ := pf_comp.Subcomponents.NewSubcomponent(scanner.Text())
         ygot.BuildEmptyTree(pf_scomp)

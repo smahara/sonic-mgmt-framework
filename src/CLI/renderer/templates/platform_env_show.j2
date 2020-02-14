@@ -4,9 +4,7 @@
 {% set  subcomponent_list = subcomponent_val['subcomponent'] %}
 {% for subcomponent_inst in subcomponent_list %}
 {% set subcomp_name = subcomponent_inst['name'].strip() %}
-{% if 'Total Power' not in subcomp_name %}
 {{subcomp_name.ljust(20)}}
-{% endif %}
 {% set sub_comp_state = subcomponent_inst['state'] %}
 {% for attr1 in sub_comp_state %}
 {% if attr1 == 'openconfig-platform-ext:sensor-category' %}
