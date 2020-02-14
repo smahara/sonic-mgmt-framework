@@ -330,6 +330,9 @@ func validateIntfAssociatedWithVlan(d *db.DB, ifName *string) error {
     }
 
     vlanKeys, err = vlanTable.GetKeys()
+    if err != nil {
+        return errors.New("Failed to get keys from table: " + VLAN_TN)
+    }
     log.Infof("Found %d Vlan Table keys", len(vlanKeys))
 
     for _, vlan := range vlanKeys {
@@ -339,10 +342,16 @@ func validateIntfAssociatedWithVlan(d *db.DB, ifName *string) error {
         }
         members, ok := vlanEntry.Field["members@"]
         if ok {
-            if strings.Contains(members, *ifName) {
-                errStr := "Interface: " + *ifName + " is part of VLAN: " + vlan.Get(0)
-                log.Error(errStr)
-                return tlerr.InvalidArgsError{Format:errStr}
+            memberPortsList := generateMemberPortsSliceFromString(&members)
+            if memberPortsList == nil {
+                return nil
+            }
+            for _, memberName := range memberPortsList {
+                if memberName == *ifName {
+                    errStr := *ifName + " is part of : " + vlan.Get(0)
+                    log.Error(errStr)
+                    return tlerr.InvalidArgsError{Format:errStr}
+                }
             }
         }
     }
@@ -1207,8 +1216,7 @@ var YangToDb_sw_vlans_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (map[
     if intfType == IntfTypeEthernet {
         err = validateIntfAssociatedWithPortChannel(inParams.d, &ifName)
         if err != nil {
-            errStr := "VLAN config is not permitted on LAG member port"
-            return nil, tlerr.InvalidArgsError{Format: errStr}
+            return nil, err
         }
     }
     switch inParams.oper {
