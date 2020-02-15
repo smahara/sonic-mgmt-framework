@@ -894,7 +894,7 @@ func intfVlanMemberRemoval(swVlanConfig *swVlanMemberPort_t,
     case IntfTypePortChannel:
         /* Handling the deletion of trunk-vlans leaf-list. YGOT target for leaf-list is nil,
            This is the reason why we do string comparison of targetUri */
-        if swVlanConfig.swPortChannelMember.Config.TrunkVlans == nil && targetUriPath == "/openconfig-interfaces:interfaces/interface/openconfig-if-aggregation:aggregate/openconfig-vlan:switched-vlan/config/trunk-vlans" {
+        if swVlanConfig.swPortChannelMember.Config.TrunkVlans == nil && targetUriPath == "/openconfig-interfaces:interfaces/interface/openconfig-if-aggregate:aggregation/openconfig-vlan:switched-vlan/config/trunk-vlans" {
             ifVlanInfo.mode = TRUNK
             err = fillTrunkVlansForInterface(inParams.d, ifName, &ifVlanInfo)
             if err != nil {
