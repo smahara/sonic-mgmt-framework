@@ -363,7 +363,29 @@ func uriWithKeyCreate (uri string, xpathTmplt string, data interface{}) (string,
          yangEntry := xYangSpecMap[xpathTmplt].yangEntry
          if yangEntry != nil {
               for _, k := range (strings.Split(yangEntry.Key, " ")) {
-                  uri += fmt.Sprintf("[%v=%v]", k, data.(map[string]interface{})[k])
+		      keyXpath := xpathTmplt + "/" + k
+		      if _, keyXpathEntryOk := xYangSpecMap[keyXpath]; !keyXpathEntryOk {
+			      log.Errorf("No entry found in xYangSpec map for xapth %v", keyXpath)
+                              err = fmt.Errorf("No entry found in xYangSpec map for xapth %v", keyXpath)
+                              break
+		      }
+		      keyYangEntry := xYangSpecMap[keyXpath].yangEntry
+		      if keyYangEntry == nil {
+			      log.Errorf("Yang Entry not available for xpath %v", keyXpath)
+			      err = fmt.Errorf("Yang Entry not available for xpath %v", keyXpath)
+			      break
+		      }
+		      keyVal, keyValErr := unmarshalJsonToDbData(keyYangEntry, keyXpath, k, data.(map[string]interface{})[k])
+		      if keyValErr != nil {
+			      log.Errorf("unmarshalJsonToDbData() error for key %v with xpath %v", k, keyXpath)
+			      err = keyValErr
+			      break
+		      }
+		      if ((strings.Contains(keyVal, ":")) && (strings.HasPrefix(keyVal, OC_MDL_PFX) || strings.HasPrefix(keyVal, IETF_MDL_PFX) || strings.HasPrefix(keyVal, IANA_MDL_PFX))) {
+			      // identity-ref/enum has module prefix
+			      keyVal = strings.SplitN(keyVal, ":", 2)[1]
+		      }
+                      uri += fmt.Sprintf("[%v=%v]", k, keyVal)
               }
 	 } else {
             err = fmt.Errorf("Yang Entry not available for xpath ", xpathTmplt)
@@ -863,7 +885,7 @@ func yangFloatIntToGoType(t yang.TypeKind, v float64) (interface{}, error) {
         return nil, fmt.Errorf("unexpected YANG type %v", t)
 }
 
-func unmarshalJsonToDbData(schema *yang.Entry, fieldName string, value interface{}) (string, error) {
+func unmarshalJsonToDbData(schema *yang.Entry, fieldXpath string, fieldName string, value interface{}) (string, error) {
         var data string
 
         switch v := value.(type) {
@@ -872,6 +894,9 @@ func unmarshalJsonToDbData(schema *yang.Entry, fieldName string, value interface
         }
 
         ykind := schema.Type.Kind
+	if ykind == yang.Yleafref {
+		ykind = getLeafrefRefdYangType(ykind, fieldXpath)
+	}
 
         switch ykind {
         case yang.Ystring, yang.Ydecimal64, yang.Yint64, yang.Yuint64,

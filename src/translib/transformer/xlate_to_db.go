@@ -312,7 +312,7 @@ func mapFillDataUtil(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requ
 			}
 
                         // SNC-3626 - string conversion based on the primitive type
-                        fVal, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldName, valData.Index(fidx).Interface())
+                        fVal, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldXpath, fieldName, valData.Index(fidx).Interface())
                         if err == nil {
 			      if ((strings.Contains(fVal, ":")) && (strings.HasPrefix(fVal, OC_MDL_PFX) || strings.HasPrefix(fVal, IETF_MDL_PFX) || strings.HasPrefix(fVal, IANA_MDL_PFX))) {
 				      // identity-ref/enum has module prefix
@@ -330,7 +330,7 @@ func mapFillDataUtil(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requ
 	} else { // xpath is a leaf
 
                 // SNC-3626 - string conversion based on the primitive type
-                fVal, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldName, value)
+                fVal, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldXpath, fieldName, value)
                 if err == nil {
                       valueStr = fVal
                 } else {
@@ -391,7 +391,7 @@ func dbMapDataFill(uri string, tableName string, keyName string, d map[string]in
 			// should ideally never happen , just adding for safety
 			xfmrLogInfoAll("Did not find entry in xDbSpecMap for field xpath = %v", fieldXpath)
 		}
-		dbval, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, field, value)
+		dbval, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldXpath, field, value)
 		if err != nil {
 			log.Errorf("Failed to unmashal Json to DbData: path(\"%v\") error (\"%v\").", fieldXpath, err)
 		} else {
@@ -639,7 +639,7 @@ func sonicYangReqToDbMapDelete(requestUri string, xpathPrefix string, tableName 
 							     terminalNodeData := strings.TrimSuffix(strings.SplitN(terminalNode, "[", 2)[1], "]")
 							     terminalNodeDataLst := strings.SplitN(terminalNodeData, "=", 2)
 							     terminalNodeVal := terminalNodeDataLst[1]
-							     dbFldVal, err = unmarshalJsonToDbData(xDbSpecMap[dbSpecField].dbEntry, fieldName, terminalNodeVal)
+							     dbFldVal, err = unmarshalJsonToDbData(xDbSpecMap[dbSpecField].dbEntry, dbSpecField, fieldName, terminalNodeVal)
 							     if err != nil {
 								     log.Errorf("Failed to unmashal Json to DbData: path(\"%v\") error (\"%v\").", dbSpecField, err)
 								     return err
