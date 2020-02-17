@@ -120,13 +120,26 @@ func keyXfmrHandler(inParams XfmrParams, xfmrFuncNm string) (string, error) {
 /* Invoke the post tansformer */
 func postXfmrHandlerFunc(xfmrPost string, inParams XfmrParams) (map[string]map[string]db.Value, error) {
     retData := make(map[string]map[string]db.Value)
+    xfmrLogInfoAll("Received inParams %v, post transformer function name %v", inParams, xfmrPost)
     ret, err := XlateFuncCall(xfmrPost, inParams)
     if err != nil {
         return nil, err
     }
     if ((ret != nil) && (len(ret)>0)) {
-        retData = ret[0].Interface().(map[string]map[string]db.Value)
-        xfmrLogInfoAll("Post Transformer function : %v retData : %v", xfmrPost, retData)
+	    if len(ret) == POST_XFMR_RET_ARGS {
+		    // post xfmr returns err as second value in return data list from <xfmr_func>.Call()
+		    if ret[POST_XFMR_RET_ERR_INDX].Interface() != nil {
+			    err = ret[POST_XFMR_RET_ERR_INDX].Interface().(error)
+			    if err != nil {
+				    log.Warningf("Transformer function(\"%v\") returned error - %v.", xfmrPost, err)
+				    return retData, err
+			    }
+		    }
+	    }
+	    if ret[POST_XFMR_RET_VAL_INDX].Interface() != nil {
+		    retData = ret[POST_XFMR_RET_VAL_INDX].Interface().(map[string]map[string]db.Value)
+		    xfmrLogInfoAll("Post Transformer function : %v retData : %v", xfmrPost, retData)
+	    }
     }
     return retData, err
 }
@@ -274,6 +287,15 @@ func mapFillDataUtil(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requ
 	}
 	fieldName := xpathInfo.fieldName
 	valueStr := ""
+
+        fieldXpath := tableName + "/" + fieldName
+        _, ok = xDbSpecMap[fieldXpath]
+        if !ok {
+                logStr := fmt.Sprintf("Failed to find the xDbSpecMap: xpath(\"%v\").", fieldXpath)
+                log.Error(logStr)
+                return nil
+        }
+
 	if xpathInfo.yangEntry.IsLeafList() {
 		/* Both yang side and Db side('@' suffix field) the data type is leaf-list */
 		xfmrLogInfoAll("Yang type and Db type is Leaflist for field  = %v", xpath)
@@ -288,17 +310,35 @@ func mapFillDataUtil(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requ
 			if fidx > 0 {
 				valueStr += ","
 			}
-			fVal := fmt.Sprintf("%v", valData.Index(fidx).Interface())
-			if ((strings.Contains(fVal, ":")) && (strings.HasPrefix(fVal, OC_MDL_PFX) || strings.HasPrefix(fVal, IETF_MDL_PFX) || strings.HasPrefix(fVal, IANA_MDL_PFX))) {
-				// identity-ref/enum has module prefix
-				fVal = strings.SplitN(fVal, ":", 2)[1]
-			}
-			valueStr = valueStr + fVal
+
+                        // SNC-3626 - string conversion based on the primitive type
+                        fVal, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldName, valData.Index(fidx).Interface())
+                        if err == nil {
+			      if ((strings.Contains(fVal, ":")) && (strings.HasPrefix(fVal, OC_MDL_PFX) || strings.HasPrefix(fVal, IETF_MDL_PFX) || strings.HasPrefix(fVal, IANA_MDL_PFX))) {
+				      // identity-ref/enum has module prefix
+				      fVal = strings.SplitN(fVal, ":", 2)[1]
+			      }
+			      valueStr = valueStr + fVal
+                        } else {
+                              logStr := fmt.Sprintf("Failed to unmarshal Json to DbData: table(\"%v\") field(\"%v\") value(\"%v\").", tableName, fieldName, valData.Index(fidx).Interface())
+                              log.Error(logStr)
+                              return nil
+                        }
 		}
 		xfmrLogInfoAll("leaf-list value after conversion to DB format %v  :  %v", fieldName, valueStr)
 
 	} else { // xpath is a leaf
-		valueStr  = fmt.Sprintf("%v", value)
+
+                // SNC-3626 - string conversion based on the primitive type
+                fVal, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldName, value)
+                if err == nil {
+                      valueStr = fVal
+                } else {
+                      logStr := fmt.Sprintf("Failed to unmarshal Json to DbData: table(\"%v\") field(\"%v\") value(\"%v\").", tableName, fieldName, value)
+                      log.Error(logStr)
+                      return nil
+                }
+
 		if ((strings.Contains(valueStr, ":")) && (strings.HasPrefix(valueStr, OC_MDL_PFX) || strings.HasPrefix(valueStr, IETF_MDL_PFX) || strings.HasPrefix(valueStr, IANA_MDL_PFX))) {
 			// identity-ref/enum might has module prefix
 			valueStr = strings.SplitN(valueStr, ":", 2)[1]
@@ -528,6 +568,9 @@ func dbMapDelete(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requestU
 				dbresult[db.ConfigDB] = result
 				inParams := formXfmrInputRequest(d, dbs, db.ConfigDB, ygRoot, uri, requestUri, oper, "", &dbresult, subOpDataMap, nil, txCache)
 				result, err = postXfmrHandlerFunc(xYangSpecMap[moduleNm].xfmrPost, inParams)
+				if err != nil {
+					return err
+				}
 				if inParams.skipOrdTblChk != nil {
 					*skipOrdTbl = *(inParams.skipOrdTblChk)
 					xfmrLogInfo("skipOrdTbl flag: %v", *skipOrdTbl)
@@ -677,7 +720,7 @@ func dbMapDefaultFieldValFill(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri str
 							if len(*childNode.xfmrTbl) > 0 {
 								inParams := formXfmrInputRequest(d, dbs, db.MaxDB, ygRoot, tblUri, requestUri, oper, "", nil, subOpDataMap, "", txCache)
 								chldTblNm, _ := tblNameFromTblXfmrGet(*childNode.xfmrTbl, inParams)
-								xfmrLogInfoAll("Table transformer %v for xpath childXpath %v returned table %v", *childNode.xfmrTbl, childXpath, chldTblNm)
+								xfmrLogInfoAll("Table transformer %v for xpath %v returned table %v", *childNode.xfmrTbl, childXpath, chldTblNm)
 								if chldTblNm != tblName {
 									continue
 								}
@@ -807,6 +850,9 @@ func dbMapCreate(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requestU
 					var dbs [db.MaxDB]*db.DB
 					inParams := formXfmrInputRequest(d, dbs, db.ConfigDB, ygRoot, uri, requestUri, oper, "", &dbDataMap, subOpDataMap, nil, txCache)
 					result, err = postXfmrHandlerFunc(xYangSpecMap[moduleNm].xfmrPost, inParams)
+					if err != nil {
+						return err
+					}
 				}
 			} else {
 				log.Errorf("No Entry exists for module %s in xYangSpecMap. Unable to process post xfmr (\"%v\") uri(\"%v\") error (\"%v\").", oper, uri, err)
@@ -838,7 +884,13 @@ func dbMapCreate(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requestU
 }
 
 func yangNodeForUriGet(uri string, ygRoot *ygot.GoStruct) (interface{}, error) {
-	path, _ := ygot.StringToPath(uri, ygot.StructuredPath, ygot.StringSlicePath)
+	path, err := ygot.StringToPath(uri, ygot.StructuredPath, ygot.StringSlicePath)
+	if path == nil || err != nil {
+		log.Warningf("For uri %v - StringToPath failure", uri)
+		errStr := fmt.Sprintf("Ygot stringTopath failed for uri(%v)", uri)
+		return nil, tlerr.InternalError{Format: errStr}
+	}
+
 	for _, p := range path.Elem {
 		pathSlice := strings.Split(p.Name, ":")
 		p.Name = pathSlice[len(pathSlice)-1]

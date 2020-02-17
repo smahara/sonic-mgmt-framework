@@ -69,6 +69,13 @@ def filter_address(d, isIPv4):
 def invoke_api(func, args=[]):
     api = cc.ApiClient()
 
+    # handle interfaces using the 'switch' mode
+    if func == 'if_config':
+        if args[0] == 'phy-if-name' or args[0] == 'vlan-if-name':
+            body = { "openconfig-interfaces:config": { "name": args[1] }}
+            path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}/config', name=args[1])
+            return api.patch(path, body)
+
     # Create interface
     if func == 'patch_openconfig_interfaces_interfaces_interface':
         path = cc.Path('/restconf/data/openconfig-interfaces:interfaces/interface={name}', name=args[0])
@@ -251,6 +258,11 @@ def invoke_api(func, args=[]):
             else:
                 filter_address(d, False)
 
+        path = cc.Path('/restconf/data/sonic-interface:sonic-interface/INTF_TABLE/INTF_TABLE_LIST')
+        responsePortTbl = api.get(path)
+        if responsePortTbl.ok():
+            d.update(responsePortTbl.content)
+
         path = cc.Path('/restconf/data/sonic-port:sonic-port/PORT_TABLE/PORT_TABLE_LIST')
         responsePortTbl = api.get(path)
         if responsePortTbl.ok():
@@ -328,10 +340,10 @@ def getSonicId(item):
         return ifId
     return ifName
 
-def run(func, args):   
+def run(func, args):
 
     try:
-        response = invoke_api(func, args)    
+        response = invoke_api(func, args)
         if func == 'ip_interfaces_get' or func == 'ip6_interfaces_get':
             show_cli_output(args[0], response)
             return
@@ -352,6 +364,7 @@ def run(func, args):
 
             if api_response is None:
                 print("Failed")
+                return 1
             else:
                 if func == 'get_openconfig_interfaces_interfaces_interface':
                     show_cli_output(args[1], api_response)
@@ -359,14 +372,13 @@ def run(func, args):
                     show_cli_output(args[0], api_response)
                 elif func == 'get_sonic_port_sonic_port_port_table':
                     show_cli_output(args[0], api_response)
-                else:
-                    return
         else:
             print response.error_message()
+            return 1
 
-        
     except Exception as e:
-        print("Exception when calling OpenconfigInterfacesApi->%s : %s\n" %(func, e))
+        print("%Error: Transaction Failure")
+        return 1
 
 if __name__ == '__main__':
 

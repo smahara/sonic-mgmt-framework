@@ -28,6 +28,7 @@ while [[ $# -gt 0 ]]; do
 case "$1" in
     -host) HOST=$2; shift 2 ;;
     -port) PORT=$2; shift 2 ;;
+    -auth) AUTH=1; shift ;;
     *) ARGS+=("$1"); shift ;;
 esac
 done
@@ -37,6 +38,8 @@ BUILDDIR=$TOPDIR/build
 
 CLISOURCE=$TOPDIR/src/CLI
 CLIBUILD=$BUILDDIR/cli
+
+[ -z $AUTH ] && export CLISH_NOAUTH=1
 
 [ -z $SYSTEM_NAME ] && export SYSTEM_NAME=sonic-cli
 
@@ -63,7 +66,5 @@ export PYTHONPATH
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$KLISH_BIN/.libs
 
-export PATH=$PATH:$KLISH_BIN
-
-(cd $BUILDDIR && clish ${ARGS[@]})
+(cd ${BUILDDIR} && ${KLISH_BIN}/clish "${ARGS[@]}")
 
