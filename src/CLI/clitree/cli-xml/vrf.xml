@@ -40,12 +40,50 @@ limitations under the License.
                 python $SONIC_CLI_ROOT/sonic-cli-vrf.py get_openconfig_network_instance_network_instances_network_instance show_vrf.j2 ${vrf-name};
             fi
         </ACTION>
+        <DOCGEN>
+            <DESCRIPTION>
+                Display configuration information for a specified VRF and its associated interfaces or
+                all VRF and their associated interfaces.
+            </DESCRIPTION>
+            <USAGE>
+                sonic# show ip vrf
+            </USAGE>
+            <EXAMPLE summary="show all VRF with their associated interfaces">
+                sonic# show ip vrf
+                VRF-NAME            INTERFACES
+                ----------------------------------------------------------------
+                mgmt                eth0
+                Vrf_red             Ethernet16
+                                    Ethernet8
+            </EXAMPLE>
+            <EXAMPLE summary="show a specified VRF with its associated interface">
+                sonic# show ip vrf Vrf_red
+                VRF-NAME            INTERFACES
+                ----------------------------------------------------------------
+                Vrf_red             Ethernet16
+                                    Ethernet8
+            </EXAMPLE>
+        </DOCGEN>
       </COMMAND>
 
       <COMMAND name="show ip vrf management" help="Show management VRF information">
         <ACTION> 
           python $SONIC_CLI_ROOT/sonic-cli-vrf.py get_openconfig_network_instance_network_instances_network_instance show_vrf.j2 "mgmt"
         </ACTION>
+        <DOCGEN>
+            <DESCRIPTION>
+                Display configuration information for management VRF.
+            </DESCRIPTION>
+            <USAGE>
+                sonic# show ip vrf management
+            </USAGE>
+            <EXAMPLE summary="show management VRF">
+                sonic# show ip vrf management
+                VRF-NAME            INTERFACES
+                ----------------------------------------------------------------
+                mgmt                eth0
+            </EXAMPLE>
+        </DOCGEN>
       </COMMAND>
     </VIEW>
 
@@ -55,6 +93,17 @@ limitations under the License.
       <ACTION> 
         python $SONIC_CLI_ROOT/sonic-cli-vrf.py patch_openconfig_network_instance_network_instances_network_instance "mgmt" "L3VRF" "True" 
       </ACTION> 
+      <DOCGEN>
+          <DESCRIPTION>
+              Command to configure management VRF.
+          </DESCRIPTION>
+          <USAGE>
+              sonic# ip vrf management
+          </USAGE>
+          <EXAMPLE summary="Configure management VRF">
+              sonic# ip vrf management
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
     
     <COMMAND
@@ -72,6 +121,17 @@ limitations under the License.
       <ACTION>
         python $SONIC_CLI_ROOT/sonic-cli-vrf.py patch_openconfig_network_instance_network_instances_network_instance ${vrf-name} "L3VRF" "True"
       </ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Command to configure a data VRF.
+          </DESCRIPTION>
+          <USAGE>
+              sonic# ip vrf
+          </USAGE>
+          <EXAMPLE summary="Configure a data VRF">
+              sonic# ip vrf Vrf_red
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <!-- no vrf commands -->
@@ -79,6 +139,17 @@ limitations under the License.
       <ACTION> 
         python $SONIC_CLI_ROOT/sonic-cli-vrf.py delete_openconfig_network_instance_network_instances_network_instance "mgmt" "L3VRF" "False"  
       </ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Command to delete management VRF.
+          </DESCRIPTION>
+          <USAGE>
+              sonic# no ip vrf management
+          </USAGE>
+          <EXAMPLE summary="Delete management VRF">
+              sonic# no ip vrf management
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <COMMAND
@@ -96,6 +167,17 @@ limitations under the License.
       <ACTION>
         python $SONIC_CLI_ROOT/sonic-cli-vrf.py delete_openconfig_network_instance_network_instances_network_instance ${vrf-name} "L3VRF" "False"
       </ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Command to delete a data VRF.
+          </DESCRIPTION>
+          <USAGE>
+              sonic# no ip vrf
+          </USAGE>
+          <EXAMPLE summary="Delete a data VRF">
+              sonic# no ip vrf Vrf_red
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     </VIEW>

@@ -35,6 +35,17 @@ limitations under the License.
         <ACTION>
           python $SONIC_CLI_ROOT/sonic-cli-vrf.py patch_openconfig_network_instance_network_instances_network_instance_interface ${vrf-name} arg1
         </ACTION>
+        <DOCGEN>
+            <DESCRIPTION>
+                Command to assign a VRF to an interface.
+            </DESCRIPTION>
+            <USAGE>
+                sonic# ip vrf forwarding
+            </USAGE>
+            <EXAMPLE summary="Assign a VRF to an interface">
+                sonic# ip vrf forwarding Vrf_red
+            </EXAMPLE>
+        </DOCGEN>
     </COMMAND>
 
     <COMMAND name="no ip vrf" help="Unbind interface from specified VRF domain"/>
@@ -53,6 +64,17 @@ limitations under the License.
         <ACTION>
           python $SONIC_CLI_ROOT/sonic-cli-vrf.py delete_openconfig_network_instance_network_instances_network_instance_interface ${vrf-name} arg1
         </ACTION>
+        <DOCGEN>
+            <DESCRIPTION>
+                Command to remove the assignment of a VRF to an interface.
+            </DESCRIPTION>
+            <USAGE>
+                sonic# no ip vrf forwarding
+            </USAGE>
+            <EXAMPLE summary="Remove a VRF assignment to an interface">
+                sonic# no ip vrf forwarding Vrf_red
+            </EXAMPLE>
+        </DOCGEN>
     </COMMAND>
 
 </MACRODEF>
