@@ -32,6 +32,14 @@ module openconfig-qos-annot {
     }
     */
 
+    deviation /oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:scheduler-policy/oc-qos:config {
+      deviate add {
+        sonic-ext:subtree-transformer "qos_intf_sched_policy_xfmr";
+        sonic-ext:db-name "CONFIG_DB";
+      }
+    }
+
+
     deviation /oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:input/oc-qos-ext:priority-groups {
       deviate add {
         sonic-ext:subtree-transformer "qos_get_one_intf_all_pg_counters_xfmr";
