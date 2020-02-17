@@ -32,6 +32,14 @@ def invoke(func, args=[]):
     if func == 'get_openconfig_qos_qos_queues_queue':
         path = cc.Path('/restconf/data/openconfig-qos:qos/queues/queue={name}', name=args[0])
         return api.get(path)
+    if func == 'patch_openconfig_qos_qos_interfaces_interface_output_scheduler_policy_config_name':
+        path = cc.Path('/restconf/data/openconfig-qos:qos/interfaces/interface={interface_id}/output/scheduler-policy/config/name', interface_id=args[0])
+        body = {"openconfig-qos:name": args[1]}
+        return api.patch(path, body)
+    if func == 'get_openconfig_qos_qos_interface_scheduler_policy_config':
+        path = cc.Path('/restconf/data/openconfig-qos:qos/interfaces/interface={interface_id}/output/scheduler-policy/config', interface_id=args[0])
+        return api.get(path)
+
     return api.cli_not_implemented(func)
 
 
@@ -58,6 +66,8 @@ def run(func, args):
                 show_cli_output('show_qos_queue_threshold_breaches.j2', response)
             elif func == 'get_openconfig_qos_qos_queues_queue':
                 show_cli_output('show_qos_queue_config.j2', response)
+            elif func == 'get_openconfig_qos_qos_interface_scheduler_policy_config':
+                show_cli_output('show_qos_interface_config.j2', response)
 
     else:
         print response.error_message()
