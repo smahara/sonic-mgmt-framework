@@ -764,8 +764,8 @@ limitations under the License.
     </DOCGEN>
   </COMMAND>
   <COMMAND name="update-delay" help="Force initial delay for best-path and updates">
-      <PARAM name="time" help="Maximum delay for best path calculation (Seconds)" ptype="RANGE_0_3600">
-          <PARAM name="maxmedval" help="Maximum delay for updates (Seconds)" ptype="RANGE_1_3600" optional="true"/>
+    <PARAM name="time" help="Maximum delay for best path calculation (Seconds)" ptype="RANGE_0_3600">
+       <PARAM name="maxmedval" help="Maximum delay for updates (Seconds)" ptype="RANGE_1_3600" optional="true"/>
     </PARAM>
     <ACTION> if test -z "${maxmedval}" ; then&#xA;
                  python $SONIC_CLI_ROOT/sonic_cli_bgp.py delete_openconfig_bgp_ext_network_instances_network_instance_protocols_protocol_bgp_global_update_delay_config_establish_wait ${vrf-name}&#xA;
