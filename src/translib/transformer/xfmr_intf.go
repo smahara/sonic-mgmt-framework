@@ -882,7 +882,7 @@ var intf_subintfs_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]strin
     pathInfo := NewPathInfo(inParams.uri)
     idx := pathInfo.Var("index")
     if idx != "0" {
-        errStr := "Invalid Interface Index: " + idx
+        errStr := "Invalid Sub-Interface Index: " + idx
         err := tlerr.InvalidArgsError{Format: errStr}
         return tblList, err
     }
@@ -904,7 +904,7 @@ var YangToDb_intf_subintfs_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (str
     pathInfo := NewPathInfo(inParams.uri)
     idx := pathInfo.Var("index")
     if idx != "0" {
-        errStr := "Invalid Interface Index: " + idx
+        errStr := "Invalid Sub-Interface Index: " + idx
         log.Error(errStr)
         err := tlerr.InvalidArgsError{Format: errStr}
         return idx, err
