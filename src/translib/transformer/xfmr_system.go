@@ -191,6 +191,7 @@ func getSystemCpu (idx int, cpu Cpu, syscpu *ocbinds.OpenconfigSystem_System_Cpu
         cpucur.system = uint8(cpu.System/sysinfo.Uptime)
         cpucur.idle = uint8(cpu.Idle/sysinfo.Uptime)
     }
+    ygot.BuildEmptyTree(syscpu.State)
     syscpu.State.User.Instant = &cpucur.user
     syscpu.State.Kernel.Instant = &cpucur.system
     syscpu.State.Idle.Instant = &cpucur.idle

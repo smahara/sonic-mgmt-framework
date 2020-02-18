@@ -453,6 +453,38 @@ func validateUntaggedVlanCfgredForIf(d *db.DB, vlanMemberTs *string, ifName *str
     return false, nil
 }
 
+/* Fills all the trunk-vlans part of physical or port-channel interface */
+func fillTrunkVlansForInterface(d *db.DB, ifName *string, ifVlanInfo *ifVlan) (error) {
+    var err error
+    var vlanKeys []db.Key
+    vlanTable, err := d.GetTable(&db.TableSpec{Name: VLAN_MEMBER_TN})
+    if err != nil {
+        return err
+    }
+
+    vlanKeys, err = vlanTable.GetKeys()
+
+    for _, vlanKey := range vlanKeys {
+        if len(vlanKeys) < 2 {
+            continue
+        }
+        if vlanKey.Get(1) == *ifName {
+            memberPortEntry, err := d.GetEntry(&db.TableSpec{Name:VLAN_MEMBER_TN}, vlanKey)
+            if err != nil {
+                log.Errorf("Error found on fetching Vlan member info from App DB for Interface Name : %s", *ifName)
+                return err
+            }
+            tagInfo, ok := memberPortEntry.Field["tagging_mode"]
+            if ok {
+                   if tagInfo == "tagged" {
+                        ifVlanInfo.trunkVlans = append(ifVlanInfo.trunkVlans, vlanKey.Get(0))
+                   }
+            }
+        }
+    }
+    return err
+}
+
 /* Removes the Interface name from Members list of VLAN table and updates it */
 func removeFromMembersListForVlan(d *db.DB, vlan *string, ifName *string, vlanMap map[string]db.Value) error {
 
@@ -502,7 +534,7 @@ func removeFromMembersListForAllVlans(d *db.DB, ifName *string, vlanMemberMap ma
 
 /* Remove tagged port associated with VLAN and update VLAN_MEMBER table */
 func removeTaggedVlanAndUpdateVlanMembTbl(d *db.DB, trunkVlan *string, ifName *string,
-                                          vlanMemberMap map[string]db.Value, 
+                                          vlanMemberMap map[string]db.Value,
                                           stpVlanPortMap map[string]db.Value, stpPortMap map[string]db.Value) error {
     var err error
     memberPortEntry, err := d.GetEntry(&db.TableSpec{Name:VLAN_MEMBER_TN}, db.Key{Comp: []string{*trunkVlan, *ifName}})
@@ -800,21 +832,33 @@ func processIntfVlanMemberRemoval(d *db.DB, ifVlanInfoList []*ifVlan, vlanMap ma
 func intfVlanMemberRemoval(swVlanConfig *swVlanMemberPort_t,
                            inParams *XfmrParams, ifName *string,
                            vlanMap map[string]db.Value,
-                           vlanMemberMap map[string]db.Value, 
+                           vlanMemberMap map[string]db.Value,
                            stpVlanPortMap map[string]db.Value,
                            stpPortMap map[string]db.Value, intfType E_InterfaceType) error {
     var err error
     var ifVlanInfo ifVlan
     var ifVlanInfoList []*ifVlan
 
+    targetUriPath, err := getYangPathFromUri(inParams.uri)
+    log.Info("Target URI Path = ", targetUriPath)
     switch intfType {
     case IntfTypeEthernet:
+        /* Handling the deletion of trunk-vlans leaf-list. YGOT target for leaf-list is nil,
+           This is the reason why we do string comparison of targetUri */
+        if swVlanConfig.swEthMember.Config.TrunkVlans == nil && targetUriPath == "/openconfig-interfaces:interfaces/interface/openconfig-if-ethernet:ethernet/openconfig-vlan:switched-vlan/config/trunk-vlans" {
+            ifVlanInfo.mode = TRUNK
+            err = fillTrunkVlansForInterface(inParams.d, ifName, &ifVlanInfo)
+            if err != nil {
+                return err
+            }
+        }
         if swVlanConfig.swEthMember.Config.AccessVlan != nil {
             ifVlanInfo.mode = ACCESS
         }
         if swVlanConfig.swEthMember.Config.TrunkVlans != nil {
             trunkVlansUnionList := swVlanConfig.swEthMember.Config.TrunkVlans
             ifVlanInfo.mode = TRUNK
+
             for _, trunkVlanUnion := range trunkVlansUnionList {
                 trunkVlanUnionType := reflect.TypeOf(trunkVlanUnion).Elem()
 
@@ -848,12 +892,22 @@ func intfVlanMemberRemoval(swVlanConfig *swVlanMemberPort_t,
             }
         }
     case IntfTypePortChannel:
+        /* Handling the deletion of trunk-vlans leaf-list. YGOT target for leaf-list is nil,
+           This is the reason why we do string comparison of targetUri */
+        if swVlanConfig.swPortChannelMember.Config.TrunkVlans == nil && targetUriPath == "/openconfig-interfaces:interfaces/interface/openconfig-if-aggregate:aggregation/openconfig-vlan:switched-vlan/config/trunk-vlans" {
+            ifVlanInfo.mode = TRUNK
+            err = fillTrunkVlansForInterface(inParams.d, ifName, &ifVlanInfo)
+            if err != nil {
+                return err
+            }
+        }
         if swVlanConfig.swPortChannelMember.Config.AccessVlan != nil {
             ifVlanInfo.mode = ACCESS
         }
         if swVlanConfig.swPortChannelMember.Config.TrunkVlans != nil {
             trunkVlansUnionList := swVlanConfig.swPortChannelMember.Config.TrunkVlans
             ifVlanInfo.mode = TRUNK
+
             for _, trunkVlanUnion := range trunkVlansUnionList {
                 trunkVlanUnionType := reflect.TypeOf(trunkVlanUnion).Elem()
 
