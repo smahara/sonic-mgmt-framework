@@ -381,8 +381,12 @@ func dbMapDataFill(uri string, tableName string, keyName string, d map[string]in
 					if fidx > 0 {
 						fieldValue += ","
 					}
-					fVal := fmt.Sprintf("%v", fieldDt.Index(fidx).Interface())
-					fieldValue = fieldValue + fVal
+					fVal, err := unmarshalJsonToDbData(xDbSpecMap[fieldXpath].dbEntry, fieldXpath, field, fieldDt.Index(fidx).Interface())
+					if err != nil {
+						log.Errorf("Failed to unmashal Json to DbData: path(\"%v\") error (\"%v\").", fieldXpath, err)
+					} else {
+						fieldValue = fieldValue + fVal
+					}
 				}
 				result[tableName][keyName].Field[field] = fieldValue
 				continue
@@ -411,7 +415,13 @@ func dbMapListDataFill(uri string, tableName string, dbEntry *yang.Entry, jsonDa
 			if i > 0 {
 				keyName += "|"
 			}
-			keyName += fmt.Sprintf("%v", d[k])
+			fieldXpath := tableName + "/" + k
+			val, err := unmarshalJsonToDbData(dbEntry.Dir[k], fieldXpath, k, d[k])
+			if err != nil {
+				log.Errorf("Failed to unmashal Json to DbData: path(\"%v\") error (\"%v\").", fieldXpath, err)
+			} else {
+				keyName += val
+			}
 			delete(d, k)
 		}
 		dbMapDataFill(uri, tableName, keyName, d, result)
