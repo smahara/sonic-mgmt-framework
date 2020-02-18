@@ -882,7 +882,7 @@ var intf_subintfs_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]strin
     pathInfo := NewPathInfo(inParams.uri)
     idx := pathInfo.Var("index")
     if idx != "0" {
-        errStr := "Not supported Index: " + idx
+        errStr := "Invalid Interface Index: " + idx
         err := tlerr.InvalidArgsError{Format: errStr}
         return tblList, err
     }
