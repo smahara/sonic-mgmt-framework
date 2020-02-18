@@ -317,6 +317,31 @@ limitations under the License.
          </PARAM>
 
          <ACTION builtin="clish_pyobj">sonic_cli_if portchannel_config PortChannel${lag-id} mode=${PoMode} min-links=${min-links-value} fallback=${fallback}</ACTION>
+         <DOCGEN>
+             <DESCRIPTION>
+                 Command to configure PortChannel with optional parameters (mode, min-links, fallback)
+             </DESCRIPTION>
+             <EXAMPLE summary="PortChannel Configuration with default parameters (mode LACP, min-links 0, fallback disabled)">
+                 sonic(config)# interface PortChannel 2
+                 sonic(conf-if-po2)# 
+             </EXAMPLE>
+             <EXAMPLE summary="PortChannel Configuration with Static mode">
+                 sonic(config)# interface PortChannel 2 mode on
+                 sonic(conf-if-po2)#
+             </EXAMPLE>
+             <EXAMPLE summary="PortChannel Configuration with LACP mode">
+                 sonic(config)# interface PortChannel 2 mode active
+                 sonic(conf-if-po2)#
+             </EXAMPLE>
+             <EXAMPLE summary="PortChannel Configuration with min-links option">
+                 sonic(config)# interface PortChannel 2 min-links 1
+                 sonic(conf-if-po2)#
+             </EXAMPLE>
+             <EXAMPLE summary="PortChannel Configuration with fallback option enabled">
+                 sonic(config)# interface PortChannel 2 fallback
+                 sonic(conf-if-po2)#
+             </EXAMPLE>
+         </DOCGEN>
     </COMMAND>
 
     <COMMAND
@@ -369,6 +394,14 @@ limitations under the License.
                 >
         </PARAM>
         <ACTION builtin="clish_restcl">oper=DELETE url=/restconf/data/openconfig-interfaces:interfaces/interface=PortChannel${lag-id}</ACTION>
+        <DOCGEN>
+            <DESCRIPTION>
+                Command to delete a PortChannel
+            </DESCRIPTION>
+            <EXAMPLE summary="Remove/Delete PortChannel">
+                sonic# no interface PortChannel 2
+            </EXAMPLE>
+        </DOCGEN>
     </COMMAND>
 
     <COMMAND
@@ -410,11 +443,29 @@ limitations under the License.
                 help="NAT zone of the interface"
                 ptype="RANGE_NAT_ZONE" />
             <ACTION builtin="clish_restcl">oper=PATCH url=/restconf/data/openconfig-interfaces:interfaces/interface=${iface}/openconfig-interfaces-ext:nat-zone/config/nat-zone body={"openconfig-interfaces-ext:nat-zone": ${zone}}</ACTION>
+            <DOCGEN>
+                <DESCRIPTION>
+                    Command to configure NAT Zone on an L3 interface
+                </DESCRIPTION>
+                <EXAMPLE summary="Configure NAT Zone on a Physical interface">
+                    sonic(config)# interface Ethernet 0
+                    sonic(conf-if-Ethernet0)# nat-zone 1
+                </EXAMPLE>
+            </DOCGEN>
         </COMMAND>
         <COMMAND
             name="no nat-zone"
             help="Remove Nat Zone on an interface" >
             <ACTION builtin="clish_restcl">oper=DELETE url=/restconf/data/openconfig-interfaces:interfaces/interface=${iface}/openconfig-interfaces-ext:nat-zone/config/nat-zone</ACTION>
+            <DOCGEN>
+                <DESCRIPTION>
+                    Command to remove NAT Zone on an L3 interface
+                </DESCRIPTION>
+                <EXAMPLE summary="Remove NAT Zone on a Physical interface">
+                    sonic(config)# interface Ethernet 0
+                    sonic(conf-if-Ethernet0)# no nat-zone
+                </EXAMPLE>
+            </DOCGEN>
         </COMMAND>
 
         <COMMAND
@@ -616,11 +667,29 @@ limitations under the License.
                 help="NAT zone of the interface"
                 ptype="RANGE_NAT_ZONE" />
             <ACTION builtin="clish_restcl">oper=PATCH url=/restconf/data/openconfig-interfaces:interfaces/interface=${lo_name}/openconfig-interfaces-ext:nat-zone/config/nat-zone body={"openconfig-interfaces-ext:nat-zone": ${zone}}</ACTION>
+            <DOCGEN>
+                <DESCRIPTION>
+                    Command to configure NAT Zone on an L3 interface
+                </DESCRIPTION>
+                <EXAMPLE summary="Configure NAT Zone on a Loopback interface">
+                    sonic(config)# interface Loopback 0
+                    sonic(conf-if-lo0)# nat-zone 1
+                </EXAMPLE>
+            </DOCGEN>
         </COMMAND>
         <COMMAND
             name="no nat-zone"
             help="Remove Nat Zone on the interface" >
             <ACTION builtin="clish_restcl">oper=DELETE url=/restconf/data/openconfig-interfaces:interfaces/interface=${lo_name}/openconfig-interfaces-ext:nat-zone/config/nat-zone</ACTION>
+            <DOCGEN>
+                <DESCRIPTION>
+                    Command to remove NAT Zone on an L3 interface
+                </DESCRIPTION>
+                <EXAMPLE summary="Remove NAT Zone on a Loopback interface">
+                    sonic(config)# interface Loopback 0
+                    sonic(conf-if-lo0)# no nat-zone
+                </EXAMPLE>
+            </DOCGEN>
         </COMMAND>
 </VIEW>
 
@@ -648,11 +717,29 @@ limitations under the License.
                 help="NAT zone of the vlan"
                 ptype="RANGE_NAT_ZONE" />
             <ACTION builtin="clish_restcl">oper=PATCH url=/restconf/data/openconfig-interfaces:interfaces/interface=${vlan_name}/openconfig-interfaces-ext:nat-zone/config/nat-zone body={"openconfig-interfaces-ext:nat-zone": ${zone}}</ACTION>
+            <DOCGEN>
+                <DESCRIPTION>
+                    Command to configure NAT Zone on an L3 interface
+                </DESCRIPTION>
+                <EXAMPLE summary="Configure NAT Zone on a VLAN interface">
+                    sonic(config)# interface Vlan 5
+                    sonic(conf-if-Vlan5)# nat-zone 1
+                </EXAMPLE>
+            </DOCGEN>
         </COMMAND>
         <COMMAND
             name="no nat-zone"
             help="Remove Nat Zone on a vlan" >
             <ACTION builtin="clish_restcl">oper=DELETE url=/restconf/data/openconfig-interfaces:interfaces/interface=${vlan_name}/openconfig-interfaces-ext:nat-zone/config/nat-zone</ACTION>
+            <DOCGEN>
+                <DESCRIPTION>
+                    Command to remove NAT Zone on an L3 interface
+                </DESCRIPTION>
+                <EXAMPLE summary="Remove NAT Zone on a VLAN interface">
+                    sonic(config)# interface Vlan 5
+                    sonic(conf-if-Vlan5)# no nat-zone
+                </EXAMPLE>
+            </DOCGEN>
         </COMMAND>
 
       <COMMAND
@@ -724,11 +811,29 @@ limitations under the License.
                 help="NAT zone of the port channel"
                 ptype="RANGE_NAT_ZONE" />
             <ACTION builtin="clish_restcl">oper=PATCH url=/restconf/data/openconfig-interfaces:interfaces/interface=${po_name}/openconfig-interfaces-ext:nat-zone/config/nat-zone body={"openconfig-interfaces-ext:nat-zone": ${zone}}</ACTION>
+            <DOCGEN>
+                <DESCRIPTION>
+                    Command to configure NAT Zone on an L3 interface
+                </DESCRIPTION>
+                <EXAMPLE summary="Configure NAT Zone on a PortChannel interface">
+                    sonic(config)# interface PortChannel 2
+                    sonic(conf-if-po2)# nat-zone 1
+                </EXAMPLE>
+            </DOCGEN>
         </COMMAND>
         <COMMAND
             name="no nat-zone"
             help="Remove Nat Zone on a port channel" >
             <ACTION builtin="clish_restcl">oper=DELETE url=/restconf/data/openconfig-interfaces:interfaces/interface=${po_name}/openconfig-interfaces-ext:nat-zone/config/nat-zone</ACTION>
+            <DOCGEN>
+                <DESCRIPTION>
+                    Command to remove NAT Zone on an L3 interface
+                </DESCRIPTION>
+                <EXAMPLE summary="Remove NAT Zone on a PortChannel interface">
+                    sonic(config)# interface PortChannel 2
+                    sonic(conf-if-po2)# no nat-zone
+                </EXAMPLE>
+            </DOCGEN>
         </COMMAND>
 
         <COMMAND
