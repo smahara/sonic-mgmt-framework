@@ -904,7 +904,7 @@ var YangToDb_intf_subintfs_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (str
     pathInfo := NewPathInfo(inParams.uri)
     idx := pathInfo.Var("index")
     if idx != "0" {
-        errStr := "Not supported Index: " + idx
+        errStr := "Invalid Interface Index: " + idx
         log.Error(errStr)
         err := tlerr.InvalidArgsError{Format: errStr}
         return idx, err
