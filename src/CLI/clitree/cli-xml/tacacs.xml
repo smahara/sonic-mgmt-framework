@@ -311,10 +311,13 @@ sonic(config)# tacacs-server key mykey
           </DESCRIPTION>
           <USAGE>
               Configure a tacacs server for authentication in config mode.
+              Default value of Port is 49. Default value of Priority is 1.
+              Default value of timeout is 5. Default value of Type is chap.
           </USAGE>
           <EXAMPLE>
 sonic# configure
 sonic(config)# tacacs-server host 3.3.3.3 port 30 timeout 30 key mykey type mschap priority 30
+sonic(config)# tacacs-server host 4.4.4.4
           </EXAMPLE>
       </DOCGEN>
     </COMMAND>
