@@ -2163,6 +2163,9 @@ var DbToYang_intf_get_ether_counters_xfmr SubTreeXfmrDbToYang = func(inParams Xf
         ygot.BuildEmptyTree(intfObj)
     }
 
+    ygot.BuildEmptyTree(intfObj.Ethernet)
+    ygot.BuildEmptyTree(intfObj.Ethernet.State)
+    ygot.BuildEmptyTree(intfObj.Ethernet.State.Counters)
     eth_counters = intfObj.Ethernet.State.Counters
 
     return populatePortCounters(inParams, eth_counters)
