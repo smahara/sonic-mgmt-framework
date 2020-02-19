@@ -878,8 +878,8 @@ func intf_intf_tbl_key_gen (intfName string, ip string, prefixLen int, keySep st
 
 var intf_subintfs_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]string, error) {
     var tblList []string
-
     log.Info("intf_subintfs_table_xfmr")
+
     if (inParams.oper == GET) {
         if(inParams.dbDataMap != nil) {
             (*inParams.dbDataMap)[db.ConfigDB]["SUBINTF_TBL"] = make(map[string]db.Value)
@@ -895,6 +895,14 @@ var YangToDb_intf_subintfs_xfmr KeyXfmrYangToDb = func(inParams XfmrParams) (str
     var subintf_key string
     var err error
 
+    pathInfo := NewPathInfo(inParams.uri)
+    idx := pathInfo.Var("index")
+    if idx != "0" {
+        errStr := "Invalid sub-interface index: " + idx
+        log.Error(errStr)
+        err := tlerr.InvalidArgsError{Format: errStr}
+        return idx, err
+    }
     return subintf_key, err
 }
 

@@ -463,6 +463,9 @@ func fillTrunkVlansForInterface(d *db.DB, ifName *string, ifVlanInfo *ifVlan) (e
     }
 
     vlanKeys, err = vlanTable.GetKeys()
+    if err != nil {
+        return err
+    }
 
     for _, vlanKey := range vlanKeys {
         if len(vlanKeys) < 2 {
