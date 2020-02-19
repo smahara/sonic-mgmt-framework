@@ -68,6 +68,18 @@ limitations under the License.
              mode="subcommand" 
              ptype="SUBCOMMAND">
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-tacacs.py get_sonic_tacacs_global show_tacacs_global.j2</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Displays global configuration for tacacs servers. Global parameters are considered if a particular
+              server is not configured with that parameter. 
+          </DESCRIPTION>
+          <USAGE>
+             Use the show command to display tacacs server global parameters. 
+          </USAGE>
+          <EXAMPLE summary="Display tacacs server global parameters">
+              sonic# show tacacs-server global
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
     <COMMAND name="show tacacs-server host" 
              help="Show tacacs server configuration" 
@@ -85,6 +97,30 @@ limitations under the License.
           python $SONIC_CLI_ROOT/sonic-cli-tacacs.py get_sonic_tacacs_server ${address} show_tacacs_server.j2;
         fi
       </ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Displays configured properties of tacacs server(s).
+          </DESCRIPTION>
+          <USAGE>
+              Use the command to display properties of tacacs server(s). Use IP address of the server, to
+              display particular server's configuration. If nothing is specified, displays all the servers.
+          </USAGE>
+          <EXAMPLE summary="Display all tacacs servers">
+sonic# show tacacs-server host
+------------------------------------------------------------------------------------------------
+HOST                 AUTH-TYPE       KEY        PORT       PRIORITY   TIMEOUT
+------------------------------------------------------------------------------------------------
+1.1.1.1              pap             mykey      10         10         10
+2.2.2.2              pap             mykey      20         20         20
+          </EXAMPLE>
+          <EXAMPLE summary="Display specific tacacs server">
+sonic# show tacacs-server host 1.1.1.1
+------------------------------------------------------------------------------------------------
+HOST                 AUTH-TYPE       KEY        PORT       PRIORITY   TIMEOUT
+------------------------------------------------------------------------------------------------
+1.1.1.1              pap             mykey      10         10         10
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
   </VIEW>
 
@@ -103,6 +139,22 @@ limitations under the License.
              ptype="IPV4V6_ADDR">
       </PARAM>
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-tacacs.py patch_openconfig_system_ext_system_aaa_server_groups_server_group_config_source_address ${src-ip}</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+               Specify an IP address is used as the source IP address for user authentication with a TACACS+ server in
+               CONFIGURATION mode. By default, no source ip address is configured as the IP address of the interface from
+               which a packet is sent to a TACACS+ server is used as source IP in the packet.
+          </DESCRIPTION>
+          <USAGE>
+               Configure a valid v4 or v6 address as source IP in config mode.
+          </USAGE>
+          <EXAMPLE summary="Configuring global source ip to communicate with tacacs server">
+sonic# configure
+sonic(config)# tacacs-server source-ip
+  A.B.C.D/A::B
+sonic(config)# tacacs-server source-ip 1.2.3.4
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <!-- tacacs timeout -->
@@ -115,6 +167,21 @@ limitations under the License.
              ptype="TACACS_TIMEOUT">
       </PARAM>
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-tacacs.py patch_openconfig_system_ext_system_aaa_server_groups_server_group_config_timeout ${timeout}</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Configure the global timeout used to wait for an authentication response from TACACS+ servers in CONFIGURATION mode, from 1 to
+              60 seconds; the default is 5.
+          </DESCRIPTION>
+          <USAGE>
+               Configure global timeout value in config mode.
+          </USAGE>
+          <EXAMPLE summary="Configuring global timeout to wait for response from tacacs server">
+sonic# configure
+sonic(config)# tacacs-server timeout
+  seconds  timeout (default: 5) (0..60)
+sonic(config)# tacacs-server timeout 10
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <!-- tacacs authtype -->
@@ -127,6 +194,20 @@ limitations under the License.
              ptype="AAA_AUTH_TYPE">
       </PARAM>
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-tacacs.py patch_openconfig_system_ext_system_aaa_server_groups_server_group_config_auth_type ${auth-type}</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Configure the global authentication method to be used to communicate with TACACS+ servers in CONFIGURATION mode. Default is 'pap'.
+          </DESCRIPTION>
+          <USAGE>
+              Configure authentication method in configure mode.
+          </USAGE>
+          <EXAMPLE summary="Configuring global authentication method to use to communicate with tacacs server">
+sonic# configure
+sonic(config)# tacacs-server auth-type
+pap    chap   mschap
+sonic(config)# tacacs-server auth-type chap
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <!-- tacacs secret-key -->
@@ -139,6 +220,20 @@ limitations under the License.
              ptype="TACACS_KEY">
       </PARAM>
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-tacacs.py patch_openconfig_system_ext_system_aaa_server_groups_server_group_config_secret_key ${secret-key}</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Configure the global secret key to be used to authenticate with TACACS+ servers in CONFIGURATION mode.
+          </DESCRIPTION>
+          <USAGE>
+              Configure secret key of 32 characters length to be used in authenticating tacacs server.
+          </USAGE>
+          <EXAMPLE summary="Configuring global secret key to authenticate tacacs server">
+sonic# configure
+sonic(config)# tacacs-server key
+  (Valid Chars: [0-9A-Za-z], Max Len: 32) shared secret
+sonic(config)# tacacs-server key mykey
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <!-- tacacs server -->
@@ -207,6 +302,21 @@ limitations under the License.
       </PARAM>
 
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-tacacs.py patch_tacacs_server ${host} port:${port-val} key:${key-val} timeout:${timeout-val} authtype:${type-val} priority:${priority-val}</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Configure a TACACS+ authentication server in CONFIGURATION mode.
+              Re-enter the tacacs-server host command multiple times to configure more than one TACACS+ server.
+              If configured multiple TACACS+ servers, attempts to connect in the order they were configured.
+              A sonic switch connects with the configured TACACS+ servers one at a time, until a TACACS+ server responds with an accept or reject response.
+          </DESCRIPTION>
+          <USAGE>
+              Configure a tacacs server for authentication in config mode.
+          </USAGE>
+          <EXAMPLE>
+sonic# configure
+sonic(config)# tacacs-server host 3.3.3.3 port 30 timeout 30 key mykey type mschap priority 30
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <!-- no tacacs server -->
@@ -221,26 +331,88 @@ limitations under the License.
              ptype="IPV4V6_ADDR">
       </PARAM>
       <ACTION> python $SONIC_CLI_ROOT/sonic-cli-tacacs.py delete_openconfig_system_system_aaa_server_groups_server_group_servers_server_tacacs_config ${address}</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Delete a configured tacacs host. The command takes ip address of the host.
+          </DESCRIPTION>
+          <USAGE>
+             Unconfigure previously configured tacacs server.
+          </USAGE>
+          <EXAMPLE>
+sonic# configure
+sonic(config)# no tacacs-server host
+  A.B.C.D/A::B  server ip address
+sonic(config)# no tacacs-server host 3.3.3.3
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <COMMAND name="no tacacs-server source-ip"
              help="Unconfigure global source ip for TACACS">
       <ACTION> python $SONIC_CLI_ROOT/sonic-cli-tacacs.py delete_openconfig_system_ext_system_aaa_server_groups_server_group_config_source_address</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Delete configured source IP address from config mode.
+          </DESCRIPTION>
+          <USAGE>
+              Unconfigure previously configured source IP address.
+          </USAGE>
+          <EXAMPLE>
+sonic# configure
+sonic(config)# no tacacs-server source-ip
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <COMMAND name="no tacacs-server timeout"
              help="Unconfigure global timeout for TACACS">
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-tacacs.py patch_openconfig_system_ext_system_aaa_server_groups_server_group_config_timeout 5</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Delete configured timeout from config mode. This operation defaults timeout to five seconds.
+          </DESCRIPTION>
+          <USAGE>
+              Unconfigure previously configured timeout.
+          </USAGE>
+          <EXAMPLE>
+sonic# configure
+sonic(config)# no tacacs-server timeout
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <COMMAND name="no tacacs-server auth-type"
              help="Unconfigure global auth-type for TACACS">
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-tacacs.py patch_openconfig_system_ext_system_aaa_server_groups_server_group_config_auth_type pap</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Delete configured authentication type from config mode. This operation defaults auth-type to 'pap'.
+          </DESCRIPTION>
+          <USAGE>
+              Unconfigure previously configured authentication method.
+          </USAGE>
+          <EXAMPLE>
+sonic# configure
+sonic(config)# no tacacs-server auth-type
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <COMMAND name="no tacacs-server key"
              help="Unconfigure global shared secret for TACACS">
       <ACTION> python $SONIC_CLI_ROOT/sonic-cli-tacacs.py delete_openconfig_system_ext_system_aaa_server_groups_server_group_config_secret_key</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Delete configured secret key from config mode.
+          </DESCRIPTION>
+          <USAGE>
+              Unconfigure previously configured secret key.
+          </USAGE>
+          <EXAMPLE>
+sonic# configure
+sonic(config)# no tacacs-server key
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
   </VIEW>
