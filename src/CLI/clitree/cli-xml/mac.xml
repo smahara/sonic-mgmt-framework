@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--copyright 2019 Dell, Inc.  
+<!--copyright 2019 Dell, Inc.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -9,7 +9,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
---> 
+-->
 
 <!DOCTYPE CLISH_MODULE [
 ]>
@@ -31,10 +31,99 @@ limitations under the License.
     <COMMAND
         name="show mac address-table"
         help="MAC address table"
-        >
-    <ACTION> 
-        python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 show
-    </ACTION>
+    >
+        <ACTION>
+            python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 show
+        </ACTION>
+
+        <DOCGEN>
+            <DESCRIPTION>
+                 This command shows MAC address table information. To filter the
+                 output, specify an interface, port channel, or VLAN or a MAC
+                 address. You can also display total number of MAC entries using 'count' option.
+                 The filter also allows you to show only DYNAMIC or STATIC entries
+            </DESCRIPTION>
+            <USAGE>
+                 sonic# show mac address-table [address mac-address]
+                 [interface ethernet port-number][vlan vlan-id][portchannel number] [count] [static|dynamic]
+            </USAGE>
+            <EXAMPLE summary="show mac address-table information">
+                 sonic# show mac address-table
+                 --------------------------------------------------------
+                 VLAN   MAC-ADDRESS         TYPE       INTERFACE
+                 --------------------------------------------------------
+                 10     00:00:00:00:00:01   STATIC     Ethernet0
+                 11     00:00:00:00:00:01   DYNAMIC    Ethernet0
+                 100    00:00:00:00:00:10   DYNAMIC    Ethernet36
+                 10     00:00:00:00:00:101  STATIC     Ethernet4
+                 30     00:00:00:00:00:03   STATIC     Ethernet8
+                 40     00:00:00:00:00:04   DYNAMIC    Ethernet12
+                 99     00:00:00:00:00:99   STATIC     PortChannel10
+
+                 sonic# show mac address-table address 00:00:00:00:00:01
+                 -----------------------------------------------------------
+                 VLAN   MAC-ADDRESS         TYPE       INTERFACE
+                 -----------------------------------------------------------
+                 10     00:00:00:00:00:01   STATIC     Ethernet0
+                 11     00:00:00:00:00:01   DYNAMIC    Ethernet0
+
+                 sonic# show mac address-table Vlan 10
+                 -----------------------------------------------------------
+                 VLAN   MAC-ADDRESS         TYPE         INTERFACE
+                 -----------------------------------------------------------
+                 10     00:00:00:00:00:01   STATIC       Ethernet0
+                 10     00:00:00:00:00:101  STATIC       Ethernet4
+
+                 sonic# show mac address-table interface Ethernet 0
+                 --------------------------------------------------------
+                 VLAN    MAC-ADDRESS        TYPE       INTERFACE
+                 --------------------------------------------------------
+                 10      00:00:00:00:00:01  STATIC     Ethernet0
+                 11      00:00:00:00:00:01  DYNAMIC    Ethernet0
+
+                 sonic# show mac address-table interface PortChannel 10
+                 --------------------------------------------------------
+                 VLAN    MAC-ADDRESS        TYPE       INTERFACE
+                 --------------------------------------------------------
+                 99      00:00:00:00:00:99  STATIC     PortChannel10
+
+                 sonic# show mac address-table dynamic
+                 --------------------------------------------------------
+                 VLAN    MAC-ADDRESS        TYPE       INTERFACE
+                 --------------------------------------------------------
+                 11      00:00:00:00:00:01  DYNAMIC    Ethernet0
+                 100     00:00:00:00:00:10  DYNAMIC    Ethernet36
+                 40      00:00:00:00:00:04  DYNAMIC    Ethernet12
+
+                 sonic# show mac address-table dynamic interface Ethernet 36
+                 --------------------------------------------------------
+                 VLAN    MAC-ADDRESS        TYPE       INTERFACE
+                 --------------------------------------------------------
+                 100     00:00:00:00:00:10  DYNAMIC    Ethernet36
+
+                 sonic# show mac address-table static
+                 --------------------------------------------------------
+                 VLAN    MAC-ADDRESS        TYPE       INTERFACE
+                 --------------------------------------------------------
+                 10      00:00:00:00:00:01  STATIC     Ethernet0
+                 10      00:00:00:00:00:101 STATIC     Ethernet4
+                 99      00:00:00:00:00:99  STATIC     PortChannel10
+
+                 sonic# show mac address-table static interface Ethernet 0
+                 --------------------------------------------------------
+                 VLAN    MAC-ADDRESS        TYPE       INTERFACE
+                 --------------------------------------------------------
+                 10      00:00:00:00:00:01  STATIC     Ethernet0
+            </EXAMPLE>
+
+            <EXAMPLE summary="show mac address-table count information">
+                sonic# show mac address-table count
+                MAC Entries for all vlans : 7
+                Dynamic Address Count : 3
+                Static Address (User-defined) Count : 4
+                Total MAC Addresses in Use: 7
+            </EXAMPLE>
+        </DOCGEN>
     </COMMAND>
 
 <!--====================show mac address-table count command ======================-->
@@ -42,8 +131,8 @@ limitations under the License.
         name="show mac address-table count"
         help="Count keyword"
         >
-    <ACTION> 
-        python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac_count.j2 count 
+    <ACTION>
+        python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac_count.j2 count
     </ACTION>
     </COMMAND>
 
@@ -118,12 +207,12 @@ limitations under the License.
         </PARAM>
     <ACTION>
         if test "${if-subcommands}" = "Ethernet"; then&#xA;
-            python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 interface Ethernet${phy-if-id}&#xA; 
+            python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 interface Ethernet${phy-if-id}&#xA;
         elif test "${if-subcommands}" = "PortChannel"; then&#xA;
-            python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 interface PortChannel${port-channel-id}&#xA; 
+            python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 interface PortChannel${port-channel-id}&#xA;
         else&#xA;
             python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 ${__full_line}&#xA;
-        fi	
+        fi
     </ACTION>
     </COMMAND>
 
@@ -207,9 +296,9 @@ limitations under the License.
         </PARAM>
     <ACTION>
         if test "${s-subcommands}" = "address"; then&#xA;
-            python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 static address ${mac-addr}&#xA; 
+            python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 static address ${mac-addr}&#xA;
         elif test "${s-subcommands}" = "Vlan"; then&#xA;
-            python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 static vlan ${vlan-id}&#xA; 
+            python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 static vlan ${vlan-id}&#xA;
         elif test "${s-subcommands}" = "interface"; then&#xA;
             if test "${interface-subcommand}" = "PortChannel"; then&#xA;
                 python $SONIC_CLI_ROOT/sonic-cli-mac.py get_openconfig_network_instance_network_instances_network_instance_fdb_mac_table_entries show_mac.j2 static interface PortChannel${port-channel-id}&#xA;
@@ -269,7 +358,7 @@ limitations under the License.
                     name="interface-subcommand"
                     help="Dynamic interface subcommands"
                     ptype="SUBCOMMAND"
-                    mode="switch"           
+                    mode="switch"
                     >
                     <PARAM
                         name="Ethernet"
@@ -381,6 +470,39 @@ limitations under the License.
             builtin="clish_nop"&#xA;
         fi
     </ACTION>
+       <DOCGEN>
+            <DESCRIPTION>
+                To delete dynamically learned MAC from the FDB table use 'clear mac address-table'
+                command. Currently this command clears all dynamically created entries only.
+            </DESCRIPTION>
+
+            <USAGE>
+                sonic# clear mac address-table dynamic [all] [addess mac-addr] [Vlan vlan-id]
+            </USAGE>
+
+            <EXAMPLE summary="clear mac address-table information">
+                sonic# show mac address-table
+                --------------------------------------------------------
+                VLAN   MAC-ADDRESS         TYPE       INTERFACE
+                --------------------------------------------------------
+                10     00:00:00:00:00:01   STATIC     Ethernet0
+                11     00:00:00:00:00:01   DYNAMIC    Ethernet0
+                100    00:00:00:00:00:10   DYNAMIC    Ethernet36
+                10     00:00:00:00:00:101  STATIC     Ethernet4
+                30     00:00:00:00:00:03   STATIC     Ethernet8
+                40     00:00:00:00:00:04   DYNAMIC    Ethernet12
+                99     00:00:00:00:00:99   STATIC     PortChannel10
+                sonic#clear mac address-table dynamic all
+                sonic# show mac address-table
+                --------------------------------------------------------
+                VLAN   MAC-ADDRESS         TYPE       INTERFACE
+                --------------------------------------------------------
+                10     00:00:00:00:00:01   STATIC     Ethernet0
+                10     00:00:00:00:00:101  STATIC     Ethernet4
+                30     00:00:00:00:00:03   STATIC     Ethernet8
+                99     00:00:00:00:00:99   STATIC     PortChannel10
+             </EXAMPLE>
+       <DOCGEN>
     </COMMAND>
 
 </VIEW>

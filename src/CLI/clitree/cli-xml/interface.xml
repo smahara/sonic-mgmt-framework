@@ -213,6 +213,26 @@ limitations under the License.
        <ACTION>
             python $SONIC_CLI_ROOT/sonic-cli-portchannel.py get_sonic_portchannel_sonic_portchannel_lag_table show_portchannel.j2 ${__full_line}&#xA;
        </ACTION>
+       <DOCGEN>
+           <DESCRIPTION>
+               Show all (Static and LACP) PortChannel information
+           </DESCRIPTION>
+           <USAGE>
+               sonic# show PortChannel summary
+           </USAGE>
+           <EXAMPLE summary="show PortChannel summary ">
+               sonic# show PortChannel summary
+               Flags(oper-status):  D - Down U - Up
+               ----------------------------------------------------------------------------------------------------------------------
+               Group               PortChannel                   Type                Protocol       Member Ports
+               ----------------------------------------------------------------------------------------------------------------------
+               1                   PortChannel1   (D)            Eth                 LACP           Ethernet64(D)
+                                                                                                 Ethernet72(D)
+               2                   PortChannel2   (D)            Eth                 LACP
+               6                   PortChannel6   (D)            Eth                 NONE           Ethernet80(D)
+               sonic#
+           </EXAMPLE>
+        </DOCGEN>
    </COMMAND>
 
    </VIEW>
