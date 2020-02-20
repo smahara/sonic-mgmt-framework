@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-// Copyright 2019 Dell, Inc.
+// Copyright 2020 Dell, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-package translib
+package transformer_test
 
 import (
 	"errors"
@@ -25,10 +25,6 @@ import (
 	"time"
 	db "translib/db"
 )
-
-func init() {
-	fmt.Println("+++++  Init sFlow test  +++++")
-}
 
 func Test_sFlowOperations(t *testing.T) {
 

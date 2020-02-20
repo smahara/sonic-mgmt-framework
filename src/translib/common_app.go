@@ -435,7 +435,12 @@ func sortAsPerTblDeps(tblLst []string) ([]string, error) {
 		return resultTblLst, err
 	}
 	log.Info("cvlSortDepTblList = ", cvlSortDepTblList)
-	resultTblLst = cvlSortDepTblList
+
+	if len(cvlSortDepTblList) > 0 {
+		resultTblLst = cvlSortDepTblList
+	} else {
+		resultTblLst = tblLst
+	}
 
 	cvl.ValidationSessClose(cvSess)
 	return resultTblLst, err
