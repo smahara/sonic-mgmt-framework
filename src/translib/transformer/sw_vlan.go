@@ -1630,7 +1630,6 @@ var DbToYang_sw_vlans_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (err
 
         intfObj := intfsObj.Interface[ifName]
         if (intfObj == nil) {
-            log.Info("intfObj is nil")
             intfObj, _ = intfsObj.NewInterface(ifName)
             ygot.BuildEmptyTree(intfObj)
         }
