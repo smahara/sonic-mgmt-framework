@@ -65,7 +65,7 @@ limitations under the License.
             </DESCRIPTION>
 
             <USAGE>
-                sonic# show ipv6 neighbors [interface { ethernet <port> [summary] | port-channel <id> [summary] | vlan <id> [summary] }] [ipv6-address] [mac-address <mac>] [summary]
+                sonic# show ipv6 neighbors [interface { Ethernet &lt; port &gt; [summary] | PortChannel &lt; id &gt; [summary] | Vlan &lt; id &gt; [summary] }] [&lt; ipv6-address &gt;] [mac-address &lt; mac &gt;] [summary]
             </USAGE>
 
             <EXAMPLE summary="show ipv6 neighbors information">
@@ -211,7 +211,7 @@ limitations under the License.
             </DESCRIPTION>
 
             <USAGE>
-                sonic# clear ipv6 neighbors [interface {Ethernet port-number | PortChannel number | Vlan vlan-id | Management port-number}] [ipv6-address] [force]
+                sonic# clear ipv6 neighbors [interface {Ethernet &lt; port-number &gt;| PortChannel &lt; number &gt;| Vlan &lt; vlan-id &gt;| Management &lt; port-number &gt;}] [&lt; ipv6-address &gt;] [force]
             </USAGE>
 
             <EXAMPLE summary="clear ipv6 neighbors information">

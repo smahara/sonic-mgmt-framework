@@ -502,7 +502,7 @@ limitations under the License.
                 30     00:00:00:00:00:03   STATIC     Ethernet8
                 99     00:00:00:00:00:99   STATIC     PortChannel10
              </EXAMPLE>
-       <DOCGEN>
+       </DOCGEN>
     </COMMAND>
 
 </VIEW>

@@ -66,7 +66,7 @@ limitations under the License.
             </DESCRIPTION>
 
             <USAGE>
-                sonic# show ip arp [interface { ethernet <port> [summary] | port-channel <id> [summary] | vlan <id> [summary] }] [<A.B.C.D>] [mac-address <mac>] [summary]
+                sonic# show ip arp [interface { Ethernet &lt; port &gt; [summary] | PortChannel &lt; id &gt; [summary] | Vlan &lt; id &gt; [summary] }] [&lt; ipv4-address &gt;] [mac-address &lt; mac &gt;] [summary]
             </USAGE>
 
             <EXAMPLE summary="show ip arp information">
@@ -348,7 +348,7 @@ limitations under the License.
             </DESCRIPTION>
 
             <USAGE>
-                sonic# clear ip arp [interface {Ethernet port-number | PortChannel number | Vlan vlan-id | Management port-number}] [ip-address] [force]
+                sonic# clear ip arp [interface {Ethernet &lt; port-number &gt;| PortChannel &lt; number &gt;| Vlan &lt; vlan-id &gt;| Management &lt; port-number &gt;}] [&lt; ipv4-address &gt;] [force]
             </USAGE>
 
             <EXAMPLE summary="clear ip arp information">
