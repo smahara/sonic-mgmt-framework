@@ -1246,7 +1246,7 @@ var YangToDb_sw_vlans_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (map[
 
     if intf.Ethernet == nil && intf.Aggregation == nil {
         return nil, errors.New("Wrong Config Request")
-    } 
+    }
     if intf.Ethernet != nil {
         if intf.Ethernet.SwitchedVlan == nil || intf.Ethernet.SwitchedVlan.Config == nil {
             return nil, errors.New("Wrong config request for Ethernet!")
@@ -1630,8 +1630,11 @@ var DbToYang_sw_vlans_xfmr SubTreeXfmrDbToYang = func (inParams XfmrParams) (err
 
         intfObj := intfsObj.Interface[ifName]
         if (intfObj == nil) {
-            return nil
+            log.Info("intfObj is nil")
+            intfObj, _ = intfsObj.NewInterface(ifName)
+            ygot.BuildEmptyTree(intfObj)
         }
+
         if intfObj.Ethernet == nil && intfObj.Aggregation == nil {
             return errors.New("Wrong GET request for switched-vlan!")
         }
