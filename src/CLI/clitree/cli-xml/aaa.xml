@@ -51,6 +51,22 @@ limitations under the License.
     <COMMAND name="show aaa"
              help="Show aaa info">
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-aaa.py get_openconfig_system_system_aaa_authentication_config show_aaa.j2</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Displays global configuration for aaa authentication. Login method and failthrough setting is displayed.
+          </DESCRIPTION>
+          <USAGE>
+             Use the show command to display aaa authentication global parameters.
+          </USAGE>
+          <EXAMPLE summary="Display aaa authentication parameters">
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : False
+login-method : local
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
   </VIEW>
 
@@ -77,6 +93,32 @@ limitations under the License.
         python $SONIC_CLI_ROOT/sonic-cli-aaa.py put_openconfig_system_ext_system_aaa_authentication_config_failthrough False&#xA;
           fi&#xA;
       </ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+              Configure failthrough mechanism for aaa authentication.
+          </DESCRIPTION>
+          <USAGE>
+             Use the command to enable or disable failthrough mechanism for pam modules.
+          </USAGE>
+          <EXAMPLE summary="Enable/disable aaa authentication failtrhough mechanism for pam modules">
+sonic(config)# aaa authentication failthrough
+enable  disable
+sonic(config)# aaa authentication failthrough disable
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : False
+login-method : local
+sonic(config)# aaa authentication failthrough enable
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : True
+login-method : local
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
 
     <COMMAND name="aaa authentication login-method"
@@ -129,11 +171,84 @@ limitations under the License.
           </PARAM>
       </PARAM>
       <ACTION> python $SONIC_CLI_ROOT/sonic-cli-aaa.py put_openconfig_system_system_aaa_authentication_config_authentication_method ${login} ${local} ${tacacs+} ${radius} </ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+             Configure list of authentication methods to define the types of authentication and the sequence in which they apply.
+             By default, local authentication method is used.
+          </DESCRIPTION>
+          <USAGE>
+             The authentication methods in the method list execute in the order you configure them. Reenter the methods to change the order.
+             The local authentication method remains enabled even if you remove all configured methods.
+          </USAGE>
+          <EXAMPLE summary="Configure login method(s) for aaa authentication">
+sonic(config)# aaa authentication login-method tacacs+
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : False
+login-method : tacacs+
+sonic(config)# aaa authentication login-method tacacs+ local
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : False
+login-method : tacacs+, local
+sonic(config)# aaa authentication
+failthrough  login-method
+sonic(config)# aaa authentication login-method radius local
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : False
+login-method : radius, local
+sonic(config)# aaa authentication login-method local radius
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : False
+login-method : local, radius
+sonic(config)# no aaa authentication login-method
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : False
+login-method : local
+          </EXAMPLE>
+      </DOCGEN>
     </COMMAND>
     <COMMAND name="no aaa" help="Unconfigure aaa authentication configuration"/>
     <COMMAND name="no aaa authentication" help="Unconfigure aaa authentication configuration"/>
     <COMMAND name="no aaa authentication login-method" help="Unconfigure aaa authentication login method">
       <ACTION>python $SONIC_CLI_ROOT/sonic-cli-aaa.py put_openconfig_system_system_aaa_authentication_config_authentication_method local</ACTION>
+      <DOCGEN>
+          <DESCRIPTION>
+             Unconfigure previously configured login methods for aaa authentication.
+          </DESCRIPTION>
+          <USAGE>
+             The local authentication method remains enabled when you remove configured methods.
+          </USAGE>
+          <EXAMPLE summary="Unconfigure login method(s) for aaa authentication">
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : False
+login-method : local, radius
+sonic(config)# no aaa authentication login-method
+sonic(config)# do show aaa
+---------------------------------------------------------
+AAA Authentication Information
+---------------------------------------------------------
+failthrough  : False
+login-method : local
+          </EXAMPLE>
+      </DOCGEN>
+
     </COMMAND>
   </VIEW>
 
