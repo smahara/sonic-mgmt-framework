@@ -45,7 +45,7 @@ limitations under the License.
     </COMMAND>
 
     <!-- no scheduler policy -->
-    <COMMAND name="no scheduler policy" help="Unconfigure a scheduler policy">
+    <COMMAND name="no scheduler-policy" help="Unconfigure a scheduler policy">
       <PARAM name="name" help="Name of the scheduler policy" ptype="STRING_32"> </PARAM>
         <ACTION> 
             python $SONIC_CLI_ROOT/sonic-cli-qos-scheduler.py delete_openconfig_qos_qos_scheduler_policies_scheduler_policy ${name}
@@ -66,7 +66,7 @@ limitations under the License.
         completion="false"
         />
 
-    <COMMAND
+     <COMMAND
             name="scheduler"
             help="scheduler for each queue"
             mode="subcommand"
@@ -82,15 +82,15 @@ limitations under the License.
         <ACTION>
             python $SONIC_CLI_ROOT/sonic-cli-qos-scheduler.py patch_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers_scheduler ${scheduler_policy_name} ${sequence}
         </ACTION>
-    </COMMAND>
+      </COMMAND>
 
-    <!-- no queue id-->
-    <COMMAND name="no scheduler " help="Unconfigure a queue scheduler ">
-      <PARAM name="sequence" help="Queue id" ptype="UINT"> </PARAM>
+      <!-- no scheduler id-->
+      <COMMAND name="no scheduler" help="Unconfigure a queue scheduler ">
+        <PARAM name="sequence" help="Queue id" ptype="UINT"> </PARAM>
         <ACTION> 
             python $SONIC_CLI_ROOT/sonic-cli-qos-scheduler.py delete_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers_scheduler ${scheduler_policy_name} ${sequence}
         </ACTION>
-    </COMMAND>
+      </COMMAND>
   </VIEW>
 
 
@@ -114,7 +114,7 @@ limitations under the License.
         </ACTION>
         </COMMAND>
 
-        <COMMAND name="no" help="Negate a  commands"/>
+        <COMMAND name="no" help="Negate a commands"/>
         <COMMAND name="no priority" help="scheduler is set to WRR">
         <ACTION>
             python $SONIC_CLI_ROOT/sonic-cli-qos-scheduler.py delete_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers_scheduler_config_priority ${top_scheduler_policy_name} ${scheduler_policy_per_queue_name}  
