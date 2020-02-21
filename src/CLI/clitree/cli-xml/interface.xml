@@ -163,6 +163,75 @@ limitations under the License.
             fi&#xA;
         fi
    </ACTION>
+   <DOCGEN>
+       <DESCRIPTION>
+           Show Interface Commands
+       </DESCRIPTION>
+       <USAGE>
+           sonic# show interface counters 
+           sonic# show interface Ethernet
+           sonic# show interface PortChannel
+           sonic# show interface Management
+           sonic# show interface Vlan
+           sonic# show interface Loopback
+           sonic# show interface status
+       </USAGE>
+       <EXAMPLE summary="show IGMP Snooping information ">
+           sonic# show interface PortChannel
+           PortChannel1 is up, line protocol is down, mode LACP
+           Minimum number of links to bring PortChannel up is 1
+           Fallback: Enabled
+           MTU 9100
+           LACP mode ACTIVE interval SLOW priority 65535 address ec:f4:bb:fc:09:8b
+           Members in this channel: Ethernet64
+           LACP Actor port 65  address ec:f4:bb:fc:09:8b key 1
+           LACP Partner port 0  address 00:00:00:00:00:00 key 0
+           Members in this channel: Ethernet72
+           LACP Actor port 73  address ec:f4:bb:fc:09:8b key 1
+           LACP Partner port 0  address 00:00:00:00:00:00 key 0
+           Last clearing of "show interface" counters: 1970-01-01 00:00:00
+           Input statistics:
+                     0 packets, 0 octets
+           0 Multicasts, 0 Broadcasts, 0 Unicasts
+           0 error, 0 discarded
+           Output statistics:
+                     0 packets, 0 octets
+           0 Multicasts, 0 Broadcasts, 0 Unicasts
+           0 error, 0 discarded
+
+           PortChannel12 is down, line protocol is down, mode LACP
+           Minimum number of links to bring PortChannel up is 1
+           Fallback: Disabled
+           --more--
+           MTU 9100
+           LACP mode ACTIVE interval SLOW priority 65535 address ec:f4:bb:fc:09:8b
+
+           PortChannel3 is down, line protocol is down, mode LACP
+           Minimum number of links to bring PortChannel up is 1
+           Fallback: Disabled
+           MTU 9100
+           LACP mode ACTIVE interval SLOW priority 65535 address ec:f4:bb:fc:09:8b
+
+           --more--
+           PortChannel6 is down, line protocol is down, mode Static
+           Minimum number of links to bring PortChannel up is 1
+           Fallback: Disabled
+           MTU 9100
+           Members in this channel: Ethernet80
+           Last clearing of "show interface" counters: 1970-01-01 00:00:00
+           Input statistics:
+                     0 packets, 0 octets
+           0 Multicasts, 0 Broadcasts, 0 Unicasts
+           0 error, 0 discarded
+           Output statistics:
+                     0 packets, 0 octets
+           0 Multicasts, 0 Broadcasts, 0 Unicasts
+           0 error, 0 discarded
+
+           sonic#
+
+       </EXAMPLE>
+   </DOCGEN>
    </COMMAND>
 
    <COMMAND
