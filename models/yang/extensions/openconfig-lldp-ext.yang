@@ -1,0 +1,25 @@
+module openconfig-lldp-ext {
+
+  yang-version "1";
+
+  // namespace
+  namespace "http://openconfig.net/yang/lldp/extention";
+
+  prefix "oc-lldp-ext";
+
+  import openconfig-lldp { prefix oc-lldp; }
+  import openconfig-lldp-types { prefix oc-lldp-types; }
+  import openconfig-interfaces { prefix oc-if; }
+  import ietf-yang-types { prefix yang; }
+  import openconfig-extensions { prefix oc-ext; }
+
+  deviation /oc-lldp:lldp/oc-lldp:config {
+      deviate not-supported;
+  }
+
+  deviation /oc-lldp:lldp/oc-lldp:interfaces/oc-lldp:interface/oc-lldp:config/oc-lldp:enabled {
+      deviate not-supported;
+  }
+}
+
+
