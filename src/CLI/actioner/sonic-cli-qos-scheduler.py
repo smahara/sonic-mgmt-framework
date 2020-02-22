@@ -18,7 +18,7 @@ def invoke(func, args=[]):
         body = {"openconfig-qos:config" : {"name": args[0]}}
         return api.patch(path, body)
     if func =="delete_openconfig_qos_qos_scheduler_policies_scheduler_policy":
-        path = cc.Path('/restconf/data/openconfig-qos:qos/scheduler-policies/scheduler-policy={name}/config', name=args[0] )
+        path = cc.Path('/restconf/data/openconfig-qos:qos/scheduler-policies/scheduler-policy={name}', name=args[0] )
         return api.delete(path)
     if func == 'patch_openconfig_qos_qos_scheduler_policies_scheduler_policy_schedulers_scheduler':
         path = cc.Path('/restconf/data/openconfig-qos:qos/scheduler-policies/scheduler-policy={name}/schedulers/scheduler={sequence}', name=args[0], sequence=args[1])
