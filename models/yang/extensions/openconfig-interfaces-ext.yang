@@ -225,6 +225,9 @@ module openconfig-interfaces-ext {
     deviation /oc-intf:interfaces/oc-intf:interface/oc-tun:tunnel {
         deviate not-supported;
     }
+    deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:state/oc-intf:type {
+        deviate not-supported;
+    }
     deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:state/oc-intf:ifindex {
         deviate not-supported;
     }
