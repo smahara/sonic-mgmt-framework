@@ -193,6 +193,36 @@ static std::string get_full_roles_as_string(const std::vector< std::string > & r
 }
 
 /**
+ * @brief Scan "/etc/passwd" looking for user. If found, return a pointer
+ *        to a "struct passwd" containing all the data related to user.
+ *
+ * @param fn E.g. /etc/passwd
+ * @param user The user we're looking for
+ *
+ * @return If user found, return a pointer to a struct passwd.
+ */
+static struct passwd * fgetpwnam(const char * user)
+{
+    struct passwd * pwd = NULL;
+    FILE          * f   = fopen("/etc/passwd", "re");
+    if (f)
+    {
+        struct passwd * ent;
+        while (NULL != (ent = fgetpwent(f)))
+        {
+            if (streq(ent->pw_name, user))
+            {
+                pwd = ent;
+                break;
+            }
+        }
+        fclose(f);
+    }
+
+    return pwd;
+}
+
+/**
  * @brief Create a new user
  *
  * @param login     User's login name
@@ -380,22 +410,22 @@ static std::string get_full_roles_as_string(const std::vector< std::string > & r
 {
     ::DBus::Struct< bool,       /* success */
                     std::string /* errmsg */   > ret;
-    struct passwd * pwd = ::getpwnam(login.c_str());
+    struct passwd * pwd = fgetpwnam(login.c_str());
     if (pwd == nullptr)
     {   // Add user if it doesn't exist
-    	return useradd(login,roles,hashed_pw);
+        return useradd(login,roles,hashed_pw);
 
     }
     else // User exists so update password and role
     {
         ret = passwd(login,hashed_pw);
-        if (ret._1 == true)
+        if (ret._1)
         {
-                return set_roles(login,roles);
+            return set_roles(login,roles);
         }
         else
         {
-                return ret;
+            return ret;
         }
     } 
 }
