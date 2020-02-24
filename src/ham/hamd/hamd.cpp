@@ -271,6 +271,7 @@ static std::string get_full_roles_as_string(const std::vector< std::string > & r
     return ret;
 }
 
+
 /**
  * @brief Delete a user account
  */
@@ -363,6 +364,40 @@ static std::string get_full_roles_as_string(const std::vector< std::string > & r
     ret._2 = rc == 0 ? "" : std_err;
 
     return ret;
+}
+
+/**
+ * @brief Create a new user or modify an existing user
+ *
+ * @param login     User's login name
+ * @param roles     List of roles
+ * @param hashed_pw Hashed password. Must follow usermod's --password
+ *                  syntax.
+ */
+::DBus::Struct< bool, std::string > hamd_c::usermod(const std::string                & login,
+                                                    const std::vector< std::string > & roles,
+                                                    const std::string                & hashed_pw)
+{
+    ::DBus::Struct< bool,       /* success */
+                    std::string /* errmsg */   > ret;
+    struct passwd * pwd = ::getpwnam(login.c_str());
+    if (pwd == nullptr)
+    {   // Add user if it doesn't exist
+    	return useradd(login,roles,hashed_pw);
+
+    }
+    else // User exists so update password and role
+    {
+        ret = passwd(login,hashed_pw);
+        if (ret._1 == true)
+        {
+                return set_roles(login,roles);
+        }
+        else
+        {
+                return ret;
+        }
+    } 
 }
 
 /**
