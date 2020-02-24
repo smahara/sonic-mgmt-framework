@@ -234,4 +234,8 @@ module openconfig-interfaces-ext {
     deviation /oc-intf:interfaces/oc-intf:interface/oc-intf:state/oc-intf:logical {
         deviate not-supported;
     }
+
+    deviation /oc-intf:interfaces/oc-intf:interface/oc-eth:ethernet/oc-vlan:switched-vlan/oc-vlan:config/oc-vlan:native-vlan {
+        deviate not-supported;
+    }
 }
