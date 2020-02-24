@@ -382,7 +382,7 @@ static std::string get_full_roles_as_string(const std::vector< std::string > & r
                     std::string /* errmsg */   > ret;
     struct passwd * pwd = ::getpwnam(login.c_str());
     if (pwd == nullptr)
-    {   // Add user if it doesn't exist
+    {   // Add user since it doesn't exist
     	return useradd(login,roles,hashed_pw);
 
     }
