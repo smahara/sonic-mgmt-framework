@@ -40,6 +40,7 @@ func getSchedulerIds(sp_name string) ([]string, error) {
 
         s := strings.Split(key.Comp[0], "@")
 
+
         if strings.Compare(sp_name, s[0]) == 0 {
             sched_ids = append(sched_ids, s[1])
         }
@@ -87,18 +88,30 @@ var YangToDb_qos_intf_sched_policy_xfmr SubTreeXfmrYangToDb = func(inParams Xfmr
 
     sp_name := config.Name
 
+    sp_name_str := *sp_name
+
     log.Info("YangToDb: sp_name: ", *sp_name)
 
 	queueTblMap := make(map[string]db.Value)
 	log.Info("YangToDb_qos_intf_sched_policy_xfmr: ", inParams.ygRoot, inParams.uri)
 
+    // For "no scheduler-policy", fill the current sp_name of the interface
+    if inParams.oper == DELETE {
+        sp_name_str = doGetIntfQueueSchedulerPolicy(inParams.dbs[db.ConfigDB], if_name)
+
+        if strings.Compare(sp_name_str, "") == 0 {
+            log.Info("No scheduler policy found on this interface")
+            return res_map, err 
+        }
+    }
+
     // read scheduler policy and its schedulers (seq).
-    scheduler_ids, _ := getSchedulerIds(*sp_name)
+    scheduler_ids, _ := getSchedulerIds(sp_name_str)
 
     // Use "if_name:seq" to form DB key for QUEUE, write "if_name@seq" as its scheduler profile
     for _, seq := range scheduler_ids {
         queueKey := if_name + "|" + seq
-        db_sp_name := *sp_name + "@" + seq
+        db_sp_name := sp_name_str + "@" + seq
 		log.Infof("YangToDb_qos_intf_sched_policy_xfmr --> key: %v, db_sp_name: %v", queueKey, db_sp_name)
 
         _, ok := queueTblMap[queueKey]
@@ -119,6 +132,15 @@ var YangToDb_qos_intf_sched_policy_xfmr SubTreeXfmrYangToDb = func(inParams Xfmr
 func doGetIntfQueueSchedulerPolicy(d *db.DB, if_name string) (string) {
 
     log.Info("doGetIntfQueueSchedulerPolicy: if_name ", if_name)
+
+    var err error
+    if d == nil {
+        d, err = db.NewDB(getDBOptions(db.ConfigDB))
+        if err != nil {
+            log.Infof("unable to get configDB, error %v", err)
+            return ""
+        }
+    }
 
     // QUEUE
     dbSpec := &db.TableSpec{Name: "QUEUE"}
