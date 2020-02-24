@@ -3,15 +3,11 @@ module openconfig-lldp-ext {
   yang-version "1";
 
   // namespace
-  namespace "http://openconfig.net/yang/lldp/extention";
+  namespace "http://openconfig.net/yang/lldp/extension";
 
   prefix "oc-lldp-ext";
 
   import openconfig-lldp { prefix oc-lldp; }
-  import openconfig-lldp-types { prefix oc-lldp-types; }
-  import openconfig-interfaces { prefix oc-if; }
-  import ietf-yang-types { prefix yang; }
-  import openconfig-extensions { prefix oc-ext; }
 
   deviation /oc-lldp:lldp/oc-lldp:config {
       deviate not-supported;
