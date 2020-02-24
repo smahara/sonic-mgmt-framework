@@ -412,9 +412,8 @@ static struct passwd * fgetpwnam(const char * user)
                     std::string /* errmsg */   > ret;
     struct passwd * pwd = fgetpwnam(login.c_str());
     if (pwd == nullptr)
-    {   // Add user if it doesn't exist
-        return useradd(login,roles,hashed_pw);
-
+    {   // Add user since it doesn't exist
+    	return useradd(login,roles,hashed_pw);
     }
     else // User exists so update password and role
     {
