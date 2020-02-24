@@ -29,6 +29,9 @@ def invoke(func, args=[]):
         path = cc.Path('/restconf/data/openconfig-qos:qos/queues/queue={name}/wred/config/openconfig-qos-ext:wred-profile', name=args[0])
         body = {"openconfig-qos-ext:wred-profile" : args[1]}
         return api.patch(path, body)
+    if func == 'delete_openconfig_qos_ext_qos_queues_queue_wred_config_wred_profile':
+        path = cc.Path('/restconf/data/openconfig-qos:qos/queues/queue={name}/wred/config/openconfig-qos-ext:wred-profile', name=args[0])
+        return api.delete(path)
     if func == 'get_openconfig_qos_qos_queues_queue':
         path = cc.Path('/restconf/data/openconfig-qos:qos/queues/queue={name}', name=args[0])
         return api.get(path)

@@ -109,6 +109,24 @@ limitations under the License.
             </ACTION>
         </COMMAND>
 
+        <COMMAND name="no queue" help="Negate Queue configuration">
+           <PARAM
+               name="qid"
+               help="queue name"
+               ptype="STRING_32"
+               >
+              <PARAM 
+                name="wred-profile"
+                help="WRED profile"
+                mode="subcommand"
+                ptype="SUBCOMMAND">
+              </PARAM>
+           </PARAM>
+           <ACTION>
+                python $SONIC_CLI_ROOT/sonic-cli-qos.py delete_openconfig_qos_ext_qos_queues_queue_wred_config_wred_profile ${intf_name}:${qid}
+            </ACTION>
+        </COMMAND>
+
   </VIEW>
   <VIEW name="enable-view">
     <COMMAND name="show qos" help="Show QoS information">
