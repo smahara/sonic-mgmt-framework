@@ -26,7 +26,6 @@ func getSchedulerIds(sp_name string) ([]string, error) {
 
     defer d.DeleteDB()
 
-    log.Info("Entering...")
     ts := &db.TableSpec{Name: "SCHEDULER"}
     keys, err := d.GetKeys(ts)
     for  _, key := range keys {
@@ -46,6 +45,7 @@ func getSchedulerIds(sp_name string) ([]string, error) {
         }
     }
 
+    log.Info("sp_name: ", sp_name, "sched_ids: ", sched_ids)
     return sched_ids, err
 }
 
@@ -109,6 +109,8 @@ var YangToDb_qos_intf_sched_policy_xfmr SubTreeXfmrYangToDb = func(inParams Xfmr
 	}
 
 	res_map["QUEUE"] = queueTblMap
+
+    log.Info("res_map: ", res_map)
 
 	return res_map, err
 

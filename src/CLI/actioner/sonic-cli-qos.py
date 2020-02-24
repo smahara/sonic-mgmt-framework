@@ -36,6 +36,9 @@ def invoke(func, args=[]):
         path = cc.Path('/restconf/data/openconfig-qos:qos/interfaces/interface={interface_id}/output/scheduler-policy/config/name', interface_id=args[0])
         body = {"openconfig-qos:name": args[1]}
         return api.patch(path, body)
+    if func == 'delete_openconfig_qos_qos_interfaces_interface_output_scheduler_policy_config_name':
+        path = cc.Path('/restconf/data/openconfig-qos:qos/interfaces/interface={interface_id}/output/scheduler-policy/config/name', interface_id=args[0])
+        return api.delete(path)
     if func == 'get_openconfig_qos_qos_interface_scheduler_policy_config':
         path = cc.Path('/restconf/data/openconfig-qos:qos/interfaces/interface={interface_id}/output/scheduler-policy/config', interface_id=args[0])
         return api.get(path)
