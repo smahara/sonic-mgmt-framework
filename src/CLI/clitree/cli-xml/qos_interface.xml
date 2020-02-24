@@ -100,6 +100,15 @@ limitations under the License.
                 python $SONIC_CLI_ROOT/sonic-cli-qos.py patch_openconfig_qos_qos_interfaces_interface_output_scheduler_policy_config_name ${intf_name} ${sp_name} 
             </ACTION>
         </COMMAND>
+
+
+        <COMMAND name="no" help="Negate a command"/>
+        <COMMAND name="no scheduler-policy" help="Unconfigure a scheduler policy">
+            <ACTION> 
+                python $SONIC_CLI_ROOT/sonic-cli-qos.py delete_openconfig_qos_qos_interfaces_interface_output_scheduler_policy_config_name ${intf_name}
+            </ACTION>
+        </COMMAND>
+
   </VIEW>
   <VIEW name="enable-view">
     <COMMAND name="show qos" help="Show QoS information">
