@@ -223,7 +223,7 @@ def process_oc_nbrs(response):
     return outputList
 
 def process_sonic_nbrs(response):
-    outputList    = []
+    outputList  = []
     rcvdVrfName = inputDict.get('vrf')
     rcvdIpAddr  = inputDict.get('ip')
     rcvdMacAddr = inputDict.get('mac')
@@ -309,7 +309,6 @@ def clear_neighbors(keypath, body):
         return
 
 def show_neighbors(keypath, args):
-    
     outputList = []
 
     rendererScript = "arp_show.j2"
@@ -338,7 +337,7 @@ def show_neighbors(keypath, args):
             outputList = process_oc_nbrs(response)
         elif 'sonic-neighbor:NEIGH_TABLE' in response.keys():
             outputList = process_sonic_nbrs(response)
-	
+
         show_cli_output(rendererScript, outputList)
     except Exception as e:
         # system/network error
