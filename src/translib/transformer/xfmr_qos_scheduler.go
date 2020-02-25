@@ -130,6 +130,64 @@ func getIntfsBySPName(sp_name string) ([]string) {
 }
 
 
+func isLastSchedulerInActivePolicy(sched_name string) (bool) {
+    s := strings.Split(sched_name, "@")
+    if len(s) < 2 {
+        log.Info("sched_name error: ", sched_name)
+        return false
+    }
+    
+    // read intfs refering to the scheduler profile 
+    intfs := getIntfsBySPName(s[0])
+    if  len(intfs) == 0 {
+        log.Info("No active user of the scheduler policy", s[0])
+        return false
+    }
+
+    // read schedulers in the scheduler profile
+    sched_ids, _ := getSchedulerIds(s[0])
+    for _, sched_id := range sched_ids {
+        if s[1] != sched_id {
+            log.Info("found extra scheduler in the same policy ", s[1])
+            return false
+        }
+    }
+
+    log.Info("Last scheduler in the same policy!")
+    return true
+}
+
+func isLastSchedulerField(sched_key string, attr string) (bool) {
+
+    d, err := db.NewDB(getDBOptions(db.ConfigDB))
+
+    if err != nil {
+        log.Infof("getSchedulerIds, unable to get configDB, error %v", err)
+        return false
+    }
+
+
+    defer d.DeleteDB()
+
+    ts := &db.TableSpec{Name: "SCHEDULER"}
+    entry, err := d.GetEntry(ts, db.Key{Comp: []string{sched_key}})
+
+    if err != nil {
+        log.Info("err in getting sp entry: ", sched_key)
+        return false
+    }
+
+    if len(entry.Field) == 1 {
+        _, ok := entry.Field[attr] 
+        if !ok {
+            return false
+        }
+
+        return true
+    }
+
+    return false
+}
 
 var YangToDb_qos_scheduler_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (map[string]map[string]db.Value, error) {
 
@@ -142,6 +200,7 @@ var YangToDb_qos_scheduler_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) 
     pathInfo := NewPathInfo(inParams.uri)
     sp_name := pathInfo.Var("name")
     seq := pathInfo.Var("sequence")
+    targetUriPath, err := getYangPathFromUri(inParams.uri)
 
     log.Info("YangToDb: policy name: ", sp_name, " sequence: ", seq)
 
@@ -204,6 +263,22 @@ var YangToDb_qos_scheduler_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) 
             if schedObj.Config.Priority == ocbinds.OpenconfigQos_Qos_SchedulerPolicies_SchedulerPolicy_Schedulers_Scheduler_Config_Priority_UNSET {
                 //log.Info("field Type is set for attribute deletion")
                 sched_entry[sched_key].Field["type"] = "PRIORITY"
+            }
+        
+            if isLastSchedulerInActivePolicy(sched_key) {
+                if isLastSchedulerField(sched_key, "type") {
+                    log.Info("Not allow the last field to be deleted")
+                    log.Info("Disallow to delete the last scheduler in an actively used policy: ", sched_key)
+                    return res_map, err
+                }
+            }
+        }
+
+        if targetUriPath == "/openconfig-qos:qos/scheduler-policies/scheduler-policy/schedulers/scheduler" { 
+            log.Info("checking last scheduler in an acitive policy")
+            if isLastSchedulerInActivePolicy(sched_key) {
+                log.Info("Disallow to delete the last scheduler in an actively used policy: ", sched_key)
+                return res_map, err
             }
         }
     }
