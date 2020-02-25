@@ -7,6 +7,7 @@ import (
     log "github.com/golang/glog"
     "translib/ocbinds"
     "github.com/openconfig/ygot/ygot"
+    "translib/tlerr"
 )
 func init () {
     /*
@@ -267,6 +268,7 @@ var YangToDb_qos_scheduler_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) 
         
             if isLastSchedulerInActivePolicy(sched_key) {
                 if isLastSchedulerField(sched_key, "type") {
+                    err = tlerr.InternalError{Format:"Last scheduler used by interface cannot be deleted"}
                     log.Info("Not allow the last field to be deleted")
                     log.Info("Disallow to delete the last scheduler in an actively used policy: ", sched_key)
                     return res_map, err
@@ -274,9 +276,10 @@ var YangToDb_qos_scheduler_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) 
             }
         }
 
-        if targetUriPath == "/openconfig-qos:qos/scheduler-policies/scheduler-policy/schedulers/scheduler" { 
+        if targetUriPath == "/openconfig-qos:qos/scheduler-policies/scheduler-policy/schedulers/scheduler" {
             log.Info("checking last scheduler in an acitive policy")
             if isLastSchedulerInActivePolicy(sched_key) {
+                err = tlerr.InternalError{Format:"Last scheduler used by interface cannot be deleted"}
                 log.Info("Disallow to delete the last scheduler in an actively used policy: ", sched_key)
                 return res_map, err
             }
@@ -289,7 +292,10 @@ var YangToDb_qos_scheduler_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) 
     /* update "Queue" table for newly created scheduler if the scheduler profile is used by intfs*/
     queueTblMap := make(map[string]db.Value)
 
-    if inParams.oper == CREATE  || inParams.oper == UPDATE {
+    if inParams.oper == CREATE ||
+       inParams.oper == UPDATE ||
+       (inParams.oper == DELETE &&
+        targetUriPath == "/openconfig-qos:qos/scheduler-policies/scheduler-policy/schedulers/scheduler") {
         // read intfs refering to the scheduler profile 
         intfs := getIntfsBySPName(sp_name)
 
@@ -308,6 +314,7 @@ var YangToDb_qos_scheduler_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) 
 
         res_map["QUEUE"] = queueTblMap
     }
+
 
     return res_map, err
 
