@@ -26,6 +26,7 @@ urllib3.disable_warnings()
 
 #Define globals
 vrfDict = {}
+macDict = {}
 inputDict = {}
 egressPortDict = {}
 isMacDictAvailable = False
