@@ -51,7 +51,7 @@ def get_keypath(func,args):
 
     rcvdVrf = inputDict.get('vrf')
     if rcvdVrf == None:
-        rcvdFamily = ""
+        rcvdVrf = ""
 
     rcvdForceStatus = inputDict.get('force')
     if rcvdForceStatus == None:
