@@ -880,7 +880,7 @@ var intf_subintfs_table_xfmr TableXfmrFunc = func (inParams XfmrParams) ([]strin
     var tblList []string
     log.Info("intf_subintfs_table_xfmr")
 
-    if (inParams.oper == GET) {
+    if (inParams.oper == GET || inParams.oper == DELETE) {
         if(inParams.dbDataMap != nil) {
             (*inParams.dbDataMap)[db.ConfigDB]["SUBINTF_TBL"] = make(map[string]db.Value)
             (*inParams.dbDataMap)[db.ConfigDB]["SUBINTF_TBL"]["0"] = db.Value{Field: make(map[string]string)}
@@ -913,49 +913,86 @@ var DbToYang_intf_subintfs_xfmr KeyXfmrDbToYang = func(inParams XfmrParams) (map
     return rmap, err
 }
 
-
 func intf_ip_addr_del (d *db.DB , ifName string, tblName string, subIntf *ocbinds.OpenconfigInterfaces_Interfaces_Interface_Subinterfaces_Subinterface) (map[string]map[string]db.Value, error) {
     var err error
     subIntfmap := make(map[string]map[string]db.Value)
     intfIpMap := make(map[string]db.Value)
 
-    if subIntf.Ipv4 != nil && subIntf.Ipv4.Addresses != nil {
-        if len(subIntf.Ipv4.Addresses.Address) < 1 {
-            ipMap, _:= getIntfIpByName(d, tblName, ifName, true, false, "")
-            if ipMap != nil && len(ipMap) > 0 {
-                for k, v := range ipMap {
-                    intfIpMap[k] = v
-                }
+    // Handles the case when the delete request at subinterfaces/subinterface[index = 0]
+    if subIntf.Ipv4 == nil && subIntf.Ipv6 == nil {
+	    ipv4Map, _ := getIntfIpByName(d, tblName, ifName, true, false, "")
+	    if ipv4Map != nil && len(ipv4Map) > 0 {
+            for k, v := range ipv4Map {
+                intfIpMap[k] = v
             }
-        } else {
-            for ip, _ := range subIntf.Ipv4.Addresses.Address {
-                ipMap, _ := getIntfIpByName(d, tblName, ifName, true, false, ip)
+        }
+        ipv6Map, _ := getIntfIpByName(d, tblName, ifName, false, true, "")
+        if ipv6Map != nil && len(ipv6Map) > 0 {
+            for k, v := range ipv6Map {
+                intfIpMap[k] = v
+            }
+        }
+    }
 
+    // This handles the delete for a specific IPv4 address or a group of IPv4 addresses
+    if subIntf.Ipv4 != nil {
+        if subIntf.Ipv4.Addresses != nil {
+            if len(subIntf.Ipv4.Addresses.Address) < 1 {
+                ipMap, _:= getIntfIpByName(d, tblName, ifName, true, false, "")
                 if ipMap != nil && len(ipMap) > 0 {
                     for k, v := range ipMap {
                         intfIpMap[k] = v
                     }
+                }
+            } else {
+                for ip, _ := range subIntf.Ipv4.Addresses.Address {
+                    ipMap, _ := getIntfIpByName(d, tblName, ifName, true, false, ip)
+
+                    if ipMap != nil && len(ipMap) > 0 {
+                        for k, v := range ipMap {
+                            intfIpMap[k] = v
+                        }
+                    }
+                }
+            }
+        } else {
+            // Case when delete request is at IPv4 container level
+            ipMap, _ := getIntfIpByName(d, tblName, ifName, true, false, "")
+            if ipMap != nil && len(ipMap) > 0 {
+                for k, v := range ipMap {
+                    intfIpMap[k] = v
                 }
             }
         }
     }
 
-    if subIntf.Ipv6 != nil && subIntf.Ipv6.Addresses != nil {
-        if len(subIntf.Ipv6.Addresses.Address) < 1 {
-            ipMap, _ := getIntfIpByName(d, tblName, ifName, false, true, "")
-            if ipMap != nil && len(ipMap) > 0 {
-                for k, v := range ipMap {
-                    intfIpMap[k] = v
-                }
-            }
-        } else {
-            for ip, _ := range subIntf.Ipv6.Addresses.Address {
-                ipMap, _ := getIntfIpByName(d, tblName, ifName, false, true, ip)
-
+    // This handles the delete for a specific IPv6 address or a group of IPv6 addresses
+    if subIntf.Ipv6 != nil {
+        if subIntf.Ipv6.Addresses != nil {
+            if len(subIntf.Ipv6.Addresses.Address) < 1 {
+                ipMap, _ := getIntfIpByName(d, tblName, ifName, false, true, "")
                 if ipMap != nil && len(ipMap) > 0 {
                     for k, v := range ipMap {
                         intfIpMap[k] = v
                     }
+                }
+            } else {
+                for ip, _ := range subIntf.Ipv6.Addresses.Address {
+                    ipMap, _ := getIntfIpByName(d, tblName, ifName, false, true, ip)
+
+                    if ipMap != nil && len(ipMap) > 0 {
+                        for k, v := range ipMap {
+                            intfIpMap[k] = v
+                        }
+                    }
+                }
+            }
+        } else {
+            // Case when the delete request is at IPv6 container level
+            ipMap, _ := getIntfIpByName(d, tblName, ifName, false, true, "")
+            if ipMap != nil && len(ipMap) > 0 {
+                for k, v := range ipMap {
+                    intfIpMap[k] = v
                 }
             }
         }
@@ -1179,12 +1216,15 @@ var YangToDb_intf_ip_addr_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (
     intfObj := intfsObj.Interface[ifName]
 
     if intfObj.Subinterfaces == nil || len(intfObj.Subinterfaces.Subinterface) < 1 {
-        errStr := "SubInterface node is not set"
+        errStr := "SubInterface node doesn't exist"
         log.Info("YangToDb_intf_subintf_ip_xfmr : " + errStr)
-        return subIntfmap, errors.New(errStr)
+        err = tlerr.InvalidArgsError{Format:errStr}
+        return subIntfmap, err
     }
     if _, ok := intfObj.Subinterfaces.Subinterface[0]; !ok {
         log.Info("YangToDb_intf_subintf_ip_xfmr : No IP address handling required")
+        errStr := "SubInterface index 0 doesn't exist"
+        err = tlerr.InvalidArgsError{Format:errStr}
         return subIntfmap, err
     }
 
@@ -2427,7 +2467,6 @@ func validateMultiIPForDonorIntf(d *db.DB, ifName *string) bool {
 			}
 		}
 	}
-	
 	return false
 }
 
@@ -2482,7 +2521,7 @@ var YangToDb_unnumbered_intf_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams
     subIntfObj := intfObj.Subinterfaces.Subinterface[0]
 
     log.Info("subIntfObj:=", subIntfObj)
-    if subIntfObj.Ipv4 != nil && subIntfObj.Ipv4.Unnumbered.InterfaceRef != nil {
+    if subIntfObj.Ipv4 != nil && subIntfObj.Ipv4.Unnumbered != nil && subIntfObj.Ipv4.Unnumbered.InterfaceRef != nil {
         if _, ok := subIntfmap[tblName]; !ok {
             subIntfmap[tblName] = make(map[string]db.Value)
         }

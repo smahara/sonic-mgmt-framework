@@ -412,11 +412,7 @@ func Delete(req SetRequest) (SetResponse, error) {
 	log.Info("requestUriPath : ", requestUriPath)
 
     switch requestUriPath {
-        case "/openconfig-interfaces:interfaces/interface/openconfig-if-ethernet:ethernet": fallthrough
-        case "/openconfig-interfaces:interfaces/interface/subinterfaces": fallthrough
-        case "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface": fallthrough
-        case "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv4": fallthrough
-        case "/openconfig-interfaces:interfaces/interface/subinterfaces/subinterface/openconfig-if-ip:ipv6": 
+        case "/openconfig-interfaces:interfaces/interface/openconfig-if-ethernet:ethernet": 
         {
 			log.Info("delete on this container not allowed")
 			resp.ErrSrc = AppErr

@@ -127,8 +127,11 @@ func yangListDelData(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requ
 							}
 							if chldSpec.hasChildSubTree == true {
 								if chldYangType == YANG_CONTAINER {
-									yangContainerDelData(d, ygRoot, oper, chldUri, requestUri, chldXpath, 
+									err = yangContainerDelData(d, ygRoot, oper, chldUri, requestUri, chldXpath, 
 									dbDataMap, resultMap, subTreeResMap, subOpDataMap, txCache)
+									if err != nil {
+										return err
+									}
 								} else if chldYangType == YANG_LIST {
 									err = yangListDelData(d, ygRoot, oper, chldUri, requestUri, chldXpath,
 									dbDataMap, resultMap, subTreeResMap, subOpDataMap, txCache)
@@ -141,8 +144,9 @@ func yangListDelData(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string, requ
 					}
 				}
 			}
-		}
-	}
+        }
+
+    }
 	return err
 }
 
@@ -169,7 +173,10 @@ func yangContainerDelData(d *db.DB, ygRoot *ygot.GoStruct, oper int, uri string,
 			} 
 			if xYangSpecMap[chldXpath].hasChildSubTree == true {
 				if chldYangType == YANG_CONTAINER {
-					yangContainerDelData(d, ygRoot, oper, chldUri, requestUri, chldXpath, dbDataMap, resultMap, subTreeResMap, subOpDataMap, txCache)
+					err = yangContainerDelData(d, ygRoot, oper, chldUri, requestUri, chldXpath, dbDataMap, resultMap, subTreeResMap, subOpDataMap, txCache)
+					if err != nil {
+						return err
+					}
 				} else if chldYangType == YANG_LIST {
 					err = yangListDelData(d, ygRoot, oper, chldUri, requestUri, chldXpath, dbDataMap, resultMap,  subTreeResMap, subOpDataMap, txCache)
 					if err != nil {
@@ -204,7 +211,7 @@ func allChildTblGetToDelete(d *db.DB, ygRoot *ygot.GoStruct, oper int, requestUr
 			err = yangListDelData(d, ygRoot, oper, requestUri, requestUri, xpath, &dbDataMap, resultMap, &subTreeResMap, subOpDataMap, txCache)
 			return subTreeResMap, err
 		} else if (spec.yangDataType == YANG_CONTAINER) {
-			yangContainerDelData(d, ygRoot, oper, requestUri, requestUri, xpath, &dbDataMap, resultMap, &subTreeResMap, subOpDataMap, txCache)
+			err = yangContainerDelData(d, ygRoot, oper, requestUri, requestUri, xpath, &dbDataMap, resultMap, &subTreeResMap, subOpDataMap, txCache)
 		}
 	}
 	return subTreeResMap, err
